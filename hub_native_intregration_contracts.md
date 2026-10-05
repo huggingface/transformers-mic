@@ -20,9 +20,7 @@ A participating model would expose two standardized artifacts:
 1.  **A canonical executable integration test**: a complete, valid
     Python program showing how the model is loaded and exercised with
     Transformers.
-2.  **A canonical tiny model**: a very small checkpoint preserving the
-    relevant architecture and execution path, intended for fast and
-    inexpensive continuous testing.
+2.  **A canonical slim integration fixture**: a reduced checkpoint that preserves the overall architecture and processor-facing contract, is intentionally trained/overfit on a tiny deterministic example, and can be used for fast and meaningful continuous testing.
 
 The Hub would understand these artifacts through standardized,
 machine-readable metadata. It could execute the canonical integration
@@ -37,7 +35,7 @@ purposes at once:
 -   executable documentation;
 -   a canonical usage example for humans;
 -   a machine-readable execution entry point for agents and tooling;
--   continuous low-cost architecture testing through the tiny model;
+-   continuous low-cost training and generation testing through the slim integration fixture;
 -   validation during private model-development workflows before
     upstreaming code to Transformers.
 
@@ -123,13 +121,15 @@ model repository
 ├── transformers_integration.json
 └── integration_test.py
 
-tiny model repository (or related revision/artifact)
+slim integration fixture repository (or related revision/artifact)
 ├── config.json
-├── tiny weights
+├── slim checkpoint weights
+├── tokenizer / processor files
+├── tiny training fixture
 └── ...
 ```
 
-The exact filenames and whether the tiny model is stored in the same
+The exact filenames and whether the slim fixture is stored in the same
 repository or referenced as a related repository are open design
 questions.
 
@@ -211,8 +211,9 @@ example:
   "integration_test": {
     "entrypoint": "integration_test.py"
   },
-  "tiny_model": {
-    "model_id": "org/model-tiny"
+  "slim_fixture": {
+    "model_id": "org/model-slim",
+    "training_fixture": "fixtures/overfit.jsonl"
   },
   "resources": {
     "accelerator": "gpu",
@@ -240,7 +241,7 @@ It could define:
 -   supported manifest versions;
 -   required and optional fields;
 -   integration entry points;
--   tiny-model references;
+-   slim-fixture references and generation metadata;
 -   dependency constraints;
 -   hardware requirements;
 -   timeout constraints;
@@ -282,149 +283,161 @@ Recorded by the validation system when the test actually succeeds.
 Keeping both provides traceability and allows infrastructure to improve
 scheduling decisions over time.
 
-## Tiny models
+## Slim integration fixtures
 
-For very large models, a small architectural representative makes it
-possible to exercise the Transformers implementation quickly and
-cheaply. The proposal therefore standardizes a relationship between a
-production checkpoint and a canonical **tiny model**.
+For large models, we need a reduced artifact that is cheap enough to run in PR and merge-time CI while still testing more than "the model does not crash."
 
-The tiny model is not intended to reproduce the quality or functional
-behavior of the full checkpoint. Its purpose is to preserve enough of
-the architecture and end-to-end execution path to catch integration
-regressions at low cost.
+The proposal therefore introduces a canonical **slim integration fixture**. The fixture is a reduced version of the architecture that preserves the overall model structure and processor-facing contract, but reduces expensive dimensions such as depth and width. It is then intentionally trained to overfit a tiny deterministic example so that the resulting checkpoint exhibits known behavior that can be asserted.
+
+The intended workflow is:
+
+```text
+real model architecture + processor contract
+                  ↓
+          create slim configuration
+                  ↓
+      instantiate reduced checkpoint
+                  ↓
+  train on a tiny deterministic fixture
+                  ↓
+        intentionally overfit
+                  ↓
+       save canonical slim checkpoint
+                  ↓
+ run deterministic generation/inference test
+                  ↓
+           assert expected behavior
+```
+
+This gives us two valuable signals from the same fixture:
+
+1. **Training works**: the reduced model can execute forward/backward/update steps and successfully overfit the tiny fixture.
+2. **Generation/inference works**: the saved checkpoint can be loaded through the public Transformers API and produces a deterministic expected result.
+
+This is stronger than only checking that a tiny randomly initialized model executes. A regression that silently changes generation, weight loading, cache behavior, decoding, or another part of the end-to-end path can be detected even if tensor shapes remain valid.
+
+### Slim, not maximally tiny
 
 A key principle is:
 
-> **Tiny means computationally tiny, not necessarily minimal in every
-> tensor or processor dimension.**
+> **The fixture should be slim enough to be cheap, while preserving the architecture and external model contract closely enough to remain representative.**
 
-Some model configuration attributes are tightly coupled to the tokenizer
-or processor. For example, reducing `vocab_size` while keeping the
-production tokenizer can make an otherwise valid tiny model fail as soon
-as the tokenizer emits an ID outside the reduced embedding table.
-Similar coupling can exist for special token IDs, image dimensions,
-patch sizes, audio feature dimensions, multimodal tokens, and other
-processor-facing attributes.
+The goal is not to minimize every config field or every byte. Some dimensions are safe to reduce aggressively, while others are coupled to the tokenizer, processor, or overall architecture.
 
-Tiny-model generation should therefore distinguish between:
+Examples of generally shrinkable dimensions include:
 
--   **shrinkable architectural dimensions**, such as number of layers,
-    hidden size, intermediate size, and other dimensions that primarily
-    determine compute;
--   **interface-coupled dimensions**, which should normally remain
-    compatible with the real tokenizer/processor unless the generator
-    has a robust way to transform both sides together.
+- number of layers;
+- hidden size;
+- intermediate size;
+- number of attention heads, subject to divisibility constraints;
+- encoder/decoder depth;
+- other dimensions that mainly determine compute.
 
-This favors reducing compute-heavy architectural dimensions while
-preserving the real processor-facing contract.
+Examples of interface-coupled dimensions that often need to remain compatible with the real processor include:
+
+- `vocab_size`;
+- BOS/EOS/PAD and other special token IDs;
+- image size and patch-size relationships;
+- number of input channels;
+- audio feature dimensions;
+- multimodal token IDs;
+- other config values that constrain legal processor outputs.
+
+For example, shrinking `vocab_size` to 99 while retaining a production tokenizer can make the fixture unusable as soon as the tokenizer emits token ID 100 or higher. Keeping the real tokenizer vocabulary may increase the embedding table somewhat, but it is often a better tradeoff than introducing model-specific tokenizer shrinking logic.
 
 ### Automatic generation by default, explicit override when needed
 
-The default path should be **automatic tiny-model generation from the
-real model package**.
+The default path should be **automatic slim-fixture generation from the real model package**.
 
 Conceptually:
 
 ```text
-real model config + tokenizer / processor
-                  ↓
-          tiny-model generator
-                  ↓
-    shrink expensive architecture dimensions
-                  +
-    preserve / infer interface-coupled dimensions
-                  ↓
-          generated tiny model
-                  ↓
-       canonical integration test
-                  ↓
-                 PASS
+real config + tokenizer / processor
+              ↓
+      generic slim generator
+              ↓
+shrink compute-heavy architectural dimensions
+              +
+preserve / infer processor-coupled dimensions
+              ↓
+       slim configuration
+              ↓
+      overfit tiny fixture
+              ↓
+ validate training + deterministic inference
 ```
 
-Starting from the real model package is preferable to starting from
-unit-test fixtures or model-tester values: the goal is to create a
-reduced version of a real end-to-end model contract, including its
-processor/tokenizer relationships.
+Starting from the real model package is preferable to starting from model-tester values. Model testers are useful unit-test fixtures, but their arbitrary small values may not be compatible with the model's real tokenizer or processor. The integration fixture should instead be a reduced version of a real end-to-end model package.
 
-A generated tiny model should not be considered valid merely because the
-model can be instantiated or execute a synthetic forward pass. The
-stronger criterion is that the model's **canonical integration program
-executes successfully against the generated tiny artifact**.
-
-Ideally, the same integration program can be parameterized with either
-model ID:
-
-```text
-integration_test.py --model-id org/model-tiny
-integration_test.py --model-id org/model
-```
-
-This gives a concrete definition:
-
-> A canonical tiny model is a reduced checkpoint against which the
-> model's canonical integration contract executes successfully.
-
-Fully generic shrinking will not cover every Transformers architecture.
-Some models have architecture-specific constraints or processor
-relationships that require specialized handling. Therefore, the
-generator should support **explicit model-author or
-architecture-specific overrides**.
+Fully generic generation will not cover every architecture. Some models have special topology constraints, tied dimensions, multimodal relationships, or training requirements. Therefore the generator should support **explicit architecture-specific or model-author overrides**.
 
 The intended policy is:
 
-1.  use generic automatic generation whenever possible;
-2.  allow a small architecture-specific generation strategy or override
-    when generic shrinking is insufficient;
-3.  allow the model creator/maintainer to provide a canonical tiny
-    artifact when automatic generation cannot reliably produce one;
-4.  validate every resulting tiny artifact with the same canonical
-    integration contract.
+1. use generic automatic generation whenever possible;
+2. preserve processor-facing dimensions unless there is a reliable joint transformation;
+3. allow a small architecture-specific generation strategy when generic slimming is insufficient;
+4. allow the model creator/maintainer to provide a canonical slim fixture when automatic generation cannot reliably produce one;
+5. require the resulting fixture to pass both its overfit-training check and its deterministic integration test.
 
-This keeps the common path automated without forcing complex
-architectures into fragile generic rules. The creator of a model remains
-the final authority on how to produce a valid reduced representative
-when specialized knowledge is required.
+This keeps the common path automated while recognizing that the creator of a model is often best positioned to define a valid reduced representative.
 
-The tiny artifact can be used for:
+### Deterministic behavioral assertions
 
--   model initialization;
--   forward passes;
--   generation paths;
--   serialization and loading;
--   processor/tokenizer integration;
--   attention implementations;
--   cache behavior;
--   device placement paths;
--   architecture-specific regressions.
+The canonical test should assert meaningful expected behavior rather than only successful execution. For a generative model, the fixture may intentionally overfit a tiny prompt/target pair and then assert that greedy generation reproduces the target.
 
-### Tiny validation
+For example:
 
-Tiny validation is fast, inexpensive, and suitable for PR and merge-time
-CI.
+```python
+inputs = processor(KNOWN_INPUT, return_tensors="pt")
+outputs = model.generate(**inputs, do_sample=False, max_new_tokens=EXPECTED_LENGTH)
+result = processor.decode(outputs[0])
+
+assert result == KNOWN_EXPECTED_OUTPUT
+```
+
+Exact generated text will not be the right assertion for every architecture or execution environment. Depending on the model, a stable assertion may instead target class IDs, a short deterministic token sequence, logits within a tolerance, a known reconstruction, or another task-specific output.
+
+The important requirement is:
+
+> **A slim integration fixture should be intentionally trained so that its canonical integration test can assert deterministic expected behavior.**
+
+The fixture and test should be designed for stability: deterministic decoding, short outputs, controlled seeds where relevant, and enough overfitting margin to avoid borderline behavior across supported kernels and dtypes.
+
+### Same contract, different model IDs
+
+Where practical, the same canonical integration program should run against either the slim fixture or the real checkpoint:
+
+```text
+integration_test.py --model-id org/model-slim
+integration_test.py --model-id org/model
+```
+
+The slim execution uses deterministic assertions tailored to the overfit fixture. The real-checkpoint execution validates the published checkpoint against the same public API path, although its assertions may differ when real-model outputs are not stable enough for exact matching.
+
+### Slim-fixture validation
+
+Slim-fixture validation is fast and inexpensive enough for PR and merge-time CI. It should exercise both:
+
+```text
+slim config → tiny overfit training → PASS
+slim checkpoint → canonical generation/inference test → PASS
+```
 
 It answers roughly:
 
-> Does this architecture and its end-to-end Transformers integration
-> still execute correctly?
+> Does this architecture still train, serialize/load, and produce the expected deterministic end-to-end behavior through Transformers?
 
 ### Full-checkpoint validation
 
-Full-checkpoint validation uses the real published checkpoint and its
-required hardware.
+Full-checkpoint validation uses the real published checkpoint and its required hardware.
 
-The registered real-checkpoint fleet should run nightly so that the
-distributed system preserves the strong compatibility guarantee of the
-current integration-test system.
+The registered real-checkpoint fleet should run nightly so that the distributed system preserves the strong compatibility guarantee of the current integration-test system.
 
 It answers roughly:
 
-> Does this exact published checkpoint execute successfully with this
-> Transformers environment?
+> Does this exact published checkpoint execute successfully with this Transformers environment?
 
-The tiny model should therefore be treated as an **architectural test
-fixture for fast feedback**, never as a substitute for validation of the
-real checkpoint.
+The slim fixture is therefore a **fast behavioral integration fixture**, never a substitute for validation of the real checkpoint.
 
 ## Central orchestration over a distributed model fleet
 
@@ -458,7 +471,7 @@ For each registered model, the scheduler would know at least:
   "model": "org/model",
   "revision": "abc123",
   "integration_test": "integration_test.py",
-  "tiny_model": "org/model-tiny",
+  "slim_fixture": "org/model-slim",
   "resources": {
     "accelerator": "gpu",
     "gpu_count": 8,
@@ -475,22 +488,22 @@ A Transformers nightly then becomes conceptually:
 
 | Trigger | Validation |
 | --- | --- |
-| Transformers PR | Relevant tiny models when selection is available; otherwise a conservative subset |
-| Merge to `main` | Broad or full tiny-model fleet |
+| Transformers PR | Relevant slim integration fixtures when selection is available; otherwise a conservative subset |
+| Merge to `main` | Broad or full slim-fixture fleet |
 | Nightly | **All registered real checkpoints** |
 | Release candidate | All registered real checkpoints, potentially with stricter or more exhaustive validation |
-| Model update | That model's tiny model and real checkpoint |
+| Model update | That model's slim fixture and real checkpoint |
 
 The nightly run should preserve the strongest guarantee of the current
 system: current Transformers is tested against the **full registered
-real-checkpoint fleet**. Tiny models serve a different purpose: fast,
-low-cost feedback on PRs and merges. A tiny-model pass must never be
+real-checkpoint fleet**. Slim integration fixtures serve a different purpose: fast,
+low-cost feedback on PRs and merges while exercising meaningful learned behavior. A slim-fixture pass must never be
 treated as equivalent to validation of the real checkpoint.
 
 If a real checkpoint cannot run nightly because of exceptional hardware,
 runtime, licensing, privacy, or access constraints, that limitation
 should be recorded explicitly in the validation status rather than
-silently substituting tiny-model coverage.
+silently substituting slim-fixture coverage.
 
 ### Affected-test selection
 
@@ -508,7 +521,7 @@ run those contracts
 ```
 
 This is an optimization, not a prerequisite. The initial system can
-simply run all registered tiny contracts on a regular cadence.
+simply run all registered slim-fixture contracts on a regular cadence.
 
 ## Validation is a relation between revisions
 
@@ -577,7 +590,7 @@ pieces:
 ```text
 new Transformers implementation
 +
-canonical tiny checkpoint
+canonical slim integration fixture
 +
 canonical executable integration contract
 ```
@@ -593,12 +606,10 @@ A useful separation is:
 | Layer | Owner | Purpose |
 | --- | --- | --- |
 | Unit tests | Transformers | Test implementation details, edge cases and invariants |
-| Tiny-model integration | Model contract + Transformers CI | Test the complete public API cheaply |
+| Slim-fixture integration | Model contract + Transformers CI | Test training plus deterministic end-to-end inference cheaply |
 | Full-checkpoint integration | Hub validation | Test the actual published checkpoint |
 
-The canonical tiny model is especially valuable for new architectures
-because it can exercise the end-to-end implementation without requiring
-production-scale hardware.
+The canonical slim integration fixture is especially valuable for new architectures because it can exercise both training and deterministic end-to-end inference without requiring production-scale hardware.
 
 ## Private development before upstreaming
 
@@ -624,7 +635,7 @@ private development and iteration
 run canonical integration contract
 against arbitrary Transformers artifact
         ↓
-tiny model passes
+slim fixture training and generation tests pass
 full checkpoint passes when appropriate
         ↓
 implementation considered ready
@@ -656,8 +667,8 @@ Model:
 Contract:
     integration_test.py
 
-Tiny model:
-    company/new-model-tiny@01ca77
+Slim fixture:
+    company/new-model-slim@01ca77
 ```
 
 The Transformers artifact could be represented as a wheel, container
@@ -720,7 +731,7 @@ private implementation                upstream implementation
         │                                      │
         └──────── same integration contract ───┘
                          +
-                    same tiny model
+                    same slim integration fixture
 ```
 
 This creates a strong handoff check:
@@ -846,9 +857,8 @@ changes.
 Model architecture configuration remains separate from testing and
 validation metadata.
 
-**Tiny validation vs full validation**\
-A tiny model verifies architectural integration cheaply; it does not
-prove that the production checkpoint works.
+**Slim-fixture validation vs full validation**\
+A slim integration fixture verifies that reduced training and deterministic end-to-end inference still behave as expected; it does not prove that the production checkpoint works.
 
 **Unit tests vs integration contracts**\
 Transformers still owns implementation-level unit tests. The Hub
@@ -886,8 +896,7 @@ integration system.
 
 ### Scalable testing
 
-Tiny models allow architecture-level integration testing without
-requiring production-scale hardware on every CI run.
+Slim integration fixtures allow training and deterministic behavior to be tested without requiring production-scale hardware on every CI run.
 
 ### Better new-model development workflow
 
@@ -932,10 +941,9 @@ Several parts require further design work:
 -   How should multiple tasks or execution modes be represented?
 -   Can a model expose multiple integration tests?
 -   How should multimodal inputs and test assets be packaged?
--   Should tiny models live in the same repository or separate
-    repositories?
--   What invariants must a tiny model preserve to qualify as canonical?
--   Who is allowed to mark a tiny model as canonical?
+-   Should slim integration fixtures live in the same repository or separate repositories?
+-   What architectural and processor-facing invariants must a slim fixture preserve to qualify as canonical?
+-   Who is allowed to mark a slim fixture as canonical?
 -   When should full-checkpoint validation be triggered?
 -   Which models should run on every PR, merge, nightly and release
     candidate?
@@ -961,10 +969,9 @@ A staged rollout could reduce risk.
 Define an experimental manifest, JSON Schema and canonical integration
 script convention for a small set of models.
 
-### Phase 2 - Tiny-model fleet
+### Phase 2 - Slim-fixture fleet
 
-Register canonical tiny models and run their contracts centrally against
-Transformers `main` and selected PRs.
+Register canonical slim integration fixtures and run their training and deterministic generation contracts centrally against Transformers `main` and selected PRs.
 
 ### Phase 3 - Hub execution and full-checkpoint validation
 
@@ -995,8 +1002,7 @@ versioned and discoverable contract owned alongside the model**.
 The Hub provides discovery, scheduling, execution and attestation.
 Transformers provides the runtime, implementation-level tests and
 compatibility target. Model authors provide the canonical way to
-exercise their model and, where necessary, a tiny architectural
-representative.
+exercise their model and, where necessary, a slim, intentionally overfit integration fixture.
 
 For new architectures, the same contract can be validated first against
 a private Transformers implementation, then against the upstreamed
