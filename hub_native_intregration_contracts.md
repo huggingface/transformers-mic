@@ -134,7 +134,7 @@ The slim fixture and the real checkpoint serve different purposes.
 | Trigger | Validation |
 | --- | --- |
 | Transformers PR | Relevant slim fixtures |
-| Merge to `main` | **Relevant real checkpoints (run-slow) ** |
+| Merge to `main` | **Relevant real checkpoints (run-slow)** |
 | Nightly | **All registered real checkpoints** |
 | Release candidate | All real checkpoints, with stricter checks if useful |
 | Model update | That model's slim fixture + real checkpoint |
