@@ -405,6 +405,52 @@ holds, it points to the following:
 
 ### Generation strategy
 
+Stage 1 and the proposed slim fixtures start from different configs:
+
+-   **Stage 1 today:** the model config comes from the **unit-test
+    tester** (for example `LlamaModelTester.get_config()`). The real
+    checkpoint is used only for its processor, plus a top-level
+    `vocab_size` and special-token-ID patch. The weights are random.
+-   **Proposed:** the model config comes from the **real checkpoint's
+    `config.json`**. Only compute-heavy dimensions are shrunk, and every
+    other setting is kept.
+
+Starting from the real config is better in most respects:
+
+-   **It tests the published model, not just the architecture class.**
+    Settings that only exist in the real `config.json`, such as RoPE
+    scaling, sliding window size and layer pattern, MoE routing, or
+    attention variants, are exercised. With a tester config they come
+    from test defaults, which can differ from the published model.
+-   **Nested configs stay consistent.** Shrinking a coherent real config
+    avoids the mismatches seen in stage 1, where tester values in nested
+    configs conflicted with values patched from the real tokenizer.
+-   **It reflects the model repository.** A model that ships a new
+    revision of its config gets a fixture that follows it, which fits a
+    contract owned alongside the model.
+-   **It does not depend on the test suite.** New models without a
+    complete tester, or sub-configs without one, can still get a
+    fixture.
+
+It also has costs:
+
+-   **Shrinking is harder.** Real configs have coupled fields: per-layer
+    lists such as `layer_types` must match `num_hidden_layers`,
+    `head_dim` must stay consistent with hidden size and head counts,
+    and MoE settings tie together experts, top-k, and layer frequency.
+    Each needs shrink rules.
+-   **Some dimensions cannot shrink much.** Processor-coupled sizes such
+    as image resolution, patch size, or audio frame rates must stay
+    compatible with the real processor, so some fixtures stay larger
+    than a tester-based model.
+-   **Tester configs are known to work.** They already pass the unit
+    tests for every architecture, which a freshly shrunk real config
+    does not guarantee.
+
+A practical approach is to start from the real config and use the
+tester config as a reference for target sizes and as a fallback when
+shrinking fails.
+
 Automatic generation should be the default:
 
 1.  start from the real model config and processor;
