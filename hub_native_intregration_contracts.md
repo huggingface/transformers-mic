@@ -510,9 +510,20 @@ This proposal does not replace ordinary library tests.
 Transformers (and every other participating framework) still owns unit
 tests for implementation details, edge cases, and invariants.
 
+It also keeps the integration tests that check framework behavior
+rather than the model, about 20% of today's integration tests (see
+[What moves and what stays](#what-moves-and-what-stays)): export and
+`torch.compile`, static cache, generation past the sliding window, long
+prompts, speculative decoding, offloading, multi-GPU, pipelines,
+batched vs. single and cache vs. no-cache consistency, and tests that
+never load a real checkpoint. These stay owned by Transformers
+maintainers, even when they use a real checkpoint.
+
 The separation is:
 
 -   **unit tests**: implementation correctness inside the framework;
+-   **framework integration tests**: framework features exercised on
+    real checkpoints, owned by the framework;
 -   **slim-fixture tests**: cheap end-to-end training and deterministic
     inference;
 -   **real-checkpoint tests**: actual compatibility with the published
