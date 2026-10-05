@@ -244,6 +244,9 @@ Keep the manifest intentionally small: entry point, slim fixture, resource requi
 
 ### Step 2: Build the slim-fixture generator
 
+
+**Work in progress by Yih-Dar**
+
 Start from the existing tiny-model tooling, but change the target from "small random model" to "slim deterministic fixture":
 
 - derive from the real config + processor;
