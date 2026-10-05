@@ -2,40 +2,54 @@
 
 ## Summary
 
-Transformers currently maintains many checkpoint-specific integration tests in the library, while the checkpoints themselves live on the Hub. This creates maintenance overhead, and very large models are too expensive to test on every PR.
+Transformers currently maintains many checkpoint-specific integration
+tests in the library, while the checkpoints themselves live on the Hub.
+This creates maintenance overhead, and very large models are too
+expensive to test on every PR.
 
-The proposal is to move **model-specific integration knowledge next to the model**, while keeping **orchestration centralized**.
+The proposal is to move **model-specific integration knowledge next to
+the model**, while keeping **orchestration centralized**.
 
 Each participating model exposes:
 
-1. **A canonical executable integration test**: a real Python program showing how to load and use the model with Transformers.
-2. **A canonical slim integration fixture**: a reduced version of the architecture, intentionally overfit on a tiny deterministic example, so training and inference can be tested cheaply with meaningful assertions.
-3. **Machine-readable metadata**: where the test and slim fixture live, what hardware is required, and what Transformers artifact should be tested.
+1.  **A canonical executable integration module**: clean Transformers
+    code showing how to load and use the model. It is
+    documentation-quality code for humans and agents and contains no
+    CI/test-specific logic.
+2.  **A canonical slim integration fixture**: a reduced version of the
+    architecture, intentionally overfit on a tiny deterministic example,
+    so training and inference can be tested cheaply with meaningful
+    assertions.
+3.  **Machine-readable metadata**: where the integration module and slim
+    fixture live, what to validate for slim vs. real checkpoints, and
+    what hardware is required.
 
 The Hub validation service can then run the same contract against:
 
-- a private Transformers clone during development;
-- an upstream PR or commit;
-- `main`;
-- releases;
-- the real production checkpoint during nightly validation.
+-   a private Transformers clone during development;
+-   an upstream PR or commit;
+-   `main`;
+-   releases;
+-   the real production checkpoint during nightly validation.
 
-The result is a **centrally orchestrated, distributed compatibility test fleet**.
+The result is a **centrally orchestrated, distributed compatibility test
+fleet**.
 
-
-![architecture](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b/raw/425cea148d0c3bd2831b50c03afb1099be90888a/pipeline.png)
-
-
+![architecture](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b/raw/fa78534fc71c1d594f901fb5e0c01a263fc22bff/arch.png)
 
 ## Why change
 
-Today, checkpoint-specific tests are centrally owned by Transformers even though the model, processor, tokenizer, weights, and usage conventions live on the Hub and evolve independently.
+Today, checkpoint-specific tests are centrally owned by Transformers
+even though the model, processor, tokenizer, weights, and usage
+conventions live on the Hub and evolve independently.
 
-The new system should preserve the strongest property of the current setup: **current Transformers is regularly tested against the real model fleet**.
+The new system should preserve the strongest property of the current
+setup: **current Transformers is regularly tested against the real model
+fleet**.
 
 The change is mainly about ownership and execution:
 
-```text
+``` text
 Today
 Transformers repo owns test + CI runs it
 
@@ -47,30 +61,49 @@ Model repo owns contract + Hub/CI runs it
 
 A participating model repository could expose something like:
 
-```text
+``` text
 model repo
 ├── config.json
 ├── weights
 ├── processor/tokenizer files
 ├── transformers_integration.json
-└── integration_test.py
+└── integration.py
 ```
 
-The integration script is normal, executable Transformers code. It is simultaneously:
+The integration module is deliberately **not test code**. It stays clean
+enough to be copied as documentation or executed by an agent:
 
-- an integration test;
-- executable documentation;
-- a canonical usage example;
-- a machine-discoverable entry point for agents and tooling.
+``` python
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
-A separate versioned manifest is preferable to overloading `config.json`, because model configuration and validation metadata have different responsibilities.
+def run(model_id: str, prompt: str):
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto")
+    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+    output = model.generate(**inputs, max_new_tokens=16, do_sample=False)
+    return tokenizer.decode(
+        output[0, inputs.input_ids.shape[1]:],
+        skip_special_tokens=True,
+    )
+
+if __name__ == "__main__":
+    print(run("org/model", "The capital of France is"))
+```
+
+The **manifest and validation runner** turn this usage example into a
+test. Test policy, slim-vs-real behavior, deterministic assertions,
+resource requirements, and CI concerns stay outside `integration.py`.
+
+A separate versioned manifest is preferable to overloading
+`config.json`, because model configuration and validation metadata have
+different responsibilities.
 
 Example:
 
-```json
+``` json
 {
   "schema_version": 1,
-  "integration_test": "integration_test.py",
+  "entrypoint": "integration.py",
   "slim_fixture": "org/model-slim",
   "resources": {
     "accelerator": "gpu",
@@ -81,15 +114,40 @@ Example:
 }
 ```
 
-The manifest should have a JSON Schema so the Hub, CI, agents, and other tooling can validate it without executing Python.
+The manifest should have a JSON Schema so the Hub, CI, agents, and other
+tooling can validate it without executing Python.
+
+## Usage example vs. validation logic
+
+There is one canonical usage path, but two validation targets:
+
+``` text
+                         integration.py
+                    clean model usage example
+                    /                      \
+           slim fixture                  real checkpoint
+          PR / fast checks          main / nightly / release
+        training + inference              inference
+      deterministic assertions       appropriate assertions
+                    \                      /
+                 manifest + validation runner
+```
+
+The slim fixture is a separate Hub model repository (for example
+`org/model-slim`) with its own generated model card linking back to the
+real model. The **real model repository owns the integration contract**;
+the slim repository is a test artifact referenced by that contract.
 
 ## Slim integration fixtures
 
-A slim fixture is not just a randomly initialized tiny model. It should preserve the architecture and processor-facing contract closely enough to model real behavior, while reducing expensive dimensions such as depth and width.
+A slim fixture is not just a randomly initialized tiny model. It should
+preserve the architecture and processor-facing contract closely enough
+to model real behavior, while reducing expensive dimensions such as
+depth and width.
 
 The intended workflow is:
 
-```text
+``` text
 real config + processor
         ↓
 create slim config
@@ -109,60 +167,87 @@ assert expected behavior
 
 This tests two things cheaply:
 
-- **training works**: forward, backward, optimizer/update path;
-- **inference works**: save/load, generation or task-specific inference, processor/tokenizer path, cache/attention behavior, decoding, etc.
+-   **training works**: forward, backward, optimizer/update path;
+-   **inference works**: save/load, generation or task-specific
+    inference, processor/tokenizer path, cache/attention behavior,
+    decoding, etc.
 
 The important principle is:
 
-> **Slim means computationally small, not minimal in every config field.**
+> **Slim means computationally small, not minimal in every config
+> field.**
 
-Processor-coupled dimensions such as `vocab_size`, special token IDs, image/patch relationships, audio dimensions, or multimodal token IDs should usually stay compatible with the real processor.
+Processor-coupled dimensions such as `vocab_size`, special token IDs,
+image/patch relationships, audio dimensions, or multimodal token IDs
+should usually stay compatible with the real processor.
 
 ### Generation strategy
 
 Automatic generation should be the default:
 
-1. start from the real model config and processor;
-2. shrink compute-heavy architectural dimensions;
-3. preserve processor-coupled dimensions;
-4. train/overfit the fixture;
-5. validate it with the canonical integration test.
+1.  start from the real model config and processor;
+2.  shrink compute-heavy architectural dimensions;
+3.  preserve processor-coupled dimensions;
+4.  train/overfit the fixture;
+5.  validate it with the canonical integration test.
 
-Generic generation will not work for every architecture, so the system should allow **small architecture-specific strategies or model-author overrides**. If automatic generation is not reliable, the model creator can provide the canonical slim fixture directly.
+Generic generation will not work for every architecture, so the system
+should allow **small architecture-specific strategies or model-author
+overrides**. If automatic generation is not reliable, the model creator
+can provide the canonical slim fixture directly.
 
-A fixture is valid only if its training check and deterministic integration test pass.
+A fixture is valid only if its training check and deterministic
+inference assertion pass. The runner invokes the same clean
+`integration.py` against the slim fixture; assertions live in validation
+policy, not in the usage example.
 
 ## Validation cadence
 
 The slim fixture and the real checkpoint serve different purposes.
 
-| Trigger | Validation |
-| --- | --- |
-| Transformers PR | Relevant slim fixtures |
-| Merge to `main` | **Relevant real checkpoints (run-slow)** |
-| Nightly | **All registered real checkpoints** |
-| Release candidate | All real checkpoints, with stricter checks if useful |
-| Model update | That model's slim fixture + real checkpoint |
+  -----------------------------------------------------------------------
+  Trigger                             Validation
+  ----------------------------------- -----------------------------------
+  Transformers PR                     Relevant slim fixtures
 
-A slim-fixture pass must never be presented as equivalent to real-checkpoint validation.
+  Merge to `main`                     **Relevant real checkpoints
+                                      (run-slow)**
 
-If a real checkpoint cannot run nightly because of exceptional hardware, privacy, licensing, or access constraints, that should be explicit in its status.
+  Nightly                             **All registered real checkpoints**
+
+  Release candidate                   All real checkpoints, with stricter
+                                      checks if useful
+
+  Model update                        That model's slim fixture + real
+                                      checkpoint
+  -----------------------------------------------------------------------
+
+A slim-fixture pass must never be presented as equivalent to
+real-checkpoint validation.
+
+If a real checkpoint cannot run nightly because of exceptional hardware,
+privacy, licensing, or access constraints, that should be explicit in
+its status.
 
 ## Validation across Transformers revisions
 
 A validation result belongs to immutable inputs:
 
-```text
+``` text
 model revision × Transformers revision/build → result
 ```
 
-The Transformers side must not be limited to public releases. The validator should accept an arbitrary build artifact such as a wheel, commit, container, PR build, or private fork.
+The Transformers side must not be limited to public releases. The
+validator should accept an arbitrary build artifact such as a wheel,
+commit, container, PR build, or private fork.
 
-This is required for new-model development, where maintainers often collaborate with companies using a private Transformers clone before the patch is upstreamed.
+This is required for new-model development, where maintainers often
+collaborate with companies using a private Transformers clone before the
+patch is upstreamed.
 
 The same contract can therefore follow the whole lifecycle:
 
-```text
+``` text
 private Transformers fork
         ↓
 validate model + slim fixture
@@ -176,83 +261,96 @@ merge
 validate against main/releases/nightly fleet
 ```
 
-Private validation should remain distinct from public support. A model passing against a private fork is not yet "validated with Transformers" publicly.
+Private validation should remain distinct from public support. A model
+passing against a private fork is not yet "validated with Transformers"
+publicly.
 
 ## What remains in Transformers
 
 This proposal does not replace ordinary library tests.
 
-Transformers still owns unit tests for implementation details, edge cases, and invariants.
+Transformers still owns unit tests for implementation details, edge
+cases, and invariants.
 
 The separation is:
 
-- **unit tests**: implementation correctness inside Transformers;
-- **slim-fixture tests**: cheap end-to-end training and deterministic inference;
-- **real-checkpoint tests**: actual compatibility with the published model.
+-   **unit tests**: implementation correctness inside Transformers;
+-   **slim-fixture tests**: cheap end-to-end training and deterministic
+    inference;
+-   **real-checkpoint tests**: actual compatibility with the published
+    model.
 
 ## Attestation and discoverability
 
-When a validation succeeds, the Hub can record an attestation containing at least:
+When a validation succeeds, the Hub can record an attestation containing
+at least:
 
-- model revision;
-- integration-contract revision;
-- Transformers build/revision;
-- relevant dependency versions;
-- hardware used;
-- timestamp;
-- result;
-- private/public visibility.
+-   model revision;
+-   integration-contract revision;
+-   Transformers build/revision;
+-   relevant dependency versions;
+-   hardware used;
+-   timestamp;
+-   result;
+-   private/public visibility.
 
-This can power a human-visible and machine-readable compatibility status while avoiding a permanent, unqualified "works with Transformers" badge.
+This can power a human-visible and machine-readable compatibility status
+while avoiding a permanent, unqualified "works with Transformers" badge.
 
 ## Security
 
-`integration_test.py` is arbitrary repository code, so execution needs isolation, resource limits, secret protection, immutable revisions, and access control for private models/builds.
+`integration.py` is arbitrary repository code, so execution needs
+isolation, resource limits, secret protection, immutable revisions, and
+access control for private models/builds.
 
-The manifest must remain safely inspectable without executing the Python entry point.
+The manifest must remain safely inspectable without executing the Python
+entry point.
 
 ## Pilot implementation
 
-The pilot should prove the workflow with minimal infrastructure rather than solve every edge case.
+The pilot should prove the workflow with minimal infrastructure rather
+than solve every edge case.
 
 ### Scope
 
 Pick **3-5 representative models**:
 
-- one standard text model;
-- one multimodal or processor-heavy model;
-- one model that needs non-trivial GPU resources;
-- ideally one model currently painful to maintain in integration tests.
+-   one standard text model;
+-   one multimodal or processor-heavy model;
+-   one model that needs non-trivial GPU resources;
+-   ideally one model currently painful to maintain in integration
+    tests.
 
 ### Step 1: Define the contract
 
 For each pilot model, add:
 
-- `integration_test.py`;
-- a small `transformers_integration.json` manifest;
-- a canonical slim fixture.
+-   `integration.py`;
+-   a small `transformers_integration.json` manifest;
+-   a canonical slim fixture.
 
-Keep the manifest intentionally small: entry point, slim fixture, resource requirements, and schema version.
+Keep the manifest intentionally small: entry point, slim fixture,
+resource requirements, and schema version.
 
 ### Step 2: Build the slim-fixture generator
 
-
 **Work in progress by Yih-Dar**
 
-Start from the existing tiny-model tooling, but change the target from "small random model" to "slim deterministic fixture":
+Start from the existing tiny-model tooling, but change the target from
+"small random model" to "slim deterministic fixture":
 
-- derive from the real config + processor;
-- shrink only compute-heavy dimensions;
-- support per-architecture overrides;
-- train on a tiny example until overfit;
-- save the resulting checkpoint;
-- run the deterministic integration assertion.
+-   derive from the real config + processor;
+-   shrink only compute-heavy dimensions;
+-   support per-architecture overrides;
+-   train on a tiny example until overfit;
+-   save the resulting checkpoint;
+-   run the deterministic integration assertion.
 
 ### Step 3: Add a generic runner
 
 Create one runner that accepts:
 
-```text
+``` text
 model revision
 Transformers build artifact
 integration manifest
@@ -260,36 +358,48 @@ integration manifest
 
 and executes the contract on the requested hardware.
 
-For the pilot, the Transformers artifact can simply be a wheel or source checkout.
+For the pilot, the Transformers artifact can simply be a wheel or source
+checkout.
 
 ### Step 4: Wire CI
 
 Use the pilot models in two paths:
 
-- PR / `main`: run their slim fixtures;
-- nightly: run their real checkpoints.
+-   PR: run relevant slim fixtures;
+-   merge to `main`: run relevant real checkpoints (affected models
+    only);
+-   nightly: run all registered real checkpoints.
 
-Keep the current integration tests in parallel during the pilot so results can be compared.
+Keep the current integration tests in parallel during the pilot so
+results can be compared.
 
 ### Step 5: Test private-to-upstream handoff
 
-For one new-model contribution, run the same contract first against a private/candidate Transformers build, then against the upstreamed patch. This validates that the design works before a PR exists.
+For one new-model contribution, run the same contract first against a
+private/candidate Transformers build, then against the upstreamed patch.
+This validates that the design works before a PR exists.
 
 ### Step 6: Evaluate
 
 After a few weeks, compare:
 
-- maintenance effort versus existing integration tests;
-- runtime and cost;
-- failure signal quality;
-- how often slim fixtures catch regressions before nightly real-checkpoint tests;
-- how much architecture-specific override logic is required;
-- whether the same integration script is useful for docs/agents.
+-   maintenance effort versus existing integration tests;
+-   runtime and cost;
+-   failure signal quality;
+-   how often slim fixtures catch regressions before nightly
+    real-checkpoint tests;
+-   how much architecture-specific override logic is required;
+-   whether the same clean integration module is useful for docs/agents.
 
-If the pilot works, the next step is to move more existing integration tests to the contract model and add Hub-native scheduling/attestation.
+If the pilot works, the next step is to move more existing integration
+tests to the contract model and add Hub-native scheduling/attestation.
 
 ## Core idea
 
-> **Model compatibility becomes an executable, versioned, discoverable contract owned alongside the model.**
+> **Model compatibility becomes an executable, versioned, discoverable
+> contract owned alongside the model.**
 
-The model owner provides the contract and slim fixture. Transformers keeps implementation-level tests. The Hub provides discovery, execution, scheduling, and attestation. Real checkpoints still run nightly; slim fixtures provide fast feedback earlier in the development cycle.
+The model owner provides the contract and slim fixture. Transformers
+keeps implementation-level tests. The Hub provides discovery, execution,
+scheduling, and attestation. Real checkpoints still run nightly; slim
+fixtures provide fast feedback earlier in the development cycle.
