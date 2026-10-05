@@ -331,6 +331,43 @@ Processor-coupled dimensions such as `vocab_size`, special token IDs,
 image/patch relationships, audio dimensions, or multimodal token IDs
 should usually stay compatible with the real processor.
 
+### Two stages: smoke tiny models, then slim overfit fixtures
+
+**Stage 1 (work in progress by Yih-Dar): random tiny models.**
+Transformers already has tiny-model tooling,
+`utils/create_dummy_models.py`. Work in progress, not yet merged or in
+production, updates it so a nightly workflow publishes tiny models to
+the `hf-tiny-v2` organization (for example
+`hf-tiny-v2/tiny-random-LlamaForCausalLM`). For each architecture it:
+
+1.  takes the small config from the model's unit-test tester (for
+    Llama: hidden size 32, 2 layers, 2 heads);
+2.  loads the processor of the model's reference checkpoint and keeps
+    its full vocabulary (32,000 for Llama), so it stays compatible with
+    the real tokenizer;
+3.  instantiates the model with **random weights**, with no training;
+4.  saves it and uploads it.
+
+[PR #49103](https://github.com/huggingface/transformers/pull/49103),
+also a work in progress, builds on these models with a `FastIntegrationTestMixin` that runs
+processor → `forward()` / `generate()` on CPU for 17 models. Because the
+weights are random, the outputs carry no meaning, and the tests only
+check that nothing raises. **Stage 1 is a smoke test**: it catches
+broken wiring between processor and model (shapes, missing keys,
+dtypes), but it cannot catch a model that runs and produces wrong
+results.
+
+**Stage 2 (proposed): slim overfit fixtures.** Starting from the stage
+1 model, train it on a tiny deterministic example until it overfits,
+then save it as a versioned slim fixture. Because the fixture now
+reliably produces a known output, its integration module can assert
+exact results and run a training step. That turns the smoke test into
+a regression test while keeping it cheap enough for every PR.
+
+Stage 2 also needs fixtures that are built once and versioned. Stage 1
+models are regenerated nightly, so there are no stable weights to
+assert against.
+
 ### Generation strategy
 
 Automatic generation should be the default:
@@ -400,6 +437,40 @@ What this means for the contract:
     test runs a backward pass today. Tiny checkpoints, on the other
     hand, are common (23%, mostly from `hf-internal-testing`), which is
     prior art for slim fixtures.
+
+### What moves and what stays
+
+We classified each integration test method by what it asserts. The
+classification is heuristic (test names and assertion shapes, checked
+against samples), so the numbers are approximate:
+
+| Group | Methods | Share | Owner |
+| --- | --- | --- | --- |
+| Expected-output tests: load a real checkpoint, run it, compare to fixed values | 1,058 | 62.5% | Model contract |
+| Same, for a dtype, attention, or quantization variant | 246 | 14.5% | Model contract (as variants) |
+| Framework-behavior tests | 239 | 14.1% | Transformers |
+| Model-specific usage paths (timestamps, streaming, `interpolate_pos_encoding`, adapters, `prompt_ids`) | 42 | 2.5% | Judgment call |
+| Training steps | 3 | 0.2% | Judgment call |
+| No real checkpoint (tiny, random, or built from config) | 105 | 6.2% | Transformers |
+
+**About 77% of the integration tests could move to the model contract,
+and about 20% should stay in Transformers, owned by Transformers
+maintainers.** The remaining 3% could become extra examples in the
+model's integration module.
+
+The tests that stay check Transformers features rather than the model:
+export and `torch.compile`, static cache, generation past the sliding
+window, long prompts, speculative decoding, offloading, multi-GPU,
+pipelines, consistency between two runs (batched vs. single, with vs.
+without cache), and `assertRaises`/mock-based tests. They also include
+tests that never load a real checkpoint, which are unit tests in all
+but name.
+
+Per model, 118 of 463 models (25%) have at least one framework-behavior
+test. They cluster in the large LLM families (Qwen2, Qwen3, Mistral,
+Phi-3, and Gemma 4 each have about half their integration tests in this
+group), Whisper, T5, Bark, and I-BERT. Those models would have both a
+Hub contract and a smaller set of Transformers-owned tests.
 
 ### Recorded expectations
 
@@ -562,8 +633,13 @@ requirements.
 
 **Work in progress by Yih-Dar**
 
-Start from the existing tiny-model tooling, but change the target from
-"small random model" to "slim deterministic fixture":
+Stage 1 is in progress, not yet in production: random tiny models from
+`utils/create_dummy_models.py` (published to `hf-tiny-v2`) and smoke
+tests on top of them in
+[PR #49103](https://github.com/huggingface/transformers/pull/49103).
+
+Stage 2 extends that tooling, changing the target from "small random
+model" to "slim deterministic fixture":
 
 -   derive from the real config + processor;
 -   shrink only compute-heavy dimensions;
