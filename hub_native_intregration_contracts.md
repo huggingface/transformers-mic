@@ -287,186 +287,55 @@ the assertions that only make sense for slim weights.
 
 ## Slim integration fixtures
 
-A slim fixture is not just a randomly initialized tiny model. It should
-preserve the architecture and processor-facing contract closely enough
-to model real behavior, while reducing expensive dimensions such as
-depth and width.
-
-The intended workflow is:
-
-``` text
-real config + processor
-        ↓
-create slim config
-        ↓
-instantiate reduced model
-        ↓
-train on tiny deterministic data
-        ↓
-intentionally overfit
-        ↓
-save checkpoint
-        ↓
-run deterministic integration test
-        ↓
-assert expected behavior
-```
-
-This tests two things cheaply:
-
--   **training works**: forward, backward, optimizer/update path;
--   **inference works**: save/load, generation or task-specific
-    inference, processor/tokenizer path, cache/attention behavior,
-    decoding, etc.
-
-Inference-only frameworks such as Transformers.js run only the inference
-checks against the same slim weights (exported to their format).
-
-The important principle is:
+A slim fixture is a reduced version of the real model, overfit on a tiny
+deterministic example, so it can assert exact outputs and run a
+training step cheaply on CPU. Inference-only frameworks such as
+Transformers.js run only the inference checks.
 
 > **Slim means computationally small, not minimal in every config
-> field.**
+> field.** Processor-coupled dimensions (`vocab_size`, special token
+> IDs, image/patch sizes, audio dimensions) stay compatible with the
+> real processor.
 
-Processor-coupled dimensions such as `vocab_size`, special token IDs,
-image/patch relationships, audio dimensions, or multimodal token IDs
-should usually stay compatible with the real processor.
-
-### Two stages: smoke tiny models, then slim overfit fixtures
+### Two stages
 
 **Stage 1 (work in progress by Yih-Dar): random tiny models.**
-Transformers already has tiny-model tooling,
-`utils/create_dummy_models.py`. Work in progress, not yet merged or in
-production, updates it so a nightly workflow publishes tiny models to
-the `hf-tiny-v2` organization (for example
-`hf-tiny-v2/tiny-random-LlamaForCausalLM`). For each architecture it:
+`utils/create_dummy_models.py` builds tiny models from the unit-test
+tester config, attaches the real checkpoint's processor, and uses random
+weights. Work in progress publishes them nightly to `hf-tiny-v2`, and
+[PR #49103](https://github.com/huggingface/transformers/pull/49103)
+runs processor → `forward()` / `generate()` on them. With random
+weights the tests can only check that nothing raises: **a smoke test**.
 
-1.  takes the small config from the model's unit-test tester (for
-    Llama: hidden size 32, 2 layers, 2 heads);
-2.  loads the processor of the model's reference checkpoint and keeps
-    its full vocabulary (32,000 for Llama), so it stays compatible with
-    the real tokenizer;
-3.  instantiates the model with **random weights**, with no training;
-4.  saves it and uploads it.
+**Stage 2 (proposed): slim overfit fixtures.**
 
-[PR #49103](https://github.com/huggingface/transformers/pull/49103),
-also a work in progress, builds on these models with a `FastIntegrationTestMixin` that runs
-processor → `forward()` / `generate()` on CPU for 17 models. Because the
-weights are random, the outputs carry no meaning, and the tests only
-check that nothing raises. **Stage 1 is a smoke test**: it catches
-broken wiring between processor and model (shapes, missing keys,
-dtypes), but it cannot catch a model that runs and produces wrong
-results.
+1.  start from the real checkpoint's `config.json` and processor;
+2.  shrink compute-heavy dimensions (layers, width, experts);
+3.  train on a tiny example until it overfits;
+4.  export framework-specific weight formats if needed;
+5.  publish as a versioned slim repository and validate it by running
+    its integration modules.
 
-**Stage 2 (proposed): slim overfit fixtures.** Starting from the stage
-1 model, train it on a tiny deterministic example until it overfits,
-then save it as a versioned slim fixture. Because the fixture now
-reliably produces a known output, its integration module can assert
-exact results and run a training step. That turns the smoke test into
-a regression test while keeping it cheap enough for every PR.
+Starting from the real config, rather than the tester config, tests the
+published model's actual settings (RoPE scaling, sliding window, MoE
+routing) and keeps nested configs consistent. The cost is shrink rules
+for coupled fields (`layer_types`, `head_dim`, MoE settings); the tester
+config remains a reference for target sizes and a fallback. Some
+architectures will need overrides, or the model creator can provide the
+fixture directly.
 
-Stage 2 also needs fixtures that are built once and versioned. Stage 1
-models are regenerated nightly, so there are no stable weights to
-assert against.
+A fixture is valid only if its integration modules pass. A fixture that
+cannot be built blocks registration of the contract rather than being
+skipped.
 
 ### Early observations from stage 1
 
-These come from a single run of the stage 1 workflow, so they are
-signals worth watching rather than conclusions. That run failed for 11
-model classes, for two reasons:
-
--   **Nested configs out of sync (3 classes: Canary, Granite Speech 5).**
-    The tiny config comes from the unit-test tester (decoder vocabulary
-    of 99, for example), then `vocab_size` is overridden with the real
-    tokenizer's size (16384). The override only reaches the top-level
-    config, so the model's own validation rejects the mismatch with the
-    nested decoder or encoder config. This is the "keep
-    processor-coupled dimensions" rule applied at only one level of the
-    config.
--   **No processor found (8 classes: MiniCPM-V 4.7, Muse Glimmer,
-    PP-LCNet V4, Qwen4Exp).** The tooling finds a processor through the
-    checkpoint named in the config class docstring. Sub-configs (text
-    or vision configs) have no processor of their own, and new models
-    may not point to a usable checkpoint.
-
-Each failure is quick or slow to fix depending on the model, and today
-one maintainer triages them across all architectures. If the pattern
-holds, it points to the following:
-
--   **Generate from the real model repository.** A slim fixture built
-    from the real repository already has its config and processor, which
-    would remove the "no processor found" failures.
--   **Let the model contributor own the fixture.** Whoever adds the
-    model knows its quirks and can build and validate the slim fixture
-    as part of the contribution, with agents doing much of the fixing.
--   **Expect per-architecture overrides.** The generic path will not
-    cover every model, as the nested config failures show.
--   **Fail loudly.** A fixture that cannot be built should block
-    registration of the contract, not turn into a skip.
-
-### Generation strategy
-
-Stage 1 and the proposed slim fixtures start from different configs:
-
--   **Stage 1 today:** the model config comes from the **unit-test
-    tester** (for example `LlamaModelTester.get_config()`). The real
-    checkpoint is used only for its processor, plus a top-level
-    `vocab_size` and special-token-ID patch. The weights are random.
--   **Proposed:** the model config comes from the **real checkpoint's
-    `config.json`**. Only compute-heavy dimensions are shrunk, and every
-    other setting is kept.
-
-Starting from the real config is better in most respects:
-
--   **It tests the published model, not just the architecture class.**
-    Settings that only exist in the real `config.json`, such as RoPE
-    scaling, sliding window size and layer pattern, MoE routing, or
-    attention variants, are exercised. With a tester config they come
-    from test defaults, which can differ from the published model.
--   **Nested configs stay consistent.** Shrinking a coherent real config
-    avoids the mismatches seen in stage 1, where tester values in nested
-    configs conflicted with values patched from the real tokenizer.
--   **It reflects the model repository.** A model that ships a new
-    revision of its config gets a fixture that follows it, which fits a
-    contract owned alongside the model.
--   **It does not depend on the test suite.** New models without a
-    complete tester, or sub-configs without one, can still get a
-    fixture.
-
-It also has costs:
-
--   **Shrinking is harder.** Real configs have coupled fields: per-layer
-    lists such as `layer_types` must match `num_hidden_layers`,
-    `head_dim` must stay consistent with hidden size and head counts,
-    and MoE settings tie together experts, top-k, and layer frequency.
-    Each needs shrink rules.
--   **Some dimensions cannot shrink much.** Processor-coupled sizes such
-    as image resolution, patch size, or audio frame rates must stay
-    compatible with the real processor, so some fixtures stay larger
-    than a tester-based model.
--   **Tester configs are known to work.** They already pass the unit
-    tests for every architecture, which a freshly shrunk real config
-    does not guarantee.
-
-A practical approach is to start from the real config and use the
-tester config as a reference for target sizes and as a fallback when
-shrinking fails.
-
-Automatic generation should be the default:
-
-1.  start from the real model config and processor;
-2.  shrink compute-heavy architectural dimensions;
-3.  preserve processor-coupled dimensions;
-4.  train/overfit the fixture;
-5.  export any framework-specific weight formats;
-6.  validate it by running its integration modules.
-
-Generic generation will not work for every architecture, so the system
-should allow **small architecture-specific strategies or model-author
-overrides**. If automatic generation is not reliable, the model creator
-can provide the canonical slim fixture directly.
-
-A fixture is valid only if the slim repository's integration modules
-pass: the training check and the deterministic inference assertions.
+A single stage 1 run failed for 11 model classes: nested configs out of
+sync after the top-level `vocab_size` patch (Canary, Granite Speech 5),
+and no processor found for sub-configs or new models (MiniCPM-V 4.7,
+Qwen4Exp, and others). It is one run, but both failure types would go
+away if fixtures were built from the real model repository by the
+model's contributor.
 
 ## Reality check: how Transformers asserts today
 
