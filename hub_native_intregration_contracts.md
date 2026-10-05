@@ -26,6 +26,10 @@ The result is a **centrally orchestrated, distributed compatibility test fleet**
 ![architecture](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b/raw/425cea148d0c3bd2831b50c03afb1099be90888a/pipeline.png)
 
 
+![card](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b/raw/425cea148d0c3bd2831b50c03afb1099be90888a/model-card.png)
+
+
+
 ## Why change
 
 Today, checkpoint-specific tests are centrally owned by Transformers even though the model, processor, tokenizer, weights, and usage conventions live on the Hub and evolve independently.
