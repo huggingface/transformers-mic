@@ -35,7 +35,7 @@ The Hub validation service can then run the same contract against:
 The result is a **centrally orchestrated, distributed compatibility test
 fleet**.
 
-![architecture](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b/raw/fa78534fc71c1d594f901fb5e0c01a263fc22bff/arch.png)
+![architecture](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b/raw/1ba6a2f80fc3e5c01e33ecc10cf007a78082d03b/model-arch.png)
 
 ## Why change
 
