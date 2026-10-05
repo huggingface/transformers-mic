@@ -98,13 +98,16 @@ and checks the result, which makes the file its own integration test:
 
 ``` python
 # org/model/integrations/transformers/integration.py
+import json
 import os
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-def run(model_id: str, prompt: str):
+def run(model_id: str, prompt: str, **model_kwargs):
     tokenizer = AutoTokenizer.from_pretrained(model_id)
-    model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto")
+    model = AutoModelForCausalLM.from_pretrained(
+        model_id, device_map="auto", **model_kwargs
+    )
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
     output = model.generate(**inputs, max_new_tokens=16, do_sample=False)
     return tokenizer.decode(
@@ -114,9 +117,10 @@ def run(model_id: str, prompt: str):
 
 if __name__ == "__main__":
     model_id = os.environ.get("MODEL_ID", "org/model")
-    output = run(model_id, "The capital of France is")
-    print(output)
-    assert "Paris" in output
+    model_kwargs = json.loads(os.environ.get("MODEL_KWARGS", "{}"))
+    output = run(model_id, "The capital of France is", **model_kwargs)
+    assert "Paris" in output  # smoke check, see "Recorded expectations"
+    print(json.dumps({"text": output}))
 ```
 
 The same model used from Transformers.js:
@@ -140,8 +144,8 @@ export async function run(modelId, prompt) {
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const modelId = process.env.MODEL_ID ?? "org/model";
   const output = await run(modelId, "The capital of France is");
-  console.log(output);
   assert.match(output, /Paris/);
+  console.log(JSON.stringify({ text: output }));
 }
 ```
 
@@ -179,8 +183,13 @@ if __name__ == "__main__":
 
 The runner executes the file (`python integration.py`,
 `node integration.js`) with `MODEL_ID` set to the model pinned at an
-immutable revision. Exit code 0 means pass. Hardware requirements and
-CI concerns stay in the manifest and the runner.
+immutable revision, and `MODEL_KWARGS` set to the variant being tested
+(attention implementation, dtype, quantization, ...). Exit code 0 means
+the module's own checks passed. The last line of output is a JSON
+object with the values the runner compares against recorded
+expectations (see [Recorded expectations](#recorded-expectations)).
+Hardware requirements and CI concerns stay in the manifest and the
+runner.
 
 A separate versioned manifest is preferable to overloading
 `config.json`, because model configuration and validation metadata have
@@ -197,6 +206,15 @@ The real model's manifest points to its slim fixture:
     "transformers": {
       "runtime": "python",
       "entrypoint": "integrations/transformers/integration.py",
+      "variants": {
+        "default": {"dtype": "bfloat16"},
+        "sdpa": {"dtype": "bfloat16", "attn_implementation": "sdpa"},
+        "flash": {"dtype": "bfloat16", "attn_implementation": "flash_attention_2"}
+      },
+      "expectations": {
+        "text": "exact",
+        "logits": {"atol": 1e-4, "rtol": 1e-4}
+      },
       "resources": {
         "accelerator": "gpu",
         "gpu_count": 1,
@@ -332,6 +350,82 @@ can provide the canonical slim fixture directly.
 A fixture is valid only if the slim repository's integration modules
 pass: the training check and the deterministic inference assertions.
 
+## Reality check: how Transformers asserts today
+
+To ground the contract, we scanned the existing integration tests in
+Transformers: **505 `*IntegrationTest` classes across 474 model test
+files, with 1,693 test methods**. The shares below come from pattern
+matching, so they are approximate.
+
+| Pattern | Share of test methods |
+| --- | --- |
+| Call `generate()` | 49% |
+| Compare tensors with tolerances (mostly `atol`/`rtol` 1e-4, then 1e-3) | 44% |
+| Decode text | 44% |
+| Check shapes | 42% |
+| Exact text equality | 30% |
+| Per-hardware expected values (`Expectations`) | 26% |
+| Tiny or random checkpoints | 23% |
+| Logits or hidden-state slices (`[0, :3, :3]`) | 13% |
+| Token ID comparison | 10% |
+| Loss or labels | 6% |
+| `backward()` | 0.4% (6 methods) |
+
+Loose checks are rare: there are about 100 `assertIn` calls, against
+about 1,750 `assertEqual` and 1,300 tolerance-based tensor comparisons.
+Most methods are `@slow` and many require an accelerator.
+
+What this means for the contract:
+
+1.  **Expected values depend on hardware.** A quarter of the tests keep
+    separate expected values per device type and generation. For
+    example, the Llama-2-7B logits test stores different values for
+    XPU 3, CUDA 7, CUDA 8, and ROCm 9.4. A single hand-written exact
+    assertion in `integration.py` would not survive different runners,
+    and per-device tables are exactly the test machinery the usage
+    example should not carry.
+2.  **Expected values change with the framework.** These values are
+    updated in Transformers PRs today. If they lived in the model
+    repository, a legitimate Transformers change that shifts the logits
+    would require a commit to the model repository.
+3.  **One model is tested in several variants.** There are about 3.4
+    test methods per class, covering FlashAttention (88 methods),
+    bitsandbytes quantization (81), fp16, `torch.compile`, export, and
+    multi-GPU. A single `run()` call covers one path, so variants must
+    be part of the contract.
+4.  **Checks are strict.** Greedy text is compared exactly, and logits
+    are compared with tight tolerances. A substring check such as
+    `"Paris" in output` is a smoke check, not a regression test.
+5.  **The slim training check is new coverage.** Almost no integration
+    test runs a backward pass today. Tiny checkpoints, on the other
+    hand, are common (23%, mostly from `hf-internal-testing`), which is
+    prior art for slim fixtures.
+
+### Recorded expectations
+
+For real checkpoints, expected values should be **recorded, not
+hand-written**:
+
+1.  The integration module returns its outputs (text, token IDs, a
+    logits slice) as JSON and keeps only a smoke assertion.
+2.  The first validated run of a model revision on a given hardware
+    class records those outputs together with the attestation.
+3.  Later runs on the same hardware class compare against the record
+    using the tolerances declared in the manifest (`"text": "exact"`,
+    `"logits": {"atol": 1e-4, "rtol": 1e-4}`).
+4.  When a framework change legitimately shifts the outputs, a
+    maintainer reviews the difference and re-records it. This is the
+    equivalent of updating an `Expectations` table today, but it does
+    not require a commit to the model repository.
+
+The runner executes every variant listed in the manifest by passing it
+as `MODEL_KWARGS`. Each variant gets its own recorded expectations per
+hardware class.
+
+The slim fixture does not need any of this. It runs deterministically
+on CPU, so its integration module keeps exact assertions in its main
+block.
+
 ## Validation cadence
 
 The slim fixture and the real checkpoint serve different purposes. The
@@ -413,6 +507,8 @@ at least:
 -   framework name and build/revision;
 -   relevant dependency versions;
 -   hardware used;
+-   variant (attention implementation, dtype, quantization, ...);
+-   recorded outputs, used as expectations for later runs;
 -   timestamp;
 -   result;
 -   private/public visibility.
@@ -488,7 +584,8 @@ framework + build artifact
 integration manifest
 ```
 
-and executes the contract on the requested hardware.
+and executes the contract on the requested hardware, once per declared
+variant, comparing the outputs against recorded expectations.
 
 The runner core is framework-agnostic. A small per-framework adapter
 knows how to install the build artifact and execute the integration
@@ -524,6 +621,7 @@ After a few weeks, compare:
 -   how often slim fixtures catch regressions before nightly
     real-checkpoint tests;
 -   how much architecture-specific override logic is required;
+-   how often recorded expectations need re-recording, and why;
 -   whether the same clean integration module is useful for docs/agents;
 -   how much effort adding a second framework took.
 

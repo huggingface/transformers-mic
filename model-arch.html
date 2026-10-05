@@ -73,7 +73,7 @@ td{padding:3px 4px;border-bottom:1px solid #f3f4f6}
         <div class="f">config.json<br>weights/<br>processor/<br><span class="hl">integration.json</span><br>integrations/</div>
         <div class="f f2"><span class="hlg">transformers/integration.py</span><br><span class="hly">transformers.js/integration.js</span></div>
       </div>
-      <div class="call"><b>Integration modules</b><ul><li>One per framework</li><li>Usage example for humans and agents</li><li>Main block runs it and asserts on the result</li><li>Exit code 0 = pass</li></ul></div>
+      <div class="call"><b>Integration modules</b><ul><li>One per framework</li><li>Usage example for humans and agents</li><li>Main block: smoke assert + prints outputs as JSON</li><li>Exact values are recorded, not hand-written</li></ul></div>
     </div>
     <div class="card repo" style="margin-bottom:0">
       <div class="tree"><div class="t">org/model-slim <span class="muted" style="font-weight:400">(slim fixture)</span></div>
@@ -93,9 +93,9 @@ td{padding:3px 4px;border-bottom:1px solid #f3f4f6}
     <div class="arrow">▼</div>
     <div class="step"><div class="sq">⚙</div><div><b>Set up environment</b><span>Install framework build: wheel, npm tarball,<br>PR / main / release / private fork. Provision hardware</span></div></div>
     <div class="arrow">▼</div>
-    <div class="step"><div class="sq">▶</div><div><b>Execute integration module</b><span><span class="mono">python integration.py</span> / <span class="mono">node integration.js</span><br>with <span class="mono">MODEL_ID</span> pinned to a revision</span></div></div>
+    <div class="step"><div class="sq">▶</div><div><b>Execute integration module, per variant</b><span><span class="mono">python integration.py</span> / <span class="mono">node integration.js</span><br><span class="mono">MODEL_ID</span> pinned, <span class="mono">MODEL_KWARGS</span> = sdpa, flash, bf16...</span></div></div>
     <div class="arrow">▼</div>
-    <div class="step" style="margin-bottom:0"><div class="sq">▮</div><div><b>Report and attest</b><span>model × framework × build → result, logs, artifacts</span></div></div>
+    <div class="step" style="margin-bottom:0"><div class="sq">▮</div><div><b>Compare and attest</b><span>Diff outputs vs recorded expectations (per hardware)<br>First run records; shifts are reviewed and re-recorded</span></div></div>
   </div>
   <!-- Targets -->
   <div class="col green" style="flex:.9">
@@ -107,7 +107,8 @@ td{padding:3px 4px;border-bottom:1px solid #f3f4f6}
       <li><div>Deterministic assertions<small>e.g. exact output</small></div></li></ul></div>
     <div class="card" style="margin-bottom:0"><b style="font-size:13px">Real checkpoint (main / nightly / release)</b><div class="mono muted">org/model</div>
       <ul class="chk"><li><div>Inference check<small>generation or task-specific, every framework</small></div></li>
-      <li><div>Appropriate assertions<small>e.g. expected content, shapes, processor behavior</small></div></li></ul>
+      <li><div>Recorded expectations<small>exact text, logits within atol, per hardware class</small></div></li>
+      <li><div>Every declared variant<small>attention impl, dtype, quantization</small></div></li></ul>
       <div style="margin-top:6px"><span class="pill p-py">Transformers</span> <span class="pill p-js">Transformers.js</span> <span class="muted" style="font-size:10.5px">+ any framework</span></div></div>
   </div>
   <!-- CI -->
@@ -147,18 +148,18 @@ td{padding:3px 4px;border-bottom:1px solid #f3f4f6}
           <span>Training step</span><span class="ok">passed</span><span class="muted">n/a</span>
           <span>Generation</span><span class="ok">passed</span><span class="ok">passed</span>
           <span>Deterministic output</span><span class="ok">passed</span><span class="ok">passed</span></div></div>
-        <div class="panel"><div class="hd"><div><b style="font-size:12.5px">Real checkpoint (main / nightly / release)</b><br><span class="muted" style="font-size:11px">Integration modules on the full checkpoint</span></div><span class="link">Qwen/Qwen3.8-27B ↗</span></div>
-          <div class="res"><span class="h">Check</span><span class="h">Transformers</span><span class="h">Transformers.js</span>
-          <span>Load model</span><span class="ok">passed</span><span class="ok">passed</span>
-          <span>Generation</span><span class="ok">passed</span><span class="ok">passed</span>
-          <span>Output assertions</span><span class="ok">passed</span><span class="ok">passed</span></div></div>
+        <div class="panel"><div class="hd"><div><b style="font-size:12.5px">Real checkpoint (main / nightly / release)</b><br><span class="muted" style="font-size:11px">Variants vs recorded expectations (cuda 8.x)</span></div><span class="link">Qwen/Qwen3.8-27B ↗</span></div>
+          <div class="res"><span class="h">Variant</span><span class="h">Transformers</span><span class="h">Transformers.js</span>
+          <span>default (bf16)</span><span class="ok">matches</span><span class="ok">matches</span>
+          <span>sdpa</span><span class="ok">matches</span><span class="muted">n/a</span>
+          <span>flash_attention_2</span><span class="ok">matches</span><span class="muted">n/a</span></div></div>
       </div>
       <div style="margin-top:7px"><b style="font-size:12.5px">Recent test runs</b>
-      <table><tr><th>Date</th><th>Trigger</th><th>Target model</th><th>Framework</th><th>Build</th><th>Status</th><th>Duration</th></tr>
-      <tr><td>2 hours ago</td><td><span class="tr t-pr">PR</span></td><td>Qwen/Qwen3.8-27B-slim</td><td>Transformers</td><td>PR #41203</td><td class="ok">✓ Passed</td><td>2m 31s</td></tr>
-      <tr><td>5 hours ago</td><td><span class="tr t-main">Main</span></td><td>Qwen/Qwen3.8-27B</td><td>Transformers.js</td><td>v3.7.0</td><td class="ok">✓ Passed</td><td>4m 02s</td></tr>
-      <tr><td>1 day ago</td><td><span class="tr t-n">Nightly</span></td><td>Qwen/Qwen3.8-27B</td><td>Transformers</td><td>main@8c1f2e</td><td class="ok">✓ Passed</td><td>3m 12s</td></tr>
-      <tr><td>1 week ago</td><td><span class="tr t-r">Release</span></td><td>Qwen/Qwen3.8-27B</td><td>Transformers</td><td>v4.47.0</td><td class="ok">✓ Passed</td><td>3m 05s</td></tr>
+      <table><tr><th>Date</th><th>Trigger</th><th>Target model</th><th>Framework</th><th>Variant</th><th>Build</th><th>Status</th><th>Duration</th></tr>
+      <tr><td>2 hours ago</td><td><span class="tr t-pr">PR</span></td><td>Qwen/Qwen3.8-27B-slim</td><td>Transformers</td><td>default</td><td>PR #41203</td><td class="ok">✓ Passed</td><td>2m 31s</td></tr>
+      <tr><td>5 hours ago</td><td><span class="tr t-main">Main</span></td><td>Qwen/Qwen3.8-27B</td><td>Transformers.js</td><td>default</td><td>v3.7.0</td><td class="ok">✓ Passed</td><td>4m 02s</td></tr>
+      <tr><td>1 day ago</td><td><span class="tr t-n">Nightly</span></td><td>Qwen/Qwen3.8-27B</td><td>Transformers</td><td>flash_attention_2</td><td>main@8c1f2e</td><td class="ok">✓ Passed</td><td>3m 12s</td></tr>
+      <tr><td>1 week ago</td><td><span class="tr t-r">Release</span></td><td>Qwen/Qwen3.8-27B</td><td>Transformers</td><td>sdpa</td><td>v4.47.0</td><td class="ok">✓ Passed</td><td>3m 05s</td></tr>
       </table></div>
     </div>
   </div>
