@@ -368,6 +368,41 @@ Stage 2 also needs fixtures that are built once and versioned. Stage 1
 models are regenerated nightly, so there are no stable weights to
 assert against.
 
+### Early observations from stage 1
+
+These come from a single run of the stage 1 workflow, so they are
+signals worth watching rather than conclusions. That run failed for 11
+model classes, for two reasons:
+
+-   **Nested configs out of sync (3 classes: Canary, Granite Speech 5).**
+    The tiny config comes from the unit-test tester (decoder vocabulary
+    of 99, for example), then `vocab_size` is overridden with the real
+    tokenizer's size (16384). The override only reaches the top-level
+    config, so the model's own validation rejects the mismatch with the
+    nested decoder or encoder config. This is the "keep
+    processor-coupled dimensions" rule applied at only one level of the
+    config.
+-   **No processor found (8 classes: MiniCPM-V 4.7, Muse Glimmer,
+    PP-LCNet V4, Qwen4Exp).** The tooling finds a processor through the
+    checkpoint named in the config class docstring. Sub-configs (text
+    or vision configs) have no processor of their own, and new models
+    may not point to a usable checkpoint.
+
+Each failure is quick or slow to fix depending on the model, and today
+one maintainer triages them across all architectures. If the pattern
+holds, it points to the following:
+
+-   **Generate from the real model repository.** A slim fixture built
+    from the real repository already has its config and processor, which
+    would remove the "no processor found" failures.
+-   **Let the model contributor own the fixture.** Whoever adds the
+    model knows its quirks and can build and validate the slim fixture
+    as part of the contribution, with agents doing much of the fixing.
+-   **Expect per-architecture overrides.** The generic path will not
+    cover every model, as the nested config failures show.
+-   **Fail loudly.** A fixture that cannot be built should block
+    registration of the contract, not turn into a skip.
+
 ### Generation strategy
 
 Automatic generation should be the default:
