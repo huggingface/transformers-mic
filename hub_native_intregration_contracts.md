@@ -115,7 +115,7 @@ contract.
 
 Conceptually:
 
-``` text
+```text
 model repository
 ├── config.json
 ├── model weights
@@ -140,7 +140,7 @@ test fragment or prose snippet.
 
 For example:
 
-``` python
+```python
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 model_id = "org/model"
@@ -204,7 +204,7 @@ related artifacts.
 A cleaner design may therefore be a separate versioned manifest, for
 example:
 
-``` json
+```json
 {
   "schema_version": 1,
   "framework": "transformers",
@@ -326,7 +326,7 @@ real model package**.
 
 Conceptually:
 
-``` text
+```text
 real model config + tokenizer / processor
                   ↓
           tiny-model generator
@@ -355,7 +355,7 @@ executes successfully against the generated tiny artifact**.
 Ideally, the same integration program can be parameterized with either
 model ID:
 
-``` text
+```text
 integration_test.py --model-id org/model-tiny
 integration_test.py --model-id org/model
 ```
@@ -433,7 +433,7 @@ integration coverage whenever Transformers changes.
 
 Conceptually:
 
-``` text
+```text
 Transformers commit / nightly build
             ↓
 Publish or identify candidate Transformers artifact
@@ -453,7 +453,7 @@ Transformers change.
 
 For each registered model, the scheduler would know at least:
 
-``` json
+```json
 {
   "model": "org/model",
   "revision": "abc123",
@@ -473,24 +473,13 @@ A Transformers nightly then becomes conceptually:
 
 ### Suggested validation cadence
 
-  -----------------------------------------------------------------------
-  Trigger                             Validation
-  ----------------------------------- -----------------------------------
-  Transformers PR                     Relevant tiny models when selection
-                                      is available; otherwise a
-                                      conservative subset
-
-  Merge to `main`                     Broad or full tiny-model fleet
-
-  Nightly                             **All registered real checkpoints**
-
-  Release candidate                   All registered real checkpoints,
-                                      potentially with stricter or more
-                                      exhaustive validation
-
-  Model update                        That model's tiny model and real
-                                      checkpoint
-  -----------------------------------------------------------------------
+| Trigger | Validation |
+| --- | --- |
+| Transformers PR | Relevant tiny models when selection is available; otherwise a conservative subset |
+| Merge to `main` | Broad or full tiny-model fleet |
+| Nightly | **All registered real checkpoints** |
+| Release candidate | All registered real checkpoints, potentially with stricter or more exhaustive validation |
+| Model update | That model's tiny model and real checkpoint |
 
 The nightly run should preserve the strongest guarantee of the current
 system: current Transformers is tested against the **full registered
@@ -510,7 +499,7 @@ by a change.
 
 For example:
 
-``` text
+```text
 change in modeling_llama.py
         ↓
 models declaring architecture = llama
@@ -528,13 +517,13 @@ rather than to a model in the abstract.
 
 Conceptually:
 
-``` text
+```text
 model_revision × transformers_revision → result
 ```
 
 For example:
 
-``` text
+```text
 org/model @ 812bd4
 transformers @ 98ac21
 integration contract @ 812bd4
@@ -546,11 +535,11 @@ duration: 4m32s
 
 This naturally produces a compatibility matrix over time:
 
-  Model       Monday Transformers   Tuesday Transformers
-  --------- --------------------- ----------------------
-  Model A                    pass                   pass
-  Model B                    pass                   fail
-  Model C                    pass                   pass
+| Model | Monday Transformers | Tuesday Transformers |
+| --- | --- | --- |
+| Model A | pass | pass |
+| Model B | pass | fail |
+| Model C | pass | pass |
 
 A regression becomes immediately attributable to a concrete Transformers
 revision.
@@ -561,13 +550,13 @@ The same infrastructure should work in both directions.
 
 A Transformers change can trigger model revalidation:
 
-``` text
+```text
 Transformers changed → revalidate model contracts
 ```
 
 A model change can trigger validation against Transformers:
 
-``` text
+```text
 Model changed → revalidate against current/released Transformers
 ```
 
@@ -585,7 +574,7 @@ builds**, not only published versions.
 A new architecture contribution should conceptually include three
 pieces:
 
-``` text
+```text
 new Transformers implementation
 +
 canonical tiny checkpoint
@@ -601,19 +590,11 @@ The proposal does not replace ordinary Transformers unit tests.
 
 A useful separation is:
 
-  -----------------------------------------------------------------------
-  Layer                   Owner                   Purpose
-  ----------------------- ----------------------- -----------------------
-  Unit tests              Transformers            Test implementation
-                                                  details, edge cases and
-                                                  invariants
-
-  Tiny-model integration  Model contract +        Test the complete
-                          Transformers CI         public API cheaply
-
-  Full-checkpoint         Hub validation          Test the actual
-  integration                                     published checkpoint
-  -----------------------------------------------------------------------
+| Layer | Owner | Purpose |
+| --- | --- | --- |
+| Unit tests | Transformers | Test implementation details, edge cases and invariants |
+| Tiny-model integration | Model contract + Transformers CI | Test the complete public API cheaply |
+| Full-checkpoint integration | Hub validation | Test the actual published checkpoint |
 
 The canonical tiny model is especially valuable for new architectures
 because it can exercise the end-to-end implementation without requiring
@@ -633,7 +614,7 @@ The validation architecture should support this workflow directly.
 
 Conceptually:
 
-``` text
+```text
 Company model repository
         +
 Maintainer/private Transformers fork
@@ -665,7 +646,7 @@ This leads to an important design requirement:
 
 The validator should be able to consume something equivalent to:
 
-``` text
+```text
 Transformers source:
     private-fork@4e8a21f
 
@@ -692,7 +673,7 @@ Private development introduces an important distinction between
 
 During development:
 
-``` text
+```text
 company/new-model
     × private-transformers-fork@abc123
     → PASS
@@ -704,7 +685,7 @@ Transformers.
 
 After upstreaming:
 
-``` text
+```text
 company/new-model
     × huggingface/transformers@def456
     → PASS
@@ -714,7 +695,7 @@ This result can become the basis for public compatibility metadata.
 
 Possible lifecycle states include:
 
-``` text
+```text
 contract present
     ↓
 validated against private candidate
@@ -734,7 +715,7 @@ private development results access-controlled.
 The same external contract should survive the transition from private
 implementation to upstream Transformers.
 
-``` text
+```text
 private implementation                upstream implementation
         │                                      │
         └──────── same integration contract ───┘
@@ -760,7 +741,7 @@ implementation**, not the implementation itself.
 
 For an upstream Transformers model:
 
-``` text
+```text
 Transformers repository
     └── modeling_newmodel.py    ← implementation
 
@@ -773,7 +754,7 @@ This keeps the proposal conceptually separate from `trust_remote_code`.
 Remote-code models could still participate, but the manifest should
 distinguish implementation source, for example:
 
-``` json
+```json
 {
   "implementation": {
     "source": "transformers"
@@ -783,7 +764,7 @@ distinguish implementation source, for example:
 
 versus:
 
-``` json
+```json
 {
   "implementation": {
     "source": "repository",
