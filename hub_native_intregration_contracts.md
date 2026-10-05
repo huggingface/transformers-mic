@@ -22,6 +22,10 @@ The Hub validation service can then run the same contract against:
 
 The result is a **centrally orchestrated, distributed compatibility test fleet**.
 
+
+![architecture](pipeline.png)
+
+
 ## Why change
 
 Today, checkpoint-specific tests are centrally owned by Transformers even though the model, processor, tokenizer, weights, and usage conventions live on the Hub and evolve independently.
