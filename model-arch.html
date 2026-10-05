@@ -1,0 +1,166 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Model arch</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1536px;height:1050px;background:#fff;font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;color:#111827;font-size:12px;line-height:1.35;padding:6px 22px}
+h1{font-size:25px;font-weight:700;letter-spacing:-.3px;margin:2px 0 8px}
+.mono{font-family:Menlo,monospace;font-size:11px}
+.muted{color:#6b7280}
+.row{display:flex;gap:14px}
+.col{border-radius:12px;padding:12px}
+.col h2{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.col .sub{font-size:12px;color:#4b5563;margin:1px 0 9px 34px}
+.ic{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;flex:none}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:9px 10px;margin-bottom:8px}
+.blue{background:#eef4fd}.orange{background:#fdf3e6}.green{background:#eaf6ee}.purple{background:#f1effb}
+.repo{display:flex;gap:8px}
+.tree{flex:1.15}
+.tree .t{font-weight:700;font-size:13px}
+.tree div.f{padding-left:12px;border-left:1px solid #d1d5db;margin-left:5px;font-size:11.5px;line-height:1.55}
+.tree div.f2{padding-left:24px}
+.hl{color:#2563eb}.hlg{color:#15803d}.hly{color:#a16207}
+.call{flex:1;background:#eef4fd;border-radius:7px;padding:7px 8px;font-size:11px}
+.call ul{margin:4px 0 0 13px}
+.step{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:7px 10px;margin-bottom:4px}
+.step b{display:block;font-size:12.5px}
+.step span{font-size:11px;color:#374151}
+.sq{width:32px;height:32px;border-radius:8px;background:#f3f0ff;color:#6d28d9;display:flex;align-items:center;justify-content:center;font-size:16px;flex:none}
+.arrow{text-align:center;color:#9ca3af;font-size:10px;line-height:8px;margin-bottom:4px}
+.chk{list-style:none}
+.chk li{display:flex;gap:7px;margin:5px 0;font-size:11.5px}
+.chk li:before{content:"✓";flex:none;width:15px;height:15px;border-radius:50%;background:#16a34a;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.chk li small{display:block;color:#6b7280;font-size:10.5px}
+.trig{display:flex;gap:10px;align-items:center}
+.trig b{color:#5b21b6;font-size:13px}
+.trig .ti{font-size:18px;color:#6d28d9;width:26px;text-align:center}
+.pill{display:inline-block;border-radius:5px;padding:1px 6px;font-size:10.5px;font-weight:600}
+.p-py{background:#fef3c7;color:#92400e}.p-js{background:#fef9c3;color:#854d0e;border:1px solid #fde68a}
+hr{border:0;border-top:1px solid #e5e7eb;margin:10px 0 4px}
+/* model card */
+.mc{border:1px solid #e5e7eb;border-radius:12px;padding:10px 18px}
+.nav{display:flex;align-items:center;gap:18px;font-size:13px}
+.search{flex:0 0 400px;border:1px solid #e5e7eb;border-radius:8px;padding:6px 10px;color:#9ca3af}
+.tags{display:flex;gap:7px;margin:8px 0}
+.tag{border:1px solid #e5e7eb;border-radius:7px;padding:4px 9px;font-size:12px}
+.tabs{display:flex;gap:40px;font-size:13px;border-bottom:1px solid #e5e7eb;padding:4px 16px 8px}
+.tabs .on{font-weight:700;border-bottom:2px solid #111;padding-bottom:7px;margin-bottom:-9px}
+.side .it{border:1px solid #f3f4f6;border-radius:8px;padding:6px 10px;margin-bottom:5px}
+.side .it b{display:block;font-size:12.5px}.side .it span{font-size:11px;color:#6b7280}
+.side .on{background:#eef2ff}.side .on b{color:#1d4ed8;text-decoration:underline}
+.banner{background:#effaf3;border:1px solid #d1fae5;border-radius:9px;padding:8px 12px;display:flex;align-items:center;gap:12px}
+.fw{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:5px 10px;font-size:11.5px}
+.panel{flex:1;border:1px solid #e5e7eb;border-radius:9px;padding:8px 12px}
+.panel .hd{display:flex;justify-content:space-between;align-items:flex-start}
+.link{border:1px solid #bfdbfe;background:#eff6ff;color:#1d4ed8;border-radius:6px;padding:2px 7px;font-size:11px}
+.res{display:grid;grid-template-columns:1fr 70px 70px;font-size:11.5px;row-gap:2px;margin-top:5px}
+.res .h{color:#6b7280;font-size:10.5px}
+.ok{color:#16a34a}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{color:#6b7280;font-weight:500;text-align:left;padding:3px 4px;border-bottom:1px solid #e5e7eb}
+td{padding:3px 4px;border-bottom:1px solid #f3f4f6}
+.tr{display:inline-block;border-radius:5px;padding:0 6px;font-size:10px;font-weight:600}
+.t-pr{background:#ede9fe;color:#6d28d9}.t-main{background:#ffedd5;color:#c2410c}.t-n{background:#dbeafe;color:#1d4ed8}.t-r{background:#e0e7ff;color:#4338ca}
+</style></head><body>
+
+<h1>1. Architecture and validation flow</h1>
+<div class="row" style="height:436px">
+  <!-- Repos -->
+  <div class="col blue" style="flex:1.12">
+    <h2><span class="ic" style="background:#1e3a8a">H</span>Model repositories on the Hub</h2>
+    <div class="sub">Two repositories per model, same convention</div>
+    <div class="card repo">
+      <div class="tree"><div class="t">org/model <span class="muted" style="font-weight:400">(real checkpoint)</span></div>
+        <div class="f">config.json<br>weights/<br>processor/<br><span class="hl">integration.json</span><br>integrations/</div>
+        <div class="f f2"><span class="hlg">transformers/integration.py</span><br><span class="hly">transformers.js/integration.js</span></div>
+      </div>
+      <div class="call"><b>Integration modules</b><ul><li>One per framework</li><li>Usage example for humans and agents</li><li>Main block runs it and asserts on the result</li><li>Exit code 0 = pass</li></ul></div>
+    </div>
+    <div class="card repo" style="margin-bottom:0">
+      <div class="tree"><div class="t">org/model-slim <span class="muted" style="font-weight:400">(slim fixture)</span></div>
+        <div class="f">config.json<br>weights/ <span class="muted">(slim, overfit)</span><br>processor/<br><span class="hl">integration.json</span><br>integrations/</div>
+        <div class="f f2"><span class="hlg">transformers/integration.py</span><br><span class="hly">transformers.js/integration.js</span></div>
+      </div>
+      <div class="call"><b>Reduced model</b>, overfit on a tiny deterministic example<ul><li>Same layout and convention</li><li>Exact-output + training assertions</li><li>Used for fast PR checks</li></ul></div>
+    </div>
+  </div>
+  <!-- Service -->
+  <div class="col orange" style="flex:.98">
+    <h2><span class="ic" style="background:#f97316">⚙</span>Hub validation service</h2>
+    <div class="sub">Centralized orchestration, distributed tests</div>
+    <div class="step"><div class="sq">◎</div><div><b>Select models to run</b><span>All or relevant models (based on changes)</span></div></div>
+    <div class="arrow">▼</div>
+    <div class="step"><div class="sq">▤</div><div><b>Load integration contract</b><span>Read <span class="mono">integration.json</span>, pick the framework entry</span></div></div>
+    <div class="arrow">▼</div>
+    <div class="step"><div class="sq">⚙</div><div><b>Set up environment</b><span>Install framework build: wheel, npm tarball,<br>PR / main / release / private fork. Provision hardware</span></div></div>
+    <div class="arrow">▼</div>
+    <div class="step"><div class="sq">▶</div><div><b>Execute integration module</b><span><span class="mono">python integration.py</span> / <span class="mono">node integration.js</span><br>with <span class="mono">MODEL_ID</span> pinned to a revision</span></div></div>
+    <div class="arrow">▼</div>
+    <div class="step" style="margin-bottom:0"><div class="sq">▮</div><div><b>Report and attest</b><span>model × framework × build → result, logs, artifacts</span></div></div>
+  </div>
+  <!-- Targets -->
+  <div class="col green" style="flex:.9">
+    <h2><span class="ic" style="background:#16a34a">✓</span>Validation targets</h2>
+    <div class="sub">Same convention, different weights</div>
+    <div class="card"><b style="font-size:13px">Slim fixture (PR)</b><div class="mono muted">org/model-slim</div>
+      <ul class="chk"><li><div>Training check<small>forward, backward, optimizer (Transformers)</small></div></li>
+      <li><div>Inference check<small>generation or task-specific, every framework</small></div></li>
+      <li><div>Deterministic assertions<small>e.g. exact output</small></div></li></ul></div>
+    <div class="card" style="margin-bottom:0"><b style="font-size:13px">Real checkpoint (main / nightly / release)</b><div class="mono muted">org/model</div>
+      <ul class="chk"><li><div>Inference check<small>generation or task-specific, every framework</small></div></li>
+      <li><div>Appropriate assertions<small>e.g. expected content, shapes, processor behavior</small></div></li></ul>
+      <div style="margin-top:6px"><span class="pill p-py">Transformers</span> <span class="pill p-js">Transformers.js</span> <span class="muted" style="font-size:10.5px">+ any framework</span></div></div>
+  </div>
+  <!-- CI -->
+  <div class="col purple" style="flex:.78">
+    <h2><span class="ic" style="background:#7c3aed">↻</span>CI / automation</h2>
+    <div class="sub">Same triggers in each framework's CI</div>
+    <div class="card trig"><div class="ti">⑂</div><div><b>Framework PR</b><br>Relevant slim fixtures<br><span class="muted">(fast feedback)</span></div></div>
+    <div class="card trig"><div class="ti">⑂</div><div><b>Merge to main</b><br>Relevant real checkpoints<br><span class="muted">(affected models only)</span></div></div>
+    <div class="card trig"><div class="ti">◷</div><div><b>Nightly</b><br>All registered real checkpoints</div></div>
+    <div class="card trig"><div class="ti">◈</div><div><b>Release candidate</b><br>All real checkpoints<br><span class="muted">(possibly stricter)</span></div></div>
+    <div class="card trig" style="margin-bottom:0"><div class="ti">⇪</div><div><b>Model update</b><br>Slim + real, every declared framework</div></div>
+  </div>
+</div>
+
+<hr>
+<h1>2. Prototype model card: Tests tab</h1>
+<div class="mc">
+  <div class="nav"><b style="font-size:15px">🤗 Hugging Face</b><div class="search">Search models, datasets, users...</div><span style="flex:1"></span><span>Models</span><span>Datasets</span><span>Spaces</span><span>Docs</span><span>Pricing</span></div>
+  <div style="font-size:19px;margin-top:8px"><span class="muted">Qwen /</span> <b>Qwen3.8-27B</b></div>
+  <div class="tags"><span class="tag">Image-Text-to-Text</span><span class="tag">Transformers</span><span class="tag">Transformers.js</span><span class="tag">Safetensors</span><span class="tag">ONNX</span><span class="tag">License: apache-2.0</span></div>
+  <div class="tabs"><span>Model card</span><span>Files and versions</span><span>Community</span><span class="on">⚗ Tests</span></div>
+  <div class="row" style="margin-top:10px;gap:12px">
+    <div class="side" style="flex:0 0 220px">
+      <div class="it"><b>Overview</b><span>Summary and status</span></div>
+      <div class="it on"><b>Test results</b><span>Detailed results and history</span></div>
+      <div class="it"><b>Slim fixture</b><span>Small model for fast tests</span></div>
+      <div class="it"><b>Integration modules</b><span>One executable example per framework</span></div>
+      <div class="it"><b>Configuration</b><span>integration.json, resources</span></div>
+    </div>
+    <div style="flex:1">
+      <div class="banner"><span class="ic" style="background:#16a34a">✓</span><div style="flex:1"><b style="color:#166534;font-size:13px">Compatible with 2 frameworks</b><br><span style="font-size:11px">All integration modules passed on their latest runs.</span></div>
+        <div class="fw"><b>Transformers</b> v4.47.1 <span class="ok">✓</span><br><span class="muted">2 hours ago</span></div>
+        <div class="fw"><b>Transformers.js</b> v3.7.0 <span class="ok">✓</span><br><span class="muted">5 hours ago</span></div></div>
+      <div class="row" style="margin-top:8px;gap:10px">
+        <div class="panel"><div class="hd"><div><b style="font-size:12.5px">Slim fixture (PR)</b><br><span class="muted" style="font-size:11px">Training + exact-output checks on a reduced model</span></div><span class="link">Qwen/Qwen3.8-27B-slim ↗</span></div>
+          <div class="res"><span class="h">Check</span><span class="h">Transformers</span><span class="h">Transformers.js</span>
+          <span>Training step</span><span class="ok">passed</span><span class="muted">n/a</span>
+          <span>Generation</span><span class="ok">passed</span><span class="ok">passed</span>
+          <span>Deterministic output</span><span class="ok">passed</span><span class="ok">passed</span></div></div>
+        <div class="panel"><div class="hd"><div><b style="font-size:12.5px">Real checkpoint (main / nightly / release)</b><br><span class="muted" style="font-size:11px">Integration modules on the full checkpoint</span></div><span class="link">Qwen/Qwen3.8-27B ↗</span></div>
+          <div class="res"><span class="h">Check</span><span class="h">Transformers</span><span class="h">Transformers.js</span>
+          <span>Load model</span><span class="ok">passed</span><span class="ok">passed</span>
+          <span>Generation</span><span class="ok">passed</span><span class="ok">passed</span>
+          <span>Output assertions</span><span class="ok">passed</span><span class="ok">passed</span></div></div>
+      </div>
+      <div style="margin-top:7px"><b style="font-size:12.5px">Recent test runs</b>
+      <table><tr><th>Date</th><th>Trigger</th><th>Target model</th><th>Framework</th><th>Build</th><th>Status</th><th>Duration</th></tr>
+      <tr><td>2 hours ago</td><td><span class="tr t-pr">PR</span></td><td>Qwen/Qwen3.8-27B-slim</td><td>Transformers</td><td>PR #41203</td><td class="ok">✓ Passed</td><td>2m 31s</td></tr>
+      <tr><td>5 hours ago</td><td><span class="tr t-main">Main</span></td><td>Qwen/Qwen3.8-27B</td><td>Transformers.js</td><td>v3.7.0</td><td class="ok">✓ Passed</td><td>4m 02s</td></tr>
+      <tr><td>1 day ago</td><td><span class="tr t-n">Nightly</span></td><td>Qwen/Qwen3.8-27B</td><td>Transformers</td><td>main@8c1f2e</td><td class="ok">✓ Passed</td><td>3m 12s</td></tr>
+      <tr><td>1 week ago</td><td><span class="tr t-r">Release</span></td><td>Qwen/Qwen3.8-27B</td><td>Transformers</td><td>v4.47.0</td><td class="ok">✓ Passed</td><td>3m 05s</td></tr>
+      </table></div>
+    </div>
+  </div>
+</div>
+</body></html>
