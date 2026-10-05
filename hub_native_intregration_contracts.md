@@ -26,7 +26,7 @@ The result is a **centrally orchestrated, distributed compatibility test fleet**
 ![architecture](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b/raw/425cea148d0c3bd2831b50c03afb1099be90888a/pipeline.png)
 
 
-![card](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b/raw/425cea148d0c3bd2831b50c03afb1099be90888a/model-card.png)
+![card](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b/raw/c5ce7d2ccff67535927d3a803e76048b1dfb18db/model-card.png)
 
 
 
