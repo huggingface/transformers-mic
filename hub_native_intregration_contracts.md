@@ -14,7 +14,7 @@ Each participating model exposes:
 
 The Hub validation service can then run the same contract against:
 
-- a private Transformers fork during development;
+- a private Transformers clone during development;
 - an upstream PR or commit;
 - `main`;
 - releases;
