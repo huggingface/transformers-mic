@@ -16,6 +16,12 @@ Framework CI fetches these at pinned revisions and runs them: against the small 
 
 The first goal is CI, not a new Hub feature. If this works, the same contracts can later back compatibility status, tested snippets, Colabs, APIs, or agent usage.
 
+## Problem
+
+Model compatibility is expensive to verify. Integration coverage depends on real checkpoints, large downloads, GPUs, framework-specific test code, or manual checks, so only a small part of the model fleet runs on each PR. We find regressions late: after merge, in nightly jobs, during a release, or from users.
+
+The code that validates a model is also separate from the code we show users, which is separate again from Hub snippets and other examples. Each copy drifts on its own: in a [recorded agent run](docs/agent-walkthrough.md), the `microsoft/Florence-2-base` card snippet failed as written (a missing import, unlisted dependencies, and remote code that breaks on every `transformers` version tried), and neither model tried came with a way to check that its output was right.
+
 ## The proposed standard
 
 A MIC is defined per model and framework. A conforming MIC has:
@@ -39,12 +45,6 @@ A MIC is defined per model and framework. A conforming MIC has:
 8. **Everything pinned.** Framework CI runs contracts from a fleet lock listing the model, processor, converted artifact, contract, fixture, baseline, and dependency revisions.
 
 The manifest and result schemas and the shared runner are what the pilot builds ([next steps](docs/next-steps.md), step 3). Details are in the [technical design](docs/design.md).
-
-## Problem
-
-Model compatibility is expensive to verify. Integration coverage depends on real checkpoints, large downloads, GPUs, framework-specific test code, or manual checks, so only a small part of the model fleet runs on each PR. We find regressions late: after merge, in nightly jobs, during a release, or from users.
-
-The code that validates a model is also separate from the code we show users, which is separate again from Hub snippets and other examples. Each copy drifts on its own: in a [recorded agent run](docs/agent-walkthrough.md), the `microsoft/Florence-2-base` card snippet failed as written (a missing import, unlisted dependencies, and remote code that breaks on every `transformers` version tried), and neither model tried came with a way to check that its output was right.
 
 ## Why on the Hub, owned by Hugging Face
 
