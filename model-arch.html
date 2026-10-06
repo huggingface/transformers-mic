@@ -75,7 +75,7 @@ td{padding:3px 4px;border-bottom:1px solid #f3f4f6}
     </div>
     <div class="card repo" style="padding:7px 10px">
       <div class="tree"><div class="t">hf-internal-testing/<br>model-integration</div>
-        <div class="f"><span class="hl">integration.json</span> → org/model<br>integrations/</div>
+        <div class="f"><span class="hl">integration.json</span> → org/model<br>expectations/<br>integrations/</div>
         <div class="f f2"><span class="hlg">transformers/integration.py</span><br><span class="hly">transformers.js/integration.js</span></div>
       </div>
       <div class="call" style="flex:.8"><b>Hugging Face</b><ul><li>Usage example, one per framework</li><li>Smoke assert + JSON outputs</li><li>Written from a template when adding the model</li></ul></div>
@@ -89,8 +89,8 @@ td{padding:3px 4px;border-bottom:1px solid #f3f4f6}
   </div>
   <!-- Service -->
   <div class="col orange" style="flex:.98">
-    <h2><span class="ic" style="background:#f97316">⚙</span>Hub validation service</h2>
-    <div class="sub">Centralized orchestration, distributed tests</div>
+    <h2><span class="ic" style="background:#f97316">⚙</span>Validation runner</h2>
+    <div class="sub">Runs in framework CI; the Hub shows results</div>
     <div class="step"><div class="sq">◎</div><div><b>Select models to run</b><span>All or relevant models (based on changes)</span></div></div>
     <div class="arrow">▼</div>
     <div class="step"><div class="sq">▤</div><div><b>Load integration contract</b><span>Read <span class="mono">integration.json</span>, pick the framework entry</span></div></div>
@@ -99,7 +99,7 @@ td{padding:3px 4px;border-bottom:1px solid #f3f4f6}
     <div class="arrow">▼</div>
     <div class="step"><div class="sq">▶</div><div><b>Execute integration module, per variant</b><span><span class="mono">python integration.py</span> / <span class="mono">node integration.js</span><br><span class="mono">MODEL_ID</span> @ commit, <span class="mono">MODEL_KWARGS</span> per variant</span></div></div>
     <div class="arrow">▼</div>
-    <div class="step" style="margin-bottom:0"><div class="sq">▮</div><div><b>Compare and attest</b><span>Diff outputs vs recorded expectations (per hardware)<br>First run records; shifts are reviewed and re-recorded</span></div></div>
+    <div class="step" style="margin-bottom:0"><div class="sq">▮</div><div><b>Compare and report</b><span>Diff vs recorded expectations (per hardware)<br>PR check + pings; shifts re-recorded from the PR</span></div></div>
   </div>
   <!-- Targets -->
   <div class="col green" style="flex:.9">
@@ -128,7 +128,7 @@ td{padding:3px 4px;border-bottom:1px solid #f3f4f6}
 </div>
 
 <hr>
-<h1>2. Prototype model card: Tests tab</h1>
+<h1>2. Hub track: Tests tab on the model card (prototype)</h1>
 <div class="mc">
   <div class="nav"><b style="font-size:15px">🤗 Hugging Face</b><div class="search">Search models, datasets, users...</div><span style="flex:1"></span><span>Models</span><span>Datasets</span><span>Spaces</span><span>Docs</span><span>Pricing</span></div>
   <div style="font-size:19px;margin-top:8px"><span class="muted">Qwen /</span> <b>Qwen3.8-27B</b></div>
