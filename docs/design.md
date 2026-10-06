@@ -329,6 +329,8 @@ Possible follow-ups:
 
 A compatibility result should be an attestation for a specific set of revisions and environment, not a permanent “supported” badge.
 
+The [agent walkthrough](agent-walkthrough.md) shows what this would replace: a card saying "install `transformers` from `main`" long after release, `transformersInfo` claiming native support for a repo that only works with (broken) remote code, and no link from that repo to the maintained native port in another organization.
+
 The record should include at least:
 
 - model and processor revision;
@@ -386,5 +388,6 @@ The pilot should resolve:
 6. How do we handle licensed, gated, or private models in fleet validation?
 7. When should a model/framework combination be considered unsupported versus simply unvalidated?
 8. What amount of contract maintenance is acceptable before this becomes another test suite we have to carry?
+9. How do published fixtures stay out of model discovery (tags, card text, search exclusion, or an unlisted organization), so they don't show up as candidate models for users and agents?
 
 If the pilot shows good real-regression coverage at substantially lower PR cost, without creating large ongoing maintenance overhead, we can expand the fleet and then build the Hub-facing pieces.

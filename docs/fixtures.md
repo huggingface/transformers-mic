@@ -55,7 +55,7 @@ Recipe:
 3. Initialize from a fixed seed and save.
 4. Run the input-sensitivity check: perturb or swap inputs and require logits to move well beyond tolerance. If it fails, go to stage 3.
 5. Record baselines on a known-good build, under the default runtime configuration: discrete outputs, selected logits, loss, gradients on named modules, and whether an SGD step updates parameters.
-6. Publish at a pinned revision and add it to the fleet lock.
+6. Publish at a pinned revision, marked as a test artifact (tag and card) and kept out of default Hub search, then add it to the fleet lock.
 
 Shrinking from the real config preserves more integration-relevant behavior than unit-test configs, but it will not work generically for every architecture. Nested configs, coupled fields (`layer_types`, `head_dim`), MoE models, and processor assumptions need explicit rules, with test configs as a fallback.
 
@@ -146,6 +146,6 @@ python experiments/experiment.py \
 
 - Shrink rules for coupled configs, nested multimodal configs, and MoE, and a measured success rate across the fleet.
 - Bring stage 1 closer to stage 2: fixed seeds, pinned revisions, recorded baselines, unchanged processor files, and the input-sensitivity check, ideally in the same `create_dummy_models.py` pipeline rather than a parallel one.
-- Publish fixtures as `hf-internal-testing/<model>-slim` and record their revisions in the fleet lock.
+- Publish fixtures as `hf-internal-testing/<model>-slim` and record their revisions in the fleet lock. Keep them out of model discovery: in the [agent walkthrough](agent-walkthrough.md), a size-filtered Hub search surfaced `trl-internal-testing/tiny-*` fixtures as candidate models, and a fleet of slim fixtures would add thousands more.
 - Calibrate tolerances on the CI CPU platform and on one GPU, and decide which baselines must be hardware-specific.
 - Measure fixture upkeep in the pilot: shrink-rule fixes, non-converging overfits, and baseline reviews.

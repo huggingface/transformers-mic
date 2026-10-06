@@ -87,6 +87,11 @@ pilot.
 Count distinct regressions separately from repeated seeds. Do not drop
 unreproducible cases from the report or count them as successful checks.
 
+**GPU:** everything so far ran on CPU. GPU-specific regressions, GPU
+tolerance calibration (dtype and attention backend), and GPU baselines
+will run on Hugging Face GPU CI runners once access is set up; until then
+GPU results are reported as missing, not as passing.
+
 Remaining for this step: GPU-specific cases, bugs found by nightly/slow
 tests, a larger benign set, and a real regression on a fixture that
 fails the input-sensitivity gate (Whisper) to test the overfit fallback.
@@ -98,10 +103,12 @@ Use overfitting where it adds detection or demonstrably improves diagnosis.
 
 ## 2. Measure stability and total cost
 
-- [ ] Run the frozen fixtures against documented benign changes and
-  supported dependency upgrades. Verify benign behavior independently
-  with the full checkpoint or existing tests; a changed snapshot alone
-  does not establish a regression.
+- [x] Run the frozen fixtures against documented benign changes and
+  supported dependency upgrades (CPU, 2026-10-06): 10 benign Transformers
+  changes, and torch 2.12.1/2.13.0/2.14.1, tokenizers 0.23.2, numpy 2.2.6,
+  and Pillow 12.3.0 one at a time, under eager and SDPA. No flags in 770
+  checks; real checkpoints were checked alongside. See
+  [Evidence](evidence.md#stability-and-cost-on-cpu).
 - [ ] Repeat on the actual CI CPU platform, then one supported GPU with
   its relevant dtype and attention backend. Declare unsupported variants
   explicitly. Calibrate tolerances on clean runs, then freeze them before
@@ -109,8 +116,13 @@ Use overfitting where it adds detection or demonstrably improves diagnosis.
 - [ ] Measure both cold and warm execution: environment setup, downloads,
   processor/model loading, inference, training checks, comparison, and
   reporting. Include fixture generation/export time and artifact size.
+  Done locally for process start, loading, inference, training probe,
+  comparison, memory, and artifact size ([cost.py](../experiments/cost.py));
+  environment setup, downloads, and a purged OS file cache still need CI.
 - [ ] Compare the same coverage against current CI using wall time,
-  CPU/GPU time, and transfer/storage volume. Track fixture creation,
+  CPU/GPU time, and transfer/storage volume. So far only transfer volume:
+  the current slow tests for these eight families load ~144 GB of
+  weights. Track fixture creation,
   repair, expectation review, and failure-triage time separately.
 
 **Deliverable:** cost and stability report with sample counts, failures,

@@ -10,6 +10,42 @@ Companion to the [proposal](../README.md). This document collects what the local
 
 These are small local experiments, not fleet-level evidence: ten model families, synthetic faults, eleven candidate regressions (eight reproducible), ten benign changes, CPU only. The full case list, with commits and verdicts, is in [cases.json](../experiments/cases.json).
 
+## How agents use the Hub today
+
+A [recorded agent walkthrough](agent-walkthrough.md) took two vision models from the Hub to working code on a CPU-only Mac. It is one agent and one run per model, so it shows that these failure modes exist, not how often they occur:
+
+- **Card snippets break.** The `microsoft/Florence-2-base` snippet is missing `import torch`, needs dependencies the card does not list (`requests`, `einops`, `timm`), and its remote code fails on `transformers` 5.17, 4.57.6, and 4.41.2. The `Qwen/Qwen3.5-0.8B` card has no in-process snippet at all. A contract's usage module is executed in CI, so it cannot drift this way.
+- **Nobody can tell whether the output is right.** Both results were judged by eye. The UMT5 regression below produced fluent output from a non-causal decoder and was only caught by recorded baselines. Contract baselines are a correctness reference for users and agents, not only for CI.
+- **The default runtime is unclear.** The agent could not tell whether bf16 on CPU with SDPA was the intended configuration. Contracts record the configuration they run, which is also the answer to that question.
+- **Version and support metadata is stale or contradictory.** Florence-2's `transformersInfo` says native support, `config.auto_map` says remote code, and native loading fails on that repo; the working port lives in `florence-community/Florence-2-base`, with no link from the original. A revision-specific compatibility record would have pointed there.
+
+## Stability and cost on CPU
+
+**Dependency upgrades.** Fixtures and real-checkpoint baselines frozen with torch 2.11.0, tokenizers 0.23.1, numpy 1.26.4, and Pillow 12.2.0 were re-checked with one dependency changed at a time: torch 2.12.1, 2.13.0, and 2.14.1 (with matching torchvision), tokenizers 0.23.2, numpy 2.2.6, and Pillow 12.3.0, each under eager and SDPA. **No flags in 770 checks** ([stability.json](../experiments/results/stability.json)). The largest drift was 1.3e-5 on slim fixtures and 8.4e-5 on real checkpoints (Wav2Vec2 with numpy 2.x, UMT5 under SDPA), so real-checkpoint tolerances sit closer to the `1e-4` limit than slim ones.
+
+**Cost of one check.** Each check ran in a fresh process, three times, on CPU with warm OS file caches and no downloads ([cost.py](../experiments/cost.py), [cost.json](../experiments/results/cost.json)):
+
+| Family | Slim work | Real work | Slim weights | Real weights |
+| --- | ---: | ---: | ---: | ---: |
+| SmolLM | 0.27 s | 0.25 s | 13 MB | 538 MB |
+| CLIP | 0.40 s | 0.41 s | 14 MB | 605 MB |
+| BERT | 0.09 s | 0.14 s | 8 MB | 440 MB |
+| T5 | 0.14 s | 0.18 s | 9 MB | 242 MB |
+| Whisper | 0.57 s | 1.26 s | 15 MB | 151 MB |
+| Wav2Vec2 | 0.28 s | 0.47 s | 0.4 MB | 378 MB |
+| UMT5 | 0.76 s | 1.15 s | 66 MB | 1,227 MB |
+
+"Work" is processor and input preparation, model load, first inference, comparison, and (slim only) the training probe. On top of that, every fresh process spent about 2.4 s importing torch and Transformers.
+
+What this says:
+
+- **Process start dominates.** A runner should execute many contracts in one process, or the import cost will outweigh the checks themselves.
+- **Against these small real checkpoints, slim fixtures save little time locally.** The real checkpoints here are each family's smallest variant, already cached. Real inference was 5–20× slower, but loading and preprocessing are similar.
+- **The savings are in transfer and model size.** Slim weights are 10–1,300× smaller than these checkpoints. The slow tests for the same eight families currently load about 144 GB of weights (two Llama 7–8B, three OLMo up to 7B, Whisper large variants, and twelve Wav2Vec2 checkpoints), most of which cannot run on CPU at all.
+- **Memory follows the same pattern:** 0.5–1.3 GB peak RSS for slim checks, mostly the framework itself, versus 0.7–2 GB for these small real checkpoints.
+
+Not measured yet: environment setup, downloads from the Hub, a cold OS file cache, the actual CI CPU platform, and GPUs.
+
 ## Historical regression replay
 
 To test real bugs rather than synthetic faults, I replayed documented Transformers regressions fixed since May 2026 ([freeze/check](../experiments/replay.py), [per-case driver](../experiments/replay_case.py), [usage repros](../experiments/usage_repros.py)).

@@ -18,7 +18,7 @@ The first goal is CI, not a new Hub feature. If this works, the same contracts c
 
 Model compatibility is expensive to verify. Integration coverage depends on real checkpoints, large downloads, GPUs, framework-specific test code, or manual checks, so only a small part of the model fleet runs on each PR. We find regressions late: after merge, in nightly jobs, during a release, or from users.
 
-The code that validates a model is also separate from the code we show users, which is separate again from Hub snippets and other examples. Each copy drifts on its own.
+The code that validates a model is also separate from the code we show users, which is separate again from Hub snippets and other examples. Each copy drifts on its own: in a [recorded agent run](docs/agent-walkthrough.md), the `microsoft/Florence-2-base` card snippet failed as written (a missing import, unlisted dependencies, and remote code that breaks on every `transformers` version tried), and neither model tried came with a way to check that its output was right.
 
 ## Why on the Hub, owned by Hugging Face
 
@@ -36,4 +36,5 @@ Run a CI-only pilot on 3–5 models, with existing tests kept running in paralle
 - [Technical design](docs/design.md): contract layout, CI triggers, where code lives, checks, baselines, runner, pilot plan, open questions.
 - [Small fixtures](docs/fixtures.md): the fixture project, from today's tiny models to frozen random and overfit fixtures.
 - [Next steps](docs/next-steps.md): the validation plan and what is done.
+- [Agent walkthrough](docs/agent-walkthrough.md): a recorded run of an agent taking Hub models to working code, and where it got stuck.
 - [Agent walkthrough](docs/agent-walkthrough.md): a recorded run of an agent taking two Hub models to working code, every tool call included, with a prompt to repeat it in other agents.
