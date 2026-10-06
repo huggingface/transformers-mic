@@ -306,6 +306,8 @@ There is already related work in Transformers around generating small random mod
 
 That is a useful first stage because it gives us broad smoke coverage cheaply.
 
+Today's stage 1 (`utils/create_dummy_models.py`, [#49103](https://github.com/huggingface/transformers/pull/49103)) gives random tiny models built from unit-test configs with the real vocabulary, used as smoke tests. To serve as the frozen fixtures described above, it would additionally need: a fixed seed and pinned fixture revisions, recorded baselines instead of shape-only assertions, the input-sensitivity check, and processor files copied unchanged rather than re-saved and resized.
+
 A second stage would start from the actual model configuration and processor, apply architecture-specific shrink rules, freeze the resulting fixture, check that it is sensitive to its inputs, and overfit it only when it is not.
 
 Starting from the real config should preserve more integration-relevant behavior, but it will not automatically work for every architecture. Nested configs, coupled dimensions, MoE models, and processor assumptions will need explicit handling.
