@@ -54,7 +54,7 @@ pilot.
 - Contracts must run the default runtime configuration: the UMT5 causal
   bug ([#49135](https://github.com/huggingface/transformers/pull/49135)) only shows under SDPA. Choose attention at load time;
   `set_attn_implementation()` after loading silently skips the T5-family
-  encoder/decoder on current `main` (not yet reported upstream).
+  encoder/decoder on current `main` ([#49372](https://github.com/huggingface/transformers/issues/49372)).
 - Builds before 2026-08-17 need `tokenizers` 0.22.x (and older `kernels`
   before mid-June); fleet locks must pin the dependency environment.
 - In-family regressions are rare in a five-month window; most relevant
