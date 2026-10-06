@@ -1,0 +1,91 @@
+{
+  "frozen_on": "4d536e1f1a32a7bbe7c2e35fc418e5b1b1d4c25b",
+  "environment": "ARM Mac, CPU, float32, torch 2.11.0, tokenizers 0.23.1; builds before 2026-08-17 use tokenizers 0.22.2, builds before 2026-06-15 also kernels 0.12",
+  "verdicts": {
+    "caught": "bad build flagged, fixed build clean",
+    "missed": "bad build not flagged",
+    "not_reproduced": "no observable difference between bad and fixed builds on the real checkpoint",
+    "n/a": "not applicable to this target"
+  },
+  "regressions": [
+    {
+      "id": "clip-text-kwargs",
+      "fix_pr": 46195, "issue": 46192, "fix": "420c80aad0", "bad": "c220ea9ece", "introduced": "c624d5ba0b",
+      "family": "clip", "path": "CLIPProcessor(..., return_tensors='pt', text_kwargs={...})",
+      "real": "caught (crash)", "generic_slim": "missed", "usage_slim": "caught (crash)"
+    },
+    {
+      "id": "whisper-timestamps-batch-decode",
+      "fix_pr": 47997, "fix": "64b6595f0c", "bad": "16cbed7ee2", "introduced": "05c0e1d390",
+      "family": "whisper", "path": "processor.batch_decode(ids, decode_with_timestamps=True)",
+      "real": "caught (crash)", "generic_slim": "missed", "usage_slim": "caught (crash)"
+    },
+    {
+      "id": "t5-batch-decode-cleanup",
+      "fix_pr": 47793, "fix": "4ff98bf236", "bad": "eed9b89292", "introduced": "05c0e1d390",
+      "family": "t5", "path": "tokenizer.decode(batch_of_ids)",
+      "real": "caught", "generic_slim": "missed", "usage_slim": "caught only with punctuation in inputs"
+    },
+    {
+      "id": "legacy-additional-special-tokens",
+      "fix_pr": 47848, "issue": 47838, "fix": "e0299e2a02", "bad": "5aab6428ed", "introduced": "b76caaa88d",
+      "family": "text", "path": "AutoTokenizer on a legacy tokenizer_config.json",
+      "real": "caught", "generic_slim": "missed", "usage_slim": "missed (re-saved tokenizer)"
+    },
+    {
+      "id": "olmo-stray-eos",
+      "fix_pr": 47988, "fix": "ce5c8f5e43", "bad": "96fe6dce36", "introduced": "73a13f86f6",
+      "family": "olmo", "path": "tokenizer(text)",
+      "real": "caught", "generic_slim": "missed (re-saved tokenizer)", "usage_slim": "n/a"
+    },
+    {
+      "id": "umt5-noncausal-sdpa",
+      "fix_pr": 49135, "issue": 49134, "fix": "d7ba937671", "bad": "8d43073411", "introduced": "560f36cc56",
+      "family": "umt5", "path": "forward/generate with default (SDPA) attention",
+      "real": "caught under SDPA only", "generic_slim": "caught under SDPA on 6/6 fixtures; missed under eager", "usage_slim": "caught under SDPA"
+    },
+    {
+      "id": "processor-config-helpers",
+      "fix_pr": 47628, "fix": "c62820a73c", "bad": "9302fe0624", "introduced": "5150dac727",
+      "family": "clip, whisper, wav2vec2", "path": "get_image_processor_config / get_feature_extractor_config",
+      "real": "caught", "generic_slim": "n/a", "usage_slim": "caught with copied processor files; missed with re-saved files"
+    },
+    {
+      "id": "bert-variant-clm-noncausal",
+      "fix_pr": 48785, "issue": 48745, "fix": "3aba670a29", "bad": "2cba19507b", "introduced": "5206626c48",
+      "family": "bigbird", "path": "BigBirdForCausalLM(is_decoder=True, attention_type='original_full')",
+      "real": "caught (future-token leak 16.8 vs 5e-5)", "generic_slim": "n/a", "usage_slim": "caught (leak 0.0098 vs 2e-7; logits differ by ~2e-3)"
+    },
+    {
+      "id": "t5-tied-weights-order",
+      "fix_pr": 48238, "issue": 48154, "fix": "483b880664", "bad": "6c6bac29f5",
+      "family": "t5", "path": "from_pretrained on checkpoints without shared.weight",
+      "real": "not_reproduced (t5-small)", "generic_slim": "clean", "usage_slim": "n/a"
+    },
+    {
+      "id": "mms-set-target-lang",
+      "fix_pr": 47440, "fix": "5aab6428ed", "bad": "0c18a63804",
+      "family": "mms", "path": "Wav2Vec2CTCTokenizer.set_target_lang",
+      "real": "not_reproduced (stale internal entry, identical ids and text)", "generic_slim": "n/a", "usage_slim": "not_reproduced"
+    },
+    {
+      "id": "clip-conversion-mapping",
+      "fix_pr": 46406, "issue": 46402, "fix": "bb1cfda217", "bad": "b61788843e",
+      "family": "clip", "path": "CLIPTextModelWithProjection.from_pretrained",
+      "real": "not_reproduced", "generic_slim": "n/a", "usage_slim": "not_reproduced"
+    }
+  ],
+  "benign": [
+    {"pr": 49265, "commit": "c633787a7a", "parent": "56d3afc0a5", "change": "RoPE with mul instead of matmul"},
+    {"pr": 47975, "commit": "4b24a197a1", "parent": "e4052f55b2", "change": "greedy decode without per-step sync"},
+    {"pr": 48897, "commit": "207fca7b5b", "parent": "c210bb3966", "change": "in-place torchvision normalize"},
+    {"pr": 47964, "commit": "0e2ce39f5f", "parent": "f2ef0b94e8", "change": "group_images_by_shape fast path"},
+    {"pr": 48975, "commit": "d85573b1b6", "parent": "56928739ac", "change": "mask-skip guard under torch.compile"},
+    {"pr": 47829, "commit": "33aaea53d8", "parent": "89310e24e2", "change": "auto-generated model inits"},
+    {"pr": 49228, "commit": "0a896aa41b", "parent": "a005fc82ba", "change": "remove rotary deprecation cycle"},
+    {"pr": 49231, "commit": "f9ecae3e73", "parent": "0a896aa41b", "change": "remove mask/cache deprecation cycle"},
+    {"pr": 46196, "commit": "2b296305d7", "parent": "9ad4b85842", "change": "Wav2Vec2 SDPA dispatch"},
+    {"pr": 49101, "commit": "5f0b641da2", "parent": "1014cee4de", "change": "attention refactor for continuous batching"}
+  ],
+  "benign_result": "0 false alarms on 20 builds x 42 frozen checks, under eager and under SDPA chosen at load time"
+}

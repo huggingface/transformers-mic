@@ -922,7 +922,7 @@ def save_fixture(task, model, path):
     }
 
 
-def evaluate(task, model, fixture_path=None, gradients=True):
+def evaluate(task, model, fixture_path=None, gradients=True, source_path=None):
     baseline = observe(task, model)
     result = {"baseline": baseline, "controls": [], "faults": []}
     if gradients:
@@ -956,11 +956,15 @@ def evaluate(task, model, fixture_path=None, gradients=True):
         latencies.append(time.perf_counter() - start)
         result["controls"].append({"name": "repeat", **control(actual)})
     result["inference_median_seconds"] = statistics.median(latencies)
-    model.set_attn_implementation("sdpa")
-    try:
-        result["controls"].append({"name": "sdpa", **control(observe(task, model))})
-    finally:
-        model.set_attn_implementation("eager")
+    # Reload with SDPA rather than calling set_attn_implementation(), which does
+    # not reach T5-family encoder/decoder stacks (transformers#49372).
+    sdpa_path = fixture_path or source_path
+    if sdpa_path:
+        sdpa_model = task.load_model(sdpa_path, attn="sdpa")
+        result["controls"].append(
+            {"name": "sdpa", **control(observe(task, sdpa_model), task, sdpa_model)}
+        )
+        del sdpa_model
     if fixture_path:
         reloaded = task.load_model(fixture_path)
         reloaded_task = type(task)(fixture_path)
@@ -1162,7 +1166,9 @@ def main():
                     "family": family,
                     "source": source,
                     "parameters": sum(p.numel() for p in model.parameters()),
-                    "evaluation": evaluate(reference_task, model, gradients=False),
+                    "evaluation": evaluate(
+                        reference_task, model, gradients=False, source_path=snapshot(source)
+                    ),
                 }
             )
             write_report()

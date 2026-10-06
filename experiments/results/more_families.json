@@ -24,7 +24,7 @@
       "torchvision": "0.26.0"
     }
   },
-  "script_sha256": "625ee87efffc9bee59b17310b2bae78a286354e9ab095db655d996aec381b0e5",
+  "script_sha256": "f79eedd9abed62e5db36d5afeb298b04f7db8767e263925ea17490eb23ab4a1e",
   "arguments": {
     "seeds": [
       17,
@@ -40,8 +40,8 @@
     "threads": 2,
     "max_steps": 500,
     "real_checkpoints": false,
-    "output": "model_integration_contracts_results_more.json",
-    "artifacts": "/private/tmp/claude-501/-Users-tarek-Dev-hub-tests/c828919c-9a9a-4e23-95f1-dcd6695a129c/scratchpad/fixtures"
+    "output": "experiments/results/more_families.json",
+    "artifacts": "/private/tmp/claude-501/-Users-tarek-Dev-hub-tests/c828919c-9a9a-4e23-95f1-dcd6695a129c/scratchpad/fixtures_rerun"
   },
   "fixtures": [
     {
@@ -53,8 +53,8 @@
         "86b5e0934494bd15c9632b12f734a8a67f723594",
         ""
       ],
-      "processor_seconds": 0.03855304198805243,
-      "model_build_seconds": 0.046972000040113926,
+      "processor_seconds": 0.033759749960154295,
+      "model_build_seconds": 0.05470304109621793,
       "parameters": 2088186,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -102,7 +102,7 @@
         "output_attentions": false
       },
       "artifact": {
-        "seconds": 0.033443332999013364,
+        "seconds": 0.030919792014174163,
         "files": {
           "config.json": {
             "bytes": 753,
@@ -1575,7 +1575,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.010081415995955467
+            "seconds": 0.017086416017264128
           },
           {
             "name": "ignore_padding",
@@ -1593,7 +1593,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.009291291004046798
+            "seconds": 0.01393000001553446
           },
           {
             "name": "wrong_token_type",
@@ -1611,7 +1611,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009466165909543633
+            "seconds": 0.016239500022493303
           },
           {
             "name": "disable_position_embeddings",
@@ -1629,7 +1629,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009330707951448858
+            "seconds": 0.013086582999676466
           },
           {
             "name": "zero_attention",
@@ -1647,7 +1647,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.009078166913241148
+            "seconds": 0.01275724999140948
           },
           {
             "name": "detach_mlp",
@@ -1665,7 +1665,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.009305416024290025
+            "seconds": 0.013757292064838111
           },
           {
             "name": "wrong_training_labels",
@@ -1683,7 +1683,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.014702041982673109
+            "seconds": 0.014635958010330796
           }
         ],
         "baseline_training": {
@@ -1693,8 +1693,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.025941167026758194,
-        "inference_median_seconds": 0.001372499973513186
+        "training_probe_seconds": 0.023388084024190903,
+        "inference_median_seconds": 0.003199458005838096
       }
     },
     {
@@ -1706,8 +1706,8 @@
         "86b5e0934494bd15c9632b12f734a8a67f723594",
         ""
       ],
-      "processor_seconds": 0.03855304198805243,
-      "model_build_seconds": 0.046972000040113926,
+      "processor_seconds": 0.033759749960154295,
+      "model_build_seconds": 0.05470304109621793,
       "parameters": 2088186,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -1755,13 +1755,13 @@
         "output_attentions": false
       },
       "training": {
-        "seconds": 0.3315636250190437,
+        "seconds": 0.4826276251114905,
         "steps": 50,
         "loss": 0.0018515976844355464,
         "converged": true
       },
       "artifact": {
-        "seconds": 0.012970957905054092,
+        "seconds": 0.01261520804837346,
         "files": {
           "config.json": {
             "bytes": 753,
@@ -3234,7 +3234,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.011748583987355232
+            "seconds": 0.011187582975253463
           },
           {
             "name": "ignore_padding",
@@ -3252,7 +3252,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.012087124981917441
+            "seconds": 0.011800333973951638
           },
           {
             "name": "wrong_token_type",
@@ -3270,7 +3270,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.01223204203415662
+            "seconds": 0.012068500043824315
           },
           {
             "name": "disable_position_embeddings",
@@ -3288,7 +3288,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.013232292025350034
+            "seconds": 0.011131625040434301
           },
           {
             "name": "zero_attention",
@@ -3306,7 +3306,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.015302666928619146
+            "seconds": 0.011319459066726267
           },
           {
             "name": "detach_mlp",
@@ -3324,7 +3324,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.014096874976530671
+            "seconds": 0.0106637499993667
           },
           {
             "name": "wrong_training_labels",
@@ -3342,7 +3342,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.011919417069293559
+            "seconds": 0.011590374982915819
           }
         ],
         "baseline_training": {
@@ -3352,8 +3352,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.008298750035464764,
-        "inference_median_seconds": 0.0014021249953657389
+        "training_probe_seconds": 0.010787792038172483,
+        "inference_median_seconds": 0.001785749918781221
       }
     },
     {
@@ -3365,8 +3365,8 @@
         "86b5e0934494bd15c9632b12f734a8a67f723594",
         ""
       ],
-      "processor_seconds": 0.03855304198805243,
-      "model_build_seconds": 0.04216637508943677,
+      "processor_seconds": 0.033759749960154295,
+      "model_build_seconds": 0.04230154200922698,
       "parameters": 2088186,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -3414,7 +3414,7 @@
         "output_attentions": false
       },
       "artifact": {
-        "seconds": 0.015918750083073974,
+        "seconds": 0.013162082992494106,
         "files": {
           "config.json": {
             "bytes": 753,
@@ -4887,7 +4887,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.010341167100705206
+            "seconds": 0.01352554198820144
           },
           {
             "name": "ignore_padding",
@@ -4905,7 +4905,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.010022333008237183
+            "seconds": 0.013642915990203619
           },
           {
             "name": "wrong_token_type",
@@ -4923,7 +4923,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.010334916994906962
+            "seconds": 0.01218887499999255
           },
           {
             "name": "disable_position_embeddings",
@@ -4941,7 +4941,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009924459038302302
+            "seconds": 0.010451250011101365
           },
           {
             "name": "zero_attention",
@@ -4959,7 +4959,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.010093958000652492
+            "seconds": 0.010088333976455033
           },
           {
             "name": "detach_mlp",
@@ -4977,7 +4977,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.01003125007264316
+            "seconds": 0.010921292006969452
           },
           {
             "name": "wrong_training_labels",
@@ -4995,7 +4995,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.010070250020362437
+            "seconds": 0.010976499994285405
           }
         ],
         "baseline_training": {
@@ -5005,8 +5005,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.009550250018946826,
-        "inference_median_seconds": 0.001834415947087109
+        "training_probe_seconds": 0.009801583015359938,
+        "inference_median_seconds": 0.0016350829973816872
       }
     },
     {
@@ -5018,8 +5018,8 @@
         "86b5e0934494bd15c9632b12f734a8a67f723594",
         ""
       ],
-      "processor_seconds": 0.03855304198805243,
-      "model_build_seconds": 0.04216637508943677,
+      "processor_seconds": 0.033759749960154295,
+      "model_build_seconds": 0.04230154200922698,
       "parameters": 2088186,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -5067,13 +5067,13 @@
         "output_attentions": false
       },
       "training": {
-        "seconds": 0.4009364580269903,
+        "seconds": 0.3471097919391468,
         "steps": 50,
         "loss": 0.002180007752031088,
         "converged": true
       },
       "artifact": {
-        "seconds": 0.01481904205866158,
+        "seconds": 0.012886499986052513,
         "files": {
           "config.json": {
             "bytes": 753,
@@ -6546,7 +6546,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.011659707990474999
+            "seconds": 0.010904834023676813
           },
           {
             "name": "ignore_padding",
@@ -6564,7 +6564,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.01033858407754451
+            "seconds": 0.010657708044163883
           },
           {
             "name": "wrong_token_type",
@@ -6582,7 +6582,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.014331291080452502
+            "seconds": 0.010975042008794844
           },
           {
             "name": "disable_position_embeddings",
@@ -6600,7 +6600,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.010498124989680946
+            "seconds": 0.010915875085629523
           },
           {
             "name": "zero_attention",
@@ -6618,7 +6618,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.01046379201579839
+            "seconds": 0.01119662495329976
           },
           {
             "name": "detach_mlp",
@@ -6636,7 +6636,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.010005709016695619
+            "seconds": 0.013546375092118979
           },
           {
             "name": "wrong_training_labels",
@@ -6654,7 +6654,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009745084098540246
+            "seconds": 0.013023208011873066
           }
         ],
         "baseline_training": {
@@ -6664,8 +6664,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.01132100005634129,
-        "inference_median_seconds": 0.00221783306915313
+        "training_probe_seconds": 0.009204459027387202,
+        "inference_median_seconds": 0.001502125058323145
       }
     },
     {
@@ -6677,8 +6677,8 @@
         "86b5e0934494bd15c9632b12f734a8a67f723594",
         ""
       ],
-      "processor_seconds": 0.03855304198805243,
-      "model_build_seconds": 0.03893962502479553,
+      "processor_seconds": 0.033759749960154295,
+      "model_build_seconds": 0.057540084002539515,
       "parameters": 2088186,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -6726,7 +6726,7 @@
         "output_attentions": false
       },
       "artifact": {
-        "seconds": 0.013085916987620294,
+        "seconds": 0.014734916971065104,
         "files": {
           "config.json": {
             "bytes": 753,
@@ -8199,7 +8199,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.009524833061732352
+            "seconds": 0.01958391594234854
           },
           {
             "name": "ignore_padding",
@@ -8217,7 +8217,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.009709291975013912
+            "seconds": 0.016297583002597094
           },
           {
             "name": "wrong_token_type",
@@ -8235,7 +8235,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009719333029352129
+            "seconds": 0.014472833019681275
           },
           {
             "name": "disable_position_embeddings",
@@ -8253,7 +8253,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009484542068094015
+            "seconds": 0.01814775005914271
           },
           {
             "name": "zero_attention",
@@ -8271,7 +8271,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.00940037495456636
+            "seconds": 0.0126725829904899
           },
           {
             "name": "detach_mlp",
@@ -8289,7 +8289,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.009967499994672835
+            "seconds": 0.01353150000795722
           },
           {
             "name": "wrong_training_labels",
@@ -8307,7 +8307,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009797792066819966
+            "seconds": 0.011372167035005987
           }
         ],
         "baseline_training": {
@@ -8317,8 +8317,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.008008291944861412,
-        "inference_median_seconds": 0.0014447499997913837
+        "training_probe_seconds": 0.01404533302411437,
+        "inference_median_seconds": 0.0023209579521790147
       }
     },
     {
@@ -8330,8 +8330,8 @@
         "86b5e0934494bd15c9632b12f734a8a67f723594",
         ""
       ],
-      "processor_seconds": 0.03855304198805243,
-      "model_build_seconds": 0.03893962502479553,
+      "processor_seconds": 0.033759749960154295,
+      "model_build_seconds": 0.057540084002539515,
       "parameters": 2088186,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -8379,13 +8379,13 @@
         "output_attentions": false
       },
       "training": {
-        "seconds": 0.35618904198054224,
+        "seconds": 0.4960542500484735,
         "steps": 50,
         "loss": 0.0019472574349492788,
         "converged": true
       },
       "artifact": {
-        "seconds": 0.012715250020846725,
+        "seconds": 0.012860124930739403,
         "files": {
           "config.json": {
             "bytes": 753,
@@ -9858,7 +9858,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.010663124965503812
+            "seconds": 0.012127083027735353
           },
           {
             "name": "ignore_padding",
@@ -9876,7 +9876,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009757874999195337
+            "seconds": 0.012037542066536844
           },
           {
             "name": "wrong_token_type",
@@ -9894,7 +9894,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009986083023250103
+            "seconds": 0.011398041038773954
           },
           {
             "name": "disable_position_embeddings",
@@ -9912,7 +9912,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009553916985169053
+            "seconds": 0.013283333042636514
           },
           {
             "name": "zero_attention",
@@ -9930,7 +9930,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.009652583044953644
+            "seconds": 0.011186832911334932
           },
           {
             "name": "detach_mlp",
@@ -9948,7 +9948,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.010470667039044201
+            "seconds": 0.011398540926165879
           },
           {
             "name": "wrong_training_labels",
@@ -9966,7 +9966,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.010031540994532406
+            "seconds": 0.011931749992072582
           }
         ],
         "baseline_training": {
@@ -9976,8 +9976,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.010221083066426218,
-        "inference_median_seconds": 0.0016236669616773725
+        "training_probe_seconds": 0.012830916908569634,
+        "inference_median_seconds": 0.0019214999629184604
       }
     },
     {
@@ -9989,8 +9989,8 @@
         "df1b051c49625cf57a3d0d8d3863ed4d13564fe4",
         ""
       ],
-      "processor_seconds": 0.05633366701658815,
-      "model_build_seconds": 0.10499908297788352,
+      "processor_seconds": 0.06602066592313349,
+      "model_build_seconds": 0.1236704170005396,
       "parameters": 2221056,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -10070,7 +10070,7 @@
         "output_attentions": false
       },
       "artifact": {
-        "seconds": 0.021312291966751218,
+        "seconds": 0.014798250049352646,
         "files": {
           "config.json": {
             "bytes": 1555,
@@ -10456,7 +10456,7 @@
             "numerical_detected": false,
             "recorded_output_detected": false,
             "semantic_detected": null,
-            "max_absolute_delta": 0.0,
+            "max_absolute_delta": 1.3113021850585938e-06,
             "training_detected": false,
             "loss_detected": false
           },
@@ -10487,7 +10487,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.017430583015084267
+            "seconds": 0.022932124906219542
           },
           {
             "name": "ignore_padding",
@@ -10505,7 +10505,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.016139165963977575
+            "seconds": 0.018296417081728578
           },
           {
             "name": "disable_position_bias",
@@ -10523,7 +10523,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.016314333071932197
+            "seconds": 0.01992150000296533
           },
           {
             "name": "remove_causal_mask",
@@ -10541,7 +10541,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.017177582951262593
+            "seconds": 0.018721250002272427
           },
           {
             "name": "zero_cross_attention",
@@ -10559,7 +10559,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.01633508293889463
+            "seconds": 0.020838583004660904
           },
           {
             "name": "detach_encoder",
@@ -10577,7 +10577,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.015553583041764796
+            "seconds": 0.017765458906069398
           },
           {
             "name": "wrong_training_labels",
@@ -10595,7 +10595,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.016459958045743406
+            "seconds": 0.01896441704593599
           }
         ],
         "baseline_training": {
@@ -10605,8 +10605,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.015836499980650842,
-        "inference_median_seconds": 0.0068159159272909164
+        "training_probe_seconds": 0.012887542019598186,
+        "inference_median_seconds": 0.007525291992351413
       }
     },
     {
@@ -10618,8 +10618,8 @@
         "df1b051c49625cf57a3d0d8d3863ed4d13564fe4",
         ""
       ],
-      "processor_seconds": 0.05633366701658815,
-      "model_build_seconds": 0.10499908297788352,
+      "processor_seconds": 0.06602066592313349,
+      "model_build_seconds": 0.1236704170005396,
       "parameters": 2221056,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -10699,13 +10699,13 @@
         "output_attentions": false
       },
       "training": {
-        "seconds": 0.749117499915883,
+        "seconds": 0.9767304579727352,
         "steps": 100,
         "loss": 0.03566208481788635,
         "converged": true
       },
       "artifact": {
-        "seconds": 0.01777362497523427,
+        "seconds": 0.01458741701208055,
         "files": {
           "config.json": {
             "bytes": 1555,
@@ -11083,7 +11083,7 @@
             "numerical_detected": false,
             "recorded_output_detected": false,
             "semantic_detected": false,
-            "max_absolute_delta": 0.0,
+            "max_absolute_delta": 2.86102294921875e-06,
             "training_detected": false,
             "loss_detected": false
           },
@@ -11114,7 +11114,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.014529375010170043
+            "seconds": 0.0158633750397712
           },
           {
             "name": "ignore_padding",
@@ -11132,7 +11132,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.01387187500949949
+            "seconds": 0.01772991707548499
           },
           {
             "name": "disable_position_bias",
@@ -11150,7 +11150,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.013758291956037283
+            "seconds": 0.016729417024180293
           },
           {
             "name": "remove_causal_mask",
@@ -11168,7 +11168,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.014001374947838485
+            "seconds": 0.020646040909923613
           },
           {
             "name": "zero_cross_attention",
@@ -11186,7 +11186,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.013692665961571038
+            "seconds": 0.017360291094519198
           },
           {
             "name": "detach_encoder",
@@ -11204,7 +11204,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.013059417018666863
+            "seconds": 0.017956499941647053
           },
           {
             "name": "wrong_training_labels",
@@ -11222,7 +11222,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.013680792064405978
+            "seconds": 0.01646724995225668
           }
         ],
         "baseline_training": {
@@ -11232,8 +11232,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.009529415983706713,
-        "inference_median_seconds": 0.004999666940420866
+        "training_probe_seconds": 0.01335995807312429,
+        "inference_median_seconds": 0.005714750033803284
       }
     },
     {
@@ -11245,8 +11245,8 @@
         "df1b051c49625cf57a3d0d8d3863ed4d13564fe4",
         ""
       ],
-      "processor_seconds": 0.05633366701658815,
-      "model_build_seconds": 0.10250045894645154,
+      "processor_seconds": 0.06602066592313349,
+      "model_build_seconds": 0.11889683397021145,
       "parameters": 2221056,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -11326,7 +11326,7 @@
         "output_attentions": false
       },
       "artifact": {
-        "seconds": 0.025010625016875565,
+        "seconds": 0.016271459055133164,
         "files": {
           "config.json": {
             "bytes": 1555,
@@ -11712,7 +11712,7 @@
             "numerical_detected": false,
             "recorded_output_detected": false,
             "semantic_detected": null,
-            "max_absolute_delta": 0.0,
+            "max_absolute_delta": 8.940696716308594e-07,
             "training_detected": false,
             "loss_detected": false
           },
@@ -11743,7 +11743,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.016241915989667177
+            "seconds": 0.019505958072841167
           },
           {
             "name": "ignore_padding",
@@ -11761,7 +11761,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.0158919160021469
+            "seconds": 0.0201183749595657
           },
           {
             "name": "disable_position_bias",
@@ -11779,7 +11779,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.01724970794748515
+            "seconds": 0.02014549996238202
           },
           {
             "name": "remove_causal_mask",
@@ -11797,7 +11797,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.02040287503041327
+            "seconds": 0.01816679199691862
           },
           {
             "name": "zero_cross_attention",
@@ -11815,7 +11815,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.020601249998435378
+            "seconds": 0.01819683297071606
           },
           {
             "name": "detach_encoder",
@@ -11833,7 +11833,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.016959124943241477
+            "seconds": 0.01833779097069055
           },
           {
             "name": "wrong_training_labels",
@@ -11851,7 +11851,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.018300084047950804
+            "seconds": 0.02042441605590284
           }
         ],
         "baseline_training": {
@@ -11861,8 +11861,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.009385042008943856,
-        "inference_median_seconds": 0.007085958030074835
+        "training_probe_seconds": 0.014287333004176617,
+        "inference_median_seconds": 0.008259333088062704
       }
     },
     {
@@ -11874,8 +11874,8 @@
         "df1b051c49625cf57a3d0d8d3863ed4d13564fe4",
         ""
       ],
-      "processor_seconds": 0.05633366701658815,
-      "model_build_seconds": 0.10250045894645154,
+      "processor_seconds": 0.06602066592313349,
+      "model_build_seconds": 0.11889683397021145,
       "parameters": 2221056,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -11955,13 +11955,13 @@
         "output_attentions": false
       },
       "training": {
-        "seconds": 0.9720297909807414,
+        "seconds": 1.1283361660316586,
         "steps": 110,
         "loss": 0.03400570526719093,
         "converged": true
       },
       "artifact": {
-        "seconds": 0.015087999985553324,
+        "seconds": 0.01438633305951953,
         "files": {
           "config.json": {
             "bytes": 1555,
@@ -12339,7 +12339,7 @@
             "numerical_detected": false,
             "recorded_output_detected": false,
             "semantic_detected": false,
-            "max_absolute_delta": 0.0,
+            "max_absolute_delta": 1.9073486328125e-06,
             "training_detected": false,
             "loss_detected": false
           },
@@ -12370,7 +12370,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.014274499961175025
+            "seconds": 0.023259334033355117
           },
           {
             "name": "ignore_padding",
@@ -12388,7 +12388,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.013884541927836835
+            "seconds": 0.017945165978744626
           },
           {
             "name": "disable_position_bias",
@@ -12406,7 +12406,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.014029167010448873
+            "seconds": 0.019000125001184642
           },
           {
             "name": "remove_causal_mask",
@@ -12424,7 +12424,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.014176834025420249
+            "seconds": 0.01791087503079325
           },
           {
             "name": "zero_cross_attention",
@@ -12442,7 +12442,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.01381079200655222
+            "seconds": 0.021650959039106965
           },
           {
             "name": "detach_encoder",
@@ -12460,7 +12460,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.012893833103589714
+            "seconds": 0.02088962495326996
           },
           {
             "name": "wrong_training_labels",
@@ -12478,7 +12478,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.013882790924981236
+            "seconds": 0.01799995801411569
           }
         ],
         "baseline_training": {
@@ -12488,8 +12488,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.00954054098110646,
-        "inference_median_seconds": 0.005275625037029386
+        "training_probe_seconds": 0.01071329100523144,
+        "inference_median_seconds": 0.006729791057296097
       }
     },
     {
@@ -12501,8 +12501,8 @@
         "df1b051c49625cf57a3d0d8d3863ed4d13564fe4",
         ""
       ],
-      "processor_seconds": 0.05633366701658815,
-      "model_build_seconds": 0.1026004160521552,
+      "processor_seconds": 0.06602066592313349,
+      "model_build_seconds": 0.11457837501075119,
       "parameters": 2221056,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -12582,7 +12582,7 @@
         "output_attentions": false
       },
       "artifact": {
-        "seconds": 0.013818625011481345,
+        "seconds": 0.016442209016531706,
         "files": {
           "config.json": {
             "bytes": 1555,
@@ -12968,7 +12968,7 @@
             "numerical_detected": false,
             "recorded_output_detected": false,
             "semantic_detected": null,
-            "max_absolute_delta": 0.0,
+            "max_absolute_delta": 1.1920928955078125e-06,
             "training_detected": false,
             "loss_detected": false
           },
@@ -12999,7 +12999,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.016030500060878694
+            "seconds": 0.023099208949133754
           },
           {
             "name": "ignore_padding",
@@ -13017,7 +13017,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.015644666040316224
+            "seconds": 0.020381417009048164
           },
           {
             "name": "disable_position_bias",
@@ -13035,7 +13035,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.015704208053648472
+            "seconds": 0.019996915943920612
           },
           {
             "name": "remove_causal_mask",
@@ -13053,7 +13053,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.015919583034701645
+            "seconds": 0.023067875066772103
           },
           {
             "name": "zero_cross_attention",
@@ -13071,7 +13071,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.015154666965827346
+            "seconds": 0.022941832896322012
           },
           {
             "name": "detach_encoder",
@@ -13089,7 +13089,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.01436087500769645
+            "seconds": 0.01823683292604983
           },
           {
             "name": "wrong_training_labels",
@@ -13107,7 +13107,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.015114667010493577
+            "seconds": 0.02284208405762911
           }
         ],
         "baseline_training": {
@@ -13117,8 +13117,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.008729916997253895,
-        "inference_median_seconds": 0.006407167064025998
+        "training_probe_seconds": 0.012561667012050748,
+        "inference_median_seconds": 0.009742999915033579
       }
     },
     {
@@ -13130,8 +13130,8 @@
         "df1b051c49625cf57a3d0d8d3863ed4d13564fe4",
         ""
       ],
-      "processor_seconds": 0.05633366701658815,
-      "model_build_seconds": 0.1026004160521552,
+      "processor_seconds": 0.06602066592313349,
+      "model_build_seconds": 0.11457837501075119,
       "parameters": 2221056,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -13211,13 +13211,13 @@
         "output_attentions": false
       },
       "training": {
-        "seconds": 0.7331994170090184,
+        "seconds": 0.9498353749513626,
         "steps": 90,
         "loss": 0.037549104541540146,
         "converged": true
       },
       "artifact": {
-        "seconds": 0.016833874979056418,
+        "seconds": 0.01440537499729544,
         "files": {
           "config.json": {
             "bytes": 1555,
@@ -13595,7 +13595,7 @@
             "numerical_detected": false,
             "recorded_output_detected": false,
             "semantic_detected": false,
-            "max_absolute_delta": 0.0,
+            "max_absolute_delta": 1.9073486328125e-06,
             "training_detected": false,
             "loss_detected": false
           },
@@ -13626,7 +13626,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.014796500094234943
+            "seconds": 0.017488625016994774
           },
           {
             "name": "ignore_padding",
@@ -13644,7 +13644,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.013526624999940395
+            "seconds": 0.017950540990568697
           },
           {
             "name": "disable_position_bias",
@@ -13662,7 +13662,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.01373045810032636
+            "seconds": 0.01773491606581956
           },
           {
             "name": "remove_causal_mask",
@@ -13680,7 +13680,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.014198207994922996
+            "seconds": 0.019832334015518427
           },
           {
             "name": "zero_cross_attention",
@@ -13698,7 +13698,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.013751207967288792
+            "seconds": 0.017277875100262463
           },
           {
             "name": "detach_encoder",
@@ -13716,7 +13716,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.013459165929816663
+            "seconds": 0.017078625038266182
           },
           {
             "name": "wrong_training_labels",
@@ -13734,7 +13734,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.013798707979731262
+            "seconds": 0.02132945798803121
           }
         ],
         "baseline_training": {
@@ -13744,8 +13744,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.009442082955501974,
-        "inference_median_seconds": 0.0048983750166371465
+        "training_probe_seconds": 0.010963000007905066,
+        "inference_median_seconds": 0.006825041025876999
       }
     },
     {
@@ -13757,8 +13757,8 @@
         "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
         ""
       ],
-      "processor_seconds": 0.42370625003241,
-      "model_build_seconds": 0.06890445901080966,
+      "processor_seconds": 0.38025329203810543,
+      "model_build_seconds": 0.0771784579847008,
       "parameters": 3639104,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -13927,7 +13927,7 @@
         "output_attentions": false
       },
       "artifact": {
-        "seconds": 0.03407612501177937,
+        "seconds": 0.03899766597896814,
         "files": {
           "config.json": {
             "bytes": 2208,
@@ -14348,7 +14348,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.25714258302468807
+            "seconds": 0.32859191694296896
           },
           {
             "name": "reverse_audio",
@@ -14366,7 +14366,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.2523100000107661
+            "seconds": 0.3769395829876885
           },
           {
             "name": "scale_features",
@@ -14384,7 +14384,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.23903937498107553
+            "seconds": 0.3468104579951614
           },
           {
             "name": "zero_encoder_positions",
@@ -14402,7 +14402,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.24088320892769843
+            "seconds": 0.3359331249957904
           },
           {
             "name": "remove_causal_mask",
@@ -14420,7 +14420,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.2423682080116123
+            "seconds": 0.32358275004662573
           },
           {
             "name": "zero_cross_attention",
@@ -14438,7 +14438,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.236961540998891
+            "seconds": 0.303937540971674
           },
           {
             "name": "detach_encoder",
@@ -14456,7 +14456,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.19119808299001306
+            "seconds": 0.31877824990078807
           },
           {
             "name": "wrong_training_labels",
@@ -14474,7 +14474,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.2365082090254873
+            "seconds": 0.5188671660143882
           }
         ],
         "baseline_training": {
@@ -14484,8 +14484,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.1731762500712648,
-        "inference_median_seconds": 0.12384137499611825
+        "training_probe_seconds": 0.20739999995566905,
+        "inference_median_seconds": 0.1595655420096591
       }
     },
     {
@@ -14497,8 +14497,8 @@
         "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
         ""
       ],
-      "processor_seconds": 0.42370625003241,
-      "model_build_seconds": 0.06890445901080966,
+      "processor_seconds": 0.38025329203810543,
+      "model_build_seconds": 0.0771784579847008,
       "parameters": 3639104,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -14667,13 +14667,13 @@
         "output_attentions": false
       },
       "training": {
-        "seconds": 50.53960962500423,
+        "seconds": 72.65573133307043,
         "steps": 390,
         "loss": 0.01089437399059534,
         "converged": true
       },
       "artifact": {
-        "seconds": 0.04506245895754546,
+        "seconds": 0.056239333003759384,
         "files": {
           "config.json": {
             "bytes": 2208,
@@ -15086,7 +15086,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.25772283296100795
+            "seconds": 0.4165106669533998
           },
           {
             "name": "reverse_audio",
@@ -15104,7 +15104,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.250609542010352
+            "seconds": 0.36451366706751287
           },
           {
             "name": "scale_features",
@@ -15122,7 +15122,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.24569295905530453
+            "seconds": 0.3911149579798803
           },
           {
             "name": "zero_encoder_positions",
@@ -15140,7 +15140,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.2548063329886645
+            "seconds": 0.3693369160173461
           },
           {
             "name": "remove_causal_mask",
@@ -15158,7 +15158,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.29168174997903407
+            "seconds": 0.4126504580490291
           },
           {
             "name": "zero_cross_attention",
@@ -15176,7 +15176,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.4977225420298055
+            "seconds": 0.42038254195358604
           },
           {
             "name": "detach_encoder",
@@ -15194,7 +15194,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.37562362500466406
+            "seconds": 0.3154372909339145
           },
           {
             "name": "wrong_training_labels",
@@ -15212,7 +15212,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.29960058408323675
+            "seconds": 0.39299945905804634
           }
         ],
         "baseline_training": {
@@ -15222,8 +15222,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.15382279199548066,
-        "inference_median_seconds": 0.1330142499646172
+        "training_probe_seconds": 0.20609970903024077,
+        "inference_median_seconds": 0.16962354199495167
       }
     },
     {
@@ -15235,8 +15235,8 @@
         "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
         ""
       ],
-      "processor_seconds": 0.42370625003241,
-      "model_build_seconds": 0.06996183400042355,
+      "processor_seconds": 0.38025329203810543,
+      "model_build_seconds": 0.08695379190612584,
       "parameters": 3639104,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -15405,7 +15405,7 @@
         "output_attentions": false
       },
       "artifact": {
-        "seconds": 0.03656837495509535,
+        "seconds": 0.04386162501759827,
         "files": {
           "config.json": {
             "bytes": 2208,
@@ -15826,7 +15826,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.2907865000888705
+            "seconds": 0.38224316702689976
           },
           {
             "name": "reverse_audio",
@@ -15844,7 +15844,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.2521099579753354
+            "seconds": 0.3726807920029387
           },
           {
             "name": "scale_features",
@@ -15862,7 +15862,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.2540803749579936
+            "seconds": 0.47946704109199345
           },
           {
             "name": "zero_encoder_positions",
@@ -15880,7 +15880,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.29652095900382847
+            "seconds": 0.3828455839538947
           },
           {
             "name": "remove_causal_mask",
@@ -15898,7 +15898,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.3092985419789329
+            "seconds": 0.4138098330004141
           },
           {
             "name": "zero_cross_attention",
@@ -15916,7 +15916,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.2552192499861121
+            "seconds": 0.4751091670477763
           },
           {
             "name": "detach_encoder",
@@ -15934,7 +15934,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.1985727499704808
+            "seconds": 0.33847645798232406
           },
           {
             "name": "wrong_training_labels",
@@ -15952,7 +15952,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.23892945901025087
+            "seconds": 0.37125333305448294
           }
         ],
         "baseline_training": {
@@ -15962,8 +15962,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.12429670803248882,
-        "inference_median_seconds": 0.12639383308123797
+        "training_probe_seconds": 0.19855062500573695,
+        "inference_median_seconds": 0.23149899998679757
       }
     },
     {
@@ -15975,8 +15975,8 @@
         "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
         ""
       ],
-      "processor_seconds": 0.42370625003241,
-      "model_build_seconds": 0.06996183400042355,
+      "processor_seconds": 0.38025329203810543,
+      "model_build_seconds": 0.08695379190612584,
       "parameters": 3639104,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -16145,13 +16145,13 @@
         "output_attentions": false
       },
       "training": {
-        "seconds": 23.43988416600041,
+        "seconds": 35.18779608304612,
         "steps": 180,
         "loss": 0.01161054614931345,
         "converged": true
       },
       "artifact": {
-        "seconds": 0.03333445801399648,
+        "seconds": 0.045089750085026026,
         "files": {
           "config.json": {
             "bytes": 2208,
@@ -16564,7 +16564,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.23708345892373472
+            "seconds": 0.33808937505818903
           },
           {
             "name": "reverse_audio",
@@ -16582,7 +16582,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.24001191603019834
+            "seconds": 0.4340650000376627
           },
           {
             "name": "scale_features",
@@ -16600,7 +16600,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.2737307499628514
+            "seconds": 0.435097667039372
           },
           {
             "name": "zero_encoder_positions",
@@ -16618,7 +16618,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.24939916597213596
+            "seconds": 0.3473079170798883
           },
           {
             "name": "remove_causal_mask",
@@ -16636,7 +16636,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.23996199993416667
+            "seconds": 0.38761574996169657
           },
           {
             "name": "zero_cross_attention",
@@ -16654,7 +16654,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.23682395892683417
+            "seconds": 0.31533345801290125
           },
           {
             "name": "detach_encoder",
@@ -16672,7 +16672,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.1946100000059232
+            "seconds": 0.24590054096188396
           },
           {
             "name": "wrong_training_labels",
@@ -16690,7 +16690,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.3998050829395652
+            "seconds": 0.3276092499727383
           }
         ],
         "baseline_training": {
@@ -16700,8 +16700,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.11532400001306087,
-        "inference_median_seconds": 0.12283716606907547
+        "training_probe_seconds": 0.1661693329224363,
+        "inference_median_seconds": 0.18017212499398738
       }
     },
     {
@@ -16713,8 +16713,8 @@
         "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
         ""
       ],
-      "processor_seconds": 0.42370625003241,
-      "model_build_seconds": 0.06984712497796863,
+      "processor_seconds": 0.38025329203810543,
+      "model_build_seconds": 0.08798241592012346,
       "parameters": 3639104,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -16883,7 +16883,7 @@
         "output_attentions": false
       },
       "artifact": {
-        "seconds": 0.033508584019728005,
+        "seconds": 0.040779541013762355,
         "files": {
           "config.json": {
             "bytes": 2208,
@@ -17304,7 +17304,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.2380058749113232
+            "seconds": 0.3149894579546526
           },
           {
             "name": "reverse_audio",
@@ -17322,7 +17322,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.24534649995621294
+            "seconds": 0.32716720807366073
           },
           {
             "name": "scale_features",
@@ -17340,7 +17340,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.31502800004091114
+            "seconds": 0.3452575419796631
           },
           {
             "name": "zero_encoder_positions",
@@ -17358,7 +17358,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.2725815000012517
+            "seconds": 0.30433604202698916
           },
           {
             "name": "remove_causal_mask",
@@ -17376,7 +17376,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.2534739999100566
+            "seconds": 0.32807000004686415
           },
           {
             "name": "zero_cross_attention",
@@ -17394,7 +17394,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.28989141702186316
+            "seconds": 0.32846070907544345
           },
           {
             "name": "detach_encoder",
@@ -17412,7 +17412,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.2290738329757005
+            "seconds": 0.2639962079701945
           },
           {
             "name": "wrong_training_labels",
@@ -17430,7 +17430,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.2803191670682281
+            "seconds": 0.3125908749643713
           }
         ],
         "baseline_training": {
@@ -17440,8 +17440,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.11550149996764958,
-        "inference_median_seconds": 0.12482812500093132
+        "training_probe_seconds": 0.15762612503021955,
+        "inference_median_seconds": 0.16260475001763552
       }
     },
     {
@@ -17453,8 +17453,8 @@
         "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
         ""
       ],
-      "processor_seconds": 0.42370625003241,
-      "model_build_seconds": 0.06984712497796863,
+      "processor_seconds": 0.38025329203810543,
+      "model_build_seconds": 0.08798241592012346,
       "parameters": 3639104,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -17623,13 +17623,13 @@
         "output_attentions": false
       },
       "training": {
-        "seconds": 32.75350020895712,
+        "seconds": 49.434166291030124,
         "steps": 240,
         "loss": 0.012224458158016205,
         "converged": true
       },
       "artifact": {
-        "seconds": 0.03782837500330061,
+        "seconds": 0.04581004206556827,
         "files": {
           "config.json": {
             "bytes": 2208,
@@ -18042,7 +18042,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.3405192920472473
+            "seconds": 0.37152074999175966
           },
           {
             "name": "reverse_audio",
@@ -18060,7 +18060,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.2984206669498235
+            "seconds": 0.3062547920271754
           },
           {
             "name": "scale_features",
@@ -18078,7 +18078,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.29183429200202227
+            "seconds": 0.3348579170415178
           },
           {
             "name": "zero_encoder_positions",
@@ -18096,7 +18096,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.2743247910402715
+            "seconds": 0.34761483292095363
           },
           {
             "name": "remove_causal_mask",
@@ -18114,7 +18114,7 @@
             },
             "training_detected": false,
             "loss_detected": false,
-            "seconds": 0.28140033304225653
+            "seconds": 0.31117533310316503
           },
           {
             "name": "zero_cross_attention",
@@ -18132,7 +18132,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.26554733293596655
+            "seconds": 0.49592733301687986
           },
           {
             "name": "detach_encoder",
@@ -18150,7 +18150,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.2225202500121668
+            "seconds": 0.35722304100636393
           },
           {
             "name": "wrong_training_labels",
@@ -18168,7 +18168,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.36177858302835375
+            "seconds": 0.3585546250687912
           }
         ],
         "baseline_training": {
@@ -18178,8 +18178,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.12394216598477215,
-        "inference_median_seconds": 0.14305466692894697
+        "training_probe_seconds": 0.31855745799839497,
+        "inference_median_seconds": 0.169631791068241
       }
     },
     {
@@ -18191,8 +18191,8 @@
         "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
         ""
       ],
-      "processor_seconds": 0.011738708009943366,
-      "model_build_seconds": 0.006757915951311588,
+      "processor_seconds": 0.014015708002261817,
+      "model_build_seconds": 0.005894583999179304,
       "parameters": 104560,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -18319,7 +18319,7 @@
         "output_attentions": false
       },
       "artifact": {
-        "seconds": 0.004157750052399933,
+        "seconds": 0.00430699996650219,
         "files": {
           "config.json": {
             "bytes": 2052,
@@ -24692,7 +24692,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.010045374976471066
+            "seconds": 0.018758999998681247
           },
           {
             "name": "reverse_audio",
@@ -24710,7 +24710,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.010009000077843666
+            "seconds": 0.01456087501719594
           },
           {
             "name": "zero_positional_conv",
@@ -24728,7 +24728,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009694125037640333
+            "seconds": 0.012529166997410357
           },
           {
             "name": "zero_attention",
@@ -24746,7 +24746,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.009722291957587004
+            "seconds": 0.012978499988093972
           },
           {
             "name": "detach_feature_projection",
@@ -24764,7 +24764,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.007803292013704777
+            "seconds": 0.009944375022314489
           },
           {
             "name": "wrong_training_labels",
@@ -24782,7 +24782,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009831208037212491
+            "seconds": 0.013557333033531904
           }
         ],
         "baseline_training": {
@@ -24792,8 +24792,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.010273750056512654,
-        "inference_median_seconds": 0.002707166946493089
+        "training_probe_seconds": 0.009609750006347895,
+        "inference_median_seconds": 0.003676749998703599
       }
     },
     {
@@ -24805,8 +24805,8 @@
         "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
         ""
       ],
-      "processor_seconds": 0.011738708009943366,
-      "model_build_seconds": 0.006757915951311588,
+      "processor_seconds": 0.014015708002261817,
+      "model_build_seconds": 0.005894583999179304,
       "parameters": 104560,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -24933,13 +24933,13 @@
         "output_attentions": false
       },
       "training": {
-        "seconds": 3.503984292037785,
+        "seconds": 5.663017207989469,
         "steps": 500,
         "loss": 0.7901170253753662,
         "converged": false
       },
       "artifact": {
-        "seconds": 0.003523375024087727,
+        "seconds": 0.00918445794377476,
         "files": {
           "config.json": {
             "bytes": 2052,
@@ -31312,7 +31312,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009911125060170889
+            "seconds": 0.0122802919941023
           },
           {
             "name": "reverse_audio",
@@ -31330,7 +31330,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.01006212504580617
+            "seconds": 0.011888750013895333
           },
           {
             "name": "zero_positional_conv",
@@ -31348,7 +31348,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009564541978761554
+            "seconds": 0.011610499932430685
           },
           {
             "name": "zero_attention",
@@ -31366,7 +31366,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.009580499958246946
+            "seconds": 0.011860833037644625
           },
           {
             "name": "detach_feature_projection",
@@ -31384,7 +31384,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.007639958057552576
+            "seconds": 0.008396000019274652
           },
           {
             "name": "wrong_training_labels",
@@ -31402,7 +31402,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009716333937831223
+            "seconds": 0.010864000068977475
           }
         ],
         "baseline_training": {
@@ -31412,8 +31412,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.00665029208175838,
-        "inference_median_seconds": 0.0026426250115036964
+        "training_probe_seconds": 0.017962750047445297,
+        "inference_median_seconds": 0.005706291063688695
       }
     },
     {
@@ -31425,8 +31425,8 @@
         "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
         ""
       ],
-      "processor_seconds": 0.011738708009943366,
-      "model_build_seconds": 0.004380833939649165,
+      "processor_seconds": 0.014015708002261817,
+      "model_build_seconds": 0.0049567079404369,
       "parameters": 104560,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -31553,7 +31553,7 @@
         "output_attentions": false
       },
       "artifact": {
-        "seconds": 0.0049664590042084455,
+        "seconds": 0.004011083045043051,
         "files": {
           "config.json": {
             "bytes": 2052,
@@ -37926,7 +37926,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.010169042041525245
+            "seconds": 0.012385625042952597
           },
           {
             "name": "reverse_audio",
@@ -37944,7 +37944,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.010137666948139668
+            "seconds": 0.011117290938273072
           },
           {
             "name": "zero_positional_conv",
@@ -37962,7 +37962,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009696708992123604
+            "seconds": 0.011621791985817254
           },
           {
             "name": "zero_attention",
@@ -37980,7 +37980,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.009624833008274436
+            "seconds": 0.010450790985487401
           },
           {
             "name": "detach_feature_projection",
@@ -37998,7 +37998,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.007776167010888457
+            "seconds": 0.008558750036172569
           },
           {
             "name": "wrong_training_labels",
@@ -38016,7 +38016,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009855291922576725
+            "seconds": 0.010556374909356236
           }
         ],
         "baseline_training": {
@@ -38026,8 +38026,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.006699291989207268,
-        "inference_median_seconds": 0.0026849169516935945
+        "training_probe_seconds": 0.007961416966281831,
+        "inference_median_seconds": 0.003378499997779727
       }
     },
     {
@@ -38039,8 +38039,8 @@
         "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
         ""
       ],
-      "processor_seconds": 0.011738708009943366,
-      "model_build_seconds": 0.004380833939649165,
+      "processor_seconds": 0.014015708002261817,
+      "model_build_seconds": 0.0049567079404369,
       "parameters": 104560,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -38167,13 +38167,13 @@
         "output_attentions": false
       },
       "training": {
-        "seconds": 1.446137166931294,
+        "seconds": 2.1208056668983772,
         "steps": 220,
         "loss": 0.006061539985239506,
         "converged": true
       },
       "artifact": {
-        "seconds": 0.003559625009074807,
+        "seconds": 0.004025625064969063,
         "files": {
           "config.json": {
             "bytes": 2052,
@@ -44546,7 +44546,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.0099876249441877
+            "seconds": 0.015598208061419427
           },
           {
             "name": "reverse_audio",
@@ -44564,7 +44564,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009894417016766965
+            "seconds": 0.016075833002105355
           },
           {
             "name": "zero_positional_conv",
@@ -44582,7 +44582,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009480791981332004
+            "seconds": 0.0145365409553051
           },
           {
             "name": "zero_attention",
@@ -44600,7 +44600,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.009568832931108773
+            "seconds": 0.011503917048685253
           },
           {
             "name": "detach_feature_projection",
@@ -44618,7 +44618,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.007675874978303909
+            "seconds": 0.008987916982732713
           },
           {
             "name": "wrong_training_labels",
@@ -44636,7 +44636,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009791792021133006
+            "seconds": 0.01200004096608609
           }
         ],
         "baseline_training": {
@@ -44646,8 +44646,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.006715917028486729,
-        "inference_median_seconds": 0.0026114999782294035
+        "training_probe_seconds": 0.009063875069841743,
+        "inference_median_seconds": 0.0030387500301003456
       }
     },
     {
@@ -44659,8 +44659,8 @@
         "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
         ""
       ],
-      "processor_seconds": 0.011738708009943366,
-      "model_build_seconds": 0.004803417017683387,
+      "processor_seconds": 0.014015708002261817,
+      "model_build_seconds": 0.005294500035233796,
       "parameters": 104560,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -44787,7 +44787,7 @@
         "output_attentions": false
       },
       "artifact": {
-        "seconds": 0.005371666047722101,
+        "seconds": 0.004316125065088272,
         "files": {
           "config.json": {
             "bytes": 2052,
@@ -51160,7 +51160,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.01034691696986556
+            "seconds": 0.02774912491440773
           },
           {
             "name": "reverse_audio",
@@ -51178,7 +51178,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.010213207919150591
+            "seconds": 0.026692249928601086
           },
           {
             "name": "zero_positional_conv",
@@ -51196,7 +51196,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009770708973519504
+            "seconds": 0.025954041979275644
           },
           {
             "name": "zero_attention",
@@ -51214,7 +51214,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.009782333043403924
+            "seconds": 0.02205129200592637
           },
           {
             "name": "detach_feature_projection",
@@ -51232,7 +51232,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.007892707944847643
+            "seconds": 0.018401750014163554
           },
           {
             "name": "wrong_training_labels",
@@ -51250,7 +51250,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.010007667005993426
+            "seconds": 0.019749709055759013
           }
         ],
         "baseline_training": {
@@ -51260,8 +51260,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.0071396660059690475,
-        "inference_median_seconds": 0.002911917050369084
+        "training_probe_seconds": 0.010647874907590449,
+        "inference_median_seconds": 0.007101042079739273
       }
     },
     {
@@ -51273,8 +51273,8 @@
         "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
         ""
       ],
-      "processor_seconds": 0.011738708009943366,
-      "model_build_seconds": 0.004803417017683387,
+      "processor_seconds": 0.014015708002261817,
+      "model_build_seconds": 0.005294500035233796,
       "parameters": 104560,
       "config": {
         "transformers_version": "5.19.0.dev0",
@@ -51401,13 +51401,13 @@
         "output_attentions": false
       },
       "training": {
-        "seconds": 1.0472652500029653,
+        "seconds": 1.4206631670240313,
         "steps": 160,
         "loss": 0.002800555666908622,
         "converged": true
       },
       "artifact": {
-        "seconds": 0.0035182079300284386,
+        "seconds": 0.0037012919783592224,
         "files": {
           "config.json": {
             "bytes": 2052,
@@ -57780,7 +57780,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.010034082923084497
+            "seconds": 0.01138120808172971
           },
           {
             "name": "reverse_audio",
@@ -57798,7 +57798,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009963167016394436
+            "seconds": 0.011356999981217086
           },
           {
             "name": "zero_positional_conv",
@@ -57816,7 +57816,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009591083973646164
+            "seconds": 0.011337374919094145
           },
           {
             "name": "zero_attention",
@@ -57834,7 +57834,7 @@
             },
             "training_detected": true,
             "loss_detected": true,
-            "seconds": 0.009578624973073602
+            "seconds": 0.011112874955870211
           },
           {
             "name": "detach_feature_projection",
@@ -57852,7 +57852,7 @@
             },
             "training_detected": true,
             "loss_detected": false,
-            "seconds": 0.007646166952326894
+            "seconds": 0.0087106249993667
           },
           {
             "name": "wrong_training_labels",
@@ -57870,7 +57870,7 @@
             },
             "training_detected": false,
             "loss_detected": true,
-            "seconds": 0.009832083946093917
+            "seconds": 0.011330791981890798
           }
         ],
         "baseline_training": {
@@ -57880,8 +57880,8 @@
           "required_gradients": true,
           "updated": true
         },
-        "training_probe_seconds": 0.00670558400452137,
-        "inference_median_seconds": 0.0026333749992772937
+        "training_probe_seconds": 0.007267624954693019,
+        "inference_median_seconds": 0.0026853340677917004
       }
     }
   ],

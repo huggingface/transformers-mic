@@ -36,8 +36,8 @@ pilot.
   random misses isolated to Whisper input/label faults.
 - [x] Add the input-sensitivity gate and "overfit on failure" rule to the
   proposal's fixture plan and decision.
-- [x] First historical replay (2026-10-06): 7 regressions fixed since May
-  2026 and 10 benign changes, frozen on `4d536e1f`, checked on bad and
+- [x] First historical replay (2026-10-06): 11 candidate regressions fixed
+  since May 2026 (8 reproducible) and 10 benign changes, frozen on `4d536e1f`, checked on bad and
   fixed builds with [freeze/check](../experiments/replay.py),
   the [per-case driver](../experiments/replay_case.py), and
   [usage repros](../experiments/usage_repros.py). Results are
@@ -88,9 +88,9 @@ Count distinct regressions separately from repeated seeds. Do not drop
 unreproducible cases from the report or count them as successful checks.
 
 Remaining for this step: GPU-specific cases, bugs found by nightly/slow
-tests, a larger benign set, and the four candidates not yet replayed
-([#47628](https://github.com/huggingface/transformers/pull/47628) config helpers, [#47440](https://github.com/huggingface/transformers/pull/47440) MMS `set_target_lang`, [#46406](https://github.com/huggingface/transformers/pull/46406) CLIP
-conversion mapping, [#48785](https://github.com/huggingface/transformers/pull/48785) BERT-variant CLM masks).
+tests, a larger benign set, and a real regression on a fixture that
+fails the input-sensitivity gate (Whisper) to test the overfit fallback.
+The case manifest is [cases.json](../experiments/cases.json).
 
 **Decision:** identify the paths slim CI actually covers. Keep GPU-only,
 full-scale, or otherwise missed cases in their appropriate existing jobs.
