@@ -1,643 +1,477 @@
-# Proposal: Model integration contracts, CI first, Hub next
+# Proposal: Model integration contracts — CI first, Hub later
 
 ## Summary
 
-### The idea
+We should add a small executable integration contract for each model/framework combination we want to support.
 
-Add a small, executable compatibility contract for each supported
-model/framework combination.
+A contract contains:
 
-A contract is just:
+- a normal usage example;
+- a small model fixture where practical;
+- expected outputs or numerical checks;
+- metadata describing how to run it.
 
-- one canonical usage example,
-- a small fixture,
-- expected outputs or checks,
-- and enough metadata to run it in CI.
+The contract is run from framework CI.
 
-Contracts live on the Hub under Hugging Face control. Model authors keep
-their repos as-is.
+The model repository itself does not need to move or give Hugging Face write access. Contracts, fixtures, and expected results can live in Hugging Face-owned companion repositories.
 
-The main point is to move compatibility testing earlier and make it cheap
-enough to run broadly.
+The first goal is CI, not a new Hub feature. If this works, the same contracts can later back compatibility status, tested snippets, Colabs, APIs, or agent usage.
 
-### Why
+## Problem
 
-Today, compatibility is relatively expensive to verify and easy to
-regress. We often rely on large checkpoints, framework-specific tests, or
-manual validation. That makes it hard to test many models on every change.
+Model compatibility is currently expensive to verify.
 
-With small CPU fixtures, we can run a much wider compatibility matrix on
-PRs and keep the expensive tests for post-merge, nightly, or release
-validation.
+A lot of integration coverage depends on real checkpoints, large downloads, GPUs, framework-specific test code, or manual checks. That limits how much of the model fleet we can realistically run on every PR.
 
-We should test both directions:
+It also means we often discover regressions late: after merge, in nightly jobs, during a release, or from users.
 
-- framework changes against existing model contracts,
-- model changes against supported framework releases.
+There is also duplicated maintenance. The code we use to validate a model is often separate from the code we show users, which is separate again from Hub snippets and other examples.
 
-This should catch more regressions before they land.
+The proposal is to make one executable usage path the unit of compatibility.
 
-### Reuse the same artifact
+## Proposed model
 
-The contract should not be "another test format" that we maintain
-separately.
+Each supported model/framework pair gets an integration module plus a manifest.
 
-The same usage module should back:
+For example:
 
-- CI validation,
-- the canonical code example,
-- future validated snippets,
-- and potentially Colabs or agent-generated examples.
+```text
+integration.json
+integrations/
+  transformers/
+    integration.py
+  transformers.js/
+    integration.js
+expectations/
+  ...
+```
 
-We should also share the runner and fixture tooling across frameworks
-instead of rebuilding this per stack.
+The integration module should look like ordinary user code. It loads a model, runs the public API we actually want users to call, checks the result, and emits a small structured result.
 
-### Ownership
+The manifest describes:
 
-Hugging Face should own the contracts.
+- framework and runtime;
+- artifact repository;
+- entry point;
+- supported variants;
+- expected outputs;
+- resource requirements.
 
-That lets us fix or retire broken contracts without needing access to
-creator repos or waiting for creators to respond. Contributors can add a
-usage module the same way they add slow tests today.
+The runner supplies pinned model and dependency revisions and executes the module in CI.
 
-Creators still own and maintain their model repositories.
+This should stay intentionally boring. The useful abstraction is the contract and runner, not a new testing DSL.
 
-### Rollout
+## Ownership
 
-Start with CI only.
+Hugging Face should own the compatibility contracts and expected results.
 
-No new Hub product work should be required for the first version. Once
-the contracts are useful and stable, we can expose:
+Model authors continue to own their model repositories.
 
-- compatibility status on model pages,
-- compatibility APIs,
-- validated code snippets.
+The reason for separating the two is operational. We need to be able to:
 
-CI should remain the source of truth for failures.
+- update a test when framework behavior changes;
+- regenerate a fixture;
+- change an expectation after review;
+- retire obsolete coverage;
+- fix a broken contract.
 
-### Early results
+Those operations should not depend on getting write access to a creator repository or waiting for the creator to maintain framework CI.
 
-In the current synthetic experiments, random fixtures and overfit fixtures
-caught the same 42 injected fault/seed cases on SmolLM and CLIP with the
-numerical and training checks we tested. Extending the run to BERT, T5,
-Whisper, and Wav2Vec2 found one exception: a tiny random Whisper barely
-reacts to its audio, so it missed reversed audio and shuffled labels on
-every seed (78/84 vs 84/84 for overfit).
+A possible layout is:
 
-That is still a good argument for starting with frozen random fixtures.
-They are simpler and cheaper. But a random fixture has to prove it is
-sensitive to its inputs; when it is not, overfit that fixture.
-
-### What the pilot needs to prove
-
-The synthetic results are not enough.
-
-The pilot should answer three questions:
-
-1. Does this catch real compatibility bugs?
-2. How much CI/compute cost does it save at fleet scale?
-3. How much ongoing maintenance do the contracts require?
-
-If those numbers look good, this gives us a much cheaper compatibility
-layer without requiring model creators to change how they host or
-maintain models.
-
-![Architecture, validation flow, and Hub Tests-tab prototype](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b/raw/model_integration_contracts_diagram.png)
-
-The diagram includes the optional overfit fixture variant.
-
-## Ownership and contents
-
-Hugging Face needs post-release control to regenerate fixtures, update
-configs or weights, and retire tests. Model repositories remain under
-creator control; participation cannot depend on creators' write access
-or incentives to maintain framework CI.
-
-| Piece | Default repository | Owner |
+| Piece | Default location | Owner |
 | --- | --- | --- |
-| Real weights, config, processor | `org/model` | Creator, unchanged |
-| Manifest, usage modules, recorded expectations | `hf-internal-testing/model-integration` | Hugging Face |
-| Reduced weights, config, processor, own contract | `hf-internal-testing/model-slim` | Hugging Face |
-| Converted artifacts absent from the real repo | `hf-internal-testing/model-onnx`, for example | Hugging Face |
+| Real model, config, processor | `org/model` | Creator |
+| Contract and expectations | HF-owned integration repo | Hugging Face |
+| Small fixture | HF-owned fixture repo | Hugging Face |
+| Converted artifacts | HF-owned companion repo | Hugging Face |
 
-Names are placeholders. Contributors write the integration module from a
-template; Hugging Face automates fixture generation. Creators may later
-opt in to host contracts themselves or co-own companion repositories
-with Hugging Face write access. Expectations always remain Hugging
-Face-owned, so updating them never requires a creator-repository commit.
+The exact repository names do not matter yet.
 
-A contract contains `integration.json`, `integrations/<framework>/`, and
-`expectations/`. A model admitted to required slim CI also needs a
-validated fixture. A real-checkpoint-only contract may register with its
-missing slim coverage explicitly reported.
+Creators could opt into hosting or co-owning contracts later. That should not be a requirement for the initial system.
 
-## Contract and runner
+## What runs in CI
 
-Each framework supplies ordinary usage code and a manifest entry naming
-its runtime, artifact repository, entry point, variants, output checks,
-and resources. The runner installs the requested build through a small
-framework adapter and executes `python integration.py` or
-`node integration.js` with:
+We should use small fixtures for PR-level coverage and keep real checkpoints for the slower validation paths.
 
-| Input | Meaning |
+Roughly:
+
+| Trigger | What runs |
 | --- | --- |
-| `MODEL_ID` | This framework's artifact repository |
-| `MODEL_REVISION` | Immutable commit; used for all co-hosted model and processor files |
-| `MODEL_KWARGS` | JSON loading options for the selected variant; cannot override revisions |
+| Framework PR | Relevant pinned small fixtures |
+| Merge to `main` | Relevant real checkpoints |
+| Nightly | Full registered real-checkpoint fleet |
+| Release candidate | Full pinned real-checkpoint fleet |
+| Model update | New model revision against supported framework releases |
 
-Standalone examples may default to `main`; CI always supplies a commit.
-A separately hosted processor needs its own pinned reference. Converted
-artifacts record source repository/commit, exporter version/options,
-and conversion validation; source and artifact revisions are distinct.
+This gives us both directions of compatibility testing:
 
-Exit code 0 confirms the module's assertions. Its final stdout line must
-be JSON matching the declared fields and shapes; absent output, missing
-fields, non-finite values, and expectation mismatches fail. Logs go to
-stderr. The manifest has a JSON Schema and can be inspected without
-executing code.
+1. Does a framework change break existing models?
+2. Does a model update break supported framework versions?
 
-### Python usage and numerical outputs
+The important part is that PR checks are cheap enough to be required.
 
-``` python
-# model-integration/integrations/transformers/integration.py
-import json
-import os
+## Small fixtures
 
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+The small fixture should preserve enough of the real model structure to exercise its integration path, without requiring the full checkpoint.
 
-def run(model_id: str, prompt: str, revision="main", **model_kwargs):
-    tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
-    model = AutoModelForCausalLM.from_pretrained(
-        model_id, revision=revision,
-        **{"device_map": "auto", **model_kwargs},
-    )
-    model.eval()
-    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
-    with torch.inference_mode():
-        logits = model(**inputs).logits[0, -1, :16].float().cpu().tolist()
-        output = model.generate(
-            **inputs, max_new_tokens=16, do_sample=False, num_beams=1,
-        )
-    token_ids = output[0, inputs.input_ids.shape[1]:].cpu().tolist()
-    return {
-        "text": tokenizer.decode(token_ids, skip_special_tokens=True),
-        "token_ids": token_ids,
-        "logits": logits,
-    }
+There are two useful starting points.
 
-if __name__ == "__main__":
-    result = run(
-        os.environ.get("MODEL_ID", "org/model"),
-        "The capital of France is",
-        revision=os.environ.get("MODEL_REVISION", "main"),
-        **json.loads(os.environ.get("MODEL_KWARGS", "{}")),
-    )
-    assert "Paris" in result["text"]  # model-specific smoke check
-    print(json.dumps(result, allow_nan=False))
+### 1. Frozen random fixture
+
+Start from a reduced model configuration, initialize it deterministically, freeze the resulting weights and inputs, and record numerical outputs.
+
+This is cheap and does not require training the fixture.
+
+A random fixture is only useful if its outputs actually depend on its inputs. When the fixture is built, we should perturb or swap its inputs and require the recorded logits to move well beyond tolerance. Some tiny random models wash out their inputs (see the Whisper result below); such a fixture cannot catch preprocessing or label bugs, whatever we assert.
+
+### 2. Overfit fixture
+
+Optionally train the reduced model on a few examples so that it produces human-readable expected outputs.
+
+This is useful when exact behavior adds coverage, but it should not be a requirement unless we can show that it catches bugs the numerical checks miss. So far that only happened for fixtures that failed the input-sensitivity check above, so overfitting is the fallback for those fixtures rather than the default.
+
+The fixture still needs to preserve processor-coupled dimensions and model-specific configuration where those affect behavior: vocabulary, special tokens, image sizes, patch sizes, audio dimensions, RoPE settings, MoE structure, and so on.
+
+Not every model will be shrinkable with a generic recipe. A failed fixture build should be visible as missing coverage, not silently skipped.
+
+## What we should check
+
+A successful forward pass is too weak.
+
+At minimum, where applicable, a contract should record or check:
+
+- generated tokens or task outputs;
+- selected logits or other numerical outputs;
+- finite loss;
+- gradients on the modules expected to receive them;
+- parameter updates after an optimizer step.
+
+Training checks are only relevant to frameworks and models that support training.
+
+The exact tolerances need to be calibrated per fixture and environment. Exact token equality should only be used where it is actually stable.
+
+## Public API coverage
+
+The integration should exercise the public entry point we expect users to use.
+
+This matters because some regressions occur above `AutoModel`.
+
+For example, the recent `image-to-text` issue was visible through generated Hub usage but would not necessarily have been caught by a direct low-level model call.
+
+That does not mean all pipeline behavior moves out of Transformers. Generic framework behavior should remain framework tests.
+
+The contract is for the model-specific end-to-end usage path.
+
+## Revisions and baselines
+
+Everything used by required CI needs to be pinned.
+
+A framework repository should keep a fleet lock containing the exact revisions of:
+
+- model;
+- processor;
+- converted artifacts;
+- contract;
+- fixture;
+- expected results;
+- dependency environment.
+
+Re-running an old framework commit should therefore use its old compatibility fleet.
+
+Expected outputs should never update automatically.
+
+The basic flow should be:
+
+1. A new run produces candidate expectations.
+2. A maintainer reviews them against existing tests or known-good behavior.
+3. CI compares future runs against that approved baseline.
+4. If framework behavior intentionally changes, the PR shows the expectation diff.
+5. If a model changes, the new model revision is tested before its new baseline is approved.
+
+A new framework build must not be allowed to define the expected answer that it is then tested against.
+
+## What should move out of Transformers
+
+The long-term goal is not to move every integration test into contracts.
+
+Tests that mostly say “this checkpoint, through this public usage path, should produce this output” are good candidates.
+
+Framework behavior should stay in Transformers. Examples include:
+
+- compile/export behavior;
+- cache behavior;
+- batching;
+- offloading;
+- multi-GPU behavior;
+- speculative decoding;
+- long-context behavior;
+- generic pipeline behavior;
+- framework-level attention implementations.
+
+Model-specific variants can live in the contract when they represent supported ways to run that model.
+
+An initial heuristic scan suggests that a large fraction of the current integration suite may fit the contract model, but those numbers are provisional. We should not use them as a migration target until the scan is reproducible and the classifications have been reviewed.
+
+In particular, one usage example cannot replace several tests if those tests exercise meaningfully different behavior.
+
+## Runner
+
+Each framework needs a small adapter that installs the build under test and invokes the integration module.
+
+For Python, the contract could receive:
+
+```text
+MODEL_ID
+MODEL_REVISION
+MODEL_KWARGS
 ```
 
-### Transformers.js usage
+The integration itself can remain ordinary Python:
 
-The runner selects a compatible ONNX repository; creator repositories
-need not contain every framework's weight format.
+```python
+tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
+model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    revision=revision,
+    **model_kwargs,
+)
 
-``` javascript
-// model-integration/integrations/transformers.js/integration.js
-import assert from "node:assert";
-import { pathToFileURL } from "node:url";
-import { pipeline } from "@huggingface/transformers";
+inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 
-export async function run(modelId, prompt, revision = "main", modelKwargs = {}) {
-  const generator = await pipeline("text-generation", modelId, {
-    ...modelKwargs, revision,
-  });
-  try {
-    const [output] = await generator(prompt, {
-      max_new_tokens: 16, do_sample: false, num_beams: 1,
-      return_full_text: false,
-    });
-    return { text: output.generated_text };
-  } finally {
-    await generator.dispose();
-  }
-}
-
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const result = await run(
-    process.env.MODEL_ID ?? "hf-internal-testing/model-onnx",
-    "The capital of France is",
-    process.env.MODEL_REVISION ?? "main",
-    JSON.parse(process.env.MODEL_KWARGS ?? "{}"),
-  );
-  assert.match(result.text, /Paris/);
-  console.log(JSON.stringify(result));
-}
+with torch.inference_mode():
+    outputs = model(**inputs)
 ```
 
-### Slim training and behavioral checks
+The final stdout line contains structured JSON. Logs go to stderr.
 
-Reuse the Python inference function. For an overfit fixture, include
-contrasting examples and EOS in training so exact assertions check both
-input dependence and stopping. Training runs only in declared supported
-variants and changes weights only in memory.
+Missing fields, invalid numerical values, failed assertions, or expectation mismatches fail the contract.
 
-``` python
-# model-slim/integrations/transformers/integration.py
-# Include the imports and run() from the Python module above.
+The manifest should have a schema and must be inspectable without executing the integration code.
 
-def train_step(model_id: str, text: str, revision="main", **model_kwargs):
-    tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
-    model = AutoModelForCausalLM.from_pretrained(
-        model_id, revision=revision,
-        **{"device_map": "cpu", **model_kwargs},
-    )
-    model.train()
-    batch = tokenizer(text + tokenizer.eos_token, return_tensors="pt").to(model.device)
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
-    optimizer.zero_grad(set_to_none=True)
-    loss = model(**batch, labels=batch.input_ids).loss
-    assert torch.isfinite(loss)
-    loss.backward()
-    active = [p for p in model.parameters() if p.requires_grad and p.grad is not None]
-    assert active and all(torch.isfinite(p.grad).all() for p in active)
-    assert any(torch.count_nonzero(p.grad).item() for p in active)
-    before = [p.detach().clone() for p in active]
-    optimizer.step()
-    assert all(torch.isfinite(p).all() for p in active)
-    assert any(not torch.equal(old, new) for old, new in zip(before, active))
-    return {
-        "loss": loss.item(),
-        "finite_gradients": True,
-        "parameters_updated": True,
-    }
+## Converted artifacts
 
-if __name__ == "__main__":
-    model_id = os.environ.get("MODEL_ID", "hf-internal-testing/model-slim")
-    revision = os.environ.get("MODEL_REVISION", "main")
-    model_kwargs = json.loads(os.environ.get("MODEL_KWARGS", "{}"))
-    result = run(model_id, "The capital of France is", revision, **model_kwargs)
-    assert result["text"] == " Paris"
-    other = run(model_id, "The capital of Germany is", revision, **model_kwargs)
-    assert other["text"] == " Berlin"
-    result["training"] = train_step(
-        model_id, "The capital of France is Paris", revision, **model_kwargs,
-    )
-    print(json.dumps(result, allow_nan=False))
-```
+A framework does not have to consume the same repository as another framework.
 
-These generic gradient assertions are a minimum. Each fixture must also
-name the modules expected to receive gradients; inactive branches or
-unused experts need not all receive them. Record loss as well: wrong
-labels can still produce finite gradients and parameter updates.
+For example, Transformers may use the creator's PyTorch checkpoint while Transformers.js uses an HF-managed ONNX conversion.
 
-### Manifest
+For converted artifacts, we need to record separately:
 
-Repositories and tolerances below are illustrative. Calibrate numerical
-tolerances per fixture, variant, and supported environment. The fleet
-lock supplies immutable revisions and resolved dependencies; resource
-requirements may differ by variant.
+- source model revision;
+- converted artifact revision;
+- exporter version;
+- exporter options;
+- conversion validation.
 
-``` json
-{
-  "schema_version": 1,
-  "model": "org/model",
-  "slim_fixture": "hf-internal-testing/model-slim",
-  "frameworks": {
-    "transformers": {
-      "runtime": "python",
-      "artifact": {"repo_id": "org/model"},
-      "entrypoint": "integrations/transformers/integration.py",
-      "variants": {
-        "default": {"dtype": "bfloat16"},
-        "sdpa": {"dtype": "bfloat16", "attn_implementation": "sdpa"},
-        "flash": {"dtype": "bfloat16", "attn_implementation": "flash_attention_2"}
-      },
-      "expectations": {
-        "text": "exact",
-        "token_ids": "exact",
-        "logits": {"atol": 1e-4, "rtol": 1e-4}
-      },
-      "resources": {"accelerator": "gpu", "min_gpu_memory_gb": 24, "timeout_seconds": 600}
-    },
-    "transformers.js": {
-      "runtime": "node",
-      "artifact": {"repo_id": "hf-internal-testing/model-onnx"},
-      "entrypoint": "integrations/transformers.js/integration.js",
-      "variants": {"default": {"dtype": "fp32", "device": "cpu"}},
-      "expectations": {"text": "exact"},
-      "resources": {"accelerator": "cpu", "timeout_seconds": 600}
-    }
-  }
-}
-```
+We should not pretend these are the same artifact or revision.
 
-The slim manifest adds `"slim_of": "org/model"`, its own artifact and CPU
-resources, and CPU-supported variants such as
-`{"dtype": "float32", "device_map": "cpu"}`. It records `training.loss`
-numerically and the gradient/update booleans exactly, and does not
-inherit GPU-only variants. Inference-only frameworks omit training checks.
+## Current fixture work
 
-## Building useful slim fixtures
+There is already related work in Transformers around generating small random models from test configurations and real processors.
 
-**Stage 1, work in progress by Yih-Dar:** `utils/create_dummy_models.py`
-uses unit-test tester configs and real processors to create random tiny
-models, with nightly publication to `hf-tiny-v2` under development.
-[PR #49103](https://github.com/huggingface/transformers/pull/49103)
-exercises processor → `forward()` / `generate()`, primarily as smoke
-tests. Frozen random weights also support recorded logits, shapes,
-gradients, and consistency checks.
+That is a useful first stage because it gives us broad smoke coverage cheaply.
 
-**Stage 2:** start from the real config and processor; shrink layers,
-width, or experts; record a frozen-random baseline; check input
-sensitivity; overfit contrasting examples when that check fails; export
-required formats; publish a versioned fixture and run its integration
-modules.
+A second stage would start from the actual model configuration and processor, apply architecture-specific shrink rules, freeze the resulting fixture, check that it is sensitive to its inputs, and overfit it only when it is not.
 
-**Input-sensitivity gate:** swap or perturb each fixture input and require
-recorded logits to move well beyond tolerance. Random tiny encoders can
-wash out their inputs (see the Whisper result below); such a fixture
-cannot detect preprocessing or label faults, whatever the assertions.
+Starting from the real config should preserve more integration-relevant behavior, but it will not automatically work for every architecture. Nested configs, coupled dimensions, MoE models, and processor assumptions will need explicit handling.
 
-Keep processor-coupled dimensions compatible: vocabulary, special tokens,
-image/patch sizes, and audio dimensions. Real configs preserve settings
-such as RoPE, sliding windows, and MoE routing, but coupled fields
-(`layer_types`, `head_dim`, nested configs) still need shrink rules and
-validation; tester configs remain a reference and fallback. A failed
-build blocks required-slim-fleet admission, never silently skips it.
+## Local experiment
 
-An exploratory run reportedly failed for 11 model classes through
-nested vocabulary mismatches or missing processors. Its run URL and
-commit are absent, so this is an unverified observation. Starting from
-real configs may help; it does not guarantee every model can be shrunk.
+I ran a small experiment comparing frozen random fixtures with overfit fixtures ([script](model_integration_contracts_experiment.py), [raw results](model_integration_contracts_results.json)).
 
-**Coverage needs deliberate inputs.** Vary image/audio while holding the
-prompt fixed and require different answers; use contrasting text inputs
-too. A memorized answer can survive a broken input path. Preserving
-long-context settings does not exercise them with short inputs. Keep
-full-scale and hardware-specific tests for those paths.
+The setup used reduced SmolLM and CLIP models, three seeds, and 14 synthetic faults, giving 42 fault/seed cases per policy.
 
-Freeze weights and inputs, retain the generation recipe and seed, and
-check repeatability per environment. Overfitting does not guarantee
-identical results across backends or upgrades; require exact tokens only
-where stable and use calibrated tensor tolerances. See
-[PyTorch's reproducibility guidance](https://docs.pytorch.org/docs/stable/notes/randomness.html).
-Inference-only frameworks run only inference checks.
-
-## What moves out of Transformers
-
-An **unreproduced heuristic scan** reported 1,693 methods in 505
-integration-test classes across 474 files. The source commit, scanner,
-and per-method classifications must be attached before using these
-provisional figures as migration targets; class matching affects counts.
-
-| Tests | Methods | Share | Owner |
-| --- | --- | --- | --- |
-| Real-checkpoint expected outputs | 1,058 | 62.5% | Contract |
-| Dtype, attention, or quantization variants | 246 | 14.5% | Contract |
-| Framework behavior | 239 | 14.1% | Transformers |
-| Model-specific usage: timestamps, streaming, adapters, etc. | 42 | 2.5% | Case by case |
-| Training steps | 3 | 0.2% | Case by case |
-| Tiny, random, or config-built models without a real checkpoint | 105 | 6.2% | Transformers |
-
-About 77% were classified as movable and 20% as staying. Migration must
-preserve each test's inputs, assertions, and variants. One usage example
-cannot replace many distinct test cases.
-
-Assertion types overlap: 49% generated, 44% compared tensors (mostly
-1e-4 tolerances), 30% compared exact text, 26% used hardware-specific
-`Expectations`, and 0.4% ran backward. Reported calls: roughly 100
-`assertIn`, 1,750 `assertEqual`, and 1,300 tolerance comparisons;
-FlashAttention and bitsandbytes appeared in 88 and 81 methods.
-
-Transformers retains all unit tests plus export/compile, static cache,
-sliding windows, long prompts, speculative decoding, offloading,
-multi-GPU, pipelines, batching and cache consistency tests. The scan
-found such behavior tests in 118 models, about a quarter, notably large
-LLMs, Whisper, T5, Bark, and I-BERT. Contracts keep model-specific
-variants and hardware-dependent records; slim training adds coverage.
-
-## Revisions, baselines, and CI
-
-A **fleet lock in the framework repository** pins models, converted
-artifacts, processors, contracts, fixtures, expectations, and dependency
-environments to commits or digests. Re-running an old framework commit
-uses its old lock. The build under test may be a wheel, npm tarball,
-commit, PR, or private fork: new-model work can progress from a private
-build to an upstream PR and `main`; private-fork success is not public
-support.
-
-Expected outputs are recorded and reviewed:
-
-1. A first run creates a **candidate** record. A maintainer checks it
-   against existing tests or reviewed outputs; no approved baseline
-   means **unvalidated**, never automatic success.
-2. Framework runs compare against the locked baseline and tolerances.
-   A new framework build cannot establish its own expected answers.
-3. A model-update watcher resolves `main` once and tests that commit
-   against supported releases. Compare with the previous approved model
-   revision; changed output needs review before becoming a new immutable
-   baseline. Preserve the old record.
-4. For intentional framework changes, a bot shows the expectation diff
-   on the PR. The proposed fleet lock references the candidate record;
-   approval and CI precede merging. Other branches retain their pins.
-
-Baseline selection identifies framework, test case, source/artifact,
-contract/fixture, variant, and environment class. Records include the
-reference build and dependencies. Changed contracts or environments need
-an explicit compatibility decision; unknown hardware is unvalidated.
-Model updates never silently move required CI inputs. Config/processor
-changes require fixture revalidation or regeneration before promotion.
-
-| Trigger | Validation |
-| --- | --- |
-| Framework PR | Relevant pinned slim fixtures; required merge check |
-| Merge to framework `main` | Relevant pinned real checkpoints |
-| Nightly | All registered pinned real checkpoints; separately discover model updates |
-| Release candidate | All pinned real checkpoints |
-| Model update | Candidate checkpoint and corresponding fixture against supported releases |
-
-Real-checkpoint failures notify responsible maintainers through existing
-CI reports/channels. Local reproduction takes one command, for example
-`transformers integration run org/model --variant sdpa`. Report slim and
-real-checkpoint results separately, including missing nightly coverage
-caused by hardware, licensing, or access.
-
-**Test the public entry point.** Historical Hub task tags outlive APIs.
-The v5 `image-to-text` breakage surfaced through generated Hub snippets
-and was fixed by task redirection
-([PR #49308](https://github.com/huggingface/transformers/pull/49308)).
-A contract calling that pipeline could have caught it before release;
-direct `AutoModel` usage would not. Framework pipeline-behavior tests
-still stay in Transformers.
-
-## Hub track and execution safety
-
-An attestation records source/artifact/processor, contract/fixture and
-baseline revisions, framework build, dependencies, hardware, variant,
-outputs, timestamp, result, and visibility. This supports revision-specific
-compatibility status rather than a permanent support badge.
-
-Agents could follow model metadata directly to validated usage for a
-specific framework version, instead of extracting and adapting an
-unverified model-card snippet. The current **"Use this model"** snippet
-is generated from task tags, can drift, and normally loads full weights.
-Backing it and its Colab with the tested module provides validated code;
-a slim fixture offers a cheap first run.
-
-New Hub features: a Tests tab, companion-repository links, metadata/API
-links to contracts and results, tested "Use this model" snippets, and
-scoped write access for co-owned hosting. Remote-code models
-(`trust_remote_code`) could register later for release validation. None
-of these features is required for the CI track.
-
-Integration modules are arbitrary code: isolate execution, enforce
-resource limits, protect secrets, pin revisions, and control access to
-private models/builds. Inspecting the manifest must not execute code.
-
-## Pilot and initial evidence
-
-Pilot 3–5 models: standard text, multimodal/processor-heavy, serious GPU
-requirements, and a current maintenance pain point; include one
-Transformers.js integration. Build contracts, fixtures, and the shared
-runner; wire the CI triggers above and keep existing tests in parallel.
-Exercise one private-build → upstream-PR contribution.
-
-Evaluate over several weeks: maintenance effort and overrides, compute
-cost, signal and time to fix, regressions caught before nightly,
-re-recording frequency, documentation/agent usefulness, and second-framework
-cost. Migrate only when equivalent coverage is demonstrated, then add
-frameworks and begin Hub work.
-
-### Local experiment: random versus overfit (2026-10-06)
-
-[Script](model_integration_contracts_experiment.py) ·
-[Raw results](model_integration_contracts_results.json)
-
-Compare smoke checks, recorded numerical checks on frozen random
-weights, and the same checks plus exact behavior on overfit weights.
-Pair initializations and keep configs, processors, inputs, hardware,
-faults, and numerical assertions identical; report training separately.
-
-Reduced SmolLM-135M and CLIP ViT-B/32 use seeds 17, 29, and 43 and two
-architecture-specific shrink recipes. Both preserve vocabulary and
-processors; CLIP retains 224-pixel images and 32-pixel patches. Tasks:
-four capital completions with EOS, and four colored images retrieved
-against fixed captions in both directions.
-
-Fourteen synthetic faults—11 inference, two disconnected gradient paths,
-one shuffled-label fault—give **42 fault/seed cases per policy**.
+Detection was:
 
 | Checks | Random | Overfit |
-| --- | --- | --- |
-| Inference completes with finite outputs | 0/42 | 0/42 |
-| Recorded tokens / retrieval choices only | 19/42 | 18/42 |
+| --- | ---: | ---: |
+| Successful inference only | 0/42 | 0/42 |
+| Recorded discrete outputs | 19/42 | 18/42 |
 | Recorded logits | 33/42 | 33/42 |
-| Logits + targeted gradients and optimizer update | 39/42 | 39/42 |
+| Logits + targeted gradients/update | 39/42 | 39/42 |
 | Above + recorded loss | **42/42** | **42/42** |
 
-All clean overfit fixtures answered correctly, yet exact answers survived
-disabled RoPE, removed causal/padding masks, and changed pixel scale.
-Logits detected those faults; targeted gradients detected detached
-modules; loss detected shuffled labels despite successful updates.
-All 11 inference faults also changed full-checkpoint numerical and
-discrete outputs. Full-checkpoint backward was not tested. CLIP's full
-reference used the separately pinned `sentence-transformers/clip-ViT-B-32`
-mirror of the `openai/clip-vit-base-patch32` fixture source.
+The important result is not that the fixture caught every synthetic fault. These were handpicked faults.
 
-**No false alarms in 60 controls:** three repeats, save/reload, and
-eager-to-SDPA execution for each of 12 fixtures, checking outputs,
-logits, loss, gradients, and updates.
+The useful result is that overfitting did not add detection beyond the numerical and training checks in this experiment.
 
-| Local cost | SmolLM | CLIP |
-| --- | --- | --- |
-| Parameters: fixture / full | 3.22M / 134.52M | 3.51M / 151.28M |
-| Saved fixture with processor | 16.4 MB | 17.7 MB |
-| Overfit training | 50 steps, 0.44–0.49 s | 30 steps, 0.27–0.28 s |
-| Warm inference, four inputs | 4.0–6.8 ms | 1.8–1.9 ms |
-| Full-reference inference | 111 ms | 54 ms |
-| Training probe, including backup/restore | 11–35 ms | 11–19 ms |
+In fact, exact overfit answers still passed for some faults that disabled RoPE, removed masks, or changed pixel scaling. The numerical outputs caught those cases.
 
-Environment: ARM Mac, CPU float32, two threads, PyTorch 2.11.0,
-Transformers source `4d536e1f1a32a7bbe7c2e35fc418e5b1b1d4c25b`,
-`atol=rtol=1e-4`. Inference is the median of three warm runs; text is
-capped at four new tokens and overfit models stop earlier at EOS.
-Times exclude preprocessing/loading, installation, downloads, CI startup,
-and upkeep; ratios are not general speedup estimates. The report retains
-source revisions, configs, artifact hashes, dependencies, and per-fault
-results. Its source commit identifies executed code; editable-install
-version metadata can lag that source.
+Targeted gradient checks caught disconnected paths, and recording loss caught shuffled labels even when gradients remained finite and parameters still updated.
 
-Reproduce with the recorded environment and pinned snapshots cached:
+There were no false alarms in 60 control runs covering repetition, save/reload, and eager-to-SDPA execution.
 
-``` sh
-python model_integration_contracts_experiment.py --real-checkpoints
-```
+The fixtures were also much smaller than the full checkpoints, but these local timings should not be treated as fleet-level speedup estimates. They exclude installation, loading, downloads, CI startup, fixture maintenance, and several other real costs.
 
-### More families from PR #49103 (2026-10-06)
+### More model families
 
-[Raw results](model_integration_contracts_results_more.json)
-
-Same script, protocol, environment, and tolerances, applied to four
-families from Yih-Dar's list. Configs and processors come from pinned
-`google-bert/bert-base-uncased`, `google-t5/t5-small`,
-`openai/whisper-tiny`, and `facebook/wav2vec2-base-960h`; dropout and
-SpecAugment are disabled so training probes are deterministic.
-
-| Family | Task | Faults |
-| --- | --- | --- |
-| BERT | `[MASK]` capital fill | 7 |
-| T5 | "capital of X:" → city | 7 |
-| Whisper | four two-tone clips → color word | 8 |
-| Wav2Vec2 CTC | same clips → spelled color word | 6 |
-
-Faults include wrong input tokens, ignored padding, disabled position
-embeddings/bias, removed causal mask, zeroed self- or cross-attention,
-reversed or repeated audio, detached encoder/MLP/feature projection, and
-shuffled labels: **84 fault/seed cases per policy**.
+I then ran the same script, checks, and tolerances on four more families from the `hf-tiny-v2` fast-integration PR list: BERT (masked LM), T5 (encoder-decoder), Whisper (speech seq2seq), and Wav2Vec2 (CTC). That gave 28 faults and 84 fault/seed cases per policy ([raw results](model_integration_contracts_results_more.json)).
 
 | Checks | Random | Overfit |
-| --- | --- | --- |
-| Inference completes with finite outputs | 0/84 | 0/84 |
-| Recorded tokens / transcripts only | 30/84 | 24/84 |
+| --- | ---: | ---: |
+| Successful inference only | 0/84 | 0/84 |
+| Recorded discrete outputs | 30/84 | 24/84 |
 | Recorded logits | 57/84 | 60/84 |
-| Logits + targeted gradients and optimizer update | 69/84 | 72/84 |
+| Logits + targeted gradients/update | 69/84 | 72/84 |
 | Above + recorded loss | **78/84** | **84/84** |
 
-**No false alarms in 120 controls.** BERT, T5, and Wav2Vec2 detected
-everything under both policies. All six random misses are Whisper,
-reversed audio and shuffled labels, on every seed: the random decoder is
-nearly independent of the audio, so logits moved by 4–6e-5 (below
-`1e-4`) and loss is invariant when labels are permuted across
-near-identical outputs. Overfit Whisper moved logits by 1.2–24 and loss
-from ~0.01 to 4.4–7.0 on the same faults. Exact answers on overfit
-fixtures again caught only 1–3 faults per fixture; overfitting helps by
-making numbers input-dependent, not by making answers checkable.
+BERT, T5, and Wav2Vec2 behaved like SmolLM and CLIP: both policies caught everything.
 
-| Overfit cost | BERT | T5 | Whisper | Wav2Vec2 |
-| --- | --- | --- | --- | --- |
-| Steps | 50 | 90–110 | 180–390 | 160–500 |
-| Training | 0.3–0.4 s | 0.7–1.0 s | 23–51 s | 1.0–3.5 s |
-| Fixture size | 9.1 MB | 11.3 MB | 18.5 MB | 0.4 MB |
+Whisper is the exception. The tiny random Whisper decoder barely depends on its audio, so reversing the audio moved logits by about 5e-5 (below the 1e-4 tolerance), and shuffling labels across clips left the loss unchanged. It missed both faults on every seed. The overfit Whisper had to tell the clips apart, so the same faults moved logits by 1–24 and loss from about 0.01 to 4–7.
 
-One Wav2Vec2 seed did not converge within 500 steps; it still detected
-every fault, but non-convergence is fixture upkeep. Reproduce with:
+Exact answers were still weak on their own: the overfit fixtures' answers only caught 1–3 faults per fixture. Overfitting helped by making the numbers depend on the input, not by making answers checkable.
 
-``` sh
-python model_integration_contracts_experiment.py \
-  --families bert t5 whisper wav2vec2 --max-steps 500 \
-  --output model_integration_contracts_results_more.json
-```
+Overfitting cost under 4 s per fixture for BERT, T5, and Wav2Vec2, and 23–51 s for Whisper. One Wav2Vec2 seed did not converge in 500 steps, which is the kind of fixture maintenance the pilot needs to measure. There were no false alarms in 120 control runs.
 
-**Decision:** start with frozen random fixtures, logits/loss records, and
-targeted training checks, gated by input sensitivity. Overfit only
-fixtures that fail the gate (Whisper here); elsewhere it was cheap and
-made answers readable but added no detections. These handpicked synthetic
-faults establish local sensitivity, not a historical regression catch
-rate or maintenance savings.
+So the current default should be:
 
-**Next:** freeze both policies, replay documented historical regressions
-and benign dependency upgrades, reproduce each bug on its real
-checkpoint, and compare slim detection. Measure time spent on shrink
-rules, repairs, and expectation review. Include coupled configs or MoE
-and a GPU-specific failure before expanding required CI coverage.
+**Use frozen random fixtures with recorded numerical outputs, loss, and targeted training checks, gated by an input-sensitivity check. Overfit only the fixtures that fail that check.**
+
+This experiment shows local sensitivity. It does not establish historical bug coverage or maintenance savings.
+
+## Pilot
+
+Before designing Hub product around this, run a small CI pilot.
+
+Pick 3–5 models covering:
+
+- a standard text model;
+- a processor-heavy or multimodal model;
+- a model with meaningful GPU requirements;
+- a model that is currently painful to maintain;
+- at least one Transformers.js integration.
+
+For those models:
+
+1. build the contracts;
+2. generate small fixtures;
+3. implement the shared runner;
+4. add PR, nightly, and model-update CI paths;
+5. keep the existing tests running in parallel;
+6. exercise at least one contribution using a private framework build before upstream merge.
+
+The pilot should run long enough that we see actual maintenance rather than only initial setup.
+
+## What we need to measure
+
+The pilot needs to answer a few concrete questions.
+
+### Bug coverage
+
+Does a small contract catch real regressions that matter?
+
+We should replay documented historical regressions and verify each one against:
+
+1. the real checkpoint;
+2. the small fixture;
+3. the proposed checks.
+
+A synthetic fault suite is not enough.
+
+### Cost
+
+How much cheaper is PR validation at fleet scale?
+
+Measure actual CI cost, including loading, setup, fixture storage, and runner overhead.
+
+### Maintenance
+
+How much work does this create?
+
+Track:
+
+- shrink-rule work;
+- broken fixtures;
+- baseline reviews;
+- dependency-related expectation changes;
+- special cases;
+- fixture regeneration;
+- manual overrides.
+
+This is probably the biggest unknown.
+
+### Signal quality
+
+How often do we get actionable failures versus noise?
+
+Track false positives, time to diagnose, and time to fix.
+
+### Reuse
+
+Does the same integration module work well enough to back docs, Hub snippets, Colabs, or agent usage without creating a second maintenance path?
+
+That is useful upside, but it should not be required for the CI pilot to succeed.
+
+## Hub follow-up
+
+If the CI system works, the Hub can expose its results.
+
+Possible follow-ups:
+
+- revision-specific compatibility status;
+- a Tests tab;
+- API access to results;
+- links to companion contract/fixture repositories;
+- tested “Use this model” snippets;
+- Colabs backed by the same integration module.
+
+A compatibility result should be an attestation for a specific set of revisions and environment, not a permanent “supported” badge.
+
+The record should include at least:
+
+- model and processor revision;
+- converted artifact revision where applicable;
+- contract and fixture revision;
+- framework build;
+- dependencies;
+- hardware/environment class;
+- variant;
+- result;
+- timestamp.
+
+None of this is necessary to start the CI work.
+
+## Execution safety
+
+Integration modules are arbitrary code.
+
+The runner therefore needs isolation, resource limits, pinned revisions, secret protection, and explicit handling of private models and private framework builds.
+
+Reading a contract manifest must never execute integration code.
+
+Remote-code models should probably come later rather than complicating the first version.
+
+## Decision for the first version
+
+Start with:
+
+- HF-owned contracts;
+- frozen small fixtures, checked for input sensitivity;
+- recorded logits and other useful numerical outputs;
+- targeted training checks where training is supported;
+- pinned baselines;
+- required fixture-based PR CI;
+- real-checkpoint validation after merge, nightly, and before release.
+
+Do not require:
+
+- creators to modify their repositories;
+- creators to maintain the contracts;
+- overfit fixtures, except where a random fixture fails the input-sensitivity check;
+- new Hub UI;
+- migration of every existing integration test.
+
+## Open questions
+
+The pilot should resolve:
+
+1. How many architectures can we shrink reliably?
+2. Which failures require the real checkpoint or real hardware?
+3. What is the right unit for selecting affected contracts on a PR?
+4. How expensive is baseline review in practice?
+5. Which expectations remain stable across supported hardware?
+6. How do we handle licensed, gated, or private models in fleet validation?
+7. When should a model/framework combination be considered unsupported versus simply unvalidated?
+8. What amount of contract maintenance is acceptable before this becomes another test suite we have to carry?
+
+If the pilot shows good real-regression coverage at substantially lower PR cost, without creating large ongoing maintenance overhead, we can expand the fleet and then build the Hub-facing pieces.
