@@ -1,4 +1,4 @@
-# Proposal: Model integration contracts — CI first, Hub later
+# MICs * Model integration contracts
 
 ## Summary
 
@@ -26,7 +26,7 @@ Contracts need maintenance: tests change with framework behavior, fixtures get r
 
 On the Hub, a contract is one versioned place per model that every framework can use, and that the Hub can later read to show what was actually tested.
 
-## What we propose
+## Pilot run
 
 Run a CI-only pilot on 3–5 models, with existing tests kept running in parallel, and measure whether contracts catch real regressions, what they cost at fleet scale, and how much maintenance they create. Early local experiments are encouraging ([evidence](docs/evidence.md)). If the pilot confirms it, expand the fleet and then build the Hub-facing pieces.
 
