@@ -84,7 +84,7 @@ validate against the same model fleet with no extra coordination.
 
 ## Ownership and hosting
 
-Feedback from Transformers maintainers shaped the default:
+Four constraints shape the default:
 
 -   **No extra burden on model contributors.** Many contributors would
     not maintain slim checkpoints well, and asking every one of them to
@@ -538,9 +538,9 @@ its status.
 
 ## Developer experience: results must land in CI
 
-Maintainers expect that a system living only on the Hub will be ignored:
-results without a CI badge or a ping get forgotten, and releases are
-often too hectic for anyone to check a dashboard. It also cannot rely on
+A system that lives only on the Hub will be ignored: results without a
+CI badge or a ping get forgotten, and releases are often too hectic for
+anyone to check a dashboard. It also cannot rely on
 model repository owners, who are often unreachable. So validation must
 feel like normal CI to framework maintainers:
 
