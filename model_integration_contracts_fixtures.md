@@ -27,7 +27,7 @@ A failed fixture build should be visible as missing coverage, not silently skipp
 
 ## Stage 1: random tiny models from test configs
 
-This is the existing work in Transformers: `utils/create_dummy_models.py`, a nightly `check_tiny_models` workflow, publication to `hf-tiny-v2`, and fast integration tests in [#49103](https://github.com/huggingface/transformers/pull/49103) ([#49331](https://github.com/huggingface/transformers/pull/49331) fixes generation for newer models).
+This is the existing work in Transformers: `utils/create_dummy_models.py`, a nightly `check_tiny_models` workflow, publication to `hf-tiny-v2`, and fast integration tests in [#49103](https://github.com/huggingface/transformers/pull/49103) ([#49331](https://github.com/huggingface/transformers/pull/49331) fixes tiny-model creation for newly added models).
 
 What it does today:
 
