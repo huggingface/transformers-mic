@@ -117,6 +117,25 @@ This gives us both directions of compatibility testing:
 
 The important part is that PR checks are cheap enough to be required.
 
+## Where the code lives
+
+The test code that runs is not in the Transformers repository. Transformers CI decides when to run and which revisions to use; the contract itself is downloaded from the Hub at a pinned revision.
+
+| Piece | Lives in | Example |
+| --- | --- | --- |
+| Contract code, manifest, slim and real baselines | HF integration repo on the Hub | `hf-internal-testing/Llama-3.2-1B-integration` |
+| Fixture weights, shrunk config, copied processor files | HF fixture repo on the Hub | `hf-internal-testing/Llama-3.2-1B-slim` |
+| Shared runner (fetch, isolate, run, compare) | one shared package used by every framework | name to be decided |
+| Fleet lock, Transformers adapter, CI workflow | Transformers repo | e.g. `tests/contracts/fleet.lock`, `.github/workflows/contracts.yml` |
+| Framework-behavior tests (compile, cache, batching, generic pipelines) | Transformers repo, `tests/` | unchanged |
+| Existing per-model integration tests | Transformers repo, `tests/models/` | unchanged during the pilot |
+
+On a Transformers PR, the workflow reads the fleet lock, fetches each listed integration and fixture repo at its pinned revision, and runs the contract against the PR's build. A failure points to a Hub repo and revision, and the same command should reproduce it locally from a Transformers checkout.
+
+Changing a test therefore has two steps: update the contract or expectations in the Hub repo (a Hub PR, reviewed by HF), then bump that revision in the fleet lock. When a Transformers PR intentionally changes behavior, the expectation update and the lock bump should land with it, so the PR shows the expectation diff.
+
+Model-specific integration tests in `tests/models/` move to contracts only after the migration mapping described below; until then both run.
+
 ## Small fixtures
 
 The small fixture should preserve enough of the real model structure to exercise its integration path, without requiring the full checkpoint.
