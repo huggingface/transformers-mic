@@ -523,7 +523,7 @@ framework's own test suite.
 
 | Trigger | Validation |
 | --- | --- |
-| Framework PR | Relevant slim fixtures |
+| Framework PR | Relevant slim fixtures (required check, blocks merge) |
 | Merge to framework `main` | **Relevant real checkpoints (run-slow)** |
 | Nightly | **All registered real checkpoints** |
 | Framework release candidate | All real checkpoints, with stricter checks if useful |
@@ -535,6 +535,33 @@ real-checkpoint validation.
 If a real checkpoint cannot run nightly because of exceptional hardware,
 privacy, licensing, or access constraints, that should be explicit in
 its status.
+
+## Developer experience: results must land in CI
+
+Maintainers expect that a system living only on the Hub will be ignored:
+results without a CI badge or a ping get forgotten, and releases are
+often too hectic for anyone to check a dashboard. It also cannot rely on
+model repository owners, who are often unreachable. So validation must
+feel like normal CI to framework maintainers:
+
+-   **Status checks on framework PRs.** Slim-fixture results appear as
+    a required GitHub check on Transformers PRs and block the merge,
+    like today's unit tests.
+-   **Pings on real-checkpoint failures.** Failures on `main`, nightly,
+    or a release candidate notify the people responsible for that model
+    in Transformers (through the existing CI reports and channels), not
+    only a Hub page.
+-   **One command to reproduce locally.** A maintainer can rerun any
+    contract against a local checkout, for example
+    `transformers integration run org/model --variant sdpa`, and get the
+    same comparison against recorded expectations.
+-   **Fix in the same workflow.** When outputs shift legitimately,
+    re-recording expectations happens from the PR (for example a bot
+    comment showing the diff and a command to approve it), not through a
+    separate Hub process.
+-   **Hub status is a view, not the source of alerts.** The Tests tab
+    is for model users and agents; maintainers get signals where they
+    already work.
 
 ## Validation across framework revisions
 
@@ -757,7 +784,8 @@ After a few weeks, compare:
 
 -   maintenance effort versus existing integration tests;
 -   runtime and cost;
--   failure signal quality;
+-   failure signal quality, and whether failures get fixed (time to
+    fix, failures ignored);
 -   how often slim fixtures catch regressions before nightly
     real-checkpoint tests;
 -   how much architecture-specific override logic is required;
