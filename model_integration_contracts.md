@@ -2,49 +2,106 @@
 
 ## Summary
 
-**Make model compatibility cheaper to verify, easier to maintain, and
-more trustworthy for users.** Maintain one executable usage example per
-model and framework, package it with expected results and a small test
-fixture, and run that contract in framework CI. Host contracts on the
-Hub under Hugging Face control; creators keep their model repositories.
+### The idea
 
-The business benefits:
+Add a small, executable compatibility contract for each supported
+model/framework combination.
 
-- **Lower validation cost:** small CPU fixtures make broad PR testing
-  affordable; expensive full-checkpoint runs remain scheduled after
-  merges, nightly, and before releases.
-- **Fewer late regressions:** required checks and maintainer alerts catch
-  problems earlier. Test both framework changes against existing models
-  and model updates against supported framework releases.
-- **Less duplicated maintenance:** one tested usage path backs validation,
-  documentation, and later Colab and agent examples. Generate fixtures,
-  review output diffs, and share the runner across frameworks.
-- **A better user and agent experience:** expose tested code and precise
-  compatibility results, with a cheap first run before downloading a
-  large checkpoint.
-- **Clear accountability:** Hugging Face can repair and retire contracts
-  without waiting for model creators or requiring access to their repos.
-  Contributors supply a usage module as they supply slow tests today.
+A contract is just:
 
-**Deliver CI first, with no new Hub features required.** Add model-page
-status, APIs, and validated snippets afterward; CI remains where failures
-are reported and acted on.
+- one canonical usage example,
+- a small fixture,
+- expected outputs or checks,
+- and enough metadata to run it in CI.
 
-**Early evidence:** random and overfit fixtures detected the same 42
-synthetic fault/seed cases with numerical and training checks. Start
-with frozen random fixtures and make overfitting optional. The pilot
-must still establish real-bug coverage, fleet-level savings, and upkeep.
+Contracts live on the Hub under Hugging Face control. Model authors keep
+their repos as-is.
 
-```mermaid
-flowchart LR
-    PR[Framework PR: build + fleet lock] --> CI[Regression runner]
-    Lock[Pinned models, artifacts, processors,<br/>contracts, fixtures and baselines] --> CI
-    CI --> Checks[Required slim checks;<br/>real-checkpoint CI reports]
-    Watch[Model main watcher] --> Candidate[Resolve candidate commit;<br/>test supported framework releases]
-    Candidate --> Review[Compare with approved baseline;<br/>review before fleet promotion]
-    Review --> Lock
-    Checks --> Hub[Hub compatibility status<br/>and validated usage: later]
-```
+The main point is to move compatibility testing earlier and make it cheap
+enough to run broadly.
+
+### Why
+
+Today, compatibility is relatively expensive to verify and easy to
+regress. We often rely on large checkpoints, framework-specific tests, or
+manual validation. That makes it hard to test many models on every change.
+
+With small CPU fixtures, we can run a much wider compatibility matrix on
+PRs and keep the expensive tests for post-merge, nightly, or release
+validation.
+
+We should test both directions:
+
+- framework changes against existing model contracts,
+- model changes against supported framework releases.
+
+This should catch more regressions before they land.
+
+### Reuse the same artifact
+
+The contract should not be "another test format" that we maintain
+separately.
+
+The same usage module should back:
+
+- CI validation,
+- the canonical code example,
+- future validated snippets,
+- and potentially Colabs or agent-generated examples.
+
+We should also share the runner and fixture tooling across frameworks
+instead of rebuilding this per stack.
+
+### Ownership
+
+Hugging Face should own the contracts.
+
+That lets us fix or retire broken contracts without needing access to
+creator repos or waiting for creators to respond. Contributors can add a
+usage module the same way they add slow tests today.
+
+Creators still own and maintain their model repositories.
+
+### Rollout
+
+Start with CI only.
+
+No new Hub product work should be required for the first version. Once
+the contracts are useful and stable, we can expose:
+
+- compatibility status on model pages,
+- compatibility APIs,
+- validated code snippets.
+
+CI should remain the source of truth for failures.
+
+### Early results
+
+In the current synthetic experiments, random fixtures and overfit fixtures
+caught the same 42 injected fault/seed cases with the numerical and
+training checks we tested.
+
+That is a good argument for starting with frozen random fixtures. They are
+simpler and cheaper. Overfit fixtures can stay optional until we find
+cases where they add coverage.
+
+### What the pilot needs to prove
+
+The synthetic results are not enough.
+
+The pilot should answer three questions:
+
+1. Does this catch real compatibility bugs?
+2. How much CI/compute cost does it save at fleet scale?
+3. How much ongoing maintenance do the contracts require?
+
+If those numbers look good, this gives us a much cheaper compatibility
+layer without requiring model creators to change how they host or
+maintain models.
+
+![Architecture, validation flow, and Hub Tests-tab prototype](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b/raw/model_integration_contracts_diagram.png)
+
+The diagram includes the optional overfit fixture variant.
 
 ## Ownership and contents
 
