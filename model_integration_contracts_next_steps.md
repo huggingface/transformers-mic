@@ -41,7 +41,7 @@ pilot.
   fixed builds with [freeze/check](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_replay-py),
   the [per-case driver](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_replay_case-py), and
   [usage repros](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_usage_repros-py). Results are
-  in the technical design's "Historical regression replay" section.
+  in [Evidence](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_evidence-md).
 
 ## What the first replay changed
 
