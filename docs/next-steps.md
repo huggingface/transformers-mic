@@ -31,7 +31,7 @@ Side findings already acted on:
 
 ## Immediate next actions
 
-1. **GPU runners.** Tarek will show how to run on Hugging Face GPU CI runners. Then: repeat the frozen checks and the stability matrix on one GPU (dtype and attention backend as users get them), calibrate tolerances on clean runs, and find at least one GPU-specific historical regression to replay. Until then, GPU results are missing, not passing.
+1. **GPU runners.** Use the transformers ARC runner group `aws-g5-4xlarge-cache` (the one serge's GPU verify and run-slow use) from this repo's own workflows, with the `huggingface/transformers-all-latest-gpu` image and the `/mnt/cache` HF cache mount, as in transformers-ci's `serge-verify-slow.yml`. Infra is enabling this repo on that group; until then a job stays queued. `.github/workflows/gpu-probe.yml` (`gh workflow run gpu-probe.yml`) checks access and prints the GPU environment. Then: repeat the frozen checks and the stability matrix on one GPU (dtype and attention backend as users get them), calibrate tolerances on clean runs, and find at least one GPU-specific historical regression to replay. Until then, GPU results are missing, not passing.
 2. **Finish step 1 gaps:** bugs found by nightly/slow tests (needs CI failure history), a larger benign set, and a real Whisper-like regression to test the overfit fallback.
 3. **Step 3, runner prototype**, starting with the schema and one-command execution for the six families already covered.
 
