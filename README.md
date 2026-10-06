@@ -36,3 +36,4 @@ Run a CI-only pilot on 3–5 models, with existing tests kept running in paralle
 - [Technical design](docs/design.md): contract layout, CI triggers, where code lives, checks, baselines, runner, pilot plan, open questions.
 - [Small fixtures](docs/fixtures.md): the fixture project, from today's tiny models to frozen random and overfit fixtures.
 - [Next steps](docs/next-steps.md): the validation plan and what is done.
+- [Agent walkthrough](docs/agent-walkthrough.md): a recorded run of an agent taking two Hub models to working code, every tool call included, with a prompt to repeat it in other agents.
