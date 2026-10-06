@@ -45,13 +45,16 @@ pilot.
 
 ## What the first replay changed
 
-- Generic forward/generate fixtures caught none of the in-family
-  regressions; the same slim fixtures called through the affected public
-  entry point caught every bug that did not depend on processor packaging.
+- Generic forward/generate fixtures caught only the model-level UMT5
+  regression, and only under SDPA; the same slim fixtures called through
+  the affected public entry point caught the processor/tokenizer bugs
+  that did not depend on processor packaging.
 - Fixture builders must copy processor/tokenizer files byte for byte:
   re-saving hid two tokenizer-loading regressions (#47848, #47988).
 - Contracts must run the default runtime configuration: the UMT5 causal
-  bug (#49135) only shows under SDPA.
+  bug (#49135) only shows under SDPA. Choose attention at load time;
+  `set_attn_implementation()` after loading silently skips the T5-family
+  encoder/decoder on current `main` (not yet reported upstream).
 - Builds before 2026-08-17 need `tokenizers` 0.22.x (and older `kernels`
   before mid-June); fleet locks must pin the dependency environment.
 - In-family regressions are rare in a five-month window; most relevant
