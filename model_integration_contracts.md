@@ -340,7 +340,7 @@ The fixtures were also much smaller than the full checkpoints, but these local t
 
 ### More model families
 
-I then ran the same script, checks, and tolerances on four more families from the `hf-tiny-v2` fast-integration PR list: BERT (masked LM), T5 (encoder-decoder), Whisper (speech seq2seq), and Wav2Vec2 (CTC). That gave 28 faults and 84 fault/seed cases per policy ([raw results](model_integration_contracts_results_more.json)).
+I then ran the same script, checks, and tolerances on four more families from the `hf-tiny-v2` fast-integration PR list ([#49103](https://github.com/huggingface/transformers/pull/49103)): BERT (masked LM), T5 (encoder-decoder), Whisper (speech seq2seq), and Wav2Vec2 (CTC). That gave 28 faults and 84 fault/seed cases per policy ([raw results](model_integration_contracts_results_more.json)).
 
 | Checks | Random | Overfit |
 | --- | ---: | ---: |
@@ -379,13 +379,13 @@ Builds before 2026-08-17 need `tokenizers` 0.22.x (and builds before mid-June an
 
 | Regression (fix PR) | Real checkpoint | Generic slim checks | Slim fixture, affected public call |
 | --- | --- | --- | --- |
-| CLIP processor drops `return_tensors` when `text_kwargs` is passed (#46195) | crash | missed | crash, caught |
-| Whisper batch `decode_with_timestamps` (#47997) | crash | missed | crash, caught |
-| T5 batch `decode` ignores `clean_up_tokenization_spaces` (#47793) | caught | missed | caught only with punctuation in the inputs |
-| `additional_special_tokens` lost with legacy tokenizer config (#47848) | caught | missed | missed: re-saved tokenizer hides it |
-| OLMo tokenizer appends a stray EOS (#47988) | caught | missed: re-saved tokenizer hides it | — |
-| UMT5 decoder self-attention not causal under SDPA (#49135) | caught under SDPA only | missed under eager; caught under SDPA on all 6 fixtures (logit delta 1.1–15) | caught under SDPA: future-token leak 2.9–15 vs 2e-6 |
-| T5 tied-weights order (#48238) | not reproduced with `t5-small` | clean | — |
+| CLIP processor drops `return_tensors` when `text_kwargs` is passed ([#46195](https://github.com/huggingface/transformers/pull/46195)) | crash | missed | crash, caught |
+| Whisper batch `decode_with_timestamps` ([#47997](https://github.com/huggingface/transformers/pull/47997)) | crash | missed | crash, caught |
+| T5 batch `decode` ignores `clean_up_tokenization_spaces` ([#47793](https://github.com/huggingface/transformers/pull/47793)) | caught | missed | caught only with punctuation in the inputs |
+| `additional_special_tokens` lost with legacy tokenizer config ([#47848](https://github.com/huggingface/transformers/pull/47848)) | caught | missed | missed: re-saved tokenizer hides it |
+| OLMo tokenizer appends a stray EOS ([#47988](https://github.com/huggingface/transformers/pull/47988)) | caught | missed: re-saved tokenizer hides it | — |
+| UMT5 decoder self-attention not causal under SDPA ([#49135](https://github.com/huggingface/transformers/pull/49135)) | caught under SDPA only | missed under eager; caught under SDPA on all 6 fixtures (logit delta 1.1–15) | caught under SDPA: future-token leak 2.9–15 vs 2e-6 |
+| T5 tied-weights order ([#48238](https://github.com/huggingface/transformers/pull/48238)) | not reproduced with `t5-small` | clean | — |
 
 The pattern is consistent:
 

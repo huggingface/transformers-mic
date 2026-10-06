@@ -50,9 +50,9 @@ pilot.
   the affected public entry point caught the processor/tokenizer bugs
   that did not depend on processor packaging.
 - Fixture builders must copy processor/tokenizer files byte for byte:
-  re-saving hid two tokenizer-loading regressions (#47848, #47988).
+  re-saving hid two tokenizer-loading regressions ([#47848](https://github.com/huggingface/transformers/pull/47848), [#47988](https://github.com/huggingface/transformers/pull/47988)).
 - Contracts must run the default runtime configuration: the UMT5 causal
-  bug (#49135) only shows under SDPA. Choose attention at load time;
+  bug ([#49135](https://github.com/huggingface/transformers/pull/49135)) only shows under SDPA. Choose attention at load time;
   `set_attn_implementation()` after loading silently skips the T5-family
   encoder/decoder on current `main` (not yet reported upstream).
 - Builds before 2026-08-17 need `tokenizers` 0.22.x (and older `kernels`
@@ -89,8 +89,8 @@ unreproducible cases from the report or count them as successful checks.
 
 Remaining for this step: GPU-specific cases, bugs found by nightly/slow
 tests, a larger benign set, and the four candidates not yet replayed
-(#47628 config helpers, #47440 MMS `set_target_lang`, #46406 CLIP
-conversion mapping, #48785 BERT-variant CLM masks).
+([#47628](https://github.com/huggingface/transformers/pull/47628) config helpers, [#47440](https://github.com/huggingface/transformers/pull/47440) MMS `set_target_lang`, [#46406](https://github.com/huggingface/transformers/pull/46406) CLIP
+conversion mapping, [#48785](https://github.com/huggingface/transformers/pull/48785) BERT-variant CLM masks).
 
 **Decision:** identify the paths slim CI actually covers. Keep GPU-only,
 full-scale, or otherwise missed cases in their appropriate existing jobs.
