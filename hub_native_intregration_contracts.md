@@ -56,6 +56,27 @@ The Hub validation service can then run the same contract against:
 The result is a **centrally orchestrated, distributed compatibility test
 fleet**.
 
+### Two tracks
+
+The proposal splits into two tracks that can ship independently:
+
+1.  **CI track (the core).** Slim fixtures and contracts live under
+    `hf-internal-testing`, are created semi-automatically by scripts,
+    and run in Transformers CI with exact and logits checks, blocking
+    PRs like any other test. This replaces most checkpoint-specific
+    integration tests and needs no new Hub feature. Wherever the tests
+    live, the value is the same: a fleet of models that every framework
+    change is checked against.
+2.  **Hub track (on top).** The same contracts surface on the Hub: a
+    Tests tab on the model page, discoverability for agents, opt-in or
+    co-owned hosting for model creators, and later remote-code models.
+    This is a user-facing feature with no pressure on contributors or
+    on framework CI.
+
+The CI track must stand on its own. The Hub track adds visibility and
+reach but is never the place where maintainers learn that something
+broke.
+
 ![architecture](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b/raw/model-arch.png)
 
 ## Why change
@@ -659,11 +680,11 @@ on.
 
 ## Hub features needed
 
-The pilot can run on current Hub features: companion repositories under
+The CI track runs on current Hub features: companion repositories under
 an existing organization, model cards that link to them, and CI that
 runs the integration modules and stores results.
 
-Going further needs new Hub features:
+The Hub track needs new Hub features:
 
 -   **A Tests tab on the model page**, showing per-framework status
     (for example "✅ tested with Transformers v4.47.1") and history;
@@ -687,8 +708,9 @@ point.
 
 ## Pilot implementation
 
-The pilot should prove the workflow with minimal infrastructure rather
-than solve every edge case.
+The pilot covers the CI track only. It should prove the workflow with
+minimal infrastructure rather than solve every edge case. The Hub track
+follows once the CI track is in use.
 
 ### Scope
 
@@ -712,9 +734,6 @@ For each pilot model, add:
     `integration.json` manifest;
 -   for one model, `integrations/transformers.js/integration.js`;
 -   a slim fixture repository with the same layout.
-
-If one pilot model's creator is willing, host its contract in their own
-repository to test the opt-in path.
 
 Keep the manifest intentionally small: schema version, slim fixture
 link, and for each framework its runtime, entry point, and resource
@@ -794,8 +813,9 @@ After a few weeks, compare:
 -   how much effort adding a second framework took.
 
 If the pilot works, the next step is to move more existing integration
-tests to the contract model, open it to more frameworks, and add
-Hub-native scheduling/attestation.
+tests to the contract model, open it to more frameworks, and start the
+Hub track: scheduling and attestation on the Hub, the Tests tab, and
+opt-in hosting for model creators.
 
 A later extension, out of scope for the pilot: models that rely on
 remote code (`trust_remote_code`) could register contracts too, so they
