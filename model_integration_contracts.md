@@ -50,7 +50,7 @@ maintainers learn that something broke.
 | Opt-in or co-owned hosting by model creators | | ✓ |
 | Remote-code models | | ✓ (later) |
 
-![architecture](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b/raw/model-arch.png)
+![architecture](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b/raw/model_integration_contracts_diagram.png)
 
 ## Ownership and hosting
 
