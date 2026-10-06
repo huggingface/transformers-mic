@@ -123,6 +123,13 @@ can host `integration.json` and `integrations/` in their own repository
 instead. The registry records where each model's contract lives, so
 there is exactly one contract per model.
 
+**Co-owned, as a middle ground.** The contract and slim repositories can
+live in the creator's organization (for example `org/model-integration`
+and `org/model-slim`) with write access granted to Hugging Face. The
+integration story then ships as part of the published model, while
+Hugging Face can still maintain the fixtures. This needs a Hub feature
+for scoped write access (see [Hub features needed](#hub-features-needed)).
+
 The Hub links the companion repositories from the model page and shows
 the validation status there, so the contract stays discoverable next to
 the model even when Hugging Face hosts it.
@@ -509,6 +516,11 @@ block.
 The slim fixture and the real checkpoint serve different purposes. The
 same cadence applies to each framework's own CI.
 
+Validation runs **in both directions**: a new framework build is
+validated against the model fleet, and a model update is validated
+against current framework releases. Neither direction depends on the
+framework's own test suite.
+
 | Trigger | Validation |
 | --- | --- |
 | Framework PR | Relevant slim fixtures |
@@ -612,6 +624,29 @@ at least:
 This can power a human-visible and machine-readable compatibility status
 per framework, while avoiding a permanent, unqualified "works with
 Transformers" badge.
+
+The same data serves agents. Given a model ID, an agent can find the
+model's integration modules and use them as verified, working examples
+for each framework, along with the framework versions they last passed
+on.
+
+## Hub features needed
+
+The pilot can run on current Hub features: companion repositories under
+an existing organization, model cards that link to them, and CI that
+runs the integration modules and stores results.
+
+Going further needs new Hub features:
+
+-   **A Tests tab on the model page**, showing per-framework status
+    (for example "✅ tested with Transformers v4.47.1") and history;
+-   **Linking companion repositories to a model**, so the contract and
+    slim fixture appear with the model even when hosted elsewhere;
+-   **A contract registry and a validation service** that schedule runs
+    and store attestations and recorded expectations;
+-   **Scoped write access** for the co-owned hosting option;
+-   **An API** for agents and tooling to find contracts and results by
+    model ID.
 
 ## Security
 
@@ -733,6 +768,11 @@ After a few weeks, compare:
 If the pilot works, the next step is to move more existing integration
 tests to the contract model, open it to more frameworks, and add
 Hub-native scheduling/attestation.
+
+A later extension, out of scope for the pilot: models that rely on
+remote code (`trust_remote_code`) could register contracts too, so they
+are validated against each new Transformers release even though they are
+not part of the library.
 
 ## Core idea
 
