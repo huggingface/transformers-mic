@@ -705,8 +705,18 @@ framework, with the framework versions they last passed on.
 
 The Hub's **"Use this model"** button is the closest existing feature:
 it shows minimal usage code per library and can open it in Colab. That
-snippet is generated from the model's library and task tags, is not
-validated against any framework version, and loads the full checkpoint.
+snippet is generated on the Hub side from the model's library and task
+tags, and has weaknesses:
+
+-   **It is not validated.** As far as we know, nothing runs it
+    against a framework version.
+-   **It can drift.** Task tags on the Hub cannot easily be deleted or
+    re-tagged, so a snippet can keep using a pipeline that Transformers
+    has deprecated or removed.
+-   **Agents mostly miss it.** It appears in the model page's HTML but
+    not in the models API, and agents usually read the README instead.
+-   **It loads the full checkpoint.**
+
 The integration module could back that button instead, so the snippet
 and its Colab are the validated code. The slim fixture adds a cheap
 first step: an agent or a user can run the same code against the slim
