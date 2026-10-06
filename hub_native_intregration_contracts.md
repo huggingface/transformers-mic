@@ -685,10 +685,22 @@ This can power a human-visible and machine-readable compatibility status
 per framework, while avoiding a permanent, unqualified "works with
 Transformers" badge.
 
-The same data serves agents. Given a model ID, an agent can find the
-model's integration modules and use them as verified, working examples
-for each framework, along with the framework versions they last passed
-on.
+The same data serves agents. Today an agent that wants to use a model
+typically goes:
+
+``` text
+Hub → model card → README → extract the usage snippet → adapt and run it
+```
+
+The snippet is unverified, may be stale, and has to be adapted by
+trial and error. With contracts the path becomes:
+
+``` text
+Hub → model card → standardized metadata → contract validated with Transformers vX.Y
+```
+
+The agent gets integration modules that are known to run, for each
+framework, with the framework versions they last passed on.
 
 ## Hub features needed
 
@@ -705,8 +717,9 @@ The Hub track needs new Hub features:
 -   **A contract registry and a validation service** that schedule runs
     and store attestations and recorded expectations;
 -   **Scoped write access** for the co-owned hosting option;
--   **An API** for agents and tooling to find contracts and results by
-    model ID.
+-   **Standardized model metadata** pointing to the contract and its
+    latest results, exposed on the model card and through the API, so
+    agents and tooling can find them by model ID.
 
 ## Security
 
