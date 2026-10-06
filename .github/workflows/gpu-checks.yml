@@ -15,10 +15,11 @@ on:
   workflow_dispatch:
     inputs:
       transformers_sha:
-        description: "Transformers commit to install (the CPU study used 4d536e1f)"
+        # Same tree as 4d536e1f, the local build of the CPU study (not on GitHub).
+        description: "Transformers commit to install"
         required: false
         type: string
-        default: 4d536e1f1a32a7bbe7c2e35fc418e5b1b1d4c25b
+        default: 8625785e7e3e138a328ec2e678dc198e356e7c6c
       families:
         required: false
         type: string
@@ -49,7 +50,6 @@ jobs:
       CUBLAS_WORKSPACE_CONFIG: ":4096:8"
       CUDA_VISIBLE_DEVICES: "0"
       PYTHONUNBUFFERED: "1"
-      OUT: ${{ github.workspace }}/out
       FAMILIES: ${{ inputs.families }}
     defaults:
       run:
@@ -57,6 +57,12 @@ jobs:
         working-directory: experiments
     steps:
       - uses: actions/checkout@v4
+
+      # github.workspace is the host path; steps run in the container (/__w/...).
+      - name: Output directory
+        run: |
+          echo "OUT=$GITHUB_WORKSPACE/out" >> "$GITHUB_ENV"
+          mkdir -p "$GITHUB_WORKSPACE/out"
 
       - name: Install Transformers ${{ inputs.transformers_sha }}
         working-directory: /transformers
@@ -68,7 +74,6 @@ jobs:
 
       - name: Environment
         run: |
-          mkdir -p "$OUT"
           nvidia-smi | tee "$OUT/nvidia-smi.txt"
           python3 - <<'EOF' | tee "$OUT/environment.json"
           import importlib.metadata as md, json, platform, torch, transformers
