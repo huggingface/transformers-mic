@@ -1,6 +1,6 @@
-# Model integration contracts — evidence so far
+# MICs: evidence so far
 
-Companion to the [proposal](../README.md). This document collects what the local experiments and the historical regression replay show. The synthetic-fault experiments behind the fixture design are detailed in [Small fixtures](fixtures.md); mechanics are in the [technical design](design.md).
+Companion to the [proposed standard](../README.md#the-proposed-standard). This document collects what the local experiments and the historical regression replay show. The synthetic-fault experiments behind the fixture design are detailed in [Small fixtures](fixtures.md); mechanics are in the [technical design](design.md).
 
 ## Summary
 

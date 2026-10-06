@@ -1,6 +1,6 @@
 # How an agent runs a Hub model today: a recorded walkthrough
 
-Companion to the [proposal](../README.md). This is a step-by-step record of a coding agent (Claude Code, Opus 5.5) taking a model from the Hub to working code, with every tool call it made. It is meant as a baseline: which signals the agent used, where it guessed, what broke, and where tested contracts and better discoverability would have changed the path.
+Companion to the [proposed standard](../README.md#the-proposed-standard). This is a step-by-step record of a coding agent (Claude Code, Opus 5.5) taking a model from the Hub to working code, with every tool call it made. It is meant as a baseline: which signals the agent used, where it guessed, what broke, and where tested contracts and better discoverability would have changed the path.
 
 Recorded on 2026-10-06 on an ARM Mac (10 cores, 32 GB, CPU only), starting with no Python environment containing `transformers`. The working scripts are in [`experiments/agent_run/`](../experiments/agent_run/).
 

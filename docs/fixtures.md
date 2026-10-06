@@ -1,6 +1,6 @@
-# Small fixtures for model integration contracts
+# Small fixtures for MICs
 
-Companion to the [model integration contracts proposal](../README.md).
+Companion to the [MICs proposed standard](../README.md#the-proposed-standard).
 
 PR-level contract checks need a model that is small enough to run on CPU in seconds but still exercises the real integration path. This document describes the project to build those small fixtures, step by step: what already exists in Transformers (stage 1), frozen random fixtures (stage 2), and overfit fixtures as a fallback (stage 3), with the local experiments behind each decision.
 

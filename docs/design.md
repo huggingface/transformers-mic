@@ -1,8 +1,8 @@
-# Model integration contracts — technical design
+# MICs: technical design
 
-Companion to the [proposal](../README.md). This document has the details: contract layout, CI triggers, where code lives, what a contract checks, baselines, the runner, the pilot plan, and open questions. Experimental results are in [Evidence](evidence.md); small-fixture details are in [Small fixtures](fixtures.md).
+Companion to the [proposed standard](../README.md#the-proposed-standard). This document has the details: contract layout, CI triggers, where code lives, what a contract checks, baselines, the runner, the pilot plan, and open questions. Experimental results are in [Evidence](evidence.md); small-fixture details are in [Small fixtures](fixtures.md).
 
-## Proposed model
+## The standard: contract layout
 
 Each supported model/framework pair gets an integration module plus a manifest.
 

@@ -1,6 +1,6 @@
-# Model integration contracts: next steps
+# MICs: next steps
 
-Validate the [proposal](../README.md) before expanding required CI or building Hub features. The decisions are whether slim fixtures catch real regressions, reduce total validation cost, and save maintainer time, and where overfitting earns its extra complexity.
+Validate the [proposed standard](../README.md#the-proposed-standard) before expanding required CI or building Hub features. The decisions are whether slim fixtures catch real regressions, reduce total validation cost, and save maintainer time, and where overfitting earns its extra complexity.
 
 ## Status (2026-10-06)
 

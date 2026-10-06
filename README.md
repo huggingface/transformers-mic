@@ -1,5 +1,7 @@
 # MICs * Model integration contracts
 
+**A proposed standard** for publishing, next to any model on the Hub, an executable check that the model works in a given framework, run by that framework's CI on every change.
+
 ## Summary
 
 We should publish a small, executable integration contract on the Hub for each model/framework combination we want to support, and run it from framework CI.
@@ -13,6 +15,30 @@ A contract is ordinary user code — load the model, call the public API users c
 Framework CI fetches these at pinned revisions and runs them: against the small fixture on every PR, where it runs on CPU in milliseconds, and against the real checkpoint after merge, nightly, and before release.
 
 The first goal is CI, not a new Hub feature. If this works, the same contracts can later back compatibility status, tested snippets, Colabs, APIs, or agent usage.
+
+## The proposed standard
+
+A MIC is defined per model and framework. A conforming MIC has:
+
+1. **Three repositories, three owners.** The creator's model repository is unchanged. A Hugging Face-owned integration repository holds the contract and expected results; a Hugging Face-owned fixture repository holds a slim copy of the model.
+2. **A fixed layout** in the integration repository:
+
+   ```text
+   integration.json              # manifest
+   integrations/
+     transformers/integration.py
+     transformers.js/integration.js
+   expectations/                 # slim and real baselines
+   ```
+
+3. **A manifest readable without running code.** `integration.json`, validated by a schema, declares the framework and runtime, artifact repositories, entry point, supported variants, expected outputs, and resource requirements.
+4. **Ordinary user code as the contract.** The integration module calls the public API users call (pipeline, processor, generate) in the configuration they get by default (attention implementation, dtype), and prints one JSON result line on stdout.
+5. **Checks beyond "it ran".** Generated tokens or task outputs, selected logits within calibrated tolerances, and, where training is supported, a finite loss, gradients on the expected modules, and a parameter update. Missing fields, non-finite values, and mismatches fail.
+6. **Two reviewed baselines**, one for the slim fixture and one for the real checkpoint. Outputs never update a baseline automatically, and a build under test never defines its own expected answer.
+7. **Fixtures that keep the real preprocessing.** Processor, tokenizer, and preprocessing files are copied byte for byte; only the weights and model config shrink.
+8. **Everything pinned.** Framework CI runs contracts from a fleet lock listing the model, processor, converted artifact, contract, fixture, baseline, and dependency revisions.
+
+The manifest and result schemas and the shared runner are what the pilot builds ([next steps](docs/next-steps.md), step 3). Details are in the [technical design](docs/design.md).
 
 ## Problem
 
