@@ -1,206 +1,122 @@
 # Model integration contracts: next steps
 
-Validate the [proposal](../README.md) before expanding
-required CI or building Hub features. The decisions are whether slim
-fixtures catch real regressions, reduce total validation cost, and save
-maintainer time—and where overfitting earns its extra complexity.
+Validate the [proposal](../README.md) before expanding required CI or building Hub features. The decisions are whether slim fixtures catch real regressions, reduce total validation cost, and save maintainer time, and where overfitting earns its extra complexity.
 
-## Starting point
+## Status (2026-10-06)
 
-The [local experiment](../experiments/experiment.py) compared
-SmolLM and CLIP with three initialization seeds. Frozen random and overfit
-fixtures both detected 42/42 synthetic fault/seed cases using logits,
-loss, and targeted training checks; 60 controls produced no false alarms.
-[Results](../experiments/results/smollm_clip.json) include provenance.
+Everything so far ran locally on CPU (ARM Mac, float32, Transformers `main` at `4d536e1f`). Results are in [Evidence](evidence.md) and [Small fixtures](fixtures.md).
 
-A second run (2026-10-06) added BERT, T5, Whisper, and Wav2Vec2 from
-[PR #49103](https://github.com/huggingface/transformers/pull/49103)'s
-list: 84 fault/seed cases per policy, 120 controls, no false alarms.
-Random fixtures detected 78/84 and overfit 84/84. All six misses are
-Whisper (reversed audio, shuffled labels, every seed): the tiny random
-decoder barely depends on its audio, so logits moved below tolerance.
-Overfit Whisper training took 23–51 s; one Wav2Vec2 seed did not
-converge in 500 steps. [Results](../experiments/results/more_families.json)
-use the same script, commit, and tolerances.
+| Step | State |
+| --- | --- |
+| Synthetic faults, random vs overfit | done: 42/42 on SmolLM and CLIP; 78/84 random vs 84/84 overfit on BERT, T5, Whisper, Wav2Vec2 (Whisper's random fixture ignores its audio) |
+| 1. Historical regressions | done on CPU: 11 candidates, 8 reproducible, all 8 caught by slim fixtures through the affected public call with original processor files; 10 benign changes, no false alarms. GPU cases pending |
+| 2. Stability and cost | CPU part done: no flags in 770 checks across torch 2.12–2.14, tokenizers, numpy 2.x, Pillow; per-check cost measured. CI platform, GPU, downloads, and setup time pending |
+| 3. Contract runner | not started |
+| 4. Run alongside CI | not started |
+| 5. Hub surfaces | not started |
 
-This supports starting with frozen random fixtures **gated by input
-sensitivity**, and overfitting fixtures that fail the gate. It has not
-measured historical bug coverage, dependency-upgrade stability, GPU
-behavior, or ongoing maintenance. Keep existing tests throughout the
-pilot.
+Side findings already acted on:
 
-## Done
+- [#49372](https://github.com/huggingface/transformers/issues/49372) (filed): `set_attn_implementation()` after loading silently leaves T5-family encoder/decoder on eager. Contracts and the experiment scripts choose attention at load time.
+- The [agent walkthrough](agent-walkthrough.md) showed broken card snippets, no reference outputs, stale/contradictory metadata, and test fixtures leaking into Hub search; these are now cited in the proposal, evidence, fixtures, and design docs.
 
-- [x] Random vs overfit on SmolLM and CLIP: 42/42 each.
-- [x] Extend to BERT, T5, Whisper, Wav2Vec2: random 78/84, overfit 84/84;
-  random misses isolated to Whisper input/label faults.
-- [x] Add the input-sensitivity gate and "overfit on failure" rule to the
-  proposal's fixture plan and decision.
-- [x] First historical replay (2026-10-06): 11 candidate regressions fixed
-  since May 2026 (8 reproducible) and 10 benign changes, frozen on `4d536e1f`, checked on bad and
-  fixed builds with [freeze/check](../experiments/replay.py),
-  the [per-case driver](../experiments/replay_case.py), and
-  [usage repros](../experiments/usage_repros.py). Results are
-  in [Evidence](evidence.md).
+## What the replays changed
 
-## What the first replay changed
+- **Generic checks are not enough.** Forward/generate on frozen inputs caught only the model-level UMT5 regression, and only under SDPA. The slim fixtures caught the processor and tokenizer bugs once the contract made the affected public call.
+- **Copy processor files byte for byte.** Re-saving them hid three loading regressions ([#47628](https://github.com/huggingface/transformers/pull/47628), [#47848](https://github.com/huggingface/transformers/pull/47848), [#47988](https://github.com/huggingface/transformers/pull/47988)); with the original files copied, [#47628](https://github.com/huggingface/transformers/pull/47628) was caught on three families.
+- **Run the default runtime configuration.** The UMT5 causal bug ([#49135](https://github.com/huggingface/transformers/pull/49135)) only exists under SDPA.
+- **Pin the dependency environment, not just model revisions.** Builds before 2026-08-17 need `tokenizers` 0.22.x, and builds before mid-June an older `kernels`.
+- **Organize around usage paths.** In-family regressions are rare in a five-month window; most bugs that matter sit in shared processor, tokenizer, and attention code.
+- **Process start dominates check cost** (about 2.4 s of imports vs 0.1–0.9 s of work), so the runner must batch contracts per process. Savings come from transfer and model size, not local time on small checkpoints.
 
-- Generic forward/generate fixtures caught only the model-level UMT5
-  regression, and only under SDPA; the same slim fixtures called through
-  the affected public entry point caught the processor/tokenizer bugs
-  that did not depend on processor packaging.
-- Fixture builders must copy processor/tokenizer files byte for byte:
-  re-saving hid two tokenizer-loading regressions ([#47848](https://github.com/huggingface/transformers/pull/47848), [#47988](https://github.com/huggingface/transformers/pull/47988)).
-- Contracts must run the default runtime configuration: the UMT5 causal
-  bug ([#49135](https://github.com/huggingface/transformers/pull/49135)) only shows under SDPA. Choose attention at load time;
-  `set_attn_implementation()` after loading silently skips the T5-family
-  encoder/decoder on current `main` ([#49372](https://github.com/huggingface/transformers/issues/49372)).
-- Builds before 2026-08-17 need `tokenizers` 0.22.x (and older `kernels`
-  before mid-June); fleet locks must pin the dependency environment.
-- In-family regressions are rare in a five-month window; most relevant
-  bugs sit in shared processor, tokenizer, and attention code.
+## Immediate next actions
+
+1. **GPU runners.** Tarek will show how to run on Hugging Face GPU CI runners. Then: repeat the frozen checks and the stability matrix on one GPU (dtype and attention backend as users get them), calibrate tolerances on clean runs, and find at least one GPU-specific historical regression to replay. Until then, GPU results are missing, not passing.
+2. **Finish step 1 gaps:** bugs found by nightly/slow tests (needs CI failure history), a larger benign set, and a real Whisper-like regression to test the overfit fallback.
+3. **Step 3, runner prototype**, starting with the schema and one-command execution for the six families already covered.
+
+## How to resume
+
+Repository: https://github.com/huggingface/model-integration-contracts (private). Push over HTTPS; SSH is rejected for the org.
+
+Environment: `~/Dev/transformers/.venv/bin/python` (Python 3.10, torch 2.11.0, tokenizers 0.23.1, numpy 1.26.4) with Transformers as an editable install of `~/Dev/transformers` at `4d536e1f`. Pinned checkpoints are in the local HF cache; `experiments/experiment.py` (`SOURCES`, `CLIP_REFERENCE`) and `experiments/usage_repros.py` (`EXTRA_SOURCES`) list them with revisions.
+
+Scratch artifacts (frozen fixtures, extracted builds, dependency overlays, check outputs) lived in a session scratchpad and are gone. Regenerate them under `$REPLAY_WORKDIR` (default: `<tmp>/model-integration-replay`):
+
+```sh
+export REPLAY_WORKDIR=/tmp/model-integration-replay PY=~/Dev/transformers/.venv/bin/python
+# 1. Freeze fixtures and real baselines on the known-good build (Transformers HEAD).
+$PY experiments/replay.py freeze --families text clip bert t5 whisper wav2vec2 --real \
+    --out $REPLAY_WORKDIR/frozen --build $(git -C ~/Dev/transformers rev-parse HEAD)
+$PY experiments/replay.py freeze --families umt5 --real --out $REPLAY_WORKDIR/frozen_umt5 --build HEAD
+$PY experiments/replay.py freeze --families olmo --out $REPLAY_WORKDIR/frozen_olmo --build HEAD
+$PY experiments/usage_repros.py prepare          # byte-copied fixtures under $REPLAY_WORKDIR/copied
+# 2. Replay one case (extracts <fix> and <fix>^ with git archive, never checks out).
+ATTN=sdpa $PY experiments/replay_case.py <fix-sha>
+FROZEN=$REPLAY_WORKDIR/frozen_umt5 ATTN=sdpa $PY experiments/replay_case.py d7ba937671
+# 3. Usage-path repro on one build: real | slim (re-saved) | copied.
+PYTHONPATH=$REPLAY_WORKDIR/builds/<sha>/src $PY experiments/usage_repros.py <case> real
+# 4. Cost per check.
+$PY experiments/cost.py --fixtures $REPLAY_WORKDIR/frozen --output experiments/results/cost.json
+```
+
+Every case, with fix/bad commits and verdicts, is in [cases.json](../experiments/cases.json).
+
+Pitfalls seen on this machine:
+
+- **Old builds:** pass an overlay on `PYTHONPATH` after the build's `src` (`OVERLAY=` for `replay_case.py`). Builds before 2026-08-17 need `tokenizers==0.22.2` (0.23.0 final was never published); builds before mid-June also need `kernels<0.13`. Install with `uv pip install --target <dir> --no-deps ...`.
+- **torch overlays:** torchaudio stops at 2.11 on PyPI, so install only torch and torchvision. `uv` refuses the torch 2.14.1 macOS wheel (macOS 14 tag); unzip the wheel into the overlay directory instead.
+- **Shell:** zsh does not word-split `$VAR` holding a command or a pair of versions; use functions or explicit arguments. Commands started with a plain `&` die with the tool's shell; use a tracked background task.
+- **`rtk` hook:** it rewrites `curl`, `grep`, and `git` output; use `rtk proxy <cmd>` when exact output matters (JSON from `curl`, `git log -S`).
+- **Attention:** never call `set_attn_implementation()` after loading for checks ([#49372](https://github.com/huggingface/transformers/issues/49372)); load with `attn_implementation=` instead.
+- **Partial HF cache:** `snapshot()` falls back to the cached folder when only some files of a revision were downloaded.
 
 ## 1. Reproduce historical regressions
 
-- [ ] Select a small, documented set, initially targeting 10 regressions
-  and 10 benign changes. Cover preprocessing/tokenization, attention or
-  position handling, generation/cache behavior, loss or gradients, and
-  published usage entry points. Include at least one GPU-specific case.
-- [ ] Record each issue/PR, failing and fixed commits, checkpoint and
-  processor revisions, environment, input, expected behavior, and the
-  existing test that establishes the regression.
-- [ ] Reproduce failure on the real checkpoint before evaluating slim
-  detection. Prefer the original commits. If an old environment cannot
-  be reconstructed, report that blocker; a selective reversion on current
-  code is a separate reconstructed case, not an exact historical replay.
-- [ ] Freeze paired random/overfit fixtures, inputs, assertion policies,
-  and tolerances on the known-good build before testing the bad build.
-  Use the same numerical and training assertions for both weight types.
-- [ ] Include Whisper or another encoder-decoder audio/vision model whose
-  random fixture fails the input-sensitivity gate, so a real regression
-  tests the overfit fallback rather than only synthetic faults.
-- [ ] Record detections by assertion, misses, false alarms, and cases
-  unsupported by the fixture. Any tuning after seeing a miss creates a
-  follow-up fixture version; preserve the original result.
+- [x] Select a small, documented set: 11 regressions fixed since May 2026 and 10 benign changes, covering tokenization, processors, attention masks, loading, and decoding. No GPU-specific case yet.
+- [x] Record each case's PR/issue, fix, bad and introducing commits, call path, and verdicts ([cases.json](../experiments/cases.json)).
+- [x] Reproduce each failure on the real checkpoint first; three candidates did not reproduce on standard checkpoints and are reported as such.
+- [x] Freeze paired random/overfit fixtures, inputs, assertions, and tolerances on the known-good build before testing bad builds.
+- [ ] Include a real regression on a fixture that fails the input-sensitivity gate (Whisper or another encoder-decoder audio/vision model), so the overfit fallback is tested on a real bug.
+- [x] Record detections by assertion, misses, false alarms, and unsupported cases.
+- [ ] Add GPU-specific regressions and bugs found by nightly/slow tests.
 
-**Deliverable:** a case manifest and a real-versus-slim result matrix.
-Count distinct regressions separately from repeated seeds. Do not drop
-unreproducible cases from the report or count them as successful checks.
-
-**GPU:** everything so far ran on CPU. GPU-specific regressions, GPU
-tolerance calibration (dtype and attention backend), and GPU baselines
-will run on Hugging Face GPU CI runners once access is set up; until then
-GPU results are reported as missing, not as passing.
-
-Remaining for this step: GPU-specific cases, bugs found by nightly/slow
-tests, a larger benign set, and a real regression on a fixture that
-fails the input-sensitivity gate (Whisper) to test the overfit fallback.
-The case manifest is [cases.json](../experiments/cases.json).
-
-**Decision:** identify the paths slim CI actually covers. Keep GPU-only,
-full-scale, or otherwise missed cases in their appropriate existing jobs.
-Use overfitting where it adds detection or demonstrably improves diagnosis.
+**Decision:** identify the paths slim CI actually covers. Keep GPU-only, full-scale, or otherwise missed cases in their existing jobs. Use overfitting where it adds detection or demonstrably improves diagnosis.
 
 ## 2. Measure stability and total cost
 
-- [x] Run the frozen fixtures against documented benign changes and
-  supported dependency upgrades (CPU, 2026-10-06): 10 benign Transformers
-  changes, and torch 2.12.1/2.13.0/2.14.1, tokenizers 0.23.2, numpy 2.2.6,
-  and Pillow 12.3.0 one at a time, under eager and SDPA. No flags in 770
-  checks; real checkpoints were checked alongside. See
-  [Evidence](evidence.md#stability-and-cost-on-cpu).
-- [ ] Repeat on the actual CI CPU platform, then one supported GPU with
-  its relevant dtype and attention backend. Declare unsupported variants
-  explicitly. Calibrate tolerances on clean runs, then freeze them before
-  evaluating faults; retain hardware-specific baselines where needed.
-- [ ] Measure both cold and warm execution: environment setup, downloads,
-  processor/model loading, inference, training checks, comparison, and
-  reporting. Include fixture generation/export time and artifact size.
-  Done locally for process start, loading, inference, training probe,
-  comparison, memory, and artifact size ([cost.py](../experiments/cost.py));
-  environment setup, downloads, and a purged OS file cache still need CI.
-- [ ] Compare the same coverage against current CI using wall time,
-  CPU/GPU time, and transfer/storage volume. So far only transfer volume:
-  the current slow tests for these eight families load ~144 GB of
-  weights. Track fixture creation,
-  repair, expectation review, and failure-triage time separately.
+- [x] Run the frozen fixtures against benign Transformers changes and dependency upgrades (torch 2.12.1/2.13.0/2.14.1, tokenizers 0.23.2, numpy 2.2.6, Pillow 12.3.0; eager and SDPA): no flags in 770 checks ([stability.json](../experiments/results/stability.json)).
+- [ ] Repeat on the actual CI CPU platform, then one supported GPU with its dtype and attention backend. Calibrate tolerances on clean runs and freeze them; keep hardware-specific baselines where needed. Real-checkpoint drift already reaches 8.4e-5 against a 1e-4 tolerance on CPU.
+- [ ] Measure cold and warm execution including environment setup, Hub downloads, and a purged OS file cache. Process start, loading, inference, training probe, comparison, memory, and artifact size are measured locally ([cost.json](../experiments/results/cost.json)).
+- [ ] Compare against current CI in wall time, CPU/GPU time, and transfer. So far only transfer: the slow tests for these eight families load about 144 GB of weights. Track fixture creation, repair, review, and triage time separately.
 
-**Deliverable:** cost and stability report with sample counts, failures,
-baseline churn, and manual interventions. Agree on acceptable job runtime
-and noise with maintainers before enabling a required check. Local warm
-latency and zero failures in a small sample are insufficient rollout gates.
+**Deliverable:** cost and stability report with sample counts, failures, baseline churn, and manual interventions. Agree on acceptable runtime and noise with maintainers before enabling a required check.
 
 ## 3. Build the smallest usable contract runner
 
-Start from the six existing experiment families. Add one coupled-config or
-MoE model and one GPU-heavy or costly-to-maintain case; roles may overlap
-within the proposed 3–5-model pilot. Assign maintainers before onboarding.
+Start from the six experiment families. Add one coupled-config or MoE model and one GPU-heavy or costly-to-maintain case; roles may overlap within the 3–5-model pilot. Assign maintainers before onboarding.
 
-- [ ] Define schemas for the manifest, fleet lock, required output fields,
-  expected shapes, baseline identity, and result record.
-- [ ] Implement one-command execution with pinned model, processor,
-  artifact, contract, fixture, baseline, and dependency inputs. Reject
-  missing/non-finite outputs and unsupported variants explicitly.
-- [ ] Add the Python adapter, then one Transformers.js case with a pinned
-  ONNX artifact and conversion provenance. Keep training checks optional
-  for inference-only frameworks.
-- [ ] Copy processor, tokenizer, and preprocessing files from the real
-  model unchanged; shrink only weights and model config.
-- [ ] Record baselines under the default attention implementation and
-  dtype; keep eager as an explicit variant.
-- [ ] Implement the input-sensitivity gate at fixture build time: swap
-  or perturb each input, require recorded logits to move well beyond
-  tolerance, and fall back to overfitting (recording steps and
-  convergence) when they do not. Report non-convergence as a build
-  failure, not a skipped check.
-- [ ] Implement baseline creation and PR review without automatically
-  accepting new outputs. Separate model-update discovery from the pinned
-  inputs used by required framework checks.
-- [ ] Define how changed framework files select relevant contracts; use
-  a conservative fallback for shared code changes. Apply the proposal's
-  execution isolation and private-artifact access rules.
-- [ ] Reproduce the published usage entry point, including pipeline
-  dispatch where the snippet uses it. Exercise private build → upstream
-  PR → main once; do not label private-build success as public support.
+- [ ] Define schemas for the manifest, fleet lock, required output fields, expected shapes, baseline identity, and result record.
+- [ ] Implement one-command execution with pinned model, processor, artifact, contract, fixture, baseline, and dependency inputs; run many contracts per process. Reject missing/non-finite outputs and unsupported variants explicitly.
+- [ ] Add the Python adapter, then one Transformers.js case with a pinned ONNX artifact and conversion provenance. Keep training checks optional for inference-only frameworks.
+- [ ] Build fixtures by copying processor, tokenizer, and preprocessing files unchanged; shrink only weights and model config. Mark published fixtures as test artifacts and keep them out of Hub search.
+- [ ] Record baselines under the default attention implementation and dtype, chosen at load time; keep eager as an explicit variant.
+- [ ] Implement the input-sensitivity gate at fixture build time, falling back to overfitting; report non-convergence as a build failure.
+- [ ] Implement baseline creation and PR review without automatically accepting new outputs. Separate model-update discovery from the pinned inputs used by required framework checks.
+- [ ] Define how changed framework files select relevant contracts, with a conservative fallback for shared code. Apply execution isolation and private-artifact rules.
+- [ ] Reproduce the published usage entry point, including pipeline dispatch where the snippet uses it. Exercise private build → upstream PR → main once.
 
-**Deliverable:** reviewed local commands and CI artifacts for each pilot
-contract, including a failure that maintainers can reproduce from its
-recorded inputs. An unknown baseline must remain unvalidated.
+**Deliverable:** reviewed local commands and CI artifacts for each pilot contract, including a failure maintainers can reproduce from its recorded inputs.
 
 ## 4. Run alongside existing CI, then decide
 
-- [ ] Begin with non-blocking PR runs, pinned real-checkpoint runs after
-  merges/nightly, and a separate model-update job. Send failures through
-  existing maintainer reports. Keep slim and real results distinct.
-- [ ] Observe several weeks of framework and model changes. Record
-  regressions caught before nightly, misses, false alarms, time to fix,
-  baseline updates, fixture repairs, and maintainer effort. Include at
-  least one dependency update; elapsed time alone is not evidence.
-- [ ] Promote only stable contracts to required PR checks. Keep a named
-  owner and an explicit, reported process for temporarily disabling a
-  broken fixture; avoid silent skips.
-- [ ] Map every proposed test migration to retained inputs, assertions,
-  variants, hardware, and run frequency. Preserve framework-behavior
-  tests and any coverage the contract does not reproduce. Attach the
-  scanner, source commit, and classifications behind migration estimates.
+- [ ] Begin with non-blocking PR runs, pinned real-checkpoint runs after merges and nightly, and a separate model-update job. Keep slim and real results distinct.
+- [ ] Observe several weeks of framework and model changes, including at least one dependency update. Record regressions caught before nightly, misses, false alarms, time to fix, baseline updates, fixture repairs, and maintainer effort.
+- [ ] Promote only stable contracts to required PR checks, with a named owner and a reported process for temporarily disabling a broken fixture.
+- [ ] Map every proposed test migration to retained inputs, assertions, variants, hardware, and run frequency.
 
-**Decision:** expand only with evidence of useful real-bug signal,
-acceptable CI cost/noise, and manageable upkeep. Otherwise narrow the
-supported fleet, improve assertions, or retain the current tests. Compare
-random and overfit policies on those same outcomes.
+**Decision:** expand only with evidence of useful real-bug signal, acceptable CI cost and noise, and manageable upkeep.
 
 ## 5. Surface proven results on the Hub
 
-After CI is independently useful, scope the Tests-tab prototype,
-companion-repository links, contract/result metadata and APIs, and
-validated “Use this model”/Colab snippets. Expose model/framework/build
-revisions, real-versus-slim coverage, and unvalidated or unavailable
-results. Evaluate whether users and agents can discover and run the
-tested example with less adaptation. Co-owned hosting and remote-code
-models remain later extensions.
-
-## Immediate next action
-
-Build the historical-case manifest and reproduce the first text and
-processor-heavy regressions on their real checkpoints. That provides
-the next meaningful evidence before more runner or Hub implementation.
+After CI is independently useful, scope the Tests-tab prototype, companion-repository links, contract/result metadata and APIs, and validated "Use this model"/Colab snippets. Expose model/framework/build revisions, real-versus-slim coverage, and unvalidated results. Re-run the [agent walkthrough](agent-walkthrough.md) prompt to check whether agents find and run the tested example with less adaptation.
