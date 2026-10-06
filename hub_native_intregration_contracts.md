@@ -86,6 +86,7 @@ broke.
 | Hosting under `hf-internal-testing` | ✓ | |
 | Tests tab and compatibility status on the model page | | ✓ |
 | Agent lookup by model ID | | ✓ |
+| "Use this model" snippet and Colab from the integration module | | ✓ |
 | Opt-in or co-owned hosting by model creators | | ✓ |
 | Remote-code models | | ✓ (later) |
 
@@ -702,6 +703,16 @@ Hub → model card → standardized metadata → contract validated with Transfo
 The agent gets integration modules that are known to run, for each
 framework, with the framework versions they last passed on.
 
+The Hub's **"Use this model"** button is the closest existing feature:
+it shows minimal usage code per library and can open it in Colab. That
+snippet is generated from the model's library and task tags, is not
+validated against any framework version, and loads the full checkpoint.
+The integration module could back that button instead, so the snippet
+and its Colab are the validated code. The slim fixture adds a cheap
+first step: an agent or a user can run the same code against the slim
+model to check the code path in seconds, before downloading a large
+checkpoint.
+
 ## Hub features needed
 
 The CI track runs on current Hub features: companion repositories under
@@ -717,6 +728,8 @@ The Hub track needs new Hub features:
 -   **A contract registry and a validation service** that schedule runs
     and store attestations and recorded expectations;
 -   **Scoped write access** for the co-owned hosting option;
+-   **"Use this model" backed by the integration module**, so the
+    snippet and its Colab come from validated code;
 -   **Standardized model metadata** pointing to the contract and its
     latest results, exposed on the model card and through the API, so
     agents and tooling can find them by model ID.
