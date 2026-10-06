@@ -36,6 +36,26 @@ pilot.
   random misses isolated to Whisper input/label faults.
 - [x] Add the input-sensitivity gate and "overfit on failure" rule to the
   proposal's fixture plan and decision.
+- [x] First historical replay (2026-10-06): 7 regressions fixed since May
+  2026 and 10 benign changes, frozen on `4d536e1f`, checked on bad and
+  fixed builds with [freeze/check](model_integration_contracts_replay.py),
+  the [per-case driver](model_integration_contracts_replay_case.py), and
+  [usage repros](model_integration_contracts_usage_repros.py). Results are
+  in the proposal's "Historical regression replay" section.
+
+## What the first replay changed
+
+- Generic forward/generate fixtures caught none of the in-family
+  regressions; the same slim fixtures called through the affected public
+  entry point caught every bug that did not depend on processor packaging.
+- Fixture builders must copy processor/tokenizer files byte for byte:
+  re-saving hid two tokenizer-loading regressions (#47848, #47988).
+- Contracts must run the default runtime configuration: the UMT5 causal
+  bug (#49135) only shows under SDPA.
+- Builds before 2026-08-17 need `tokenizers` 0.22.x (and older `kernels`
+  before mid-June); fleet locks must pin the dependency environment.
+- In-family regressions are rare in a five-month window; most relevant
+  bugs sit in shared processor, tokenizer, and attention code.
 
 ## 1. Reproduce historical regressions
 
@@ -63,6 +83,11 @@ pilot.
 **Deliverable:** a case manifest and a real-versus-slim result matrix.
 Count distinct regressions separately from repeated seeds. Do not drop
 unreproducible cases from the report or count them as successful checks.
+
+Remaining for this step: GPU-specific cases, bugs found by nightly/slow
+tests, a larger benign set, and the four candidates not yet replayed
+(#47628 config helpers, #47440 MMS `set_target_lang`, #46406 CLIP
+conversion mapping, #48785 BERT-variant CLM masks).
 
 **Decision:** identify the paths slim CI actually covers. Keep GPU-only,
 full-scale, or otherwise missed cases in their appropriate existing jobs.
@@ -104,6 +129,10 @@ within the proposed 3–5-model pilot. Assign maintainers before onboarding.
 - [ ] Add the Python adapter, then one Transformers.js case with a pinned
   ONNX artifact and conversion provenance. Keep training checks optional
   for inference-only frameworks.
+- [ ] Copy processor, tokenizer, and preprocessing files from the real
+  model unchanged; shrink only weights and model config.
+- [ ] Record baselines under the default attention implementation and
+  dtype; keep eager as an explicit variant.
 - [ ] Implement the input-sensitivity gate at fixture build time: swap
   or perturb each input, require recorded logits to move well beyond
   tolerance, and fall back to overfitting (recording steps and

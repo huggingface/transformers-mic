@@ -29,6 +29,8 @@ os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
 import torch
 import transformers
 from huggingface_hub import snapshot_download
+from huggingface_hub.constants import HF_HUB_CACHE
+from huggingface_hub.errors import IncompleteSnapshotError
 from PIL import Image
 from transformers import (
     AutoConfig,
@@ -38,6 +40,8 @@ from transformers import (
     CLIPModel,
     CLIPProcessor,
     T5ForConditionalGeneration,
+    UMT5Config,
+    UMT5ForConditionalGeneration,
     Wav2Vec2ForCTC,
     Wav2Vec2Processor,
     WhisperForConditionalGeneration,
@@ -71,10 +75,12 @@ ATOL = RTOL = 1e-4
 
 def snapshot(source):
     repo, revision, subfolder = source
-    return (
-        Path(snapshot_download(repo, revision=revision, local_files_only=True))
-        / subfolder
-    )
+    try:
+        path = Path(snapshot_download(repo, revision=revision, local_files_only=True))
+    except IncompleteSnapshotError:
+        # Only the files these tasks need are cached; use them as they are.
+        path = Path(HF_HUB_CACHE) / f"models--{repo.replace('/', '--')}" / "snapshots" / revision
+    return path / subfolder
 
 
 def log(event, **values):
@@ -455,6 +461,8 @@ class BertTask:
 
 class T5Task:
     name = "t5"
+    config_cls = AutoConfig
+    model_cls = T5ForConditionalGeneration
     faults = (
         "wrong_country_token",
         "ignore_padding",
@@ -490,18 +498,18 @@ class T5Task:
         self.germany = self.processor.encode("Germany", add_special_tokens=False)[-1]
 
     def make_model(self):
-        config = no_dropout(AutoConfig.from_pretrained(self.path, local_files_only=True))
+        config = no_dropout(self.config_cls.from_pretrained(self.path, local_files_only=True))
         config.d_model = 64
         config.d_ff = 128
         config.d_kv = 16
         config.num_layers = config.num_decoder_layers = 2
         config.num_heads = 4
-        return T5ForConditionalGeneration._from_config(
+        return self.model_cls._from_config(
             config, attn_implementation="eager", dtype=torch.float32
         )
 
     def load_model(self, path):
-        return T5ForConditionalGeneration.from_pretrained(
+        return self.model_cls.from_pretrained(
             path, local_files_only=True, attn_implementation="eager", dtype=torch.float32
         )
 
@@ -757,8 +765,21 @@ class Wav2Vec2Task:
             )
 
 
+class UMT5Task(T5Task):
+    name = "umt5"
+    config_cls = UMT5Config  # the Hub config predates model_type
+    model_cls = UMT5ForConditionalGeneration
+
+
+class OlmoTask(TextTask):
+    name = "olmo"
+
+
 TASKS = {
-    task.name: task for task in (TextTask, ClipTask, BertTask, T5Task, WhisperTask, Wav2Vec2Task)
+    task.name: task
+    for task in (
+        TextTask, ClipTask, BertTask, T5Task, WhisperTask, Wav2Vec2Task, UMT5Task, OlmoTask
+    )
 }
 # Hub sources for the added families; only configs and processors are used.
 SOURCES.update(
@@ -770,6 +791,9 @@ SOURCES.update(
         "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
         "",
     ),
+    # Sibling families used to replay historical regressions.
+    umt5=("google/umt5-small", "8c63c2b77efbf8e41206a2c8d994846cc9392360", ""),
+    olmo=("allenai/OLMo-1B-hf", "aee7752d9c08ee4775e9b0091426d8410e8f6a89", ""),
 )
 
 

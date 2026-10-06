@@ -139,6 +139,10 @@ The fixture still needs to preserve processor-coupled dimensions and model-speci
 
 Not every model will be shrinkable with a generic recipe. A failed fixture build should be visible as missing coverage, not silently skipped.
 
+Only the weights and model config should be shrunk. Tokenizer, processor, and preprocessing files should be copied from the real model byte for byte, not loaded and re-saved. Re-saving with the fixture builder's framework version silently normalizes legacy configs, and in the historical replay below that hid two real tokenizer-loading regressions from the slim fixture while the real checkpoint still showed them.
+
+Copying costs almost nothing. Across eight families, the original processor files were within about ±1.5 MB of the re-saved ones (UMT5: +4.5 MB on an 87 MB fixture), and loaded as fast or faster locally. The real cost is that fixtures keep the full vocabulary, so processor files are 20–50% of each fixture; that is needed to keep the real tokenizer and is independent of copying.
+
 ## What we should check
 
 A successful forward pass is too weak.
@@ -155,6 +159,10 @@ Training checks are only relevant to frameworks and models that support training
 
 The exact tolerances need to be calibrated per fixture and environment. Exact token equality should only be used where it is actually stable.
 
+The contract should run the configuration users get by default. If users get SDPA attention, the contract records and checks SDPA; eager can be an extra variant, not a replacement chosen for determinism. In the replay below, a UMT5 regression that made decoder self-attention non-causal under SDPA was invisible to eager-pinned checks on both the slim fixtures and the real checkpoint.
+
+Inputs need to be deliberate. A contract that only decodes "Paris" and "Berlin" cannot see a decoding regression that only affects punctuation spacing.
+
 ## Public API coverage
 
 The integration should exercise the public entry point we expect users to use.
@@ -166,6 +174,8 @@ For example, the recent `image-to-text` issue was visible through generated Hub 
 That does not mean all pipeline behavior moves out of Transformers. Generic framework behavior should remain framework tests.
 
 The contract is for the model-specific end-to-end usage path.
+
+The historical replay below makes this concrete: generic forward/generate fixtures missed every in-family regression we replayed, while the same small fixtures called through the affected public entry point (`processor(..., text_kwargs=...)`, `batch_decode(..., decode_with_timestamps=True)`, batch `decode`) caught them.
 
 ## Revisions and baselines
 
@@ -333,6 +343,42 @@ So the current default should be:
 
 This experiment shows local sensitivity. It does not establish historical bug coverage or maintenance savings.
 
+## Historical regression replay
+
+To test real bugs rather than synthetic faults, I replayed documented Transformers regressions fixed since May 2026 ([freeze/check](model_integration_contracts_replay.py), [per-case driver](model_integration_contracts_replay_case.py), [usage repros](model_integration_contracts_usage_repros.py)).
+
+Method:
+
+1. Freeze random and overfit slim fixtures, plus real-checkpoint baselines, on a known-good build (`main` at `4d536e1f`).
+2. Extract the bad build (the fix commit's parent) and the fixed build.
+3. Run the frozen checks on both builds without regenerating anything. A case counts as caught when the bad build is flagged and the fixed build is not.
+4. Separately, run the affected public call on the real checkpoint and on the slim fixture under both builds.
+
+Builds before 2026-08-17 need `tokenizers` 0.22.x (and builds before mid-June an older `kernels`), so those ran with a dependency overlay. Old builds cannot always run in today's environment; the fleet lock needs to pin the dependency environment, not just model revisions.
+
+| Regression (fix PR) | Real checkpoint | Generic slim checks | Slim fixture, affected public call |
+| --- | --- | --- | --- |
+| CLIP processor drops `return_tensors` when `text_kwargs` is passed (#46195) | crash | missed | crash, caught |
+| Whisper batch `decode_with_timestamps` (#47997) | crash | missed | crash, caught |
+| T5 batch `decode` ignores `clean_up_tokenization_spaces` (#47793) | caught | missed | caught only with punctuation in the inputs |
+| `additional_special_tokens` lost with legacy tokenizer config (#47848) | caught | missed | missed: re-saved tokenizer hides it |
+| OLMo tokenizer appends a stray EOS (#47988) | caught | missed: re-saved tokenizer hides it | — |
+| UMT5 decoder self-attention not causal under SDPA (#49135) | caught under SDPA only | missed (eager) | caught under SDPA: future-token leak 2.9–15 vs 2e-6 |
+| T5 tied-weights order (#48238) | not reproduced with `t5-small` | clean | — |
+
+The pattern is consistent:
+
+- **Generic checks are not enough.** A forward pass plus greedy generate on frozen inputs caught none of these regressions. They live in processors, tokenizers, decoding helpers, or a non-default attention path.
+- **The usage path catches them, and the small fixture is enough for it.** Whenever the contract made the affected call, the slim fixture caught the bug just as the real checkpoint did. None of these needed real weights.
+- **Fixture packaging matters.** Two tokenizer-loading regressions were visible on the real checkpoint but not on the slim fixture, because the fixture builder had re-saved the tokenizer with a fixed build.
+- **Runtime defaults matter.** The UMT5 bug only exists under SDPA, the default.
+
+To measure false alarms, I replayed 10 benign changes from the same window that touched the same code paths (RoPE, greedy decoding, image processing, masking, attention refactors, auto-generated inits). Across 20 builds and 42 frozen checks per build, there were **no false alarms** with eager attention. Rechecking all 20 builds under SDPA, the default, also produced no false alarms, including the change that moved Wav2Vec2 to SDPA dispatch and an attention refactor for continuous batching.
+
+The candidate search also showed that documented regressions inside a given model family are relatively rare in a five-month window; most bugs that matter to these models are in shared processor, tokenizer, and attention code. That supports organizing contracts around public usage paths rather than per-model forward checks.
+
+This is a small sample: seven regressions, ten benign changes, CPU only, and no GPU-specific case.
+
 ## Pilot
 
 Before designing Hub product around this, run a small CI pilot.
@@ -370,7 +416,7 @@ We should replay documented historical regressions and verify each one against:
 2. the small fixture;
 3. the proposed checks.
 
-A synthetic fault suite is not enough.
+A synthetic fault suite is not enough. The first replay (above) is a start; the pilot should extend it with GPU-specific regressions and with bugs found by the existing nightly and slow tests.
 
 ### Cost
 
@@ -450,7 +496,8 @@ Remote-code models should probably come later rather than complicating the first
 Start with:
 
 - HF-owned contracts;
-- frozen small fixtures, checked for input sensitivity;
+- frozen small fixtures, checked for input sensitivity, with the real processor files copied unchanged;
+- contracts that call the public entry points users call, with the default runtime configuration;
 - recorded logits and other useful numerical outputs;
 - targeted training checks where training is supported;
 - pinned baselines;
