@@ -66,21 +66,25 @@ td{padding:3px 4px;border-bottom:1px solid #f3f4f6}
 <div class="row" style="height:436px">
   <!-- Repos -->
   <div class="col blue" style="flex:1.12">
-    <h2><span class="ic" style="background:#1e3a8a">H</span>Model repositories on the Hub</h2>
-    <div class="sub">Two repositories per model, same convention</div>
-    <div class="card repo">
+    <h2><span class="ic" style="background:#1e3a8a">H</span>Repositories on the Hub</h2>
+    <div class="sub">Real model untouched; contract + slim owned by Hugging Face</div>
+    <div class="card repo" style="padding:7px 10px">
       <div class="tree"><div class="t">org/model <span class="muted" style="font-weight:400">(real checkpoint)</span></div>
-        <div class="f">config.json<br>weights/<br>processor/<br><span class="hl">integration.json</span><br>integrations/</div>
-        <div class="f f2"><span class="hlg">transformers/integration.py</span><br><span class="hly">transformers.js/integration.js</span></div>
-      </div>
-      <div class="call"><b>Integration modules</b><ul><li>One per framework</li><li>Usage example for humans and agents</li><li>Main block: smoke assert + prints outputs as JSON</li><li>Exact values are recorded, not hand-written</li></ul></div>
+        <div class="f">config.json · weights/ · processor/</div></div>
+      <div class="call" style="flex:.8;background:#f3f4f6"><b>Model creator</b><br>Unchanged. Can opt in to host the contract here.</div>
     </div>
-    <div class="card repo" style="margin-bottom:0">
-      <div class="tree"><div class="t">org/model-slim <span class="muted" style="font-weight:400">(slim fixture)</span></div>
-        <div class="f">config.json<br>weights/ <span class="muted">(slim, overfit)</span><br>processor/<br><span class="hl">integration.json</span><br>integrations/</div>
+    <div class="card repo" style="padding:7px 10px">
+      <div class="tree"><div class="t">hf-internal-testing/<br>model-integration</div>
+        <div class="f"><span class="hl">integration.json</span> → org/model<br>integrations/</div>
         <div class="f f2"><span class="hlg">transformers/integration.py</span><br><span class="hly">transformers.js/integration.js</span></div>
       </div>
-      <div class="call"><b>Reduced model</b>, overfit on a tiny deterministic example<ul><li>Same layout and convention</li><li>Exact-output + training assertions</li><li>Used for fast PR checks</li></ul></div>
+      <div class="call" style="flex:.8"><b>Hugging Face</b><ul><li>Usage example, one per framework</li><li>Smoke assert + JSON outputs</li><li>Written from a template when adding the model</li></ul></div>
+    </div>
+    <div class="card repo" style="padding:7px 10px;margin-bottom:0">
+      <div class="tree"><div class="t">hf-internal-testing/<br>model-slim</div>
+        <div class="f">weights/ <span class="muted">(slim, overfit)</span><br><span class="hl">integration.json</span> → org/model<br>integrations/…</div>
+      </div>
+      <div class="call" style="flex:.8"><b>Hugging Face</b><ul><li>Generated automatically</li><li>Exact-output + training asserts</li><li>Fast PR checks</li></ul></div>
     </div>
   </div>
   <!-- Service -->
@@ -93,7 +97,7 @@ td{padding:3px 4px;border-bottom:1px solid #f3f4f6}
     <div class="arrow">▼</div>
     <div class="step"><div class="sq">⚙</div><div><b>Set up environment</b><span>Install framework build: wheel, npm tarball,<br>PR / main / release / private fork. Provision hardware</span></div></div>
     <div class="arrow">▼</div>
-    <div class="step"><div class="sq">▶</div><div><b>Execute integration module, per variant</b><span><span class="mono">python integration.py</span> / <span class="mono">node integration.js</span><br><span class="mono">MODEL_ID</span> pinned, <span class="mono">MODEL_KWARGS</span> = sdpa, flash, bf16...</span></div></div>
+    <div class="step"><div class="sq">▶</div><div><b>Execute integration module, per variant</b><span><span class="mono">python integration.py</span> / <span class="mono">node integration.js</span><br><span class="mono">MODEL_ID</span> @ commit, <span class="mono">MODEL_KWARGS</span> per variant</span></div></div>
     <div class="arrow">▼</div>
     <div class="step" style="margin-bottom:0"><div class="sq">▮</div><div><b>Compare and attest</b><span>Diff outputs vs recorded expectations (per hardware)<br>First run records; shifts are reviewed and re-recorded</span></div></div>
   </div>
@@ -101,7 +105,7 @@ td{padding:3px 4px;border-bottom:1px solid #f3f4f6}
   <div class="col green" style="flex:.9">
     <h2><span class="ic" style="background:#16a34a">✓</span>Validation targets</h2>
     <div class="sub">Same convention, different weights</div>
-    <div class="card"><b style="font-size:13px">Slim fixture (PR)</b><div class="mono muted">org/model-slim</div>
+    <div class="card"><b style="font-size:13px">Slim fixture (PR)</b><div class="mono muted">hf-internal-testing/model-slim</div>
       <ul class="chk"><li><div>Training check<small>forward, backward, optimizer (Transformers)</small></div></li>
       <li><div>Inference check<small>generation or task-specific, every framework</small></div></li>
       <li><div>Deterministic assertions<small>e.g. exact output</small></div></li></ul></div>
@@ -143,7 +147,7 @@ td{padding:3px 4px;border-bottom:1px solid #f3f4f6}
         <div class="fw"><b>Transformers</b> v4.47.1 <span class="ok">✓</span><br><span class="muted">2 hours ago</span></div>
         <div class="fw"><b>Transformers.js</b> v3.7.0 <span class="ok">✓</span><br><span class="muted">5 hours ago</span></div></div>
       <div class="row" style="margin-top:8px;gap:10px">
-        <div class="panel"><div class="hd"><div><b style="font-size:12.5px">Slim fixture (PR)</b><br><span class="muted" style="font-size:11px">Training + exact-output checks on a reduced model</span></div><span class="link">Qwen/Qwen3.8-27B-slim ↗</span></div>
+        <div class="panel"><div class="hd"><div><b style="font-size:12.5px">Slim fixture (PR)</b><br><span class="muted" style="font-size:11px">Training + exact-output checks on a reduced model</span></div><span class="link">hf-internal-testing/Qwen3.8-27B-slim ↗</span></div>
           <div class="res"><span class="h">Check</span><span class="h">Transformers</span><span class="h">Transformers.js</span>
           <span>Training step</span><span class="ok">passed</span><span class="muted">n/a</span>
           <span>Generation</span><span class="ok">passed</span><span class="ok">passed</span>
@@ -156,7 +160,7 @@ td{padding:3px 4px;border-bottom:1px solid #f3f4f6}
       </div>
       <div style="margin-top:7px"><b style="font-size:12.5px">Recent test runs</b>
       <table><tr><th>Date</th><th>Trigger</th><th>Target model</th><th>Framework</th><th>Variant</th><th>Build</th><th>Status</th><th>Duration</th></tr>
-      <tr><td>2 hours ago</td><td><span class="tr t-pr">PR</span></td><td>Qwen/Qwen3.8-27B-slim</td><td>Transformers</td><td>default</td><td>PR #41203</td><td class="ok">✓ Passed</td><td>2m 31s</td></tr>
+      <tr><td>2 hours ago</td><td><span class="tr t-pr">PR</span></td><td>hf-internal-testing/Qwen3.8-27B-slim</td><td>Transformers</td><td>default</td><td>PR #41203</td><td class="ok">✓ Passed</td><td>2m 31s</td></tr>
       <tr><td>5 hours ago</td><td><span class="tr t-main">Main</span></td><td>Qwen/Qwen3.8-27B</td><td>Transformers.js</td><td>default</td><td>v3.7.0</td><td class="ok">✓ Passed</td><td>4m 02s</td></tr>
       <tr><td>1 day ago</td><td><span class="tr t-n">Nightly</span></td><td>Qwen/Qwen3.8-27B</td><td>Transformers</td><td>flash_attention_2</td><td>main@8c1f2e</td><td class="ok">✓ Passed</td><td>3m 12s</td></tr>
       <tr><td>1 week ago</td><td><span class="tr t-r">Release</span></td><td>Qwen/Qwen3.8-27B</td><td>Transformers</td><td>sdpa</td><td>v4.47.0</td><td class="ok">✓ Passed</td><td>3m 05s</td></tr>

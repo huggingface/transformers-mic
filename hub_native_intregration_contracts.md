@@ -7,15 +7,16 @@ tests in the library, while the checkpoints themselves live on the Hub.
 This creates maintenance overhead, and very large models are too
 expensive to test on every PR.
 
-The proposal is to move **model-specific integration knowledge next to
-the model**, while keeping **orchestration centralized**.
+The proposal is to move **model-specific integration knowledge out of
+the Transformers test suite and onto the Hub, next to the model**, while
+keeping **orchestration centralized**.
 
 The contract is **framework-neutral**. Transformers is the first
 framework, but the same convention lets a model declare integrations
 for Transformers.js, or any other library that loads Hub models, side by
 side.
 
-Each participating model exposes:
+Each participating model gets:
 
 1.  **A canonical executable integration module per framework**: clean
     code showing how to load and use the model with that framework
@@ -31,6 +32,13 @@ Each participating model exposes:
 3.  **Machine-readable metadata**: which frameworks are supported, where
     each integration module lives, where the slim fixture lives, and
     what hardware is required.
+
+By default these live in **companion repositories owned by Hugging
+Face**, not in the model creator's repository. The real model repository
+is left untouched, and Hugging Face keeps full control over the contract
+and the slim weights. Model creators who want to can opt in and host the
+contract in their own repository. See
+[Ownership and hosting](#ownership-and-hosting).
 
 The slim fixture is itself a Hub model repository and follows the same
 convention: its own integration modules and manifest. Each
@@ -67,37 +75,87 @@ Today
 Transformers repo owns test + CI runs it
 
 Proposed
-Model repo owns contract + Hub/CI runs it
+Hub companion repo owns contract + Hub/CI runs it
 ```
 
-Because the contract lives with the model rather than inside one
-library, other frameworks get the same benefit: Transformers.js can
+Because the contract lives on the Hub next to the model rather than
+inside one library, other frameworks get the same benefit: Transformers.js can
 validate against the same model fleet with no extra coordination.
+
+## Ownership and hosting
+
+Feedback from Transformers maintainers shaped the default:
+
+-   **No extra burden on model contributors.** Many contributors would
+    not maintain slim checkpoints well, and asking every one of them to
+    is not realistic. Slim fixture generation should be automated on
+    the Hugging Face side.
+-   **Hugging Face needs control after release.** Maintainers must be
+    able to change configs or weights, regenerate fixtures, or deprecate
+    them without asking the model owner.
+-   **Model repositories belong to their creators.** Companies publish
+    on the Hub on the understanding that they own their repositories.
+    Requiring write access, or files inside their repositories, would
+    conflict with that.
+-   **Incentives are uneven.** Large labs doing coordinated releases
+    care about first-class Transformers support. Many other contributors
+    do not.
+
+So the default is:
+
+| Piece | Hosted in | Owned by |
+| --- | --- | --- |
+| Real model (config, weights, processor) | `org/model` | Model creator (unchanged) |
+| Integration contract (`integration.json`, integration modules) | `hf-internal-testing/model-integration` | Hugging Face |
+| Slim fixture (slim weights, its own integration modules) | `hf-internal-testing/model-slim` | Hugging Face |
+
+The organization name is a placeholder; `hf-internal-testing` already
+hosts test checkpoints today.
+
+What contributors provide stays close to today: when adding a model to
+Transformers, they write the integration module, copied from a template
+for a similar model, much like they write slow integration tests now.
+Hugging Face automation generates the slim fixture and records
+expectations.
+
+**Opt-in for model creators.** A creator who wants first-class support
+can host `integration.json` and `integrations/` in their own repository
+instead. The registry records where each model's contract lives, so
+there is exactly one contract per model.
+
+The Hub links the companion repositories from the model page and shows
+the validation status there, so the contract stays discoverable next to
+the model even when Hugging Face hosts it.
 
 ## Model integration contract
 
-A participating model repository and its slim fixture repository share
-the same layout, with one directory per framework:
+With the default hosting, a model has three repositories. The contract
+and the slim fixture share the same layout, with one directory per
+framework:
 
 ``` text
-org/model                            org/model-slim
-├── config.json                      ├── config.json
-├── weights                          ├── weights (slim, overfit)
-├── processor/tokenizer files        ├── processor/tokenizer files
-├── integration.json                 ├── integration.json
-└── integrations                     └── integrations
-    ├── transformers                     ├── transformers
-    │   └── integration.py               │   └── integration.py
-    └── transformers.js                  └── transformers.js
-        └── integration.js                   └── integration.js
+org/model                     hf-internal-testing/       hf-internal-testing/
+(real model, unchanged)       model-integration          model-slim
+├── config.json               ├── integration.json       ├── config.json
+├── weights                   └── integrations           ├── weights (slim, overfit)
+└── processor files               ├── transformers       ├── processor files
+                                  │   └── integration.py ├── integration.json
+                                  └── transformers.js    └── integrations
+                                      └── integration.js     ├── transformers
+                                                             │   └── integration.py
+                                                             └── transformers.js
+                                                                 └── integration.js
 ```
+
+If the creator opts in, `integration.json` and `integrations/` move into
+`org/model` instead, with the same content.
 
 The integration module is ordinary usage code that can be copied as
 documentation or executed by an agent. Its main block runs the example
 and checks the result, which makes the file its own integration test:
 
 ``` python
-# org/model/integrations/transformers/integration.py
+# model-integration/integrations/transformers/integration.py
 import json
 import os
 
@@ -126,7 +184,7 @@ if __name__ == "__main__":
 The same model used from Transformers.js:
 
 ``` javascript
-// org/model/integrations/transformers.js/integration.js
+// model-integration/integrations/transformers.js/integration.js
 import assert from "node:assert";
 import { pathToFileURL } from "node:url";
 import { pipeline } from "@huggingface/transformers";
@@ -155,7 +213,7 @@ overfit on a tiny example, its module can assert exact outputs and,
 for frameworks that support it, also show and check a training step:
 
 ``` python
-# org/model-slim/integrations/transformers/integration.py
+# model-slim/integrations/transformers/integration.py
 import os
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -174,7 +232,7 @@ def train_step(model_id: str, text: str):
     return model, loss.item()
 
 if __name__ == "__main__":
-    model_id = os.environ.get("MODEL_ID", "org/model-slim")
+    model_id = os.environ.get("MODEL_ID", "hf-internal-testing/model-slim")
     assert run(model_id, PROMPT) == " Paris"
     model, loss = train_step(model_id, PROMPT + " Paris")
     assert loss < 0.1
@@ -182,8 +240,7 @@ if __name__ == "__main__":
 ```
 
 The runner executes the file (`python integration.py`,
-`node integration.js`) with `MODEL_ID` set to the model pinned at an
-immutable revision, and `MODEL_KWARGS` set to the variant being tested
+`node integration.js`) with `MODEL_ID` set to the model, and `MODEL_KWARGS` set to the variant being tested
 (attention implementation, dtype, quantization, ...). Exit code 0 means
 the module's own checks passed. The last line of output is a JSON
 object with the values the runner compares against recorded
@@ -196,12 +253,14 @@ A separate versioned manifest is preferable to overloading
 different responsibilities. The manifest is named `integration.json`,
 not after a single framework, and lists each supported framework.
 
-The real model's manifest points to its slim fixture:
+The contract's manifest names the model it validates and its slim
+fixture:
 
 ``` json
 {
   "schema_version": 1,
-  "slim_fixture": "org/model-slim",
+  "model": "org/model",
+  "slim_fixture": "hf-internal-testing/model-slim",
   "frameworks": {
     "transformers": {
       "runtime": "python",
@@ -261,29 +320,28 @@ tooling can validate it without executing any code.
 Adding a framework means adding a directory and a manifest entry. It
 never requires changes to the other frameworks' modules. Framework
 specific weight formats (for example ONNX weights for Transformers.js)
-live in the model repository as they do today.
+live in the real model repository as they do today.
 
 ## Usage example vs. validation logic
 
 For each framework there is one canonical usage path, but two
-validation targets. Each lives in its own repository with its own
-integration module:
+validation targets, each with its own integration module:
 
 ``` text
-            org/model-slim                     org/model
-        integration modules              integration modules
-            slim fixture                    real checkpoint
-          PR / fast checks             main / nightly / release
-        training + inference                  inference
-      deterministic assertions          appropriate assertions
-                    \                          /
-                     manifest + validation runner
+        model-slim                     model-integration
+    integration modules               integration modules
+      slim fixture                  runs against org/model
+    PR / fast checks              main / nightly / release
+  training + inference                   inference
+deterministic assertions             recorded expectations
+             \                               /
+                manifest + validation runner
 ```
 
 The slim fixture repository has its own generated model card linking
-back to the real model. The **real model repository owns the integration
-contract** and declares its slim fixture; the slim repository carries
-the assertions that only make sense for slim weights.
+back to the real model. The **contract repository** names the real model
+and declares its slim fixture; the slim repository carries the
+assertions that only make sense for slim weights.
 
 ## Slim integration fixtures
 
@@ -321,8 +379,7 @@ published model's actual settings (RoPE scaling, sliding window, MoE
 routing) and keeps nested configs consistent. The cost is shrink rules
 for coupled fields (`layer_types`, `head_dim`, MoE settings); the tester
 config remains a reference for target sizes and a fallback. Some
-architectures will need overrides, or the model creator can provide the
-fixture directly.
+architectures will need overrides, maintained by Hugging Face.
 
 A fixture is valid only if its integration modules pass. A fixture that
 cannot be built blocks registration of the contract rather than being
@@ -334,8 +391,8 @@ A single stage 1 run failed for 11 model classes: nested configs out of
 sync after the top-level `vocab_size` patch (Canary, Granite Speech 5),
 and no processor found for sub-configs or new models (MiniCPM-V 4.7,
 Qwen4Exp, and others). It is one run, but both failure types would go
-away if fixtures were built from the real model repository by the
-model's contributor.
+away if fixtures were built from the real model repository's config and
+processor.
 
 ## Reality check: how Transformers asserts today
 
@@ -475,6 +532,13 @@ A validation result belongs to immutable inputs:
 model revision × framework × framework revision/build → result
 ```
 
+Runs follow the real model's `main` branch, as integration tests do
+today: model updates that break tests happen, but rarely. Each run
+resolves `main` to a commit and records it, so a result always refers
+to an exact revision. A model update that changes outputs, such as a
+switch from right to left padding, shows up as a mismatch with the
+recorded expectations and is reviewed like any other change.
+
 The framework side must not be limited to public releases. The
 validator should accept an arbitrary build artifact such as a wheel, an
 npm tarball, a commit, a container, a PR build, or a private fork.
@@ -581,10 +645,14 @@ to prove the contract is not tied to Python.
 
 For each pilot model, add:
 
--   `integrations/transformers/integration.py`;
+-   a contract repository under `hf-internal-testing` with
+    `integrations/transformers/integration.py` and a small
+    `integration.json` manifest;
 -   for one model, `integrations/transformers.js/integration.js`;
--   a small `integration.json` manifest;
--   a canonical slim fixture repository with the same layout.
+-   a slim fixture repository with the same layout.
+
+If one pilot model's creator is willing, host its contract in their own
+repository to test the opt-in path.
 
 Keep the manifest intentionally small: schema version, slim fixture
 link, and for each framework its runtime, entry point, and resource
@@ -669,10 +737,12 @@ Hub-native scheduling/attestation.
 ## Core idea
 
 > **Model compatibility becomes an executable, versioned, discoverable
-> contract owned alongside the model.**
+> contract that lives on the Hub next to the model.**
 
-The model owner provides an integration module for each framework,
-and the slim fixture. Each framework keeps its implementation-level
-tests. The Hub provides discovery, execution, scheduling, and
+Hugging Face hosts the contract and the slim fixture by default, and
+model creators can opt in to host the contract themselves. Contributors
+write the integration module when adding a model, as they write tests
+today. Each framework keeps its implementation-level and
+framework-behavior tests. The Hub provides discovery, execution, scheduling, and
 attestation. Real checkpoints still run nightly; slim fixtures provide
 fast feedback earlier in the development cycle.
