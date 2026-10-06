@@ -13,7 +13,11 @@ A contract contains:
 
 The contract is run from framework CI.
 
-The model repository itself does not need to move or give Hugging Face write access. Contracts, fixtures, and expected results can live in Hugging Face-owned companion repositories.
+The model repository itself does not need to move or give Hugging Face write access. Contracts, fixtures, and expected results can live in Hugging Face-owned companion repositories on the Hub. For example, for `meta-llama/Llama-3.2-1B`:
+
+- `meta-llama/Llama-3.2-1B`: the real model, owned by the creator, unchanged;
+- `hf-internal-testing/Llama-3.2-1B-integration`: the contract and expected results;
+- `hf-internal-testing/Llama-3.2-1B-slim`: the small fixture.
 
 The first goal is CI, not a new Hub feature. If this works, the same contracts can later back compatibility status, tested snippets, Colabs, APIs, or agent usage.
 
@@ -79,12 +83,12 @@ Those operations should not depend on getting write access to a creator reposito
 
 A possible layout is:
 
-| Piece | Default location | Owner |
-| --- | --- | --- |
-| Real model, config, processor | `org/model` | Creator |
-| Contract and expectations | HF-owned integration repo | Hugging Face |
-| Small fixture | HF-owned fixture repo | Hugging Face |
-| Converted artifacts | HF-owned companion repo | Hugging Face |
+| Piece | Default location | Example | Owner |
+| --- | --- | --- | --- |
+| Real model, config, processor | `org/model` | `meta-llama/Llama-3.2-1B` | Creator |
+| Contract and expectations | HF-owned integration repo | `hf-internal-testing/Llama-3.2-1B-integration` | Hugging Face |
+| Small fixture | HF-owned fixture repo | `hf-internal-testing/Llama-3.2-1B-slim` | Hugging Face |
+| Converted artifacts | HF-owned companion repo | `onnx-community/Llama-3.2-1B-ONNX` | Hugging Face |
 
 The exact repository names do not matter yet.
 
