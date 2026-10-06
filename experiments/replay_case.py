@@ -1,11 +1,11 @@
 """Check frozen fixtures on the bad and fixed builds of one historical regression.
 
-    python model_integration_contracts_replay_case.py <fix-sha> [bad-sha]
+    python replay_case.py <fix-sha> [bad-sha]
 
 Defaults the bad build to <fix-sha>^. Builds are extracted with git archive from
 $TRANSFORMERS_REPO (never checked out) into $REPLAY_WORKDIR/builds and put first
 on PYTHONPATH, followed by $OVERLAY (older dependency pins). $FROZEN selects the
-fixtures frozen by model_integration_contracts_replay.py, $ATTN the attention
+fixtures frozen by replay.py, $ATTN the attention
 implementation to check, $CHECKS the cache directory for check results.
 """
 import json, subprocess, sys, os, tempfile
@@ -30,7 +30,7 @@ def check(ref):
     if not out.exists():
         out.parent.mkdir(exist_ok=True)
         env = {**os.environ, "PYTHONPATH": ":".join(filter(None, [str(build(ref) / "src"), os.environ.get("OVERLAY")]))}
-        subprocess.run([PY, HUB / "model_integration_contracts_replay.py", "check", "--fixtures", Path(os.environ.get("FROZEN", S / "frozen")),
+        subprocess.run([PY, HUB / "replay.py", "check", "--fixtures", Path(os.environ.get("FROZEN", S / "frozen")),
                         "--build", ref, "--attn", os.environ.get("ATTN", "eager"), "--output", out], env=env, cwd=HUB, check=True,
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return json.loads(out.read_text())["rows"]

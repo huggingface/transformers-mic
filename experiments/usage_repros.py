@@ -1,9 +1,9 @@
 """Call the public entry point affected by each replayed regression.
 
-    PYTHONPATH=<build>/src python model_integration_contracts_usage_repros.py <case> <real|slim>
+    PYTHONPATH=<build>/src python usage_repros.py <case> <real|slim>
 
 Prints one JSON observation. Compare the output of the bad and fixed builds.
-"slim" uses the seed-17 overfit fixture frozen by model_integration_contracts_replay.py
+"slim" uses the seed-17 overfit fixture frozen by replay.py
 under $REPLAY_WORKDIR/frozen; "real" uses the pinned real checkpoint.
 """
 import json, os, shutil, sys, tempfile, warnings
@@ -17,7 +17,7 @@ import transformers
 from PIL import Image
 
 transformers.logging.set_verbosity_error()
-import model_integration_contracts_experiment as exp
+import experiment as exp
 
 WORKDIR = Path(os.environ.get("REPLAY_WORKDIR", Path(tempfile.gettempdir()) / "model-integration-replay"))
 

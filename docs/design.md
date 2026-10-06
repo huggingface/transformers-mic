@@ -1,6 +1,6 @@
 # Model integration contracts — technical design
 
-Companion to the [proposal](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts-md). This document has the details: contract layout, CI triggers, where code lives, what a contract checks, baselines, the runner, the pilot plan, and open questions. Experimental results are in [Evidence](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_evidence-md); small-fixture details are in [Small fixtures](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_fixtures-md).
+Companion to the [proposal](../README.md). This document has the details: contract layout, CI triggers, where code lives, what a contract checks, baselines, the runner, the pilot plan, and open questions. Experimental results are in [Evidence](evidence.md); small-fixture details are in [Small fixtures](fixtures.md).
 
 ## Proposed model
 
@@ -121,7 +121,7 @@ Training checks are only relevant to frameworks and models that support training
 
 The exact tolerances need to be calibrated per fixture and environment. Exact token equality should only be used where it is actually stable.
 
-The contract should run the configuration users get by default. If users get SDPA attention, the contract records and checks SDPA; eager can be an extra variant, not a replacement chosen for determinism. In the [historical regression replay](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_evidence-md), a UMT5 regression that made decoder self-attention non-causal under SDPA was invisible to eager-pinned checks on both the slim fixtures and the real checkpoint.
+The contract should run the configuration users get by default. If users get SDPA attention, the contract records and checks SDPA; eager can be an extra variant, not a replacement chosen for determinism. In the [historical regression replay](evidence.md), a UMT5 regression that made decoder self-attention non-causal under SDPA was invisible to eager-pinned checks on both the slim fixtures and the real checkpoint.
 
 Inputs need to be deliberate. A contract that only decodes "Paris" and "Berlin" cannot see a decoding regression that only affects punctuation spacing.
 
@@ -137,7 +137,7 @@ That does not mean all pipeline behavior moves out of Transformers. Generic fram
 
 The contract is for the model-specific end-to-end usage path.
 
-The [historical regression replay](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_evidence-md) makes this concrete: generic forward/generate fixtures missed every processor and tokenizer regression we replayed, while the same small fixtures called through the affected public entry point (`processor(..., text_kwargs=...)`, `batch_decode(..., decode_with_timestamps=True)`, batch `decode`) caught them.
+The [historical regression replay](evidence.md) makes this concrete: generic forward/generate fixtures missed every processor and tokenizer regression we replayed, while the same small fixtures called through the affected public entry point (`processor(..., text_kwargs=...)`, `batch_decode(..., decode_with_timestamps=True)`, batch `decode`) caught them.
 
 ## Revisions and baselines
 
@@ -278,7 +278,7 @@ We should replay documented historical regressions and verify each one against:
 2. the small fixture;
 3. the proposed checks.
 
-A synthetic fault suite is not enough. The [first replay](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_evidence-md) is a start; the pilot should extend it with GPU-specific regressions and with bugs found by the existing nightly and slow tests.
+A synthetic fault suite is not enough. The [first replay](evidence.md) is a start; the pilot should extend it with GPU-specific regressions and with bugs found by the existing nightly and slow tests.
 
 ### Cost
 

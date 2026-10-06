@@ -1,17 +1,17 @@
 # Model integration contracts: next steps
 
-Validate the [proposal](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts-md) before expanding
+Validate the [proposal](../README.md) before expanding
 required CI or building Hub features. The decisions are whether slim
 fixtures catch real regressions, reduce total validation cost, and save
 maintainer time—and where overfitting earns its extra complexity.
 
 ## Starting point
 
-The [local experiment](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_experiment-py) compared
+The [local experiment](../experiments/experiment.py) compared
 SmolLM and CLIP with three initialization seeds. Frozen random and overfit
 fixtures both detected 42/42 synthetic fault/seed cases using logits,
 loss, and targeted training checks; 60 controls produced no false alarms.
-[Results](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_results-json) include provenance.
+[Results](../experiments/results/smollm_clip.json) include provenance.
 
 A second run (2026-10-06) added BERT, T5, Whisper, and Wav2Vec2 from
 [PR #49103](https://github.com/huggingface/transformers/pull/49103)'s
@@ -20,7 +20,7 @@ Random fixtures detected 78/84 and overfit 84/84. All six misses are
 Whisper (reversed audio, shuffled labels, every seed): the tiny random
 decoder barely depends on its audio, so logits moved below tolerance.
 Overfit Whisper training took 23–51 s; one Wav2Vec2 seed did not
-converge in 500 steps. [Results](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_results_more-json)
+converge in 500 steps. [Results](../experiments/results/more_families.json)
 use the same script, commit, and tolerances.
 
 This supports starting with frozen random fixtures **gated by input
@@ -38,10 +38,10 @@ pilot.
   proposal's fixture plan and decision.
 - [x] First historical replay (2026-10-06): 7 regressions fixed since May
   2026 and 10 benign changes, frozen on `4d536e1f`, checked on bad and
-  fixed builds with [freeze/check](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_replay-py),
-  the [per-case driver](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_replay_case-py), and
-  [usage repros](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_usage_repros-py). Results are
-  in [Evidence](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_evidence-md).
+  fixed builds with [freeze/check](../experiments/replay.py),
+  the [per-case driver](../experiments/replay_case.py), and
+  [usage repros](../experiments/usage_repros.py). Results are
+  in [Evidence](evidence.md).
 
 ## What the first replay changed
 

@@ -1,10 +1,10 @@
 """Freeze slim fixtures on a known-good build, then check them on another build.
 
     # On the known-good build (fixtures, baselines, and real-checkpoint records):
-    PYTHONPATH=<good>/src python model_integration_contracts_replay.py freeze \\
+    PYTHONPATH=<good>/src python replay.py freeze \\
         --families text t5 --out <dir> --build <sha>
     # On the build under test, with nothing regenerated:
-    PYTHONPATH=<bad>/src python model_integration_contracts_replay.py check \\
+    PYTHONPATH=<bad>/src python replay.py check \\
         --fixtures <dir> --build <sha> --output <result.json>
 
 Reuses the experiment's tasks, assertions, and tolerances. Fixtures are frozen
@@ -21,7 +21,7 @@ from pathlib import Path
 import torch
 import transformers
 
-import model_integration_contracts_experiment as exp
+import experiment as exp
 
 
 # Real checkpoints whose weights are compared alongside the slim fixtures.

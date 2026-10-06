@@ -1,6 +1,6 @@
 # Small fixtures for model integration contracts
 
-Companion to the [model integration contracts proposal](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts-md).
+Companion to the [model integration contracts proposal](../README.md).
 
 PR-level contract checks need a model that is small enough to run on CPU in seconds but still exercises the real integration path. This document describes the project to build those small fixtures, step by step: what already exists in Transformers (stage 1), frozen random fixtures (stage 2), and overfit fixtures as a fallback (stage 3), with the local experiments behind each decision.
 
@@ -61,7 +61,7 @@ Shrinking from the real config preserves more integration-relevant behavior than
 
 ### Evidence: synthetic faults on SmolLM and CLIP
 
-Reduced SmolLM-135M and CLIP ViT-B/32, three seeds, 14 synthetic faults (11 inference, 2 disconnected gradient paths, 1 shuffled-label fault): 42 fault/seed cases per policy. Random and overfit fixtures were compared on identical faults, inputs, and assertions ([script](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_experiment-py), [raw results](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_results-json)).
+Reduced SmolLM-135M and CLIP ViT-B/32, three seeds, 14 synthetic faults (11 inference, 2 disconnected gradient paths, 1 shuffled-label fault): 42 fault/seed cases per policy. Random and overfit fixtures were compared on identical faults, inputs, and assertions ([script](../experiments/experiment.py), [raw results](../experiments/results/smollm_clip.json)).
 
 | Checks | Random | Overfit |
 | --- | ---: | ---: |
@@ -87,7 +87,7 @@ These timings exclude loading, downloads, CI startup, and upkeep; they are not f
 
 ### Evidence: four more families
 
-Same script, checks, and tolerances on BERT (masked LM), T5 (encoder-decoder), Whisper (speech seq2seq), and Wav2Vec2 (CTC), from the #49103 model list: 28 faults, 84 fault/seed cases per policy ([raw results](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_results_more-json)).
+Same script, checks, and tolerances on BERT (masked LM), T5 (encoder-decoder), Whisper (speech seq2seq), and Wav2Vec2 (CTC), from the #49103 model list: 28 faults, 84 fault/seed cases per policy ([raw results](../experiments/results/more_families.json)).
 
 | Checks | Random | Overfit |
 | --- | ---: | ---: |
@@ -101,7 +101,7 @@ BERT, T5, and Wav2Vec2 behaved like SmolLM and CLIP: random fixtures caught ever
 
 ### Evidence: historical regressions
 
-The [historical regression replay](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_evidence-md) froze random and overfit fixtures for six families (plus UMT5 and OLMo) on a known-good build, then checked them on the bad and fixed builds of seven real regressions and ten benign changes. Three results shaped the stage 2 recipe:
+The [historical regression replay](evidence.md) froze random and overfit fixtures for six families (plus UMT5 and OLMo) on a known-good build, then checked them on the bad and fixed builds of seven real regressions and ten benign changes. Three results shaped the stage 2 recipe:
 
 - **Copy processor files; do not re-save them.** Two tokenizer-loading regressions ([#47848](https://github.com/huggingface/transformers/pull/47848), [#47988](https://github.com/huggingface/transformers/pull/47988)) were visible on the real checkpoint but not on the fixtures, because the fixture builder had re-saved the tokenizer with a fixed build. Copying costs almost nothing: across eight families the original files were within about ±1.5 MB of re-saved ones (UMT5: +4.5 MB on an 87 MB fixture) and loaded as fast or faster. Processor files are 20–50% of each fixture because the full vocabulary is kept; that is inherent to using the real tokenizer.
 - **Record baselines under the default runtime configuration.** The UMT5 causal-attention regression ([#49135](https://github.com/huggingface/transformers/pull/49135)) only exists under SDPA. Under SDPA, the frozen checks caught it on all six fixtures (logit delta 1.1–15) and on the real checkpoint; eager-pinned checks missed it everywhere. Choose the attention implementation at load time: on current `main`, `set_attn_implementation()` after loading silently leaves T5-family encoder/decoder stacks on eager.
@@ -136,10 +136,10 @@ Use it only when the random fixture fails the input-sensitivity check. The evide
 Reproduce:
 
 ``` sh
-python model_integration_contracts_experiment.py --real-checkpoints
-python model_integration_contracts_experiment.py \
+python experiments/experiment.py --real-checkpoints
+python experiments/experiment.py \
   --families bert t5 whisper wav2vec2 --max-steps 500 \
-  --output model_integration_contracts_results_more.json
+  --output experiments/results/more_families.json
 ```
 
 ## Open work

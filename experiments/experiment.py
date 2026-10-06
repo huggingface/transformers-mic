@@ -1047,7 +1047,7 @@ def main():
     parser.add_argument("--max-steps", type=int, default=250)
     parser.add_argument("--real-checkpoints", action="store_true")
     parser.add_argument(
-        "--output", type=Path, default=Path("model_integration_contracts_results.json")
+        "--output", type=Path, default=Path(__file__).parent / "results" / "smollm_clip.json"
     )
     parser.add_argument(
         "--artifacts",

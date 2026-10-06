@@ -28,11 +28,11 @@ On the Hub, a contract is one versioned place per model that every framework can
 
 ## What we propose
 
-Run a CI-only pilot on 3–5 models, with existing tests kept running in parallel, and measure whether contracts catch real regressions, what they cost at fleet scale, and how much maintenance they create. Early local experiments are encouraging ([evidence](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_evidence-md)). If the pilot confirms it, expand the fleet and then build the Hub-facing pieces.
+Run a CI-only pilot on 3–5 models, with existing tests kept running in parallel, and measure whether contracts catch real regressions, what they cost at fleet scale, and how much maintenance they create. Early local experiments are encouraging ([evidence](docs/evidence.md)). If the pilot confirms it, expand the fleet and then build the Hub-facing pieces.
 
 ## Documents
 
-- [Evidence](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_evidence-md): what the local experiments and the historical regression replay show.
-- [Technical design](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_design-md): contract layout, CI triggers, where code lives, checks, baselines, runner, pilot plan, open questions.
-- [Small fixtures](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_fixtures-md): the fixture project, from today's tiny models to frozen random and overfit fixtures.
-- [Next steps](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_next_steps-md): the validation plan and what is done.
+- [Evidence](docs/evidence.md): what the local experiments and the historical regression replay show.
+- [Technical design](docs/design.md): contract layout, CI triggers, where code lives, checks, baselines, runner, pilot plan, open questions.
+- [Small fixtures](docs/fixtures.md): the fixture project, from today's tiny models to frozen random and overfit fixtures.
+- [Next steps](docs/next-steps.md): the validation plan and what is done.

@@ -1,6 +1,6 @@
 # Model integration contracts — evidence so far
 
-Companion to the [proposal](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts-md). This document collects what the local experiments and the historical regression replay show. The synthetic-fault experiments behind the fixture design are detailed in [Small fixtures](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_fixtures-md); mechanics are in the [technical design](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_design-md).
+Companion to the [proposal](../README.md). This document collects what the local experiments and the historical regression replay show. The synthetic-fault experiments behind the fixture design are detailed in [Small fixtures](fixtures.md); mechanics are in the [technical design](design.md).
 
 ## Summary
 
@@ -12,7 +12,7 @@ These are small local experiments, not fleet-level evidence: eight model familie
 
 ## Historical regression replay
 
-To test real bugs rather than synthetic faults, I replayed documented Transformers regressions fixed since May 2026 ([freeze/check](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_replay-py), [per-case driver](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_replay_case-py), [usage repros](https://gist.github.com/tarekziade/c3f203edbb8b97e40b86a97c5909a81b#file-model_integration_contracts_usage_repros-py)).
+To test real bugs rather than synthetic faults, I replayed documented Transformers regressions fixed since May 2026 ([freeze/check](../experiments/replay.py), [per-case driver](../experiments/replay_case.py), [usage repros](../experiments/usage_repros.py)).
 
 Method:
 
