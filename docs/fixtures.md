@@ -48,6 +48,8 @@ This is a useful first stage: broad smoke coverage of processor → model → fo
 
 ## Stage 2: frozen random fixtures
 
+Stage 2 keeps stage 1's random weights but changes everything around them: the config is shrunk from the real model instead of taken from unit tests, processor files are copied unchanged instead of re-saved, and the fixture is seeded, pinned, and checked against recorded baselines instead of only being run.
+
 Recipe:
 
 1. Start from the real model config and copy the real processor files unchanged.
