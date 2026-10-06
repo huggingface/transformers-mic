@@ -710,7 +710,7 @@ validated against any framework version, and loads the full checkpoint.
 The integration module could back that button instead, so the snippet
 and its Colab are the validated code. The slim fixture adds a cheap
 first step: an agent or a user can run the same code against the slim
-model to check the code path in seconds, before downloading a large
+model to check the code path cheaply, before downloading a large
 checkpoint.
 
 ## Hub features needed
