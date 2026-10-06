@@ -8,11 +8,13 @@ We should publish a small, executable integration contract on the Hub for each m
 
 A contract is ordinary user code — load the model, call the public API users call, check the result — plus a small fixture and the expected results. It lives in a Hugging Face-owned companion repository next to the model, not in the model repository and not in the framework repository:
 
-- `meta-llama/Llama-3.2-1B`: the real model, owned by the creator, unchanged;
-- `hf-internal-testing/Llama-3.2-1B-integration`: the contract and expected results, owned by Hugging Face;
-- `hf-internal-testing/Llama-3.2-1B-slim`: a small fixture of the same model, owned by Hugging Face.
+- `HuggingFaceTB/SmolLM-135M`: the real model, owned by the creator, unchanged;
+- [`hf-internal-testing/SmolLM-135M-integration`](example/SmolLM-135M-integration): the contract and expected results, owned by Hugging Face;
+- [`hf-internal-testing/SmolLM-135M-slim`](example/SmolLM-135M-slim): a small fixture of the same model, owned by Hugging Face.
 
-Framework CI fetches these at pinned revisions and runs them: against the small fixture on every PR, where it runs on CPU in milliseconds, and against the real checkpoint after merge, nightly, and before release.
+Framework CI fetches these at pinned revisions and runs them: against the small fixture on every PR, where it runs on CPU in seconds, and against the real checkpoint after merge, nightly, and before release.
+
+**[Full example](example/README.md):** a complete, runnable MIC for SmolLM-135M in Transformers and Transformers.js, covering the manifest, contracts, reviewed baselines, fixture, fleet lock, and a runner sketch.
 
 The first goal is CI, not a new Hub feature. If this works, the same contracts can later back compatibility status, tested snippets, Colabs, APIs, or agent usage.
 
@@ -24,27 +26,31 @@ The code that validates a model is also separate from the code we show users, wh
 
 ## The proposed standard
 
-A MIC is defined per model and framework. A conforming MIC has:
+A MIC is defined per model and framework. A conforming MIC has the parts below; each links to the [full example](example/README.md) for SmolLM-135M.
 
-1. **Three repositories, three owners.** The creator's model repository is unchanged. A Hugging Face-owned integration repository holds the contract and expected results; a Hugging Face-owned fixture repository holds a slim copy of the model.
+1. **Three repositories, three owners.** The creator's model repository is unchanged. A Hugging Face-owned [integration repository](example/SmolLM-135M-integration) holds the contract and all expected results. A Hugging Face-owned [fixture repository](example/SmolLM-135M-slim) holds only the slim model: weights, the shrunk config, and copied processor files.
 2. **A fixed layout** in the integration repository:
 
    ```text
-   integration.json              # manifest
+   integration.json                  # manifest
    integrations/
      transformers/integration.py
      transformers.js/integration.js
-   expectations/                 # slim and real baselines
+   expectations/
+     transformers/slim.json          # baseline for the fixture, at its pinned revision
+     transformers/real.json          # baseline for the creator's checkpoint, at its pinned revision
+     transformers/real.eager.json    # one more file per non-default variant
+     transformers.js/real.json
    ```
 
-3. **A manifest readable without running code.** `integration.json`, validated by a schema, declares the framework and runtime, artifact repositories, entry point, supported variants, expected outputs, and resource requirements.
-4. **Ordinary user code as the contract.** The integration module calls the public API users call (pipeline, processor, generate) in the configuration they get by default (attention implementation, dtype), and prints one JSON result line on stdout.
+3. **A manifest readable without running code.** [`integration.json`](example/SmolLM-135M-integration/integration.json), validated by a schema (written during the pilot), declares the framework and runtime, artifact repositories, entry point, supported variants, expected outputs, and resource requirements.
+4. **Ordinary user code as the contract.** The integration module ([Python](example/SmolLM-135M-integration/integrations/transformers/integration.py), [JavaScript](example/SmolLM-135M-integration/integrations/transformers.js/integration.js)) calls the public API users call (pipeline, processor, generate) in the configuration they get by default (attention implementation, dtype), and prints one JSON result line on stdout.
 5. **Checks beyond "it ran".** Generated tokens or task outputs, selected logits within calibrated tolerances, and, where training is supported, a finite loss, gradients on the expected modules, and a parameter update. Missing fields, non-finite values, and mismatches fail.
-6. **Two reviewed baselines**, one for the slim fixture and one for the real checkpoint. Outputs never update a baseline automatically, and a build under test never defines its own expected answer.
-7. **Fixtures that keep the real preprocessing.** Processor, tokenizer, and preprocessing files are copied byte for byte; only the weights and model config shrink.
-8. **Everything pinned.** Framework CI runs contracts from a fleet lock listing the model, processor, converted artifact, contract, fixture, baseline, and dependency revisions.
+6. **Reviewed baselines** in the integration repository's [`expectations/`](example/SmolLM-135M-integration/expectations): one for the slim fixture and one for the real checkpoint, per framework and variant. Each records the artifact revision and environment it came from. Outputs never update a baseline automatically ([`run.py --record`](example/run.py) only writes a candidate), and a build under test never defines its own expected answer.
+7. **[Fixtures](example/SmolLM-135M-slim) that keep the real preprocessing.** Processor, tokenizer, and preprocessing files are copied byte for byte; only the weights and model config shrink.
+8. **Everything pinned.** Framework CI runs contracts from a [fleet lock](example/fleet.lock) listing the model, processor, converted artifact, contract, fixture, baseline, and dependency revisions.
 
-The manifest and result schemas and the shared runner are what the pilot builds ([next steps](docs/next-steps.md), step 3). Details are in the [technical design](docs/design.md).
+The example's [`run.py`](example/run.py) sketches the shared runner. The manifest and result schemas and the real runner are what the pilot builds ([next steps](docs/next-steps.md), step 3). Details are in the [technical design](docs/design.md).
 
 ## Why on the Hub, owned by Hugging Face
 
@@ -58,6 +64,7 @@ Run a CI-only pilot on 3–5 models, with existing tests kept running in paralle
 
 ## Documents
 
+- [Full example](example/README.md): a runnable MIC for SmolLM-135M in Transformers and Transformers.js, with every part of the standard.
 - [Evidence](docs/evidence.md): what the local experiments and the historical regression replay show.
 - [Technical design](docs/design.md): contract layout, CI triggers, where code lives, checks, baselines, runner, pilot plan, open questions.
 - [Small fixtures](docs/fixtures.md): the fixture project, from today's tiny models to frozen random and overfit fixtures.

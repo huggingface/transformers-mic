@@ -1,0 +1,36 @@
+{
+  "comment": "What Transformers CI would keep (e.g. tests/contracts/fleet.lock): every input of every contract, pinned. The two hf-internal-testing repos are not published; 'path' points at their contents in this directory.",
+  "contracts": [
+    {
+      "integration": {
+        "repo": "hf-internal-testing/SmolLM-135M-integration",
+        "revision": "unpublished",
+        "path": "SmolLM-135M-integration"
+      },
+      "model": {
+        "repo": "HuggingFaceTB/SmolLM-135M",
+        "revision": "1d461723eec654e65efdc40cf49301c89c0c92f4"
+      },
+      "fixture": {
+        "repo": "hf-internal-testing/SmolLM-135M-slim",
+        "revision": "unpublished",
+        "path": "SmolLM-135M-slim"
+      },
+      "artifacts": {
+        "onnx-community/SmolLM-135M-ONNX": "f4acdf4c16b4deaee4cc6659fd3e32e44ecc37fd"
+      }
+    }
+  ],
+  "environment": {
+    "python": {
+      "python": "3.10",
+      "torch": "2.11.0",
+      "tokenizers": "0.23.1",
+      "numpy": "1.26.4"
+    },
+    "javascript": {
+      "node": "25",
+      "@huggingface/transformers": "4.3.0"
+    }
+  }
+}

@@ -4,20 +4,21 @@ Companion to the [proposed standard](../README.md#the-proposed-standard). This d
 
 ## The standard: contract layout
 
-Each supported model/framework pair gets an integration module plus a manifest.
-
-For example:
+Each supported model/framework pair gets an integration module plus a manifest. The [full example](../example/README.md) is a runnable MIC for SmolLM-135M with all of these files.
 
 ```text
-integration.json
+integration.json                  # manifest
 integrations/
-  transformers/
-    integration.py
-  transformers.js/
-    integration.js
+  transformers/integration.py
+  transformers.js/integration.js
 expectations/
-  ...
+  transformers/slim.json          # baseline for the fixture, at its pinned revision
+  transformers/real.json          # baseline for the creator's checkpoint, at its pinned revision
+  transformers/real.eager.json    # one more file per non-default variant
+  transformers.js/real.json
 ```
+
+The fixture repository holds only the slim model: weights, the shrunk config, and processor files copied unchanged. Expected results for both the fixture and the real checkpoint live in the integration repository.
 
 The integration module should look like ordinary user code. It loads a model, runs the public API we actually want users to call, checks the result, and emits a small structured result.
 

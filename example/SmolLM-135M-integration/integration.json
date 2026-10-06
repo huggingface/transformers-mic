@@ -1,0 +1,69 @@
+{
+  "mic": "0.1",
+  "model": {
+    "repo": "HuggingFaceTB/SmolLM-135M",
+    "owner": "creator"
+  },
+  "fixture": {
+    "repo": "hf-internal-testing/SmolLM-135M-slim",
+    "built_from": "HuggingFaceTB/SmolLM-135M",
+    "build": "build.json"
+  },
+  "integrations": {
+    "transformers": {
+      "language": "python",
+      "entry_point": "integrations/transformers/integration.py",
+      "requires": ["transformers>=5", "torch"],
+      "usage": "AutoTokenizer + AutoModelForCausalLM.generate, batched, left padding",
+      "artifacts": {
+        "slim": "fixture",
+        "real": "model"
+      },
+      "variants": {
+        "default": {},
+        "eager": {"attn_implementation": "eager"}
+      },
+      "training": true,
+      "resources": {
+        "slim": {"device": "cpu", "memory_gb": 1, "download_mb": 16},
+        "real": {"device": "cpu", "memory_gb": 2, "download_mb": 270}
+      }
+    },
+    "transformers.js": {
+      "language": "javascript",
+      "entry_point": "integrations/transformers.js/integration.js",
+      "requires": ["@huggingface/transformers@4.3.0"],
+      "usage": "AutoTokenizer + AutoModelForCausalLM.generate, batched, left padding",
+      "artifacts": {
+        "real": {
+          "repo": "onnx-community/SmolLM-135M-ONNX",
+          "converted_from": "HuggingFaceTB/SmolLM-135M",
+          "file": "onnx/model.onnx"
+        }
+      },
+      "unsupported": {
+        "slim": "no ONNX conversion of the fixture yet"
+      },
+      "variants": {
+        "default": {"dtype": "fp32"}
+      },
+      "training": false,
+      "resources": {
+        "real": {"device": "cpu", "memory_gb": 2, "download_mb": 540}
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {"compare": "exact"},
+    "generated_tokens": {"compare": "exact"},
+    "generated_text": {"compare": "exact"},
+    "next_token_logits": {"compare": "allclose", "atol": 1e-4, "rtol": 1e-4},
+    "training.loss": {"compare": "allclose", "atol": 1e-4, "rtol": 1e-4},
+    "training.gradients": {"compare": "all_true"},
+    "training.updated": {"compare": "true"}
+  },
+  "expectations": {
+    "default": "expectations/{framework}/{target}.json",
+    "variant": "expectations/{framework}/{target}.{variant}.json"
+  }
+}
