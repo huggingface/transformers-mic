@@ -71,6 +71,24 @@ CLIP_REFERENCE = (
     "0_CLIPModel",
 )
 ATOL = RTOL = 1e-4
+# Where checks run: CONTRACT_DEVICE=cuda, CONTRACT_DTYPE=bfloat16 on GPU. Fixtures
+# are always trained and saved in float32; DTYPE only applies to loading and inputs.
+DEVICE = torch.device(os.environ.get("CONTRACT_DEVICE", "cpu"))
+DTYPE = getattr(torch, os.environ.get("CONTRACT_DTYPE", "float32"))
+
+
+def place(task):
+    """Move a task's input tensors to DEVICE, floating-point ones in DTYPE."""
+
+    def move(value):
+        if isinstance(value, torch.Tensor):
+            return value.to(DEVICE, DTYPE if value.is_floating_point() else None)
+        if isinstance(value, dict):
+            return {key: move(item) for key, item in value.items()}
+        return value
+
+    for name, value in vars(task).items():
+        setattr(task, name, move(value))
 
 
 def snapshot(source):
@@ -145,6 +163,7 @@ class TextTask:
         )
         self.france = self.processor.encode(" France", add_special_tokens=False)[-1]
         self.germany = self.processor.encode(" Germany", add_special_tokens=False)[-1]
+        place(self)
 
     def make_model(self):
         config = AutoConfig.from_pretrained(self.path, local_files_only=True)
@@ -157,15 +176,15 @@ class TextTask:
         config.pad_token_id = self.processor.pad_token_id
         return AutoModelForCausalLM.from_config(
             config, attn_implementation="eager", dtype=torch.float32
-        )
+        ).to(DEVICE)
 
     def load_model(self, path, attn="eager"):
         return AutoModelForCausalLM.from_pretrained(
             path,
             local_files_only=True,
             attn_implementation=attn,
-            dtype=torch.float32,
-        )
+            dtype=DTYPE,
+        ).to(DEVICE)
 
     def loss(self, model, batch):
         return model(**batch, use_cache=False).loss
@@ -260,6 +279,7 @@ class ClipTask:
             )
         )
         self.training_batch = self.inference_batch
+        place(self)
 
     def make_model(self):
         config = AutoConfig.from_pretrained(self.path, local_files_only=True)
@@ -271,15 +291,15 @@ class ClipTask:
             sub.num_attention_heads = 4
             sub.projection_dim = 32
         config._attn_implementation = "eager"
-        return CLIPModel(config).float()
+        return CLIPModel(config).float().to(DEVICE)
 
     def load_model(self, path, attn="eager"):
         return CLIPModel.from_pretrained(
             path,
             local_files_only=True,
             attn_implementation=attn,
-            dtype=torch.float32,
-        )
+            dtype=DTYPE,
+        ).to(DEVICE)
 
     def loss(self, model, batch):
         return model(**batch, return_loss=True).loss
@@ -401,6 +421,7 @@ class BertTask:
         self.sample_ids = sample_ids(len(self.processor), self.gold)
         self.france = self.processor.encode("france", add_special_tokens=False)[0]
         self.germany = self.processor.encode("germany", add_special_tokens=False)[0]
+        place(self)
 
     def make_model(self):
         config = no_dropout(AutoConfig.from_pretrained(self.path, local_files_only=True))
@@ -410,12 +431,12 @@ class BertTask:
         config.num_attention_heads = 4
         return BertForMaskedLM._from_config(
             config, attn_implementation="eager", dtype=torch.float32
-        )
+        ).to(DEVICE)
 
     def load_model(self, path, attn="eager"):
         return BertForMaskedLM.from_pretrained(
-            path, local_files_only=True, attn_implementation=attn, dtype=torch.float32
-        )
+            path, local_files_only=True, attn_implementation=attn, dtype=DTYPE
+        ).to(DEVICE)
 
     def loss(self, model, batch):
         return model(**batch).loss
@@ -496,6 +517,7 @@ class T5Task:
         self.sample_ids = sample_ids(len(self.processor), self.gold)
         self.france = self.processor.encode("France", add_special_tokens=False)[-1]
         self.germany = self.processor.encode("Germany", add_special_tokens=False)[-1]
+        place(self)
 
     def make_model(self):
         config = no_dropout(self.config_cls.from_pretrained(self.path, local_files_only=True))
@@ -506,12 +528,12 @@ class T5Task:
         config.num_heads = 4
         return self.model_cls._from_config(
             config, attn_implementation="eager", dtype=torch.float32
-        )
+        ).to(DEVICE)
 
     def load_model(self, path, attn="eager"):
         return self.model_cls.from_pretrained(
-            path, local_files_only=True, attn_implementation=attn, dtype=torch.float32
-        )
+            path, local_files_only=True, attn_implementation=attn, dtype=DTYPE
+        ).to(DEVICE)
 
     def loss(self, model, batch):
         return model(**batch).loss
@@ -607,6 +629,7 @@ class WhisperTask:
             "labels": labels,
         }
         self.sample_ids = sample_ids(len(tokenizer), self.gold)
+        place(self)
 
     def make_model(self):
         config = no_dropout(AutoConfig.from_pretrained(self.path, local_files_only=True))
@@ -617,12 +640,12 @@ class WhisperTask:
         config.encoder_attention_heads = config.decoder_attention_heads = 4
         return WhisperForConditionalGeneration._from_config(
             config, attn_implementation="eager", dtype=torch.float32
-        )
+        ).to(DEVICE)
 
     def load_model(self, path, attn="eager"):
         return WhisperForConditionalGeneration.from_pretrained(
-            path, local_files_only=True, attn_implementation=attn, dtype=torch.float32
-        )
+            path, local_files_only=True, attn_implementation=attn, dtype=DTYPE
+        ).to(DEVICE)
 
     def loss(self, model, batch):
         return model(**batch).loss
@@ -636,7 +659,7 @@ class WhisperTask:
         # Greedy loop with a fixed task prefix; generate() adds Whisper-specific
         # language and timestamp logic that is outside this comparison.
         encoder = model.model.encoder(infer_batch["input_features"])
-        ids = torch.tensor([self.prefix] * len(self.gold))
+        ids = torch.tensor([self.prefix] * len(self.gold), device=DEVICE)
         for _ in range(4):
             step = model(encoder_outputs=encoder, decoder_input_ids=ids).logits
             ids = torch.cat([ids, step[:, -1:].argmax(-1)], dim=1)
@@ -708,6 +731,7 @@ class Wav2Vec2Task:
             labels["input_ids"] == self.processor.tokenizer.pad_token_id, -100
         )
         self.training_batch = {**self.inference_batch, "labels": labels}
+        place(self)
 
     def make_model(self):
         config = no_dropout(AutoConfig.from_pretrained(self.path, local_files_only=True))
@@ -720,12 +744,12 @@ class Wav2Vec2Task:
         config.num_conv_pos_embedding_groups = 4
         return Wav2Vec2ForCTC._from_config(
             config, attn_implementation="eager", dtype=torch.float32
-        )
+        ).to(DEVICE)
 
     def load_model(self, path, attn="eager"):
         return Wav2Vec2ForCTC.from_pretrained(
-            path, local_files_only=True, attn_implementation=attn, dtype=torch.float32
-        )
+            path, local_files_only=True, attn_implementation=attn, dtype=DTYPE
+        ).to(DEVICE)
 
     def loss(self, model, batch):
         return model(**batch).loss
@@ -1084,8 +1108,8 @@ def main():
             ).hexdigest(),
             "transformers_source_dirty": bool(tracked_changes),
             "threads": args.threads,
-            "device": "cpu",
-            "dtype": "float32",
+            "device": str(DEVICE),
+            "dtype": str(DTYPE).removeprefix("torch."),
             "atol": ATOL,
             "rtol": RTOL,
         },

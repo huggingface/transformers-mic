@@ -32,7 +32,7 @@ def child(family, target, fixtures, attn):
 
     transformers.logging.set_verbosity_error()
     torch.set_num_threads(2)
-    torch.use_deterministic_algorithms(True)
+    torch.use_deterministic_algorithms(True, warn_only=exp.DEVICE.type == "cuda")
     phases = {"import": time.perf_counter() - t0}
     manifest = json.loads((fixtures / "baselines.json").read_text())
     if target == "real":
@@ -69,10 +69,16 @@ def child(family, target, fixtures, attn):
         "family": family,
         "target": target,
         "attn": attn,
+        "device": str(exp.DEVICE),
+        "dtype": str(exp.DTYPE).removeprefix("torch."),
         "parameters": sum(p.numel() for p in model.parameters()),
         "weight_bytes": sum(f.stat().st_size for f in files if f.name.endswith(WEIGHTS)),
         "other_bytes": sum(f.stat().st_size for f in files if not f.name.endswith(WEIGHTS)),
-        "peak_rss_mb": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 2**20,
+        # ru_maxrss is bytes on macOS, kilobytes on Linux.
+        "peak_rss_mb": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        / (2**20 if sys.platform == "darwin" else 2**10),
+        "peak_device_mb": torch.cuda.max_memory_allocated() / 2**20
+        if exp.DEVICE.type == "cuda" else None,
         "phases": phases,
         "check_seconds": sum(v for k, v in phases.items() if k != "warm_inference_median"),
     }))

@@ -1,0 +1,163 @@
+name: GPU checks
+
+# Step 2 on GPU: freeze the slim fixtures and real-checkpoint baselines, then
+# check them on CUDA under the dtypes and attention backends users get, and
+# measure per-check cost. Same runner group, image, and node-local HF cache as
+# transformers-ci's serge-verify-slow.yml. Results are uploaded as an artifact.
+#
+# Two frozen sets answer different questions:
+#   frozen-cpu  float32 on the runner's CPU: do CPU baselines and tolerances
+#               carry over to GPU?
+#   frozen-gpu  float32 on CUDA: how stable is a GPU baseline on GPU, run to run
+#               and across dtype/attention?
+
+on:
+  workflow_dispatch:
+    inputs:
+      transformers_sha:
+        description: "Transformers commit to install (the CPU study used 4d536e1f)"
+        required: false
+        type: string
+        default: 4d536e1f1a32a7bbe7c2e35fc418e5b1b1d4c25b
+      families:
+        required: false
+        type: string
+        default: text clip bert t5 whisper wav2vec2
+      machine_type:
+        required: false
+        type: string
+        default: aws-g5-4xlarge-cache
+      docker:
+        required: false
+        type: string
+        default: huggingface/transformers-all-latest-gpu
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on:
+      group: '${{ inputs.machine_type }}'
+    timeout-minutes: 240
+    container:
+      image: ${{ inputs.docker }}
+      options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    env:
+      HF_HOME: /mnt/cache
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      CUBLAS_WORKSPACE_CONFIG: ":4096:8"
+      CUDA_VISIBLE_DEVICES: "0"
+      PYTHONUNBUFFERED: "1"
+      OUT: ${{ github.workspace }}/out
+      FAMILIES: ${{ inputs.families }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: experiments
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Transformers ${{ inputs.transformers_sha }}
+        working-directory: /transformers
+        run: |
+          git fetch --quiet origin "${{ inputs.transformers_sha }}"
+          git checkout --quiet "${{ inputs.transformers_sha }}"
+          python3 -m pip uninstall -y transformers
+          python3 -m pip install --quiet -e .
+
+      - name: Environment
+        run: |
+          mkdir -p "$OUT"
+          nvidia-smi | tee "$OUT/nvidia-smi.txt"
+          python3 - <<'EOF' | tee "$OUT/environment.json"
+          import importlib.metadata as md, json, platform, torch, transformers
+          names = ["torch", "tokenizers", "numpy", "pillow", "safetensors", "huggingface-hub", "accelerate", "kernels"]
+          versions = {}
+          for name in names:
+              try:
+                  versions[name] = md.version(name)
+              except md.PackageNotFoundError:
+                  versions[name] = None
+          print(json.dumps({
+              "python": platform.python_version(),
+              "cpu": platform.processor() or platform.machine(),
+              "cuda": torch.version.cuda,
+              "cudnn": torch.backends.cudnn.version(),
+              "gpu": torch.cuda.get_device_name(0),
+              "transformers": transformers.__version__,
+              "transformers_file": transformers.__file__,
+              "packages": versions,
+          }, indent=1))
+          EOF
+
+      - name: Prefetch pinned snapshots
+        run: python3 prefetch.py
+
+      - name: Freeze on CPU (float32)
+        run: |
+          python3 replay.py freeze --families $FAMILIES --real --threads 8 \
+            --out "$OUT/frozen-cpu" --build "${{ inputs.transformers_sha }}"
+
+      - name: Freeze on GPU (float32)
+        env:
+          CONTRACT_DEVICE: cuda
+        run: |
+          python3 replay.py freeze --families $FAMILIES --real --threads 8 \
+            --out "$OUT/frozen-gpu" --build "${{ inputs.transformers_sha }}"
+
+      - name: Check on GPU
+        env:
+          CONTRACT_DEVICE: cuda
+        run: |
+          check() {  # <frozen set> <dtype> <attn> <label>
+            CONTRACT_DTYPE=$2 python3 replay.py check --fixtures "$OUT/frozen-$1" \
+              --build "${{ inputs.transformers_sha }}" --attn "$3" \
+              --output "$OUT/checks/$1/$4.json" > "$OUT/checks-$1-$4.log" 2>&1 \
+              || { tail -50 "$OUT/checks-$1-$4.log"; return 1; }
+            echo "$1 $4: done"
+          }
+          for frozen in cpu gpu; do
+            check $frozen float32 eager float32-eager
+            check $frozen float32 sdpa float32-sdpa
+            check $frozen bfloat16 sdpa bfloat16-sdpa
+            check $frozen float16 sdpa float16-sdpa
+          done
+          # Run to run on the same GPU, same process setup.
+          for run in 2 3; do
+            check gpu float32 sdpa float32-sdpa-run$run
+          done
+
+      - name: Cost per check on GPU
+        env:
+          CONTRACT_DEVICE: cuda
+        run: |
+          python3 cost.py --fixtures "$OUT/frozen-gpu" --attn sdpa --output "$OUT/cost-float32.json"
+          CONTRACT_DTYPE=bfloat16 python3 cost.py --fixtures "$OUT/frozen-gpu" --attn sdpa \
+            --targets real --output "$OUT/cost-bfloat16.json"
+
+      - name: Summarize
+        if: always()
+        run: |
+          python3 - <<'EOF' | tee "$OUT/summary.txt"
+          import json, os
+          from pathlib import Path
+          root = Path(os.environ["OUT"]) / "checks"
+          keys = ("smoke_detected", "numerical_detected", "recorded_output_detected", "training_detected", "loss_detected")
+          for path in sorted(root.glob("*/*.json")):
+              rows = json.loads(path.read_text())["rows"]
+              flagged = [r for r in rows if any(r.get(k) for k in keys)]
+              worst = max((r.get("max_absolute_delta") or 0) for r in rows)
+              print(f"{path.parent.name:4} {path.stem:24} rows={len(rows):3} flagged={len(flagged):3} max_delta={worst:.3g}")
+              for r in flagged:
+                  hits = [k for k in keys if r.get(k)]
+                  print(f"    {r['family']:9} {r['weights']:8} seed={r['seed']} {hits} delta={r.get('max_absolute_delta')} {r.get('error', '')[:120]}")
+          EOF
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gpu-checks
+          # Includes the slim fixtures themselves (a few MB), so GPU results can
+          # be re-checked elsewhere against the same weights.
+          path: out

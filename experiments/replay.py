@@ -45,6 +45,8 @@ def record(task, model, gradients):
 
 
 def freeze(args):
+    if exp.DTYPE != torch.float32:
+        raise SystemExit("freeze in float32; CONTRACT_DTYPE only applies to check")
     manifest = {"build": args.build, "transformers": transformers.__version__}
     manifest["fixtures"] = []
     for family in args.families:
@@ -106,6 +108,9 @@ def check(args):
         "frozen_build": manifest["build"],
         "build": args.build,
         "attn": args.attn,
+        "device": str(exp.DEVICE),
+        "dtype": str(exp.DTYPE).removeprefix("torch."),
+        "torch": torch.__version__,
         "transformers": transformers.__version__,
         "transformers_file": transformers.__file__,
         "rows": [],
@@ -182,7 +187,8 @@ def main():
         p.add_argument("--threads", type=int, default=2)
     args = parser.parse_args()
     torch.set_num_threads(args.threads)
-    torch.use_deterministic_algorithms(True)
+    # On CUDA, an op without a deterministic kernel must not read as a detection.
+    torch.use_deterministic_algorithms(True, warn_only=exp.DEVICE.type == "cuda")
     transformers.logging.set_verbosity_error()
     freeze(args) if args.command == "freeze" else check(args)
 
