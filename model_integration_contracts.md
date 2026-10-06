@@ -78,12 +78,15 @@ CI should remain the source of truth for failures.
 ### Early results
 
 In the current synthetic experiments, random fixtures and overfit fixtures
-caught the same 42 injected fault/seed cases with the numerical and
-training checks we tested.
+caught the same 42 injected fault/seed cases on SmolLM and CLIP with the
+numerical and training checks we tested. Extending the run to BERT, T5,
+Whisper, and Wav2Vec2 found one exception: a tiny random Whisper barely
+reacts to its audio, so it missed reversed audio and shuffled labels on
+every seed (78/84 vs 84/84 for overfit).
 
-That is a good argument for starting with frozen random fixtures. They are
-simpler and cheaper. Overfit fixtures can stay optional until we find
-cases where they add coverage.
+That is still a good argument for starting with frozen random fixtures.
+They are simpler and cheaper. But a random fixture has to prove it is
+sensitive to its inputs; when it is not, overfit that fixture.
 
 ### What the pilot needs to prove
 
@@ -346,9 +349,15 @@ tests. Frozen random weights also support recorded logits, shapes,
 gradients, and consistency checks.
 
 **Stage 2:** start from the real config and processor; shrink layers,
-width, or experts; record a frozen-random baseline; optionally overfit
-contrasting examples; export required formats; publish a versioned
-fixture and run its integration modules.
+width, or experts; record a frozen-random baseline; check input
+sensitivity; overfit contrasting examples when that check fails; export
+required formats; publish a versioned fixture and run its integration
+modules.
+
+**Input-sensitivity gate:** swap or perturb each fixture input and require
+recorded logits to move well beyond tolerance. Random tiny encoders can
+wash out their inputs (see the Whisper result below); such a fixture
+cannot detect preprocessing or label faults, whatever the assertions.
 
 Keep processor-coupled dimensions compatible: vocabulary, special tokens,
 image/patch sizes, and audio dimensions. Real configs preserve settings
@@ -565,11 +574,67 @@ Reproduce with the recorded environment and pinned snapshots cached:
 python model_integration_contracts_experiment.py --real-checkpoints
 ```
 
+### More families from PR #49103 (2026-10-06)
+
+[Raw results](model_integration_contracts_results_more.json)
+
+Same script, protocol, environment, and tolerances, applied to four
+families from Yih-Dar's list. Configs and processors come from pinned
+`google-bert/bert-base-uncased`, `google-t5/t5-small`,
+`openai/whisper-tiny`, and `facebook/wav2vec2-base-960h`; dropout and
+SpecAugment are disabled so training probes are deterministic.
+
+| Family | Task | Faults |
+| --- | --- | --- |
+| BERT | `[MASK]` capital fill | 7 |
+| T5 | "capital of X:" → city | 7 |
+| Whisper | four two-tone clips → color word | 8 |
+| Wav2Vec2 CTC | same clips → spelled color word | 6 |
+
+Faults include wrong input tokens, ignored padding, disabled position
+embeddings/bias, removed causal mask, zeroed self- or cross-attention,
+reversed or repeated audio, detached encoder/MLP/feature projection, and
+shuffled labels: **84 fault/seed cases per policy**.
+
+| Checks | Random | Overfit |
+| --- | --- | --- |
+| Inference completes with finite outputs | 0/84 | 0/84 |
+| Recorded tokens / transcripts only | 30/84 | 24/84 |
+| Recorded logits | 57/84 | 60/84 |
+| Logits + targeted gradients and optimizer update | 69/84 | 72/84 |
+| Above + recorded loss | **78/84** | **84/84** |
+
+**No false alarms in 120 controls.** BERT, T5, and Wav2Vec2 detected
+everything under both policies. All six random misses are Whisper,
+reversed audio and shuffled labels, on every seed: the random decoder is
+nearly independent of the audio, so logits moved by 4–6e-5 (below
+`1e-4`) and loss is invariant when labels are permuted across
+near-identical outputs. Overfit Whisper moved logits by 1.2–24 and loss
+from ~0.01 to 4.4–7.0 on the same faults. Exact answers on overfit
+fixtures again caught only 1–3 faults per fixture; overfitting helps by
+making numbers input-dependent, not by making answers checkable.
+
+| Overfit cost | BERT | T5 | Whisper | Wav2Vec2 |
+| --- | --- | --- | --- | --- |
+| Steps | 50 | 90–110 | 180–390 | 160–500 |
+| Training | 0.3–0.4 s | 0.7–1.0 s | 23–51 s | 1.0–3.5 s |
+| Fixture size | 9.1 MB | 11.3 MB | 18.5 MB | 0.4 MB |
+
+One Wav2Vec2 seed did not converge within 500 steps; it still detected
+every fault, but non-convergence is fixture upkeep. Reproduce with:
+
+``` sh
+python model_integration_contracts_experiment.py \
+  --families bert t5 whisper wav2vec2 --max-steps 500 \
+  --output model_integration_contracts_results_more.json
+```
+
 **Decision:** start with frozen random fixtures, logits/loss records, and
-targeted training checks. Overfitting was cheap and made answers readable,
-but added no detections beyond those checks here; keep it optional.
-These handpicked synthetic faults establish local sensitivity, not a
-historical regression catch rate or maintenance savings.
+targeted training checks, gated by input sensitivity. Overfit only
+fixtures that fail the gate (Whisper here); elsewhere it was cheap and
+made answers readable but added no detections. These handpicked synthetic
+faults establish local sensitivity, not a historical regression catch
+rate or maintenance savings.
 
 **Next:** freeze both policies, replay documented historical regressions
 and benign dependency upgrades, reproduce each bug on its real
