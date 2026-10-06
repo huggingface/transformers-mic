@@ -122,10 +122,10 @@ def check(args):
             else:
                 path = args.fixtures / frozen["path"]
             task = task_cls(path)
-            model = task.load_model(path)
-            if args.attn != "eager":
-                # Baselines are recorded with eager; eager/SDPA agree within tolerance.
-                model.set_attn_implementation(args.attn)
+            # Baselines are recorded with eager; eager/SDPA agree within tolerance.
+            # Choose at load time: set_attn_implementation() after loading does not
+            # reach the T5-family encoder/decoder stacks.
+            model = task.load_model(path, attn=args.attn)
             actual = exp.observe(task, model)
             row.update(smoke_detected=False, **exp.compare(actual, frozen["baseline"]))
             row["outputs"] = actual["outputs"]

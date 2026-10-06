@@ -159,11 +159,11 @@ class TextTask:
             config, attn_implementation="eager", dtype=torch.float32
         )
 
-    def load_model(self, path):
+    def load_model(self, path, attn="eager"):
         return AutoModelForCausalLM.from_pretrained(
             path,
             local_files_only=True,
-            attn_implementation="eager",
+            attn_implementation=attn,
             dtype=torch.float32,
         )
 
@@ -273,11 +273,11 @@ class ClipTask:
         config._attn_implementation = "eager"
         return CLIPModel(config).float()
 
-    def load_model(self, path):
+    def load_model(self, path, attn="eager"):
         return CLIPModel.from_pretrained(
             path,
             local_files_only=True,
-            attn_implementation="eager",
+            attn_implementation=attn,
             dtype=torch.float32,
         )
 
@@ -412,9 +412,9 @@ class BertTask:
             config, attn_implementation="eager", dtype=torch.float32
         )
 
-    def load_model(self, path):
+    def load_model(self, path, attn="eager"):
         return BertForMaskedLM.from_pretrained(
-            path, local_files_only=True, attn_implementation="eager", dtype=torch.float32
+            path, local_files_only=True, attn_implementation=attn, dtype=torch.float32
         )
 
     def loss(self, model, batch):
@@ -508,9 +508,9 @@ class T5Task:
             config, attn_implementation="eager", dtype=torch.float32
         )
 
-    def load_model(self, path):
+    def load_model(self, path, attn="eager"):
         return self.model_cls.from_pretrained(
-            path, local_files_only=True, attn_implementation="eager", dtype=torch.float32
+            path, local_files_only=True, attn_implementation=attn, dtype=torch.float32
         )
 
     def loss(self, model, batch):
@@ -619,9 +619,9 @@ class WhisperTask:
             config, attn_implementation="eager", dtype=torch.float32
         )
 
-    def load_model(self, path):
+    def load_model(self, path, attn="eager"):
         return WhisperForConditionalGeneration.from_pretrained(
-            path, local_files_only=True, attn_implementation="eager", dtype=torch.float32
+            path, local_files_only=True, attn_implementation=attn, dtype=torch.float32
         )
 
     def loss(self, model, batch):
@@ -722,9 +722,9 @@ class Wav2Vec2Task:
             config, attn_implementation="eager", dtype=torch.float32
         )
 
-    def load_model(self, path):
+    def load_model(self, path, attn="eager"):
         return Wav2Vec2ForCTC.from_pretrained(
-            path, local_files_only=True, attn_implementation="eager", dtype=torch.float32
+            path, local_files_only=True, attn_implementation=attn, dtype=torch.float32
         )
 
     def loss(self, model, batch):
