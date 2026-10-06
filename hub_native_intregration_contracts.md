@@ -555,6 +555,16 @@ validated against the model fleet, and a model update is validated
 against current framework releases. Neither direction depends on the
 framework's own test suite.
 
+The first direction matters because Hub metadata is effectively
+permanent: task tags are not deprecated on the Hub, so backward
+compatibility is the framework's job. The `image-to-text` case shows the
+gap. Transformers v5 removed the pipeline, the breakage was found
+through the Hub's generated snippets rather than by any test, and the
+fix was to alias the old task to the new one in Transformers
+([PR #49308](https://github.com/huggingface/transformers/pull/49308)).
+Contracts for those models, run against the v5 release candidate, would
+have flagged it before the release.
+
 | Trigger | Validation |
 | --- | --- |
 | Framework PR | Relevant slim fixtures (required check, blocks merge) |
@@ -710,9 +720,11 @@ tags, and has weaknesses:
 
 -   **It is not validated.** As far as we know, nothing runs it
     against a framework version.
--   **It can drift.** Task tags on the Hub cannot easily be deleted or
-    re-tagged, so a snippet can keep using a pipeline that Transformers
-    has deprecated or removed.
+-   **It can drift.** The Hub does not deprecate or re-tag task tags,
+    so a snippet can keep using a pipeline that Transformers has
+    removed. Transformers v5 removed the `image-to-text` pipeline, and
+    the generated snippet for the roughly 2,000 models tagged
+    `image-to-text` stopped working with v5.
 -   **Agents mostly miss it.** It appears in the model page's HTML but
     not in the models API, and agents usually read the README instead.
 -   **It loads the full checkpoint.**
