@@ -100,13 +100,15 @@ We should use small fixtures for PR-level coverage and keep real checkpoints for
 
 Roughly:
 
-| Trigger | What runs |
-| --- | --- |
-| Framework PR | Relevant pinned small fixtures |
-| Merge to `main` | Relevant real checkpoints |
-| Nightly | Full registered real-checkpoint fleet |
-| Release candidate | Full pinned real-checkpoint fleet |
-| Model update | New model revision against supported framework releases |
+| Trigger | Contract and expectations | Weights | Expectations used |
+| --- | --- | --- | --- |
+| Framework PR | integration repo, pinned | fixture repo, pinned | slim baseline |
+| Merge to `main` | integration repo, pinned | creator repo (or HF conversion), pinned | real-checkpoint baseline |
+| Nightly | same, full fleet | creator repos, pinned | real-checkpoint baseline |
+| Release candidate | same, full fleet | creator repos, pinned | real-checkpoint baseline |
+| Model update | integration repo | new creator revision | candidate baseline, reviewed before approval |
+
+The contract code is the same for every trigger; only the weights change. The integration repo therefore keeps two baselines per model: one for the slim fixture and one for the real checkpoint, since the fixture's outputs are unrelated to the real model's. Frameworks that need a converted artifact (for example Transformers.js) load the HF-owned conversion, such as `onnx-community/<model>-ONNX`, instead of the creator repo.
 
 This gives us both directions of compatibility testing:
 
