@@ -110,6 +110,7 @@ def check(args):
         "attn": args.attn,
         "device": str(exp.DEVICE),
         "dtype": str(exp.DTYPE).removeprefix("torch."),
+        "cudnn_tf32": torch.backends.cudnn.allow_tf32,
         "torch": torch.__version__,
         "transformers": transformers.__version__,
         "transformers_file": transformers.__file__,

@@ -75,6 +75,10 @@ ATOL = RTOL = 1e-4
 # are always trained and saved in float32; DTYPE only applies to loading and inputs.
 DEVICE = torch.device(os.environ.get("CONTRACT_DEVICE", "cpu"))
 DTYPE = getattr(torch, os.environ.get("CONTRACT_DTYPE", "float32"))
+# CONTRACT_TF32=0 turns off TF32 for cuDNN convolutions, which PyTorch enables
+# by default on Ampere and newer GPUs (matmuls already default to full float32).
+if os.environ.get("CONTRACT_TF32") == "0":
+    torch.backends.cudnn.allow_tf32 = False
 
 
 def place(task):
