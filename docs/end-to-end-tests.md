@@ -41,6 +41,8 @@ The [full example](../example/README.md): one contract per usage path, written a
 - **Runtime identity, exact:** device, dtype, attention implementation actually used.
 - Non-finite values and failed assertions fail the check and are never recorded as baselines.
 
+**Minimum hardware:** each target's `resources` in the manifest (devices, GPU count, memory per GPU, RAM, free disk) are checked first; a host that cannot run a target reports it `unsupported` with what is missing, so GPU-only and multi-GPU checkpoints skip cleanly on CPU runners while their fixtures still run.
+
 **Variants:** `default` (the dtype and attention users get, e.g. SDPA), `eager`, `bfloat16`. Transformers.js (SmolLM only): `default` (CPU), `webgpu`, `webgpu-fp16`, `webgpu-q4f16`.
 
 **Baselines:** one per target, platform, and variant under `expectations/<contract>/<platform>/<target>[.<variant>].json`; `cpu-arm64` (Apple M5), `cpu-x86_64` (GitHub runners, recorded by [`cpu-baselines.yml`](../.github/workflows/cpu-baselines.yml)), and `cuda` (A10G). CPU baselines are per architecture because Whisper's numbers differ between them by more than `1e-4`; `--golden cpu` means this machine's CPU platform. `--record` writes candidates that must reproduce in a fresh process; a reviewer renames them to approve.

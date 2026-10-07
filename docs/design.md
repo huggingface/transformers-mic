@@ -31,8 +31,21 @@ The manifest describes:
 - which fixture covers each checkpoint;
 - per framework: entry point, format, artifacts (for example ONNX conversions), supported variants, and unsupported targets with a reason;
 - whether training checks apply;
-- resource requirements;
+- minimum hardware per target (see below);
 - the comparison rule for each output.
+
+**Minimum hardware.** Some checkpoints only run on a GPU, or only across several. The manifest's `resources` gives each target (`fixture` for all fixtures, or a checkpoint repo) its minimum specs, with optional overrides per variant:
+
+```json
+"resources": {
+  "fixture": {"memory_gb": 1},
+  "HuggingFaceTB/SmolLM-1.7B": {"memory_gb": 12, "disk_gb": 8, "measured": "peak RSS 10.6 GB, Apple M5"},
+  "org/large-moe": {"devices": ["cuda"], "gpus": 4, "gpu_memory_gb": 80, "memory_gb": 64, "disk_gb": 400,
+                    "variants": {"bfloat16": {"gpus": 2}}}
+}
+```
+
+`devices` lists where the target can run (default CPU and CUDA); `gpus` above 1 means multi-GPU, which the contract handles itself (for example `device_map="auto"`); `gpu_memory_gb` is per GPU, `memory_gb` is host RAM, and `disk_gb` is free disk for the download. The runner checks them before downloading anything and reports a target the host cannot run as `unsupported`, with what is missing (`needs cuda; this host has no GPU`, `needs 12 GB RAM (host has 16)`), never as a failure. CI picks the runner class from the same numbers, and fixtures stay small enough to run anywhere: a GPU-only checkpoint still gets PR coverage on CPU through its fixture. The numbers should be measured, not guessed: SmolLM-1.7B's 20 GB estimate was a guess, its measured peak is 10.6 GB, and a 16 GB GitHub runner was killed recording it because two processes held the model at once.
 
 Reference inputs must also have an immutable identity, such as a pinned asset revision and content hash, so a user or agent can reproduce the check rather than depend on a mutable example URL. Model, processor, and input revisions belong in the result record.
 
@@ -243,10 +256,11 @@ The [runner prototype](../example/README.md#runner-prototype) implements this fo
 - **Pinned fixtures.** The fleet lock pins each fixture's file hashes; a missing or different fixture is an error that names the build command, not a skip.
 - **Tolerances per platform.** The manifest sets the default tolerances; `expectations/<contract>/<platform>/tolerances.json` overrides them for one platform, with a required reason, since GPU and lower-precision runs drift more than CPU float32.
 - **Baselines must reproduce.** Non-finite outputs fail without a baseline and are never recorded. `--record` reruns each target in a fresh process and refuses outputs that differ. This caught a contract seeding mistake and an uninitialized-weight bug in Transformers' Wav2Vec2 loading ([details](../example/README.md#runner-prototype)).
+- **Minimum hardware.** Each target's `resources` are checked against the host (RAM, free disk, GPU count and memory) before anything is downloaded; a target the host cannot run is `unsupported`, with the reason.
 - **Known failures.** A framework can list a target under `known_failures` in its fleet lock, with the issue. A failure is then reported as `xfail`, and a pass fails the run, so the entry is removed once fixed. Alternatively, `local_patches` names a workaround (applied in every contract process and recorded in each result), as for the Wav2Vec2 bug [#49385](https://github.com/huggingface/transformers/issues/49385).
 - **Replays.** [`replay.py`](../example/replay.py) runs the unchanged runner on the bad and fixed builds of a historical regression, against the reviewed fixtures and baselines.
 
-Not implemented yet: selecting contracts from a PR's changed files, execution isolation for untrusted contract code, and private-artifact rules.
+Not implemented yet: execution isolation for untrusted contract code, private-artifact rules, and choosing the CI runner class from `resources`.
 
 ## Converted artifacts
 

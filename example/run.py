@@ -65,6 +65,7 @@ import json
 import math
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -339,6 +340,49 @@ def non_finite(rules, actual):
     ]
 
 
+@cache
+def host():
+    """This machine's RAM, free disk, and GPUs, for checking a target's minimum hardware."""
+    gpus = []
+    try:
+        import torch
+
+        if torch.cuda.is_available():
+            gpus = [torch.cuda.get_device_properties(i).total_memory / 1e9 for i in range(torch.cuda.device_count())]
+    except ImportError:
+        pass
+    return {
+        "memory_gb": os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / 1e9,
+        "disk_gb": shutil.disk_usage(os.environ.get("HF_HOME", Path.home())).free / 1e9,
+        "gpus_gb": gpus,
+    }
+
+
+def resource_problem(spec, variant):
+    """Why this host cannot run a target with these minimum specs, or None."""
+    if not spec:
+        return None
+    spec = {**spec, **spec.get("variants", {}).get(variant, {})}
+    h = host()
+    device = "cuda" if h["gpus_gb"] else "cpu"  # what the contracts pick
+    devices = spec.get("devices", ["cpu", "cuda"])
+    if spec.get("gpus", 0) and "cpu" in devices:
+        devices = [d for d in devices if d != "cpu"]
+    if device not in devices:
+        return f"needs {' or '.join(devices)}; this host has {'no GPU' if device == 'cpu' else device}"
+    problems = []
+    if device == "cuda":
+        if len(h["gpus_gb"]) < max(spec.get("gpus", 1), 1):
+            problems.append(f"{spec.get('gpus', 1)} GPUs (host has {len(h['gpus_gb'])})")
+        if spec.get("gpu_memory_gb", 0) > min(h["gpus_gb"]):
+            problems.append(f"{spec['gpu_memory_gb']:g} GB per GPU (host has {min(h['gpus_gb']):.0f})")
+    if spec.get("memory_gb", 0) > h["memory_gb"]:
+        problems.append(f"{spec['memory_gb']:g} GB RAM (host has {h['memory_gb']:.0f})")
+    if spec.get("disk_gb", 0) > h["disk_gb"]:
+        problems.append(f"{spec['disk_gb']:g} GB free disk (host has {h['disk_gb']:.0f})")
+    return f"needs {', '.join(problems)}" if problems else None
+
+
 def platform_class(device):
     """The baseline platform: the device, with the architecture for CPUs."""
     if device != "cpu":
@@ -448,6 +492,13 @@ def main():
                     continue
                 if problem:
                     emit({**record, "status": "unsupported" if model is None else "error", "failures": [problem]})
+                    continue
+                resources = integration.get("resources", {})
+                short_names = {short(r): r for r in manifest["checkpoints"]}
+                spec = resources.get("fixture") if kind == "fixture" else resources.get(short_names.get(target))
+                too_small = resource_problem(spec, args.variant)
+                if too_small:
+                    emit({**record, "status": "unsupported", "failures": [too_small]})
                     continue
                 if callable(model):
                     model = model()

@@ -67,8 +67,10 @@
           "download_mb": 1300
         },
         "HuggingFaceTB/SmolLM-1.7B": {
-          "memory_gb": 20,
-          "download_mb": 6400
+          "memory_gb": 12,
+          "disk_gb": 8,
+          "download_mb": 6400,
+          "measured": "peak RSS 10.6 GB (default) and 11.3 GB (bfloat16: the variant reload holds two copies), one process, Apple M5, 2026-10-07"
         }
       }
     },

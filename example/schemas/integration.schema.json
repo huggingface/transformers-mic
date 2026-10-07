@@ -187,7 +187,96 @@
       "type": "boolean"
      },
      "resources": {
-      "type": "object"
+      "type": "object",
+      "description": "minimum hardware per target: 'fixture' for every fixture, or a checkpoint repo. The runner reports a target as unsupported, with the reason, on a host that does not meet it.",
+      "propertyNames": {
+       "type": "string",
+       "pattern": "^(fixture|[\\w.-]+/[\\w.-]+)$"
+      },
+      "additionalProperties": {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "devices": {
+         "type": "array",
+         "items": {
+          "enum": [
+           "cpu",
+           "cuda"
+          ]
+         },
+         "minItems": 1,
+         "uniqueItems": true,
+         "description": "devices the target can run on (default: cpu and cuda); [\"cuda\"] for GPU-only targets"
+        },
+        "gpus": {
+         "type": "integer",
+         "minimum": 0,
+         "description": "minimum GPU count; more than 1 means multi-GPU (the contract loads with device_map=\"auto\")"
+        },
+        "gpu_memory_gb": {
+         "type": "number",
+         "minimum": 0,
+         "description": "minimum memory per GPU, for a run on GPU"
+        },
+        "memory_gb": {
+         "type": "number",
+         "minimum": 0,
+         "description": "minimum host RAM (peak of a run on CPU; loading on GPU needs it too)"
+        },
+        "disk_gb": {
+         "type": "number",
+         "minimum": 0,
+         "description": "minimum free disk for the download and cache"
+        },
+        "download_mb": {
+         "type": "number",
+         "minimum": 0,
+         "description": "informational: size of the download"
+        },
+        "measured": {
+         "type": "string",
+         "description": "where the numbers come from (machine, peak RSS, date)"
+        },
+        "variants": {
+         "type": "object",
+         "additionalProperties": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+           "devices": {
+            "type": "array",
+            "items": {
+             "enum": [
+              "cpu",
+              "cuda"
+             ]
+            },
+            "minItems": 1,
+            "uniqueItems": true,
+            "description": "devices the target can run on (default: cpu and cuda); [\"cuda\"] for GPU-only targets"
+           },
+           "gpus": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "minimum GPU count; more than 1 means multi-GPU (the contract loads with device_map=\"auto\")"
+           },
+           "gpu_memory_gb": {
+            "type": "number",
+            "minimum": 0,
+            "description": "minimum memory per GPU, for a run on GPU"
+           },
+           "memory_gb": {
+            "type": "number",
+            "minimum": 0,
+            "description": "minimum host RAM (peak of a run on CPU; loading on GPU needs it too)"
+           }
+          }
+         },
+         "description": "overrides per variant (e.g. bfloat16 needs about half the memory)"
+        }
+       }
+      }
      }
     }
    }
