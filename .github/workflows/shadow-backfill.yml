@@ -2,7 +2,8 @@ name: Shadow backfill
 
 # The shadow job (shadow.yml) on past Transformers main commits, to get weeks of
 # step-4 data at once: every first-parent commit in [since, until), oldest
-# first, split over parallel chunks. Each chunk installs the fleet lock's pinned
+# first, split over 20 parallel chunks. Commits whose dependency table rejects a pin
+# get the newest accepted version instead (shadow.pip_overrides). Each chunk installs the fleet lock's pinned
 # environment once, with Transformers editable, and checks each commit out in
 # turn (.github/scripts/backfill.py). Results go to the shadow-results branch
 # as runs/backfill/<since>_<until>-<run id>.jsonl.
@@ -25,7 +26,7 @@ permissions:
 env:
   SINCE: ${{ inputs.since }}
   UNTIL: ${{ inputs.until }}
-  CHUNKS: 10
+  CHUNKS: 20
   HF_HUB_DISABLE_PROGRESS_BARS: "1"
   PYTHONUNBUFFERED: "1"
 
@@ -36,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        chunk: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        chunk: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

@@ -11,12 +11,22 @@ files are its diff against its first parent, so the selection is the one that
 PR would have made. Every result record gets the run metadata under `shadow`,
 as in shadow.yml; a commit where the runner produced no record gets one error
 record (target "*") so it is counted, not lost.
+
+Older commits can require other dependency versions than the fleet lock pins
+(tokenizers<=0.23.0 before 2026-08-17). Before each commit, every pinned
+package is checked against that commit's dependency_versions_table.py; one the
+commit does not accept is replaced with the newest version it does, and put
+back to the pin once a later commit accepts it again. The overrides are
+recorded under shadow.pip_overrides, and the runner's environment_differs shows
+them too.
 """
 
 import argparse
+import importlib.metadata as md
 import json
 import os
 import platform
+import re
 import subprocess
 import sys
 import tempfile
@@ -28,6 +38,40 @@ HERE = Path(__file__).resolve().parents[2]
 
 def git(repo, *args):
     return subprocess.run(["git", "-C", repo, *args], check=True, capture_output=True, text=True).stdout
+
+
+def normalize(name):
+    return re.sub(r"[-_.]+", "-", name).lower()
+
+
+def dependency_overrides(repo, sha, pinned):
+    """Install what this commit's dependency table needs instead of the pins; return {package: requirement}."""
+    from packaging.requirements import Requirement
+
+    table = git(repo, "show", f"{sha}:src/transformers/dependency_versions_table.py")
+    specs = {normalize(name): spec for name, spec in re.findall(r'"([^"]+)": "([^"]+)"', table)}
+    wanted, overrides = [], {}
+    for name, version in pinned.items():
+        if name == "python" or normalize(name) not in specs:
+            continue
+        requirement = Requirement(specs[normalize(name)])
+        target = f"{name}=={version}"
+        if requirement.specifier and not requirement.specifier.contains(version, prereleases=True):
+            target = overrides[name] = f"{name}{requirement.specifier}"
+        try:
+            installed = md.version(name).split("+")[0]
+        except md.PackageNotFoundError:
+            installed = None
+        satisfied = installed is not None and (
+            Requirement(target).specifier.contains(installed, prereleases=True)
+            and (name in overrides or installed == version)
+        )
+        if not satisfied:
+            wanted.append(target)
+    if wanted:
+        print(f"  installing {wanted}", flush=True)
+        subprocess.run([sys.executable, "-m", "pip", "install", "--quiet", *wanted], check=True)
+    return overrides
 
 
 def cpu_info():
@@ -57,6 +101,7 @@ def main():
     shas = git(args.repo, "rev-list", "--first-parent", "--reverse", f"--since={args.since}", f"--until={args.until}", args.ref).split()
     mine = shas[args.chunk :: args.chunks]
     cpu, flags = cpu_info()
+    pinned = json.loads((HERE / "example/transformers/tests/contracts/fleet.lock").read_text())["environment"]
     print(f"{len(shas)} commits in {args.since}..{args.until}; chunk {args.chunk}/{args.chunks}: {len(mine)}", flush=True)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     for index, sha in enumerate(mine):
@@ -64,12 +109,13 @@ def main():
         subject = git(args.repo, "log", "-1", "--format=%s", sha).strip()
         date = git(args.repo, "log", "-1", "--format=%cI", sha).strip()
         changed = git(args.repo, "diff", "--name-only", f"{sha}^", sha)
+        overrides = dependency_overrides(args.repo, sha, pinned)
         meta = {
             "transformers_ref": "main", "transformers_sha": sha, "commit_subject": subject, "commit_date": date,
             "event": "backfill", "run_id": os.environ.get("GITHUB_RUN_ID", ""), "runner": os.environ.get("RUNNER_NAME", ""),
             "arch": platform.machine(), "cpu": cpu, "cpu_flags": flags,
             "changed_files_source": f"diff {sha[:10]}^..{sha[:10]}", "changed_files": len(changed.split()),
-            "changed_files_truncated": False, "position": shas.index(sha),
+            "changed_files_truncated": False, "position": shas.index(sha), "pip_overrides": overrides,
         }
         with tempfile.TemporaryDirectory() as tmp:
             changed_path, raw = Path(tmp) / "changed.txt", Path(tmp) / "raw.jsonl"
