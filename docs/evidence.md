@@ -4,7 +4,7 @@ Companion to the [proposed standard](../README.md#the-proposed-standard). This d
 
 ## Summary
 
-- **Small fixtures detect what matters, if the checks are numerical.** On synthetic faults across six model families, frozen random fixtures with recorded logits, loss, and gradient checks caught 120 of 126 fault cases; a passing forward pass caught none. The misses were one model (Whisper) whose random fixture ignores its inputs; overfitting that fixture fixed it.
+- **Small fixtures detect what matters, if the checks are numerical.** On synthetic faults across six model families, frozen fixtures with recorded logits, loss, and gradient checks caught 126 of 126 fault cases when overfit and 120 of 126 when left random; a passing forward pass caught none. All random misses were Whisper, whose random fixture ignores its audio.
 - **The contract must call what users call.** Replaying eleven candidate Transformers regressions (eight reproducible), generic forward/generate checks missed every processor and tokenizer bug; the same small fixtures called through the affected public API caught them.
 - **No false alarms so far.** Fixtures frozen on today's `main` stayed clean across ten benign changes from the past two months.
 - **No fixture went non-finite, and real weights are not needed for detection.** Random, overfit, pruned real layers, and sliced real tensors were compared on the six families, in float32, bfloat16, and float16, on CPU and the A10G: 288 load-and-train checks, all finite. Overfit fixtures caught 126 of 126 fault cases, random 120, sliced (real tensors at fixture width) 41 of 42, pruned real layers 42 of 42 at 8–235× the size ([details](fixtures.md#choosing-the-weights)).

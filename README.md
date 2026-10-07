@@ -68,5 +68,5 @@ Run a CI-only pilot on 3–5 models, with existing tests kept running in paralle
 - [Full example](example/README.md): a runnable MIC for SmolLM text generation (three checkpoints, two fixtures) in Transformers and Transformers.js, with every part of the standard.
 - [Evidence](docs/evidence.md): what the local experiments and the historical regression replay show.
 - [Technical design](docs/design.md): contract layout, CI triggers, where code lives, checks, baselines, runner, pilot plan, open questions.
-- [Small fixtures](docs/fixtures.md): the fixture project, from today's tiny models to frozen random and overfit fixtures.
+- [Small fixtures](docs/fixtures.md): the fixture recipe (real config shrunk by layer pattern, copied processor files, overfit and frozen) and the experiments behind it.
 - [Agent walkthrough](docs/agent-walkthrough.md): a recorded run of an agent taking two Hub models to working code, every tool call included, with a prompt to repeat it in other agents.
