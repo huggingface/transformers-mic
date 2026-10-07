@@ -1,23 +1,23 @@
 # MICs * Model integration contracts
 
-**A proposed standard** for publishing, next to any model on the Hub, an executable check that the model works in a given framework, run by that framework's CI on every change.
+**A proposed standard** for publishing, next to any model on the Hub, an executable check that the model works in a given framework and can be run by that framework's CI.
 
 ## Summary
 
 We should publish a small, executable integration contract on the Hub for each usage path we want to support (an architecture and a task, across the checkpoints that share it), and run it from framework CI.
 
-A contract is ordinary user code: load the model, call the public API users call, report the result. It runs against small fixtures on every PR and against the real checkpoints later. The contract and fixtures live in Hugging Face-owned companion repositories on the Hub, not in the model repositories; each framework keeps its expected results next to its own tests:
+A contract is ordinary user code: load the model, call the public API users call, report the result. In the proposed Transformers flow, it runs against small fixtures on every PR and against the real checkpoints later. The contract and fixtures live in Hugging Face-owned companion repositories on the Hub, not in the model repositories; each framework keeps its expected results next to its own tests:
 
 - `HuggingFaceTB/SmolLM-135M`, `-360M`, and `-1.7B`: the real models, owned by the creator, unchanged;
 - [`hf-internal-testing/SmolLM-integration`](example/hub/SmolLM-integration): one contract for SmolLM text generation covering all three checkpoints, owned by Hugging Face;
 - [`hf-internal-testing/proto-SmolLM-slim`](https://huggingface.co/hf-internal-testing/proto-SmolLM-slim) and [`proto-SmolLM-1.7B-slim`](https://huggingface.co/hf-internal-testing/proto-SmolLM-1.7B-slim) (published; sources in [`example/hub/`](example/hub)): small fixtures, one per distinct tokenizer and config, owned by Hugging Face;
 - [`transformers/tests/contracts/`](example/transformers/tests/contracts): the fleet lock and Transformers' expected results, owned by Transformers maintainers.
 
-Framework CI fetches the contract and fixtures at pinned revisions and runs them: against each small fixture on every PR, where it runs on CPU in seconds, and against the real checkpoints after merge, nightly, and before release.
+Transformers CI would fetch the contract and fixtures at pinned revisions and run them: against each small fixture on every PR, where it runs on CPU in seconds, and against the real checkpoints after merge, nightly, and before release. Transformers.js has its own contract entry point and baselines; its CI triggers remain to be defined.
 
 **A passing slim check is only a fast regression signal. It does not mean that the real model passes.** Contracts can replace model-specific integration tests in `run-slow` by running against full checkpoints; the other slow framework tests remain. [Slim models in Transformers development and CI](docs/slim-models-in-transformers-ci.md) explains the impact on PRs, contract maintenance, and the fast and slow validation paths.
 
-![One MIC runs against slim fixtures for fast PR checks and real checkpoints for full-model checks.](docs/assets/mic-overview.svg)
+![A proposed link lets agents discover a model's MIC on the Hub. Transformers checks slim fixtures on PRs and real checkpoints in run-slow or nightly jobs; Transformers.js has its own contract entry point and baseline, with CI triggers still to define.](docs/assets/mic-overview.svg)
 
 **[Full example](example/README.md):** a complete, runnable MIC for SmolLM text generation in Transformers and Transformers.js: manifest, contract as doc-builder runnable markdown, shared fixtures, fleet locks, reviewed baselines in each framework, and a runner sketch.
 

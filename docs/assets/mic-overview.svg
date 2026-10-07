@@ -1,13 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
-  <title id="title">One model integration contract, two validation paths</title>
-  <desc id="description">The same Hub contract runs in fast pull request checks with slim fixtures and in run-slow or nightly checks with real checkpoints. Each path uses its own reviewed baseline from the framework repository. A slim pass is only a fast signal; a real-checkpoint run produces a model result.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" role="img" aria-labelledby="title description">
+  <title id="title">A model, its MIC, agents, and two framework integrations</title>
+  <desc id="description">A model page on the Hugging Face Hub points to its model integration contract through a proposed discovery link. Agents can look up the tested usage path. The contract has entries for Transformers and Transformers.js. Transformers runs fast pull request checks with slim fixtures and run-slow or nightly checks with real checkpoints. Transformers.js uses its own artifact and reviewed baseline; its CI triggers are still to be defined.</desc>
 
   <defs>
     <filter id="shadow" x="-20%" y="-30%" width="140%" height="170%">
       <feDropShadow dx="0" dy="7" stdDeviation="12" flood-color="#243b53" flood-opacity="0.07"/>
     </filter>
-    <marker id="branch-arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
-      <path d="M1 1 L7 4.5 L1 8" fill="none" stroke="#7990a6" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    <marker id="gray-arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M1 1 L7 4.5 L1 8" fill="none" stroke="#7d90a6" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
     </marker>
     <marker id="teal-arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
       <path d="M1 1 L7 4.5 L1 8" fill="none" stroke="#158d79" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
@@ -17,54 +17,80 @@
     </marker>
   </defs>
 
-  <rect width="1200" height="630" rx="26" fill="#f8fafc"/>
+  <g font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif">
+    <rect width="1200" height="700" rx="26" fill="#f8fafc"/>
 
-  <!-- A single versioned usage path on the Hub feeds both CI lanes. -->
-  <rect x="78" y="42" width="1044" height="198" rx="24" fill="#edf2f8" stroke="#dbe4ee" stroke-width="1.5"/>
-  <text x="112" y="82" fill="#52657d" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="15" font-weight="700" letter-spacing="2">HUGGING FACE HUB</text>
-  <rect x="399" y="104" width="402" height="112" rx="20" fill="#fff" stroke="#d5dfeb" stroke-width="1.5" filter="url(#shadow)"/>
-  <rect x="423" y="128" width="62" height="62" rx="18" fill="#fef3db"/>
-  <text x="454" y="169" text-anchor="middle" fill="#b36b00" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="26" font-weight="700">{ }</text>
-  <text x="508" y="151" fill="#172b45" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="26" font-weight="700">MIC contract</text>
-  <text x="508" y="182" fill="#667990" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="17">one public usage path</text>
+    <!-- Proposed Hub discovery: a model points to a tested usage path. -->
+    <rect x="60" y="36" width="760" height="226" rx="24" fill="#edf2f8" stroke="#dbe4ee" stroke-width="1.5"/>
+    <text x="88" y="77" fill="#52657d" font-size="15" font-weight="700" letter-spacing="2">HUGGING FACE HUB</text>
+    <rect x="84" y="105" width="220" height="112" rx="20" fill="#fff" stroke="#d5dfeb" stroke-width="1.5" filter="url(#shadow)"/>
+    <rect x="103" y="125" width="56" height="56" rx="17" fill="#e0edf9"/>
+    <circle cx="131" cy="153" r="13" fill="none" stroke="#547ca7" stroke-width="2.5"/>
+    <circle cx="131" cy="153" r="4" fill="#547ca7"/>
+    <text x="174" y="151" fill="#172b45" font-size="21" font-weight="700">Model</text>
+    <text x="174" y="179" fill="#667990" font-size="15">creator-owned</text>
 
-  <path d="M600 216 V269 M329 269 H871" fill="none" stroke="#95a8ba" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M329 269 V305" fill="none" stroke="#95a8ba" stroke-width="2.5" stroke-linecap="round" marker-end="url(#branch-arrow)"/>
-  <path d="M871 269 V305" fill="none" stroke="#95a8ba" stroke-width="2.5" stroke-linecap="round" marker-end="url(#branch-arrow)"/>
+    <path d="M315 161 H386" fill="none" stroke="#7d90a6" stroke-width="2.5" stroke-dasharray="6 5" stroke-linecap="round" marker-end="url(#gray-arrow)"/>
+    <text x="353" y="139" text-anchor="middle" fill="#667990" font-size="13" font-weight="600">links to</text>
 
-  <!-- Fast PR lane. -->
-  <rect x="78" y="318" width="502" height="242" rx="24" fill="#e9f7f3" stroke="#cbeadf" stroke-width="1.5"/>
-  <rect x="105" y="340" width="125" height="30" rx="15" fill="#d0ede4"/>
-  <text x="168" y="361" text-anchor="middle" fill="#147e6e" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14" font-weight="700" letter-spacing="0.8">FAST · PR</text>
-  <rect x="105" y="386" width="194" height="86" rx="17" fill="#fff" stroke="#c6e4da" stroke-width="1.4"/>
-  <text x="126" y="423" fill="#173c38" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="21" font-weight="700">Slim fixture</text>
-  <text x="126" y="449" fill="#65847d" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="15">HF-owned</text>
-  <path d="M308 429 H344" fill="none" stroke="#158d79" stroke-width="2.5" stroke-linecap="round" marker-end="url(#teal-arrow)"/>
-  <rect x="358" y="386" width="195" height="86" rx="17" fill="#fff" stroke="#c6e4da" stroke-width="1.4"/>
-  <text x="379" y="423" fill="#173c38" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="21" font-weight="700">Run MIC</text>
-  <text x="379" y="449" fill="#65847d" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="15">fixture baseline</text>
-  <path d="M455 473 V490" fill="none" stroke="#158d79" stroke-width="2.5" stroke-linecap="round" marker-end="url(#teal-arrow)"/>
-  <rect x="105" y="501" width="448" height="38" rx="13" fill="#d0ede4"/>
-  <circle cx="128" cy="520" r="8" fill="#16967f"/>
-  <path d="m124.5 520 2.5 2.6 4.7-5.3" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="147" y="526" fill="#176b5e" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" font-weight="700">Fast signal only</text>
+    <rect x="402" y="105" width="384" height="112" rx="20" fill="#fff" stroke="#d5dfeb" stroke-width="1.5" filter="url(#shadow)"/>
+    <rect x="423" y="128" width="62" height="62" rx="18" fill="#fef3db"/>
+    <text x="454" y="169" text-anchor="middle" fill="#b36b00" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="26" font-weight="700">{ }</text>
+    <text x="508" y="151" fill="#172b45" font-size="25" font-weight="700">MIC contract</text>
+    <text x="508" y="182" fill="#667990" font-size="16">tested usage path</text>
+    <text x="88" y="243" fill="#708299" font-size="13">Proposed model → contract link</text>
 
-  <!-- Full-checkpoint lane. -->
-  <rect x="620" y="318" width="502" height="242" rx="24" fill="#eef2fd" stroke="#d6def6" stroke-width="1.5"/>
-  <rect x="647" y="340" width="250" height="30" rx="15" fill="#dbe4ff"/>
-  <text x="772" y="361" text-anchor="middle" fill="#425dc7" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14" font-weight="700" letter-spacing="0.5">RUN-SLOW · NIGHTLY</text>
-  <rect x="647" y="386" width="194" height="86" rx="17" fill="#fff" stroke="#d5def4" stroke-width="1.4"/>
-  <text x="668" y="423" fill="#26365f" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="20" font-weight="700">Real checkpoint</text>
-  <text x="668" y="449" fill="#707fa4" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="15">creator-owned</text>
-  <path d="M850 429 H886" fill="none" stroke="#4d69d6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#blue-arrow)"/>
-  <rect x="900" y="386" width="195" height="86" rx="17" fill="#fff" stroke="#d5def4" stroke-width="1.4"/>
-  <text x="921" y="423" fill="#26365f" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="21" font-weight="700">Run MIC</text>
-  <text x="921" y="449" fill="#707fa4" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="15">model baseline</text>
-  <path d="M997 473 V490" fill="none" stroke="#4d69d6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#blue-arrow)"/>
-  <rect x="647" y="501" width="448" height="38" rx="13" fill="#dbe4ff"/>
-  <circle cx="670" cy="520" r="8" fill="#5f76dc"/>
-  <path d="m666.5 520 2.5 2.6 4.7-5.3" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="689" y="526" fill="#3e54b0" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" font-weight="700">Full-model result</text>
+    <!-- Agents ask the Hub for the tested path and retrieve the MIC. -->
+    <path d="M903 145 H836" fill="none" stroke="#7d90a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#gray-arrow)"/>
+    <path d="M836 180 H903" fill="none" stroke="#7d90a6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#gray-arrow)"/>
+    <rect x="918" y="105" width="226" height="112" rx="20" fill="#fff" stroke="#d5dfeb" stroke-width="1.5" filter="url(#shadow)"/>
+    <rect x="937" y="125" width="55" height="55" rx="17" fill="#eee8fa"/>
+    <circle cx="956" cy="148" r="3" fill="#8066b1"/>
+    <circle cx="973" cy="148" r="3" fill="#8066b1"/>
+    <path d="M953 161 Q965 170 977 161" fill="none" stroke="#8066b1" stroke-width="2.5" stroke-linecap="round"/>
+    <text x="1007" y="151" fill="#172b45" font-size="21" font-weight="700">Agents</text>
+    <text x="1007" y="179" fill="#667990" font-size="15">discover MICs</text>
+    <text x="1007" y="200" fill="#708299" font-size="12">proposed lookup</text>
 
-  <text x="600" y="605" text-anchor="middle" fill="#61748b" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="17">Reviewed baselines live in each framework repository</text>
+    <!-- The Hub contract has a framework-specific entry point in each consumer. -->
+    <path d="M594 217 V302 M410 302 H979" fill="none" stroke="#95a8ba" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M410 302 V327" fill="none" stroke="#95a8ba" stroke-width="2.5" stroke-linecap="round" marker-end="url(#gray-arrow)"/>
+    <path d="M979 302 V327" fill="none" stroke="#95a8ba" stroke-width="2.5" stroke-linecap="round" marker-end="url(#gray-arrow)"/>
+
+    <!-- Only Transformers CI has named trigger paths in this proposal. -->
+    <rect x="60" y="340" width="720" height="310" rx="24" fill="#e9f7f3" stroke="#cbeadf" stroke-width="1.5"/>
+    <text x="86" y="382" fill="#176b5e" font-size="19" font-weight="700" letter-spacing="0.5">TRANSFORMERS</text>
+    <text x="752" y="381" text-anchor="end" fill="#65847d" font-size="14">framework CI</text>
+
+    <rect x="84" y="405" width="324" height="216" rx="19" fill="#fff" stroke="#c6e4da" stroke-width="1.5"/>
+    <rect x="104" y="425" width="115" height="30" rx="15" fill="#d0ede4"/>
+    <text x="161" y="446" text-anchor="middle" fill="#147e6e" font-size="14" font-weight="700">FAST · PR</text>
+    <text x="108" y="490" fill="#173c38" font-size="22" font-weight="700">Slim fixture</text>
+    <text x="108" y="514" fill="#65847d" font-size="15">HF-owned · fixture baseline</text>
+    <path d="M246 529 V551" fill="none" stroke="#158d79" stroke-width="2.5" stroke-linecap="round" marker-end="url(#teal-arrow)"/>
+    <rect x="104" y="563" width="280" height="38" rx="13" fill="#d0ede4"/>
+    <text x="124" y="589" fill="#176b5e" font-size="18" font-weight="700">Fast signal only</text>
+
+    <rect x="432" y="405" width="324" height="216" rx="19" fill="#fff" stroke="#c6e4da" stroke-width="1.5"/>
+    <rect x="452" y="425" width="225" height="30" rx="15" fill="#d0ede4"/>
+    <text x="564" y="446" text-anchor="middle" fill="#147e6e" font-size="14" font-weight="700">RUN-SLOW · NIGHTLY</text>
+    <text x="456" y="490" fill="#173c38" font-size="22" font-weight="700">Real checkpoint</text>
+    <text x="456" y="514" fill="#65847d" font-size="15">creator-owned · model baseline</text>
+    <path d="M594 529 V551" fill="none" stroke="#158d79" stroke-width="2.5" stroke-linecap="round" marker-end="url(#teal-arrow)"/>
+    <rect x="452" y="563" width="280" height="38" rx="13" fill="#d0ede4"/>
+    <text x="472" y="589" fill="#176b5e" font-size="18" font-weight="700">Full-model result</text>
+
+    <!-- Transformers.js has its own artifacts and baselines; CI triggers are unspecified. -->
+    <rect x="814" y="340" width="330" height="310" rx="24" fill="#eef2fd" stroke="#d6def6" stroke-width="1.5"/>
+    <text x="839" y="382" fill="#425dc7" font-size="19" font-weight="700" letter-spacing="0.3">TRANSFORMERS.JS</text>
+    <rect x="839" y="405" width="280" height="216" rx="19" fill="#fff" stroke="#d5def4" stroke-width="1.5"/>
+    <text x="860" y="453" fill="#26365f" font-size="21" font-weight="700">ONNX artifact</text>
+    <path d="M979 468 V489" fill="none" stroke="#4d69d6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#blue-arrow)"/>
+    <text x="860" y="526" fill="#26365f" font-size="21" font-weight="700">Run its MIC</text>
+    <text x="860" y="552" fill="#707fa4" font-size="15">own reviewed baseline</text>
+    <rect x="859" y="575" width="240" height="29" rx="14.5" fill="#dbe4ff"/>
+    <text x="979" y="595" text-anchor="middle" fill="#425dc7" font-size="14" font-weight="700">CI triggers to define</text>
+
+    <text x="600" y="680" text-anchor="middle" fill="#61748b" font-size="16">Frameworks keep their own reviewed baselines</text>
+  </g>
 </svg>
