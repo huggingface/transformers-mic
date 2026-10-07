@@ -9,6 +9,7 @@
     python example/run.py ... --record                              # candidate baselines for review
     python example/run.py --framework transformers.js --variant webgpu-fp16 --golden cpu
     python example/run.py ... --output results.jsonl                # one result record per line
+    git diff --name-only A B | python example/run.py --framework transformers --fixtures-only --changed-files -
 
 For each contract in <framework>/tests/contracts/fleet.lock it reads the
 manifest from the pinned integration repo, expands the targets (each slim
@@ -26,7 +27,8 @@ process instead. Script contracts (Transformers.js) always run in their own proc
 --changed-files runs only the contracts the listed Transformers files can
 affect (select_contracts.py): a model directory selects the contracts whose
 fixtures use it, other library code selects all of them, and files outside the
-library select none.
+library select none. With --run-all every contract runs anyway and each record
+carries selected_by (null when not selected), to measure what selection misses.
 
 Fixtures are downloaded at the Hub revision the fleet lock pins (or taken
 from their local build folder when unpublished, or with --local-fixtures), and
@@ -359,6 +361,8 @@ def main():
     parser.add_argument("--output", type=Path, help="append result records to this JSON lines file")
     parser.add_argument("--changed-files", type=Path, metavar="FILE",
                         help="run only the contracts these changed Transformers files can affect (one path per line; - for stdin)")
+    parser.add_argument("--run-all", action="store_true",
+                        help="with --changed-files: run every contract anyway, recording selected_by (null if not selected)")
     args = parser.parse_args()
 
     lock_dir = HERE / args.framework / "tests/contracts"
@@ -406,7 +410,7 @@ def main():
         for name, contract in lock["contracts"].items():
             if args.contract and name not in args.contract:
                 continue
-            if selected_by is not None and name not in selected_by:
+            if selected_by is not None and name not in selected_by and not args.run_all:
                 continue
             root = (lock_dir / contract["integration"]["path"]).resolve()
             manifest = load(root / "integration.json", "integration")
@@ -416,7 +420,7 @@ def main():
                 "contract_revision": contract["integration"]["revision"],
                 "framework": args.framework,
                 "variant": args.variant,
-                **({"selected_by": selected_by[name]} if selected_by else {}),
+                **({"selected_by": selected_by.get(name)} if selected_by is not None else {}),
             }
             variant = integration["variants"].get(args.variant)
             executor = Executor(root / integration["entry_point"], integration["format"], args.isolate, Path(tmp), local_patches)

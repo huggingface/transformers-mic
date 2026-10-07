@@ -25,6 +25,13 @@
   "variant": {
    "type": "string"
   },
+  "selected_by": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "description": "with --changed-files: why the change selects this contract, null if it does not"
+  },
   "target": {
    "type": "string"
   },
