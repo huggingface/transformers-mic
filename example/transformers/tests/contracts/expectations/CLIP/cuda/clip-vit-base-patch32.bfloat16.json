@@ -10,14 +10,25 @@
   "environment": {
    "python": "3.10.12",
    "transformers": "5.19.0.dev0",
-   "torch": "2.14.0+cu130",
-   "tokenizers": "0.23.2",
-   "numpy": "2.2.6",
+   "torch": "2.11.0+cu128",
+   "torchvision": "0.26.0+cu128",
+   "torchaudio": "2.11.0+cu128",
+   "tokenizers": "0.23.1",
+   "numpy": "1.26.4",
+   "pillow": "12.2.0",
+   "accelerate": "1.13.0",
+   "safetensors": "0.8.0",
+   "huggingface-hub": "1.32.0",
+   "sentencepiece": "0.2.1",
+   "protobuf": "6.33.6",
+   "librosa": "0.11.0",
+   "soundfile": "0.13.1",
+   "scipy": "1.15.3",
    "local_patches": [
     "masked-spec-embed-init"
    ]
   },
-  "seconds": 1.28,
+  "seconds": 8.29,
   "platform": "cuda"
  },
  "outputs": {
@@ -41,7 +52,7 @@
   "logits_per_image": [
    [
     28.625,
-    23.25,
+    23.125,
     23.625,
     24.5
    ],
@@ -49,23 +60,23 @@
     24.5,
     30.375,
     24.5,
-    25.875
+    25.75
    ],
    [
     25.375,
-    23.875,
+    24.0,
     30.375,
     25.0
    ],
    [
-    22.5,
+    22.625,
     23.625,
     23.625,
     31.125
    ]
   ],
   "training": {
-   "loss": 0.016357421875,
+   "loss": 0.01611328125,
    "gradients": {
     "visual_projection.weight": true,
     "text_projection.weight": true

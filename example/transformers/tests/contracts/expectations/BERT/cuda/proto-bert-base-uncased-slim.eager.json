@@ -6,18 +6,29 @@
   "variant": "eager",
   "target": "proto-bert-base-uncased-slim",
   "kind": "fixture",
-  "revision": "unpublished",
+  "revision": "ca05f68c78ce2e6778754ae4d33ab0c8abd457a6",
   "environment": {
    "python": "3.10.12",
    "transformers": "5.19.0.dev0",
-   "torch": "2.14.0+cu130",
-   "tokenizers": "0.23.2",
-   "numpy": "2.2.6",
+   "torch": "2.11.0+cu128",
+   "torchvision": "0.26.0+cu128",
+   "torchaudio": "2.11.0+cu128",
+   "tokenizers": "0.23.1",
+   "numpy": "1.26.4",
+   "pillow": "12.2.0",
+   "accelerate": "1.13.0",
+   "safetensors": "0.8.0",
+   "huggingface-hub": "1.32.0",
+   "sentencepiece": "0.2.1",
+   "protobuf": "6.33.6",
+   "librosa": "0.11.0",
+   "soundfile": "0.13.1",
+   "scipy": "1.15.3",
    "local_patches": [
     "masked-spec-embed-init"
    ]
   },
-  "seconds": 0.34,
+  "seconds": 6.59,
   "platform": "cuda"
  },
  "outputs": {
