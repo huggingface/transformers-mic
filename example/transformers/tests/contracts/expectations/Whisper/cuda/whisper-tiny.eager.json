@@ -25,10 +25,11 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
-    "masked-spec-embed-init"
+    "masked-spec-embed-init",
+    "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 8.15,
+  "seconds": 9.12,
   "platform": "cuda"
  },
  "outputs": {
@@ -86,6 +87,57 @@
     -12.329566955566406,
     -1.6896250247955322
    ]
+  ],
+  "timestamped_tokens": [
+   [
+    50364,
+    363,
+    26345,
+    0,
+    50414
+   ],
+   [
+    50364,
+    4621,
+    0,
+    50414,
+    50257
+   ],
+   [
+    50364,
+    1044,
+    291,
+    13,
+    50414
+   ],
+   [
+    50364,
+    2411,
+    50414,
+    50257,
+    50257
+   ]
+  ],
+  "timestamped_text": [
+   "<|0.00|> BOOM!<|1.00|>",
+   "<|0.00|> Bye!<|1.00|><|endoftext|>",
+   "<|0.00|> Thank you.<|1.00|>",
+   "<|0.00|> .<|1.00|><|endoftext|><|endoftext|>"
+  ],
+  "feature_extractor_config_keys": [
+   "chunk_length",
+   "feature_extractor_type",
+   "feature_size",
+   "hop_length",
+   "mel_filters",
+   "n_fft",
+   "n_samples",
+   "nb_max_frames",
+   "padding_side",
+   "padding_value",
+   "processor_class",
+   "return_attention_mask",
+   "sampling_rate"
   ],
   "training": {
    "loss": 3.3646082878112793,

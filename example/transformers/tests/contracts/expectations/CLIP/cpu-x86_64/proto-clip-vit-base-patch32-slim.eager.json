@@ -25,10 +25,11 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
-    "masked-spec-embed-init"
+    "masked-spec-embed-init",
+    "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 7.2,
+  "seconds": 7.17,
   "platform": "cpu-x86_64"
  },
  "outputs": {
@@ -74,6 +75,59 @@
     -0.10970831662416458,
     -0.47324153780937195
    ]
+  ],
+  "text_kwargs_input_ids": [
+   [
+    49406,
+    320,
+    1125,
+    539,
+    320,
+    736,
+    3999,
+    49407
+   ],
+   [
+    49406,
+    320,
+    1125,
+    539,
+    320,
+    1901,
+    3999,
+    49407
+   ],
+   [
+    49406,
+    320,
+    1125,
+    539,
+    320,
+    1746,
+    3999,
+    49407
+   ],
+   [
+    49406,
+    320,
+    1125,
+    539,
+    320,
+    4481,
+    3999,
+    49407
+   ]
+  ],
+  "image_processor_config_keys": [
+   "crop_size",
+   "do_center_crop",
+   "do_normalize",
+   "do_resize",
+   "feature_extractor_type",
+   "image_mean",
+   "image_std",
+   "resample",
+   "size"
   ],
   "training": {
    "loss": 2.5255937576293945,

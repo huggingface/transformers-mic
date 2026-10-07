@@ -25,10 +25,11 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
-    "masked-spec-embed-init"
+    "masked-spec-embed-init",
+    "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 26.14,
+  "seconds": 27.48,
   "platform": "cuda"
  },
  "outputs": {

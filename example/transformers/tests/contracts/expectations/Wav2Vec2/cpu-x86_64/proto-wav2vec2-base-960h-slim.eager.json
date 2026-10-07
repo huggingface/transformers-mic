@@ -25,10 +25,11 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
-    "masked-spec-embed-init"
+    "masked-spec-embed-init",
+    "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 8.76,
+  "seconds": 9.15,
   "platform": "cpu-x86_64"
  },
  "outputs": {
@@ -6922,6 +6923,14 @@
      0.25023141503334045
     ]
    ]
+  ],
+  "feature_extractor_config_keys": [
+   "do_normalize",
+   "feature_size",
+   "padding_side",
+   "padding_value",
+   "return_attention_mask",
+   "sampling_rate"
   ],
   "training": {
    "loss": 560.339599609375,

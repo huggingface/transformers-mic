@@ -25,10 +25,11 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
-    "masked-spec-embed-init"
+    "masked-spec-embed-init",
+    "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 9.97,
+  "seconds": 10.17,
   "platform": "cpu-x86_64"
  },
  "outputs": {
@@ -142,6 +143,10 @@
     0.0,
     0.0
    ]
+  ],
+  "decoded_roundtrip": [
+   "Yes, it is.",
+   "Hello, world! How are you?"
   ],
   "training": {
    "loss": 12.861257553100586,
