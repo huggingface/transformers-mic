@@ -18,9 +18,9 @@ hf-internal-testing/proto-SmolLM-slim              # Hub, owned by Hugging Face:
   model.safetensors, config.json, tokenizer files copied unchanged, build.json
 transformers/tests/contracts/                # framework repo, owned by its maintainers: what to expect
   fleet.lock                                 # pinned contract, fixtures, checkpoints, artifacts, dependencies
-  expectations/SmolLM/cpu/proto-SmolLM-slim.json   # one reviewed baseline per target, platform, and variant
-  expectations/SmolLM/cpu/SmolLM-135M.json
-  expectations/SmolLM/cpu/SmolLM-135M.eager.json
+  expectations/SmolLM/cpu-arm64/proto-SmolLM-slim.json   # one reviewed baseline per target, platform, and variant
+  expectations/SmolLM/cpu-arm64/SmolLM-135M.json
+  expectations/SmolLM/cpu-arm64/SmolLM-135M.eager.json
 ```
 
 The contract module should look like ordinary user code. It loads a model, runs the public API we actually want users to call, and emits a small structured result. The runner, not the contract, compares that result with the framework's baseline.

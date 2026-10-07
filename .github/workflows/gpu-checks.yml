@@ -200,7 +200,7 @@ jobs:
           for f in example/transformers/tests/contracts/expectations/*/cuda/*.candidate.json; do mv "$f" "${f%.candidate.json}.json"; done
           for n in 2 3; do run check-default-run$n; done
           run check-eager --variant eager
-          run golden-cpu --golden cpu                              # GPU float32 vs the CPU baselines
+          run golden-cpu --golden cpu-arm64                          # GPU float32 vs the CPU baselines
           run golden-cuda-bfloat16 --variant bfloat16 --golden cuda  # bfloat16 vs GPU float32
           run fixtures-batched --fixtures-only
           run fixtures-isolated --fixtures-only --isolate

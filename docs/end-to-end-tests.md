@@ -43,7 +43,7 @@ The [full example](../example/README.md): one contract per usage path, written a
 
 **Variants:** `default` (the dtype and attention users get, e.g. SDPA), `eager`, `bfloat16`. Transformers.js (SmolLM only): `default` (CPU), `webgpu`, `webgpu-fp16`, `webgpu-q4f16`.
 
-**Baselines:** one per target, platform, and variant under `expectations/<contract>/<platform>/<target>[.<variant>].json`; `cpu` (Apple M5) and `cuda` (A10G) so far. `--record` writes candidates that must reproduce in a fresh process; a reviewer renames them to approve.
+**Baselines:** one per target, platform, and variant under `expectations/<contract>/<platform>/<target>[.<variant>].json`; `cpu-arm64` (Apple M5), `cpu-x86_64` (GitHub runners, recorded by [`cpu-baselines.yml`](../.github/workflows/cpu-baselines.yml)), and `cuda` (A10G). CPU baselines are per architecture because Whisper's numbers differ between them by more than `1e-4`; `--golden cpu` means this machine's CPU platform. `--record` writes candidates that must reproduce in a fresh process; a reviewer renames them to approve.
 
 ```sh
 python example/run.py --framework transformers                       # every contract and target, default variant
@@ -88,7 +88,7 @@ gh workflow run shadow.yml --repo huggingface/model-integration-contracts -f tra
 
 ## 4. GPU checks
 
-[`gpu-checks.yml`](../.github/workflows/gpu-checks.yml) runs on the Transformers ARC group `aws-g5-4xlarge-cache` (one A10G) in the `huggingface/transformers-all-latest-gpu` image. [`gpu-probe.yml`](../.github/workflows/gpu-probe.yml) only checks access and the environment.
+[`gpu-checks.yml`](../.github/workflows/gpu-checks.yml) runs on the Transformers ARC group `aws-g5-4xlarge-cache` (one A10G) in the `huggingface/transformers-all-latest-gpu` image. [`gpu-probe.yml`](../.github/workflows/gpu-probe.yml) only checks access and the environment. [`cpu-baselines.yml`](../.github/workflows/cpu-baselines.yml) records `cpu-x86_64` candidates on a GitHub runner, checks against them, and uploads them for review.
 
 | `matrix` | What runs |
 | --- | --- |

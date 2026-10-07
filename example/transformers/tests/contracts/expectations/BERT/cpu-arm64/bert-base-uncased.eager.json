@@ -3,7 +3,7 @@
   "contract": "hf-internal-testing/BERT-integration",
   "contract_revision": "unpublished",
   "framework": "transformers",
-  "variant": "default",
+  "variant": "eager",
   "target": "bert-base-uncased",
   "kind": "checkpoint",
   "revision": "86b5e0934494bd15c9632b12f734a8a67f723594",
@@ -14,14 +14,14 @@
    "tokenizers": "0.23.1",
    "numpy": "1.26.4"
   },
-  "seconds": 0.29,
-  "platform": "cpu"
+  "seconds": 0.32,
+  "platform": "cpu-arm64"
  },
  "outputs": {
   "runtime": {
    "device": "cpu",
    "dtype": "float32",
-   "attn_implementation": "sdpa"
+   "attn_implementation": "eager"
   },
   "predicted_tokens": [
    3000,
@@ -37,32 +37,32 @@
   ],
   "answer_logits": [
    [
-    12.346078872680664,
-    1.9429868459701538,
-    6.547845363616943,
-    3.6329305171966553
+    12.346074104309082,
+    1.9429826736450195,
+    6.547835826873779,
+    3.6329286098480225
    ],
    [
-    6.0643768310546875,
+    6.064375400543213,
     12.20837688446045,
-    6.488188743591309,
-    6.152795791625977
+    6.488185882568359,
+    6.152797222137451
    ],
    [
-    6.255679130554199,
-    4.63712739944458,
+    6.255683898925781,
+    4.637130260467529,
     12.204496383666992,
-    4.7241902351379395
+    4.724190711975098
    ],
    [
-    5.90989351272583,
-    3.585038185119629,
-    4.6298065185546875,
-    12.290736198425293
+    5.909890174865723,
+    3.5850353240966797,
+    4.629806041717529,
+    12.290733337402344
    ]
   ],
   "training": {
-   "loss": 1.6517921686172485,
+   "loss": 1.6517914533615112,
    "gradients": {
     "bert.encoder.layer.0.attention.self.query.weight": true,
     "bert.encoder.layer.0.intermediate.dense.weight": true

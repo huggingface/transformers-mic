@@ -41,9 +41,9 @@ A MIC is defined per usage path and covers every checkpoint that shares it. A co
      integrations/transformers.js/integration.js
    transformers/tests/contracts/               # framework repo: what to expect
      fleet.lock
-     expectations/SmolLM/cpu/proto-SmolLM-slim.json  # one baseline per target, platform, and variant
-     expectations/SmolLM/cpu/SmolLM-135M.json
-     expectations/SmolLM/cpu/SmolLM-135M.eager.json
+     expectations/SmolLM/cpu-arm64/proto-SmolLM-slim.json  # one baseline per target, platform, and variant
+     expectations/SmolLM/cpu-arm64/SmolLM-135M.json
+     expectations/SmolLM/cpu-arm64/SmolLM-135M.eager.json
    ```
 
 3. **A manifest readable without running code.** [`integration.json`](example/hub/SmolLM-integration/integration.json), validated by a schema (written during the pilot), declares the checkpoints and the fixture that covers each, and per framework the entry point, artifacts, supported variants, unsupported targets with a reason, resource requirements, and the comparison rule for each output.

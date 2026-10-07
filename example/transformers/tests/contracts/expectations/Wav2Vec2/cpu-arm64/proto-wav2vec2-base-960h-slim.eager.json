@@ -18,7 +18,7 @@
    ]
   },
   "seconds": 0.29,
-  "platform": "cpu"
+  "platform": "cpu-arm64"
  },
  "outputs": {
   "runtime": {

@@ -50,6 +50,10 @@ in isolated ones) and recorded in each result's environment.
 next to it, and a reviewer renames it. --golden <platform> checks a run against
 another platform's reviewed baseline: discrete outputs must match exactly;
 logits are reported as max delta, not compared.
+The platform is the device the contract reports, with the CPU architecture
+for CPUs (cpu-arm64, cpu-x86_64): numeric outputs differ across CPU
+architectures by more than 1e-4 for some fixtures (Whisper), so each has its
+own baselines. --golden cpu means this machine's CPU platform.
 """
 
 import argparse
@@ -335,6 +339,14 @@ def non_finite(rules, actual):
     ]
 
 
+def platform_class(device):
+    """The baseline platform: the device, with the architecture for CPUs."""
+    if device != "cpu":
+        return device
+    machine = os.uname().machine.lower()
+    return f"cpu-{ {'aarch64': 'arm64', 'amd64': 'x86_64'}.get(machine, machine) }"
+
+
 def rules_for(manifest, platform_dir):
     """The manifest's comparison rules with this platform's tolerance overrides."""
     rules = {name: dict(rule) for name, rule in manifest["outputs"].items()}
@@ -364,6 +376,8 @@ def main():
     parser.add_argument("--run-all", action="store_true",
                         help="with --changed-files: run every contract anyway, recording selected_by (null if not selected)")
     args = parser.parse_args()
+    if args.golden:
+        args.golden = platform_class(args.golden)
 
     lock_dir = HERE / args.framework / "tests/contracts"
     lock = load(lock_dir / "fleet.lock", "fleet-lock")
@@ -453,7 +467,7 @@ def main():
                     emit({**record, "status": "error", "failures": [stderr.strip()[-1500:] or "no result record"]})
                     continue
                 actual = json.loads(lines[-1])
-                platform = actual["runtime"]["device"]
+                platform = platform_class(actual["runtime"]["device"])
                 record["platform"] = platform
                 suffix = "" if args.variant == "default" or args.golden else f".{args.variant}"
                 platform_dir = lock_dir / "expectations" / name / (args.golden or platform)
