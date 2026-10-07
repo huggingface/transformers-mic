@@ -2,6 +2,8 @@
 
 This page is the Transformers contract of the SmolLM MIC and also a usage example. [doc-builder](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md) renders the `runnable` blocks below as documentation, and its pytest plugin runs them as written against `HuggingFaceTB/SmolLM-135M`. The MIC runner runs the same blocks against each slim fixture and each checkpoint in [`integration.json`](../../integration.json). Lines marked `# doc-builder: hide` only matter there: they swap in the pinned checkpoint or variant and print the result record. They do not appear in rendered docs.
 
+This example's results apply to the target and runtime recorded with its reviewed baseline. Fixture outputs differ from real-checkpoint outputs, and agreement on these prompts does not establish correctness on arbitrary prompts. To reproduce a tested run, use its pinned framework build and environment rather than infer compatibility from the model's serialization metadata. The enclosing [example](../../../../README.md) records the current local setup and remaining publication work.
+
 ## Generate
 
 ```py runnable:generate

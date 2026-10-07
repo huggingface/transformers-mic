@@ -38,6 +38,12 @@ PR-level contract checks need a model small enough to run on CPU in seconds that
 5. **Freeze and publish** at a pinned revision, marked as a test artifact and kept out of Hub search. Training and hardware only matter again on a rebuild. Overfit convergence depends on hardware: a different Wav2Vec2 seed failed on CPU and on the A10G.
 6. **Record baselines** on a known-good build under the default runtime (for example SDPA, with eager as a variant). Record discrete outputs, selected logits, loss, gradients on named modules, and whether an SGD step updates parameters, separately per platform class and dtype.
 
+## What a fixture result tells an agent
+
+A fixture pass checks the integration path exercised by that fixture. Its overfit answers are not reference outputs for the real checkpoint, and neither result establishes correctness on arbitrary new inputs. Keep fixture results separate from the real-checkpoint baselines and expose which target, inputs, and runtime were checked.
+
+The [agent walkthroughs](evidence.md#how-agents-use-the-hub-today) support tested usage examples, explicit environments, and reference checks; they do not independently validate this shrinking or overfitting recipe. That evidence comes from the experiments below and must be extended in the pilot. Agents should discover a model's contract through a link or lookup from the real model, while the fixture itself remains marked as a test artifact and excluded from candidate-model search.
+
 ## Choosing the weights
 
 Four ways to fill the same fixture were compared on the six families with identical faults, controls, and tolerances. Each saved fixture was also reloaded in float32, bfloat16, and float16 for inference and a training step, on the Mac CPU and on the A10G. Detection counts were identical on both ([script](../experiments/fixture_init.py), [CPU](../experiments/results/fixture_init.json), [GPU](../experiments/results/fixture_init_gpu.json)).

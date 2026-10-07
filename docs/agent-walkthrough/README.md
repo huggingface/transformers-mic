@@ -23,6 +23,36 @@ The Claude result was moved from `docs/agent-walkthrough.md`; its shared rerun p
 
 These are observations, not a speed ranking or a controlled benchmark. Existing caches, network access, package versions, agent prior knowledge, and tool-call counting differ between runs. Codex reused cached weights and shared setup between its two tasks; its log distinguishes nested tool calls from orchestration wrappers. Read each result's timing definitions, correctness checks, and limitations before comparing it with another run.
 
+## What the two runs support
+
+Both agents had to reconstruct a working usage path. For the same requested Microsoft Florence checkpoint, Claude substituted a community repository while Codex used an older pinned stack and an import-scanner workaround. Both relied on visual assessment rather than a reviewed model-output baseline. This supports tested examples, explicit environments, revision-specific compatibility, and reference checks as plausible ways to reduce guesswork; neither run measured the benefit of actually having a MIC.
+
+The [evidence assessment](../evidence.md#how-agents-use-the-hub-today) separates these model-integration issues from network, sandbox, package-tool, and reporting failures. A passing reference check would establish agreement on fixed inputs and a recorded runtime, not semantic correctness on arbitrary new inputs. The [design](../design.md#agent-discovery-and-reproduction) also requires a way to discover the contract from the real model; its initial scope defers remote-code models such as this Microsoft checkpoint.
+
+The result files remain historical records. This assessment and the proposed experiment below are subsequent analysis, not instructions the agents received during those runs.
+
+## Controlled comparison with and without a MIC
+
+This experiment has not been run. It tests the agent-reuse hypothesis separately from the CI pilot.
+
+1. Start fresh sessions of the same agent/model in both conditions. Use repeated runs with recorded model/version and settings, and avoid carrying conversation history or earlier results between conditions.
+2. Give both conditions comparable machines, permissions, network access, package availability, and initial cache contents. Record cold and warm cache runs separately. Pin the model revisions and reference images used for evaluation; do not let one condition inherit downloads from the other.
+3. Use the two tasks below in both conditions. Expose a discoverable MIC link or lookup from the model only in the treatment condition, with its executable example, tested environment, fixed inputs, and reviewed reference results. Record whether the agent finds it; merely supplying a separate contract repository is not proof of discovery.
+4. Use the same amended prompt in both conditions: replace only the third Rules bullet with the text below. All other task, image, logging, and stopping instructions stay unchanged. The original exploratory prompt prohibited integration-contract documents, so using it unchanged would invalidate a MIC treatment.
+5. Evaluate Task B on the requested repository; label substitutions and workarounds explicitly. For Task A, record the chosen model and resources, and compare its outcome separately. Use an independent evaluator with the approved reference checks for each tested runtime, plus a task-appropriate assessment of the generated output. Distinguish reproduced reference behavior from correctness on other inputs.
+6. Report success/failure for every run, time to the first independently verified result, code adaptations, failed attempts, discovery success, and incorrect or overstated success claims. Define a common tool-call counting unit, and separate model-integration effort from infrastructure failures and report-writing overhead. Report variation across runs rather than one speedup from two sessions.
+
+Replacement for the third Rules bullet, in both comparison conditions:
+
+```text
+- Don't read agent walkthroughs or previous agents' results. You may use
+  the Hub, PyPI, installed packages, your own knowledge, and model-specific
+  MICs, including their tested examples, environment locks, and reference
+  results, if they are available.
+```
+
+Keep each comparison prompt and result in a new file labeled with its condition and run number. Preserve the exploratory results above and the original prompt below.
+
 ## Prompts
 
 The following is the shared two-task prompt, including both input URLs and the required log format. Copy the entire block into the fresh session; do not supply the results above as context.

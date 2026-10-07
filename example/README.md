@@ -78,3 +78,11 @@ What building the example showed:
 - `run.py` starts a new process per target. The shared runner should batch targets per process, because imports dominate check cost ([evidence](../docs/evidence.md)). It should also add the manifest and result schemas, isolation, and the input-sensitivity gate ([design](../docs/design.md)).
 - Variants need a second, hidden `from_pretrained` call in the runnable block. A doc-builder hook for passing load arguments to a block would remove it.
 - Baselines here are CPU only. A GPU job would need its own reviewed baselines: on an A10G, CPU-recorded logits held for text models but not for convolutional ones, and lower precision changed outputs ([evidence](../docs/evidence.md#on-gpu)).
+
+## What this example offers an agent
+
+The manifest, runnable usage example, fleet lock, and reviewed baselines demonstrate the information an agent could use to choose a target, reproduce a tested path, and check fixed inputs. The [walkthroughs](../docs/evidence.md#how-agents-use-the-hub-today) show why that information is useful: agents inferred environments, reconciled conflicting loader guidance, and accepted plausible output without a reviewed reference.
+
+The local example does not yet provide discovery from a Hub model page, a published last-passing record, or a complete environment-bootstrap service. Broad manifest requirements such as `transformers>=5` are not a compatibility guarantee; an agent needs the framework build and full environment associated with the passing record. The [design](../docs/design.md#agent-discovery-and-reproduction) describes that proposed connection, and the [controlled comparison](../docs/agent-walkthrough/README.md#controlled-comparison-with-and-without-a-mic) is how to measure its benefit.
+
+A passing slim check validates the fixture's path and overfit outputs. A real-checkpoint baseline validates agreement on that checkpoint's fixed reference inputs and runtime; it does not guarantee semantic correctness for an arbitrary prompt. This native SmolLM example also does not cover the custom-code loader workaround needed for the Microsoft Florence walkthrough.

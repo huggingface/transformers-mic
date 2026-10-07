@@ -23,7 +23,9 @@ The first goal is CI, not a new Hub feature. If this works, the same contracts c
 
 Model compatibility is expensive to verify. Integration coverage depends on real checkpoints, large downloads, GPUs, framework-specific test code, or manual checks, so only a small part of the model fleet runs on each PR. We find regressions late: after merge, in nightly jobs, during a release, or from users.
 
-The code that validates a model is also separate from the code we show users, which is separate again from Hub snippets and other examples. Each copy drifts on its own: in a [recorded Claude run](docs/agent-walkthrough/claude-opus.md), the `microsoft/Florence-2-base` card snippet failed as written (a missing import, unlisted dependencies, and remote code that breaks on every `transformers` version tried), and neither model tried came with a way to check that its output was right.
+The code that validates a model is also separate from the code we show users, which is separate again from Hub snippets and other examples. Each copy drifts on its own. In two [recorded agent runs](docs/agent-walkthrough/README.md), Claude substituted the community Florence-2 checkpoint after the Microsoft path failed; Codex ran the requested Microsoft checkpoint with an older pinned environment and an import-scanner workaround. Both had to reconstruct a working usage path, and neither compared its results with a reviewed baseline.
+
+These observations support tested examples, explicit environments, and reference checks as ways to reduce agent guesswork. They do not yet measure an improvement from MICs: neither agent had one, and network, sandbox, and package-tool failures caused separate delays. The [assessment](docs/evidence.md#how-agents-use-the-hub-today) distinguishes those limits. Direct agent reuse also requires a discoverable link from a model to its tested path; a companion repository alone is not enough.
 
 ## The proposed standard
 
@@ -53,6 +55,8 @@ A MIC is defined per usage path and covers every checkpoint that shares it. A co
 
 The example's [`run.py`](example/run.py) sketches the shared runner. The manifest and result schemas and the real runner are what the pilot builds. Details are in the [technical design](docs/design.md).
 
+Matching a reviewed baseline establishes agreement on fixed inputs under the recorded runtime. It does not establish semantic correctness on arbitrary new inputs, and a passing slim fixture is not a passing result for the real checkpoint.
+
 ## Why on the Hub, owned by Hugging Face
 
 Contracts need maintenance: inputs change, fixtures get regenerated, checkpoints get added. That should not depend on write access to a creator's repository or on the creator maintaining framework CI. Hugging Face owns the contracts and fixtures; creators keep owning their models and change nothing. Expected results change mostly when a framework changes, so each framework owns its own, and the PR that changes behavior also shows the expectation diff.
@@ -62,6 +66,8 @@ On the Hub, a contract is one versioned place per usage path that every framewor
 ## Pilot run
 
 Run a CI-only pilot on 3–5 models, with existing tests kept running in parallel, and measure whether contracts catch real regressions, what they cost at fleet scale, and how much maintenance they create. Early local experiments are encouraging ([evidence](docs/evidence.md)). If the pilot confirms it, expand the fleet and then build the Hub-facing pieces.
+
+Measure agent reuse separately with the [controlled walkthrough recipe](docs/agent-walkthrough/README.md#controlled-comparison-with-and-without-a-mic): comparable environments, fresh sessions, and the same tasks with or without a discoverable MIC. Track completion on the requested repository, time to verified output, code changes, failed attempts, and incorrect success claims. Remote-code models such as the Microsoft Florence path are deferred in the initial CI scope; that first version should not be presented as already solving this case.
 
 ## Documents
 

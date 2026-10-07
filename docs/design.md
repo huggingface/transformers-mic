@@ -34,6 +34,8 @@ The manifest describes:
 - resource requirements;
 - the comparison rule for each output.
 
+Reference inputs must also have an immutable identity, such as a pinned asset revision and content hash, so a user or agent can reproduce the check rather than depend on a mutable example URL. Model, processor, and input revisions belong in the result record.
+
 The runner supplies pinned model and dependency revisions and executes the contract in CI.
 
 This should stay intentionally boring. The useful abstraction is the contract and runner, not a new testing DSL.
@@ -49,6 +51,8 @@ Where a framework's docs support it, the contract is written as [doc-builder run
 What stays outside the snippet is the expected answer. Exact-output asserts in the code (the usual runnable-block style) cannot hold across a slim fixture and a real checkpoint, or across CPU, GPU, and dtypes. Expected results therefore live in reviewed baselines in each framework repository ([why](evidence.md#on-gpu)).
 
 The hidden lines carry three things: the checkpoint or fixture the runner selects, the variant's load arguments, and the result record. Variants currently need a second, hidden load call. A doc-builder hook for parameterizing a block without changing its rendered form would remove it.
+
+The [agent walkthroughs](agent-walkthrough/README.md) support this reuse: both agents reconstructed a working loader and environment from several sources. A published example must identify the path actually tested. If a workaround is necessary, its code and environment must be explicit and reviewed; a passing patched example must not be presented as evidence that the unmodified model-card snippet passes.
 
 ### Grouping checkpoints
 
@@ -143,6 +147,8 @@ Training checks are only relevant to frameworks and models that support training
 The exact tolerances need to be calibrated per fixture and environment. Exact token equality should only be used where it is actually stable.
 
 Baselines are per platform class and dtype; the fixture is shared. On one A10G GPU, baselines recorded there held at `1e-4`, but CPU-recorded logits for convolutional models drifted up to 3e-2, and bfloat16 or float16 runs failed every float32 baseline, sometimes with different generated outputs ([evidence](evidence.md#on-gpu)). A baseline therefore records the device, dtype, and attention implementation it was recorded with, and the runner should refuse to compare across them; the [example runner](../example/run.py) fails a run whose runtime differs from its baseline.
+
+A match establishes agreement with reviewed behavior on those fixed inputs and that runtime. It does not establish semantic correctness on arbitrary inputs. Fixture and real-checkpoint results must remain distinct: an agent choosing a real model cannot treat a passing overfit fixture as a reference answer from that model. For vision tasks, reference records should include the input identity and the outputs being checked, such as labels and boxes with explicit comparison rules.
 
 The contract should run the configuration users get by default. If users get SDPA attention, the contract records and checks SDPA; eager can be an extra variant, not a replacement chosen for determinism. In the [historical regression replay](evidence.md), a UMT5 regression that made decoder self-attention non-causal under SDPA was invisible to eager-pinned checks on both the slim fixtures and the real checkpoint.
 
@@ -321,6 +327,8 @@ Does the same integration module work well enough to back docs, Hub snippets, Co
 
 That is useful upside, but it should not be required for the CI pilot to succeed.
 
+The two current walkthroughs identify plausible benefits, but neither used a MIC and their environments were not controlled. Use the [separate agent comparison recipe](agent-walkthrough/README.md#controlled-comparison-with-and-without-a-mic) to measure discovery, completion on the requested repository, time to verified output, code adaptations, failed attempts, and incorrect success claims. Keep infrastructure failures and report-writing overhead separate from model-integration work; do not infer savings from the whole session duration.
+
 ## Hub follow-up
 
 If the CI system works, the Hub can expose its results.
@@ -337,7 +345,7 @@ Possible follow-ups:
 
 A compatibility result should be an attestation for a specific set of revisions and environment, not a permanent “supported” badge.
 
-The [Claude walkthrough](agent-walkthrough/claude-opus.md) shows what this would replace: a card saying "install `transformers` from `main`" long after release, `transformersInfo` claiming native support for a repo that only works with (broken) remote code, and no link from that repo to the maintained native port in another organization.
+The [two walkthroughs](evidence.md#how-agents-use-the-hub-today) show why the record needs this scope. Claude substituted a native community checkpoint after the Microsoft Florence path failed; Codex ran the requested Microsoft checkpoint with an older pinned environment and an import-scanner workaround. Neither outcome supports a general claim that the repository works or does not work. The useful record names the exact checkpoint, runtime, calling code, and result, including whether a workaround was required.
 
 The record should include at least:
 
@@ -348,10 +356,25 @@ The record should include at least:
 - dependencies;
 - hardware/environment class;
 - variant;
+- reference-input identity and the exact usage code, including any reviewed workaround;
+- whether the result covers a fixture, the requested checkpoint, or a substituted/converted artifact;
 - result;
 - timestamp.
 
 None of this is necessary to start the CI work.
+
+### Agent discovery and reproduction
+
+A companion repository alone is not enough for agent reuse. An agent starting from a model page or model identifier needs a link or lookup to the relevant task/framework contract and a last-passing run record. That lookup can precede a full Tests tab; its presence and usefulness should be measured rather than assumed.
+
+The returned record should let an agent:
+
+1. Select the requested checkpoint and task, with resource requirements and clear unsupported or unvalidated configurations. A different repository must be labeled as a substitution or converted artifact.
+2. Reproduce a tested environment, including the framework build and dependency lock, Python/runtime version, platform, dtype, attention implementation, and any workaround. A broad package requirement or `config.transformers_version` is not a tested-environment record.
+3. Run the same versioned example that CI ran, using pinned sample inputs available for local execution.
+4. Find the reviewed baseline in the framework repository at its pinned revision, compare with it, and distinguish a fixture pass from a real-checkpoint pass.
+
+Keep slim fixtures out of model discovery while keeping their parent contract discoverable from the real model. A test-artifact tag and a link to a contract solve different problems. Passing results must carry their tested scope rather than a blanket compatibility badge. The current example is a local prototype; Hub discovery and published attestations are not implemented yet.
 
 ## Execution safety
 
@@ -362,6 +385,8 @@ The runner therefore needs isolation, resource limits, pinned revisions, secret 
 Reading a contract manifest must never execute integration code.
 
 Remote-code models should probably come later rather than complicating the first version.
+
+That scope excludes the Microsoft Florence path used in the walkthroughs. Their compatibility failures motivate a later extension; the initial native-model pilot should not claim to solve that case. When remote code is supported, pin its revision and record any loader workaround as part of the tested path.
 
 ## Decision for the first version
 

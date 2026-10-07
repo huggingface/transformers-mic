@@ -10,7 +10,9 @@ base_model:
 
 # MIC: SmolLM text generation
 
-Model integration contract for one usage path, batched greedy generation, across the SmolLM checkpoints that share it. Owned by Hugging Face. The model repositories are unchanged. This repository holds the contract code and the manifest; each framework keeps its own expected results. It is a test artifact, not a model, and is excluded from Hub search.
+Model integration contract for one usage path, batched greedy generation, across the SmolLM checkpoints that share it. The proposed owner is Hugging Face; this example has not been published. The model repositories are unchanged. This repository holds the contract code and the manifest; each framework keeps its own expected results. It is a test artifact and should be excluded from candidate-model search when published.
+
+For agent reuse, the real model must link to this contract or expose a lookup, together with a last-passing environment and the reviewed baseline's location. A contract hidden from model search still needs to be discoverable from its covered checkpoints. A fixture pass and a real-checkpoint pass have different scopes; either establishes agreement on fixed inputs and a recorded runtime, not correctness on arbitrary prompts.
 
 | File | What it is |
 | --- | --- |
