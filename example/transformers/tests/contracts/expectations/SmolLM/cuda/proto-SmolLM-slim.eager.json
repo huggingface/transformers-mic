@@ -1,0 +1,88 @@
+{
+ "recorded_with": {
+  "contract": "hf-internal-testing/SmolLM-integration",
+  "contract_revision": "unpublished",
+  "framework": "transformers",
+  "variant": "eager",
+  "target": "proto-SmolLM-slim",
+  "kind": "fixture",
+  "revision": "unpublished",
+  "environment": {
+   "python": "3.10.12",
+   "transformers": "5.19.0.dev0",
+   "torch": "2.14.0+cu130",
+   "tokenizers": "0.23.2",
+   "numpy": "2.2.6",
+   "local_patches": [
+    "masked-spec-embed-init"
+   ]
+  },
+  "seconds": 0.92,
+  "platform": "cuda"
+ },
+ "outputs": {
+  "runtime": {
+   "device": "cuda",
+   "dtype": "float32",
+   "attn_implementation": "eager"
+  },
+  "generated_tokens": [
+   [
+    7042,
+    0
+   ],
+   [
+    11452,
+    0
+   ],
+   [
+    7268,
+    0
+   ],
+   [
+    4528,
+    0
+   ]
+  ],
+  "generated_text": [
+   " Paris",
+   " Berlin",
+   " Rome",
+   " London"
+  ],
+  "next_token_logits": [
+   [
+    11.667832374572754,
+    3.9565482139587402,
+    4.142997741699219,
+    4.093367576599121
+   ],
+   [
+    2.8302929401397705,
+    11.563215255737305,
+    3.680344820022583,
+    3.9845268726348877
+   ],
+   [
+    3.785161256790161,
+    3.925632953643799,
+    11.399067878723145,
+    2.7391810417175293
+   ],
+   [
+    3.4422380924224854,
+    3.4308416843414307,
+    3.177485704421997,
+    11.49376392364502
+   ]
+  ],
+  "training": {
+   "loss": 9.284322738647461,
+   "gradients": {
+    "model.layers.0.self_attn.q_proj.weight": true,
+    "model.layers.0.mlp.down_proj.weight": true
+   },
+   "updated": true
+  }
+ }
+}

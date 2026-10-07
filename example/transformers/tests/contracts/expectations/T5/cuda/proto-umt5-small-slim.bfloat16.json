@@ -1,0 +1,144 @@
+{
+ "recorded_with": {
+  "contract": "hf-internal-testing/T5-integration",
+  "contract_revision": "unpublished",
+  "framework": "transformers",
+  "variant": "bfloat16",
+  "target": "proto-umt5-small-slim",
+  "kind": "fixture",
+  "revision": "unpublished",
+  "environment": {
+   "python": "3.10.12",
+   "transformers": "5.19.0.dev0",
+   "torch": "2.14.0+cu130",
+   "tokenizers": "0.23.2",
+   "numpy": "2.2.6",
+   "local_patches": [
+    "masked-spec-embed-init"
+   ]
+  },
+  "seconds": 2.19,
+  "platform": "cuda"
+ },
+ "outputs": {
+  "runtime": {
+   "device": "cuda",
+   "dtype": "bfloat16",
+   "attn_implementation": "sdpa"
+  },
+  "generated_tokens": [
+   [
+    0,
+    51767,
+    51767,
+    51767,
+    51767,
+    51767,
+    51767,
+    51767,
+    51767,
+    51767,
+    51767,
+    51767,
+    51767
+   ],
+   [
+    0,
+    51767,
+    51767,
+    51767,
+    51767,
+    51767,
+    51767,
+    51767,
+    51767,
+    51767,
+    51767,
+    51767,
+    51767
+   ],
+   [
+    0,
+    175990,
+    175990,
+    175990,
+    175990,
+    175990,
+    175990,
+    175990,
+    175990,
+    175990,
+    175990,
+    175990,
+    175990
+   ],
+   [
+    0,
+    159310,
+    159310,
+    159310,
+    159310,
+    159310,
+    159310,
+    159310,
+    159310,
+    159310,
+    159310,
+    159310,
+    159310
+   ]
+  ],
+  "generated_text": [
+   "\u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430",
+   "\u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430 \u0441\u0435\u043b\u0430",
+   "adaug adaug adaug adaug adaug adaug adaug adaug adaug adaug adaug adaug",
+   "vintern vintern vintern vintern vintern vintern vintern vintern vintern vintern vintern vintern"
+  ],
+  "label_logprobs": [
+   [
+    -13.122173309326172,
+    -12.111019134521484,
+    -13.719939231872559,
+    -12.224020004272461,
+    -12.132532119750977,
+    -11.029413223266602,
+    0.0
+   ],
+   [
+    -12.414332389831543,
+    -12.806427955627441,
+    -13.649127960205078,
+    -13.477734565734863,
+    -12.956212043762207,
+    -9.592361450195312,
+    -12.952919006347656
+   ],
+   [
+    -12.411694526672363,
+    -14.571028709411621,
+    -14.673826217651367,
+    -12.051545143127441,
+    -13.047586441040039,
+    -12.427095413208008,
+    0.0
+   ],
+   [
+    -12.316648483276367,
+    -13.970794677734375,
+    -11.1793851852417,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  ],
+  "training": {
+   "loss": 12.8125,
+   "gradients": {
+    "encoder.block.0.layer.0.SelfAttention.q.weight": true,
+    "decoder.block.0.layer.1.EncDecAttention.q.weight": true
+   },
+   "updated": true
+  }
+ }
+}

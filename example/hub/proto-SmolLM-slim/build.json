@@ -1,0 +1,54 @@
+{
+ "fixture": "hf-internal-testing/proto-SmolLM-slim",
+ "key": "5fe5094035d3b760e5fece7218637c822044d7726e58b0537ea0175ef4eb3084",
+ "key_fields": {
+  "model_type": "llama",
+  "architectures": [
+   "LlamaForCausalLM"
+  ],
+  "vocab_size": 49152,
+  "tie_word_embeddings": true,
+  "rope_theta": 10000.0,
+  "rope_scaling": null,
+  "max_position_embeddings": 2048,
+  "bos_token_id": 0,
+  "eos_token_id": 0,
+  "rms_norm_eps": 1e-05,
+  "hidden_act": "silu",
+  "attention_bias": false,
+  "mlp_bias": false,
+  "grouped_kv_heads": true
+ },
+ "covers": {
+  "HuggingFaceTB/SmolLM-135M": "1d461723eec654e65efdc40cf49301c89c0c92f4",
+  "HuggingFaceTB/SmolLM-360M": "59f7ef243ee09a72cbc14cb054393a3e3b771d41"
+ },
+ "built_from": {
+  "repo": "HuggingFaceTB/SmolLM-135M",
+  "revision": "1d461723eec654e65efdc40cf49301c89c0c92f4"
+ },
+ "seed": 17,
+ "training": {
+  "seconds": 0.43305258301552385,
+  "steps": 50,
+  "loss": 0.003646926721557975,
+  "converged": true
+ },
+ "copied_unchanged": [
+  "tokenizer.json",
+  "tokenizer_config.json",
+  "special_tokens_map.json",
+  "vocab.json",
+  "merges.txt"
+ ],
+ "sha256": {
+  "config.json": "c8226cace2f107b8e723740717c0168f9e7ea096e3de2b897e13ddd7affc59f9",
+  "generation_config.json": "793cfc022261e51f1a9f923d7c5d7c8bc6b1e0ed3dabda2f60f097d4ff693f2c",
+  "merges.txt": "0b54e8aa4e53d5383e2e4bc635a56b43f9647f7b13832d5d9ecd8f82dac4f510",
+  "model.safetensors": "613fa0bfc527b44166af8da3c70217999c78c9da746090048bf13485e8c5041d",
+  "special_tokens_map.json": "e786b595b9a23148bf1630df78d9037a048ea671e48bfd3549a1e3c233742bb3",
+  "tokenizer.json": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
+  "tokenizer_config.json": "238ad6b60d48e471624ea70bc79e92f2611844d5016471fee8c167854bcb98e8",
+  "vocab.json": "82b84012e3add4d01d12ba14442026e49b8cbbaead1f79ecf3d919784f82dc79"
+ }
+}

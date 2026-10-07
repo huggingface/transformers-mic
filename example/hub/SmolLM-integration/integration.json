@@ -5,24 +5,24 @@
   "architecture": "LlamaForCausalLM",
   "checkpoints": {
     "HuggingFaceTB/SmolLM-135M": {
-      "fixture": "hf-internal-testing/SmolLM-slim"
+      "fixture": "hf-internal-testing/proto-SmolLM-slim"
     },
     "HuggingFaceTB/SmolLM-360M": {
-      "fixture": "hf-internal-testing/SmolLM-slim"
+      "fixture": "hf-internal-testing/proto-SmolLM-slim"
     },
     "HuggingFaceTB/SmolLM-1.7B": {
-      "fixture": "hf-internal-testing/SmolLM-1.7B-slim"
+      "fixture": "hf-internal-testing/proto-SmolLM-1.7B-slim"
     }
   },
   "fixtures": {
-    "hf-internal-testing/SmolLM-slim": {
+    "hf-internal-testing/proto-SmolLM-slim": {
       "built_from": "HuggingFaceTB/SmolLM-135M",
       "covers": [
         "HuggingFaceTB/SmolLM-135M",
         "HuggingFaceTB/SmolLM-360M"
       ]
     },
-    "hf-internal-testing/SmolLM-1.7B-slim": {
+    "hf-internal-testing/proto-SmolLM-1.7B-slim": {
       "built_from": "HuggingFaceTB/SmolLM-1.7B",
       "covers": [
         "HuggingFaceTB/SmolLM-1.7B"

@@ -2,7 +2,7 @@
 
     python example/run.py --framework transformers                  # every contract, target, default variant
     python example/run.py --framework transformers --contract T5 --variant eager
-    python example/run.py --framework transformers --target t5-small-slim
+    python example/run.py --framework transformers --target proto-t5-small-slim
     python example/run.py --framework transformers --fixtures-only  # what a framework PR runs
     python example/run.py --framework transformers --isolate        # one process per target
     python example/run.py --framework transformers.js
@@ -23,8 +23,14 @@ build tests and renders. They run in this process, one after the other, so
 imports are paid once for the whole run; --isolate runs each target in its own
 process instead. Script contracts (Transformers.js) always run in their own process.
 
-Fixtures are checked against the file hashes in their build.json, which the
-fleet lock pins; a fixture that is missing or differs is an error, not a skip
+--changed-files runs only the contracts the listed Transformers files can
+affect (select_contracts.py): a model directory selects the contracts whose
+fixtures use it, other library code selects all of them, and files outside the
+library select none.
+
+Fixtures are downloaded at the Hub revision the fleet lock pins (or taken
+from their local build folder when unpublished, or with --local-fixtures), and
+checked against the file hashes in their build.json, which the lock also pins; a fixture that is missing or differs is an error, not a skip
 (build it with build_fixtures.py). Comparison tolerances come from the
 manifest, overridden per platform by expectations/<contract>/<platform>/tolerances.json,
 since GPU and lower-precision runs drift more than CPU float32.
@@ -97,7 +103,7 @@ def digest(files):
 
 
 def file_hashes(folder):
-    skip = ("README.md", "build.json")
+    skip = ("README.md", "build.json", ".gitattributes")
     return {
         f.name: hashlib.sha256(f.read_bytes()).hexdigest()
         for f in sorted(folder.iterdir())
@@ -134,13 +140,22 @@ def checkpoint_path(repo, revision):
     return snapshot_download(repo, revision=revision, ignore_patterns=ignore)
 
 
-def targets(lock_dir, contract, manifest, framework, fixtures_only=False):
+def fixture_folder(lock_dir, repo, pin, local):
+    """The pinned fixture: its Hub revision, or the local build folder if unpublished or asked for."""
+    if local or pin["revision"] == "unpublished":
+        return (lock_dir / pin["path"]).resolve()
+    from huggingface_hub import snapshot_download
+
+    return Path(snapshot_download(repo, revision=pin["revision"]))
+
+
+def targets(lock_dir, contract, manifest, framework, fixtures_only=False, local_fixtures=False):
     """Yield (target, kind, model, revision, problem) for every target of a contract."""
     integration = manifest["integrations"][framework]
     unsupported = integration.get("unsupported", {})
     if "fixtures" in integration["targets"]:
         for repo, pin in contract.get("fixtures", {}).items():
-            folder = (lock_dir / pin["path"]).resolve()
+            folder = fixture_folder(lock_dir, repo, pin, local_fixtures)
             yield short(repo), "fixture", str(folder), pin["revision"], fixture_problem(folder, pin)
     elif "fixtures" in unsupported:
         for repo in manifest["fixtures"]:
@@ -336,11 +351,14 @@ def main():
     parser.add_argument("--contract", action="append", help="run only this contract (repeatable)")
     parser.add_argument("--target", action="append", help="run only this target, fixture or checkpoint name (repeatable)")
     parser.add_argument("--fixtures-only", action="store_true", help="skip real checkpoints")
+    parser.add_argument("--local-fixtures", action="store_true", help="use the local build folders instead of the pinned Hub revisions")
     parser.add_argument("--variant", default="default")
     parser.add_argument("--isolate", action="store_true", help="run each target in its own process")
     parser.add_argument("--record", action="store_true", help="write candidate baselines for review")
     parser.add_argument("--golden", metavar="PLATFORM", help="check discrete outputs against this platform's baseline")
     parser.add_argument("--output", type=Path, help="append result records to this JSON lines file")
+    parser.add_argument("--changed-files", type=Path, metavar="FILE",
+                        help="run only the contracts these changed Transformers files can affect (one path per line; - for stdin)")
     args = parser.parse_args()
 
     lock_dir = HERE / args.framework / "tests/contracts"
@@ -349,6 +367,18 @@ def main():
     counts = {}
     status = 0
 
+    selected_by = None
+    if args.changed_files:
+        import select_contracts
+
+        lines = sys.stdin.read() if str(args.changed_files) == "-" else args.changed_files.read_text()
+        dirs = {
+            name: sorted({d for repo, pin in contract.get("fixtures", {}).items()
+                          for d in select_contracts.code_dirs(fixture_folder(lock_dir, repo, pin, args.local_fixtures))})
+            for name, contract in lock["contracts"].items()
+        }
+        selected_by = select_contracts.select([line.strip() for line in lines.splitlines() if line.strip()], dirs)
+        print(json.dumps({"selection": selected_by, "code_dirs": dirs}), file=sys.stderr, flush=True)
     known = lock.get("known_failures", {})
     local_patches = sorted(lock.get("local_patches", {}))
     if local_patches and args.framework == "transformers":
@@ -376,6 +406,8 @@ def main():
         for name, contract in lock["contracts"].items():
             if args.contract and name not in args.contract:
                 continue
+            if selected_by is not None and name not in selected_by:
+                continue
             root = (lock_dir / contract["integration"]["path"]).resolve()
             manifest = load(root / "integration.json", "integration")
             integration = manifest["integrations"][args.framework]
@@ -384,11 +416,12 @@ def main():
                 "contract_revision": contract["integration"]["revision"],
                 "framework": args.framework,
                 "variant": args.variant,
+                **({"selected_by": selected_by[name]} if selected_by else {}),
             }
             variant = integration["variants"].get(args.variant)
             executor = Executor(root / integration["entry_point"], integration["format"], args.isolate, Path(tmp), local_patches)
             env_info = None
-            for target, kind, model, revision, problem in targets(lock_dir, contract, manifest, args.framework, args.fixtures_only):
+            for target, kind, model, revision, problem in targets(lock_dir, contract, manifest, args.framework, args.fixtures_only, args.local_fixtures):
                 if args.target and target not in args.target:
                     continue
                 record = {**base, "target": target, "kind": kind, "revision": revision}

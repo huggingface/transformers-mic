@@ -1,0 +1,127 @@
+{
+ "fixture": "hf-internal-testing/proto-umt5-small-slim",
+ "key": "d2f1e2c7f6649f4449bb875377c87d5fc8e4db35e734686f10b75e84cc9bb20a",
+ "key_fields": {
+  "architectures": [
+   "UMT5ForConditionalGeneration"
+  ],
+  "output_hidden_states": false,
+  "return_dict": true,
+  "chunk_size_feed_forward": 0,
+  "is_encoder_decoder": true,
+  "id2label": {
+   "0": "LABEL_0",
+   "1": "LABEL_1"
+  },
+  "label2id": {
+   "LABEL_0": 0,
+   "LABEL_1": 1
+  },
+  "problem_type": null,
+  "vocab_size": 256384,
+  "d_model": 64,
+  "d_kv": 16,
+  "d_ff": 128,
+  "num_layers": 2,
+  "num_decoder_layers": 2,
+  "num_heads": 4,
+  "relative_attention_num_buckets": 32,
+  "relative_attention_max_distance": 128,
+  "dropout_rate": 0.1,
+  "layer_norm_epsilon": 1e-06,
+  "initializer_factor": 1.0,
+  "feed_forward_proj": "gated-gelu",
+  "use_cache": true,
+  "pad_token_id": 0,
+  "eos_token_id": 1,
+  "decoder_start_token_id": 0,
+  "classifier_dropout": 0.0,
+  "is_decoder": false,
+  "dense_act_fn": "gelu_new",
+  "is_gated_act": true,
+  "tie_word_embeddings": true,
+  "max_new_tokens": 64,
+  "scalable_attention": true,
+  "tokenizer_class": "T5Tokenizer",
+  "model_type": "umt5",
+  "output_attentions": false
+ },
+ "covers": {
+  "google/umt5-small": "8c63c2b77efbf8e41206a2c8d994846cc9392360"
+ },
+ "built_from": {
+  "repo": "google/umt5-small",
+  "revision": "8c63c2b77efbf8e41206a2c8d994846cc9392360"
+ },
+ "seed": 17,
+ "builder": "example/build_fixtures.py",
+ "model_class": "UMT5ForConditionalGeneration",
+ "parameters": 16606464,
+ "missing_parameters": [],
+ "captured": {
+  "call": "training step",
+  "inputs": [
+   "attention_mask",
+   "input_ids",
+   "labels"
+  ]
+ },
+ "weights": "random",
+ "gate": {
+  "random": {
+   "pass": true,
+   "accepted_insensitive": {},
+   "threshold": 0.001,
+   "deltas": {
+    "input_ids:roll_batch": 3.8824729919433594,
+    "input_ids:reverse": 4.70123291015625,
+    "attention_mask:all_ones": 3.08957576751709
+   },
+   "weakest": "attention_mask:all_ones",
+   "no_perturbation_defined": []
+  }
+ },
+ "numeric_health": {
+  "float32": {
+   "outputs_finite": true,
+   "loss_finite": true,
+   "gradients_finite": true,
+   "finite": true
+  },
+  "bfloat16": {
+   "outputs_finite": true,
+   "loss_finite": true,
+   "gradients_finite": true,
+   "finite": true
+  },
+  "float16": {
+   "outputs_finite": true,
+   "loss_finite": true,
+   "gradients_finite": true,
+   "finite": true
+  }
+ },
+ "copied_unchanged": [
+  "generation_config.json",
+  "special_tokens_map.json",
+  "spiece.model",
+  "tokenizer.json",
+  "tokenizer_config.json"
+ ],
+ "environment": {
+  "python": "3.10.19",
+  "machine": "arm64",
+  "torch": "2.11.0",
+  "transformers": "5.19.0.dev0",
+  "tokenizers": "0.23.1"
+ },
+ "sha256": {
+  "config.json": "d7861f2c8163d6843b61441b364712d9bbab56ace56ca1afb7470237316e9704",
+  "generation_config.json": "288cea4e1feab193062ecf0e99bbfb43d1648122260d517f9e8ca6c90e7b1a7f",
+  "model.safetensors": "928ed244d86b8d1eb51f9338551ca56c59f10779af98faf77e176fb7ceb786b5",
+  "special_tokens_map.json": "14ef492a69e59396e918521a5f8394af1acf9f8dddd47273693b2b42570dfd12",
+  "spiece.model": "e3909a67b780650b35cf529ac782ad2b6b26e6d1f849d3fbb6a872905f452458",
+  "tokenizer.json": "af904105ce1071b1202bba0059a841f4a7b85b48b6ec179c4948e3483476e0dd",
+  "tokenizer_config.json": "616015e2b6c26f9a98ae3171634518d440a46260ebc1115c2596792d33827bdc"
+ }
+}

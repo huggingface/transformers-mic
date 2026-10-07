@@ -5,11 +5,11 @@
   "architecture": "WhisperForConditionalGeneration",
   "checkpoints": {
     "openai/whisper-tiny": {
-      "fixture": "hf-internal-testing/whisper-tiny-slim"
+      "fixture": "hf-internal-testing/proto-whisper-tiny-slim"
     }
   },
   "fixtures": {
-    "hf-internal-testing/whisper-tiny-slim": {
+    "hf-internal-testing/proto-whisper-tiny-slim": {
       "built_from": "openai/whisper-tiny",
       "covers": [
         "openai/whisper-tiny"

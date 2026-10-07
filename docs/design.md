@@ -14,11 +14,11 @@ hf-internal-testing/SmolLM-integration       # Hub, owned by Hugging Face: what 
   integrations/
     transformers/usage.md                    # runnable markdown: documentation and test
     transformers.js/integration.js
-hf-internal-testing/SmolLM-slim              # Hub, owned by Hugging Face: one fixture per fixture key
+hf-internal-testing/proto-SmolLM-slim              # Hub, owned by Hugging Face: one fixture per fixture key
   model.safetensors, config.json, tokenizer files copied unchanged, build.json
 transformers/tests/contracts/                # framework repo, owned by its maintainers: what to expect
   fleet.lock                                 # pinned contract, fixtures, checkpoints, artifacts, dependencies
-  expectations/SmolLM/cpu/SmolLM-slim.json   # one reviewed baseline per target, platform, and variant
+  expectations/SmolLM/cpu/proto-SmolLM-slim.json   # one reviewed baseline per target, platform, and variant
   expectations/SmolLM/cpu/SmolLM-135M.json
   expectations/SmolLM/cpu/SmolLM-135M.eager.json
 ```
@@ -80,7 +80,7 @@ Those operations should not depend on getting write access to a creator reposito
 | --- | --- | --- | --- |
 | Real model, config, processor | `org/model` | `HuggingFaceTB/SmolLM-135M` | Creator |
 | Contract and manifest, per usage path | HF-owned integration repo | `hf-internal-testing/SmolLM-integration` | Hugging Face |
-| Small fixture, per fixture key | HF-owned fixture repo | `hf-internal-testing/SmolLM-slim` | Hugging Face |
+| Small fixture, per fixture key | HF-owned fixture repo | `hf-internal-testing/proto-SmolLM-slim` | Hugging Face |
 | Converted artifacts | HF-owned companion repo | `onnx-community/SmolLM-135M-ONNX` | Hugging Face |
 | Fleet lock and expected results | framework repo | `transformers/tests/contracts/` | Framework maintainers |
 
@@ -118,7 +118,7 @@ The contract code that runs is not in the Transformers repository. Transformers 
 | Piece | Lives in | Example |
 | --- | --- | --- |
 | Contract code and manifest | HF integration repo on the Hub | `hf-internal-testing/SmolLM-integration` |
-| Fixture weights, shrunk config, copied processor files | HF fixture repo on the Hub | `hf-internal-testing/SmolLM-slim` |
+| Fixture weights, shrunk config, copied processor files | HF fixture repo on the Hub | `hf-internal-testing/proto-SmolLM-slim` |
 | Shared runner (fetch, isolate, run, compare) | one shared package used by every framework | name to be decided |
 | Fleet lock, expected results, Transformers adapter, CI workflow | Transformers repo | `tests/contracts/fleet.lock`, `tests/contracts/expectations/`, `.github/workflows/contracts.yml` |
 | Framework-behavior tests (compile, cache, batching, generic pipelines) | Transformers repo, `tests/` | unchanged |

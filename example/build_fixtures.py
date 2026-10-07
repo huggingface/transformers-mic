@@ -1,7 +1,7 @@
 """Build slim fixtures for the contracts in a fleet lock, with the same recipe for every model.
 
     python example/build_fixtures.py                                   # every fixture with a build recipe
-    python example/build_fixtures.py --fixture whisper-tiny-slim
+    python example/build_fixtures.py --fixture proto-whisper-tiny-slim
     python example/build_fixtures.py --keys-only                       # check fixture keys, build nothing
 
 For each fixture in a contract's manifest that has a `build` recipe:

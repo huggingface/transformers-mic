@@ -10,8 +10,8 @@ Five more contracts (CLIP, BERT, T5 with UMT5, Whisper, Wav2Vec2) run through th
 | --- | --- | --- |
 | `HuggingFaceTB/SmolLM-135M`, `-360M`, `-1.7B` | Creator | not copied: unchanged, pinned in the fleet locks |
 | `hf-internal-testing/SmolLM-integration`: contract and manifest | Hugging Face | [`hub/SmolLM-integration/`](hub/SmolLM-integration) |
-| `hf-internal-testing/SmolLM-slim`: fixture for 135M and 360M | Hugging Face | [`hub/SmolLM-slim/`](hub/SmolLM-slim) |
-| `hf-internal-testing/SmolLM-1.7B-slim`: fixture for 1.7B | Hugging Face | [`hub/SmolLM-1.7B-slim/`](hub/SmolLM-1.7B-slim) |
+| `hf-internal-testing/proto-SmolLM-slim`: fixture for 135M and 360M | Hugging Face | [`hub/proto-SmolLM-slim/`](hub/proto-SmolLM-slim) |
+| `hf-internal-testing/proto-SmolLM-1.7B-slim`: fixture for 1.7B | Hugging Face | [`hub/proto-SmolLM-1.7B-slim/`](hub/proto-SmolLM-1.7B-slim) |
 | `onnx-community/SmolLM-135M-ONNX`, `-360M-ONNX` | Hugging Face | not copied: the conversions Transformers.js loads |
 | Transformers: fleet lock and expected results | Transformers maintainers | [`transformers/tests/contracts/`](transformers/tests/contracts) |
 | Transformers.js: fleet lock and expected results | Transformers.js maintainers | [`transformers.js/tests/contracts/`](transformers.js/tests/contracts) |
@@ -56,9 +56,9 @@ $PY example/run.py --framework transformers --variant eager
 $PY example/run.py --framework transformers.js
 $PY example/run.py --framework transformers.js --variant webgpu                    # WebGPU baselines
 $PY example/run.py --framework transformers.js --variant webgpu-fp16 --golden cpu  # tokens vs CPU golden
-$PY example/run.py --framework transformers --target SmolLM-slim --record
+$PY example/run.py --framework transformers --target proto-SmolLM-slim --record
 $PY example/run.py --framework transformers --fixtures-only      # what a framework PR runs
-$PY example/build_fixtures.py --fixture whisper-tiny-slim        # rebuild one fixture
+$PY example/build_fixtures.py --fixture proto-whisper-tiny-slim        # rebuild one fixture
 $PY example/replay.py d7ba937671 --contract T5                    # UMT5 #49135, bad vs fixed build
 ```
 
@@ -68,8 +68,8 @@ Results on CPU (Apple M5, Transformers `5.19.0.dev0`, torch 2.11.0, `@huggingfac
 
 | Framework | Target | Runtime | Generated (default variant) | Default | Eager | Seconds |
 | --- | --- | --- | --- | --- | --- | ---: |
-| Transformers | SmolLM-slim | float32 | " Paris", " Berlin", " Rome", " London" | pass | pass | 2.8 |
-| Transformers | SmolLM-1.7B-slim | float32 | same | pass | pass | 2.6 |
+| Transformers | proto-SmolLM-slim | float32 | " Paris", " Berlin", " Rome", " London" | pass | pass | 2.8 |
+| Transformers | proto-SmolLM-1.7B-slim | float32 | same | pass | pass | 2.6 |
 | Transformers | SmolLM-135M | bfloat16 | " Paris, the capital", " Berlin.\nThe", " Rome. It is", " London.\nThe" | pass | pass | 5.8 |
 | Transformers | SmolLM-360M | bfloat16 | " Paris.\nThe", " Berlin.\nThe", " Rome.\nThe", " London.\nThe" | pass | pass | 11.0 |
 | Transformers | SmolLM-1.7B | float32 | " Paris.\nThe", " Berlin.\nGermany", " Rome.\nThe", " London.\nThe" | pass | pass | 33.4 |
@@ -135,7 +135,7 @@ The same contracts and the same pinned fixtures ran on an NVIDIA A10G (torch 2.1
 
 ## Not real yet
 
-- The `hf-internal-testing` repositories are unpublished; the fleet locks point at the folders in [`hub/`](hub) (`"revision": "unpublished"`).
+- The fixtures are published as `hf-internal-testing/proto-*` and pinned by revision in the Transformers fleet lock; the integration repositories are still unpublished, and the fleet locks point at their folders in [`hub/`](hub) (`"revision": "unpublished"`).
 - Contracts run in the runner's own process, with no isolation beyond `--isolate` (one process per target). Selecting contracts from the files a framework PR changes is not implemented.
 - Fixtures built by `build_fixtures.py` are reproducible on one machine only: rebuilt on an x86 CPU, every fixture's weights differed from the pinned bytes. They must be published and pinned rather than rebuilt by each CI job; until then the GPU job downloads them from a release asset.
 - Variants need a second, hidden `from_pretrained` call in the runnable block. A doc-builder hook for passing load arguments to a block would remove it.
