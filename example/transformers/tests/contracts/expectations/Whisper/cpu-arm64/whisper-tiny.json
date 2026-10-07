@@ -9,12 +9,27 @@
   "revision": "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
   "environment": {
    "python": "3.10.19",
-   "transformers": "5.19.0.dev0",
+   "transformers": "5.16.0.dev0",
    "torch": "2.11.0",
+   "torchvision": "0.26.0",
+   "torchaudio": "2.11.0",
    "tokenizers": "0.23.1",
-   "numpy": "1.26.4"
+   "numpy": "1.26.4",
+   "pillow": "12.2.0",
+   "accelerate": "1.13.0",
+   "safetensors": "0.8.0",
+   "huggingface-hub": "1.32.0",
+   "sentencepiece": "0.2.1",
+   "protobuf": "6.33.6",
+   "librosa": "0.11.0",
+   "soundfile": "0.13.1",
+   "scipy": "1.15.3",
+   "local_patches": [
+    "masked-spec-embed-init",
+    "whisper-decode-tensor-batch"
+   ]
   },
-  "seconds": 1.01,
+  "seconds": 1.4,
   "platform": "cpu-arm64"
  },
  "outputs": {
@@ -72,6 +87,57 @@
     -12.329267501831055,
     -1.6897436380386353
    ]
+  ],
+  "timestamped_tokens": [
+   [
+    50364,
+    363,
+    26345,
+    0,
+    50414
+   ],
+   [
+    50364,
+    4621,
+    0,
+    50414,
+    50257
+   ],
+   [
+    50364,
+    1044,
+    291,
+    13,
+    50414
+   ],
+   [
+    50364,
+    2411,
+    50414,
+    50257,
+    50257
+   ]
+  ],
+  "timestamped_text": [
+   "<|0.00|> BOOM!<|1.00|>",
+   "<|0.00|> Bye!<|1.00|><|endoftext|>",
+   "<|0.00|> Thank you.<|1.00|>",
+   "<|0.00|> .<|1.00|><|endoftext|><|endoftext|>"
+  ],
+  "feature_extractor_config_keys": [
+   "chunk_length",
+   "feature_extractor_type",
+   "feature_size",
+   "hop_length",
+   "mel_filters",
+   "n_fft",
+   "n_samples",
+   "nb_max_frames",
+   "padding_side",
+   "padding_value",
+   "processor_class",
+   "return_attention_mask",
+   "sampling_rate"
   ],
   "training": {
    "loss": 3.3645946979522705,

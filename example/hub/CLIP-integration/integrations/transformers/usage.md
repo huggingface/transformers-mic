@@ -34,9 +34,23 @@ for name, index in zip(colors, best.tolist()):
     print(f"{name} image -> {captions[index]!r}")
 ```
 
+## Pass options to one modality
+
+A processor call can route options to one of its inputs, here padding to the text only. Integrations also read the preprocessing configuration without building a processor.
+
+```py runnable:clip:3
+from transformers.models.auto.image_processing_auto import get_image_processor_config
+
+text_only = processor(text=captions, images=images, return_tensors="pt", text_kwargs={"padding": True})
+print(text_only["input_ids"].shape)
+
+image_config = get_image_processor_config(model_id)
+print(sorted(image_config))
+```
+
 ## One training step
 
-```py runnable:clip:2
+```py runnable:clip:3
 model.train()
 optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 loss = model(**inputs, return_loss=True).loss
@@ -57,6 +71,8 @@ if os.environ.get("MIC_RUNNER"):  # doc-builder: hide
         "image_to_text": best.tolist(),
         "text_to_image": logits_per_image.argmax(dim=0).tolist(),
         "logits_per_image": logits_per_image.float().tolist(),
+        "text_kwargs_input_ids": text_only["input_ids"].tolist(),
+        "image_processor_config_keys": sorted(image_config),
         "training": {
             "loss": loss.item(),
             "gradients": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0) for n in checked},

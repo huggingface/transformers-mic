@@ -9,15 +9,27 @@
   "revision": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
   "environment": {
    "python": "3.10.19",
-   "transformers": "5.19.0.dev0",
+   "transformers": "5.16.0.dev0",
    "torch": "2.11.0",
+   "torchvision": "0.26.0",
+   "torchaudio": "2.11.0",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
+   "pillow": "12.2.0",
+   "accelerate": "1.13.0",
+   "safetensors": "0.8.0",
+   "huggingface-hub": "1.32.0",
+   "sentencepiece": "0.2.1",
+   "protobuf": "6.33.6",
+   "librosa": "0.11.0",
+   "soundfile": "0.13.1",
+   "scipy": "1.15.3",
    "local_patches": [
-    "masked-spec-embed-init"
+    "masked-spec-embed-init",
+    "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 0.54,
+  "seconds": 1.14,
   "platform": "cpu-arm64"
  },
  "outputs": {
@@ -6911,6 +6923,14 @@
      -3.0512137413024902
     ]
    ]
+  ],
+  "feature_extractor_config_keys": [
+   "do_normalize",
+   "feature_size",
+   "padding_side",
+   "padding_value",
+   "return_attention_mask",
+   "sampling_rate"
   ],
   "training": {
    "loss": 69.04936218261719,

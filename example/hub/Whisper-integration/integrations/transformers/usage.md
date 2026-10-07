@@ -35,9 +35,24 @@ generated = model.generate(inputs.input_features, language="en", task="transcrib
 print(processor.batch_decode(generated, skip_special_tokens=True))
 ```
 
+## Transcribe with timestamps
+
+Whisper can predict segment timestamps; decoding with `decode_with_timestamps=True` keeps them in the text. Integrations also read the feature extractor's configuration without building a processor.
+
+```py runnable:transcribe:3
+from transformers.models.auto.feature_extraction_auto import get_feature_extractor_config
+
+timestamped = model.generate(inputs.input_features, language="en", task="transcribe", return_timestamps=True, max_new_tokens=8)
+timestamped_text = processor.batch_decode(timestamped, decode_with_timestamps=True)
+print(timestamped_text)
+
+feature_config = get_feature_extractor_config(model_id)
+print(sorted(feature_config))
+```
+
 ## One training step
 
-```py runnable:transcribe:2
+```py runnable:transcribe:3
 transcripts = [" red", " green", " blue", " yellow"]
 processor.tokenizer.set_prefix_tokens(language="english", task="transcribe", predict_timestamps=False)
 targets = processor.tokenizer(transcripts, return_tensors="pt", padding=True).to(device)
@@ -69,6 +84,9 @@ if os.environ.get("MIC_RUNNER"):  # doc-builder: hide
         "generated_tokens": generated.tolist(),
         "generated_text": processor.batch_decode(generated, skip_special_tokens=True),
         "label_logprobs": label_logprobs.tolist(),
+        "timestamped_tokens": timestamped.tolist(),
+        "timestamped_text": timestamped_text,
+        "feature_extractor_config_keys": sorted(feature_config),
         "training": {
             "loss": loss.item(),
             "gradients": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0) for n in checked},

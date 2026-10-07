@@ -85,6 +85,9 @@
       "atol": 0.0001,
       "rtol": 0.0001
     },
+    "decoded_roundtrip": {
+      "compare": "exact"
+    },
     "training.loss": {
       "compare": "allclose",
       "atol": 0.0001,

@@ -9,12 +9,27 @@
   "revision": "3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268",
   "environment": {
    "python": "3.10.19",
-   "transformers": "5.19.0.dev0",
+   "transformers": "5.16.0.dev0",
    "torch": "2.11.0",
+   "torchvision": "0.26.0",
+   "torchaudio": "2.11.0",
    "tokenizers": "0.23.1",
-   "numpy": "1.26.4"
+   "numpy": "1.26.4",
+   "pillow": "12.2.0",
+   "accelerate": "1.13.0",
+   "safetensors": "0.8.0",
+   "huggingface-hub": "1.32.0",
+   "sentencepiece": "0.2.1",
+   "protobuf": "6.33.6",
+   "librosa": "0.11.0",
+   "soundfile": "0.13.1",
+   "scipy": "1.15.3",
+   "local_patches": [
+    "masked-spec-embed-init",
+    "whisper-decode-tensor-batch"
+   ]
   },
-  "seconds": 0.51,
+  "seconds": 1.6,
   "platform": "cpu-arm64"
  },
  "outputs": {
@@ -60,6 +75,59 @@
     24.103904724121094,
     31.41314125061035
    ]
+  ],
+  "text_kwargs_input_ids": [
+   [
+    49406,
+    320,
+    1125,
+    539,
+    320,
+    736,
+    3999,
+    49407
+   ],
+   [
+    49406,
+    320,
+    1125,
+    539,
+    320,
+    1901,
+    3999,
+    49407
+   ],
+   [
+    49406,
+    320,
+    1125,
+    539,
+    320,
+    1746,
+    3999,
+    49407
+   ],
+   [
+    49406,
+    320,
+    1125,
+    539,
+    320,
+    4481,
+    3999,
+    49407
+   ]
+  ],
+  "image_processor_config_keys": [
+   "crop_size",
+   "do_center_crop",
+   "do_normalize",
+   "do_resize",
+   "feature_extractor_type",
+   "image_mean",
+   "image_std",
+   "resample",
+   "size"
   ],
   "training": {
    "loss": 0.01594667136669159,

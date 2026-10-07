@@ -9,12 +9,27 @@
   "revision": "df1b051c49625cf57a3d0d8d3863ed4d13564fe4",
   "environment": {
    "python": "3.10.19",
-   "transformers": "5.19.0.dev0",
+   "transformers": "5.16.0.dev0",
    "torch": "2.11.0",
+   "torchvision": "0.26.0",
+   "torchaudio": "2.11.0",
    "tokenizers": "0.23.1",
-   "numpy": "1.26.4"
+   "numpy": "1.26.4",
+   "pillow": "12.2.0",
+   "accelerate": "1.13.0",
+   "safetensors": "0.8.0",
+   "huggingface-hub": "1.32.0",
+   "sentencepiece": "0.2.1",
+   "protobuf": "6.33.6",
+   "librosa": "0.11.0",
+   "soundfile": "0.13.1",
+   "scipy": "1.15.3",
+   "local_patches": [
+    "masked-spec-embed-init",
+    "whisper-decode-tensor-batch"
+   ]
   },
-  "seconds": 0.32,
+  "seconds": 0.53,
   "platform": "cpu-arm64"
  },
  "outputs": {
@@ -124,6 +139,10 @@
     0.0,
     0.0
    ]
+  ],
+  "decoded_roundtrip": [
+   "Yes, it is.",
+   "Hello, world! How are you?"
   ],
   "training": {
    "loss": 0.44009360671043396,

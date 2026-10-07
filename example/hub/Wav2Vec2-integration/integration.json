@@ -71,6 +71,9 @@
       "atol": 0.0001,
       "rtol": 0.0001
     },
+    "feature_extractor_config_keys": {
+      "compare": "exact"
+    },
     "training.loss": {
       "compare": "allclose",
       "atol": 0.0001,

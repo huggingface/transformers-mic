@@ -53,7 +53,32 @@ def masked_spec_embed_init():
     return patched
 
 
-PATCHES = {"masked-spec-embed-init": masked_spec_embed_init}
+def whisper_decode_tensor_batch():
+    """Decode a 2-D tensor with timestamps per sequence, as decode already does for a list of lists.
+
+    WhisperTokenizer.decode only treats its input as a batch when it is a list of
+    lists, so batch_decode(model.generate(...), decode_with_timestamps=True) merges
+    the rows into one string (one token per row) or raises (longer rows).
+    """
+    try:
+        from transformers.models.whisper.tokenization_whisper import WhisperTokenizer
+    except ImportError:
+        return []
+    original = WhisperTokenizer.decode
+    if getattr(original, "_mic_patched", False):
+        return []
+
+    def decode(self, token_ids, *args, original=original, **kwargs):
+        if kwargs.get("decode_with_timestamps") and getattr(token_ids, "ndim", 0) == 2:
+            token_ids = token_ids.tolist()
+        return original(self, token_ids, *args, **kwargs)
+
+    decode._mic_patched = True
+    WhisperTokenizer.decode = decode
+    return ["WhisperTokenizer"]
+
+
+PATCHES = {"masked-spec-embed-init": masked_spec_embed_init, "whisper-decode-tensor-batch": whisper_decode_tensor_batch}
 
 
 def apply(names):

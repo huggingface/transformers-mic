@@ -27,9 +27,19 @@ generated = model.generate(**inputs, max_new_tokens=12, do_sample=False)
 print(tokenizer.batch_decode(generated, skip_special_tokens=True))
 ```
 
+## Decode a batch of token ids
+
+`decode` accepts a batch and returns one string per sequence, cleaning up the spaces the tokenizer puts before punctuation.
+
+```py runnable:translate:3
+punctuated = ["Yes , it is .", "Hello , world ! How are you ?"]
+roundtrip = tokenizer.decode(tokenizer(punctuated).input_ids, skip_special_tokens=True)
+print(roundtrip)
+```
+
 ## One training step
 
-```py runnable:translate:2
+```py runnable:translate:3
 targets = ["Das Haus ist wunderbar.", "Ich lese gerne Bücher.", "Wo ist der Bahnhof?", "Danke!"]
 labels = tokenizer(text_target=targets, return_tensors="pt", padding=True).input_ids.to(device)
 labels[labels == tokenizer.pad_token_id] = -100
@@ -59,6 +69,7 @@ if os.environ.get("MIC_RUNNER"):  # doc-builder: hide
         "generated_tokens": generated.tolist(),
         "generated_text": tokenizer.batch_decode(generated, skip_special_tokens=True),
         "label_logprobs": label_logprobs.tolist(),
+        "decoded_roundtrip": roundtrip,
         "training": {
             "loss": loss.item(),
             "gradients": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0) for n in checked},

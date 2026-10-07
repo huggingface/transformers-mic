@@ -119,7 +119,8 @@
     }
   },
   "local_patches": {
-    "masked-spec-embed-init": "https://github.com/huggingface/transformers/issues/49385: masked_spec_embed is left uninitialized when a checkpoint lacks it (wav2vec2-base-960h does), so SpecAugment training reads garbage; initialize it with init.uniform_ like HuBERT. Remove and re-record the Wav2Vec2 baselines once fixed upstream."
+    "masked-spec-embed-init": "https://github.com/huggingface/transformers/issues/49385: masked_spec_embed is left uninitialized when a checkpoint lacks it (wav2vec2-base-960h does), so SpecAugment training reads garbage; initialize it with init.uniform_ like HuBERT. Remove and re-record the Wav2Vec2 baselines once fixed upstream.",
+    "whisper-decode-tensor-batch": "Not yet reported upstream: WhisperTokenizer.decode only batches a list of lists, so processor.batch_decode(model.generate(..., return_timestamps=True), decode_with_timestamps=True) merges the rows of the generated tensor into one string or raises; #47997 fixed lists only. Convert a 2-D tensor to a list first. Remove once fixed upstream."
   },
   "environment": {
     "python": "3.10",

@@ -37,9 +37,20 @@ predicted_ids = logits.argmax(dim=-1)
 print(processor.batch_decode(predicted_ids))
 ```
 
+## Read the preprocessing configuration
+
+Integrations read the feature extractor's configuration without building a processor.
+
+```py runnable:ctc:3
+from transformers.models.auto.feature_extraction_auto import get_feature_extractor_config
+
+feature_config = get_feature_extractor_config(model_id)
+print(sorted(feature_config))
+```
+
 ## One training step
 
-```py runnable:ctc:2
+```py runnable:ctc:3
 transcripts = ["RED", "GREEN", "BLUE", "YELLOW"]
 labels = processor(text=transcripts, return_tensors="pt", padding=True).input_ids.to(device)
 labels = labels.masked_fill(labels == processor.tokenizer.pad_token_id, -100)
@@ -65,6 +76,7 @@ if os.environ.get("MIC_RUNNER"):  # doc-builder: hide
         "predicted_ids": predicted_ids.tolist(),
         "predicted_text": processor.batch_decode(predicted_ids),
         "logits": logits.float().tolist(),
+        "feature_extractor_config_keys": sorted(feature_config),
         "training": {
             "loss": loss.item(),
             "gradients": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0) for n in checked},
