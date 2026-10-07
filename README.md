@@ -17,6 +17,8 @@ Framework CI fetches the contract and fixtures at pinned revisions and runs them
 
 **A passing slim check is only a fast regression signal. It does not mean that the real model passes.** Contracts can replace model-specific integration tests in `run-slow` by running against full checkpoints; the other slow framework tests remain. [Slim models in Transformers development and CI](docs/slim-models-in-transformers-ci.md) explains the impact on PRs, contract maintenance, and the fast and slow validation paths.
 
+![One MIC runs against slim fixtures for fast PR checks and real checkpoints for full-model checks.](docs/assets/mic-overview.svg)
+
 **[Full example](example/README.md):** a complete, runnable MIC for SmolLM text generation in Transformers and Transformers.js: manifest, contract as doc-builder runnable markdown, shared fixtures, fleet locks, reviewed baselines in each framework, and a runner sketch.
 
 The first goal is CI, not a new Hub feature. If this works, the same contracts can later back compatibility status, tested snippets, Colabs, APIs, or agent usage.

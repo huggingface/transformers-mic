@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">One model integration contract, two validation paths</title>
+  <desc id="description">The same Hub contract runs in fast pull request checks with slim fixtures and in run-slow or nightly checks with real checkpoints. Each path uses its own reviewed baseline from the framework repository. A slim pass is only a fast signal; a real-checkpoint run produces a model result.</desc>
+
+  <defs>
+    <filter id="shadow" x="-20%" y="-30%" width="140%" height="170%">
+      <feDropShadow dx="0" dy="7" stdDeviation="12" flood-color="#243b53" flood-opacity="0.07"/>
+    </filter>
+    <marker id="branch-arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M1 1 L7 4.5 L1 8" fill="none" stroke="#7990a6" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="teal-arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M1 1 L7 4.5 L1 8" fill="none" stroke="#158d79" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="blue-arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M1 1 L7 4.5 L1 8" fill="none" stroke="#4d69d6" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="630" rx="26" fill="#f8fafc"/>
+
+  <!-- A single versioned usage path on the Hub feeds both CI lanes. -->
+  <rect x="78" y="42" width="1044" height="198" rx="24" fill="#edf2f8" stroke="#dbe4ee" stroke-width="1.5"/>
+  <text x="112" y="82" fill="#52657d" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="15" font-weight="700" letter-spacing="2">HUGGING FACE HUB</text>
+  <rect x="399" y="104" width="402" height="112" rx="20" fill="#fff" stroke="#d5dfeb" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="423" y="128" width="62" height="62" rx="18" fill="#fef3db"/>
+  <text x="454" y="169" text-anchor="middle" fill="#b36b00" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="26" font-weight="700">{ }</text>
+  <text x="508" y="151" fill="#172b45" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="26" font-weight="700">MIC contract</text>
+  <text x="508" y="182" fill="#667990" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="17">one public usage path</text>
+
+  <path d="M600 216 V269 M329 269 H871" fill="none" stroke="#95a8ba" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M329 269 V305" fill="none" stroke="#95a8ba" stroke-width="2.5" stroke-linecap="round" marker-end="url(#branch-arrow)"/>
+  <path d="M871 269 V305" fill="none" stroke="#95a8ba" stroke-width="2.5" stroke-linecap="round" marker-end="url(#branch-arrow)"/>
+
+  <!-- Fast PR lane. -->
+  <rect x="78" y="318" width="502" height="242" rx="24" fill="#e9f7f3" stroke="#cbeadf" stroke-width="1.5"/>
+  <rect x="105" y="340" width="125" height="30" rx="15" fill="#d0ede4"/>
+  <text x="168" y="361" text-anchor="middle" fill="#147e6e" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14" font-weight="700" letter-spacing="0.8">FAST · PR</text>
+  <rect x="105" y="386" width="194" height="86" rx="17" fill="#fff" stroke="#c6e4da" stroke-width="1.4"/>
+  <text x="126" y="423" fill="#173c38" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="21" font-weight="700">Slim fixture</text>
+  <text x="126" y="449" fill="#65847d" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="15">HF-owned</text>
+  <path d="M308 429 H344" fill="none" stroke="#158d79" stroke-width="2.5" stroke-linecap="round" marker-end="url(#teal-arrow)"/>
+  <rect x="358" y="386" width="195" height="86" rx="17" fill="#fff" stroke="#c6e4da" stroke-width="1.4"/>
+  <text x="379" y="423" fill="#173c38" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="21" font-weight="700">Run MIC</text>
+  <text x="379" y="449" fill="#65847d" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="15">fixture baseline</text>
+  <path d="M455 473 V490" fill="none" stroke="#158d79" stroke-width="2.5" stroke-linecap="round" marker-end="url(#teal-arrow)"/>
+  <rect x="105" y="501" width="448" height="38" rx="13" fill="#d0ede4"/>
+  <circle cx="128" cy="520" r="8" fill="#16967f"/>
+  <path d="m124.5 520 2.5 2.6 4.7-5.3" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="147" y="526" fill="#176b5e" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" font-weight="700">Fast signal only</text>
+
+  <!-- Full-checkpoint lane. -->
+  <rect x="620" y="318" width="502" height="242" rx="24" fill="#eef2fd" stroke="#d6def6" stroke-width="1.5"/>
+  <rect x="647" y="340" width="250" height="30" rx="15" fill="#dbe4ff"/>
+  <text x="772" y="361" text-anchor="middle" fill="#425dc7" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="14" font-weight="700" letter-spacing="0.5">RUN-SLOW · NIGHTLY</text>
+  <rect x="647" y="386" width="194" height="86" rx="17" fill="#fff" stroke="#d5def4" stroke-width="1.4"/>
+  <text x="668" y="423" fill="#26365f" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="20" font-weight="700">Real checkpoint</text>
+  <text x="668" y="449" fill="#707fa4" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="15">creator-owned</text>
+  <path d="M850 429 H886" fill="none" stroke="#4d69d6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#blue-arrow)"/>
+  <rect x="900" y="386" width="195" height="86" rx="17" fill="#fff" stroke="#d5def4" stroke-width="1.4"/>
+  <text x="921" y="423" fill="#26365f" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="21" font-weight="700">Run MIC</text>
+  <text x="921" y="449" fill="#707fa4" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="15">model baseline</text>
+  <path d="M997 473 V490" fill="none" stroke="#4d69d6" stroke-width="2.5" stroke-linecap="round" marker-end="url(#blue-arrow)"/>
+  <rect x="647" y="501" width="448" height="38" rx="13" fill="#dbe4ff"/>
+  <circle cx="670" cy="520" r="8" fill="#5f76dc"/>
+  <path d="m666.5 520 2.5 2.6 4.7-5.3" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="689" y="526" fill="#3e54b0" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="18" font-weight="700">Full-model result</text>
+
+  <text x="600" y="605" text-anchor="middle" fill="#61748b" font-family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" font-size="17">Reviewed baselines live in each framework repository</text>
+</svg>
