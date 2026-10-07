@@ -84,7 +84,7 @@ python example/publish_fixtures.py                                  # upload fix
 - **Scheduled:** daily on Transformers `main`; changed files are those since the previous scheduled run.
 - **Dispatched:** any commit sha, branch, or `pr/<n>`; `pip_overrides` for old builds.
 
-- **Backfill:** [`shadow-backfill.yml`](../.github/workflows/shadow-backfill.yml) runs the same checks on every first-parent `main` commit in a date window, 10 parallel jobs, one install per job and one checkout per commit ([results](evidence.md#shadow-backfill): 563 commits, 2026-08-17 to 2026-10-07, one regression caught on every commit until its fix, no false alarm).
+- **Backfill:** [`shadow-backfill.yml`](../.github/workflows/shadow-backfill.yml) runs the same checks on every first-parent `main` commit in a date window, 10 parallel jobs, one install per job and one checkout per commit ([results](evidence.md#shadow-backfill): 1,468 commits, 2026-05-02 to 2026-10-07: UMT5 caught at its introducing commit, one benign change flagged, four regressions missed for lack of the affected call; per-commit dependency overrides from each commit's own requirements).
 
 ```sh
 gh workflow run shadow.yml --repo huggingface/model-integration-contracts -f transformers_ref=pr/49386

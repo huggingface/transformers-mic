@@ -124,7 +124,7 @@ This gives us both directions of compatibility testing:
 
 The important part is that PR checks are cheap enough to be required.
 
-The prototype runs these paths in its own repository, outside Transformers CI: a [shadow job](../.github/workflows/shadow.yml) runs the fixtures on Transformers `main` daily or on any commit or PR, the [shadow backfill](../.github/workflows/shadow-backfill.yml) runs them on every `main` commit in a past window, and a [nightly job](../.github/workflows/nightly.yml) runs the real checkpoints and fixtures on an A10G runner's CPU and GPU. Over seven weeks of `main` (563 commits), the fixture checks failed only on the UMT5 regression, until its fix ([evidence](evidence.md#shadow-backfill)).
+The prototype runs these paths in its own repository, outside Transformers CI: a [shadow job](../.github/workflows/shadow.yml) runs the fixtures on Transformers `main` daily or on any commit or PR, the [shadow backfill](../.github/workflows/shadow-backfill.yml) runs them on every `main` commit in a past window, and a [nightly job](../.github/workflows/nightly.yml) runs the real checkpoints and fixtures on an A10G runner's CPU and GPU. Over five months of `main` (1,468 commits), the fixture checks caught the UMT5 regression on its introducing commit and flagged one benign change ([evidence](evidence.md#shadow-backfill)).
 
 ## Where the code lives
 
@@ -325,7 +325,7 @@ We should replay documented historical regressions and verify each one against:
 
 A synthetic fault suite is not enough. The [first replay](evidence.md) is a start; the pilot should extend it with GPU-specific regressions and with bugs found by the existing nightly and slow tests.
 
-Replaying contracts on a framework's own history measures the same thing without picking cases: the [shadow backfill](evidence.md#shadow-backfill) ran the fixtures on every `main` commit of a date window, frozen contracts and baselines, and records per commit what failed and what the changed-file selection would have run. Seven weeks contained one regression (UMT5), caught on every commit until its fix; a window in which regressions are introduced is still needed to measure what selection misses.
+Replaying contracts on a framework's own history measures the same thing without picking cases: the [shadow backfill](evidence.md#shadow-backfill) ran the fixtures on every `main` commit of a date window, frozen contracts and baselines, and records per commit what failed and what the changed-file selection would have run. Over five months (1,468 commits), the one regression the contracts cover (UMT5) failed from its introducing commit to its fix; four regressions in the same families were missed because no contract makes the affected call; selection picked the affected contract on every commit that changed a result.
 
 ### Cost
 
@@ -353,7 +353,7 @@ This is probably the biggest unknown.
 
 How often do we get actionable failures versus noise?
 
-Track false positives, time to diagnose, and time to fix. The backfill gives a first baseline: over 563 `main` commits, no false positive on 8 fixtures and no baseline update; each failure in a future window should be classified the same way.
+Track false positives, time to diagnose, and time to fix. The backfill gives a first baseline: over 1,468 `main` commits, one false positive on 8 fixtures (a load-time RNG shift moving the Wav2Vec2 fixture's training loss) and one intended change (T5-family SDPA); each failure in a future window should be classified the same way.
 
 ### Reuse
 
