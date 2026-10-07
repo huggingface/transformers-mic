@@ -24,11 +24,6 @@ on:
         required: false
         type: string
         default: text clip bert t5 whisper wav2vec2
-      fixtures_release:
-        description: "contracts: release tag holding the pinned fixtures (fixtures.tar.gz)"
-        required: false
-        type: string
-        default: fixtures-40a5b2f
       matrix:
         description: "full: everything below · tf32: CPU baselines checked on GPU in float32, cuDNN TF32 on vs off · init: fixture_init.py (random/overfit/pruned/sliced) on GPU · contracts: the example runner's six contracts on GPU (record, stability, CPU golden, bfloat16)"
         required: false
@@ -172,24 +167,12 @@ jobs:
             --targets real --output "$OUT/cost-bfloat16.json"
 
       # ---- contracts: the example runner on GPU -------------------------------
-      - name: Contract runner dependencies and pinned fixtures
+      - name: Contract runner dependencies
         if: inputs.matrix == 'contracts'
         working-directory: .
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           python3 -m pip install --quiet "git+https://github.com/huggingface/doc-builder" jsonschema
-          # The fixtures are not in git; the exact pinned bytes come from a release asset.
-          python3 - <<'EOF'
-          import json, os, urllib.request
-          api = f"https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ inputs.fixtures_release }}"
-          headers = {"Authorization": f"Bearer {os.environ['GH_TOKEN']}", "Accept": "application/vnd.github+json"}
-          release = json.load(urllib.request.urlopen(urllib.request.Request(api, headers=headers)))
-          asset = next(a for a in release["assets"] if a["name"] == "fixtures.tar.gz")
-          request = urllib.request.Request(asset["url"], headers={**headers, "Accept": "application/octet-stream"})
-          open("/tmp/fixtures.tar.gz", "wb").write(urllib.request.urlopen(request).read())
-          EOF
-          tar -xzf /tmp/fixtures.tar.gz -C example/hub
+          # The runner downloads the fixtures from the Hub at the revisions the fleet lock pins.
           python3 example/run.py --help > /dev/null
 
       - name: Rebuild fixtures on this machine's CPU (are they reproducible?)
