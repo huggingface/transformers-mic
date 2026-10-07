@@ -136,7 +136,8 @@ The same contracts and the same pinned fixtures ran on an NVIDIA A10G (torch 2.1
 ## Not real yet
 
 - The fixtures are published as `hf-internal-testing/proto-*` and pinned by revision in the Transformers fleet lock; the integration repositories are still unpublished, and the fleet locks point at their folders in [`hub/`](hub) (`"revision": "unpublished"`).
-- Contracts run in the runner's own process, with no isolation beyond `--isolate` (one process per target). Contracts are selected from the files a framework change touches ([`select_contracts.py`](select_contracts.py), `run.py --changed-files`), but no CI job uses the selection yet.
+- Contracts run in the runner's own process, with no isolation beyond `--isolate` (one process per target).
+- The shadow, backfill, and nightly jobs run in this repository, not in Transformers CI; the backfill over 563 `main` commits is in the [evidence](../docs/evidence.md#shadow-backfill). Contracts are selected from the files a framework change touches ([`select_contracts.py`](select_contracts.py), `run.py --changed-files`), but no CI job uses the selection yet.
 - Fixtures built by `build_fixtures.py` are reproducible on one machine only: rebuilt on an x86 CPU, every fixture's weights differed from the pinned bytes. So they are published and pinned rather than rebuilt by each CI job; the GPU and shadow jobs download them from the Hub.
 - Variants need a second, hidden `from_pretrained` call in the runnable block. A doc-builder hook for passing load arguments to a block would remove it.
 - Baselines here are CPU (Apple M5) and CUDA (A10G), plus WebGPU fp32 for Transformers.js. Whether the CPU baselines hold on x86 CPU runners is not checked yet.

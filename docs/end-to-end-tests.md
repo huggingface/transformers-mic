@@ -8,7 +8,8 @@ Every end-to-end check this repository runs: what it exercises, where it runs, a
 | --- | --- | --- | --- |
 | [Contract runner](#1-contract-runner) | Do the six MICs still pass on this Transformers build? | Mac CPU, A10G, GitHub CPU | [`example/run.py`](../example/run.py) |
 | [Fixture build gates](#2-fixture-build-gates) | Is a slim fixture good enough to catch faults? | Mac CPU | [`example/build_fixtures.py`](../example/build_fixtures.py) |
-| [Shadow job](#3-shadow-job) | What would contracts have caught on real Transformers commits and PRs? | GitHub CPU (x86) | [`shadow.yml`](../.github/workflows/shadow.yml) |
+| [Shadow job](#3-shadow-job) | What would contracts have caught on real Transformers commits and PRs? | GitHub CPU (x86) | [`shadow.yml`](../.github/workflows/shadow.yml), [`shadow-backfill.yml`](../.github/workflows/shadow-backfill.yml) |
+| [Nightly checkpoints](#4-gpu-checks) | Do the real checkpoints still pass on `main`, on CPU and GPU? | A10G runner (CPU and GPU) | [`nightly.yml`](../.github/workflows/nightly.yml) |
 | [GPU checks](#4-gpu-checks) | Do fixtures and baselines hold on CUDA, across dtypes and attention? | A10G | [`gpu-checks.yml`](../.github/workflows/gpu-checks.yml) |
 | [Historical regressions](#5-historical-regressions) | Would slim fixtures have caught bugs that actually shipped? | Mac CPU | [`experiments/replay_case.py`](../experiments/replay_case.py), [`usage_repros.py`](../experiments/usage_repros.py), [`example/replay.py`](../example/replay.py) |
 | [Synthetic faults](#6-synthetic-faults) | Random vs overfit vs other weight schemes, on injected faults | Mac CPU, A10G | [`experiments/experiment.py`](../experiments/experiment.py), [`fixture_init.py`](../experiments/fixture_init.py) |
@@ -83,17 +84,17 @@ python example/publish_fixtures.py                                  # upload fix
 - **Scheduled:** daily on Transformers `main`; changed files are those since the previous scheduled run.
 - **Dispatched:** any commit sha, branch, or `pr/<n>`; `pip_overrides` for old builds.
 
-- **Backfill:** [`shadow-backfill.yml`](../.github/workflows/shadow-backfill.yml) runs the same checks on every first-parent `main` commit in a date window, 10 parallel jobs, one install per job and one checkout per commit ([results](evidence.md#shadow-backfill)).
+- **Backfill:** [`shadow-backfill.yml`](../.github/workflows/shadow-backfill.yml) runs the same checks on every first-parent `main` commit in a date window, 10 parallel jobs, one install per job and one checkout per commit ([results](evidence.md#shadow-backfill): 563 commits, 2026-08-17 to 2026-10-07, one regression caught on every commit until its fix, no false alarm).
 
 ```sh
 gh workflow run shadow.yml --repo huggingface/model-integration-contracts -f transformers_ref=pr/49386
-gh workflow run shadow-backfill.yml --repo huggingface/model-integration-contracts -f since=2026-09-07 -f until=2026-10-08
+gh workflow run shadow-backfill.yml --repo huggingface/model-integration-contracts -f since=2026-08-17 -f until=2026-09-07
 gh workflow run shadow.yml --repo huggingface/model-integration-contracts -f transformers_ref=560f36cc56 -f pip_overrides=tokenizers==0.22.2
 ```
 
 ## 4. GPU checks
 
-[`gpu-checks.yml`](../.github/workflows/gpu-checks.yml) runs on the Transformers ARC group `aws-g5-4xlarge-cache` (one A10G) in the `huggingface/transformers-all-latest-gpu` image. [`gpu-probe.yml`](../.github/workflows/gpu-probe.yml) only checks access and the environment. [`cpu-baselines.yml`](../.github/workflows/cpu-baselines.yml) records `cpu-x86_64` candidates, checks against them, and uploads them for review, on a GitHub runner (`machine=github`, 7 GB RAM) or on the CPU of a GPU runner (`machine=gpu-host`, 64 GB, CPU-only torch).
+[`gpu-checks.yml`](../.github/workflows/gpu-checks.yml) runs on the Transformers ARC group `aws-g5-4xlarge-cache` (one A10G) in the `huggingface/transformers-all-latest-gpu` image. [`gpu-probe.yml`](../.github/workflows/gpu-probe.yml) only checks access and the environment. [`nightly.yml`](../.github/workflows/nightly.yml) runs every target (real checkpoints and fixtures) nightly on Transformers `main` with the fleet lock's environment and CUDA torch: on the runner's CPU with CUDA hidden (`cpu-x86_64`, default and eager) and on the GPU (`cuda`, default, eager, bfloat16), appending to `shadow-results` under `runs/nightly/`; `mode=record` writes `cuda` candidates instead. [`cpu-baselines.yml`](../.github/workflows/cpu-baselines.yml) records `cpu-x86_64` candidates, checks against them, and uploads them for review, on a GitHub runner (`machine=github`, 7 GB RAM) or on the CPU of a GPU runner (`machine=gpu-host`, 64 GB, CPU-only torch).
 
 | `matrix` | What runs |
 | --- | --- |

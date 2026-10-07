@@ -69,7 +69,7 @@ On the Hub, a contract is one versioned place per usage path that every framewor
 
 ## Pilot run
 
-Run a CI-only pilot on 3–5 models, with existing tests kept running in parallel, and measure whether contracts catch real regressions, what they cost at fleet scale, and how much maintenance they create. Early local experiments are encouraging ([evidence](docs/evidence.md)). If the pilot confirms it, expand the fleet and then build the Hub-facing pieces.
+Run a CI-only pilot on 3–5 models, with existing tests kept running in parallel, and measure whether contracts catch real regressions, what they cost at fleet scale, and how much maintenance they create. Early experiments are encouraging ([evidence](docs/evidence.md)): replayed on all 563 Transformers `main` commits of the last seven weeks, the six prototype contracts' fixtures flagged the one regression in that history (UMT5, [#49135](https://github.com/huggingface/transformers/pull/49135)) on every commit until its fix, raised no false alarm, and needed no baseline update, at about 15 s per commit on a CPU runner ([shadow backfill](docs/evidence.md#shadow-backfill)). If the pilot confirms it, expand the fleet and then build the Hub-facing pieces.
 
 Measure agent reuse separately with the [controlled walkthrough recipe](docs/agent-walkthrough/README.md#controlled-comparison-with-and-without-a-mic): comparable environments, fresh sessions, and the same tasks with or without a discoverable MIC. Track completion on the requested repository, time to verified output, code changes, failed attempts, and incorrect success claims. Remote-code models such as the Microsoft Florence path are deferred in the initial CI scope; that first version should not be presented as already solving this case.
 

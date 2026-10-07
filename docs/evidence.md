@@ -1,6 +1,6 @@
 # MICs: evidence so far
 
-Companion to the [proposed standard](../README.md#the-proposed-standard). This document collects what the local experiments and the historical regression replay show. The synthetic-fault experiments behind the fixture design are detailed in [Small fixtures](fixtures.md); mechanics are in the [technical design](design.md).
+Companion to the [proposed standard](../README.md#the-proposed-standard). This document collects what the local experiments, the historical regression replay, and the shadow backfill over Transformers `main` show. The synthetic-fault experiments behind the fixture design are detailed in [Small fixtures](fixtures.md); mechanics are in the [technical design](design.md).
 
 ## Summary
 
@@ -16,10 +16,10 @@ Companion to the [proposed standard](../README.md#the-proposed-standard). This d
 - **Random weights pass the input-sensitivity gate on five of six families.** With perturbations defined per input name and a threshold of 10× the comparison tolerance, the generic fixture builder kept random weights for CLIP, BERT, T5, UMT5, and Wav2Vec2 and overfit only Whisper, matching the synthetic-fault results. UMT5 #49135 was caught through the runner on a random fixture.
 - **Per-platform baselines remove the need for looser tolerances.** On an A10G, 16 targets × 3 variants (float32 default and eager, bfloat16) reproduced at `1e-4` on `cuda`. Drift above `1e-4` appeared only between platforms (CPU → GPU, up to 2e-3 from TF32; SmolLM-135M, bfloat16 by default, generated differently) or dtypes (bfloat16 → float32, no discrete output changed). Training losses with dropout do not carry across platforms ([numbers](../experiments/results/runner.json)).
 - **Fixtures must be published, not rebuilt.** Rebuilt on an x86 CPU, every fixture's weights differed from the bytes built on Apple M5, random ones included. They are now published as `hf-internal-testing/proto-*` and pinned by revision and file hashes.
-- **A month of Transformers `main`, replayed: one real regression, no false alarms.** The [shadow backfill](end-to-end-tests.md#3-shadow-job) ran the 8 fixture contracts on all 334 first-parent commits from 2026-09-07 to 2026-10-07 (GitHub x86 runners, pinned environment, about 15 s per commit). The only failure was `proto-umt5-small-slim` on the first 224 commits, the UMT5 causal-mask bug introduced on 2026-07-30 ([#47014](https://github.com/huggingface/transformers/pull/47014)); it turned green at its fix, [#49135](https://github.com/huggingface/transformers/pull/49135) on 2026-09-28, which the selection picked through `models/umt5`. The other 7 fixtures passed on every commit, as did UMT5 on the 110 commits after the fix: no baseline update in a month. Changed-file selection skipped every contract on 171 of 334 commits (51%) and selected all of them on most of the rest, since most library changes touch shared code ([details](#shadow-backfill)).
+- **Seven weeks of Transformers `main`, replayed: one real regression, no false alarms.** The [shadow backfill](#shadow-backfill) ran the 8 fixture contracts on all 563 first-parent commits from 2026-08-17 to 2026-10-07 (GitHub x86 runners, pinned environment, about 15 s per commit). The only failure was `proto-umt5-small-slim` on the first 453 commits: the UMT5 causal-mask bug introduced on 2026-07-30 ([#47014](https://github.com/huggingface/transformers/pull/47014)), green again from its fix ([#49135](https://github.com/huggingface/transformers/pull/49135), 2026-09-28), which the selection picked through `models/umt5`. Everything else passed on every commit, with no baseline update. Changed-file selection skipped every contract on 52% of commits and selected all of them on nearly all the rest.
 - **Batching makes slim checks cheap.** Eight fixture checks across six contracts take 4.9 s in one process vs 27.4 s with one process per target on the Mac, and 13.1 s vs 81.1 s on the GPU runner.
 
-These are small local experiments, not fleet-level evidence: ten model families, synthetic faults, eleven candidate regressions (eight reproducible), ten benign changes, CPU only for the replay, plus one GPU for stability and cost. The full case list, with commits and verdicts, is in [cases.json](../experiments/cases.json).
+These are small experiments, not fleet-level evidence: ten model families, synthetic faults, eleven candidate regressions (eight reproducible), ten benign changes, seven weeks of `main` on six contracts with one regression in them, CPU only for the replay and the backfill, plus one GPU for stability and cost. The full case list, with commits and verdicts, is in [cases.json](../experiments/cases.json).
 
 ## How agents use the Hub today
 
@@ -106,20 +106,20 @@ Not measured yet: CPU-only CI runners, environment setup, downloads from the Hub
 
 ## Shadow backfill
 
-[`shadow-backfill.yml`](../.github/workflows/shadow-backfill.yml) ran the fixture contracts, unchanged, on every first-parent commit of Transformers `main` from 2026-09-07 to 2026-10-07: 334 commits × 8 fixtures = 2,672 results, in 10 parallel jobs on GitHub-hosted x86 runners with the fleet lock's environment and the `cpu-x86_64` baselines. Each result records the commit's selection (`selected_by`, from its diff against its parent). Results are on the `shadow-results` branch (`runs/backfill/`).
+[`shadow-backfill.yml`](../.github/workflows/shadow-backfill.yml) ran the fixture contracts, unchanged, on every first-parent commit of Transformers `main` from 2026-08-17 to 2026-10-07: 563 commits × 8 fixtures = 4,504 results, with no runner error. Each window ran in 10 parallel jobs on GitHub-hosted x86 runners; each job installed the fleet lock's environment once, with Transformers editable, and checked out one commit after another. Baselines were the `cpu-x86_64` ones. Each result records the commit's selection (`selected_by`, from its diff against its parent) and is on the `shadow-results` branch (`runs/backfill/`). The window starts at 2026-08-17 because earlier builds need `tokenizers` 0.22, outside the pinned environment.
 
 | | Commits |
 | --- | --- |
-| Failing: `proto-umt5-small-slim` (UMT5 decoder not causal under SDPA, [#49135](https://github.com/huggingface/transformers/pull/49135)) | 224, from the start of the window to the fix on 2026-09-28 |
-| Any other failure | 0 |
-| Selection: no contract | 171 (51%) |
-| Selection: every contract (shared code or `setup.py`) | 157 |
-| Selection: one model directory (`llama`, `t5`, `umt5`, `wav2vec2`) | 6 |
+| Failing: `proto-umt5-small-slim` (UMT5 decoder not causal under SDPA, [#49135](https://github.com/huggingface/transformers/pull/49135)) | 453, from the start of the window to the fix on 2026-09-28 |
+| Any other failure or error | 0 |
+| Selection: no contract | 293 (52%) |
+| Selection: every contract (shared code or `setup.py`) | 261 (46%) |
+| Selection: some contracts (one model directory: `llama`, `t5`, `umt5`, `wav2vec2`) | 9 (2%) |
 
-- **The regression was caught and its fix confirmed.** The bug entered `main` on 2026-07-30 ([#47014](https://github.com/huggingface/transformers/pull/47014), before the window) and stayed for two months; the fixture fails on every commit until #49135, and the fix commit itself selected the T5 contract through `models/umt5`. A shadow run on #47014's merge commit, `560f36cc56`, fails the same way ([run](https://github.com/huggingface/model-integration-contracts/actions/runs/37621423818)). This is the bug the slim fixture caught in the [replay](#historical-regression-replay); the backfill shows it would have been caught on the introducing PR and every PR after it.
-- **No false alarms and no baseline churn.** Over 110 commits after the fix, and on every commit for the other 7 fixtures, nothing failed and no baseline had to be updated.
-- **Selection is coarse.** Half of all commits change nothing a contract uses (tests, docs, CI, other models). Nearly every other commit touches shared library code, which selects every contract; only 6 were narrowed to one model directory. Selection misses cannot be measured from this window: no regression was introduced inside it.
-- **Cost.** About 15 s per commit for all 8 fixtures on a 2-core runner, after a one-time install per job; the whole month took about 15 minutes of wall time.
+- **The regression was caught on every commit and its fix confirmed.** The bug entered `main` on 2026-07-30 ([#47014](https://github.com/huggingface/transformers/pull/47014), before the window) and stayed for two months. The fixture fails on every commit until #49135, and the fix commit itself selected the T5 contract through `models/umt5`. A shadow run on #47014's merge commit, `560f36cc56`, fails the same way ([run](https://github.com/huggingface/model-integration-contracts/actions/runs/37621423818)), so a non-blocking check on that PR would have flagged it two months before the fix. This is the bug the slim fixture caught in the [replay](#historical-regression-replay).
+- **No false alarms and no baseline churn.** On 110 commits after the fix, and on every commit for the other 7 fixtures, nothing failed and no baseline needed updating. The jobs landed on three CPU models (AMD EPYC 7763, 9V45, 9V74, the last two with native bfloat16), and the float32 fixture baselines held on all of them.
+- **Selection is coarse.** Half of all commits change nothing a contract uses (tests, docs, CI, other models). Nearly all the others touch shared library code, which selects every contract; 9 were narrowed to one model directory. Selection misses cannot be measured yet: no regression was introduced inside the window.
+- **Cost.** About 15 s per commit for all 8 fixtures on a 2-core runner, after a one-time install per job; each window took about 15 minutes of wall time.
 
 ## Historical regression replay
 
