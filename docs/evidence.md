@@ -14,7 +14,7 @@ These are small local experiments, not fleet-level evidence: ten model families,
 
 ## How agents use the Hub today
 
-A [recorded agent walkthrough](agent-walkthrough.md) took two vision models from the Hub to working code on a CPU-only Mac. It is one agent and one run per model, so it shows that these failure modes exist, not how often they occur:
+A [recorded Claude walkthrough](agent-walkthrough/claude-opus.md) took two vision models from the Hub to working code on a CPU-only Mac. It is one agent and one run per model, so it shows that these failure modes exist, not how often they occur:
 
 - **Card snippets break.** The `microsoft/Florence-2-base` snippet is missing `import torch`, needs dependencies the card does not list (`requests`, `einops`, `timm`), and its remote code fails on `transformers` 5.17, 4.57.6, and 4.41.2. The `Qwen/Qwen3.5-0.8B` card has no in-process snippet at all. A contract's usage module is executed in CI, so it cannot drift this way.
 - **Nobody can tell whether the output is right.** Both results were judged by eye. The UMT5 regression below produced fluent output from a non-causal decoder and was only caught by recorded baselines. Contract baselines are a correctness reference for users and agents, not only for CI.

@@ -23,7 +23,7 @@ The first goal is CI, not a new Hub feature. If this works, the same contracts c
 
 Model compatibility is expensive to verify. Integration coverage depends on real checkpoints, large downloads, GPUs, framework-specific test code, or manual checks, so only a small part of the model fleet runs on each PR. We find regressions late: after merge, in nightly jobs, during a release, or from users.
 
-The code that validates a model is also separate from the code we show users, which is separate again from Hub snippets and other examples. Each copy drifts on its own: in a [recorded agent run](docs/agent-walkthrough.md), the `microsoft/Florence-2-base` card snippet failed as written (a missing import, unlisted dependencies, and remote code that breaks on every `transformers` version tried), and neither model tried came with a way to check that its output was right.
+The code that validates a model is also separate from the code we show users, which is separate again from Hub snippets and other examples. Each copy drifts on its own: in a [recorded Claude run](docs/agent-walkthrough/claude-opus.md), the `microsoft/Florence-2-base` card snippet failed as written (a missing import, unlisted dependencies, and remote code that breaks on every `transformers` version tried), and neither model tried came with a way to check that its output was right.
 
 ## The proposed standard
 
@@ -69,4 +69,4 @@ Run a CI-only pilot on 3–5 models, with existing tests kept running in paralle
 - [Evidence](docs/evidence.md): what the local experiments and the historical regression replay show.
 - [Technical design](docs/design.md): contract layout, CI triggers, where code lives, checks, baselines, runner, pilot plan, open questions.
 - [Small fixtures](docs/fixtures.md): the fixture recipe (real config shrunk by layer pattern, copied processor files, overfit and frozen) and the experiments behind it.
-- [Agent walkthrough](docs/agent-walkthrough.md): a recorded run of an agent taking two Hub models to working code, every tool call included, with a prompt to repeat it in other agents.
+- [Agent walkthroughs](docs/agent-walkthrough/README.md): the shared recipe and prompts, with separate Claude Opus and Codex results recording local Hub inference, tool calls, outputs, and failures.

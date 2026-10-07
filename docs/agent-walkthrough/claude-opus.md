@@ -1,8 +1,8 @@
 # How an agent runs a Hub model today: a recorded walkthrough
 
-Companion to the [proposed standard](../README.md#the-proposed-standard). This is a step-by-step record of a coding agent (Claude Code, Opus 5.5) taking a model from the Hub to working code, with every tool call it made. It is meant as a baseline: which signals the agent used, where it guessed, what broke, and where tested contracts and better discoverability would have changed the path.
+Companion to the [proposed standard](../../README.md#the-proposed-standard). This is a step-by-step record of a coding agent (Claude Code, Opus 5.5) taking a model from the Hub to working code, with every tool call it made. It is meant as a baseline: which signals the agent used, where it guessed, what broke, and where tested contracts and better discoverability would have changed the path.
 
-Recorded on 2026-10-06 on an ARM Mac (10 cores, 32 GB, CPU only), starting with no Python environment containing `transformers`. The working scripts are in [`experiments/agent_run/`](../experiments/agent_run/).
+Recorded on 2026-10-06 on an ARM Mac (10 cores, 32 GB, CPU only), starting with no Python environment containing `transformers`. The working scripts are in [`experiments/agent_run/`](../../experiments/agent_run/).
 
 ## Summary
 
@@ -21,57 +21,12 @@ Main findings:
 2. **The working repo for Florence-2 is a different repo.** Native support lives in `florence-community/Florence-2-base`. Neither the Microsoft card nor its Hub metadata points there; the agent found it in a docstring inside the installed `transformers` package.
 3. **Hub metadata contradicts itself.** For `microsoft/Florence-2-base`, `transformersInfo` says `AutoModelForMultimodalLM` (native), while `config.auto_map` says remote code via `AutoModelForCausalLM`. Following `transformersInfo` with that repo fails in the processor.
 4. **Version information is stale or missing.** Qwen's card says "install from `main`" (true at release, not anymore). Florence-2's only version hint is `transformers_version: 4.41.0.dev0` in `config.json`. Its remote code failed on 5.17.0, on 4.57.6 (two different errors), and on 4.41.2, which asks for `flash_attn` on a Mac.
-5. **Nothing says what correct output is.** The agent judged success by eye. With a less famous image, or a subtly wrong model (for example the UMT5 SDPA bug in [Evidence](evidence.md)), it would have reported success anyway.
+5. **Nothing says what correct output is.** The agent judged success by eye. With a less famous image, or a subtly wrong model (for example the UMT5 SDPA bug in [Evidence](../evidence.md)), it would have reported success anyway.
 6. **Search needs agent-side filtering.** Sorting by downloads favors 8–30B models. The `num_parameters` filter lets GGUF repos (no safetensors metadata) and test fixtures such as `trl-internal-testing/tiny-*` through.
 
-## Prompt to re-run this with another agent
+## Recipe and prompt
 
-Run this in a fresh session, in an empty directory, without access to this repository, so the agent doesn't read this walkthrough first. Swap the two requests to test other models.
-
-````text
-You are going to do two small tasks that require running a model from the
-Hugging Face Hub locally, and keep a detailed log of HOW you do it. The log
-is the real deliverable: it will be compared with other agents to find out
-which Hub signals agents use and where they get stuck.
-
-Task A (you choose the model): "Caption an image locally on this machine
-with a small open model." Use this image:
-http://images.cocodataset.org/val2017/000000039769.jpg
-
-Task B (model is given): "Run microsoft/Florence-2-base on an image:
-produce a caption and object detection." Use this image:
-https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/transformers/tasks/car.jpg
-
-Rules:
-- Start from whatever is on this machine; create an isolated environment
-  if you need packages. Don't use a hosted inference API; run locally.
-- Work the way you normally would. Don't ask me questions; make reasonable
-  choices and record them.
-- Don't read any documents about "agent walkthroughs" or "integration
-  contracts" that you may find; work only from the Hub, PyPI, the installed
-  packages, and your own knowledge.
-- Stop a line of investigation after ~10 minutes without progress and
-  record that you abandoned it and why.
-
-Produce a Markdown file `agent-walkthrough.md` containing, for each task:
-1. A numbered list of EVERY tool call you made, in order: the exact command
-   or URL (full code for scripts you wrote), a timestamp, a 1–3 line summary
-   of the result (exact error text for failures), and the decision you made
-   from it.
-2. For every decision, the signal you relied on: model card text, card
-   snippet, Hub API field (name it, e.g. pipeline_tag, transformersInfo,
-   config.auto_map, tags), config.json field, PyPI, installed source code,
-   prior knowledge, or trial and error.
-3. Which model repo, library version, and code you finally used, and the
-   output it produced.
-4. How you judged whether the output was correct, and how confident you
-   are.
-5. Total tool calls and wall time to the first correct result, and any
-   time spent on paths you abandoned.
-End with a list of the places where missing, wrong, or contradictory Hub
-information cost you time, and what information would have let you skip
-steps.
-````
+The shared [recipe and two-task prompt](README.md#prompts) are maintained separately from this recorded result.
 
 ## Environment notes
 
@@ -184,7 +139,7 @@ Signals: installed package source (auto mappings). The Hub has no machine-readab
 
 ### A10. Write and run the script
 
-The agent wrote [`qwen3_5_caption.py`](../experiments/agent_run/qwen3_5_caption.py):
+The agent wrote [`qwen3_5_caption.py`](../../experiments/agent_run/qwen3_5_caption.py):
 
 ```python
 processor = AutoProcessor.from_pretrained(model_id)
@@ -278,7 +233,7 @@ Decision: the remote code is incompatible with `transformers` 5.x. Try the nativ
 
 ### B5. Native class on the Microsoft repo
 
-The agent wrote [`florence2_native.py`](../experiments/agent_run/florence2_native.py), which takes the repo as an argument and uses `AutoProcessor` + `AutoModelForMultimodalLM` without remote code, running `<CAPTION>` and `<OD>`.
+The agent wrote [`florence2_native.py`](../../experiments/agent_run/florence2_native.py), which takes the repo as an argument and uses `AutoProcessor` + `AutoModelForMultimodalLM` without remote code, running `<CAPTION>` and `<OD>`.
 
 ```sh
 env/bin/python flo_native.py microsoft/Florence-2-base
@@ -343,9 +298,9 @@ Signals: trial and error, `config.json` `transformers_version`, prior knowledge 
 | A10 | Recommended generation settings in `generation_config.json` | Default runtime config recorded by the contract (dtype, attention, decoding) |
 | A10, B6 | Any reference output to compare against | Expected outputs from the contract's baseline |
 | B1 | Consistent metadata: `transformersInfo` says native, `auto_map` says remote code, and native fails on this repo | A compatibility status per repo and revision: "native `transformers` ≥ X: not supported; see `florence-community/Florence-2-base`" |
-| B2–B6 | A link from the original repo to the maintained native port | A companion-repo link on the model page (the [design](design.md)'s "links to companion contract/fixture repositories") |
+| B2–B6 | A link from the original repo to the maintained native port | A companion-repo link on the model page (the [design](../design.md)'s "links to companion contract/fixture repositories") |
 | B3–B4 | A working snippet; this one has a missing import, unlisted dependencies, and incompatible remote code | Snippets executed in CI, so they cannot drift |
-| B7 | The last `transformers` version where the remote code works | A revision-specific attestation (model revision + framework build + result), as in [Hub follow-up](design.md#hub-follow-up) |
+| B7 | The last `transformers` version where the remote code works | A revision-specific attestation (model revision + framework build + result), as in [Hub follow-up](../design.md#hub-follow-up) |
 
 Neither scenario needed the agent to understand the model. All the friction was in finding a working combination of repo, library version, and calling code, and then deciding without a reference whether the result was right. Those are exactly the pieces an integration contract records.
 

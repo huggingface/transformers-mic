@@ -337,7 +337,7 @@ Possible follow-ups:
 
 A compatibility result should be an attestation for a specific set of revisions and environment, not a permanent “supported” badge.
 
-The [agent walkthrough](agent-walkthrough.md) shows what this would replace: a card saying "install `transformers` from `main`" long after release, `transformersInfo` claiming native support for a repo that only works with (broken) remote code, and no link from that repo to the maintained native port in another organization.
+The [Claude walkthrough](agent-walkthrough/claude-opus.md) shows what this would replace: a card saying "install `transformers` from `main`" long after release, `transformersInfo` claiming native support for a repo that only works with (broken) remote code, and no link from that repo to the maintained native port in another organization.
 
 The record should include at least:
 
