@@ -29,7 +29,7 @@ sampling_rate = 16000
 half = torch.arange(sampling_rate // 2) / sampling_rate
 tones = [(220, 880), (440, 1320), (660, 330), (990, 550)]
 clips = [torch.cat([torch.sin(2 * math.pi * a * half), torch.sin(2 * math.pi * b * half)]).mul(0.5).numpy() for a, b in tones]
-inputs = processor(clips, sampling_rate=sampling_rate, return_tensors="pt").to(device)
+inputs = processor(clips, sampling_rate=sampling_rate, return_tensors="pt").to(device, model.dtype)  # floating-point inputs follow the model's dtype
 
 generated = model.generate(inputs.input_features, language="en", task="transcribe", max_new_tokens=8)
 print(processor.batch_decode(generated, skip_special_tokens=True))

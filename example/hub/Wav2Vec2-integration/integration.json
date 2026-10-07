@@ -38,6 +38,9 @@
         "default": {},
         "eager": {
           "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
         }
       },
       "training": true,

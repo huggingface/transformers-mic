@@ -25,7 +25,7 @@ if variant:  # doc-builder: hide
 colors = {"red": (255, 0, 0), "green": (0, 255, 0), "blue": (0, 0, 255), "yellow": (255, 255, 0)}
 images = [Image.new("RGB", (256, 256), rgb) for rgb in colors.values()]
 captions = [f"a photo of a {name} square" for name in colors]
-inputs = processor(text=captions, images=images, return_tensors="pt", padding=True).to(device)
+inputs = processor(text=captions, images=images, return_tensors="pt", padding=True).to(device, model.dtype)  # floating-point inputs follow the model's dtype
 
 with torch.no_grad():
     logits_per_image = model(**inputs).logits_per_image

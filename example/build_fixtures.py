@@ -371,6 +371,7 @@ def main():
     parser.add_argument("--framework", default="transformers", help="whose fleet lock pins the sources")
     parser.add_argument("--fixture", action="append", help="build only this fixture (short name, repeatable)")
     parser.add_argument("--keys-only", action="store_true", help="check that covered checkpoints share a key")
+    parser.add_argument("--out", type=Path, help="build into this directory instead, leaving the fixtures and lock untouched (reproducibility checks)")
     parser.add_argument("--threads", type=int, default=2)
     args = parser.parse_args()
     torch.set_num_threads(args.threads)
@@ -401,8 +402,14 @@ def main():
                 print(json.dumps({"fixture": name, "keys": keys, "shared": len(set(keys.values())) == 1}))
                 continue
             start = time.perf_counter()
-            out = (lock_dir / pin["path"]).resolve()
+            out = args.out / short(name) if args.out else (lock_dir / pin["path"]).resolve()
             build = build_fixture(name, fixture, contract_name, manifest, root, contract["checkpoints"], out)
+            if args.out:
+                same = run.digest(build["sha256"]) == pin.get("files_sha256")
+                print(json.dumps({"fixture": name, "matches_pin": same, "differs": [] if same else sorted(
+                    f for f, h in build["sha256"].items()
+                    if h != json.loads(((lock_dir / pin["path"]) / "build.json").read_text())["sha256"].get(f))}), flush=True)
+                continue
             pin["files_sha256"] = run.digest(build["sha256"])
             lock_path.write_text(json.dumps(lock, indent=2) + "\n")
             gate = build["gate"]

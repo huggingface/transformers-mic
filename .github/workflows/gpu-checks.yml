@@ -24,8 +24,13 @@ on:
         required: false
         type: string
         default: text clip bert t5 whisper wav2vec2
+      fixtures_release:
+        description: "contracts: release tag holding the pinned fixtures (fixtures.tar.gz)"
+        required: false
+        type: string
+        default: fixtures-40a5b2f
       matrix:
-        description: "full: everything below · tf32: CPU baselines checked on GPU in float32, cuDNN TF32 on vs off · init: fixture_init.py (random/overfit/pruned/sliced) on GPU"
+        description: "full: everything below · tf32: CPU baselines checked on GPU in float32, cuDNN TF32 on vs off · init: fixture_init.py (random/overfit/pruned/sliced) on GPU · contracts: the example runner's six contracts on GPU (record, stability, CPU golden, bfloat16)"
         required: false
         type: string
         default: full
@@ -102,6 +107,7 @@ jobs:
           EOF
 
       - name: Prefetch pinned snapshots
+        if: inputs.matrix != 'contracts'
         run: python3 prefetch.py
 
       - name: Fixture init schemes on GPU
@@ -115,7 +121,7 @@ jobs:
           python3 -c "import json; print(json.dumps(json.load(open('$OUT/fixture_init.json'))['summary'], indent=1))"
 
       - name: Freeze on CPU (float32)
-        if: inputs.matrix != 'init'
+        if: inputs.matrix != 'init' && inputs.matrix != 'contracts'
         run: |
           python3 replay.py freeze --families $FAMILIES --real --threads 8 \
             --out "$OUT/frozen-cpu" --build "${{ inputs.transformers_sha }}"
@@ -129,7 +135,7 @@ jobs:
             --out "$OUT/frozen-gpu" --build "${{ inputs.transformers_sha }}"
 
       - name: Check on GPU
-        if: inputs.matrix != 'init'
+        if: inputs.matrix != 'init' && inputs.matrix != 'contracts'
         env:
           CONTRACT_DEVICE: cuda
         run: |
@@ -165,8 +171,58 @@ jobs:
           CONTRACT_DTYPE=bfloat16 python3 cost.py --fixtures "$OUT/frozen-gpu" --attn sdpa \
             --targets real --output "$OUT/cost-bfloat16.json"
 
+      # ---- contracts: the example runner on GPU -------------------------------
+      - name: Contract runner dependencies and pinned fixtures
+        if: inputs.matrix == 'contracts'
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 -m pip install --quiet "git+https://github.com/huggingface/doc-builder" jsonschema
+          # The fixtures are not in git; the exact pinned bytes come from a release asset.
+          python3 - <<'EOF'
+          import json, os, urllib.request
+          api = f"https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ inputs.fixtures_release }}"
+          headers = {"Authorization": f"Bearer {os.environ['GH_TOKEN']}", "Accept": "application/vnd.github+json"}
+          release = json.load(urllib.request.urlopen(urllib.request.Request(api, headers=headers)))
+          asset = next(a for a in release["assets"] if a["name"] == "fixtures.tar.gz")
+          request = urllib.request.Request(asset["url"], headers={**headers, "Accept": "application/octet-stream"})
+          open("/tmp/fixtures.tar.gz", "wb").write(urllib.request.urlopen(request).read())
+          EOF
+          tar -xzf /tmp/fixtures.tar.gz -C example/hub
+          python3 example/run.py --help > /dev/null
+
+      - name: Rebuild fixtures on this machine's CPU (are they reproducible?)
+        if: inputs.matrix == 'contracts'
+        working-directory: .
+        run: |
+          python3 example/build_fixtures.py --out /tmp/rebuilt --threads 2 2>&1 | grep '^{' | tee "$OUT/fixture-rebuild.jsonl"
+
+      - name: Contracts on GPU
+        if: inputs.matrix == 'contracts'
+        working-directory: .
+        run: |
+          run() {  # <label> <run.py options...>
+            python3 example/run.py --framework transformers "${@:2}" --output "$OUT/contracts/$1.jsonl" \
+              > /dev/null 2> "$OUT/contracts/$1.log" || true
+            tail -1 "$OUT/contracts/$1.log"
+          }
+          mkdir -p "$OUT/contracts"
+          # Candidates; each is rerun in a fresh process and must agree within tolerance.
+          for variant in default eager bfloat16; do run record-$variant --variant $variant --record; done
+          # Approve inside the job so the checks below have GPU baselines; reviewed again before committing.
+          for f in example/transformers/tests/contracts/expectations/*/cuda/*.candidate.json; do mv "$f" "${f%.candidate.json}.json"; done
+          for n in 2 3; do run check-default-run$n; done
+          run check-eager --variant eager
+          run golden-cpu --golden cpu                              # GPU float32 vs the CPU baselines
+          run golden-cuda-bfloat16 --variant bfloat16 --golden cuda  # bfloat16 vs GPU float32
+          run fixtures-batched --fixtures-only
+          run fixtures-isolated --fixtures-only --isolate
+          mkdir -p "$OUT/expectations"
+          cp -r example/transformers/tests/contracts/expectations/. "$OUT/expectations/"
+
       - name: Summarize
-        if: always()
+        if: always() && inputs.matrix != 'contracts'
         run: |
           python3 - <<'EOF' | tee "$OUT/summary.txt"
           import json, os

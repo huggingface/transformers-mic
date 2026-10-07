@@ -444,9 +444,10 @@ def main():
                 if args.record:
                     ok2, stdout2, _ = executor.run(env, fresh_process=True)  # must reproduce outside this process
                     again = [line for line in stdout2.splitlines() if line.startswith("{")]
-                    unstable = sorted(k for k in actual if not again or json.loads(again[-1]).get(k) != actual[k])
+                    # Same rules as a check: exact outputs equal, numeric ones within this platform's tolerance.
+                    unstable = compare(rules_for(manifest, platform_dir), json.loads(again[-1]), actual) if again else ["no result record"]
                     if not ok2 or unstable:
-                        emit({**record, "status": "fail", "failures": [f"not recorded: outputs differ between two runs: {unstable}"]})
+                        emit({**record, "status": "fail", "failures": [f"not recorded: a fresh-process rerun differs: {unstable}"]})
                         continue
                     candidate = baseline.with_name(f"{target}{suffix}.candidate.json")
                     candidate.parent.mkdir(parents=True, exist_ok=True)
