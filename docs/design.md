@@ -369,7 +369,7 @@ Start with:
 
 - HF-owned contracts, one per usage path, covering the checkpoints that share it;
 - expected results kept in each framework's repository;
-- frozen small fixtures, one per fixture key, checked for input sensitivity, with the real processor files copied unchanged;
+- frozen small fixtures, one per fixture key, shrunk by layer pattern, overfit by default, and gated on input sensitivity and numeric health in every dtype and platform they run on, with the real processor files copied unchanged ([why](fixtures.md#choosing-the-weights));
 - contracts that call the public entry points users call, with the default runtime configuration;
 - recorded logits and other useful numerical outputs;
 - targeted training checks where training is supported;
@@ -381,7 +381,7 @@ Do not require:
 
 - creators to modify their repositories;
 - creators to maintain the contracts;
-- overfit fixtures, except where a random fixture fails the input-sensitivity check;
+- pruned real-weight fixtures, except as a fallback where overfitting does not converge and the size is acceptable;
 - new Hub UI;
 - migration of every existing integration test.
 

@@ -23,7 +23,7 @@ A failed fixture build should be visible as missing coverage, not silently skipp
 | --- | --- | --- |
 | 1. Random tiny models from test configs | `tiny-random-*` models for smoke tests | exists in Transformers, being extended |
 | 2. Frozen random fixtures from real configs | pinned fixtures with recorded baselines | validated locally on 8 families; not built at scale |
-| 3. Overfit fallback | fixtures trained on a few examples | only for fixtures that fail the input-sensitivity check |
+| 3. Overfit | fixtures trained on a few examples | proposed as the default after the [weights comparison](#choosing-the-weights); required where the random fixture fails the input-sensitivity check |
 
 ## Stage 1: random tiny models from test configs
 
@@ -53,13 +53,27 @@ Stage 2 keeps stage 1's random weights but changes everything around them: the c
 Recipe:
 
 1. Start from the real model config and copy the real processor files unchanged.
-2. Shrink the config with architecture-specific rules. In the experiments: hidden size 64, intermediate size 128, 2 layers, 4 heads; vocabulary, image and patch sizes, and audio dimensions preserved; dropout and SpecAugment disabled so training checks are deterministic.
+2. Shrink the config with architecture-specific rules. In the experiments: hidden size 64, intermediate size 128, 4 heads; vocabulary, image and patch sizes, and audio dimensions preserved; dropout and SpecAugment disabled so training checks are deterministic. Shrink depth by [layer pattern](#shrinking-depth-by-layer-pattern), not to a fixed count.
 3. Initialize from a fixed seed and save.
-4. Run the input-sensitivity check: perturb or swap inputs and require logits to move well beyond tolerance. If it fails, go to stage 3.
+4. Run the build gates: the input-sensitivity check (perturb or swap inputs and require logits to move well beyond tolerance; if it fails, go to stage 3) and the [numeric-health check](#numeric-health-gate).
 5. Record baselines on a known-good build, under the default runtime configuration: discrete outputs, selected logits, loss, gradients on named modules, and whether an SGD step updates parameters.
 6. Publish at a pinned revision, marked as a test artifact (tag and card) and kept out of default Hub search, then add it to the fleet lock.
 
 Shrinking from the real config preserves more integration-relevant behavior than unit-test configs, but it will not work generically for every architecture. Nested configs, coupled fields (`layer_types`, `head_dim`), MoE models, and processor assumptions need explicit rules, with test configs as a fallback.
+
+### Shrinking depth by layer pattern
+
+A fixed `num_hidden_layers = 2` is wrong for any model whose layers differ: 170 Transformers configs define `layer_types` (sliding/full attention, mamba/attention, linear/full attention), and MoE configs choose dense or sparse blocks per layer index. Assigning `num_hidden_layers = 2` on a loaded config, as the experiments did, keeps only the first two entries of the pattern:
+
+| Real config | Layers, kinds | Fixed 2 layers | By pattern |
+| --- | --- | --- | --- |
+| `google/gemma-3-1b-it` | 26: sliding ×5, full ×1, repeated | 2 sliding; full attention is never built | layers 0 and 5: sliding + full |
+| `ibm-granite/granite-4.0-h-tiny` | 40: mamba ×5, attention ×1, repeated; MoE everywhere | 2 mamba; forward crashes (the cache needs an attention layer) | layers 0 and 5: mamba + attention |
+| `deepseek-ai/DeepSeek-V2-Lite` | 27: 1 dense, then 26 sparse (`first_k_dense_replace = 1`) | 1 dense + 1 sparse, by luck of `k = 1` | layers 0 and 1: dense + sparse |
+
+The rule ([script](../experiments/layer_patterns.py), [results](../experiments/results/layer_patterns.json)): a layer's kind is its `layer_types` entry combined with whether its MLP is dense or sparse (`first_k_dense_replace` and `moe_layer_freq`, or `mlp_only_layers` and `decoder_sparse_step`). Keep the first layer of each distinct kind, in order, and re-index every per-layer list and index field (`layer_types`, `first_k_dense_replace`, `mlp_only_layers`) to the kept layers. This gives 2 layers for sliding/full, 3 for sliding/full/mamba, and 1 dense + 1 sparse for dense-then-sparse MoE. In all 15 modeling files that read `first_k_dense_replace`, it only selects dense or sparse per index (`layer_idx >= first_k_dense_replace`), so 1 + 1 covers both paths and the boundary between them. On all three configs, every kind was built, every layer ran, and logits, loss, and gradients were finite.
+
+Not covered by the rule: configs that derive the pattern from periods and offsets instead of a list (Jamba's `attn_layer_period` and `expert_layer_period`) need per-architecture rules that rewrite the period, and logic that depends on absolute layer index beyond dense/sparse (KV-cache sharing across layers, per-layer RoPE) needs the same review.
 
 ### Evidence: synthetic faults on SmolLM and CLIP
 
@@ -109,22 +123,59 @@ The [historical regression replay](evidence.md) froze random and overfit fixture
 - **Record baselines under the default runtime configuration.** The UMT5 causal-attention regression ([#49135](https://github.com/huggingface/transformers/pull/49135)) only exists under SDPA. Under SDPA, the frozen checks caught it on all six fixtures (logit delta 1.1–15) and on the real checkpoint; eager-pinned checks missed it everywhere. Choose the attention implementation at load time: on current `main`, `set_attn_implementation()` after loading silently leaves T5-family encoder/decoder stacks on eager ([#49372](https://github.com/huggingface/transformers/issues/49372)).
 - **Frozen fixtures are stable.** Fixtures frozen on today's `main` produced no false alarms on 20 builds across ten benign changes from the previous two months, under both eager and SDPA.
 
-## Stage 3: overfit fallback
+## Stage 3: overfit
 
 Recipe: train the stage 2 model on a few contrasting examples (AdamW, learning rate 5e-3, gradient clipping, up to 500 steps, stopping once answers are correct and loss is below 0.05 on two consecutive checks), then record baselines as in stage 2.
 
-Use it only when the random fixture fails the input-sensitivity check. The evidence:
+It is required when the random fixture fails the input-sensitivity check, and [proposed as the default](#choosing-the-weights) everywhere else. The evidence from the first experiments:
 
 - **Where overfitting helped: Whisper.** The tiny random Whisper decoder barely depends on its audio. Reversing the audio moved logits by about 5e-5 (below the 1e-4 tolerance), and shuffling labels across clips left the loss unchanged, so the random fixture missed both on every seed. The overfit Whisper had to tell clips apart: the same faults moved logits by 1–24 and loss from about 0.01 to 4–7.
 - **Where it did not: everything else.** For SmolLM, CLIP, BERT, T5, and Wav2Vec2, random fixtures already depended on their inputs and caught the same faults.
 - **Exact answers are weak on their own.** Overfit answers caught only 1–3 of 6–8 faults per fixture. Overfitting helps by making the numbers input-dependent, not by making answers checkable.
-- **Cost and upkeep.** Training took 0.3–3.5 s per fixture for BERT, T5, and Wav2Vec2, and 23–51 s for Whisper (3000-frame inputs). One Wav2Vec2 seed did not converge in 500 steps; it still caught every fault, but non-convergence is fixture maintenance and should fail the build visibly.
+- **Cost and upkeep.** Training took 0.3–3.5 s per fixture for BERT, T5, and Wav2Vec2, and 23–51 s for Whisper (3000-frame inputs) on the Mac; 0.5–6 s on the A10G. One Wav2Vec2 seed in three did not converge in 500 steps, and which seed depends on the hardware (17 on CPU, 43 on the A10G). It still caught every fault, but non-convergence is fixture maintenance and should fail the build visibly. Because the outcome depends on hardware, a fixture is trained once and frozen, never retrained in CI.
 
 | Overfit cost | BERT | T5 | Whisper | Wav2Vec2 |
 | --- | --- | --- | --- | --- |
 | Steps | 50 | 90–110 | 180–390 | 160–500 |
 | Training | 0.3–0.4 s | 0.7–1.0 s | 23–51 s | 1.0–3.5 s |
 | Fixture size | 9.1 MB | 11.3 MB | 18.5 MB | 0.4 MB |
+
+## Choosing the weights
+
+Random weights from a fixed seed (stage 2) and overfit weights (stage 3) are two ways to fill the fixture. Two more come from the real checkpoint: keep its first layers at full width (**pruned**), or keep the fixture's architecture and fill each tensor with a leading slice of the real one (**sliced**: real weight statistics, not a functional model). The concern behind them is numeric: random initialization, init-scheme changes, hardware, or multimodal stacks could produce NaN or degenerate fixtures that real weights avoid.
+
+All four were built for the six families and evaluated with the same faults, controls, and tolerances ([script](../experiments/fixture_init.py)). Each saved fixture was then loaded in float32, bfloat16, and float16 to run inference and a training step. Everything ran on the Mac CPU and on the A10G ([CPU results](../experiments/results/fixture_init.json), [GPU results](../experiments/results/fixture_init_gpu.json), [GPU run](https://github.com/huggingface/model-integration-contracts/actions/runs/37583722412)); detection counts were identical on both.
+
+| | Random | Overfit | Pruned (2 real layers, full width) | Sliced (real tensors, fixture width) |
+| --- | ---: | ---: | ---: | ---: |
+| Fixtures (six families) | 18 (3 seeds) | 18 (3 seeds) | 6 | 6 |
+| Faults caught, all checks | 120/126 | **126/126** | **42/42** | 41/42 |
+| Whisper | 18/24 | 24/24 | 8/8 | 7/8 |
+| Control false alarms | 0 | 0 | 0 | 0 |
+| Smallest logit move from an input fault, Whisper | 4e-5 | 1.2 | 1.9 | 1.6e-3 |
+| Non-finite outputs, loss, or gradients (3 dtypes × CPU and GPU) | 0 of 108 | 0 of 108 | 0 of 36 | 0 of 36 |
+| Weights | 0.4–14.6 MB | same as random | 94–196 MB | same as random |
+| Build | < 0.1 s | 0.3–51 s CPU, 0.5–6 s GPU; 1 of 18 did not converge on each | 0.3–1.1 s after loading the real checkpoint | < 0.1 s after loading the real checkpoint |
+| Largest bfloat16 logit drift from float32, CPU or GPU | 0.09 | 0.30 | 0.97 | 0.34 |
+
+What this says:
+
+- **No variant produced a NaN.** 288 load-and-train checks in three dtypes on two platforms, all finite, every training step passed. That is six small families at width 64, so it does not show NaN cannot happen; it shows the risk is not visible at this scale and should be caught by a gate rather than assumed away.
+- **Real weights fix Whisper without training.** The pruned Whisper caught every fault, with input faults moving logits by 1.9–5.7, like the overfit one. But pruned fixtures are 8–235× larger, because the embeddings and every kept layer stay at full width, and they grow with the model: SmolLM-135M at 2 of 30 layers is 35M parameters (142 MB), Llama-3-8B at 2 layers would be about 1.5B (1.05B of it untied embeddings).
+- **Slicing gives nothing over random.** Real weight statistics without the real function behave like random weights: the sliced Whisper still barely depends on its audio and missed the shuffled labels.
+- **Overfit is the most sensitive and stays small.** It caught everything at the random fixture's size, and its build is itself a one-time test that gradients flow and the model can learn. Its cost is build time and non-convergence, which depends on hardware.
+- **Larger logits drift more in lower precision.** Pruned fixtures drifted up to 0.97 in bfloat16 and changed outputs for CLIP and Wav2Vec2; random fixtures drifted up to 0.09. Either way, bfloat16 and float16 need their own baselines (see [Hardware and dtype](#hardware-and-dtype)).
+
+Proposed rule, replacing "overfit only on failure":
+
+1. Build the random fixture from a fixed seed, shrunk by layer pattern.
+2. Overfit it by default. If it does not converge within budget, fail the build visibly, then fall back to pruned real layers where the size is acceptable, or to the random fixture if it passes the input-sensitivity check.
+3. Run the gates on the final fixture: input sensitivity and numeric health.
+4. Freeze it. Init, training, and hardware only matter again on a rebuild.
+
+### Numeric-health gate
+
+A fixture is accepted only if, after saving and reloading, it gives finite outputs, loss, and gradients, and a training step updates its parameters, in every dtype and on every platform class it will be checked on. A failure falls back as above (overfit, then pruned) and is reported as a fixture build failure, not as a contract failure. `dtype_health` in the [script](../experiments/fixture_init.py) is the check as run here.
 
 ## Hardware and dtype
 
@@ -161,11 +212,13 @@ python experiments/experiment.py --real-checkpoints
 python experiments/experiment.py \
   --families bert t5 whisper wav2vec2 --max-steps 500 \
   --output experiments/results/more_families.json
+python experiments/fixture_init.py   # random, overfit, pruned, sliced
+python experiments/layer_patterns.py # needs network for the three configs
 ```
 
 ## Open work
 
-- Shrink rules for coupled configs, nested multimodal configs, and MoE, and a measured success rate across the fleet.
+- Shrink rules for coupled configs, nested multimodal configs, period-based layer patterns (Jamba), and MoE expert counts, and a measured success rate across the fleet. The [layer-pattern rule](#shrinking-depth-by-layer-pattern) is validated on three configs only.
 - Bring stage 1 closer to stage 2: fixed seeds, pinned revisions, recorded baselines, unchanged processor files, and the input-sensitivity check, ideally in the same `create_dummy_models.py` pipeline rather than a parallel one.
 - Publish fixtures as `hf-internal-testing/<name>-slim`, one per fixture key, and record their revisions in the fleet lock. Keep them out of model discovery: in the [agent walkthrough](agent-walkthrough.md), a size-filtered Hub search surfaced `trl-internal-testing/tiny-*` fixtures as candidate models, and a fleet of slim fixtures would add thousands more.
 - Calibrate tolerances on the CPU-only CI runners and on the other GPU types in CI. On one A10G, baselines must be GPU-specific for convolutional families and dtype-specific everywhere.
