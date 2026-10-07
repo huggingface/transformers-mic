@@ -8,6 +8,7 @@ affected baselines, once the fix is in the pinned Transformers build.
 """
 
 import importlib
+import inspect
 
 # Audio models whose `masked_spec_embed` (SpecAugment's mask vector) has no
 # `_init_weights` branch. Checkpoints that lack the tensor get uninitialized
@@ -38,6 +39,8 @@ def masked_spec_embed_init():
         original = cls._init_weights
         if getattr(original, "_mic_patched", False):
             continue
+        if "masked_spec_embed" in inspect.getsource(original):
+            continue  # fixed upstream (#49386): a second init.uniform_ would draw different values
 
         def _init_weights(self, module, original=original):
             original(self, module)

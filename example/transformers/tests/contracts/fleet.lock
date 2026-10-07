@@ -1,5 +1,5 @@
 {
-  "comment": "What Transformers would keep in tests/contracts/: every contract input, pinned. Expected results live next to it in expectations/. The hf-internal-testing repos are not published; 'path' points at their contents in this example.",
+  "comment": "What Transformers would keep in tests/contracts/: every contract input, pinned. Expected results live next to it in expectations/. The fixtures are published (hf-internal-testing/proto-*, pinned by revision); the integration repos are not, and 'path' points at their contents in this example.",
   "framework": "transformers",
   "contracts": {
     "SmolLM": {
