@@ -1,0 +1,87 @@
+{
+ "recorded_with": {
+  "contract": "hf-internal-testing/BERT-integration",
+  "contract_revision": "unpublished",
+  "framework": "transformers",
+  "variant": "default",
+  "target": "bert-base-uncased",
+  "kind": "checkpoint",
+  "revision": "86b5e0934494bd15c9632b12f734a8a67f723594",
+  "environment": {
+   "python": "3.10.12",
+   "transformers": "5.19.0.dev0",
+   "torch": "2.11.0+cpu",
+   "torchvision": "0.26.0+cpu",
+   "torchaudio": "2.11.0+cpu",
+   "tokenizers": "0.23.1",
+   "numpy": "1.26.4",
+   "pillow": "12.2.0",
+   "accelerate": "1.13.0",
+   "safetensors": "0.8.0",
+   "huggingface-hub": "1.32.0",
+   "sentencepiece": "0.2.1",
+   "protobuf": "6.33.6",
+   "librosa": "0.11.0",
+   "soundfile": "0.13.1",
+   "scipy": "1.15.3",
+   "local_patches": [
+    "masked-spec-embed-init"
+   ]
+  },
+  "seconds": 11.71,
+  "platform": "cpu-x86_64"
+ },
+ "outputs": {
+  "runtime": {
+   "device": "cpu",
+   "dtype": "float32",
+   "attn_implementation": "sdpa"
+  },
+  "predicted_tokens": [
+   3000,
+   19349,
+   4199,
+   2414
+  ],
+  "predicted_text": [
+   "paris",
+   "bonn",
+   "rome",
+   "london"
+  ],
+  "answer_logits": [
+   [
+    12.34607982635498,
+    1.9429821968078613,
+    6.5478410720825195,
+    3.632927179336548
+   ],
+   [
+    6.064364433288574,
+    12.208381652832031,
+    6.488173007965088,
+    6.152788162231445
+   ],
+   [
+    6.255678653717041,
+    4.637125015258789,
+    12.204492568969727,
+    4.724184036254883
+   ],
+   [
+    5.909883499145508,
+    3.5850374698638916,
+    4.629806041717529,
+    12.290727615356445
+   ]
+  ],
+  "training": {
+   "loss": 1.6517925262451172,
+   "gradients": {
+    "bert.encoder.layer.0.attention.self.query.weight": true,
+    "bert.encoder.layer.0.intermediate.dense.weight": true
+   },
+   "updated": true
+  }
+ }
+}

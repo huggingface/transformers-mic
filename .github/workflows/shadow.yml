@@ -124,11 +124,12 @@ jobs:
           meta=$(jq -nc \
             --arg ref "$REF" --arg sha "$SHA" --arg event "$EVENT" \
             --arg run "${{ github.run_id }}" --arg attempt "${{ github.run_attempt }}" \
-            --arg arch "$(uname -m)" --arg cpu "$(lscpu | sed -n 's/^Model name: *//p')" --arg source "$CHANGED_SOURCE" \
+            --arg arch "$(uname -m)" --arg cpu "$(lscpu | sed -n 's/^Model name: *//p')" \
+            --arg flags "$(grep -o -w -E 'avx2|avx512f|avx512_bf16|amx_bf16|amx_tile' /proc/cpuinfo | sort -u | tr '\n' ' ')" --arg source "$CHANGED_SOURCE" \
             --argjson count "$CHANGED_COUNT" --argjson truncated "$CHANGED_TRUNCATED" \
             --arg overrides "$PIP_OVERRIDES" \
             '{transformers_ref: $ref, transformers_sha: $sha, event: $event, run_id: $run, run_attempt: $attempt,
-              runner: "github-ubuntu-latest", arch: $arch, cpu: $cpu, changed_files_source: $source,
+              runner: "github-ubuntu-latest", arch: $arch, cpu: $cpu, cpu_flags: $flags, changed_files_source: $source,
               changed_files: $count, changed_files_truncated: $truncated, pip_overrides: $overrides,
               date: (now | todate)}')
           touch "$OUT/raw.jsonl"

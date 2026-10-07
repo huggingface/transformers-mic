@@ -1,0 +1,151 @@
+{
+ "recorded_with": {
+  "contract": "hf-internal-testing/T5-integration",
+  "contract_revision": "unpublished",
+  "framework": "transformers",
+  "variant": "eager",
+  "target": "t5-small",
+  "kind": "checkpoint",
+  "revision": "df1b051c49625cf57a3d0d8d3863ed4d13564fe4",
+  "environment": {
+   "python": "3.10.12",
+   "transformers": "5.19.0.dev0",
+   "torch": "2.11.0+cpu",
+   "torchvision": "0.26.0+cpu",
+   "torchaudio": "2.11.0+cpu",
+   "tokenizers": "0.23.1",
+   "numpy": "1.26.4",
+   "pillow": "12.2.0",
+   "accelerate": "1.13.0",
+   "safetensors": "0.8.0",
+   "huggingface-hub": "1.32.0",
+   "sentencepiece": "0.2.1",
+   "protobuf": "6.33.6",
+   "librosa": "0.11.0",
+   "soundfile": "0.13.1",
+   "scipy": "1.15.3",
+   "local_patches": [
+    "masked-spec-embed-init"
+   ]
+  },
+  "seconds": 9.85,
+  "platform": "cpu-x86_64"
+ },
+ "outputs": {
+  "runtime": {
+   "device": "cpu",
+   "dtype": "float32",
+   "attn_implementation": "eager"
+  },
+  "generated_tokens": [
+   [
+    0,
+    644,
+    4598,
+    229,
+    19250,
+    5,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    1674,
+    3,
+    13147,
+    15,
+    5462,
+    19219,
+    170,
+    110,
+    35,
+    5,
+    1
+   ],
+   [
+    0,
+    3488,
+    229,
+    74,
+    26989,
+    58,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    3,
+    26114,
+    9458,
+    55,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  ],
+  "generated_text": [
+   "Das Haus ist wunderbar.",
+   "Ich nehme gerne B\u00fccher zu lesen.",
+   "Wo ist der Bahnhof?",
+   "Vielen Dank!"
+  ],
+  "label_logprobs": [
+   [
+    -0.6655738353729248,
+    -0.15086139738559723,
+    -0.05507694184780121,
+    -0.5601799488067627,
+    -0.07580363750457764,
+    -0.017970366403460503,
+    0.0
+   ],
+   [
+    -0.28017356991767883,
+    -2.1064629554748535,
+    -0.005223436746746302,
+    -0.7215117812156677,
+    -0.03395809233188629,
+    -0.027783295139670372,
+    -0.002651867689564824
+   ],
+   [
+    -0.1583254486322403,
+    -0.6513488292694092,
+    -0.05260796472430229,
+    -0.07451396435499191,
+    -0.020205851644277573,
+    -0.0027078648563474417,
+    0.0
+   ],
+   [
+    -1.9390628337860107,
+    -0.053527384996414185,
+    -0.0027268866542726755,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  ],
+  "training": {
+   "loss": 0.4401020109653473,
+   "gradients": {
+    "encoder.block.0.layer.0.SelfAttention.q.weight": true,
+    "decoder.block.0.layer.1.EncDecAttention.q.weight": true
+   },
+   "updated": true
+  }
+ }
+}

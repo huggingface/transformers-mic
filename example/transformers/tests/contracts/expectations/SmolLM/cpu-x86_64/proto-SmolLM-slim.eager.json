@@ -1,0 +1,99 @@
+{
+ "recorded_with": {
+  "contract": "hf-internal-testing/SmolLM-integration",
+  "contract_revision": "unpublished",
+  "framework": "transformers",
+  "variant": "eager",
+  "target": "proto-SmolLM-slim",
+  "kind": "fixture",
+  "revision": "1c0a3216574bf8471b77d5e559fb009eebeef32d",
+  "environment": {
+   "python": "3.10.12",
+   "transformers": "5.19.0.dev0",
+   "torch": "2.11.0+cpu",
+   "torchvision": "0.26.0+cpu",
+   "torchaudio": "2.11.0+cpu",
+   "tokenizers": "0.23.1",
+   "numpy": "1.26.4",
+   "pillow": "12.2.0",
+   "accelerate": "1.13.0",
+   "safetensors": "0.8.0",
+   "huggingface-hub": "1.32.0",
+   "sentencepiece": "0.2.1",
+   "protobuf": "6.33.6",
+   "librosa": "0.11.0",
+   "soundfile": "0.13.1",
+   "scipy": "1.15.3",
+   "local_patches": [
+    "masked-spec-embed-init"
+   ]
+  },
+  "seconds": 6.51,
+  "platform": "cpu-x86_64"
+ },
+ "outputs": {
+  "runtime": {
+   "device": "cpu",
+   "dtype": "float32",
+   "attn_implementation": "eager"
+  },
+  "generated_tokens": [
+   [
+    7042,
+    0
+   ],
+   [
+    11452,
+    0
+   ],
+   [
+    7268,
+    0
+   ],
+   [
+    4528,
+    0
+   ]
+  ],
+  "generated_text": [
+   " Paris",
+   " Berlin",
+   " Rome",
+   " London"
+  ],
+  "next_token_logits": [
+   [
+    11.667831420898438,
+    3.956547737121582,
+    4.142998695373535,
+    4.093366622924805
+   ],
+   [
+    2.8302931785583496,
+    11.563215255737305,
+    3.6803433895111084,
+    3.9845268726348877
+   ],
+   [
+    3.7851626873016357,
+    3.925633430480957,
+    11.399068832397461,
+    2.7391815185546875
+   ],
+   [
+    3.4422378540039062,
+    3.4308419227600098,
+    3.1774861812591553,
+    11.49376392364502
+   ]
+  ],
+  "training": {
+   "loss": 9.284270286560059,
+   "gradients": {
+    "model.layers.0.self_attn.q_proj.weight": true,
+    "model.layers.0.mlp.down_proj.weight": true
+   },
+   "updated": true
+  }
+ }
+}

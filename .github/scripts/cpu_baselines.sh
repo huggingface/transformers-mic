@@ -21,6 +21,8 @@ echo "::endgroup::"
 {
   echo "cpu: $(lscpu | sed -n 's/^Model name: *//p')"
   echo "cores: $(nproc)"
+  # bfloat16 kernels differ with native support (Zen 4/5, Sapphire Rapids): baselines may too.
+  echo "flags: $(grep -o -w -E 'avx2|avx512f|avx512_bf16|amx_bf16|amx_tile' /proc/cpuinfo | sort -u | tr '\n' ' ')"
   echo "python: $("$PY" --version)"
   free -g | sed -n 2p
   df -h / | sed -n 2p

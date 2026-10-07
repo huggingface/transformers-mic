@@ -1,0 +1,99 @@
+{
+ "recorded_with": {
+  "contract": "hf-internal-testing/Whisper-integration",
+  "contract_revision": "unpublished",
+  "framework": "transformers",
+  "variant": "eager",
+  "target": "whisper-tiny",
+  "kind": "checkpoint",
+  "revision": "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
+  "environment": {
+   "python": "3.10.12",
+   "transformers": "5.19.0.dev0",
+   "torch": "2.11.0+cpu",
+   "torchvision": "0.26.0+cpu",
+   "torchaudio": "2.11.0+cpu",
+   "tokenizers": "0.23.1",
+   "numpy": "1.26.4",
+   "pillow": "12.2.0",
+   "accelerate": "1.13.0",
+   "safetensors": "0.8.0",
+   "huggingface-hub": "1.32.0",
+   "sentencepiece": "0.2.1",
+   "protobuf": "6.33.6",
+   "librosa": "0.11.0",
+   "soundfile": "0.13.1",
+   "scipy": "1.15.3",
+   "local_patches": [
+    "masked-spec-embed-init"
+   ]
+  },
+  "seconds": 17.9,
+  "platform": "cpu-x86_64"
+ },
+ "outputs": {
+  "runtime": {
+   "device": "cpu",
+   "dtype": "float32",
+   "attn_implementation": "eager"
+  },
+  "generated_tokens": [
+   [
+    509
+   ],
+   [
+    509
+   ],
+   [
+    291
+   ],
+   [
+    509
+   ]
+  ],
+  "generated_text": [
+   " You",
+   " You",
+   " you",
+   " You"
+  ],
+  "label_logprobs": [
+   [
+    -2.6360156536102295,
+    -0.0002810560108628124,
+    -0.5602996945381165,
+    -11.560121536254883,
+    -2.0475494861602783
+   ],
+   [
+    -2.4072115421295166,
+    -0.00014256415306590497,
+    -0.574924647808075,
+    -11.815727233886719,
+    -1.7346835136413574
+   ],
+   [
+    -3.1059932708740234,
+    -0.0002119316632160917,
+    -0.5114591121673584,
+    -11.908432006835938,
+    -1.5434941053390503
+   ],
+   [
+    -2.4235706329345703,
+    -0.00019608005823101848,
+    -0.44263190031051636,
+    -12.329262733459473,
+    -1.6897457838058472
+   ]
+  ],
+  "training": {
+   "loss": 3.364598035812378,
+   "gradients": {
+    "model.encoder.conv1.weight": true,
+    "model.decoder.layers.0.encoder_attn.q_proj.weight": true
+   },
+   "updated": true
+  }
+ }
+}
