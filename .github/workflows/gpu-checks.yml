@@ -194,9 +194,12 @@ jobs:
 
       - name: Rebuild fixtures on this machine's CPU (are they reproducible?)
         if: inputs.matrix == 'contracts'
+        continue-on-error: true  # informational: the checks below use the pinned bytes
         working-directory: .
         run: |
-          python3 example/build_fixtures.py --out /tmp/rebuilt --threads 2 2>&1 | grep '^{' | tee "$OUT/fixture-rebuild.jsonl"
+          python3 example/build_fixtures.py --out /tmp/rebuilt --threads 2 > "$OUT/fixture-rebuild.log" 2>&1 \
+            || { tail -40 "$OUT/fixture-rebuild.log"; exit 1; }
+          grep '^{' "$OUT/fixture-rebuild.log"
 
       - name: Contracts on GPU
         if: inputs.matrix == 'contracts'
