@@ -74,5 +74,6 @@ Measure agent reuse separately with the [controlled walkthrough recipe](docs/age
 - [Full example](example/README.md): a runnable MIC for SmolLM text generation (three checkpoints, two fixtures) in Transformers and Transformers.js, with every part of the standard.
 - [Evidence](docs/evidence.md): what the local experiments and the historical regression replay show.
 - [Technical design](docs/design.md): contract layout, CI triggers, where code lives, checks, baselines, runner, pilot plan, open questions.
+- [End-to-end tests](docs/end-to-end-tests.md): every check this repository runs (contracts, shadow and GPU jobs, regression replays, synthetic faults, stability, cost, sweep, WebGPU), with commands.
 - [Small fixtures](docs/fixtures.md): the fixture recipe (real config shrunk by layer pattern, copied processor files, overfit and frozen) and the experiments behind it.
 - [Agent walkthroughs](docs/agent-walkthrough/README.md): the shared recipe and prompts, with separate Claude Opus and Codex results recording local Hub inference, tool calls, outputs, and failures.
