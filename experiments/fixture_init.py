@@ -262,7 +262,8 @@ def main():
     if exp.DTYPE != torch.float32:
         raise SystemExit("build in float32; this script loads each dtype itself")
     torch.set_num_threads(args.threads)
-    torch.use_deterministic_algorithms(True)
+    # CTC loss (Wav2Vec2) has no deterministic CUDA backward.
+    torch.use_deterministic_algorithms(True, warn_only=exp.DEVICE.type == "cuda")
     transformers.logging.set_verbosity_error()
     report = {
         "environment": {
