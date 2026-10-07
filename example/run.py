@@ -246,8 +246,8 @@ def patch_prelude(names):
 class Executor:
     """Runs one contract's code for many targets: in this process, or one process each."""
 
-    def __init__(self, entry, fmt, isolate, workdir, patch_names=()):
-        self.entry, self.fmt = entry, fmt
+    def __init__(self, entry, fmt, isolate, workdir, patch_names=(), pinned=None):
+        self.entry, self.fmt, self.pinned = entry, fmt, pinned or {}
         self.inline = fmt == "runnable-markdown" and not isolate
         if fmt == "script":
             self.command, self.cwd = ["node", entry.name], entry.parent
@@ -269,17 +269,29 @@ class Executor:
             node = subprocess.run(["node", "--version"], capture_output=True, text=True).stdout.strip()
             package = self.cwd / "node_modules/@huggingface/transformers/package.json"
             return {"node": node, "@huggingface/transformers": json.loads(package.read_text())["version"]}
+        names = ["transformers", *(n for n in self.pinned if n != "python")]
         probe = (
-            "import importlib, json, platform\n"
+            "import importlib.metadata as md, json, platform\n"
             "versions = {'python': platform.python_version()}\n"
-            "for name in ('transformers', 'torch', 'tokenizers', 'numpy'):\n"
-            "    versions[name] = importlib.import_module(name).__version__\n"
+            f"for name in {names!r}:\n"
+            "    try:\n"
+            "        versions[name] = md.version(name)\n"
+            "    except md.PackageNotFoundError:\n"
+            "        versions[name] = None\n"
             "print(json.dumps(versions))\n"
         )
         if self.inline:
             ok, out, err = execute_inline(probe, "<environment>", {})
             return json.loads(out)
         return json.loads(subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True).stdout)
+
+
+def environment_differs(pinned, actual):
+    """{package: "installed (pinned)"} for every package not at the fleet lock's version."""
+    def same(want, have):
+        # "2.11.0" pins 2.11.0+cpu too; "3.10" pins any 3.10.x.
+        return have is not None and (have == want or have.split("+")[0] == want or have.startswith(want + "."))
+    return {name: f"{actual.get(name)} (pinned {want})" for name, want in pinned.items() if not same(want, actual.get(name))}
 
 
 def lookup(outputs, dotted):
@@ -481,7 +493,7 @@ def main():
                 **({"selected_by": selected_by.get(name)} if selected_by is not None else {}),
             }
             variant = integration["variants"].get(args.variant)
-            executor = Executor(root / integration["entry_point"], integration["format"], args.isolate, Path(tmp), local_patches)
+            executor = Executor(root / integration["entry_point"], integration["format"], args.isolate, Path(tmp), local_patches, lock.get("environment"))
             env_info = None
             for target, kind, model, revision, problem in targets(lock_dir, contract, manifest, args.framework, args.fixtures_only, args.local_fixtures):
                 if args.target and target not in args.target:
@@ -513,6 +525,9 @@ def main():
                 ok, stdout, stderr = executor.run(env)
                 environment = {**env_info, "local_patches": local_patches} if local_patches else env_info
                 record.update(environment=environment, seconds=round(time.perf_counter() - start, 2))
+                differs = environment_differs(lock.get("environment", {}), env_info) if integration["format"] != "script" else {}
+                if differs:
+                    record["environment_differs"] = differs
                 lines = [line for line in stdout.splitlines() if line.startswith("{")]
                 if not ok or not lines:
                     emit({**record, "status": "error", "failures": [stderr.strip()[-1500:] or "no result record"]})

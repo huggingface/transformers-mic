@@ -96,17 +96,7 @@ jobs:
 
       - name: Install
         run: |
-          python -m pip install --quiet --upgrade pip
-          python -m pip install --quiet "torch==$(jq -r .environment.torch example/transformers/tests/contracts/fleet.lock)" --index-url https://download.pytorch.org/whl/cpu
-          git init --quiet /tmp/transformers
-          git -C /tmp/transformers fetch --quiet --depth 1 https://github.com/huggingface/transformers "$FETCH"
-          git -C /tmp/transformers checkout --quiet FETCH_HEAD
-          test "$(git -C /tmp/transformers rev-parse HEAD)" = "$SHA"
-          python -m pip install --quiet /tmp/transformers
-          python -m pip install --quiet git+https://github.com/huggingface/doc-builder jsonschema accelerate Pillow
-          # The environment the baselines were recorded with, as the fleet lock pins it.
-          python -m pip install --quiet $(jq -r '.environment | "tokenizers==\(.tokenizers) numpy==\(.numpy)"' \
-            example/transformers/tests/contracts/fleet.lock)
+          PY=python .github/scripts/install_pinned.sh
           if [[ -n "$PIP_OVERRIDES" ]]; then
             read -ra overrides <<< "$PIP_OVERRIDES"
             python -m pip install --quiet "${overrides[@]}"

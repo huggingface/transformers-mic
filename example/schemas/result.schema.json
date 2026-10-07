@@ -86,6 +86,13 @@
   },
   "known_failure": {
    "type": "string"
+  },
+  "environment_differs": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "string"
+   },
+   "description": "packages not at the version the fleet lock pins: installed (pinned)"
   }
  },
  "allOf": [

@@ -8,24 +8,14 @@
 # .log, and candidates/ (the candidate baselines, at their repository paths).
 set -euo pipefail
 
-LOCK=example/transformers/tests/contracts/fleet.lock
 EXPECTATIONS=example/transformers/tests/contracts/expectations
 mkdir -p "$OUT"
-pin() { "$PY" -c "import json, sys; print(json.load(open('$LOCK'))['environment'][sys.argv[1]])" "$1"; }
 status() { "$PY" -c 'import json, sys
 for line in sys.stdin:
     r = json.loads(line); print(r["target"], r["variant"] + ":", r["status"], *r.get("failures", [])[:1], flush=True)'; }
 
 echo "::group::Install"
-"$PY" -m pip install --quiet --upgrade pip
-"$PY" -m pip install --quiet "torch==$(pin torch)" --index-url https://download.pytorch.org/whl/cpu
-rm -rf /tmp/transformers && git init --quiet /tmp/transformers
-git -C /tmp/transformers fetch --quiet --depth 1 https://github.com/huggingface/transformers "$SHA"
-git -C /tmp/transformers checkout --quiet FETCH_HEAD
-"$PY" -m pip uninstall --quiet -y transformers || true
-"$PY" -m pip install --quiet /tmp/transformers
-"$PY" -m pip install --quiet git+https://github.com/huggingface/doc-builder jsonschema accelerate Pillow
-"$PY" -m pip install --quiet "tokenizers==$(pin tokenizers)" "numpy==$(pin numpy)"
+FETCH="$SHA" .github/scripts/install_pinned.sh
 "$PY" -m pip freeze > "$OUT/pip-freeze.txt"
 echo "::endgroup::"
 {
