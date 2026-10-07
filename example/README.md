@@ -124,7 +124,7 @@ Results were identical in both modes. With every model loaded in one process, Sm
 
 ### On GPU
 
-The same contracts and the same pinned fixtures ran on an NVIDIA A10G (torch 2.14.0+cu130, Transformers `8625785e`, the tree of `4d536e1f`) through the `contracts` mode of [`gpu-checks.yml`](../.github/workflows/gpu-checks.yml) ([run](https://github.com/huggingface/model-integration-contracts/actions/runs/37615109270), [numbers](../experiments/results/runner.json)). The fixtures came from a release asset, byte for byte as pinned.
+The same contracts and the same pinned fixtures ran on an NVIDIA A10G (torch 2.14.0+cu130, Transformers `8625785e`, the tree of `4d536e1f`) through the `contracts` mode of [`gpu-checks.yml`](../.github/workflows/gpu-checks.yml) ([run](https://github.com/huggingface/model-integration-contracts/actions/runs/37615109270), [numbers](../experiments/results/runner.json)). The fixtures came from a release asset in that run, byte for byte as pinned; the job now downloads them from the Hub, and a [rerun](https://github.com/huggingface/model-integration-contracts/actions/runs/37621572296) that way gave the same results.
 
 - **GPU baselines hold at the CPU tolerance.** All 16 targets were recorded on `cuda` in three variants (default, eager, bfloat16), each reproduced in a fresh process within `1e-4`, and two more runs plus an eager run passed against them. They are committed under `expectations/<contract>/cuda/`.
 - **Across platforms, discrete outputs carry over and numbers do not.** GPU float32 against the CPU baselines: generated tokens, labels, and predictions were identical on 15 of 16 targets. The exception is SmolLM-135M, which loads in bfloat16 by default and generates " Paris, which is" on GPU instead of " Paris, the capital". Logits moved by up to 4e-6 on the text fixtures and 4e-4 to 2e-3 on the convolutional models (TF32), and training losses with dropout on did not carry over at all (CPU and CUDA draw different dropout masks).
@@ -137,7 +137,7 @@ The same contracts and the same pinned fixtures ran on an NVIDIA A10G (torch 2.1
 
 - The fixtures are published as `hf-internal-testing/proto-*` and pinned by revision in the Transformers fleet lock; the integration repositories are still unpublished, and the fleet locks point at their folders in [`hub/`](hub) (`"revision": "unpublished"`).
 - Contracts run in the runner's own process, with no isolation beyond `--isolate` (one process per target). Contracts are selected from the files a framework change touches ([`select_contracts.py`](select_contracts.py), `run.py --changed-files`), but no CI job uses the selection yet.
-- Fixtures built by `build_fixtures.py` are reproducible on one machine only: rebuilt on an x86 CPU, every fixture's weights differed from the pinned bytes. So they are published and pinned rather than rebuilt by each CI job; the GPU job still downloads them from a release asset and is to switch to the Hub.
+- Fixtures built by `build_fixtures.py` are reproducible on one machine only: rebuilt on an x86 CPU, every fixture's weights differed from the pinned bytes. So they are published and pinned rather than rebuilt by each CI job; the GPU and shadow jobs download them from the Hub.
 - Variants need a second, hidden `from_pretrained` call in the runnable block. A doc-builder hook for passing load arguments to a block would remove it.
 - Baselines here are CPU (Apple M5) and CUDA (A10G), plus WebGPU fp32 for Transformers.js. Whether the CPU baselines hold on x86 CPU runners is not checked yet.
 
