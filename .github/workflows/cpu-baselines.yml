@@ -45,6 +45,13 @@ jobs:
         with:
           python-version: "3.10"
 
+      # SmolLM-1.7B in float32 with a training step needs about 14 GB; the runner has 16.
+      - name: Swap
+        run: |
+          sudo swapoff -a || true
+          sudo fallocate -l 16G /swapfile2 && sudo chmod 600 /swapfile2 && sudo mkswap /swapfile2 > /dev/null && sudo swapon /swapfile2
+          free -g
+
       - name: Install
         run: |
           mkdir -p "$OUT"
@@ -63,8 +70,10 @@ jobs:
         run: |
           read -ra variants <<< "$VARIANTS"
           for variant in "${variants[@]}"; do
-            python example/run.py --framework transformers --variant "$variant" --record \
-              --output "$OUT/record-$variant.jsonl" > /dev/null 2> "$OUT/record-$variant.log" || true
+            # --isolate: one process per target, so no process holds two models.
+            python example/run.py --framework transformers --variant "$variant" --record --isolate \
+              --output "$OUT/record-$variant.jsonl" 2> "$OUT/record-$variant.log" \
+              | jq -r --unbuffered '"\(.target) \(.variant): \(.status)"' || true
             tail -1 "$OUT/record-$variant.log"
           done
           mkdir -p "$OUT/candidates"
@@ -79,11 +88,11 @@ jobs:
             | while read -r f; do mv "$f" "${f%.candidate.json}.json"; done
           read -ra variants <<< "$VARIANTS"
           for variant in "${variants[@]}"; do
-            python example/run.py --framework transformers --variant "$variant" \
+            python example/run.py --framework transformers --variant "$variant" --isolate \
               --output "$OUT/check-$variant.jsonl" > /dev/null 2> "$OUT/check-$variant.log" || true
             tail -1 "$OUT/check-$variant.log"
           done
-          python example/run.py --framework transformers --golden cpu-arm64 \
+          python example/run.py --framework transformers --golden cpu-arm64 --isolate \
             --output "$OUT/golden-cpu-arm64.jsonl" > /dev/null 2> "$OUT/golden-cpu-arm64.log" || true
           tail -1 "$OUT/golden-cpu-arm64.log"
 
