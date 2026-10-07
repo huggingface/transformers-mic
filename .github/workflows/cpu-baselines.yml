@@ -1,18 +1,27 @@
 name: CPU baselines
 
-# Record candidate baselines on a GitHub-hosted x86 CPU runner (platform
-# cpu-x86_64), for every Transformers target and CPU variant, with the fleet
-# lock's pinned environment. Each candidate is rerun in a fresh process and must
-# agree within tolerance. Candidates are uploaded as an artifact, never
-# committed: a reviewer downloads them, compares them with the cpu-arm64 ones,
-# and renames them to approve.
+# Record candidate cpu-x86_64 baselines for every Transformers target and CPU
+# variant, with the fleet lock's pinned environment (.github/scripts/cpu_baselines.sh).
+# Each candidate is rerun in a fresh process and must agree within tolerance.
+# Candidates are uploaded as an artifact, never committed: a reviewer compares
+# them with the cpu-arm64 ones and renames them to approve.
 #
-#   gh workflow run cpu-baselines.yml --repo huggingface/model-integration-contracts
-#   gh run download <run-id> --repo huggingface/model-integration-contracts -n cpu-baselines
+#   machine=github    GitHub-hosted ubuntu-latest (7 GB RAM here: targets that need
+#                     more, such as SmolLM-1.7B, are reported unsupported)
+#   machine=gpu-host  the CPU of a Transformers GPU runner (aws-g5-4xlarge-cache:
+#                     16 vCPUs, 64 GB), with CPU-only torch so no GPU is used
+#
+#   gh workflow run cpu-baselines.yml --repo huggingface/model-integration-contracts -f machine=gpu-host
+#   gh run download <run-id> --repo huggingface/model-integration-contracts -n cpu-baselines-gpu-host
 
 on:
   workflow_dispatch:
     inputs:
+      machine:
+        description: "github or gpu-host"
+        required: false
+        type: string
+        default: github
       transformers_sha:
         # Same tree as 4d536e1f, the build the cpu-arm64 and cuda baselines were recorded on.
         description: "Transformers commit to install"
@@ -27,81 +36,59 @@ on:
 permissions:
   contents: read
 
+env:
+  SHA: ${{ inputs.transformers_sha }}
+  VARIANTS: ${{ inputs.variants }}
+  HF_HUB_DISABLE_PROGRESS_BARS: "1"
+  PYTHONUNBUFFERED: "1"
+
 jobs:
-  record:
+  github:
+    if: inputs.machine == 'github'
     runs-on: ubuntu-latest
     timeout-minutes: 120
-    env:
-      SHA: ${{ inputs.transformers_sha }}
-      VARIANTS: ${{ inputs.variants }}
-      HF_HUB_DISABLE_PROGRESS_BARS: "1"
-      PYTHONUNBUFFERED: "1"
-      OUT: ${{ github.workspace }}/out
-      LOCK: example/transformers/tests/contracts/fleet.lock
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.10"
-
-      # SmolLM-1.7B in float32 with a training step needs about 14 GB of RAM (the
-      # runner has 16), and the real checkpoints several GB of disk. Free the
-      # preinstalled toolchains first: a 16 GB swap file alone filled the disk.
-      - name: Disk and swap
-        run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
-          sudo swapoff -a || true
-          sudo fallocate -l 8G /swapfile2 && sudo chmod 600 /swapfile2 && sudo mkswap /swapfile2 > /dev/null && sudo swapon /swapfile2
-          df -h / && free -g
-
-      - name: Install
-        run: |
-          mkdir -p "$OUT"
-          python -m pip install --quiet --upgrade pip
-          python -m pip install --quiet "torch==$(jq -r .environment.torch "$LOCK")" --index-url https://download.pytorch.org/whl/cpu
-          git init --quiet /tmp/transformers
-          git -C /tmp/transformers fetch --quiet --depth 1 https://github.com/huggingface/transformers "$SHA"
-          git -C /tmp/transformers checkout --quiet FETCH_HEAD
-          python -m pip install --quiet /tmp/transformers
-          python -m pip install --quiet git+https://github.com/huggingface/doc-builder jsonschema accelerate Pillow
-          python -m pip install --quiet $(jq -r '.environment | "tokenizers==\(.tokenizers) numpy==\(.numpy)"' "$LOCK")
-          python -m pip freeze > "$OUT/pip-freeze.txt"
-          lscpu | sed -n 's/^Model name: *//p' | tee "$OUT/cpu.txt"
-
-      - name: Record candidates
-        run: |
-          read -ra variants <<< "$VARIANTS"
-          for variant in "${variants[@]}"; do
-            # --isolate: one process per target, so no process holds two models.
-            python example/run.py --framework transformers --variant "$variant" --record --isolate \
-              --output "$OUT/record-$variant.jsonl" 2> "$OUT/record-$variant.log" \
-              | jq -r --unbuffered '"\(.target) \(.variant): \(.status)"' || true
-            tail -1 "$OUT/record-$variant.log"
-          done
-          df -h / && free -g
-          mkdir -p "$OUT/candidates"
-          find example/transformers/tests/contracts/expectations -name '*.candidate.json' -path '*/cpu-x86_64/*' \
-            | while read -r f; do mkdir -p "$OUT/candidates/$(dirname "$f")"; cp "$f" "$OUT/candidates/$f"; done
-          find "$OUT/candidates" -name '*.json' | wc -l
-
-      - name: Check against the candidates
-        run: |
-          # The same checks a shadow run makes, against the new baselines.
-          find example/transformers/tests/contracts/expectations -name '*.candidate.json' -path '*/cpu-x86_64/*' \
-            | while read -r f; do mv "$f" "${f%.candidate.json}.json"; done
-          read -ra variants <<< "$VARIANTS"
-          for variant in "${variants[@]}"; do
-            python example/run.py --framework transformers --variant "$variant" --isolate \
-              --output "$OUT/check-$variant.jsonl" > /dev/null 2> "$OUT/check-$variant.log" || true
-            tail -1 "$OUT/check-$variant.log"
-          done
-          python example/run.py --framework transformers --golden cpu-arm64 --isolate \
-            --output "$OUT/golden-cpu-arm64.jsonl" > /dev/null 2> "$OUT/golden-cpu-arm64.log" || true
-          tail -1 "$OUT/golden-cpu-arm64.log"
-
+      - name: Free disk
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+      - name: Record and check
+        env:
+          PY: python
+          OUT: ${{ github.workspace }}/out
+        run: .github/scripts/cpu_baselines.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: cpu-baselines
+          name: cpu-baselines-github
+          path: out/
+
+  gpu-host:
+    if: inputs.machine == 'gpu-host'
+    runs-on:
+      group: aws-g5-4xlarge-cache
+    timeout-minutes: 120
+    container:
+      image: huggingface/transformers-all-latest-gpu
+      # No --gpus: the contracts must run on the CPU.
+      options: --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    env:
+      HF_HOME: /mnt/cache
+      CUDA_VISIBLE_DEVICES: ""
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      # github.workspace is the host path; steps run in the container (/__w/...).
+      - name: Record and check
+        env:
+          PY: python3
+        run: OUT="$GITHUB_WORKSPACE/out" .github/scripts/cpu_baselines.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cpu-baselines-gpu-host
           path: out/

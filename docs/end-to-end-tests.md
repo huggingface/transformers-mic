@@ -90,7 +90,7 @@ gh workflow run shadow.yml --repo huggingface/model-integration-contracts -f tra
 
 ## 4. GPU checks
 
-[`gpu-checks.yml`](../.github/workflows/gpu-checks.yml) runs on the Transformers ARC group `aws-g5-4xlarge-cache` (one A10G) in the `huggingface/transformers-all-latest-gpu` image. [`gpu-probe.yml`](../.github/workflows/gpu-probe.yml) only checks access and the environment. [`cpu-baselines.yml`](../.github/workflows/cpu-baselines.yml) records `cpu-x86_64` candidates on a GitHub runner, checks against them, and uploads them for review.
+[`gpu-checks.yml`](../.github/workflows/gpu-checks.yml) runs on the Transformers ARC group `aws-g5-4xlarge-cache` (one A10G) in the `huggingface/transformers-all-latest-gpu` image. [`gpu-probe.yml`](../.github/workflows/gpu-probe.yml) only checks access and the environment. [`cpu-baselines.yml`](../.github/workflows/cpu-baselines.yml) records `cpu-x86_64` candidates, checks against them, and uploads them for review, on a GitHub runner (`machine=github`, 7 GB RAM) or on the CPU of a GPU runner (`machine=gpu-host`, 64 GB, CPU-only torch).
 
 | `matrix` | What runs |
 | --- | --- |
