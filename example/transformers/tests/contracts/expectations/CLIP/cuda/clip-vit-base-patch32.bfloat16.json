@@ -1,0 +1,76 @@
+{
+ "recorded_with": {
+  "contract": "hf-internal-testing/CLIP-integration",
+  "contract_revision": "unpublished",
+  "framework": "transformers",
+  "variant": "bfloat16",
+  "target": "clip-vit-base-patch32",
+  "kind": "checkpoint",
+  "revision": "3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268",
+  "environment": {
+   "python": "3.10.12",
+   "transformers": "5.19.0.dev0",
+   "torch": "2.14.0+cu130",
+   "tokenizers": "0.23.2",
+   "numpy": "2.2.6",
+   "local_patches": [
+    "masked-spec-embed-init"
+   ]
+  },
+  "seconds": 1.28,
+  "platform": "cuda"
+ },
+ "outputs": {
+  "runtime": {
+   "device": "cuda",
+   "dtype": "bfloat16",
+   "attn_implementation": "sdpa"
+  },
+  "image_to_text": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "text_to_image": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "logits_per_image": [
+   [
+    28.625,
+    23.25,
+    23.625,
+    24.5
+   ],
+   [
+    24.5,
+    30.375,
+    24.5,
+    25.875
+   ],
+   [
+    25.375,
+    23.875,
+    30.375,
+    25.0
+   ],
+   [
+    22.5,
+    23.625,
+    23.625,
+    31.125
+   ]
+  ],
+  "training": {
+   "loss": 0.016357421875,
+   "gradients": {
+    "visual_projection.weight": true,
+    "text_projection.weight": true
+   },
+   "updated": true
+  }
+ }
+}

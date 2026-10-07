@@ -1,0 +1,76 @@
+{
+ "recorded_with": {
+  "contract": "hf-internal-testing/CLIP-integration",
+  "contract_revision": "unpublished",
+  "framework": "transformers",
+  "variant": "default",
+  "target": "clip-vit-base-patch32-slim",
+  "kind": "fixture",
+  "revision": "unpublished",
+  "environment": {
+   "python": "3.10.12",
+   "transformers": "5.19.0.dev0",
+   "torch": "2.14.0+cu130",
+   "tokenizers": "0.23.2",
+   "numpy": "2.2.6",
+   "local_patches": [
+    "masked-spec-embed-init"
+   ]
+  },
+  "seconds": 0.82,
+  "platform": "cuda"
+ },
+ "outputs": {
+  "runtime": {
+   "device": "cuda",
+   "dtype": "float32",
+   "attn_implementation": "sdpa"
+  },
+  "image_to_text": [
+   1,
+   1,
+   1,
+   2
+  ],
+  "text_to_image": [
+   1,
+   1,
+   1,
+   1
+  ],
+  "logits_per_image": [
+   [
+    -2.6368887424468994,
+    -2.247436285018921,
+    -2.5036942958831787,
+    -2.722926616668701
+   ],
+   [
+    4.142626762390137,
+    4.256187438964844,
+    4.226197242736816,
+    3.7780885696411133
+   ],
+   [
+    1.525346040725708,
+    1.6054904460906982,
+    1.2281131744384766,
+    1.193971037864685
+   ],
+   [
+    -0.43849292397499084,
+    -0.2969170808792114,
+    -0.11086298525333405,
+    -0.4742926359176636
+   ]
+  ],
+  "training": {
+   "loss": 2.5254125595092773,
+   "gradients": {
+    "visual_projection.weight": true,
+    "text_projection.weight": true
+   },
+   "updated": true
+  }
+ }
+}

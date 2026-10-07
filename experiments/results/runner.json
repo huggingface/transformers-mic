@@ -361,5 +361,63 @@
   "umt5_auto_classes": "google/umt5-small config.json has no model_type; AutoModelForSeq2SeqLM cannot load it.",
   "fixture_mirrors_missing_parameters": "Fixtures now drop parameters the real checkpoint lacks and keep dropout/LayerDrop/SpecAugment. Without the local patch, wav2vec2-base-960h-slim fails on every run (training.loss off by 8.14 sdpa, 6.83 eager); with it, all fixture and checkpoint baselines pass (16 pass, 1 unsupported per variant).",
   "layerdrop_assertion": "With LayerDrop 0.1 kept, the seeded eager training step skipped encoder layer 0 of the Wav2Vec2 fixture, failing the layer-0 gradient assertion; the contract now checks conv_layers.0 and lm_head."
+ },
+ "gpu": {
+  "run": "https://github.com/huggingface/model-integration-contracts/actions/runs/37615109270",
+  "environment": "NVIDIA A10G, x86_64, torch 2.14.0+cu130, CUDA 13.0, tokenizers 0.23.2, numpy 2.2.6, Transformers 8625785e (same tree as 4d536e1f)",
+  "baselines": "16 targets x 3 variants (default, eager, bfloat16) recorded on cuda; each reproduced in a fresh process within 1e-4",
+  "run_to_run": "two more default runs and one eager run against the cuda baselines: 16/16 pass each",
+  "gpu_float32_vs_cpu_baselines": {
+   "discrete_outputs": "identical on 15/16; SmolLM-135M (bfloat16 by default) generates differently",
+   "logit_max_delta": {
+    "text fixtures": "1e-7 to 4e-6",
+    "clip slim/real": [
+     0.00116,
+     0.00117
+    ],
+    "whisper slim/real": [
+     0.000345,
+     0.000371
+    ],
+    "wav2vec2 slim/real": [
+     3.62e-05,
+     0.00201
+    ],
+    "bert real": 1e-05,
+    "t5 real": 2.57e-05,
+    "smollm-1.7b": 3.81e-05
+   },
+   "training_loss": "differs where dropout is on (bert real 0.385, t5-slim 0.15, wav2vec2 slim 2.59 / real 11.6): CPU and CUDA draw different dropout masks"
+  },
+  "bfloat16_vs_gpu_float32": {
+   "discrete_outputs_changed": 0,
+   "logit_max_delta": {
+    "bert-slim": 0.00258,
+    "clip-slim": 0.0511,
+    "t5-slim": 0.0142,
+    "umt5-slim": 0.0187,
+    "whisper-slim": 0.000521,
+    "wav2vec2-slim": 0.00796,
+    "clip": 0.479,
+    "bert": 0.0746,
+    "t5-small": 0.0126,
+    "whisper-tiny": 0.0807,
+    "wav2vec2": 2.3,
+    "smollm-1.7b": 0.168
+   }
+  },
+  "gate_weakest_random_delta_float32": {
+   "bert-slim": 0.00278,
+   "clip-slim": 0.00487,
+   "t5-slim": 1.28,
+   "umt5-slim": 3.09,
+   "wav2vec2-slim": 0.603,
+   "whisper-slim (overfit)": 0.279
+  },
+  "fixture_rebuild_on_x86": "model.safetensors differs from the pinned (Apple M5) bytes for all five fixtures that rebuilt, random ones included; the wav2vec2 rebuild hit the non-deterministic CUDA CTC backward (builder now hides the GPU)",
+  "batching_fixtures_only_8_targets_seconds": {
+   "batched": 13.1,
+   "isolated": 81.1
+  }
  }
 }

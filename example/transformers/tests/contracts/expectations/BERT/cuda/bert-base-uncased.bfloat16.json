@@ -1,0 +1,76 @@
+{
+ "recorded_with": {
+  "contract": "hf-internal-testing/BERT-integration",
+  "contract_revision": "unpublished",
+  "framework": "transformers",
+  "variant": "bfloat16",
+  "target": "bert-base-uncased",
+  "kind": "checkpoint",
+  "revision": "86b5e0934494bd15c9632b12f734a8a67f723594",
+  "environment": {
+   "python": "3.10.12",
+   "transformers": "5.19.0.dev0",
+   "torch": "2.14.0+cu130",
+   "tokenizers": "0.23.2",
+   "numpy": "2.2.6",
+   "local_patches": [
+    "masked-spec-embed-init"
+   ]
+  },
+  "seconds": 1.75,
+  "platform": "cuda"
+ },
+ "outputs": {
+  "runtime": {
+   "device": "cuda",
+   "dtype": "bfloat16",
+   "attn_implementation": "sdpa"
+  },
+  "predicted_tokens": [
+   3000,
+   19349,
+   4199,
+   2414
+  ],
+  "predicted_text": [
+   "paris",
+   "bonn",
+   "rome",
+   "london"
+  ],
+  "answer_logits": [
+   [
+    12.375,
+    1.9375,
+    6.53125,
+    3.640625
+   ],
+   [
+    6.09375,
+    12.25,
+    6.5,
+    6.1875
+   ],
+   [
+    6.21875,
+    4.5625,
+    12.1875,
+    4.65625
+   ],
+   [
+    5.9375,
+    3.5625,
+    4.65625,
+    12.25
+   ]
+  ],
+  "training": {
+   "loss": 1.4921875,
+   "gradients": {
+    "bert.encoder.layer.0.attention.self.query.weight": true,
+    "bert.encoder.layer.0.intermediate.dense.weight": true
+   },
+   "updated": true
+  }
+ }
+}

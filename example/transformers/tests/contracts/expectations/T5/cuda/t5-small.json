@@ -1,0 +1,140 @@
+{
+ "recorded_with": {
+  "contract": "hf-internal-testing/T5-integration",
+  "contract_revision": "unpublished",
+  "framework": "transformers",
+  "variant": "default",
+  "target": "t5-small",
+  "kind": "checkpoint",
+  "revision": "df1b051c49625cf57a3d0d8d3863ed4d13564fe4",
+  "environment": {
+   "python": "3.10.12",
+   "transformers": "5.19.0.dev0",
+   "torch": "2.14.0+cu130",
+   "tokenizers": "0.23.2",
+   "numpy": "2.2.6",
+   "local_patches": [
+    "masked-spec-embed-init"
+   ]
+  },
+  "seconds": 1.05,
+  "platform": "cuda"
+ },
+ "outputs": {
+  "runtime": {
+   "device": "cuda",
+   "dtype": "float32",
+   "attn_implementation": "sdpa"
+  },
+  "generated_tokens": [
+   [
+    0,
+    644,
+    4598,
+    229,
+    19250,
+    5,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    1674,
+    3,
+    13147,
+    15,
+    5462,
+    19219,
+    170,
+    110,
+    35,
+    5,
+    1
+   ],
+   [
+    0,
+    3488,
+    229,
+    74,
+    26989,
+    58,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    3,
+    26114,
+    9458,
+    55,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  ],
+  "generated_text": [
+   "Das Haus ist wunderbar.",
+   "Ich nehme gerne B\u00fccher zu lesen.",
+   "Wo ist der Bahnhof?",
+   "Vielen Dank!"
+  ],
+  "label_logprobs": [
+   [
+    -0.6655855178833008,
+    -0.1508723646402359,
+    -0.05508923903107643,
+    -0.5601855516433716,
+    -0.07581447064876556,
+    -0.01798067055642605,
+    0.0
+   ],
+   [
+    -0.2801833748817444,
+    -2.106472969055176,
+    -0.005225215572863817,
+    -0.7215188145637512,
+    -0.03396051004528999,
+    -0.027789555490016937,
+    -0.0026595955714583397
+   ],
+   [
+    -0.1583338975906372,
+    -0.651359498500824,
+    -0.052614975720644,
+    -0.07451473921537399,
+    -0.02021624892950058,
+    -0.0027169003151357174,
+    0.0
+   ],
+   [
+    -1.939071536064148,
+    -0.05353472754359245,
+    -0.0027341386303305626,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  ],
+  "training": {
+   "loss": 0.49811726808547974,
+   "gradients": {
+    "encoder.block.0.layer.0.SelfAttention.q.weight": true,
+    "decoder.block.0.layer.1.EncDecAttention.q.weight": true
+   },
+   "updated": true
+  }
+ }
+}

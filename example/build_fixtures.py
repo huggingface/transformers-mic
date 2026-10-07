@@ -55,6 +55,9 @@ from unittest.mock import patch
 
 os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+# Fixtures are built on the CPU, including the contract run that captures their
+# inputs: some GPU kernels have no deterministic backward (CTC loss).
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 import torch
 import transformers

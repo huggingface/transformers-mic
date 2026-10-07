@@ -1,0 +1,88 @@
+{
+ "recorded_with": {
+  "contract": "hf-internal-testing/Whisper-integration",
+  "contract_revision": "unpublished",
+  "framework": "transformers",
+  "variant": "bfloat16",
+  "target": "whisper-tiny",
+  "kind": "checkpoint",
+  "revision": "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
+  "environment": {
+   "python": "3.10.12",
+   "transformers": "5.19.0.dev0",
+   "torch": "2.14.0+cu130",
+   "tokenizers": "0.23.2",
+   "numpy": "2.2.6",
+   "local_patches": [
+    "masked-spec-embed-init"
+   ]
+  },
+  "seconds": 1.06,
+  "platform": "cuda"
+ },
+ "outputs": {
+  "runtime": {
+   "device": "cuda",
+   "dtype": "bfloat16",
+   "attn_implementation": "sdpa"
+  },
+  "generated_tokens": [
+   [
+    509
+   ],
+   [
+    509
+   ],
+   [
+    291
+   ],
+   [
+    509
+   ]
+  ],
+  "generated_text": [
+   " You",
+   " You",
+   " you",
+   " You"
+  ],
+  "label_logprobs": [
+   [
+    -2.6290202140808105,
+    -0.0002936885575763881,
+    -0.5260587930679321,
+    -11.551589965820312,
+    -2.010679244995117
+   ],
+   [
+    -2.488107919692993,
+    -0.00014959646796341985,
+    -0.565740704536438,
+    -11.835585594177246,
+    -1.722854733467102
+   ],
+   [
+    -3.080705165863037,
+    -0.00024423000286333263,
+    -0.4836554527282715,
+    -11.917319297790527,
+    -1.5711711645126343
+   ],
+   [
+    -2.4570846557617188,
+    -0.00021550717065110803,
+    -0.39499542117118835,
+    -12.31498908996582,
+    -1.6834447383880615
+   ]
+  ],
+  "training": {
+   "loss": 3.359375,
+   "gradients": {
+    "model.encoder.conv1.weight": true,
+    "model.decoder.layers.0.encoder_attn.q_proj.weight": true
+   },
+   "updated": true
+  }
+ }
+}
