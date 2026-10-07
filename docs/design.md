@@ -122,6 +122,8 @@ Training checks are only relevant to frameworks and models that support training
 
 The exact tolerances need to be calibrated per fixture and environment. Exact token equality should only be used where it is actually stable.
 
+Baselines are per platform class and dtype; the fixture is shared. On one A10G GPU, baselines recorded there held at `1e-4`, but CPU-recorded logits for convolutional models drifted up to 3e-2, and bfloat16 or float16 runs failed every float32 baseline, sometimes with different generated outputs ([evidence](evidence.md#on-gpu)). A baseline therefore records the device, dtype, and attention implementation it was recorded with, and the runner should refuse to compare across them; the [example runner](../example/run.py) fails a run whose runtime differs from its baseline.
+
 The contract should run the configuration users get by default. If users get SDPA attention, the contract records and checks SDPA; eager can be an extra variant, not a replacement chosen for determinism. In the [historical regression replay](evidence.md), a UMT5 regression that made decoder self-attention non-causal under SDPA was invisible to eager-pinned checks on both the slim fixtures and the real checkpoint.
 
 Inputs need to be deliberate. A contract that only decodes "Paris" and "Berlin" cannot see a decoding regression that only affects punctuation spacing.
@@ -385,7 +387,7 @@ The pilot should resolve:
 2. Which failures require the real checkpoint or real hardware?
 3. What is the right unit for selecting affected contracts on a PR?
 4. How expensive is baseline review in practice?
-5. Which expectations remain stable across supported hardware?
+5. Which expectations remain stable across supported hardware? On one GPU so far: generated outputs in float32 yes; logits only for models without convolutions ([evidence](evidence.md#on-gpu)).
 6. How do we handle licensed, gated, or private models in fleet validation?
 7. When should a model/framework combination be considered unsupported versus simply unvalidated?
 8. What amount of contract maintenance is acceptable before this becomes another test suite we have to carry?

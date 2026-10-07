@@ -11,7 +11,7 @@ A small fixture is useful for contracts only if it has all of the following:
 - **Real structure, small weights.** The real model config, shrunk (layers, width, heads, experts), keeping processor-coupled dimensions and model-specific settings: vocabulary, special tokens, image and patch sizes, audio dimensions, RoPE settings, MoE structure.
 - **Real processor files, unchanged.** Tokenizer, processor, and preprocessing files copied from the real model byte for byte.
 - **Frozen and pinned.** Deterministic initialization, frozen weights and inputs, published at a pinned revision (for example `hf-internal-testing/<model>-slim@<sha>`).
-- **Recorded baselines.** Outputs, selected logits, loss, targeted gradients, and an optimizer update, recorded on a known-good build and reviewed.
+- **Recorded baselines.** Outputs, selected logits, loss, targeted gradients, and an optimizer update, recorded on a known-good build and reviewed, separately for each platform class and dtype the fixture runs on (see [Hardware and dtype](#hardware-and-dtype)).
 - **Sensitive to its inputs.** Perturbing or swapping inputs must move the recorded logits well beyond tolerance.
 - **Run like users run it.** Baselines recorded under the default runtime configuration (for example SDPA attention), with eager as an extra variant.
 
@@ -126,9 +126,28 @@ Use it only when the random fixture fails the input-sensitivity check. The evide
 | Training | 0.3–0.4 s | 0.7–1.0 s | 23–51 s | 1.0–3.5 s |
 | Fixture size | 9.1 MB | 11.3 MB | 18.5 MB | 0.4 MB |
 
+## Hardware and dtype
+
+A fixture is not tied to CPU. The same files (weights, shrunk config, processor files) ran unchanged on an NVIDIA A10G GPU in the [GPU run](evidence.md#on-gpu). What depends on hardware and dtype is the baseline, so the fixture is shared and its baselines are per platform class and dtype:
+
+| Baseline recorded on → checked on | Logits at `1e-4` | Generated outputs |
+| --- | --- | --- |
+| Same GPU, float32 (three runs) | stable: max drift 6.6e-5 | unchanged |
+| CPU → GPU, float32 | stable for SmolLM, BERT, T5 (≤ 5e-5); CLIP, Whisper, Wav2Vec2 drift 1e-3 to 3e-2 | unchanged |
+| float32 → bfloat16 or float16 | over tolerance on every fixture | changed for some (T5 and Wav2Vec2 fixtures in bfloat16, real SmolLM in both) |
+
+The CPU-to-GPU drift in the convolutional families is TF32: PyTorch lets cuDNN run convolutions in TF32 by default on Ampere and newer GPUs. With it turned off, CPU baselines checked on the GPU had no flags ([evidence](evidence.md#on-gpu)). Users run with the default, so a GPU contract keeps TF32 on and records its own GPU baseline.
+
+For the fixture recipe this means:
+
+- **Record the baselines where the check runs:** CPU baselines for CPU PR checks, GPU baselines for GPU jobs, in the dtype users get for that checkpoint (for example bfloat16 when the checkpoint is stored in bfloat16).
+- **Discrete outputs are the portable signal.** In float32, generated tokens and labels stayed identical from CPU to GPU on every fixture; logits did not. Cross-platform comparisons should rely on outputs, with logits compared only against a baseline from the same platform class.
+- **Keep the training step and freezing in float32.** Fixtures are trained and saved in float32 on any device; lower precision only applies when loading for a check.
+
 ## How the experiments were run
 
 - ARM Mac, CPU, float32, two threads, PyTorch 2.11.0, Transformers `main` at `4d536e1f` (unmodified), `atol=rtol=1e-4`.
+- GPU: one NVIDIA A10G on the Transformers `aws-g5-4xlarge-cache` runners, torch 2.14.0+cu130, Transformers `8625785e` (same tree as `4d536e1f`), via [`gpu-checks.yml`](../.github/workflows/gpu-checks.yml). `CONTRACT_DEVICE` and `CONTRACT_DTYPE` select the device and dtype; fixtures are always trained and saved in float32.
 - Seeds 17, 29, and 43; random and overfit fixtures share the same initialization, config, processor, inputs, and assertions.
 - Configs and processors come from pinned real checkpoints: `HuggingFaceTB/SmolLM-135M`, `openai/clip-vit-base-patch32`, `google-bert/bert-base-uncased`, `google-t5/t5-small`, `openai/whisper-tiny`, `facebook/wav2vec2-base-960h`, `google/umt5-small`, `allenai/OLMo-1B-hf`.
 - Tasks: capital-city completion (SmolLM, OLMo), colored-square retrieval (CLIP), `[MASK]` capital fill (BERT), "capital of X:" → city (T5, UMT5), two-tone audio clips → color word (Whisper) or spelled word (Wav2Vec2).
@@ -149,5 +168,5 @@ python experiments/experiment.py \
 - Shrink rules for coupled configs, nested multimodal configs, and MoE, and a measured success rate across the fleet.
 - Bring stage 1 closer to stage 2: fixed seeds, pinned revisions, recorded baselines, unchanged processor files, and the input-sensitivity check, ideally in the same `create_dummy_models.py` pipeline rather than a parallel one.
 - Publish fixtures as `hf-internal-testing/<model>-slim` and record their revisions in the fleet lock. Keep them out of model discovery: in the [agent walkthrough](agent-walkthrough.md), a size-filtered Hub search surfaced `trl-internal-testing/tiny-*` fixtures as candidate models, and a fleet of slim fixtures would add thousands more.
-- Calibrate tolerances on the CI CPU platform and on one GPU, and decide which baselines must be hardware-specific.
+- Calibrate tolerances on the CPU-only CI runners and on the other GPU types in CI. On one A10G, baselines must be GPU-specific for convolutional families and dtype-specific everywhere.
 - Measure fixture upkeep in the pilot: shrink-rule fixes, non-converging overfits, and baseline reviews.

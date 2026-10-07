@@ -59,4 +59,4 @@ Two things the example surfaced while it was being built:
 
 - The `hf-internal-testing` repositories are unpublished; `fleet.lock` points at the folders here (`"revision": "unpublished"`).
 - `run.py` handles one contract at a time and starts a new process per run. The shared runner should batch contracts per process, because imports dominate check cost ([evidence](../docs/evidence.md)). It should also add the manifest/result schemas, isolation, and the input-sensitivity gate ([next steps](../docs/next-steps.md), step 3).
-- Tolerances are the CPU defaults (1e-4); GPU tolerances are being calibrated.
+- Baselines here are CPU only. A GPU job would need its own reviewed baselines: on an A10G, CPU-recorded logits held for text models but not for convolutional ones, and lower precision changed outputs ([evidence](../docs/evidence.md#on-gpu)).

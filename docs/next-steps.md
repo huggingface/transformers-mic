@@ -4,13 +4,13 @@ Validate the [proposed standard](../README.md#the-proposed-standard) before expa
 
 ## Status (2026-10-06)
 
-Everything so far ran locally on CPU (ARM Mac, float32, Transformers `main` at `4d536e1f`). Results are in [Evidence](evidence.md) and [Small fixtures](fixtures.md).
+Most work ran locally on CPU (ARM Mac, float32, Transformers `main` at `4d536e1f`). Stability and cost also ran on one GPU (NVIDIA A10G on the Transformers GPU runners, Transformers `8625785e`, the same tree). Results are in [Evidence](evidence.md) and [Small fixtures](fixtures.md).
 
 | Step | State |
 | --- | --- |
 | Synthetic faults, random vs overfit | done: 42/42 on SmolLM and CLIP; 78/84 random vs 84/84 overfit on BERT, T5, Whisper, Wav2Vec2 (Whisper's random fixture ignores its audio) |
 | 1. Historical regressions | done on CPU: 11 candidates, 8 reproducible, all 8 caught by slim fixtures through the affected public call with original processor files; 10 benign changes, no false alarms. GPU cases pending |
-| 2. Stability and cost | CPU part done: no flags in 770 checks across torch 2.12–2.14, tokenizers, numpy 2.x, Pillow; per-check cost measured. CI platform, GPU, downloads, and setup time pending |
+| 2. Stability and cost | CPU: no flags in 770 checks across torch 2.12–2.14, tokenizers, numpy 2.x, Pillow. GPU (A10G): GPU baselines stable at `1e-4` over three runs; CPU baselines carry over only for families without convolutions; bfloat16/float16 need their own baselines. Per-check cost measured on both. CPU-only CI runners, other GPUs, the dependency matrix on GPU, downloads, and setup time pending |
 | 3. Contract runner | not started |
 | 4. Run alongside CI | not started |
 | 5. Hub surfaces | not started |
@@ -27,15 +27,27 @@ Side findings already acted on:
 - **Run the default runtime configuration.** The UMT5 causal bug ([#49135](https://github.com/huggingface/transformers/pull/49135)) only exists under SDPA.
 - **Pin the dependency environment, not just model revisions.** Builds before 2026-08-17 need `tokenizers` 0.22.x, and builds before mid-June an older `kernels`.
 - **Organize around usage paths.** In-family regressions are rare in a five-month window; most bugs that matter sit in shared processor, tokenizer, and attention code.
-- **Process start dominates check cost** (about 2.4 s of imports vs 0.1–0.9 s of work), so the runner must batch contracts per process. Savings come from transfer and model size, not local time on small checkpoints.
+- **Process start dominates check cost** (about 2.4 s of imports on the Mac and 4.9 s on the GPU runner, vs 0.1–2 s of work), so the runner must batch contracts per process. Savings come from transfer and model size, not local time on small checkpoints.
+- **Baselines are per platform class and dtype; fixtures are shared.** On the A10G, CPU-recorded logits drifted up to 3e-2 for CLIP, Whisper, and Wav2Vec2 because cuDNN runs convolutions in TF32 by default, and every bfloat16/float16 check failed against float32 baselines, sometimes with different generated outputs ([evidence](evidence.md#on-gpu)).
 
 ## Immediate next actions
 
-1. **GPU runners.** Use the transformers ARC runner group `aws-g5-4xlarge-cache` (the one serge's GPU verify and run-slow use) from this repo's own workflows, with the `huggingface/transformers-all-latest-gpu` image and the `/mnt/cache` HF cache mount, as in transformers-ci's `serge-verify-slow.yml`. Infra is enabling this repo on that group; until then a job stays queued. `.github/workflows/gpu-probe.yml` (`gh workflow run gpu-probe.yml`) checks access and prints the GPU environment. Then: repeat the frozen checks and the stability matrix on one GPU (dtype and attention backend as users get them), calibrate tolerances on clean runs, and find at least one GPU-specific historical regression to replay. Until then, GPU results are missing, not passing.
+1. **More GPU coverage.** Frozen checks and cost now run on one A10G ([evidence](evidence.md#on-gpu)). Still to do: the dependency-upgrade matrix on GPU (CUDA torch wheels), baselines recorded in bfloat16 and checked run to run, the [full example](../example/README.md) on GPU, and at least one GPU-specific historical regression to replay. Other GPU types and multi-GPU are untested.
 2. **Finish step 1 gaps:** bugs found by nightly/slow tests (needs CI failure history), a larger benign set, and a real Whisper-like regression to test the overfit fallback.
 3. **Step 3, runner prototype**, starting with the schema and one-command execution for the six families already covered.
 
 ## How to resume
+
+GPU runs go through this repository's own workflows on the Transformers ARC runner group `aws-g5-4xlarge-cache` (one A10G, the group serge's GPU verify and run-slow use), with the `huggingface/transformers-all-latest-gpu` image and the node-local `/mnt/cache` HF cache, as in transformers-ci's `serge-verify-slow.yml`. Infra enabled this repository on that group on 2026-10-06.
+
+```sh
+gh workflow run gpu-probe.yml --repo huggingface/model-integration-contracts            # access + environment
+gh workflow run gpu-checks.yml --repo huggingface/model-integration-contracts           # freeze, check, cost (~25 min)
+gh workflow run gpu-checks.yml --repo huggingface/model-integration-contracts -f matrix=tf32 -f families="text clip whisper wav2vec2"
+gh run download <run-id> --repo huggingface/model-integration-contracts -n gpu-checks  # summary.txt, checks/, cost-*.json
+```
+
+The workflow installs a Transformers SHA from GitHub, so it must be upstream: `4d536e1f` was local-only and `8625785e` (same tree) is used instead. Steps run inside the container, where the workspace is `/__w/...`, not `github.workspace`.
 
 Repository: https://github.com/huggingface/model-integration-contracts (private). Push over HTTPS; SSH is rejected for the org.
 
@@ -69,6 +81,7 @@ Pitfalls seen on this machine:
 - **Shell:** zsh does not word-split `$VAR` holding a command or a pair of versions; use functions or explicit arguments. Commands started with a plain `&` die with the tool's shell; use a tracked background task.
 - **`rtk` hook:** it rewrites `curl`, `grep`, and `git` output; use `rtk proxy <cmd>` when exact output matters (JSON from `curl`, `git log -S`).
 - **Attention:** never call `set_attn_implementation()` after loading for checks ([#49372](https://github.com/huggingface/transformers/issues/49372)); load with `attn_implementation=` instead.
+- **TF32:** on Ampere GPUs cuDNN convolutions default to TF32; `CONTRACT_TF32=0` turns it off for diagnosis. Keep the default for baselines, since users get it.
 - **Partial HF cache:** `snapshot()` falls back to the cached folder when only some files of a revision were downloaded.
 
 ## 1. Reproduce historical regressions
@@ -86,8 +99,9 @@ Pitfalls seen on this machine:
 ## 2. Measure stability and total cost
 
 - [x] Run the frozen fixtures against benign Transformers changes and dependency upgrades (torch 2.12.1/2.13.0/2.14.1, tokenizers 0.23.2, numpy 2.2.6, Pillow 12.3.0; eager and SDPA): no flags in 770 checks ([stability.json](../experiments/results/stability.json)).
-- [ ] Repeat on the actual CI CPU platform, then one supported GPU with its dtype and attention backend. Calibrate tolerances on clean runs and freeze them; keep hardware-specific baselines where needed. Real-checkpoint drift already reaches 8.4e-5 against a 1e-4 tolerance on CPU.
-- [ ] Measure cold and warm execution including environment setup, Hub downloads, and a purged OS file cache. Process start, loading, inference, training probe, comparison, memory, and artifact size are measured locally ([cost.json](../experiments/results/cost.json)).
+- [x] Repeat on one GPU (A10G; float32 eager and SDPA, bfloat16, float16), with baselines frozen on the runner's CPU and on the GPU ([gpu.json](../experiments/results/gpu.json)). GPU baselines: no flags in three float32 runs, max drift 6.6e-5. CPU baselines on GPU: 17 of 42 flagged, all CLIP/Whisper/Wav2Vec2. bfloat16/float16 against float32 baselines: all flagged.
+- [ ] Repeat on the CPU-only CI runners, and run the dependency-upgrade matrix on GPU. Record bfloat16 baselines and check them run to run. Calibrate tolerances on clean runs and freeze them, with GPU-specific baselines for convolutional families and dtype-specific baselines everywhere. Real-checkpoint drift reaches 8.4e-5 on CPU and 6.6e-5 on GPU against a 1e-4 tolerance.
+- [ ] Measure cold and warm execution including environment setup, Hub downloads, and a purged OS file cache. Process start, loading, inference, training probe, comparison, memory, and artifact size are measured on the Mac CPU ([cost.json](../experiments/results/cost.json)) and the A10G, including peak GPU memory ([gpu.json](../experiments/results/gpu.json)).
 - [ ] Compare against current CI in wall time, CPU/GPU time, and transfer. So far only transfer: the slow tests for these eight families load about 144 GB of weights. Track fixture creation, repair, review, and triage time separately.
 
 **Deliverable:** cost and stability report with sample counts, failures, baseline churn, and manual interventions. Agree on acceptable runtime and noise with maintainers before enabling a required check.
