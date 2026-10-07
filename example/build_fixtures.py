@@ -181,7 +181,8 @@ def contract_batch(entry, fixture_dir):
         raise SystemExit(f"the contract fails on the random fixture:\n{stderr[-1500:]}")
     training = [c for c in calls if c["training"]]
     chosen = training[0] if training else calls[0]
-    batch = {k: v for k, v in chosen["kwargs"].items() if isinstance(v, (torch.Tensor, bool))}
+    # Fixtures are built on the CPU; the contract may have put its inputs on a GPU.
+    batch = {k: v.cpu() if isinstance(v, torch.Tensor) else v for k, v in chosen["kwargs"].items() if isinstance(v, (torch.Tensor, bool))}
     return batch, {"call": "training step" if training else "first inference call", "inputs": sorted(batch)}
 
 
