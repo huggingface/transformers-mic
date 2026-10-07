@@ -1,0 +1,153 @@
+name: Nightly checkpoints
+
+# Step 4: every contract on its real checkpoints (and fixtures), nightly on
+# Transformers main, non-blocking. One GPU runner (aws-g5-4xlarge-cache: A10G,
+# 64 GB RAM) runs both platforms with the fleet lock's environment, torch built
+# with CUDA:
+#   cpu-x86_64  CUDA hidden; default and eager
+#   cuda        default, eager, bfloat16
+# Results are appended to the shadow-results branch (runs/nightly/), separate
+# from the fixture-only shadow runs.
+#
+# mode=record writes cuda candidates instead of checking (each rerun in a fresh
+# process), uploaded for review; used to re-record baselines when the pinned
+# environment changes.
+#
+#   gh workflow run nightly.yml --repo huggingface/model-integration-contracts
+#   gh workflow run nightly.yml --repo huggingface/model-integration-contracts -f mode=record -f transformers_ref=8625785e7e3e138a328ec2e678dc198e356e7c6c
+
+on:
+  schedule:
+    - cron: "41 2 * * *"
+  workflow_dispatch:
+    inputs:
+      transformers_ref:
+        description: "Transformers commit sha or branch"
+        required: false
+        type: string
+        default: main
+      mode:
+        description: "check or record (cuda candidates)"
+        required: false
+        type: string
+        default: check
+
+permissions:
+  contents: write
+
+jobs:
+  nightly:
+    runs-on:
+      group: aws-g5-4xlarge-cache
+    timeout-minutes: 180
+    container:
+      image: huggingface/transformers-all-latest-gpu
+      options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    env:
+      REF: ${{ inputs.transformers_ref || 'main' }}
+      MODE: ${{ inputs.mode || 'check' }}
+      EVENT: ${{ github.event_name }}
+      HF_HOME: /mnt/cache
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      CUBLAS_WORKSPACE_CONFIG: ":4096:8"
+      PYTHONUNBUFFERED: "1"
+      GH_TOKEN: ${{ github.token }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      # github.workspace is the host path; steps run in the container (/__w/...).
+      - name: Install
+        run: |
+          echo "OUT=$GITHUB_WORKSPACE/out" >> "$GITHUB_ENV"
+          mkdir -p "$GITHUB_WORKSPACE/out"
+          sha=$(git ls-remote https://github.com/huggingface/transformers "$REF" | cut -f1 | head -1)
+          sha=${sha:-$REF}
+          echo "SHA=$sha" >> "$GITHUB_ENV"
+          PY=python3 FETCH="$sha" TORCH_INDEX=cu128 .github/scripts/install_pinned.sh
+          python3 -m pip freeze > "$GITHUB_WORKSPACE/out/pip-freeze.txt"
+          nvidia-smi --query-gpu=name,driver_version --format=csv,noheader | tee "$GITHUB_WORKSPACE/out/gpu.txt"
+          python3 -c "import torch; print(torch.__version__, torch.cuda.is_available())"
+
+      - name: Run
+        id: run
+        run: |
+          run() {  # <label> <run.py options...>
+            python3 example/run.py --framework transformers "${@:2}" --output "$OUT/$1.jsonl" \
+              > /dev/null 2> "$OUT/$1.log" || true
+            echo "$1: $(tail -1 "$OUT/$1.log")"
+          }
+          if [[ "$MODE" == record ]]; then
+            for variant in default eager bfloat16; do run record-cuda-$variant --variant $variant --record --isolate; done
+            mkdir -p "$OUT/candidates"
+            find example/transformers/tests/contracts/expectations -name '*.candidate.json' -path '*/cuda/*' \
+              | while read -r f; do mkdir -p "$OUT/candidates/$(dirname "$f")"; cp "$f" "$OUT/candidates/$f"; done
+            exit 0
+          fi
+          for variant in default eager; do CUDA_VISIBLE_DEVICES="" run cpu-$variant --variant $variant; done
+          for variant in default eager bfloat16; do CUDA_VISIBLE_DEVICES=0 run cuda-$variant --variant $variant; done
+
+      - name: Annotate results
+        if: env.MODE == 'check'
+        run: |
+          python3 - <<'EOF'
+          import json, os, pathlib, platform, subprocess
+          out = pathlib.Path(os.environ["OUT"])
+          cpu = subprocess.run("lscpu | sed -n 's/^Model name: *//p'", shell=True, capture_output=True, text=True).stdout.strip()
+          meta = {"transformers_ref": os.environ["REF"], "transformers_sha": os.environ["SHA"], "event": os.environ["EVENT"],
+                  "run_id": os.environ["GITHUB_RUN_ID"], "runner": "aws-g5-4xlarge-cache", "arch": platform.machine(),
+                  "cpu": cpu, "gpu": (out / "gpu.txt").read_text().strip()}
+          rows = []
+          for f in sorted(out.glob("*-*.jsonl")):
+              rows += [{**json.loads(line), "shadow": {**meta, "pass": f.stem}} for line in f.read_text().splitlines()]
+          (out / "results.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+          summary = [f"### Nightly: `{meta['transformers_ref']}` → `{meta['transformers_sha'][:10]}` ({meta['gpu']}, {cpu})", "",
+                     "| pass | target | status | failures |", "| --- | --- | --- | --- |"]
+          for r in rows:
+              if r["status"] not in ("pass", "xfail"):
+                  failures = "; ".join(r.get("failures", []))[:200].replace("|", "/").replace("\n", " ")
+                  summary.append(f"| {r['shadow']['pass']} | {r['target']} | {r['status']} | {failures} |")
+          counts = {}
+          for r in rows:
+              counts[r["status"]] = counts.get(r["status"], 0) + 1
+          summary += ["", f"{counts}"]
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+              f.write("\n".join(summary) + "\n")
+          print(counts)
+          bad = sum(v for k, v in counts.items() if k in ("fail", "error"))
+          with open(os.environ["GITHUB_ENV"], "a") as f:
+              f.write(f"FAILED={bad}\n")
+          EOF
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nightly
+          path: out/
+
+      - name: Append to shadow-results
+        if: env.MODE == 'check'
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch --quiet origin shadow-results:refs/remotes/origin/shadow-results
+          git worktree add --quiet -B shadow-results /tmp/shadow-results origin/shadow-results
+          file="runs/nightly/$(date -u +%F)/${{ github.run_id }}-${{ github.run_attempt }}.jsonl"
+          mkdir -p "/tmp/shadow-results/$(dirname "$file")"
+          cp "$OUT/results.jsonl" "/tmp/shadow-results/$file"
+          cd /tmp/shadow-results
+          git add -A
+          git commit --quiet -m "Nightly ${{ github.run_id }}: $REF ${SHA:0:10}"
+          for i in 1 2 3; do
+            git push --quiet origin shadow-results && break
+            git pull --quiet --rebase origin shadow-results
+          done
+
+      - name: Contract status
+        if: env.MODE == 'check' && env.FAILED != '0'
+        run: |
+          echo "::warning::$FAILED checkpoint or fixture checks failed on $REF ($SHA); see the summary"
+          exit 1
