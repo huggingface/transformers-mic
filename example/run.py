@@ -5,6 +5,7 @@
     python example/run.py --framework transformers --target SmolLM-slim
     python example/run.py --framework transformers.js
     python example/run.py ... --record                              # candidate baselines for review
+    python example/run.py --framework transformers.js --variant webgpu-fp16 --golden cpu
 
 A sketch of the shared runner. For each contract in
 <framework>/tests/contracts/fleet.lock it reads the manifest from the pinned
@@ -16,6 +17,11 @@ Runnable-markdown contracts are collected with doc-builder's own block
 collector, so the runner executes exactly what the docs build tests and renders
 (requires doc-builder from main). --record never touches an approved baseline;
 it writes <name>.candidate.json next to it, and a reviewer renames it.
+
+--golden <platform> checks a run against another platform's reviewed baseline
+(for example a new WebGPU kernel against the CPU golden): discrete outputs must
+match exactly; logits are reported as max delta, not compared, since they are
+only comparable within a platform class.
 """
 
 import argparse
@@ -139,6 +145,7 @@ def main():
     parser.add_argument("--target", help="run only this target (fixture or checkpoint name)")
     parser.add_argument("--variant", default="default")
     parser.add_argument("--record", action="store_true", help="write candidate baselines for review")
+    parser.add_argument("--golden", metavar="PLATFORM", help="check discrete outputs against this platform's baseline")
     args = parser.parse_args()
 
     lock_dir = HERE / args.framework / "tests/contracts"
@@ -187,9 +194,21 @@ def main():
                     status = 1
                     continue
                 actual = json.loads(lines[-1])
-                platform = actual["runtime"]["device"]
-                suffix = "" if args.variant == "default" else f".{args.variant}"
+                platform = args.golden or actual["runtime"]["device"]
+                suffix = "" if args.variant == "default" or args.golden else f".{args.variant}"
                 baseline = lock_dir / "expectations" / name / platform / f"{target}{suffix}.json"
+                if args.golden:
+                    expected = json.loads(baseline.read_text())["outputs"]
+                    rules = {k: r for k, r in manifest["outputs"].items() if r["compare"] == "exact" and k != "runtime"}
+                    failures = compare(rules, actual, expected)
+                    deltas = {
+                        k: max(abs(x - y) for x, y in zip(flatten(lookup(actual, k)), flatten(lookup(expected, k))))
+                        for k, r in manifest["outputs"].items()
+                        if r["compare"] == "allclose" and lookup(actual, k) is not None
+                    }
+                    print(json.dumps({**record, "golden": str(baseline.relative_to(HERE)), "status": "fail" if failures else "pass", "failures": failures, "max_delta": deltas}))
+                    status |= bool(failures)
+                    continue
                 if args.record:
                     candidate = baseline.with_name(f"{target}{suffix}.candidate.json")
                     candidate.parent.mkdir(parents=True, exist_ok=True)

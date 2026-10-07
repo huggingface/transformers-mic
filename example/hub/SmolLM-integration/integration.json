@@ -51,7 +51,10 @@
         "HuggingFaceTB/SmolLM-1.7B": "no onnx-community conversion; the creator's float32 ONNX is 6.8 GB"
       },
       "variants": {
-        "default": {"dtype": "fp32"}
+        "default": {"dtype": "fp32"},
+        "webgpu": {"dtype": "fp32", "device": "webgpu"},
+        "webgpu-fp16": {"dtype": "fp16", "device": "webgpu"},
+        "webgpu-q4f16": {"dtype": "q4f16", "device": "webgpu"}
       },
       "training": false
     }

@@ -254,6 +254,12 @@ For converted artifacts, we need to record separately:
 
 We should not pretend these are the same artifact or revision.
 
+### Golden references for kernels and performance
+
+A reviewed real-checkpoint baseline is a golden reference that kernel work can reuse. To check a new kernel or backend (for example WebGPU in Transformers.js), run the contract on it and compare discrete outputs with an existing platform's baseline. Logits are comparable only within a platform class, so they are reported as drift rather than compared ([why](evidence.md#on-gpu)). Once the backend's outputs are reviewed, it gets its own baselines. The [example runner](../example/run.py) does this with `--golden cpu`. On an Apple M5 it passed WebGPU fp32, with identical tokens and logits within 4e-5 of CPU. It failed WebGPU fp16 and q4f16, which silently returned all-zero logits ([example](../example/README.md#run-it)).
+
+Contract records also carry timings (load, first and warm generate, forward). They are stored with the baseline and not compared, so a kernel change can be tracked for speed on exactly the inputs that check its correctness. Performance needs real checkpoints on the target hardware; slim fixtures are too small to say anything about kernel speed.
+
 ## Pilot
 
 Before designing Hub product around this, run a small CI pilot.

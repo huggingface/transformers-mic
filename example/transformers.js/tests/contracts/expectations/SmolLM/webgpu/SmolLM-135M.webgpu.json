@@ -1,0 +1,85 @@
+{
+ "recorded_with": {
+  "contract": "hf-internal-testing/SmolLM-integration",
+  "target": "SmolLM-135M",
+  "variant": "webgpu",
+  "revision": "f4acdf4c16b4deaee4cc6659fd3e32e44ecc37fd",
+  "framework": "transformers.js",
+  "contract_revision": "unpublished",
+  "environment": {
+   "node": "v25.6.1",
+   "@huggingface/transformers": "4.3.0"
+  },
+  "seconds": 0.87
+ },
+ "outputs": {
+  "runtime": {
+   "device": "webgpu",
+   "dtype": "fp32"
+  },
+  "generated_tokens": [
+   [
+    7042,
+    30,
+    657,
+    314
+   ],
+   [
+    11452,
+    30,
+    198,
+    504
+   ],
+   [
+    7268,
+    30,
+    657,
+    314
+   ],
+   [
+    4528,
+    30,
+    198,
+    504
+   ]
+  ],
+  "generated_text": [
+   " Paris. It is",
+   " Berlin.\nThe",
+   " Rome. It is",
+   " London.\nThe"
+  ],
+  "next_token_logits": [
+   [
+    13.058624267578125,
+    4.602107048034668,
+    7.211542129516602,
+    6.849810600280762
+   ],
+   [
+    3.3514010906219482,
+    9.338756561279297,
+    2.178157329559326,
+    2.9179112911224365
+   ],
+   [
+    8.46955394744873,
+    4.903873443603516,
+    15.153090476989746,
+    7.202747344970703
+   ],
+   [
+    9.371926307678223,
+    7.59909725189209,
+    8.902813911437988,
+    16.786710739135742
+   ]
+  ],
+  "timing": {
+   "load_ms": 309.418166,
+   "first_generate_ms": 100.62558299999995,
+   "generate_ms": 78.30362500000001,
+   "forward_ms": 23.207082999999898
+  }
+ }
+}

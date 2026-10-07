@@ -1,0 +1,310 @@
+{
+ "environment": {
+  "machine": "macOS-26.5.1-arm64-arm-64bit",
+  "node": "v25.6.1",
+  "@huggingface/transformers": "4.3.0",
+  "onnxruntime-node": "1.30.0"
+ },
+ "rows": [
+  {
+   "artifact": "onnx-community/SmolLM-135M-ONNX",
+   "device": "cpu",
+   "dtype": "fp32",
+   "runs": 3,
+   "tokens_equal_golden": [
+    true,
+    true,
+    true
+   ],
+   "max_logit_delta_golden": 0.0,
+   "max_logit_drift_run_to_run": 0.0,
+   "generated_text": [
+    " Paris. It is",
+    " Berlin.\nThe",
+    " Rome. It is",
+    " London.\nThe"
+   ],
+   "timing_median_ms": {
+    "load_ms": 295.5,
+    "first_generate_ms": 51.7,
+    "generate_ms": 46.4,
+    "forward_ms": 11.9
+   }
+  },
+  {
+   "artifact": "onnx-community/SmolLM-135M-ONNX",
+   "device": "cpu",
+   "dtype": "fp16",
+   "runs": 3,
+   "tokens_equal_golden": [
+    true,
+    true,
+    true
+   ],
+   "max_logit_delta_golden": 0.012179374694824219,
+   "max_logit_drift_run_to_run": 0.0,
+   "generated_text": [
+    " Paris. It is",
+    " Berlin.\nThe",
+    " Rome. It is",
+    " London.\nThe"
+   ],
+   "timing_median_ms": {
+    "load_ms": 333.9,
+    "first_generate_ms": 61.4,
+    "generate_ms": 63.6,
+    "forward_ms": 20.7
+   }
+  },
+  {
+   "artifact": "onnx-community/SmolLM-135M-ONNX",
+   "device": "cpu",
+   "dtype": "q4f16",
+   "runs": 3,
+   "tokens_equal_golden": [
+    false,
+    false,
+    false
+   ],
+   "max_logit_delta_golden": 1.318178415298462,
+   "max_logit_drift_run_to_run": 0.0,
+   "generated_text": [
+    " Paris. It is",
+    " Berlin. It is",
+    " Rome. It is",
+    " London. London is"
+   ],
+   "timing_median_ms": {
+    "load_ms": 272.5,
+    "first_generate_ms": 74.5,
+    "generate_ms": 68.1,
+    "forward_ms": 30.1
+   }
+  },
+  {
+   "artifact": "onnx-community/SmolLM-135M-ONNX",
+   "device": "webgpu",
+   "dtype": "fp32",
+   "runs": 3,
+   "tokens_equal_golden": [
+    true,
+    true,
+    true
+   ],
+   "max_logit_delta_golden": 3.814697265625e-05,
+   "max_logit_drift_run_to_run": 0.0,
+   "generated_text": [
+    " Paris. It is",
+    " Berlin.\nThe",
+    " Rome. It is",
+    " London.\nThe"
+   ],
+   "timing_median_ms": {
+    "load_ms": 298.7,
+    "first_generate_ms": 92.7,
+    "generate_ms": 68.9,
+    "forward_ms": 19.7
+   }
+  },
+  {
+   "artifact": "onnx-community/SmolLM-135M-ONNX",
+   "device": "webgpu",
+   "dtype": "fp16",
+   "runs": 3,
+   "tokens_equal_golden": [
+    false,
+    false,
+    false
+   ],
+   "max_logit_delta_golden": 16.7867488861084,
+   "max_logit_drift_run_to_run": 0,
+   "generated_text": [
+    "",
+    "",
+    "",
+    ""
+   ],
+   "timing_median_ms": {
+    "load_ms": 225.8,
+    "first_generate_ms": 42.5,
+    "generate_ms": 20.4,
+    "forward_ms": 18.3
+   }
+  },
+  {
+   "artifact": "onnx-community/SmolLM-135M-ONNX",
+   "device": "webgpu",
+   "dtype": "q4f16",
+   "runs": 3,
+   "tokens_equal_golden": [
+    false,
+    false,
+    false
+   ],
+   "max_logit_delta_golden": 16.7867488861084,
+   "max_logit_drift_run_to_run": 0,
+   "generated_text": [
+    "",
+    "",
+    "",
+    ""
+   ],
+   "timing_median_ms": {
+    "load_ms": 198.3,
+    "first_generate_ms": 42.9,
+    "generate_ms": 19.1,
+    "forward_ms": 16.9
+   }
+  },
+  {
+   "artifact": "onnx-community/SmolLM-360M-ONNX",
+   "device": "cpu",
+   "dtype": "fp32",
+   "runs": 3,
+   "tokens_equal_golden": [
+    true,
+    true,
+    true
+   ],
+   "max_logit_delta_golden": 0.0,
+   "max_logit_drift_run_to_run": 0.0,
+   "generated_text": [
+    " Paris.\nThe",
+    " Berlin.\nThe",
+    " Rome.\nThe",
+    " London.\nThe"
+   ],
+   "timing_median_ms": {
+    "load_ms": 641.5,
+    "first_generate_ms": 95.7,
+    "generate_ms": 94.4,
+    "forward_ms": 22.4
+   }
+  },
+  {
+   "artifact": "onnx-community/SmolLM-360M-ONNX",
+   "device": "cpu",
+   "dtype": "fp16",
+   "runs": 3,
+   "tokens_equal_golden": [
+    true,
+    true,
+    true
+   ],
+   "max_logit_delta_golden": 0.0057392120361328125,
+   "max_logit_drift_run_to_run": 0.0,
+   "generated_text": [
+    " Paris.\nThe",
+    " Berlin.\nThe",
+    " Rome.\nThe",
+    " London.\nThe"
+   ],
+   "timing_median_ms": {
+    "load_ms": 688.4,
+    "first_generate_ms": 139.0,
+    "generate_ms": 137.0,
+    "forward_ms": 50.2
+   }
+  },
+  {
+   "artifact": "onnx-community/SmolLM-360M-ONNX",
+   "device": "cpu",
+   "dtype": "q4f16",
+   "runs": 3,
+   "tokens_equal_golden": [
+    false,
+    false,
+    false
+   ],
+   "max_logit_delta_golden": 1.872298240661621,
+   "max_logit_drift_run_to_run": 0.0,
+   "generated_text": [
+    " Paris.\nThe",
+    " Berlin.\nThe",
+    " Rome.\nThe",
+    " London. London is"
+   ],
+   "timing_median_ms": {
+    "load_ms": 405.0,
+    "first_generate_ms": 157.7,
+    "generate_ms": 169.7,
+    "forward_ms": 76.5
+   }
+  },
+  {
+   "artifact": "onnx-community/SmolLM-360M-ONNX",
+   "device": "webgpu",
+   "dtype": "fp32",
+   "runs": 3,
+   "tokens_equal_golden": [
+    true,
+    true,
+    true
+   ],
+   "max_logit_delta_golden": 1.9073486328125e-05,
+   "max_logit_drift_run_to_run": 0.0,
+   "generated_text": [
+    " Paris.\nThe",
+    " Berlin.\nThe",
+    " Rome.\nThe",
+    " London.\nThe"
+   ],
+   "timing_median_ms": {
+    "load_ms": 587.4,
+    "first_generate_ms": 144.0,
+    "generate_ms": 118.7,
+    "forward_ms": 34.7
+   }
+  },
+  {
+   "artifact": "onnx-community/SmolLM-360M-ONNX",
+   "device": "webgpu",
+   "dtype": "fp16",
+   "runs": 3,
+   "tokens_equal_golden": [
+    false,
+    false,
+    false
+   ],
+   "max_logit_delta_golden": 20.248870849609375,
+   "max_logit_drift_run_to_run": 0,
+   "generated_text": [
+    "",
+    "",
+    "",
+    ""
+   ],
+   "timing_median_ms": {
+    "load_ms": 378.8,
+    "first_generate_ms": 54.8,
+    "generate_ms": 32.7,
+    "forward_ms": 31.3
+   }
+  },
+  {
+   "artifact": "onnx-community/SmolLM-360M-ONNX",
+   "device": "webgpu",
+   "dtype": "q4f16",
+   "runs": 3,
+   "tokens_equal_golden": [
+    false,
+    false,
+    false
+   ],
+   "max_logit_delta_golden": 20.248870849609375,
+   "max_logit_drift_run_to_run": 0,
+   "generated_text": [
+    "",
+    "",
+    "",
+    ""
+   ],
+   "timing_median_ms": {
+    "load_ms": 277.0,
+    "first_generate_ms": 49.7,
+    "generate_ms": 28.7,
+    "forward_ms": 26.4
+   }
+  }
+ ]
+}

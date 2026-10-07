@@ -48,6 +48,8 @@ pip install git+https://github.com/huggingface/doc-builder   # runnable blocks a
 $PY example/run.py --framework transformers                  # 2 fixtures + 3 checkpoints
 $PY example/run.py --framework transformers --variant eager
 $PY example/run.py --framework transformers.js
+$PY example/run.py --framework transformers.js --variant webgpu                    # WebGPU baselines
+$PY example/run.py --framework transformers.js --variant webgpu-fp16 --golden cpu  # tokens vs CPU golden
 $PY example/run.py --framework transformers --target SmolLM-slim --record
 ```
 
@@ -70,6 +72,7 @@ What building the example showed:
 
 - **Variants need their own baselines.** SmolLM-135M loads in bfloat16 by default. Under eager attention its greedy continuation for France changes (" Paris. It is" instead of " Paris, the capital"). In float32 the fixtures and SmolLM-1.7B give the same results for both.
 - **Frameworks need their own baselines.** Transformers.js runs the ONNX conversion in float32 and agrees with Transformers' bfloat16 run on three prompts out of four for 135M.
+- **CPU golden outputs check WebGPU.** The Transformers.js variants `webgpu`, `webgpu-fp16`, and `webgpu-q4f16` run the same contract through onnxruntime-node's WebGPU backend (1.30, Apple M5). In fp32, WebGPU matched the CPU baseline: identical tokens, logits within 4e-5, deterministic over three runs. In fp16 and q4f16, every logit came back as exactly 0 and generation stopped after one token, with no error. CPU fp16 was fine (logits within 0.012 of fp32), so the fault is in the WebGPU half-precision path. `--golden cpu` catches it from tokens alone; WebGPU fp32 has its own reviewed baselines, and no fp16 baseline was recorded, since that would approve the bug. Each record also carries load, generate, and forward timings, which are kept but not compared ([measurements](../experiments/results/webgpu_golden.json)).
 - **The contract can be wrong too.** A first version padded the training batch on the left. Each row's first token was then predicted from a fully masked padding position, where eager and SDPA disagree, so their losses differed by 0.2 on a float32 fixture. Right padding for training fixed it. The eager variant is what exposed the mistake.
 
 ## Not real yet
@@ -77,7 +80,7 @@ What building the example showed:
 - The `hf-internal-testing` repositories are unpublished; the fleet locks point at the folders in [`hub/`](hub) (`"revision": "unpublished"`).
 - `run.py` starts a new process per target. The shared runner should batch targets per process, because imports dominate check cost ([evidence](../docs/evidence.md)). It should also add the manifest and result schemas, isolation, and the input-sensitivity gate ([design](../docs/design.md)).
 - Variants need a second, hidden `from_pretrained` call in the runnable block. A doc-builder hook for passing load arguments to a block would remove it.
-- Baselines here are CPU only. A GPU job would need its own reviewed baselines: on an A10G, CPU-recorded logits held for text models but not for convolutional ones, and lower precision changed outputs ([evidence](../docs/evidence.md#on-gpu)).
+- Baselines here are CPU, plus WebGPU fp32 for Transformers.js. A CUDA GPU job would need its own reviewed baselines: on an A10G, CPU-recorded logits held for text models but not for convolutional ones, and lower precision changed outputs ([evidence](../docs/evidence.md#on-gpu)).
 
 ## What this example offers an agent
 
