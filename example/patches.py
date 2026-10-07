@@ -54,7 +54,7 @@ def masked_spec_embed_init():
 
 
 def whisper_decode_tensor_batch():
-    """Decode a 2-D tensor with timestamps per sequence, as decode already does for a list of lists.
+    """Decode a 2-D tensor with timestamps per sequence, as decode already does for a list of lists (#49403).
 
     WhisperTokenizer.decode only treats its input as a batch when it is a list of
     lists, so batch_decode(model.generate(...), decode_with_timestamps=True) merges
