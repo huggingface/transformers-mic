@@ -1,6 +1,6 @@
 {
  "fixture": "hf-internal-testing/bert-base-uncased-slim",
- "key": "01c5148385706211fcf8703c6cec0b098678719b84c0635f11c301a21e994df0",
+ "key": "7ce74647df48e43332a1634bb3c9c123e2845de5a9401b574555e1964f417d11",
  "key_fields": {
   "architectures": [
    "BertForMaskedLM"
@@ -24,8 +24,8 @@
   "num_attention_heads": 4,
   "intermediate_size": 128,
   "hidden_act": "gelu",
-  "hidden_dropout_prob": 0.0,
-  "attention_probs_dropout_prob": 0.0,
+  "hidden_dropout_prob": 0.1,
+  "attention_probs_dropout_prob": 0.1,
   "max_position_embeddings": 512,
   "type_vocab_size": 2,
   "initializer_range": 0.02,
@@ -54,6 +54,7 @@
  "builder": "example/build_fixtures.py",
  "model_class": "BertForMaskedLM",
  "parameters": 2088186,
+ "missing_parameters": [],
  "captured": {
   "call": "training step",
   "inputs": [
@@ -114,7 +115,7 @@
  },
  "sha256": {
   "LICENSE": "43070e2d4e532684de521b885f385d0841030efa2b1a20bafb76133a5e1379c1",
-  "config.json": "27371449151a7740b1d2cbc71786115c415453b3e4e26ca34d23db22c15fa1bd",
+  "config.json": "7a55bffa8e892b3f6cac45020c9f307f98563ba5ae3bb4cee7d92a775eb35a5f",
   "model.safetensors": "edd6c55af065cd007fafa2b644f2386df5d0547c440cb6d667267ea062e0f93d",
   "tokenizer.json": "ce64fce797c24f68df90b40a3f74f579b336a493db14bd583fd520ea0d8c9a98",
   "tokenizer_config.json": "a025160ef0431f1a392f6f050c1310f4c5d9fb6f275932dbccba73c4d214bf10",

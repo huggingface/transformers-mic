@@ -17,7 +17,7 @@
     "masked-spec-embed-init"
    ]
   },
-  "seconds": 0.8,
+  "seconds": 0.64,
   "platform": "cpu"
  },
  "outputs": {
@@ -6916,7 +6916,7 @@
    "loss": 75.08861541748047,
    "gradients": {
     "wav2vec2.feature_extractor.conv_layers.0.conv.weight": true,
-    "wav2vec2.encoder.layers.0.attention.q_proj.weight": true
+    "lm_head.weight": true
    },
    "updated": true
   }

@@ -1,6 +1,6 @@
 {
  "fixture": "hf-internal-testing/clip-vit-base-patch32-slim",
- "key": "df87c8397e39afeb1bd5f460a11dd1e0c25ebd43d4184e47357ec375f946004b",
+ "key": "b50917f048e52656435ea112c71ae59d2d6a0623450e9d859145387ede6c2984",
  "key_fields": {
   "architectures": [
    "CLIPModel"
@@ -136,6 +136,7 @@
  "builder": "example/build_fixtures.py",
  "model_class": "CLIPModel",
  "parameters": 3505281,
+ "missing_parameters": [],
  "captured": {
   "call": "training step",
   "inputs": [
@@ -149,6 +150,7 @@
  "gate": {
   "random": {
    "pass": true,
+   "accepted_insensitive": {},
    "threshold": 0.001,
    "deltas": {
     "input_ids:roll_batch": 0.4480898380279541,

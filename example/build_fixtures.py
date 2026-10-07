@@ -7,14 +7,19 @@
 For each fixture in a contract's manifest that has a `build` recipe:
 
 1. Fixture key. Every checkpoint the fixture covers must have the same key:
-   its processor files byte for byte, plus its config after shrinking. The
-   build fails on a mismatch instead of testing a checkpoint through the wrong fixture.
+   its processor files byte for byte, its config after shrinking, and the
+   parameters its weights lack. The build fails on a mismatch instead of
+   testing a checkpoint through the wrong fixture.
 2. Shrink. The real config goes through the generic rule from
    experiments/sweep.py (widths by field name in every sub-config, depth by
-   layer pattern, MoE to 4 experts), with dropout off; seeded random weights.
+   layer pattern, MoE to 4 experts); nothing else changes, so dropout and
+   SpecAugment stay as configured (contracts seed them). Seeded random weights.
 3. Copy. Every non-weight file of the source checkpoint (tokenizer,
    processor, generation config) is copied unchanged; only config.json and the
-   weights are new.
+   weights are new. The weights mirror the real checkpoint's tensor names:
+   parameters the real checkpoint lacks are dropped from the fixture too, so
+   loading initializes them as it does for users, and the build checks that
+   the fixture reports the same missing parameters.
 4. Capture. The contract's own runnable markdown runs against the random
    fixture, and the runner records the arguments of each top-level model call
    by name. The training step's call is the batch used below.
@@ -37,6 +42,7 @@ import argparse
 import contextlib
 import hashlib
 import importlib.metadata
+import io
 import json
 import os
 import platform
@@ -99,35 +105,41 @@ def model_class(source, recipe):
     return getattr(transformers, AutoConfig.from_pretrained(source).architectures[0])
 
 
-def no_dropout(config):
-    """Training probes compare losses, so fixtures must train deterministically."""
-    for key, value in config.to_dict().items():
-        if isinstance(value, float) and ("dropout" in key or "layerdrop" in key or key.startswith("mask_")):
-            setattr(config, key, 0.0)
-    for key in getattr(config, "sub_configs", {}) or {}:
-        if isinstance(getattr(config, key, None), transformers.PretrainedConfig):
-            no_dropout(getattr(config, key))
-    return config
-
-
 def shrunk_config(source, cls):
-    return no_dropout(shrink(cls.config_class.from_pretrained(source)))
+    return shrink(cls.config_class.from_pretrained(source))
 
 
-def fixture_key(source, cls):
+def missing_parameters(cls, path):
+    """Parameters a checkpoint's weights lack, in the model's own names, as loading reports them."""
+    with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
+        model, info = cls.from_pretrained(path, output_loading_info=True)
+    del model
+    return sorted(info["missing_keys"])
+
+
+def fixture_key(source, cls, missing):
     config = {k: v for k, v in shrunk_config(source, cls).to_dict().items() if k not in VOLATILE}
     processor = {name: hashlib.sha256((source / name).read_bytes()).hexdigest() for name in copied_files(source)}
-    blob = json.dumps({"config": config, "processor": processor}, sort_keys=True, default=str)
+    blob = json.dumps({"config": config, "processor": processor, "missing": missing}, sort_keys=True, default=str)
     return hashlib.sha256(blob.encode()).hexdigest(), config
 
 
-def save(model, out, source):
-    """Write the fixture: new config and weights, every processor file copied unchanged."""
+def save(model, out, source, missing):
+    """Write the fixture: new config and weights without the parameters the real
+    checkpoint lacks, every processor file copied unchanged."""
+    from safetensors.torch import load_file, save_file
+
     out.mkdir(parents=True, exist_ok=True)
     for file in out.iterdir():
         if file.is_file() and file.name != "README.md":
             file.unlink()
     model.save_pretrained(out)
+    weights = out / "model.safetensors"
+    tensors = load_file(weights)
+    absent = [name for name in missing if name not in tensors]
+    if absent:
+        raise SystemExit(f"cannot mirror the real checkpoint: the fixture has no tensor named {absent}")
+    save_file({k: v for k, v in tensors.items() if k not in missing}, weights, metadata={"format": "pt"})
     copied = copied_files(source)
     for name in copied:
         shutil.copyfile(source / name, out / name)  # overwrites the generation config save_pretrained wrote
@@ -230,6 +242,12 @@ def depth(config, prefix=""):
 
 
 def readme(name, contract, build, cls, config):
+    lacks = build.get("missing_parameters", [])
+    mirror = (
+        f"The real checkpoint lacks {', '.join(f'`{n}`' for n in lacks)}, so the fixture omits it too, and loading initializes it as it does for users."
+        if lacks
+        else "The real checkpoint has every parameter, and so does the fixture."
+    )
     covers = ", ".join(f"[`{r}`](https://huggingface.co/{r})" for r in build["covers"])
     gate = build["gate"]["random"]
     if build["weights"] == "random":
@@ -259,6 +277,7 @@ A {build['parameters'] / 1e6:.1f}M-parameter fixture for the [{contract} MIC](..
 - **Same architecture, smaller config:** `{cls.__name__}`, shrunk by the generic rule in [`sweep.py`](../../../experiments/sweep.py) ({depth(config)}).
 - **Processor files copied byte for byte** from `{build['built_from']['repo']}`: {', '.join(f'`{f}`' for f in build['copied_unchanged'])}.
 - {weights}
+- **Same tensor names as the real checkpoint.** {mirror}
 - **Finite in float32, bfloat16, and float16** (forward, loss, gradients).
 
 Built by [`build_fixtures.py`](../../build_fixtures.py); [`build.json`](build.json) records the pinned sources, gate results, and file hashes. Only `README.md` and `build.json` are committed; rebuild the other files with `python example/build_fixtures.py --fixture {short(name)}`.
@@ -281,14 +300,17 @@ def environment():
 
 def build_fixture(name, fixture, contract_name, manifest, root, revisions, out):
     recipe = fixture["build"]
-    keys = {}
+    keys, missing = {}, {}
     for repo in fixture["covers"]:
         source = source_snapshot(repo, revisions[repo])
-        keys[repo] = fixture_key(source, model_class(source, recipe))
+        cls = model_class(source, recipe)
+        missing[repo] = missing_parameters(cls, run.checkpoint_path(repo, revisions[repo]))
+        keys[repo] = fixture_key(source, cls, missing[repo])
     if len({key for key, _ in keys.values()}) != 1:
         raise SystemExit(f"{name}: covered checkpoints have different fixture keys: { {r: k[:12] for r, (k, _) in keys.items()} }")
     key, config = next(iter(keys.values()))
     source_repo = fixture["built_from"]
+    lacks = missing[source_repo]
     source = source_snapshot(source_repo, revisions[source_repo])
     cls = model_class(source, recipe)
     tolerance = recipe.get("gate_tolerance") or max(
@@ -298,19 +320,23 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out):
 
     torch.manual_seed(recipe["seed"])
     model = cls._from_config(shrunk_config(source, cls), dtype=torch.float32).eval()
-    copied = save(model, out, source)
+    copied = save(model, out, source, lacks)
     entry = root / manifest["integrations"]["transformers"]["entry_point"]
     batch, captured = contract_batch(entry, out)
     accepted = recipe.get("accept_insensitive", {})
     gate = {"random": sensitivity(model, batch, threshold, accepted)}
     weights, training = "random", None
     if not gate["random"]["pass"]:
+        torch.manual_seed(recipe["seed"])  # dropout and SpecAugment stay on while training
         training = overfit(model, batch, recipe.get("max_steps", 500))
         gate["overfit"] = sensitivity(model, batch, threshold, accepted)
         if not training["converged"] or not gate["overfit"]["pass"]:
             raise SystemExit(f"{name}: random weights fail the gate and overfitting did not fix it: {training}, {gate}")
         weights = "overfit"
-        save(model, out, source)
+        save(model, out, source, lacks)
+    mirrored = missing_parameters(cls, out)
+    if mirrored != lacks:
+        raise SystemExit(f"{name}: fixture lacks {mirrored}, the real checkpoint lacks {lacks}")
     health = numeric_health(cls, out, batch)
     if not all(row["finite"] for row in health.values()):
         raise SystemExit(f"{name}: numeric health check failed: {health}")
@@ -324,6 +350,7 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out):
         "builder": "example/build_fixtures.py",
         "model_class": cls.__name__,
         "parameters": sum(p.numel() for p in model.parameters()),
+        "missing_parameters": lacks,
         "captured": captured,
         "weights": weights,
         "gate": gate,
@@ -368,7 +395,9 @@ def main():
                 keys = {}
                 for repo in fixture["covers"]:
                     source = source_snapshot(repo, contract["checkpoints"][repo])
-                    keys[repo] = fixture_key(source, model_class(source, fixture["build"]))[0][:12]
+                    cls = model_class(source, fixture["build"])
+                    lacks = missing_parameters(cls, run.checkpoint_path(repo, contract["checkpoints"][repo]))
+                    keys[repo] = fixture_key(source, cls, lacks)[0][:12]
                 print(json.dumps({"fixture": name, "keys": keys, "shared": len(set(keys.values())) == 1}))
                 continue
             start = time.perf_counter()

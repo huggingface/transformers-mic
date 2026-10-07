@@ -12,9 +12,12 @@
    "transformers": "5.19.0.dev0",
    "torch": "2.11.0",
    "tokenizers": "0.23.1",
-   "numpy": "1.26.4"
+   "numpy": "1.26.4",
+   "local_patches": [
+    "masked-spec-embed-init"
+   ]
   },
-  "seconds": 0.16,
+  "seconds": 0.17,
   "platform": "cpu"
  },
  "outputs": {
@@ -130,7 +133,7 @@
    ]
   ],
   "training": {
-   "loss": 10.836634635925293,
+   "loss": 10.951408386230469,
    "gradients": {
     "encoder.block.0.layer.0.SelfAttention.q.weight": true,
     "decoder.block.0.layer.1.EncDecAttention.q.weight": true

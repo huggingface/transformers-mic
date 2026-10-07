@@ -1,6 +1,6 @@
 {
  "fixture": "hf-internal-testing/umt5-small-slim",
- "key": "e4088bf05f38dff133b02088c38eafe8c22af67983540fab8f270a312c3ffa74",
+ "key": "d2f1e2c7f6649f4449bb875377c87d5fc8e4db35e734686f10b75e84cc9bb20a",
  "key_fields": {
   "architectures": [
    "UMT5ForConditionalGeneration"
@@ -27,7 +27,7 @@
   "num_heads": 4,
   "relative_attention_num_buckets": 32,
   "relative_attention_max_distance": 128,
-  "dropout_rate": 0.0,
+  "dropout_rate": 0.1,
   "layer_norm_epsilon": 1e-06,
   "initializer_factor": 1.0,
   "feed_forward_proj": "gated-gelu",
@@ -57,6 +57,7 @@
  "builder": "example/build_fixtures.py",
  "model_class": "UMT5ForConditionalGeneration",
  "parameters": 16606464,
+ "missing_parameters": [],
  "captured": {
   "call": "training step",
   "inputs": [
@@ -69,6 +70,7 @@
  "gate": {
   "random": {
    "pass": true,
+   "accepted_insensitive": {},
    "threshold": 0.001,
    "deltas": {
     "input_ids:roll_batch": 3.8824729919433594,
@@ -114,7 +116,7 @@
   "tokenizers": "0.23.1"
  },
  "sha256": {
-  "config.json": "9b515312e536518bfad1c99de8b9e9f9b6cf614021ce37dd1817d08dcf61fdaa",
+  "config.json": "d7861f2c8163d6843b61441b364712d9bbab56ace56ca1afb7470237316e9704",
   "generation_config.json": "288cea4e1feab193062ecf0e99bbfb43d1648122260d517f9e8ca6c90e7b1a7f",
   "model.safetensors": "928ed244d86b8d1eb51f9338551ca56c59f10779af98faf77e176fb7ceb786b5",
   "special_tokens_map.json": "14ef492a69e59396e918521a5f8394af1acf9f8dddd47273693b2b42570dfd12",

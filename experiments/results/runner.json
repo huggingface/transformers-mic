@@ -358,6 +358,8 @@
  "findings": {
   "wav2vec2_masked_spec_embed_uninitialized": "facebook/wav2vec2-base-960h lacks wav2vec2.masked_spec_embed; on load it is uninitialized memory (max |x| 3e35, sometimes NaN, varies per load); training with SpecAugment (mask_time_prob=0.05) gives NaN or garbage loss. _init_weights has no branch for it in wav2vec2, wav2vec2_conformer, data2vec, wavlm, unispeech, unispeech_sat, sew. Filed as https://github.com/huggingface/transformers/issues/49385; worked around locally with example/patches.py (masked-spec-embed-init), after which the real-checkpoint baselines reproduce (training loss 69.05 sdpa, 75.09 eager).",
   "contract_seeding": "torch.manual_seed does not seed NumPy, used by SpecAugment masks; real Wav2Vec2 loss varied 73-93 across runs until contracts used transformers.set_seed.",
-  "umt5_auto_classes": "google/umt5-small config.json has no model_type; AutoModelForSeq2SeqLM cannot load it."
+  "umt5_auto_classes": "google/umt5-small config.json has no model_type; AutoModelForSeq2SeqLM cannot load it.",
+  "fixture_mirrors_missing_parameters": "Fixtures now drop parameters the real checkpoint lacks and keep dropout/LayerDrop/SpecAugment. Without the local patch, wav2vec2-base-960h-slim fails on every run (training.loss off by 8.14 sdpa, 6.83 eager); with it, all fixture and checkpoint baselines pass (16 pass, 1 unsupported per variant).",
+  "layerdrop_assertion": "With LayerDrop 0.1 kept, the seeded eager training step skipped encoder layer 0 of the Wav2Vec2 fixture, failing the layer-0 gradient assertion; the contract now checks conv_layers.0 and lm_head."
  }
 }

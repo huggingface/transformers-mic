@@ -53,7 +53,7 @@
         "hf-internal-testing/bert-base-uncased-slim": {
           "revision": "unpublished",
           "path": "../../../hub/bert-base-uncased-slim",
-          "files_sha256": "5d95e31277460b843e05045ba7dc2d622f7f1357713af62a4e777a2fd69da209"
+          "files_sha256": "10e7f1627bf4615e202df67f40abbeb5070a88fd9741a257fbf71dee21daf16f"
         }
       },
       "checkpoints": {
@@ -70,12 +70,12 @@
         "hf-internal-testing/t5-small-slim": {
           "revision": "unpublished",
           "path": "../../../hub/t5-small-slim",
-          "files_sha256": "fbe629d2a26306b478dc3d60a420f3d02fca5d3ed626c363cb69b846030abc55"
+          "files_sha256": "530a553b936f1a6c0a68b8e394e30319fd0ae38dc76718fe55c47212d053f8a6"
         },
         "hf-internal-testing/umt5-small-slim": {
           "revision": "unpublished",
           "path": "../../../hub/umt5-small-slim",
-          "files_sha256": "3200c77eb8ff385e2f0e0acb926cfe771aa49b45fb95afc2ee14aef0f8e5d816"
+          "files_sha256": "91a8c18974956cfd1e6e08cb6ec8f056b10d12ada1a3e8d35acee48a995634ac"
         }
       },
       "checkpoints": {
@@ -93,7 +93,7 @@
         "hf-internal-testing/whisper-tiny-slim": {
           "revision": "unpublished",
           "path": "../../../hub/whisper-tiny-slim",
-          "files_sha256": "a5b57eb36d72c66676a4448a38f5b361034a88c9582afb5373c35507cebdbb04"
+          "files_sha256": "71e6e2a43065192dd2d535faaf16d2ed5bd2a6d6d7b8e66ef8388a159511ec9f"
         }
       },
       "checkpoints": {
@@ -110,7 +110,7 @@
         "hf-internal-testing/wav2vec2-base-960h-slim": {
           "revision": "unpublished",
           "path": "../../../hub/wav2vec2-base-960h-slim",
-          "files_sha256": "6d07b51bc52188505602cadeb463b0519e74b25bb030353e0f02020f2148eb2a"
+          "files_sha256": "5522f324c0e8bd3e70aa54a57318e4d5016c46df7709120dfb632423f4221c2f"
         }
       },
       "checkpoints": {

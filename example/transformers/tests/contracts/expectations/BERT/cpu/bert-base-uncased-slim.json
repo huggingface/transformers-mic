@@ -12,9 +12,12 @@
    "transformers": "5.19.0.dev0",
    "torch": "2.11.0",
    "tokenizers": "0.23.1",
-   "numpy": "1.26.4"
+   "numpy": "1.26.4",
+   "local_patches": [
+    "masked-spec-embed-init"
+   ]
   },
-  "seconds": 0.09,
+  "seconds": 0.1,
   "platform": "cpu"
  },
  "outputs": {
@@ -62,7 +65,7 @@
    ]
   ],
   "training": {
-   "loss": 10.212273597717285,
+   "loss": 10.1921968460083,
    "gradients": {
     "bert.encoder.layer.0.attention.self.query.weight": true,
     "bert.encoder.layer.0.intermediate.dense.weight": true

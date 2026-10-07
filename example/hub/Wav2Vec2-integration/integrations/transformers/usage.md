@@ -54,7 +54,8 @@ print(f"loss: {loss.item():.4f}")
 
 if os.environ.get("MIC_RUNNER"):  # doc-builder: hide
     named = dict(model.named_parameters())
-    checked = ("wav2vec2.feature_extractor.conv_layers.0.conv.weight", "wav2vec2.encoder.layers.0.attention.q_proj.weight")
+    # First and last layers: LayerDrop (0.1) may skip any encoder layer in a training step.
+    checked = ("wav2vec2.feature_extractor.conv_layers.0.conv.weight", "lm_head.weight")
     result = {
         "runtime": {
             "device": model.device.type,

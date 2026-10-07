@@ -29,7 +29,8 @@ fleet lock pins; a fixture that is missing or differs is an error, not a skip
 manifest, overridden per platform by expectations/<contract>/<platform>/tolerances.json,
 since GPU and lower-precision runs drift more than CPU float32.
 
-Non-finite numeric outputs fail on their own, and are never recorded;
+Non-finite numeric outputs and failed assertions (all_true, true) fail on
+their own, and are never recorded;
 --record also reruns each target in a fresh process and refuses outputs that
 differ. A
 framework can list a target under known_failures in its fleet lock (with the
@@ -301,6 +302,11 @@ def compare(rules, actual, expected):
     return failures
 
 
+def violated(rules, actual):
+    """The contract's own assertions (all_true, true) that fail, with or without a baseline."""
+    return compare({k: r for k, r in rules.items() if r["compare"] in ("all_true", "true")}, actual, actual)
+
+
 def non_finite(rules, actual):
     """allclose outputs holding NaN or inf: a failure with or without a baseline."""
     return [
@@ -430,9 +436,9 @@ def main():
                     }
                     emit({**record, "golden": args.golden, "status": "fail" if failures else "pass", "failures": failures, "max_delta": deltas})
                     continue
-                broken = non_finite(manifest["outputs"], actual)
+                broken = non_finite(manifest["outputs"], actual) + violated(manifest["outputs"], actual)
                 if broken:
-                    # Never record or compare non-finite outputs: a baseline would approve the bug.
+                    # Never record non-finite outputs or failed assertions: a baseline would approve the bug.
                     emit({**record, "status": "fail", "failures": broken})
                     continue
                 if args.record:

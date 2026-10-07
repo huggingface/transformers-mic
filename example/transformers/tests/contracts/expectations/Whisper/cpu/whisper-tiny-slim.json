@@ -12,9 +12,12 @@
    "transformers": "5.19.0.dev0",
    "torch": "2.11.0",
    "tokenizers": "0.23.1",
-   "numpy": "1.26.4"
+   "numpy": "1.26.4",
+   "local_patches": [
+    "masked-spec-embed-init"
+   ]
   },
-  "seconds": 0.23,
+  "seconds": 0.25,
   "platform": "cpu"
  },
  "outputs": {

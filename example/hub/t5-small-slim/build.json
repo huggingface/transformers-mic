@@ -1,6 +1,6 @@
 {
  "fixture": "hf-internal-testing/t5-small-slim",
- "key": "20afa4f687c93b8ed0c9fe1355f28e18cffa37f4c17f1dd4b9e4684e47efcc2e",
+ "key": "c5306fc184517367b7284eb6dadf3108aefc3e6a7a788afac8474637ddc09a5b",
  "key_fields": {
   "architectures": [
    "T5ForConditionalGeneration"
@@ -27,7 +27,7 @@
   "num_heads": 4,
   "relative_attention_num_buckets": 32,
   "relative_attention_max_distance": 128,
-  "dropout_rate": 0.0,
+  "dropout_rate": 0.1,
   "layer_norm_epsilon": 1e-06,
   "initializer_factor": 1.0,
   "feed_forward_proj": "relu",
@@ -86,6 +86,7 @@
  "builder": "example/build_fixtures.py",
  "model_class": "T5ForConditionalGeneration",
  "parameters": 2221056,
+ "missing_parameters": [],
  "captured": {
   "call": "training step",
   "inputs": [
@@ -98,6 +99,7 @@
  "gate": {
   "random": {
    "pass": true,
+   "accepted_insensitive": {},
    "threshold": 0.001,
    "deltas": {
     "input_ids:roll_batch": 3.331669330596924,
@@ -142,7 +144,7 @@
   "tokenizers": "0.23.1"
  },
  "sha256": {
-  "config.json": "daff2f930b4a46640930ba8fa39c4d711e3998c5486b0d9ab818b5a443e1a3f5",
+  "config.json": "055fa9bf51263b4af3ab65af8d3e61f1d3062bb9c55fa3113405887b91ee5c26",
   "generation_config.json": "f5a1c7e2be8092018d8835128987edf0111637dd98e90599cc80310fef75d95a",
   "model.safetensors": "2e86b7a256c3366ed863276db3500881f5853109edd3c4e3b32f206e8483605b",
   "spiece.model": "d60acb128cf7b7f2536e8f38a5b18a05535c9e14c7a355904270e15b0945ea86",

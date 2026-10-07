@@ -1,6 +1,6 @@
 {
  "fixture": "hf-internal-testing/whisper-tiny-slim",
- "key": "0dcdfdd82542c64511a65cc8c80f8a634b75e9141a17cead76bab1d8f0a80405",
+ "key": "71360928908b499ac6c8aed1df627aa6d075d355115339a1e0308a6755ff1775",
  "key_fields": {
   "architectures": [
    "WhisperForConditionalGeneration"
@@ -139,7 +139,7 @@
   "use_weighted_layer_sum": false,
   "classifier_proj_size": 256,
   "apply_spec_augment": false,
-  "mask_time_prob": 0.0,
+  "mask_time_prob": 0.05,
   "mask_time_length": 10,
   "mask_time_min_masks": 2,
   "mask_feature_prob": 0.0,
@@ -175,6 +175,7 @@
  "builder": "example/build_fixtures.py",
  "model_class": "WhisperForConditionalGeneration",
  "parameters": 3639104,
+ "missing_parameters": [],
  "captured": {
   "call": "training step",
   "inputs": [
@@ -215,7 +216,7 @@
   }
  },
  "training": {
-  "seconds": 19.12,
+  "seconds": 19.09,
   "steps": 200,
   "loss": 0.006217204499989748,
   "converged": true
@@ -260,7 +261,7 @@
  },
  "sha256": {
   "added_tokens.json": "9715fd2243b6f06a5858b5e32950d2853f73dd5bc201aafcf76f5082a2d8acd1",
-  "config.json": "e282b5629377db70151a5a9a9052406c55250c09491457feef361151eff5dc5a",
+  "config.json": "20df397a241075188177baf44b78ce599d572dd553b056d918e7421c623df31a",
   "generation_config.json": "a5d5325911f16e74001a72fa13d6e208eee51548f994646de1f4b4cc8b35b512",
   "merges.txt": "2df2990a395e35e8dfbc7511e08c12d56018d8d04691e0133e5d63b21e154dc6",
   "model.safetensors": "5e705fec0cb4f9db018c3892424219d68b688a1ed057b842b72859269d51c64e",
