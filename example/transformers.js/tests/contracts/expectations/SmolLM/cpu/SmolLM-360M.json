@@ -1,0 +1,79 @@
+{
+ "recorded_with": {
+  "contract": "hf-internal-testing/SmolLM-integration",
+  "target": "SmolLM-360M",
+  "variant": "default",
+  "revision": "d0bace75f3a7fa849bf7a7082801c7d3a9b90169",
+  "framework": "transformers.js",
+  "contract_revision": "unpublished",
+  "environment": {
+   "node": "v25.6.1",
+   "@huggingface/transformers": "4.3.0"
+  },
+  "seconds": 170.17
+ },
+ "outputs": {
+  "runtime": {
+   "device": "cpu",
+   "dtype": "fp32"
+  },
+  "generated_tokens": [
+   [
+    7042,
+    30,
+    198,
+    504
+   ],
+   [
+    11452,
+    30,
+    198,
+    504
+   ],
+   [
+    7268,
+    30,
+    198,
+    504
+   ],
+   [
+    4528,
+    30,
+    198,
+    504
+   ]
+  ],
+  "generated_text": [
+   " Paris.\nThe",
+   " Berlin.\nThe",
+   " Rome.\nThe",
+   " London.\nThe"
+  ],
+  "next_token_logits": [
+   [
+    19.349489212036133,
+    12.148771286010742,
+    12.207795143127441,
+    14.158951759338379
+   ],
+   [
+    11.530741691589355,
+    18.403079986572266,
+    8.830474853515625,
+    11.411989212036133
+   ],
+   [
+    12.230951309204102,
+    10.609130859375,
+    16.796506881713867,
+    12.458273887634277
+   ],
+   [
+    11.66295337677002,
+    11.060030937194824,
+    9.078299522399902,
+    20.248870849609375
+   ]
+  ]
+ }
+}

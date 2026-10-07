@@ -10,7 +10,7 @@ A small fixture is useful for contracts only if it has all of the following:
 
 - **Real structure, small weights.** The real model config, shrunk (layers, width, heads, experts), keeping processor-coupled dimensions and model-specific settings: vocabulary, special tokens, image and patch sizes, audio dimensions, RoPE settings, MoE structure.
 - **Real processor files, unchanged.** Tokenizer, processor, and preprocessing files copied from the real model byte for byte.
-- **Frozen and pinned.** Deterministic initialization, frozen weights and inputs, published at a pinned revision (for example `hf-internal-testing/<model>-slim@<sha>`).
+- **Frozen and pinned.** Deterministic initialization, frozen weights and inputs, published at a pinned revision (for example `hf-internal-testing/SmolLM-slim@<sha>`). One fixture serves every checkpoint with the same fixture key: byte-identical processor files and the same config fields wherever shrinking keeps them ([example](../example/README.md#the-parts)).
 - **Recorded baselines.** Outputs, selected logits, loss, targeted gradients, and an optimizer update, recorded on a known-good build and reviewed, separately for each platform class and dtype the fixture runs on (see [Hardware and dtype](#hardware-and-dtype)).
 - **Sensitive to its inputs.** Perturbing or swapping inputs must move the recorded logits well beyond tolerance.
 - **Run like users run it.** Baselines recorded under the default runtime configuration (for example SDPA attention), with eager as an extra variant.
@@ -167,6 +167,6 @@ python experiments/experiment.py \
 
 - Shrink rules for coupled configs, nested multimodal configs, and MoE, and a measured success rate across the fleet.
 - Bring stage 1 closer to stage 2: fixed seeds, pinned revisions, recorded baselines, unchanged processor files, and the input-sensitivity check, ideally in the same `create_dummy_models.py` pipeline rather than a parallel one.
-- Publish fixtures as `hf-internal-testing/<model>-slim` and record their revisions in the fleet lock. Keep them out of model discovery: in the [agent walkthrough](agent-walkthrough.md), a size-filtered Hub search surfaced `trl-internal-testing/tiny-*` fixtures as candidate models, and a fleet of slim fixtures would add thousands more.
+- Publish fixtures as `hf-internal-testing/<name>-slim`, one per fixture key, and record their revisions in the fleet lock. Keep them out of model discovery: in the [agent walkthrough](agent-walkthrough.md), a size-filtered Hub search surfaced `trl-internal-testing/tiny-*` fixtures as candidate models, and a fleet of slim fixtures would add thousands more.
 - Calibrate tolerances on the CPU-only CI runners and on the other GPU types in CI. On one A10G, baselines must be GPU-specific for convolutional families and dtype-specific everywhere.
 - Measure fixture upkeep in the pilot: shrink-rule fixes, non-converging overfits, and baseline reviews.

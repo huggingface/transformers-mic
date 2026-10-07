@@ -18,6 +18,7 @@ Most work ran locally on CPU (ARM Mac, float32, Transformers `main` at `4d536e1f
 Side findings already acted on:
 
 - [#49372](https://github.com/huggingface/transformers/issues/49372) (filed): `set_attn_implementation()` after loading silently leaves T5-family encoder/decoder on eager. Contracts and the experiment scripts choose attention at load time.
+- Review feedback (2026-10-07) reshaped the standard: one contract per usage path covering several checkpoints, with fixtures shared by fixture key; expected results kept in each framework's repository; contracts written as doc-builder runnable markdown. The [full example](../example/README.md) implements all three.
 - The [agent walkthrough](agent-walkthrough.md) showed broken card snippets, no reference outputs, stale/contradictory metadata, and test fixtures leaking into Hub search; these are now cited in the proposal, evidence, fixtures, and design docs.
 
 ## What the replays changed
@@ -108,16 +109,17 @@ Pitfalls seen on this machine:
 
 ## 3. Build the smallest usable contract runner
 
-Start from the six experiment families. Add one coupled-config or MoE model and one GPU-heavy or costly-to-maintain case; roles may overlap within the 3–5-model pilot. Assign maintainers before onboarding.
+Start from the six experiment families, each as one contract per usage path covering the checkpoints that share it. Add one coupled-config or MoE model and one GPU-heavy or costly-to-maintain case; roles may overlap within the 3–5-model pilot. Assign maintainers before onboarding.
 
-- [ ] Define schemas for the manifest, fleet lock, required output fields, expected shapes, baseline identity, and result record.
-- [ ] Implement one-command execution with pinned model, processor, artifact, contract, fixture, baseline, and dependency inputs; run many contracts per process. Reject missing/non-finite outputs and unsupported variants explicitly.
+- [ ] Define schemas for the manifest (usage path, covered checkpoints, fixture per checkpoint), fleet lock, required output fields, expected shapes, baseline identity (target, platform, variant), and result record. The [full example](../example/README.md) has a first version of each.
+- [ ] Implement one-command execution with pinned model, processor, artifact, contract, fixture, and dependency inputs, comparing with baselines kept in the framework repository; run many contracts and targets per process. Reject missing/non-finite outputs and unsupported variants explicitly.
 - [ ] Add the Python adapter, then one Transformers.js case with a pinned ONNX artifact and conversion provenance. Keep training checks optional for inference-only frameworks.
-- [ ] Build fixtures by copying processor, tokenizer, and preprocessing files unchanged; shrink only weights and model config. Mark published fixtures as test artifacts and keep them out of Hub search.
+- [ ] Build fixtures by copying processor, tokenizer, and preprocessing files unchanged; shrink only weights and model config. Share one fixture across checkpoints with the same fixture key, and fail the build on a mismatch. Mark published fixtures as test artifacts and keep them out of Hub search.
 - [ ] Record baselines under the default attention implementation and dtype, chosen at load time; keep eager as an explicit variant.
 - [ ] Implement the input-sensitivity gate at fixture build time, falling back to overfitting; report non-convergence as a build failure.
 - [ ] Implement baseline creation and PR review without automatically accepting new outputs. Separate model-update discovery from the pinned inputs used by required framework checks.
 - [ ] Define how changed framework files select relevant contracts, with a conservative fallback for shared code. Apply execution isolation and private-artifact rules.
+- [ ] Write Python contracts as doc-builder runnable markdown, and work with doc-builder on passing a checkpoint and load arguments to a block without hidden reload lines.
 - [ ] Reproduce the published usage entry point, including pipeline dispatch where the snippet uses it. Exercise private build → upstream PR → main once.
 
 **Deliverable:** reviewed local commands and CI artifacts for each pilot contract, including a failure maintainers can reproduce from its recorded inputs.

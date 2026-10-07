@@ -1,0 +1,28 @@
+{
+  "comment": "What Transformers would keep in tests/contracts/: every contract input, pinned. Expected results live next to it in expectations/. The hf-internal-testing repos are not published; 'path' points at their contents in this example.",
+  "framework": "transformers",
+  "contracts": {
+    "SmolLM": {
+      "integration": {
+        "repo": "hf-internal-testing/SmolLM-integration",
+        "revision": "unpublished",
+        "path": "../../../hub/SmolLM-integration"
+      },
+      "fixtures": {
+        "hf-internal-testing/SmolLM-slim": {"revision": "unpublished", "path": "../../../hub/SmolLM-slim"},
+        "hf-internal-testing/SmolLM-1.7B-slim": {"revision": "unpublished", "path": "../../../hub/SmolLM-1.7B-slim"}
+      },
+      "checkpoints": {
+        "HuggingFaceTB/SmolLM-135M": "1d461723eec654e65efdc40cf49301c89c0c92f4",
+        "HuggingFaceTB/SmolLM-360M": "59f7ef243ee09a72cbc14cb054393a3e3b771d41",
+        "HuggingFaceTB/SmolLM-1.7B": "d7449ff7241c863f3e8accc475155f0f97afa011"
+      }
+    }
+  },
+  "environment": {
+    "python": "3.10",
+    "torch": "2.11.0",
+    "tokenizers": "0.23.1",
+    "numpy": "1.26.4"
+  }
+}

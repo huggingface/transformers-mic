@@ -1,8 +1,0 @@
-{
-  "name": "smollm-135m-mic-transformers-js",
-  "private": true,
-  "type": "module",
-  "dependencies": {
-    "@huggingface/transformers": "4.3.0"
-  }
-}

@@ -1,0 +1,68 @@
+{
+  "mic": "0.2",
+  "name": "SmolLM text generation",
+  "usage": "AutoTokenizer + AutoModelForCausalLM.generate, batched, left padding",
+  "architecture": "LlamaForCausalLM",
+  "checkpoints": {
+    "HuggingFaceTB/SmolLM-135M": {"fixture": "hf-internal-testing/SmolLM-slim"},
+    "HuggingFaceTB/SmolLM-360M": {"fixture": "hf-internal-testing/SmolLM-slim"},
+    "HuggingFaceTB/SmolLM-1.7B": {"fixture": "hf-internal-testing/SmolLM-1.7B-slim"}
+  },
+  "fixtures": {
+    "hf-internal-testing/SmolLM-slim": {
+      "built_from": "HuggingFaceTB/SmolLM-135M",
+      "covers": ["HuggingFaceTB/SmolLM-135M", "HuggingFaceTB/SmolLM-360M"]
+    },
+    "hf-internal-testing/SmolLM-1.7B-slim": {
+      "built_from": "HuggingFaceTB/SmolLM-1.7B",
+      "covers": ["HuggingFaceTB/SmolLM-1.7B"],
+      "why_separate": "different tokenizer.json and tokenizer_config.json; full multi-head attention instead of grouped key/value heads"
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": ["transformers>=5", "torch", "accelerate"],
+      "targets": ["fixtures", "checkpoints"],
+      "variants": {
+        "default": {},
+        "eager": {"attn_implementation": "eager"}
+      },
+      "training": true,
+      "resources": {
+        "fixture": {"memory_gb": 1, "download_mb": 16},
+        "HuggingFaceTB/SmolLM-135M": {"memory_gb": 2, "download_mb": 513},
+        "HuggingFaceTB/SmolLM-360M": {"memory_gb": 3, "download_mb": 1300},
+        "HuggingFaceTB/SmolLM-1.7B": {"memory_gb": 20, "download_mb": 6400}
+      }
+    },
+    "transformers.js": {
+      "entry_point": "integrations/transformers.js/integration.js",
+      "format": "script",
+      "requires": ["@huggingface/transformers@4.3.0"],
+      "targets": ["checkpoints"],
+      "artifacts": {
+        "HuggingFaceTB/SmolLM-135M": {"repo": "onnx-community/SmolLM-135M-ONNX", "file": "onnx/model.onnx"},
+        "HuggingFaceTB/SmolLM-360M": {"repo": "onnx-community/SmolLM-360M-ONNX", "file": "onnx/model.onnx"}
+      },
+      "unsupported": {
+        "fixtures": "no ONNX conversion of the fixtures yet",
+        "HuggingFaceTB/SmolLM-1.7B": "no onnx-community conversion; the creator's float32 ONNX is 6.8 GB"
+      },
+      "variants": {
+        "default": {"dtype": "fp32"}
+      },
+      "training": false
+    }
+  },
+  "outputs": {
+    "runtime": {"compare": "exact"},
+    "generated_tokens": {"compare": "exact"},
+    "generated_text": {"compare": "exact"},
+    "next_token_logits": {"compare": "allclose", "atol": 1e-4, "rtol": 1e-4},
+    "training.loss": {"compare": "allclose", "atol": 1e-4, "rtol": 1e-4},
+    "training.gradients": {"compare": "all_true"},
+    "training.updated": {"compare": "true"}
+  }
+}

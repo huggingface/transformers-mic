@@ -1,62 +1,94 @@
-"""Run one MIC from a fleet lock and compare it with its reviewed baseline.
+"""Run a framework's MICs from its fleet lock and compare with its own baselines.
 
-    python example/run.py --framework transformers --target slim
-    python example/run.py --framework transformers --target real --variant eager
-    python example/run.py --framework transformers.js --target real
-    python example/run.py ... --record   # write a candidate baseline for review
+    python example/run.py --framework transformers                  # every target, default variant
+    python example/run.py --framework transformers --variant eager
+    python example/run.py --framework transformers --target SmolLM-slim
+    python example/run.py --framework transformers.js
+    python example/run.py ... --record                              # candidate baselines for review
 
-A sketch of the shared runner: it resolves pinned inputs from the lock, runs the
-integration as a separate process, reads the last stdout line, applies the
-manifest's comparison rules, and prints a result record. --record never touches
-an approved baseline; it writes <target>.candidate.json next to it, and a
-reviewer renames it.
+A sketch of the shared runner. For each contract in
+<framework>/tests/contracts/fleet.lock it reads the manifest from the pinned
+integration repo, expands the targets (each slim fixture once, then each
+checkpoint), runs the contract in its own process, and compares the result with
+<framework>/tests/contracts/expectations/<contract>/<platform>/<target>[.<variant>].json.
+
+Runnable-markdown contracts are collected with doc-builder's own block
+collector, so the runner executes exactly what the docs build tests and renders
+(requires doc-builder from main). --record never touches an approved baseline;
+it writes <name>.candidate.json next to it, and a reviewer renames it.
 """
 
 import argparse
 import json
 import math
 import os
+import re
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
 HERE = Path(__file__).parent
+_DECORATOR = re.compile(r"^\s*#\s*pytest-decorator:.*$", re.MULTILINE)
 
 
-def resolve(lock, manifest, framework, target):
-    """Return (MODEL_ID, MODEL_REVISION) for a target, from pinned inputs only."""
-    contract = lock["contracts"][0]
+def short(repo):
+    return repo.split("/")[-1]
+
+
+def targets(lock_dir, contract, manifest, framework):
+    """Yield (target, model, revision) for every target, or (target, None, reason) if unsupported."""
     integration = manifest["integrations"][framework]
-    if target in integration.get("unsupported", {}):
-        raise SystemExit(f"unsupported: {framework} {target}: {integration['unsupported'][target]}")
-    artifact = integration["artifacts"][target]
-    if artifact == "fixture":
-        return str((HERE / contract["fixture"]["path"]).resolve()), ""
-    if artifact == "model":
-        return contract["model"]["repo"], contract["model"]["revision"]
-    return artifact["repo"], contract["artifacts"][artifact["repo"]]
+    unsupported = integration.get("unsupported", {})
+    if "fixtures" in integration["targets"]:
+        for repo, pin in contract.get("fixtures", {}).items():
+            yield short(repo), str((lock_dir / pin["path"]).resolve()), pin["revision"]
+    elif "fixtures" in unsupported:
+        for repo in manifest["fixtures"]:
+            yield short(repo), None, unsupported["fixtures"]
+    for repo in manifest["checkpoints"]:
+        if repo in unsupported:
+            yield short(repo), None, unsupported[repo]
+        elif repo not in contract["checkpoints"]:
+            continue  # not in this framework's lock
+        elif framework == "transformers.js":
+            artifact = integration["artifacts"][repo]["repo"]
+            yield short(repo), artifact, contract["artifacts"][artifact]
+        else:
+            # Pin by path: the runner resolves the locked revision, the contract
+            # just loads what it is given.
+            from huggingface_hub import snapshot_download
+
+            revision = contract["checkpoints"][repo]
+            files = ["*.json", "*.txt", "*.safetensors"]
+            yield short(repo), snapshot_download(repo, revision=revision, allow_patterns=files), revision
 
 
-def environment(language, entry):
-    if language == "javascript":
+def command_for(entry, fmt, workdir):
+    if fmt == "script":
+        return ["node", entry.name], entry.parent
+    from doc_builder.testing import DocIntegrationTest
+
+    blocks = DocIntegrationTest._collect_runnable_blocks_from_text(entry.read_text())
+    script = workdir / f"{entry.stem}.py"
+    script.write_text("\n\n".join(_DECORATOR.sub("", block.code) for block in blocks))
+    return [sys.executable, str(script)], entry.parent
+
+
+def environment(fmt, cwd):
+    if fmt == "script":
         node = subprocess.run(["node", "--version"], capture_output=True, text=True).stdout.strip()
-        package = entry.parent / "node_modules/@huggingface/transformers/package.json"
+        package = cwd / "node_modules/@huggingface/transformers/package.json"
         return {"node": node, "@huggingface/transformers": json.loads(package.read_text())["version"]}
-    # Ask the libraries, not package metadata: an editable install keeps the
-    # version it had when it was installed.
     probe = (
         "import importlib, json, platform\n"
         "versions = {'python': platform.python_version()}\n"
         "for name in ('transformers', 'torch', 'tokenizers', 'numpy'):\n"
-        "    try:\n"
-        "        versions[name] = importlib.import_module(name).__version__\n"
-        "    except ImportError:\n"
-        "        versions[name] = None\n"
+        "    versions[name] = importlib.import_module(name).__version__\n"
         "print(json.dumps(versions))\n"
     )
-    out = subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True).stdout
-    return json.loads(out)
+    return json.loads(subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True).stdout)
 
 
 def lookup(outputs, dotted):
@@ -91,12 +123,9 @@ def compare(rules, actual, expected):
             if not all(isinstance(x, (int, float)) and math.isfinite(x) for x in a):
                 failures.append(f"{name}: non-finite values")
             elif len(a) != len(b):
-                failures.append(f"{name}: shape {len(a)} != {len(b)}")
-            else:
-                worst = max(abs(x - y) - rule["atol"] - rule["rtol"] * abs(y) for x, y in zip(a, b))
-                if worst > 0:
-                    delta = max(abs(x - y) for x, y in zip(a, b))
-                    failures.append(f"{name}: max delta {delta:.3g} over tolerance")
+                failures.append(f"{name}: {len(a)} values, baseline has {len(b)}")
+            elif any(abs(x - y) > rule["atol"] + rule["rtol"] * abs(y) for x, y in zip(a, b)):
+                failures.append(f"{name}: max delta {max(abs(x - y) for x, y in zip(a, b)):.3g} over tolerance")
         elif kind == "all_true" and not all(got.values()):
             failures.append(f"{name}: {[k for k, v in got.items() if not v]} false")
         elif kind == "true" and got is not True:
@@ -106,71 +135,76 @@ def compare(rules, actual, expected):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--lock", type=Path, default=HERE / "fleet.lock")
-    parser.add_argument("--framework", required=True)
-    parser.add_argument("--target", choices=("slim", "real"), required=True)
+    parser.add_argument("--framework", choices=("transformers", "transformers.js"), required=True)
+    parser.add_argument("--target", help="run only this target (fixture or checkpoint name)")
     parser.add_argument("--variant", default="default")
-    parser.add_argument("--record", action="store_true", help="write a candidate baseline for review")
+    parser.add_argument("--record", action="store_true", help="write candidate baselines for review")
     args = parser.parse_args()
 
-    lock = json.loads(args.lock.read_text())
-    contract = lock["contracts"][0]
-    root = HERE / contract["integration"]["path"]
-    manifest = json.loads((root / "integration.json").read_text())
-    integration = manifest["integrations"][args.framework]
-    model_id, revision = resolve(lock, manifest, args.framework, args.target)
-    variant = integration["variants"][args.variant]
-    entry = root / integration["entry_point"]
-    command = [sys.executable, entry.name] if integration["language"] == "python" else ["node", entry.name]
-
-    start = time.perf_counter()
-    run = subprocess.run(
-        command,
-        cwd=entry.parent,
-        capture_output=True,
-        text=True,
-        env={
-            **os.environ,
-            "MODEL_ID": model_id,
-            "MODEL_REVISION": revision,
-            "MODEL_KWARGS": json.dumps(variant),
-        },
-    )
-    seconds = time.perf_counter() - start
-    lines = [line for line in run.stdout.splitlines() if line.startswith("{")]
-    record = {
-        "contract": contract["integration"]["repo"],
-        "contract_revision": contract["integration"]["revision"],
-        "framework": args.framework,
-        "target": args.target,
-        "variant": args.variant,
-        "model": {"id": model_id if args.target == "real" else contract["fixture"]["repo"], "revision": revision or contract["fixture"]["revision"]},
-        "environment": environment(integration["language"], entry),
-        "seconds": round(seconds, 2),
-    }
-    if run.returncode or not lines:
-        record.update(status="error", failures=[run.stderr.strip()[-1000:]])
-        print(json.dumps(record, indent=1))
-        return 1
-    actual = json.loads(lines[-1])
-
-    # Each variant has its own reviewed baseline: eager and SDPA need not agree
-    # within tolerance outside float32.
-    template = manifest["expectations"]["default" if args.variant == "default" else "variant"]
-    baseline = root / template.format(framework=args.framework, target=args.target, variant=args.variant)
-    if args.record:
-        candidate = baseline.with_name(baseline.name.removesuffix(".json") + ".candidate.json")
-        candidate.write_text(json.dumps({"recorded_with": record, "outputs": actual}, indent=1) + "\n")
-        print(f"candidate baseline written to {candidate.relative_to(HERE)}; review it, then rename it to {baseline.name}")
-        return 0
-    if integration["training"] and "training" not in actual:
-        record.update(status="fail", failures=["training: missing"])
-    else:
-        expected = json.loads(baseline.read_text())["outputs"]
-        failures = compare(manifest["outputs"], actual, expected)
-        record.update(status="fail" if failures else "pass", failures=failures)
-    print(json.dumps(record, indent=1))
-    return record["status"] != "pass"
+    lock_dir = HERE / args.framework / "tests/contracts"
+    lock = json.loads((lock_dir / "fleet.lock").read_text())
+    status = 0
+    for name, contract in lock["contracts"].items():
+        root = (lock_dir / contract["integration"]["path"]).resolve()
+        manifest = json.loads((root / "integration.json").read_text())
+        integration = manifest["integrations"][args.framework]
+        variant = integration["variants"][args.variant]
+        entry = root / integration["entry_point"]
+        with tempfile.TemporaryDirectory() as tmp:
+            command, cwd = command_for(entry, integration["format"], Path(tmp))
+            env_info = environment(integration["format"], cwd)
+            for target, model, revision in targets(lock_dir, contract, manifest, args.framework):
+                if args.target and target != args.target:
+                    continue
+                record = {"contract": contract["integration"]["repo"], "target": target, "variant": args.variant}
+                if model is None:
+                    print(json.dumps({**record, "status": "unsupported", "reason": revision}))
+                    continue
+                start = time.perf_counter()
+                run = subprocess.run(
+                    command,
+                    cwd=cwd,
+                    capture_output=True,
+                    text=True,
+                    env={
+                        **os.environ,
+                        "MIC_RUNNER": "1",
+                        "MIC_MODEL": model,
+                        "MIC_MODEL_REVISION": "" if os.path.isdir(model) else revision,
+                        "MIC_MODEL_KWARGS": json.dumps(variant),
+                    },
+                )
+                record.update(
+                    revision=revision,
+                    framework=args.framework,
+                    contract_revision=contract["integration"]["revision"],
+                    environment=env_info,
+                    seconds=round(time.perf_counter() - start, 2),
+                )
+                lines = [line for line in run.stdout.splitlines() if line.startswith("{")]
+                if run.returncode or not lines:
+                    print(json.dumps({**record, "status": "error", "failures": [run.stderr.strip()[-800:]]}))
+                    status = 1
+                    continue
+                actual = json.loads(lines[-1])
+                platform = actual["runtime"]["device"]
+                suffix = "" if args.variant == "default" else f".{args.variant}"
+                baseline = lock_dir / "expectations" / name / platform / f"{target}{suffix}.json"
+                if args.record:
+                    candidate = baseline.with_name(f"{target}{suffix}.candidate.json")
+                    candidate.parent.mkdir(parents=True, exist_ok=True)
+                    candidate.write_text(json.dumps({"recorded_with": record, "outputs": actual}, indent=1) + "\n")
+                    print(json.dumps({**record, "status": "recorded", "candidate": str(candidate.relative_to(HERE))}))
+                    continue
+                if integration["training"] and "training" not in actual:
+                    failures = ["training: missing"]
+                elif not baseline.exists():
+                    failures = [f"no reviewed baseline at {baseline.relative_to(HERE)}"]
+                else:
+                    failures = compare(manifest["outputs"], actual, json.loads(baseline.read_text())["outputs"])
+                print(json.dumps({**record, "status": "fail" if failures else "pass", "failures": failures}))
+                status |= bool(failures)
+    return status
 
 
 if __name__ == "__main__":

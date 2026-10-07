@@ -1,0 +1,25 @@
+{
+  "comment": "What Transformers.js would keep in tests/contracts/: the same contract as Transformers, pinned independently, with its own expected results in expectations/.",
+  "framework": "transformers.js",
+  "contracts": {
+    "SmolLM": {
+      "integration": {
+        "repo": "hf-internal-testing/SmolLM-integration",
+        "revision": "unpublished",
+        "path": "../../../hub/SmolLM-integration"
+      },
+      "checkpoints": {
+        "HuggingFaceTB/SmolLM-135M": "1d461723eec654e65efdc40cf49301c89c0c92f4",
+        "HuggingFaceTB/SmolLM-360M": "59f7ef243ee09a72cbc14cb054393a3e3b771d41"
+      },
+      "artifacts": {
+        "onnx-community/SmolLM-135M-ONNX": "f4acdf4c16b4deaee4cc6659fd3e32e44ecc37fd",
+        "onnx-community/SmolLM-360M-ONNX": "d0bace75f3a7fa849bf7a7082801c7d3a9b90169"
+      }
+    }
+  },
+  "environment": {
+    "node": "25",
+    "@huggingface/transformers": "4.3.0"
+  }
+}
