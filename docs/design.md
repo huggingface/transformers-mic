@@ -389,7 +389,7 @@ Do not require:
 
 The pilot should resolve:
 
-1. How many architectures can we shrink reliably?
+1. How many architectures can we shrink reliably? One generic rule builds and runs 56% of Transformers usage paths (314 of 559); the rest need per-family rules, mostly for coupled size fields ([sweep](fixtures.md#does-it-scale-to-every-architecture)).
 2. Which failures require the real checkpoint or real hardware?
 3. What is the right unit for selecting affected contracts on a PR?
 4. How expensive is baseline review in practice?

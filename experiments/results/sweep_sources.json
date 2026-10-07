@@ -1,0 +1,5544 @@
+{
+ "EvollaModel": {
+  "doc_checkpoint": "westlake-repl/Evolla-10B-hf",
+  "doc_status": "ok",
+  "repo": "westlake-repl/Evolla-10B-hf",
+  "revision": "ca9a046b9106bd7a7c23de020f1b950f42554ad1",
+  "source": "doc",
+  "status": "ok"
+ },
+ "afmoe": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "repo": "arcee-ai/Trinity-Mini",
+  "revision": "cdb81e8130815fec299cccc8f8700004b8366e1e",
+  "source": "hub",
+  "status": "ok"
+ },
+ "aimv2": {
+  "doc_checkpoint": "apple/aimv2-large-patch14-224-lit",
+  "doc_status": "ok",
+  "repo": "apple/aimv2-large-patch14-224-lit",
+  "revision": "b17c109df4f9dbb941074073ad3771c28df5c826",
+  "source": "doc",
+  "status": "ok"
+ },
+ "aimv2_text_model": {
+  "doc_checkpoint": "apple/aimv2-large-patch14-224-lit",
+  "doc_status": "ok",
+  "repo": "apple/aimv2-large-patch14-224-lit",
+  "revision": "b17c109df4f9dbb941074073ad3771c28df5c826",
+  "source": "doc",
+  "status": "ok"
+ },
+ "aimv2_vision_model": {
+  "doc_checkpoint": "apple/aimv2-large-patch14-224-lit",
+  "doc_status": "ok",
+  "repo": "apple/aimv2-large-patch14-224-lit",
+  "revision": "b17c109df4f9dbb941074073ad3771c28df5c826",
+  "source": "doc",
+  "status": "ok"
+ },
+ "albert": {
+  "doc_checkpoint": "albert/albert-xxlarge-v2",
+  "doc_status": "ok",
+  "repo": "albert/albert-xxlarge-v2",
+  "revision": "97d3e58863d3a41dc581882f73b34d110b18f1f8",
+  "source": "doc",
+  "status": "ok"
+ },
+ "align": {
+  "doc_checkpoint": "kakaobrain/align-base",
+  "doc_status": "ok",
+  "repo": "kakaobrain/align-base",
+  "revision": "e96a37facc7b1f59090ece82293226b817afd6ba",
+  "source": "doc",
+  "status": "ok"
+ },
+ "align_text_model": {
+  "doc_checkpoint": "kakaobrain/align-base",
+  "doc_status": "ok",
+  "repo": "kakaobrain/align-base",
+  "revision": "e96a37facc7b1f59090ece82293226b817afd6ba",
+  "source": "doc",
+  "status": "ok"
+ },
+ "align_vision_model": {
+  "doc_checkpoint": "kakaobrain/align-base",
+  "doc_status": "ok",
+  "repo": "kakaobrain/align-base",
+  "revision": "e96a37facc7b1f59090ece82293226b817afd6ba",
+  "source": "doc",
+  "status": "ok"
+ },
+ "altclip": {
+  "doc_checkpoint": "BAAI/AltCLIP",
+  "doc_status": "ok",
+  "repo": "BAAI/AltCLIP",
+  "revision": "17788d7d45af0e41d0f10682fe91d655ac96435c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "altclip_text_model": {
+  "doc_checkpoint": "BAAI/AltCLIP",
+  "doc_status": "ok",
+  "repo": "BAAI/AltCLIP",
+  "revision": "17788d7d45af0e41d0f10682fe91d655ac96435c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "altclip_vision_model": {
+  "doc_checkpoint": "BAAI/AltCLIP",
+  "doc_status": "ok",
+  "repo": "BAAI/AltCLIP",
+  "revision": "17788d7d45af0e41d0f10682fe91d655ac96435c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "apertus": {
+  "doc_checkpoint": "swiss-ai/Apertus-8B-Instruct-2509",
+  "doc_status": "ok",
+  "repo": "swiss-ai/Apertus-8B-Instruct-2509",
+  "revision": "b946d40447b2b597999b9c86d44bee0b452c919f",
+  "source": "doc",
+  "status": "ok"
+ },
+ "arcee": {
+  "doc_checkpoint": "arcee-ai/AFM-4.5B",
+  "doc_status": "ok",
+  "repo": "arcee-ai/AFM-4.5B",
+  "revision": "e84d19711eca5817c1608cb344d931bf05c966dd",
+  "source": "doc",
+  "status": "ok"
+ },
+ "aria": {
+  "doc_checkpoint": "rhymes-ai/Aria",
+  "doc_status": "ok",
+  "repo": "rhymes-ai/Aria",
+  "revision": "53a09c77895d7025efa6239ea71cf1a8991064e8",
+  "source": "doc",
+  "status": "ok"
+ },
+ "aria_text": {
+  "doc_checkpoint": "rhymes-ai/Aria",
+  "doc_status": "ok",
+  "repo": "rhymes-ai/Aria",
+  "revision": "53a09c77895d7025efa6239ea71cf1a8991064e8",
+  "source": "doc",
+  "status": "ok"
+ },
+ "audio-spectrogram-transformer": {
+  "doc_checkpoint": "MIT/ast-finetuned-audioset-10-10-0.4593",
+  "doc_status": "ok",
+  "repo": "MIT/ast-finetuned-audioset-10-10-0.4593",
+  "revision": "f826b80d28226b62986cc218e5cec390b1096902",
+  "source": "doc",
+  "status": "ok"
+ },
+ "audioflamingo3": {
+  "doc_checkpoint": "nvidia/audio-flamingo-3-hf",
+  "doc_status": "ok",
+  "repo": "nvidia/audio-flamingo-3-hf",
+  "revision": "7d4bae64ee29878af6504ae6f6bb3e40492838ad",
+  "source": "doc",
+  "status": "ok"
+ },
+ "audioflamingo3_encoder": {
+  "doc_checkpoint": "nvidia/audio-flamingo-3-hf",
+  "doc_status": "ok",
+  "repo": "nvidia/audio-flamingo-3-hf",
+  "revision": "7d4bae64ee29878af6504ae6f6bb3e40492838ad",
+  "source": "doc",
+  "status": "ok"
+ },
+ "autoformer": {
+  "doc_checkpoint": "huggingface/autoformer-tourism-monthly",
+  "doc_status": "ok",
+  "repo": "huggingface/autoformer-tourism-monthly",
+  "revision": "3801324c8213b225c5ee93ee53f7bfd8094ae7e2",
+  "source": "doc",
+  "status": "ok"
+ },
+ "axk1": {
+  "doc_checkpoint": "skt/A.X-K1",
+  "doc_status": "ok",
+  "repo": "skt/A.X-K1",
+  "revision": "bb56f50f36b6c0b7b0c108da02db47a5e3bd9ee1",
+  "source": "doc",
+  "status": "ok"
+ },
+ "axk2": {
+  "doc_checkpoint": "skt/A.X-K2",
+  "doc_status": "ok",
+  "repo": "skt/A.X-K2",
+  "revision": "2287ca456927eed33b899c404c0b2ffaf17aa09f",
+  "source": "doc",
+  "status": "ok"
+ },
+ "aya_vision": {
+  "doc_checkpoint": "CohereForAI/aya-vision-8b",
+  "doc_status": "GatedRepoError",
+  "repo": "unsloth/aya-vision-32b",
+  "revision": "5b4c653757c1876eb98709ab0f2c05df446826a7",
+  "source": "hub",
+  "status": "ok"
+ },
+ "bamba": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "repo": "ibm-ai-platform/Bamba-9B-v1",
+  "revision": "50ec8766310eae056e05e42ba70df45645912e1e",
+  "source": "hub",
+  "status": "ok"
+ },
+ "bark": {
+  "doc_checkpoint": "suno/bark",
+  "doc_status": "ok",
+  "repo": "suno/bark",
+  "revision": "70a8a7d34168586dc5d028fa9666aceade177992",
+  "source": "doc",
+  "status": "ok"
+ },
+ "bart": {
+  "doc_checkpoint": "facebook/bart-large",
+  "doc_status": "ok",
+  "repo": "facebook/bart-large",
+  "revision": "cb48c1365bd826bd521f650dc2e0940aee54720c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "beit": {
+  "doc_checkpoint": "microsoft/beit-base-patch16-224-pt22k",
+  "doc_status": "ok",
+  "repo": "microsoft/beit-base-patch16-224-pt22k",
+  "revision": "49128b46539bd7dfad519b5e1014b050edabd9f6",
+  "source": "doc",
+  "status": "ok"
+ },
+ "bert": {
+  "doc_checkpoint": "google-bert/bert-base-uncased",
+  "doc_status": "ok",
+  "repo": "google-bert/bert-base-uncased",
+  "revision": "86b5e0934494bd15c9632b12f734a8a67f723594",
+  "source": "doc",
+  "status": "ok"
+ },
+ "bert-generation": {
+  "doc_checkpoint": "google/bert_for_seq_generation_L-24_bbc_encoder",
+  "doc_status": "ok",
+  "repo": "google/bert_for_seq_generation_L-24_bbc_encoder",
+  "revision": "c817d1fd1be2ffa69431227a1fe320544943d4db",
+  "source": "doc",
+  "status": "ok"
+ },
+ "big_bird": {
+  "doc_checkpoint": "google/bigbird-roberta-base",
+  "doc_status": "ok",
+  "repo": "google/bigbird-roberta-base",
+  "revision": "5a145f7852cba9bd431386a58137bf8a29903b90",
+  "source": "doc",
+  "status": "ok"
+ },
+ "bigbird_pegasus": {
+  "doc_checkpoint": "google/bigbird-pegasus-large-arxiv",
+  "doc_status": "ok",
+  "repo": "google/bigbird-pegasus-large-arxiv",
+  "revision": "c5ae494f3d319933617d513f8491c5be87f5d35b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "biogpt": {
+  "doc_checkpoint": "microsoft/biogpt",
+  "doc_status": "ok",
+  "repo": "microsoft/biogpt",
+  "revision": "eb0d815e95434dc9e3b78f464e52b899bee7d923",
+  "source": "doc",
+  "status": "ok"
+ },
+ "bit": {
+  "doc_checkpoint": "google/bit-50",
+  "doc_status": "ok",
+  "repo": "google/bit-50",
+  "revision": "60f75d535bfe0a2a9d419f89f96e3c6c78bd0da9",
+  "source": "doc",
+  "status": "ok"
+ },
+ "bitnet": {
+  "doc_checkpoint": "microsoft/bitnet-b1.58-2B-4T",
+  "doc_status": "ok",
+  "repo": "microsoft/bitnet-b1.58-2B-4T",
+  "revision": "04c3b9ad9361b824064a1f25ea60a8be9599b127",
+  "source": "doc",
+  "status": "ok"
+ },
+ "blenderbot": {
+  "doc_checkpoint": "facebook/blenderbot-3B",
+  "doc_status": "ok",
+  "repo": "facebook/blenderbot-3B",
+  "revision": "5d397dd187b1789a255155f5dbb6a5ee4d47e61e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "blenderbot-small": {
+  "doc_checkpoint": "facebook/blenderbot_small-90M",
+  "doc_status": "ok",
+  "repo": "facebook/blenderbot_small-90M",
+  "revision": "bbf60f5f68fd8789ac04bd1c20712233f3dc899f",
+  "source": "doc",
+  "status": "ok"
+ },
+ "blip": {
+  "doc_checkpoint": "Salesforce/blip-vqa-base",
+  "doc_status": "ok",
+  "repo": "Salesforce/blip-vqa-base",
+  "revision": "787b3d35d57e49572baabd22884b3d5a05acf072",
+  "source": "doc",
+  "status": "ok"
+ },
+ "blip-2": {
+  "doc_checkpoint": "Salesforce/blip2-opt-2.7b",
+  "doc_status": "ok",
+  "repo": "Salesforce/blip2-opt-2.7b",
+  "revision": "59a1ef6c1e5117b3f65523d1c6066825bcf315e3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "blip_2_qformer": {
+  "doc_checkpoint": "Salesforce/blip2-opt-2.7b",
+  "doc_status": "ok",
+  "repo": "Salesforce/blip2-opt-2.7b",
+  "revision": "59a1ef6c1e5117b3f65523d1c6066825bcf315e3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "blip_2_vision_model": {
+  "doc_checkpoint": "Salesforce/blip2-opt-2.7b",
+  "doc_status": "ok",
+  "repo": "Salesforce/blip2-opt-2.7b",
+  "revision": "59a1ef6c1e5117b3f65523d1c6066825bcf315e3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "blip_text_model": {
+  "doc_checkpoint": "Salesforce/blip-vqa-base",
+  "doc_status": "ok",
+  "repo": "Salesforce/blip-vqa-base",
+  "revision": "787b3d35d57e49572baabd22884b3d5a05acf072",
+  "source": "doc",
+  "status": "ok"
+ },
+ "blip_vision_model": {
+  "doc_checkpoint": "Salesforce/blip-vqa-base",
+  "doc_status": "ok",
+  "repo": "Salesforce/blip-vqa-base",
+  "revision": "787b3d35d57e49572baabd22884b3d5a05acf072",
+  "source": "doc",
+  "status": "ok"
+ },
+ "bloom": {
+  "doc_checkpoint": "bigscience/bloom",
+  "doc_status": "ok",
+  "repo": "bigscience/bloom",
+  "revision": "7f10a99ce7c08f03c7719a586cb2cbda1433ac05",
+  "source": "doc",
+  "status": "ok"
+ },
+ "blt": {
+  "doc_checkpoint": "itazap/blt-1b-hf",
+  "doc_status": "ok",
+  "repo": "itazap/blt-1b-hf",
+  "revision": "91aa6b8e168046ad91e517d2191e1e974f50cc01",
+  "source": "doc",
+  "status": "ok"
+ },
+ "blt_global_transformer": {
+  "doc_checkpoint": "itazap/blt-1b-hf",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "blt_local_decoder": {
+  "doc_checkpoint": "itazap/blt-1b-hf",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "blt_local_encoder": {
+  "doc_checkpoint": "itazap/blt-1b-hf",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "blt_patcher": {
+  "doc_checkpoint": "itazap/blt-1b-hf",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "bridgetower": {
+  "doc_checkpoint": "BridgeTower/bridgetower-base",
+  "doc_status": "wrong_model_type",
+  "repo": "regisss/bridgetower-newyorker-a100-8x",
+  "revision": "ff2eb8ee982639c2571b11eb5e199355188cbe5a",
+  "source": "hub",
+  "status": "ok"
+ },
+ "bridgetower_text_model": {
+  "doc_checkpoint": "BridgeTower/bridgetower-base",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "bridgetower_vision_model": {
+  "doc_checkpoint": "BridgeTower/bridgetower-base",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "bros": {
+  "doc_checkpoint": "jinho8345/bros-base-uncased",
+  "doc_status": "ok",
+  "repo": "jinho8345/bros-base-uncased",
+  "revision": "ca0d062e8f49e031f6eaf32fcc18be47301ce255",
+  "source": "doc",
+  "status": "ok"
+ },
+ "camembert": {
+  "doc_checkpoint": "almanach/camembert-base",
+  "doc_status": "ok",
+  "repo": "almanach/camembert-base",
+  "revision": "a75967561c78f2aa81cc41045378d3b4ee25af9e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "canary": {
+  "doc_checkpoint": "nvidia/canary-1b-v2",
+  "doc_status": "ok",
+  "repo": "nvidia/canary-1b-v2",
+  "revision": "d455706339a6b32e1aa40f82c713a482a0c938e2",
+  "source": "doc",
+  "status": "ok"
+ },
+ "canary_decoder": {
+  "doc_checkpoint": "nvidia/canary-1b-v2",
+  "doc_status": "ok",
+  "repo": "nvidia/canary-1b-v2",
+  "revision": "d455706339a6b32e1aa40f82c713a482a0c938e2",
+  "source": "doc",
+  "status": "ok"
+ },
+ "canine": {
+  "doc_checkpoint": "google/canine-s",
+  "doc_status": "ok",
+  "repo": "google/canine-s",
+  "revision": "75d6d0b3f4d0bffed0ca7ddd0b73949977d4ca02",
+  "source": "doc",
+  "status": "ok"
+ },
+ "chameleon": {
+  "doc_checkpoint": "facebook/chameleon-7b",
+  "doc_status": "GatedRepoError",
+  "repo": "leloy/Anole-7b-v0.1-hf",
+  "revision": "96df52301e844d8a624a13953051ead4c008343b",
+  "source": "hub",
+  "status": "ok"
+ },
+ "chameleon_vqgan": {
+  "doc_checkpoint": "facebook/chameleon-7b",
+  "doc_status": "GatedRepoError",
+  "repo": "leloy/Anole-7b-v0.1-vqvae-hf",
+  "revision": "72d00ee787d15e29b0c84a908e47b1e68d052a93",
+  "source": "hub",
+  "status": "ok"
+ },
+ "chinese_clip": {
+  "doc_checkpoint": "OFA-Sys/chinese-clip-vit-base-patch16",
+  "doc_status": "ok",
+  "repo": "OFA-Sys/chinese-clip-vit-base-patch16",
+  "revision": "36e679e65c2a2fead755ae21162091293ad37834",
+  "source": "doc",
+  "status": "ok"
+ },
+ "chinese_clip_text_model": {
+  "doc_checkpoint": "OFA-Sys/chinese-clip-vit-base-patch16",
+  "doc_status": "ok",
+  "repo": "OFA-Sys/chinese-clip-vit-base-patch16",
+  "revision": "36e679e65c2a2fead755ae21162091293ad37834",
+  "source": "doc",
+  "status": "ok"
+ },
+ "chinese_clip_vision_model": {
+  "doc_checkpoint": "OFA-Sys/chinese-clip-vit-base-patch16",
+  "doc_status": "ok",
+  "repo": "OFA-Sys/chinese-clip-vit-base-patch16",
+  "revision": "36e679e65c2a2fead755ae21162091293ad37834",
+  "source": "doc",
+  "status": "ok"
+ },
+ "chmv2": {
+  "doc_checkpoint": "facebook/dinov3-vitl16-chmv2-dpt-head",
+  "doc_status": "GatedRepoError",
+  "repo": "WEO-SAS/chm-meta-v2",
+  "revision": "527ae85605b786a39bf78034824e24666ed5c03c",
+  "source": "hub",
+  "status": "ok"
+ },
+ "clap": {
+  "doc_checkpoint": "laion/clap-htsat-fused",
+  "doc_status": "ok",
+  "repo": "laion/clap-htsat-fused",
+  "revision": "365dea6ef167def6676140ed93bbc43f84dabb28",
+  "source": "doc",
+  "status": "ok"
+ },
+ "clap_audio_model": {
+  "doc_checkpoint": "laion/clap-htsat-fused",
+  "doc_status": "ok",
+  "repo": "laion/clap-htsat-fused",
+  "revision": "365dea6ef167def6676140ed93bbc43f84dabb28",
+  "source": "doc",
+  "status": "ok"
+ },
+ "clap_text_model": {
+  "doc_checkpoint": "laion/clap-htsat-fused",
+  "doc_status": "ok",
+  "repo": "laion/clap-htsat-fused",
+  "revision": "365dea6ef167def6676140ed93bbc43f84dabb28",
+  "source": "doc",
+  "status": "ok"
+ },
+ "clip": {
+  "doc_checkpoint": "openai/clip-vit-base-patch32",
+  "doc_status": "ok",
+  "repo": "openai/clip-vit-base-patch32",
+  "revision": "3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268",
+  "source": "doc",
+  "status": "ok"
+ },
+ "clip_text_model": {
+  "doc_checkpoint": "openai/clip-vit-base-patch32",
+  "doc_status": "ok",
+  "repo": "openai/clip-vit-base-patch32",
+  "revision": "3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268",
+  "source": "doc",
+  "status": "ok"
+ },
+ "clip_vision_model": {
+  "doc_checkpoint": "openai/clip-vit-base-patch32",
+  "doc_status": "ok",
+  "repo": "openai/clip-vit-base-patch32",
+  "revision": "3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268",
+  "source": "doc",
+  "status": "ok"
+ },
+ "clipseg": {
+  "doc_checkpoint": "CIDAS/clipseg-rd64",
+  "doc_status": "ok",
+  "repo": "CIDAS/clipseg-rd64",
+  "revision": "1c75af8363f2e54e41c15e5dc00775314ee6b79a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "clipseg_text_model": {
+  "doc_checkpoint": "CIDAS/clipseg-rd64",
+  "doc_status": "ok",
+  "repo": "CIDAS/clipseg-rd64",
+  "revision": "1c75af8363f2e54e41c15e5dc00775314ee6b79a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "clipseg_vision_model": {
+  "doc_checkpoint": "CIDAS/clipseg-rd64",
+  "doc_status": "ok",
+  "repo": "CIDAS/clipseg-rd64",
+  "revision": "1c75af8363f2e54e41c15e5dc00775314ee6b79a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "clvp": {
+  "doc_checkpoint": "susnato/clvp_dev",
+  "doc_status": "ok",
+  "repo": "susnato/clvp_dev",
+  "revision": "5dee0e6a8386f5abe33e6df17da708f02e659eaf",
+  "source": "doc",
+  "status": "ok"
+ },
+ "clvp_decoder": {
+  "doc_checkpoint": "susnato/clvp_dev",
+  "doc_status": "ok",
+  "repo": "susnato/clvp_dev",
+  "revision": "5dee0e6a8386f5abe33e6df17da708f02e659eaf",
+  "source": "doc",
+  "status": "ok"
+ },
+ "clvp_encoder": {
+  "doc_checkpoint": "susnato/clvp_dev",
+  "doc_status": "ok",
+  "repo": "susnato/clvp_dev",
+  "revision": "5dee0e6a8386f5abe33e6df17da708f02e659eaf",
+  "source": "doc",
+  "status": "ok"
+ },
+ "codegen": {
+  "doc_checkpoint": "Salesforce/codegen-2B-mono",
+  "doc_status": "ok",
+  "repo": "Salesforce/codegen-2B-mono",
+  "revision": "0b1d0b33f26b1416f66f0ecf07cf6a29438c95ea",
+  "source": "doc",
+  "status": "ok"
+ },
+ "cohere": {
+  "doc_checkpoint": "CohereForAI/c4ai-command-r-v01",
+  "doc_status": "GatedRepoError",
+  "repo": "trl-internal-testing/tiny-CohereForCausalLM",
+  "revision": "90bc56bd12c642f6bf5e710ebd7c626dd7c0201c",
+  "source": "hub",
+  "status": "ok"
+ },
+ "cohere2": {
+  "doc_checkpoint": "CohereForAI/c4ai-command-r-v01",
+  "doc_status": "GatedRepoError",
+  "repo": "trl-internal-testing/tiny-Cohere2ForCausalLM",
+  "revision": "11632b48cc25820056f7cc5730b1a2f0a89ce47e",
+  "source": "hub",
+  "status": "ok"
+ },
+ "cohere2_moe": {
+  "doc_checkpoint": "CohereLabs/command-a-plus-05-2026",
+  "doc_status": "ok",
+  "repo": "CohereLabs/command-a-plus-05-2026",
+  "revision": "5fb6fde5fd12ff89356aae552e11883bc49f069b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "cohere2_vision": {
+  "doc_checkpoint": "CohereLabs/command-a-vision-07-2025",
+  "doc_status": "GatedRepoError",
+  "repo": "CohereLabs/command-a-plus-05-2026-bf16",
+  "revision": "5fb6fde5fd12ff89356aae552e11883bc49f069b",
+  "source": "hub",
+  "status": "ok"
+ },
+ "cohere_asr": {
+  "doc_checkpoint": "CohereLabs/cohere-transcribe-03-2026",
+  "doc_status": "GatedRepoError",
+  "repo": "syvai/hviske-v5.3",
+  "revision": "5d1a09822018702dc51d763e3a867b62d26b3501",
+  "source": "hub",
+  "status": "ok"
+ },
+ "cohere_compass": {
+  "doc_checkpoint": "CohereLabs/North-Micro-Vision-Instruct",
+  "doc_status": "ok",
+  "repo": "CohereLabs/North-Micro-Vision-Instruct",
+  "revision": "fa548d9aa62c1220bfd21fc6cfc465f1bd2a1a40",
+  "source": "doc",
+  "status": "ok"
+ },
+ "cohere_compass_text": {
+  "doc_checkpoint": "CohereLabs/North-Micro-Vision-Instruct",
+  "doc_status": "ok",
+  "repo": "CohereLabs/North-Micro-Vision-Instruct",
+  "revision": "fa548d9aa62c1220bfd21fc6cfc465f1bd2a1a40",
+  "source": "doc",
+  "status": "ok"
+ },
+ "cohere_compass_vision": {
+  "doc_checkpoint": "CohereLabs/North-Micro-Vision-Instruct",
+  "doc_status": "ok",
+  "repo": "CohereLabs/North-Micro-Vision-Instruct",
+  "revision": "fa548d9aa62c1220bfd21fc6cfc465f1bd2a1a40",
+  "source": "doc",
+  "status": "ok"
+ },
+ "colmodernvbert": {
+  "doc_checkpoint": "ModernVBERT/colmodernvbert-merged",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "colpali": {
+  "doc_checkpoint": "vidore/colpali-v1.2",
+  "doc_status": "RemoteEntryNotFoundError",
+  "repo": "vidore/colpali-v1.3-hf",
+  "revision": "133a9eb02947310513f52f8f0d39d622e0eab8dc",
+  "source": "hub",
+  "status": "ok"
+ },
+ "colqwen2": {
+  "doc_checkpoint": "vidore/colqwen2-v1.0-hf",
+  "doc_status": "ok",
+  "repo": "vidore/colqwen2-v1.0-hf",
+  "revision": "ddc07d2317c80f75fc742b7362ee9ad1912908f9",
+  "source": "doc",
+  "status": "ok"
+ },
+ "conditional_detr": {
+  "doc_checkpoint": "microsoft/conditional-detr-resnet-50",
+  "doc_status": "ok",
+  "repo": "microsoft/conditional-detr-resnet-50",
+  "revision": "8f8795fb7c319c7862d4f4cd699e76bb09cf2593",
+  "source": "doc",
+  "status": "ok"
+ },
+ "convbert": {
+  "doc_checkpoint": "YituTech/conv-bert-base",
+  "doc_status": "ok",
+  "repo": "YituTech/conv-bert-base",
+  "revision": "5cb451936b5c4a96562d8b146de85f64f9cf2c22",
+  "source": "doc",
+  "status": "ok"
+ },
+ "convnext": {
+  "doc_checkpoint": "facebook/convnext-tiny-224",
+  "doc_status": "ok",
+  "repo": "facebook/convnext-tiny-224",
+  "revision": "6166b7613034066690a621d8bf25ffdf181a34f0",
+  "source": "doc",
+  "status": "ok"
+ },
+ "convnextv2": {
+  "doc_checkpoint": "facebook/convnextv2-tiny-1k-224",
+  "doc_status": "ok",
+  "repo": "facebook/convnextv2-tiny-1k-224",
+  "revision": "f4db009e63145e02b3c075aa64d90ce41bcca4b1",
+  "source": "doc",
+  "status": "ok"
+ },
+ "cosmos3_edge": {
+  "doc_checkpoint": "nvidia/Cosmos3-Edge",
+  "doc_status": "ok",
+  "repo": "nvidia/Cosmos3-Edge",
+  "revision": "344d602b128d1bbdacb43b08d0a3626f46343e29",
+  "source": "doc",
+  "status": "ok"
+ },
+ "cosmos3_edge_text": {
+  "doc_checkpoint": "nvidia/Cosmos3-Edge",
+  "doc_status": "ok",
+  "repo": "nvidia/Cosmos3-Edge",
+  "revision": "344d602b128d1bbdacb43b08d0a3626f46343e29",
+  "source": "doc",
+  "status": "ok"
+ },
+ "cosmos3_edge_vision": {
+  "doc_checkpoint": "nvidia/Cosmos3-Edge",
+  "doc_status": "ok",
+  "repo": "nvidia/Cosmos3-Edge",
+  "revision": "344d602b128d1bbdacb43b08d0a3626f46343e29",
+  "source": "doc",
+  "status": "ok"
+ },
+ "cosmos3_omni": {
+  "doc_checkpoint": "nvidia/Cosmos3-Nano",
+  "doc_status": "ok",
+  "repo": "nvidia/Cosmos3-Nano",
+  "revision": "e59a53c25979a090fa8706c9acc0c254a6e89b92",
+  "source": "doc",
+  "status": "ok"
+ },
+ "cpmant": {
+  "doc_checkpoint": "openbmb/cpm-ant-10b",
+  "doc_status": "ok",
+  "repo": "openbmb/cpm-ant-10b",
+  "revision": "3b53c0f95f625de6ae676f9edf2cc65930f8b4b8",
+  "source": "doc",
+  "status": "ok"
+ },
+ "csm": {
+  "doc_checkpoint": "sesame/csm-1b",
+  "doc_status": "GatedRepoError",
+  "repo": "cartesia/azzurra-voice",
+  "revision": "f41947b939470b49181f77d8d89827938a2a915b",
+  "source": "hub",
+  "status": "ok"
+ },
+ "csm_depth_decoder_model": {
+  "doc_checkpoint": "sesame/csm-1b",
+  "doc_status": "GatedRepoError",
+  "status": "no_checkpoint"
+ },
+ "ctrl": {
+  "doc_checkpoint": "Salesforce/ctrl",
+  "doc_status": "ok",
+  "repo": "Salesforce/ctrl",
+  "revision": "3ff4f697e86bb0b95f7a70e39822af96671727d9",
+  "source": "doc",
+  "status": "ok"
+ },
+ "cvt": {
+  "doc_checkpoint": "microsoft/cvt-13",
+  "doc_status": "ok",
+  "repo": "microsoft/cvt-13",
+  "revision": "84e365a5f6a5ca987486abb25f3d8e5265cdc44d",
+  "source": "doc",
+  "status": "ok"
+ },
+ "cwm": {
+  "doc_checkpoint": "facebook/cwm",
+  "doc_status": "GatedRepoError",
+  "status": "no_checkpoint"
+ },
+ "d_fine": {
+  "doc_checkpoint": "ustc-community/dfine-xlarge-coco",
+  "doc_status": "ok",
+  "repo": "ustc-community/dfine-xlarge-coco",
+  "revision": "ea4f6be7350bbe3c199ec6febc74168346cb5a68",
+  "source": "doc",
+  "status": "ok"
+ },
+ "dab-detr": {
+  "doc_checkpoint": "IDEA-Research/dab-detr-resnet-50",
+  "doc_status": "ok",
+  "repo": "IDEA-Research/dab-detr-resnet-50",
+  "revision": "d8e2856ee1f7a28088f0b8069ceebf2a44cb5042",
+  "source": "doc",
+  "status": "ok"
+ },
+ "dac": {
+  "doc_checkpoint": "descript/dac_16khz",
+  "doc_status": "ok",
+  "repo": "descript/dac_16khz",
+  "revision": "7c2fc5e759f1f501aefc6e7a0265cc57f5d17ba7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "data2vec-audio": {
+  "doc_checkpoint": "facebook/data2vec-audio-base-960h",
+  "doc_status": "ok",
+  "repo": "facebook/data2vec-audio-base-960h",
+  "revision": "32331f3123e703528918aa688a9a38232d58c872",
+  "source": "doc",
+  "status": "ok"
+ },
+ "data2vec-text": {
+  "doc_checkpoint": "facebook/data2vec-text-base",
+  "doc_status": "ok",
+  "repo": "facebook/data2vec-text-base",
+  "revision": "bd0db19c3500ee7a0b626791db67fa6e9fda9a0b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "data2vec-vision": {
+  "doc_checkpoint": "facebook/data2vec-vision-base",
+  "doc_status": "ok",
+  "repo": "facebook/data2vec-vision-base",
+  "revision": "72a7bdadab41d0e9a2c8d6887b9f8a50eebb8e0f",
+  "source": "doc",
+  "status": "ok"
+ },
+ "dbrx": {
+  "doc_checkpoint": "transformers-community/dbrx-instruct",
+  "doc_status": "RepositoryNotFoundError",
+  "repo": "trl-internal-testing/tiny-DbrxForCausalLM",
+  "revision": "9b8efa12d99cf8c94c6b2afc7026c18d32b95104",
+  "source": "hub",
+  "status": "ok"
+ },
+ "deberta": {
+  "doc_checkpoint": "microsoft/deberta-base",
+  "doc_status": "ok",
+  "repo": "microsoft/deberta-base",
+  "revision": "0d1b43ccf21b5acd9f4e5f7b077fa698f05cf195",
+  "source": "doc",
+  "status": "ok"
+ },
+ "deberta-v2": {
+  "doc_checkpoint": "microsoft/deberta-v2-xlarge",
+  "doc_status": "ok",
+  "repo": "microsoft/deberta-v2-xlarge",
+  "revision": "1d134961d4db8e7e8eb1bc1ab81cb370244c57f7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "decision_transformer": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "repo": "edbeeching/decision-transformer-gym-hopper-medium",
+  "revision": "8224ec324200b150f10287b8c8c525224e62f319",
+  "source": "hub",
+  "status": "ok"
+ },
+ "deepseek_ocr2": {
+  "doc_checkpoint": "deepseek-community/DeepSeek-OCR-2",
+  "doc_status": "ok",
+  "repo": "deepseek-community/DeepSeek-OCR-2",
+  "revision": "838dc37567aa97106fcd590e2be6a8f279881813",
+  "source": "doc",
+  "status": "ok"
+ },
+ "deepseek_ocr2_encoder": {
+  "doc_checkpoint": "deepseek-community/DeepSeek-OCR-2",
+  "doc_status": "ok",
+  "repo": "deepseek-community/DeepSeek-OCR-2",
+  "revision": "838dc37567aa97106fcd590e2be6a8f279881813",
+  "source": "doc",
+  "status": "ok"
+ },
+ "deepseek_ocr2_sam_vision_model": {
+  "doc_checkpoint": "deepseek-community/DeepSeek-OCR-2",
+  "doc_status": "ok",
+  "repo": "deepseek-community/DeepSeek-OCR-2",
+  "revision": "838dc37567aa97106fcd590e2be6a8f279881813",
+  "source": "doc",
+  "status": "ok"
+ },
+ "deepseek_ocr2_text": {
+  "doc_checkpoint": "deepseek-community/DeepSeek-OCR-2",
+  "doc_status": "ok",
+  "repo": "deepseek-community/DeepSeek-OCR-2",
+  "revision": "838dc37567aa97106fcd590e2be6a8f279881813",
+  "source": "doc",
+  "status": "ok"
+ },
+ "deepseek_ocr2_vision": {
+  "doc_checkpoint": "deepseek-community/DeepSeek-OCR-2",
+  "doc_status": "ok",
+  "repo": "deepseek-community/DeepSeek-OCR-2",
+  "revision": "838dc37567aa97106fcd590e2be6a8f279881813",
+  "source": "doc",
+  "status": "ok"
+ },
+ "deepseek_v2": {
+  "doc_checkpoint": "deepseek-ai/DeepSeek-V2-Lite",
+  "doc_status": "ok",
+  "repo": "deepseek-ai/DeepSeek-V2-Lite",
+  "revision": "604d5664dddd88a0433dbae533b7fe9472482de0",
+  "source": "doc",
+  "status": "ok"
+ },
+ "deepseek_v3": {
+  "doc_checkpoint": "bzantium/tiny-deepseek-v3",
+  "doc_status": "ok",
+  "repo": "bzantium/tiny-deepseek-v3",
+  "revision": "634c1d1f51816415fa371e51281e435ce4422469",
+  "source": "doc",
+  "status": "ok"
+ },
+ "deepseek_v32": {
+  "doc_checkpoint": "deepseek-ai/DeepSeek-V3.2-Exp",
+  "doc_status": "ok",
+  "repo": "deepseek-ai/DeepSeek-V3.2-Exp",
+  "revision": "194c67e12b1b0d6df0ef373ddcf215bc84027409",
+  "source": "doc",
+  "status": "ok"
+ },
+ "deepseek_v4": {
+  "doc_checkpoint": "deepseek-ai/DeepSeek-V4-Flash-Base",
+  "doc_status": "ok",
+  "repo": "deepseek-ai/DeepSeek-V4-Flash-Base",
+  "revision": "8855555deef230a27a21a8d6f294b7b7497759b6",
+  "source": "doc",
+  "status": "ok"
+ },
+ "deepseek_vl": {
+  "doc_checkpoint": "deepseek-community/deepseek-vl-1.3b-chat",
+  "doc_status": "ok",
+  "repo": "deepseek-community/deepseek-vl-1.3b-chat",
+  "revision": "aa84ba9a033b7201d3a0a2e871291f0bb9c27329",
+  "source": "doc",
+  "status": "ok"
+ },
+ "deepseek_vl_hybrid": {
+  "doc_checkpoint": "deepseek-community/deepseek-vl-7b-chat",
+  "doc_status": "ok",
+  "repo": "deepseek-community/deepseek-vl-7b-chat",
+  "revision": "4d6f7f4aad464b5426a5321d176a11da6191ba60",
+  "source": "doc",
+  "status": "ok"
+ },
+ "deformable_detr": {
+  "doc_checkpoint": "SenseTime/deformable-detr",
+  "doc_status": "ok",
+  "repo": "SenseTime/deformable-detr",
+  "revision": "83ecd26945199939cb82806f988debdb71e6f43e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "deimv2": {
+  "doc_checkpoint": "Intellindust/DEIMv2_HGNetv2_N_COCO",
+  "doc_status": "wrong_model_type",
+  "repo": "alessioarcara/deimv2-deimv2_dinov3_x_coco",
+  "revision": "e045db5ceced93eabce064f06a7dd0005393181e",
+  "source": "hub",
+  "status": "ok"
+ },
+ "deit": {
+  "doc_checkpoint": "facebook/deit-base-distilled-patch16-224",
+  "doc_status": "ok",
+  "repo": "facebook/deit-base-distilled-patch16-224",
+  "revision": "a0fc9b37fdb63c112e76104f669208784ecfe4ea",
+  "source": "doc",
+  "status": "ok"
+ },
+ "depth_anything": {
+  "doc_checkpoint": "LiheYoung/depth-anything-small-hf",
+  "doc_status": "ok",
+  "repo": "LiheYoung/depth-anything-small-hf",
+  "revision": "25216a913fa218ccb7d58cce818d52b728b6c1f6",
+  "source": "doc",
+  "status": "ok"
+ },
+ "depth_pro": {
+  "doc_checkpoint": "apple/DepthPro",
+  "doc_status": "RemoteEntryNotFoundError",
+  "repo": "apple/DepthPro-hf",
+  "revision": "de816c8ce7168afcb231f96d501d72b869d0beda",
+  "source": "hub",
+  "status": "ok"
+ },
+ "detr": {
+  "doc_checkpoint": "facebook/detr-resnet-50",
+  "doc_status": "ok",
+  "repo": "facebook/detr-resnet-50",
+  "revision": "1d5f47bd3bdd2c4bbfa585418ffe6da5028b4c0b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "dia": {
+  "doc_checkpoint": "nari-labs/Dia-1.6B",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "dia_decoder": {
+  "doc_checkpoint": "nari-labs/Dia-1.6B",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "dia_encoder": {
+  "doc_checkpoint": "nari-labs/Dia-1.6B",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "diffllama": {
+  "doc_checkpoint": "kajuma/DiffLlama-0.3B-handcut",
+  "doc_status": "ok",
+  "repo": "kajuma/DiffLlama-0.3B-handcut",
+  "revision": "c2ad1209f1c1ebd4d4ab2eaf5c8002b541b87140",
+  "source": "doc",
+  "status": "ok"
+ },
+ "diffusion_gemma": {
+  "doc_checkpoint": "google/diffusiongemma-26B-A4B-it",
+  "doc_status": "ok",
+  "repo": "google/diffusiongemma-26B-A4B-it",
+  "revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "diffusion_gemma_text": {
+  "doc_checkpoint": "google/diffusiongemma-26B-A4B-it",
+  "doc_status": "ok",
+  "repo": "google/diffusiongemma-26B-A4B-it",
+  "revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "dinat": {
+  "doc_checkpoint": "shi-labs/dinat-mini-in1k-224",
+  "doc_status": "ok",
+  "repo": "shi-labs/dinat-mini-in1k-224",
+  "revision": "3f3b40b077e01ab6b02780f081cc878d17ab483b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "dinov2": {
+  "doc_checkpoint": "facebook/dinov2-base",
+  "doc_status": "ok",
+  "repo": "facebook/dinov2-base",
+  "revision": "f9e44c814b77203eaa57a6bdbbd535f21ede1415",
+  "source": "doc",
+  "status": "ok"
+ },
+ "dinov2_with_registers": {
+  "doc_checkpoint": "facebook/dinov2-with-registers-base",
+  "doc_status": "ok",
+  "repo": "facebook/dinov2-with-registers-base",
+  "revision": "a1d738ccfa7ae170945f210395d99dde8adb1805",
+  "source": "doc",
+  "status": "ok"
+ },
+ "dinov3_convnext": {
+  "doc_checkpoint": "facebook/dinov3-convnext-tiny-pretrain-lvd1689m",
+  "doc_status": "GatedRepoError",
+  "repo": "dflorea/dinov3-convnext-tiny-pretrain-lvd1689m-andina",
+  "revision": "4eaeaffcdd7e21c1f51b8d5136f21dcab1561dd5",
+  "source": "hub",
+  "status": "ok"
+ },
+ "dinov3_vit": {
+  "doc_checkpoint": "facebook/dinov3-vits16-pretrain-lvd1689m",
+  "doc_status": "GatedRepoError",
+  "repo": "camenduru/dinov3-vitl16-pretrain-lvd1689m",
+  "revision": "3c276edd87d6f6e569ff0c4400e086807d0f3881",
+  "source": "hub",
+  "status": "ok"
+ },
+ "distilbert": {
+  "doc_checkpoint": "google/distilbert-base-uncased",
+  "doc_status": "RepositoryNotFoundError",
+  "repo": "distilbert/distilbert-base-uncased",
+  "revision": "12040accade4e8a0f71eabdb258fecc2e7e948be",
+  "source": "hub",
+  "status": "ok"
+ },
+ "doge": {
+  "doc_checkpoint": "SmallDoge/Doge-320M",
+  "doc_status": "ok",
+  "repo": "SmallDoge/Doge-320M",
+  "revision": "2249aa221c3a526eeb261b7ded3f46b6211c3efa",
+  "source": "doc",
+  "status": "ok"
+ },
+ "donut-swin": {
+  "doc_checkpoint": "naver-clova-ix/donut-base",
+  "doc_status": "ok",
+  "repo": "naver-clova-ix/donut-base",
+  "revision": "a959cf33c20e09215873e338299c900f57047c61",
+  "source": "doc",
+  "status": "ok"
+ },
+ "dots1": {
+  "doc_checkpoint": "rednote-hilab/dots.llm1.base",
+  "doc_status": "ok",
+  "repo": "rednote-hilab/dots.llm1.base",
+  "revision": "12648c2836f619b51483a621e8ec335741bf1e57",
+  "source": "doc",
+  "status": "ok"
+ },
+ "dpr": {
+  "doc_checkpoint": "facebook/dpr-ctx_encoder-single-nq-base",
+  "doc_status": "ok",
+  "repo": "facebook/dpr-ctx_encoder-single-nq-base",
+  "revision": "bb21a3c2b1656d60c6a8e920283bc40dabddadb8",
+  "source": "doc",
+  "status": "ok"
+ },
+ "dpt": {
+  "doc_checkpoint": "Intel/dpt-large",
+  "doc_status": "ok",
+  "repo": "Intel/dpt-large",
+  "revision": "bc15f29aa3a80d532f2ed650b5e16ac48d8958f9",
+  "source": "doc",
+  "status": "ok"
+ },
+ "edgetam": {
+  "doc_checkpoint": "yonigozlan/EdgeTAM-hf",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "edgetam_video": {
+  "doc_checkpoint": "yonigozlan/EdgeTAM-hf",
+  "doc_status": "ok",
+  "repo": "yonigozlan/EdgeTAM-hf",
+  "revision": "c266ce53b3fc00f0f495b583f6a116c4e57f53bb",
+  "source": "doc",
+  "status": "ok"
+ },
+ "edgetam_vision_model": {
+  "doc_checkpoint": "yonigozlan/EdgeTAM-hf",
+  "doc_status": "ok",
+  "repo": "yonigozlan/EdgeTAM-hf",
+  "revision": "c266ce53b3fc00f0f495b583f6a116c4e57f53bb",
+  "source": "doc",
+  "status": "ok"
+ },
+ "efficientloftr": {
+  "doc_checkpoint": "zju-community/efficientloftr",
+  "doc_status": "ok",
+  "repo": "zju-community/efficientloftr",
+  "revision": "face1a79050ffa3e9da28720d1cf93aaf2e8f421",
+  "source": "doc",
+  "status": "ok"
+ },
+ "efficientnet": {
+  "doc_checkpoint": "google/efficientnet-b7",
+  "doc_status": "ok",
+  "repo": "google/efficientnet-b7",
+  "revision": "7fb0338488c493e554df736b442d7d3ae43770ca",
+  "source": "doc",
+  "status": "ok"
+ },
+ "electra": {
+  "doc_checkpoint": "google/electra-small-discriminator",
+  "doc_status": "ok",
+  "repo": "google/electra-small-discriminator",
+  "revision": "fa8239aadc095e9164941d05878b98afe9b953c3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "emu3": {
+  "doc_checkpoint": "Emu3-community/Emu3-Chat-hf",
+  "doc_status": "ok",
+  "repo": "Emu3-community/Emu3-Chat-hf",
+  "revision": "414c0a163edad789827ee473a71b75c7de546347",
+  "source": "doc",
+  "status": "ok"
+ },
+ "emu3_text_model": {
+  "doc_checkpoint": "Emu3-community/Emu3-Chat-hf",
+  "doc_status": "ok",
+  "repo": "Emu3-community/Emu3-Chat-hf",
+  "revision": "414c0a163edad789827ee473a71b75c7de546347",
+  "source": "doc",
+  "status": "ok"
+ },
+ "emu3_vqgan": {
+  "doc_checkpoint": "Emu3-community/Emu3-Chat-hf",
+  "doc_status": "ok",
+  "repo": "Emu3-community/Emu3-Chat-hf",
+  "revision": "414c0a163edad789827ee473a71b75c7de546347",
+  "source": "doc",
+  "status": "ok"
+ },
+ "encodec": {
+  "doc_checkpoint": "facebook/encodec_24khz",
+  "doc_status": "ok",
+  "repo": "facebook/encodec_24khz",
+  "revision": "c1dbe2ae3f1de713481a3b3e7c47f357092ee040",
+  "source": "doc",
+  "status": "ok"
+ },
+ "encoder-decoder": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "repo": "optimum-internal-testing/tiny-random-encoder-decoder-gpt2-bert",
+  "revision": "c33d2b7ac989b8d01fc29e3f9eeb83dcb6979c46",
+  "source": "hub",
+  "status": "ok"
+ },
+ "eomt": {
+  "doc_checkpoint": "tue-mps/coco_panoptic_eomt_large_640",
+  "doc_status": "ok",
+  "repo": "tue-mps/coco_panoptic_eomt_large_640",
+  "revision": "dcd130bed9b1ebda7041fd660fddb16f905b9c3b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "eomt_dinov3": {
+  "doc_checkpoint": "tue-mps/coco_panoptic_eomt_large_640_dinov3",
+  "doc_status": "RemoteEntryNotFoundError",
+  "repo": "tue-mps/eomt-dinov3-coco-panoptic-base-640",
+  "revision": "589ed003c94fc387d0daae28f12e9e01fc846332",
+  "source": "hub",
+  "status": "ok"
+ },
+ "ernie": {
+  "doc_checkpoint": "nghuyong/ernie-3.0-base-zh",
+  "doc_status": "ok",
+  "repo": "nghuyong/ernie-3.0-base-zh",
+  "revision": "8ad12310fa2e9668f9df5dd15e3857e374ab8147",
+  "source": "doc",
+  "status": "ok"
+ },
+ "ernie4_5": {
+  "doc_checkpoint": "baidu/ERNIE-4.5-0.3B-PT",
+  "doc_status": "ok",
+  "repo": "baidu/ERNIE-4.5-0.3B-PT",
+  "revision": "b565cf6caebdb7a1eadf00100857b1ed5e044f12",
+  "source": "doc",
+  "status": "ok"
+ },
+ "ernie4_5_moe": {
+  "doc_checkpoint": "baidu/ERNIE-4.5-21B-A3B-PT",
+  "doc_status": "ok",
+  "repo": "baidu/ERNIE-4.5-21B-A3B-PT",
+  "revision": "87db95487941cb39592ee0abca3b9155a6d19c5c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "ernie4_5_vl_moe": {
+  "doc_checkpoint": "baidu/ERNIE-4.5-VL-28B-A3B-PT",
+  "doc_status": "wrong_model_type",
+  "repo": "hf-internal-testing/Ernie-VL-Moe-Small",
+  "revision": "79b1756030ffb47115ede5d5cd301e3be63c1d29",
+  "source": "hub",
+  "status": "ok"
+ },
+ "ernie4_5_vl_moe_text": {
+  "doc_checkpoint": "baidu/ERNIE-4.5-VL-28B-A3B-PT",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "ernie4_5_vl_moe_vision": {
+  "doc_checkpoint": "baidu/ERNIE-4.5-VL-28B-A3B-PT",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "esm": {
+  "doc_checkpoint": "facebook/esm-1b",
+  "doc_status": "ok",
+  "repo": "facebook/esm-1b",
+  "revision": "6fb10624652aa86b64c620ae624baa5b5b8c3b78",
+  "source": "doc",
+  "status": "ok"
+ },
+ "esmc": {
+  "doc_checkpoint": "biohub/ESMC-6B",
+  "doc_status": "ok",
+  "repo": "biohub/ESMC-6B",
+  "revision": "af1602ba7406f521b11bf8f81d52af378cde09e4",
+  "source": "doc",
+  "status": "ok"
+ },
+ "esmfold2": {
+  "doc_checkpoint": "biohub/ESMFold2",
+  "doc_status": "ok",
+  "repo": "biohub/ESMFold2",
+  "revision": "69869f737beffec5294845ede23db5fc0b4f509e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "eurobert": {
+  "doc_checkpoint": "EuroBERT/EuroBERT-210m",
+  "doc_status": "ok",
+  "repo": "EuroBERT/EuroBERT-210m",
+  "revision": "39b51e15dd1f1a06f58b5cbf6a8a188cec60bd0e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "evolla": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "status": "no_checkpoint"
+ },
+ "exaone4": {
+  "doc_checkpoint": "LGAI-EXAONE/EXAONE-4.0-32B",
+  "doc_status": "ok",
+  "repo": "LGAI-EXAONE/EXAONE-4.0-32B",
+  "revision": "a1d54d1c148c30881ed27e035b650da489b51b92",
+  "source": "doc",
+  "status": "ok"
+ },
+ "exaone4_5": {
+  "doc_checkpoint": "LGAI-EXAONE/EXAONE-4.5-33B",
+  "doc_status": "ok",
+  "repo": "LGAI-EXAONE/EXAONE-4.5-33B",
+  "revision": "570aa4b15a4f45ba1133072b45f50198f6e3b4fd",
+  "source": "doc",
+  "status": "ok"
+ },
+ "exaone4_5_vision": {
+  "doc_checkpoint": "LGAI-EXAONE/EXAONE-4.5-33B",
+  "doc_status": "ok",
+  "repo": "LGAI-EXAONE/EXAONE-4.5-33B",
+  "revision": "570aa4b15a4f45ba1133072b45f50198f6e3b4fd",
+  "source": "doc",
+  "status": "ok"
+ },
+ "exaone_moe": {
+  "doc_checkpoint": "LGAI-EXAONE/K-EXAONE-236B-A23B",
+  "doc_status": "ok",
+  "repo": "LGAI-EXAONE/K-EXAONE-236B-A23B",
+  "revision": "61e6d578eb102b578e5704e2916ac841df9eca0a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "falcon": {
+  "doc_checkpoint": "tiiuae/falcon-7b",
+  "doc_status": "ok",
+  "repo": "tiiuae/falcon-7b",
+  "revision": "ec89142b67d748a1865ea4451372db8313ada0d8",
+  "source": "doc",
+  "status": "ok"
+ },
+ "falcon_h1": {
+  "doc_checkpoint": "tiiuae/Falcon-H1-1.5B-Deep-Instruct",
+  "doc_status": "ok",
+  "repo": "tiiuae/Falcon-H1-1.5B-Deep-Instruct",
+  "revision": "b6648636ddc906688974282de6e7a243395f5423",
+  "source": "doc",
+  "status": "ok"
+ },
+ "falcon_mamba": {
+  "doc_checkpoint": "tiiuae/falcon-mamba-7b",
+  "doc_status": "ok",
+  "repo": "tiiuae/falcon-mamba-7b",
+  "revision": "080ad94b3619e2c2d0afa59bafdc6113465b7006",
+  "source": "doc",
+  "status": "ok"
+ },
+ "fast_vlm": {
+  "doc_checkpoint": "KamilaMila/FastVLM-7B",
+  "doc_status": "ok",
+  "repo": "KamilaMila/FastVLM-7B",
+  "revision": "188ae63c204c762af941caabb7d32c221f54793d",
+  "source": "doc",
+  "status": "ok"
+ },
+ "fastspeech2_conformer": {
+  "doc_checkpoint": "espnet/fastspeech2_conformer",
+  "doc_status": "ok",
+  "repo": "espnet/fastspeech2_conformer",
+  "revision": "042ba6cbcd94061400d781881084a8b745cd81df",
+  "source": "doc",
+  "status": "ok"
+ },
+ "fastspeech2_conformer_hifigan": {
+  "doc_checkpoint": "espnet/fastspeech2_conformer_with_hifigan",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "fastspeech2_conformer_with_hifigan": {
+  "doc_checkpoint": "espnet/fastspeech2_conformer_with_hifigan",
+  "doc_status": "ok",
+  "repo": "espnet/fastspeech2_conformer_with_hifigan",
+  "revision": "7c7b76ccfcda92b7e9708f0c78e0b73f6f2247a3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "flaubert": {
+  "doc_checkpoint": "flaubert/flaubert_base_uncased",
+  "doc_status": "ok",
+  "repo": "flaubert/flaubert_base_uncased",
+  "revision": "5b5cf0a16b62b6bc97d41646aafea90664a2ed48",
+  "source": "doc",
+  "status": "ok"
+ },
+ "flava": {
+  "doc_checkpoint": "facebook/flava-full",
+  "doc_status": "ok",
+  "repo": "facebook/flava-full",
+  "revision": "51e2b5fac49169959b01da7f3708d8e0d8d7304a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "flava_image_model": {
+  "doc_checkpoint": "facebook/flava-full",
+  "doc_status": "ok",
+  "repo": "facebook/flava-full",
+  "revision": "51e2b5fac49169959b01da7f3708d8e0d8d7304a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "flava_multimodal_model": {
+  "doc_checkpoint": "facebook/flava-full",
+  "doc_status": "ok",
+  "repo": "facebook/flava-full",
+  "revision": "51e2b5fac49169959b01da7f3708d8e0d8d7304a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "flava_text_model": {
+  "doc_checkpoint": "facebook/flava-full",
+  "doc_status": "ok",
+  "repo": "facebook/flava-full",
+  "revision": "51e2b5fac49169959b01da7f3708d8e0d8d7304a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "flex_olmo": {
+  "doc_checkpoint": "allenai/FlexOlmo-7x7B-1T",
+  "doc_status": "ok",
+  "repo": "allenai/FlexOlmo-7x7B-1T",
+  "revision": "0dabfa2e5fd7d8c4bec7e3d3b1a05608255fb096",
+  "source": "doc",
+  "status": "ok"
+ },
+ "florence2": {
+  "doc_checkpoint": "florence-community/Florence-2-base",
+  "doc_status": "ok",
+  "repo": "florence-community/Florence-2-base",
+  "revision": "00921df66db728a9ceb750f5eca43e5c203a2051",
+  "source": "doc",
+  "status": "ok"
+ },
+ "florence_vision": {
+  "doc_checkpoint": "florence-community/Florence-2-base",
+  "doc_status": "ok",
+  "repo": "florence-community/Florence-2-base",
+  "revision": "00921df66db728a9ceb750f5eca43e5c203a2051",
+  "source": "doc",
+  "status": "ok"
+ },
+ "fnet": {
+  "doc_checkpoint": "google/fnet-base",
+  "doc_status": "ok",
+  "repo": "google/fnet-base",
+  "revision": "d89b6fad3cf5384848b783dc480f9685f49d008c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "focalnet": {
+  "doc_checkpoint": "microsoft/focalnet-tiny",
+  "doc_status": "ok",
+  "repo": "microsoft/focalnet-tiny",
+  "revision": "20d638e48e9b0f915874420a937b55f0a104f85c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "fsmt": {
+  "doc_checkpoint": "facebook/wmt19-en-ru",
+  "doc_status": "ok",
+  "repo": "facebook/wmt19-en-ru",
+  "revision": "834cdada94e68977b9d6c1224ca43a37390936ef",
+  "source": "doc",
+  "status": "ok"
+ },
+ "fun_asr_nano": {
+  "doc_checkpoint": "FunAudioLLM/Fun-ASR-Nano-2512-hf",
+  "doc_status": "ok",
+  "repo": "FunAudioLLM/Fun-ASR-Nano-2512-hf",
+  "revision": "7ef6cafdc445b5beff0b730cbeb51952c793ca6e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "fun_asr_nano_encoder": {
+  "doc_checkpoint": "FunAudioLLM/Fun-ASR-Nano-2512-hf",
+  "doc_status": "ok",
+  "repo": "FunAudioLLM/Fun-ASR-Nano-2512-hf",
+  "revision": "7ef6cafdc445b5beff0b730cbeb51952c793ca6e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "funnel": {
+  "doc_checkpoint": "funnel-transformer/small",
+  "doc_status": "ok",
+  "repo": "funnel-transformer/small",
+  "revision": "81e9124473a26bd4ff7244e1c1c544ef8e22ed08",
+  "source": "doc",
+  "status": "ok"
+ },
+ "fuyu": {
+  "doc_checkpoint": "adept/fuyu-8b",
+  "doc_status": "ok",
+  "repo": "adept/fuyu-8b",
+  "revision": "f41defefdb89be0d28cac19d94ce216e37cb6be5",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gemma": {
+  "doc_checkpoint": "google/gemma-7b",
+  "doc_status": "ok",
+  "repo": "google/gemma-7b",
+  "revision": "ff6768d9368919a1f025a54f9f5aa0ee591730bb",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gemma2": {
+  "doc_checkpoint": "google/gemma2-7b",
+  "doc_status": "RepositoryNotFoundError",
+  "repo": "hmellor/tiny-random-Gemma2ForCausalLM",
+  "revision": "7551e53abee9dd16896a86847cd137cbfe41764f",
+  "source": "hub",
+  "status": "ok"
+ },
+ "gemma3": {
+  "doc_checkpoint": "google/gemma-3-4b-it",
+  "doc_status": "ok",
+  "repo": "google/gemma-3-4b-it",
+  "revision": "093f9f388b31de276ce2de164bdc2081324b9767",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gemma3_text": {
+  "doc_checkpoint": "google/gemma-3-4b-it",
+  "doc_status": "ok",
+  "repo": "google/gemma-3-4b-it",
+  "revision": "093f9f388b31de276ce2de164bdc2081324b9767",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gemma3n": {
+  "doc_checkpoint": "google/gemma-3n-E4B",
+  "doc_status": "ok",
+  "repo": "google/gemma-3n-E4B",
+  "revision": "af70430f84ea4d7ac191aaa2bd8e14d2a5e8f6ee",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gemma3n_audio": {
+  "doc_checkpoint": "google/gemma-3n-E4B",
+  "doc_status": "ok",
+  "repo": "google/gemma-3n-E4B",
+  "revision": "af70430f84ea4d7ac191aaa2bd8e14d2a5e8f6ee",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gemma3n_text": {
+  "doc_checkpoint": "google/gemma-3n-E4B",
+  "doc_status": "ok",
+  "repo": "google/gemma-3n-E4B",
+  "revision": "af70430f84ea4d7ac191aaa2bd8e14d2a5e8f6ee",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gemma3n_vision": {
+  "doc_checkpoint": "google/gemma-3n-E4B",
+  "doc_status": "ok",
+  "repo": "google/gemma-3n-E4B",
+  "revision": "af70430f84ea4d7ac191aaa2bd8e14d2a5e8f6ee",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gemma4": {
+  "doc_checkpoint": "google/gemma-4-e2b-it",
+  "doc_status": "ok",
+  "repo": "google/gemma-4-e2b-it",
+  "revision": "3e22461f65e89153144f8adb70e3b8c2cc9845a7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gemma4_assistant": {
+  "doc_checkpoint": "google/gemma-4-e2b-it",
+  "doc_status": "wrong_model_type",
+  "repo": "google/gemma-4-31B-it-assistant",
+  "revision": "627c5ec1458b9086b841a91e0512fd31fd2fbbf1",
+  "source": "hub",
+  "status": "ok"
+ },
+ "gemma4_audio": {
+  "doc_checkpoint": "google/gemma-4-e2b-it",
+  "doc_status": "ok",
+  "repo": "google/gemma-4-e2b-it",
+  "revision": "3e22461f65e89153144f8adb70e3b8c2cc9845a7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gemma4_text": {
+  "doc_checkpoint": "google/gemma-4-e2b-it",
+  "doc_status": "ok",
+  "repo": "google/gemma-4-e2b-it",
+  "revision": "3e22461f65e89153144f8adb70e3b8c2cc9845a7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gemma4_unified": {
+  "doc_checkpoint": "google/gemma-4-12B-it",
+  "doc_status": "ok",
+  "repo": "google/gemma-4-12B-it",
+  "revision": "707f0a3b8a3c7ad586ed01e27eafbad8a27dd0f7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gemma4_unified_assistant": {
+  "doc_checkpoint": "google/gemma-4-12b-it",
+  "doc_status": "wrong_model_type",
+  "repo": "google/gemma-4-12B-it-assistant",
+  "revision": "46d4c6f13f0ac0ad827b915669b8df9b81c64c51",
+  "source": "hub",
+  "status": "ok"
+ },
+ "gemma4_unified_audio": {
+  "doc_checkpoint": "google/gemma-4-12B-it",
+  "doc_status": "ok",
+  "repo": "google/gemma-4-12B-it",
+  "revision": "707f0a3b8a3c7ad586ed01e27eafbad8a27dd0f7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gemma4_unified_text": {
+  "doc_checkpoint": "google/gemma-4-12B-it",
+  "doc_status": "ok",
+  "repo": "google/gemma-4-12B-it",
+  "revision": "707f0a3b8a3c7ad586ed01e27eafbad8a27dd0f7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gemma4_unified_vision": {
+  "doc_checkpoint": "google/gemma-4-12B-it",
+  "doc_status": "ok",
+  "repo": "google/gemma-4-12B-it",
+  "revision": "707f0a3b8a3c7ad586ed01e27eafbad8a27dd0f7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gemma4_vision": {
+  "doc_checkpoint": "google/gemma-4-e2b-it",
+  "doc_status": "ok",
+  "repo": "google/gemma-4-e2b-it",
+  "revision": "3e22461f65e89153144f8adb70e3b8c2cc9845a7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "git": {
+  "doc_checkpoint": "microsoft/git-base",
+  "doc_status": "ok",
+  "repo": "microsoft/git-base",
+  "revision": "1f7fe8444292beb4a259e3a5b6eba440cd5999d4",
+  "source": "doc",
+  "status": "ok"
+ },
+ "git_vision_model": {
+  "doc_checkpoint": "microsoft/git-base",
+  "doc_status": "ok",
+  "repo": "microsoft/git-base",
+  "revision": "1f7fe8444292beb4a259e3a5b6eba440cd5999d4",
+  "source": "doc",
+  "status": "ok"
+ },
+ "glm": {
+  "doc_checkpoint": "THUDM/glm-4-9b-chat",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "glm4": {
+  "doc_checkpoint": "zai-org/GLM-OCR",
+  "doc_status": "wrong_model_type",
+  "repo": "zai-org/GLM-Z1-32B-0414",
+  "revision": "8eb2858992c1f749e2a6d4075455decc2484722d",
+  "source": "hub",
+  "status": "ok"
+ },
+ "glm46v": {
+  "doc_checkpoint": "zai-org/GLM-4.1V-9B-Thinking",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "glm4_moe": {
+  "doc_checkpoint": "zai-org/GLM-4.5",
+  "doc_status": "ok",
+  "repo": "zai-org/GLM-4.5",
+  "revision": "cbb2c7cfb52fa128a9660cb1a7a78e017899e115",
+  "source": "doc",
+  "status": "ok"
+ },
+ "glm4_moe_lite": {
+  "doc_checkpoint": "zai-org/GLM-4.5",
+  "doc_status": "wrong_model_type",
+  "repo": "zai-org/GLM-4.7-Flash",
+  "revision": "7dd20894a642a0aa287e9827cb1a1f7f91386b67",
+  "source": "hub",
+  "status": "ok"
+ },
+ "glm4v": {
+  "doc_checkpoint": "zai-org/GLM-4.1V-9B-Thinking",
+  "doc_status": "ok",
+  "repo": "zai-org/GLM-4.1V-9B-Thinking",
+  "revision": "3c1471e51dc811b589d4d12b1c1c7c1c941267c2",
+  "source": "doc",
+  "status": "ok"
+ },
+ "glm4v_moe": {
+  "doc_checkpoint": "zai-org/GLM-4.5V",
+  "doc_status": "ok",
+  "repo": "zai-org/GLM-4.5V",
+  "revision": "ed47433b37111465ec527affaaddceff371bca04",
+  "source": "doc",
+  "status": "ok"
+ },
+ "glm4v_moe_text": {
+  "doc_checkpoint": "zai-org/GLM-4.5V",
+  "doc_status": "ok",
+  "repo": "zai-org/GLM-4.5V",
+  "revision": "ed47433b37111465ec527affaaddceff371bca04",
+  "source": "doc",
+  "status": "ok"
+ },
+ "glm4v_moe_vision": {
+  "doc_checkpoint": "zai-org/GLM-4.1V-9B-Thinking",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "glm4v_text": {
+  "doc_checkpoint": "zai-org/GLM-4.1V-9B-Thinking",
+  "doc_status": "ok",
+  "repo": "zai-org/GLM-4.1V-9B-Thinking",
+  "revision": "3c1471e51dc811b589d4d12b1c1c7c1c941267c2",
+  "source": "doc",
+  "status": "ok"
+ },
+ "glm4v_vision": {
+  "doc_checkpoint": "zai-org/GLM-4.1V-9B-Thinking",
+  "doc_status": "ok",
+  "repo": "zai-org/GLM-4.1V-9B-Thinking",
+  "revision": "3c1471e51dc811b589d4d12b1c1c7c1c941267c2",
+  "source": "doc",
+  "status": "ok"
+ },
+ "glm5_next": {
+  "doc_checkpoint": "zai-org/GLM-5.3-Flash",
+  "doc_status": "ok",
+  "repo": "zai-org/GLM-5.3-Flash",
+  "revision": "eb9eb208eb0d988989d07a6a12d0fdeb5f52574a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "glm5_next_text": {
+  "doc_checkpoint": "zai-org/GLM-5.3-Flash",
+  "doc_status": "ok",
+  "repo": "zai-org/GLM-5.3-Flash",
+  "revision": "eb9eb208eb0d988989d07a6a12d0fdeb5f52574a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "glm5_next_vision": {
+  "doc_checkpoint": "zai-org/GLM-5.3-Flash",
+  "doc_status": "ok",
+  "repo": "zai-org/GLM-5.3-Flash",
+  "revision": "eb9eb208eb0d988989d07a6a12d0fdeb5f52574a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "glm_image": {
+  "doc_checkpoint": "zai-org/GLM-Image",
+  "doc_status": "RemoteEntryNotFoundError",
+  "status": "no_checkpoint"
+ },
+ "glm_image_text": {
+  "doc_checkpoint": "zai-org/GLM-Image",
+  "doc_status": "RemoteEntryNotFoundError",
+  "status": "no_checkpoint"
+ },
+ "glm_image_vision": {
+  "doc_checkpoint": "zai-org/GLM-Image",
+  "doc_status": "RemoteEntryNotFoundError",
+  "status": "no_checkpoint"
+ },
+ "glm_image_vqmodel": {
+  "doc_checkpoint": "zai-org/GLM-Image",
+  "doc_status": "RemoteEntryNotFoundError",
+  "status": "no_checkpoint"
+ },
+ "glm_moe_dsa": {
+  "doc_checkpoint": "zai-org/GLM-5",
+  "doc_status": "ok",
+  "repo": "zai-org/GLM-5",
+  "revision": "c183ef8c61faee82855eca1ed9bb3a9a7ce3b0b2",
+  "source": "doc",
+  "status": "ok"
+ },
+ "glm_ocr": {
+  "doc_checkpoint": "zai-org/GLM-OCR",
+  "doc_status": "ok",
+  "repo": "zai-org/GLM-OCR",
+  "revision": "2e85a62840ccac27daa451df36c736c4636b8628",
+  "source": "doc",
+  "status": "ok"
+ },
+ "glm_ocr_text": {
+  "doc_checkpoint": "zai-org/GLM-OCR",
+  "doc_status": "ok",
+  "repo": "zai-org/GLM-OCR",
+  "revision": "2e85a62840ccac27daa451df36c736c4636b8628",
+  "source": "doc",
+  "status": "ok"
+ },
+ "glm_ocr_vision": {
+  "doc_checkpoint": "zai-org/GLM-OCR",
+  "doc_status": "ok",
+  "repo": "zai-org/GLM-OCR",
+  "revision": "2e85a62840ccac27daa451df36c736c4636b8628",
+  "source": "doc",
+  "status": "ok"
+ },
+ "glmasr": {
+  "doc_checkpoint": "zai-org/GLM-ASR-Nano-2512",
+  "doc_status": "ok",
+  "repo": "zai-org/GLM-ASR-Nano-2512",
+  "revision": "61ba4e0b3309b6656edea3e93e419f7bd5c61957",
+  "source": "doc",
+  "status": "ok"
+ },
+ "glmasr_encoder": {
+  "doc_checkpoint": "zai-org/GLM-ASR-Nano-2512",
+  "doc_status": "ok",
+  "repo": "zai-org/GLM-ASR-Nano-2512",
+  "revision": "61ba4e0b3309b6656edea3e93e419f7bd5c61957",
+  "source": "doc",
+  "status": "ok"
+ },
+ "glmga": {
+  "doc_checkpoint": "zai-org/GLM-4.1V-9B-Thinking",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "glpn": {
+  "doc_checkpoint": "vinvino02/glpn-kitti",
+  "doc_status": "ok",
+  "repo": "vinvino02/glpn-kitti",
+  "revision": "e9e84852cb27aa6347db0f98bf86e296505ac014",
+  "source": "doc",
+  "status": "ok"
+ },
+ "got_ocr2": {
+  "doc_checkpoint": "facebook/sam-vit-huge",
+  "doc_status": "wrong_model_type",
+  "repo": "stepfun-ai/GOT-OCR-2.0-hf",
+  "revision": "d3017ef2c2c1395888c8d635c5e0508bcb0ac78d",
+  "source": "hub",
+  "status": "ok"
+ },
+ "gpt-sw3": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "status": "no_checkpoint"
+ },
+ "gpt2": {
+  "doc_checkpoint": "openai-community/gpt2",
+  "doc_status": "ok",
+  "repo": "openai-community/gpt2",
+  "revision": "607a30d783dfa663caf39e06633721c8d4cfcd7e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gpt_bigcode": {
+  "doc_checkpoint": "bigcode/gpt_bigcode-santacoder",
+  "doc_status": "ok",
+  "repo": "bigcode/gpt_bigcode-santacoder",
+  "revision": "291931872cae83498cf984b16319f47f5e9e7a07",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gpt_neo": {
+  "doc_checkpoint": "EleutherAI/gpt-neo-1.3B",
+  "doc_status": "ok",
+  "repo": "EleutherAI/gpt-neo-1.3B",
+  "revision": "dbe59a7f4a88d01d1ba9798d78dbe3fe038792c8",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gpt_neox": {
+  "doc_checkpoint": "EleutherAI/gpt-neox-20b",
+  "doc_status": "ok",
+  "repo": "EleutherAI/gpt-neox-20b",
+  "revision": "c292233c833e336628618a88a648727eb3dff0a7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gpt_neox_japanese": {
+  "doc_checkpoint": "abeja/gpt-neox-japanese-2.7b",
+  "doc_status": "ok",
+  "repo": "abeja/gpt-neox-japanese-2.7b",
+  "revision": "c4958c0a96d523dd8841fc38da0741056ce470ec",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gpt_oss": {
+  "doc_checkpoint": "openai/gpt-oss-20b",
+  "doc_status": "ok",
+  "repo": "openai/gpt-oss-20b",
+  "revision": "6cee5e81ee83917806bbde320786a8fb61efebee",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gptj": {
+  "doc_checkpoint": "EleutherAI/gpt-j-6B",
+  "doc_status": "ok",
+  "repo": "EleutherAI/gpt-j-6B",
+  "revision": "47e169305d2e8376be1d31e765533382721b2cc1",
+  "source": "doc",
+  "status": "ok"
+ },
+ "granite": {
+  "doc_checkpoint": "ibm-granite/granite-3.0-8b-base",
+  "doc_status": "ok",
+  "repo": "ibm-granite/granite-3.0-8b-base",
+  "revision": "4fad7f8ad56393dcef4e34e37a35962bd091f320",
+  "source": "doc",
+  "status": "ok"
+ },
+ "granite4_vision": {
+  "doc_checkpoint": "llava-hf/llava-v1.6-mistral-7b-hf",
+  "doc_status": "wrong_model_type",
+  "repo": "ibm-granite/granite-vision-4.1-4b",
+  "revision": "37d591f06319e8f1638b5adcf58bdf50e0f84f7a",
+  "source": "hub",
+  "status": "ok"
+ },
+ "granite4_vision_text": {
+  "doc_checkpoint": "ibm-granite4_vision_text/granite4_vision_text-3.0-8b-base",
+  "doc_status": "RepositoryNotFoundError",
+  "status": "no_checkpoint"
+ },
+ "granite_speech": {
+  "doc_checkpoint": "ibm-granite/granite-speech-3.3-2b",
+  "doc_status": "ok",
+  "repo": "ibm-granite/granite-speech-3.3-2b",
+  "revision": "4ac2f02f413c6169ae8c0ccc217115a366e552d7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "granite_speech5_ctc": {
+  "doc_checkpoint": "ibm-granite/granite-speech-5.0-470m-turboctc",
+  "doc_status": "ok",
+  "repo": "ibm-granite/granite-speech-5.0-470m-turboctc",
+  "revision": "947f59af40db9791170a0628cf0f3f4812d720f1",
+  "source": "doc",
+  "status": "ok"
+ },
+ "granite_speech5_encoder": {
+  "doc_checkpoint": "ibm-granite/granite-speech-5.0-470m-turboctc",
+  "doc_status": "ok",
+  "repo": "ibm-granite/granite-speech-5.0-470m-turboctc",
+  "revision": "947f59af40db9791170a0628cf0f3f4812d720f1",
+  "source": "doc",
+  "status": "ok"
+ },
+ "granite_speech_encoder": {
+  "doc_checkpoint": "ibm-granite/granite-speech-3.3-2b",
+  "doc_status": "ok",
+  "repo": "ibm-granite/granite-speech-3.3-2b",
+  "revision": "4ac2f02f413c6169ae8c0ccc217115a366e552d7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "granite_speech_plus": {
+  "doc_checkpoint": "ibm-granite/granite-speech-4.1-2b-plus",
+  "doc_status": "ok",
+  "repo": "ibm-granite/granite-speech-4.1-2b-plus",
+  "revision": "1454e6e1e33845ca9280ff65f52cf1141ba6e6e2",
+  "source": "doc",
+  "status": "ok"
+ },
+ "granite_speech_plus_encoder": {
+  "doc_checkpoint": "ibm-granite/granite-speech-4.1-2b-plus",
+  "doc_status": "ok",
+  "repo": "ibm-granite/granite-speech-4.1-2b-plus",
+  "revision": "1454e6e1e33845ca9280ff65f52cf1141ba6e6e2",
+  "source": "doc",
+  "status": "ok"
+ },
+ "granite_swa": {
+  "doc_checkpoint": "ibm-granite/granite-swash-2b",
+  "doc_status": "ok",
+  "repo": "ibm-granite/granite-swash-2b",
+  "revision": "af1e3227100b61088eead48389ab5409b5d0e39c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "granitemoe": {
+  "doc_checkpoint": "ibm-granite/granite-speech-3.2-8b",
+  "doc_status": "wrong_model_type",
+  "repo": "ibm-research/PowerMoE-3b",
+  "revision": "13fcb5a98001438bed01cf1ac4b423751dc4c2ea",
+  "source": "hub",
+  "status": "ok"
+ },
+ "granitemoe_swa": {
+  "doc_checkpoint": "ibm-granite/granite-swash-3b-a600m",
+  "doc_status": "ok",
+  "repo": "ibm-granite/granite-swash-3b-a600m",
+  "revision": "568a94fcfeff42a8cab9ee2ffea89fde12071282",
+  "source": "doc",
+  "status": "ok"
+ },
+ "granitemoehybrid": {
+  "doc_checkpoint": "ibm-granite/granite-speech-3.2-8b",
+  "doc_status": "wrong_model_type",
+  "repo": "ibm-granite/granite-4.0-h-tiny",
+  "revision": "791e0d3d28c86e106c9b6e0b4cecdee0375b6124",
+  "source": "hub",
+  "status": "ok"
+ },
+ "granitemoeshared": {
+  "doc_checkpoint": "ibm-granite/granite-speech-3.2-8b",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "grounding-dino": {
+  "doc_checkpoint": "IDEA-Research/grounding-dino-tiny",
+  "doc_status": "ok",
+  "repo": "IDEA-Research/grounding-dino-tiny",
+  "revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71",
+  "source": "doc",
+  "status": "ok"
+ },
+ "groupvit": {
+  "doc_checkpoint": "nvidia/groupvit-gcc-yfcc",
+  "doc_status": "ok",
+  "repo": "nvidia/groupvit-gcc-yfcc",
+  "revision": "751f6d9a37c9e9e42ba527cc99d3c21b137bd2a3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "groupvit_text_model": {
+  "doc_checkpoint": "nvidia/groupvit-gcc-yfcc",
+  "doc_status": "ok",
+  "repo": "nvidia/groupvit-gcc-yfcc",
+  "revision": "751f6d9a37c9e9e42ba527cc99d3c21b137bd2a3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "groupvit_vision_model": {
+  "doc_checkpoint": "nvidia/groupvit-gcc-yfcc",
+  "doc_status": "ok",
+  "repo": "nvidia/groupvit-gcc-yfcc",
+  "revision": "751f6d9a37c9e9e42ba527cc99d3c21b137bd2a3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gte": {
+  "doc_checkpoint": "alibaba-nlp-community/gte-multilingual-base",
+  "doc_status": "ok",
+  "repo": "alibaba-nlp-community/gte-multilingual-base",
+  "revision": "fdaec56c6a50d6ebcf691f616ee83a166346b76c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "helium": {
+  "doc_checkpoint": "kyutai/helium-1-preview",
+  "doc_status": "ok",
+  "repo": "kyutai/helium-1-preview",
+  "revision": "645c94758493d06ba1b4706c5674d6510e3a84cb",
+  "source": "doc",
+  "status": "ok"
+ },
+ "hgnet_v2": {
+  "doc_checkpoint": "ustc-community/dfine_x_coco",
+  "doc_status": "ok",
+  "repo": "ustc-community/dfine_x_coco",
+  "revision": "ea4f6be7350bbe3c199ec6febc74168346cb5a68",
+  "source": "doc",
+  "status": "ok"
+ },
+ "hiera": {
+  "doc_checkpoint": "facebook/hiera-base-224",
+  "doc_status": "RepositoryNotFoundError",
+  "repo": "facebook/hiera-tiny-224-hf",
+  "revision": "0c4c06ac3760513079095ee4f400c3445fb1577a",
+  "source": "hub",
+  "status": "ok"
+ },
+ "higgs_audio_v2": {
+  "doc_checkpoint": "bosonai/higgs-audio-v2-generation-3B-base",
+  "doc_status": "ok",
+  "repo": "bosonai/higgs-audio-v2-generation-3B-base",
+  "revision": "d80c511612b3040ff2877ce3d408747df1739f11",
+  "source": "doc",
+  "status": "ok"
+ },
+ "higgs_audio_v2_tokenizer": {
+  "doc_checkpoint": "bosonai/higgs-audio-v2-tokenizer",
+  "doc_status": "ok",
+  "repo": "bosonai/higgs-audio-v2-tokenizer",
+  "revision": "815a03f1b57dcb5ae918db415f22cd0c8a6f0f54",
+  "source": "doc",
+  "status": "ok"
+ },
+ "hrm_text": {
+  "doc_checkpoint": "sapientinc/HRM-Text-1B",
+  "doc_status": "ok",
+  "repo": "sapientinc/HRM-Text-1B",
+  "revision": "22097cbcecdd1301afe30a19a3ee61b96a9863e5",
+  "source": "doc",
+  "status": "ok"
+ },
+ "hubert": {
+  "doc_checkpoint": "facebook/hubert-base-ls960",
+  "doc_status": "ok",
+  "repo": "facebook/hubert-base-ls960",
+  "revision": "dba3bb02fda4248b6e082697eee756de8fe8aa8a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "hunyuan_v1_dense": {
+  "doc_checkpoint": "tencent/Hunyuan-7B-Instruct",
+  "doc_status": "ok",
+  "repo": "tencent/Hunyuan-7B-Instruct",
+  "revision": "6fd6ecb05e76589bc43b79f49e3619445c6b4593",
+  "source": "doc",
+  "status": "ok"
+ },
+ "hunyuan_v1_moe": {
+  "doc_checkpoint": "tencent/Hunyuan-A13B-Instruct",
+  "doc_status": "ok",
+  "repo": "tencent/Hunyuan-A13B-Instruct",
+  "revision": "290ddb9a56ed23c2c83a1c8081533e58925df952",
+  "source": "doc",
+  "status": "ok"
+ },
+ "hunyuan_vl": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "repo": "tencent/HunyuanOCR",
+  "revision": "47644ecc4fc854efa4f505155158831f36773ee4",
+  "source": "hub",
+  "status": "ok"
+ },
+ "hunyuan_vl_text": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "status": "no_checkpoint"
+ },
+ "hunyuan_vl_vision": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "status": "no_checkpoint"
+ },
+ "hy_v3": {
+  "doc_checkpoint": "tencent/Hy3-preview",
+  "doc_status": "ok",
+  "repo": "tencent/Hy3-preview",
+  "revision": "549c2b3a0fd5b9a6c6059a9935bf0d59ab69d75a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "hy_v4": {
+  "doc_checkpoint": "tencent/Hy4-preview",
+  "doc_status": "ok",
+  "repo": "tencent/Hy4-preview",
+  "revision": "705d81ee51566a186d645b74c974d642ef2828fe",
+  "source": "doc",
+  "status": "ok"
+ },
+ "hyperclovax": {
+  "doc_checkpoint": "naver-hyperclovax/HyperCLOVAX-SEED-Think-14B",
+  "doc_status": "ok",
+  "repo": "naver-hyperclovax/HyperCLOVAX-SEED-Think-14B",
+  "revision": "9b74e35d4c7e4ffec489f4171273caca8948a2b9",
+  "source": "doc",
+  "status": "ok"
+ },
+ "hyperclovax_vision_v2": {
+  "doc_checkpoint": "naver-hyperclovax/HyperCLOVAX-SEED-Think-32B",
+  "doc_status": "ok",
+  "repo": "naver-hyperclovax/HyperCLOVAX-SEED-Think-32B",
+  "revision": "3c2b6338613c4e5ede30788d868363125a262934",
+  "source": "doc",
+  "status": "ok"
+ },
+ "ibert": {
+  "doc_checkpoint": "kssteven/ibert-roberta-base",
+  "doc_status": "ok",
+  "repo": "kssteven/ibert-roberta-base",
+  "revision": "4f98e9110b04a8958444d3af8ed39287834fbb90",
+  "source": "doc",
+  "status": "ok"
+ },
+ "idefics": {
+  "doc_checkpoint": "HuggingFaceM4/idefics-9b",
+  "doc_status": "ok",
+  "repo": "HuggingFaceM4/idefics-9b",
+  "revision": "4986969d084dd36ed0acf20990c64faa7e817df1",
+  "source": "doc",
+  "status": "ok"
+ },
+ "idefics2": {
+  "doc_checkpoint": "HuggingFaceM4/idefics2-8b",
+  "doc_status": "ok",
+  "repo": "HuggingFaceM4/idefics2-8b",
+  "revision": "2c42686c57fe21cf0348c9ce1077d094b72e7698",
+  "source": "doc",
+  "status": "ok"
+ },
+ "idefics2_perceiver": {
+  "doc_checkpoint": "HuggingFaceM4/idefics2-8b",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "idefics2_vision": {
+  "doc_checkpoint": "HuggingFaceM4/idefics2-8b",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "idefics3": {
+  "doc_checkpoint": "HuggingFaceM4/Idefics3-8B-Llama3",
+  "doc_status": "ok",
+  "repo": "HuggingFaceM4/Idefics3-8B-Llama3",
+  "revision": "fddb4ff79181e55a994674777e06cd5456ce3dc3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "idefics3_vision": {
+  "doc_checkpoint": "HuggingFaceM4/Idefics3-8B-Llama3",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "idefics_perciever": {
+  "doc_checkpoint": "HuggingFaceM4/idefics-9b",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "idefics_vision": {
+  "doc_checkpoint": "HuggingFaceM4/idefics-9b",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "ijepa": {
+  "doc_checkpoint": "facebook/ijepa_vith14_1k",
+  "doc_status": "ok",
+  "repo": "facebook/ijepa_vith14_1k",
+  "revision": "f157467ea509bc356ff9f61fd3c0d840eec5e04e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "imagegpt": {
+  "doc_checkpoint": "openai/imagegpt-small",
+  "doc_status": "ok",
+  "repo": "openai/imagegpt-small",
+  "revision": "10c8a8402cf80c0eaaf31fb5bc86012b34169481",
+  "source": "doc",
+  "status": "ok"
+ },
+ "informer": {
+  "doc_checkpoint": "huggingface/informer-tourism-monthly",
+  "doc_status": "ok",
+  "repo": "huggingface/informer-tourism-monthly",
+  "revision": "da30269a25658b3626dda20a94c9bf6b765f1b13",
+  "source": "doc",
+  "status": "ok"
+ },
+ "inkling_audio": {
+  "doc_checkpoint": "thinkingmachines/Inkling",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "inkling_mm_model": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "repo": "thinkingmachines/Inkling",
+  "revision": "828496eeae4c243ff1a22f7f28ff83694f2f7bc9",
+  "source": "hub",
+  "status": "ok"
+ },
+ "inkling_text": {
+  "doc_checkpoint": "thinkingmachines/Inkling",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "inkling_vision": {
+  "doc_checkpoint": "thinkingmachines/Inkling",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "instructblip": {
+  "doc_checkpoint": "Salesforce/instructblip-flan-t5-xl",
+  "doc_status": "ok",
+  "repo": "Salesforce/instructblip-flan-t5-xl",
+  "revision": "bf9bd58cb3bb06e88c03b80f9cc346b90094bc6d",
+  "source": "doc",
+  "status": "ok"
+ },
+ "instructblip_qformer": {
+  "doc_checkpoint": "Salesforce/instructblip-flan-t5-xl",
+  "doc_status": "ok",
+  "repo": "Salesforce/instructblip-flan-t5-xl",
+  "revision": "bf9bd58cb3bb06e88c03b80f9cc346b90094bc6d",
+  "source": "doc",
+  "status": "ok"
+ },
+ "instructblip_vision_model": {
+  "doc_checkpoint": "Salesforce/instructblip-flan-t5-xl",
+  "doc_status": "ok",
+  "repo": "Salesforce/instructblip-flan-t5-xl",
+  "revision": "bf9bd58cb3bb06e88c03b80f9cc346b90094bc6d",
+  "source": "doc",
+  "status": "ok"
+ },
+ "instructblipvideo": {
+  "doc_checkpoint": "Salesforce/instructblip-flan-t5-xl",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "instructblipvideo_qformer": {
+  "doc_checkpoint": "Salesforce/instructblip-flan-t5-xl",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "instructblipvideo_vision_model": {
+  "doc_checkpoint": "Salesforce/instructblip-flan-t5-xl",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "internvl": {
+  "doc_checkpoint": "OpenGVLab/InternVL3-1B-hf",
+  "doc_status": "ok",
+  "repo": "OpenGVLab/InternVL3-1B-hf",
+  "revision": "014c0583a0d4bedf29fbe2dbff4f865eb998e171",
+  "source": "doc",
+  "status": "ok"
+ },
+ "internvl_vision": {
+  "doc_checkpoint": "OpenGVLab/InternVL3-1B-hf",
+  "doc_status": "ok",
+  "repo": "OpenGVLab/InternVL3-1B-hf",
+  "revision": "014c0583a0d4bedf29fbe2dbff4f865eb998e171",
+  "source": "doc",
+  "status": "ok"
+ },
+ "jais2": {
+  "doc_checkpoint": "inceptionai/Jais-2-8B-Chat",
+  "doc_status": "GatedRepoError",
+  "repo": "yoriis/JAIS2-IT-0.3",
+  "revision": "f42ca1a7176a4753104daa2d137c267c81edbc15",
+  "source": "hub",
+  "status": "ok"
+ },
+ "jamba": {
+  "doc_checkpoint": "ai21labs/Jamba-v0.1",
+  "doc_status": "ok",
+  "repo": "ai21labs/Jamba-v0.1",
+  "revision": "9efd11575ba791d9e3d25d4c8b670e78506b2df7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "janus": {
+  "doc_checkpoint": "deepseek-community/Janus-Pro-1B",
+  "doc_status": "ok",
+  "repo": "deepseek-community/Janus-Pro-1B",
+  "revision": "1655280bb75959cc1cb85529a2a8b26e7016072e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "janus_vision_model": {
+  "doc_checkpoint": "deepseek-community/Janus-Pro-1B",
+  "doc_status": "ok",
+  "repo": "deepseek-community/Janus-Pro-1B",
+  "revision": "1655280bb75959cc1cb85529a2a8b26e7016072e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "janus_vqgan": {
+  "doc_checkpoint": "deepseek-community/Janus-Pro-1B",
+  "doc_status": "ok",
+  "repo": "deepseek-community/Janus-Pro-1B",
+  "revision": "1655280bb75959cc1cb85529a2a8b26e7016072e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "jetmoe": {
+  "doc_checkpoint": "jetmoe/jetmoe-8b",
+  "doc_status": "ok",
+  "repo": "jetmoe/jetmoe-8b",
+  "revision": "d8fd02ccf7911aa8148a63c7984ffd2e465b0352",
+  "source": "doc",
+  "status": "ok"
+ },
+ "jina_embeddings_v3": {
+  "doc_checkpoint": "jinaai/jina-embeddings-v3-hf",
+  "doc_status": "ok",
+  "repo": "jinaai/jina-embeddings-v3-hf",
+  "revision": "d18862d9a48706220815554fac3ebb4dfa46fc28",
+  "source": "doc",
+  "status": "ok"
+ },
+ "kimi_k25": {
+  "doc_checkpoint": "moonshotai/Kimi-K2.6",
+  "doc_status": "ok",
+  "repo": "moonshotai/Kimi-K2.6",
+  "revision": "7eb5002f6aadc958aed6a9177b7ed26bb94011bb",
+  "source": "doc",
+  "status": "ok"
+ },
+ "kimi_k25_vision": {
+  "doc_checkpoint": "moonshotai/Kimi-K2.6",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "kimi_linear": {
+  "doc_checkpoint": "moonshotai/Kimi-Linear-48B-A3B-Instruct",
+  "doc_status": "ok",
+  "repo": "moonshotai/Kimi-Linear-48B-A3B-Instruct",
+  "revision": "e1df551a447157d4658b573f9a695d57658590e9",
+  "source": "doc",
+  "status": "ok"
+ },
+ "kosmos-2": {
+  "doc_checkpoint": "microsoft/kosmos-2-patch14-224",
+  "doc_status": "ok",
+  "repo": "microsoft/kosmos-2-patch14-224",
+  "revision": "e91cfbcb4ce051b6a55bfb5f96165a3bbf5eb82c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "kosmos-2.5": {
+  "doc_checkpoint": "microsoft/kosmos-2.5",
+  "doc_status": "ok",
+  "repo": "microsoft/kosmos-2.5",
+  "revision": "ec3c8051b697166514a31d646cfa36d6ef4c93d7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "kosmos_2_5_text_model": {
+  "doc_checkpoint": "microsoft/kosmos-2.5",
+  "doc_status": "ok",
+  "repo": "microsoft/kosmos-2.5",
+  "revision": "ec3c8051b697166514a31d646cfa36d6ef4c93d7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "kosmos_2_5_vision_model": {
+  "doc_checkpoint": "microsoft/kosmos-2.5",
+  "doc_status": "ok",
+  "repo": "microsoft/kosmos-2.5",
+  "revision": "ec3c8051b697166514a31d646cfa36d6ef4c93d7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "kosmos_2_text_model": {
+  "doc_checkpoint": "microsoft/kosmos-2-patch14-224",
+  "doc_status": "ok",
+  "repo": "microsoft/kosmos-2-patch14-224",
+  "revision": "e91cfbcb4ce051b6a55bfb5f96165a3bbf5eb82c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "kosmos_2_vision_model": {
+  "doc_checkpoint": "microsoft/kosmos-2-patch14-224",
+  "doc_status": "ok",
+  "repo": "microsoft/kosmos-2-patch14-224",
+  "revision": "e91cfbcb4ce051b6a55bfb5f96165a3bbf5eb82c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "kyutai_speech_to_text": {
+  "doc_checkpoint": "kyutai/stt-2.6b-en-trfs",
+  "doc_status": "ok",
+  "repo": "kyutai/stt-2.6b-en-trfs",
+  "revision": "005de8e7800698a4c9963a5ac000e185b410c2f5",
+  "source": "doc",
+  "status": "ok"
+ },
+ "laguna": {
+  "doc_checkpoint": "poolside/laguna-XS.2",
+  "doc_status": "ok",
+  "repo": "poolside/laguna-XS.2",
+  "revision": "a397bde04501591d0ac3d74a5d9d0a4ec298ffb8",
+  "source": "doc",
+  "status": "ok"
+ },
+ "lasr_ctc": {
+  "doc_checkpoint": "google/medasr",
+  "doc_status": "GatedRepoError",
+  "repo": "samwell/medasr-ghana",
+  "revision": "94d86ad384152ea073e9a9b4d07672cdfeec26d9",
+  "source": "hub",
+  "status": "ok"
+ },
+ "lasr_encoder": {
+  "doc_checkpoint": "google/medasr",
+  "doc_status": "GatedRepoError",
+  "status": "no_checkpoint"
+ },
+ "layoutlm": {
+  "doc_checkpoint": "microsoft/layoutlm-base-uncased",
+  "doc_status": "ok",
+  "repo": "microsoft/layoutlm-base-uncased",
+  "revision": "30e3cdd39c11f09757b0fcf7598533d05052acef",
+  "source": "doc",
+  "status": "ok"
+ },
+ "layoutlmv2": {
+  "doc_checkpoint": "microsoft/layoutlmv2-base-uncased",
+  "doc_status": "ok",
+  "repo": "microsoft/layoutlmv2-base-uncased",
+  "revision": "ae6f4350c668f88ec580046e35c670df6ec616c1",
+  "source": "doc",
+  "status": "ok"
+ },
+ "layoutlmv3": {
+  "doc_checkpoint": "microsoft/layoutlmv3-base",
+  "doc_status": "ok",
+  "repo": "microsoft/layoutlmv3-base",
+  "revision": "cfbbbff0762e6aab37086fdd4739ad14fe7d5db4",
+  "source": "doc",
+  "status": "ok"
+ },
+ "layoutxlm": {
+  "doc_checkpoint": "microsoft/layoutxlm-base",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "led": {
+  "doc_checkpoint": "allenai/led-base-16384",
+  "doc_status": "ok",
+  "repo": "allenai/led-base-16384",
+  "revision": "38335783885b338d93791936c54bb4be46bebed9",
+  "source": "doc",
+  "status": "ok"
+ },
+ "levit": {
+  "doc_checkpoint": "facebook/levit-128S",
+  "doc_status": "ok",
+  "repo": "facebook/levit-128S",
+  "revision": "46576b0c1bead4e89d89eb42e0a1ad4cb236fb20",
+  "source": "doc",
+  "status": "ok"
+ },
+ "lfm2": {
+  "doc_checkpoint": "LiquidAI/LFM2-1.2B",
+  "doc_status": "ok",
+  "repo": "LiquidAI/LFM2-1.2B",
+  "revision": "40f3da0d0164913923aee9462c23077868b816a3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "lfm2_moe": {
+  "doc_checkpoint": "LiquidAI/LFM2-8B-A1B",
+  "doc_status": "ok",
+  "repo": "LiquidAI/LFM2-8B-A1B",
+  "revision": "c1c44ff9fc00db3ebf4516970563f5f383d23670",
+  "source": "doc",
+  "status": "ok"
+ },
+ "lfm2_vl": {
+  "doc_checkpoint": "LiquidAI/LFM2-VL-1.6B",
+  "doc_status": "ok",
+  "repo": "LiquidAI/LFM2-VL-1.6B",
+  "revision": "2c2e7f9b0f48a478d7d497ef1864519dfd3994cd",
+  "source": "doc",
+  "status": "ok"
+ },
+ "lightglue": {
+  "doc_checkpoint": "ETH-CVG/lightglue_superpoint",
+  "doc_status": "ok",
+  "repo": "ETH-CVG/lightglue_superpoint",
+  "revision": "5f5f626efee99f37dbc9eafea879d24d297aeab8",
+  "source": "doc",
+  "status": "ok"
+ },
+ "lighton_ocr": {
+  "doc_checkpoint": "lightonai/LightOnOCR-1B-1025",
+  "doc_status": "wrong_model_type",
+  "repo": "Remidesbois/LightonOCR-2-1b-poneglyph-bbox",
+  "revision": "fb35b7f4f99b282d5c2867d5cf23e66df0d03925",
+  "source": "hub",
+  "status": "ok"
+ },
+ "lilt": {
+  "doc_checkpoint": "SCUT-DLVCLab/lilt-roberta-en-base",
+  "doc_status": "ok",
+  "repo": "SCUT-DLVCLab/lilt-roberta-en-base",
+  "revision": "96328faae824978e47bd0e8ea09f66b85efda5f5",
+  "source": "doc",
+  "status": "ok"
+ },
+ "llama": {
+  "doc_checkpoint": "meta-llama/Llama-2-7b-hf",
+  "doc_status": "ok",
+  "repo": "meta-llama/Llama-2-7b-hf",
+  "revision": "01c7f73d771dfac7d292323805ebc428287df4f9",
+  "source": "doc",
+  "status": "ok"
+ },
+ "llama4": {
+  "doc_checkpoint": "meta-llama/Llama-4-Scout-17B-16E",
+  "doc_status": "GatedRepoError",
+  "repo": "unsloth/Llama-4-Scout-17B-16E-Instruct-GGUF",
+  "revision": "72a6853f56a66dc13a3a4b6bdc9cf7ee4c364b47",
+  "source": "hub",
+  "status": "ok"
+ },
+ "llama4_text": {
+  "doc_checkpoint": "meta-llama/Llama-4-Scout-17B-16E",
+  "doc_status": "GatedRepoError",
+  "repo": "trl-internal-testing/tiny-Llama4ForCausalLM",
+  "revision": "7e26be57fb240ba4b7d388ad120e820ce96f1be5",
+  "source": "hub",
+  "status": "ok"
+ },
+ "llama4_vision_model": {
+  "doc_checkpoint": "meta-llama/Llama-4-Scout-17B-16E",
+  "doc_status": "GatedRepoError",
+  "status": "no_checkpoint"
+ },
+ "llava": {
+  "doc_checkpoint": "llava-hf/llava-1.5-7b-hf",
+  "doc_status": "ok",
+  "repo": "llava-hf/llava-1.5-7b-hf",
+  "revision": "b234b804b114d9e37bb655e11cbbb5f5e971b7a9",
+  "source": "doc",
+  "status": "ok"
+ },
+ "llava_next": {
+  "doc_checkpoint": "llava-hf/llava-v1.6-mistral-7b-hf",
+  "doc_status": "ok",
+  "repo": "llava-hf/llava-v1.6-mistral-7b-hf",
+  "revision": "2424fdd47412fccc66d91719126b420e9fbd7065",
+  "source": "doc",
+  "status": "ok"
+ },
+ "llava_next_video": {
+  "doc_checkpoint": "llava-hf/LLaVA-NeXT-Video-7B-hf",
+  "doc_status": "ok",
+  "repo": "llava-hf/LLaVA-NeXT-Video-7B-hf",
+  "revision": "f417d9edeb69a9eaa88283780332d00ce3c66593",
+  "source": "doc",
+  "status": "ok"
+ },
+ "llava_onevision": {
+  "doc_checkpoint": "llava-hf/llava-onevision-qwen2-7b-ov-hf",
+  "doc_status": "ok",
+  "repo": "llava-hf/llava-onevision-qwen2-7b-ov-hf",
+  "revision": "0d50680527681998e456c7b78950205bedd8a068",
+  "source": "doc",
+  "status": "ok"
+ },
+ "longcat_flash": {
+  "doc_checkpoint": "meituan-longcat/LongCat-Flash-Chat",
+  "doc_status": "wrong_model_type",
+  "repo": "mlx-community/LongCat-Flash-Chat-bf16",
+  "revision": "15a4861b928c106ea9cbb501d2d6ffad92221e91",
+  "source": "hub",
+  "status": "ok"
+ },
+ "longformer": {
+  "doc_checkpoint": "allenai/longformer-base-4096",
+  "doc_status": "ok",
+  "repo": "allenai/longformer-base-4096",
+  "revision": "301e6a42cb0d9976a6d6a26a079fef81c18aa895",
+  "source": "doc",
+  "status": "ok"
+ },
+ "longt5": {
+  "doc_checkpoint": "google/long-t5-local-base",
+  "doc_status": "ok",
+  "repo": "google/long-t5-local-base",
+  "revision": "495147576566a61d910384ed880fcefa6ec40b49",
+  "source": "doc",
+  "status": "ok"
+ },
+ "luke": {
+  "doc_checkpoint": "studio-ousia/luke-base",
+  "doc_status": "ok",
+  "repo": "studio-ousia/luke-base",
+  "revision": "7438924defd9f3c2018d63c16073bf4bcb6a70aa",
+  "source": "doc",
+  "status": "ok"
+ },
+ "lw_detr": {
+  "doc_checkpoint": "AnnaZhang/lwdetr_small_60e_coco",
+  "doc_status": "ok",
+  "repo": "AnnaZhang/lwdetr_small_60e_coco",
+  "revision": "deebf67dc6e174fe3f4c83d7d5f9ea7eaa651197",
+  "source": "doc",
+  "status": "ok"
+ },
+ "lw_detr_vit": {
+  "doc_checkpoint": "AnnaZhang/lwdetr_small_60e_coco",
+  "doc_status": "ok",
+  "repo": "AnnaZhang/lwdetr_small_60e_coco",
+  "revision": "deebf67dc6e174fe3f4c83d7d5f9ea7eaa651197",
+  "source": "doc",
+  "status": "ok"
+ },
+ "lxmert": {
+  "doc_checkpoint": "unc-nlp/lxmert-base-uncased",
+  "doc_status": "ok",
+  "repo": "unc-nlp/lxmert-base-uncased",
+  "revision": "628572c96242d1496147beec1c13a1bb7869605d",
+  "source": "doc",
+  "status": "ok"
+ },
+ "m2m_100": {
+  "doc_checkpoint": "facebook/m2m100_418M",
+  "doc_status": "ok",
+  "repo": "facebook/m2m100_418M",
+  "revision": "55c2e61bbf05dfb8d7abccdc3fae6fc8512fd636",
+  "source": "doc",
+  "status": "ok"
+ },
+ "mamba": {
+  "doc_checkpoint": "state-spaces/mamba-2.8b",
+  "doc_status": "wrong_model_type",
+  "repo": "state-spaces/mamba-130m-hf",
+  "revision": "1e76775f628fbf1350fbe4dbb3d971ba64af25a1",
+  "source": "hub",
+  "status": "ok"
+ },
+ "mamba2": {
+  "doc_checkpoint": "state-spaces/mamba2-2.8b",
+  "doc_status": "RepositoryNotFoundError",
+  "repo": "AntonV/mamba2-130m-hf",
+  "revision": "05e8773fc4ac1cd067e8a18a5c45372ce5178405",
+  "source": "hub",
+  "status": "ok"
+ },
+ "marian": {
+  "doc_checkpoint": "Helsinki-NLP/opus-mt-en-de",
+  "doc_status": "ok",
+  "repo": "Helsinki-NLP/opus-mt-en-de",
+  "revision": "6183067f769a302e3861815543b9f312c71b0ca4",
+  "source": "doc",
+  "status": "ok"
+ },
+ "markuplm": {
+  "doc_checkpoint": "microsoft/markuplm-base",
+  "doc_status": "ok",
+  "repo": "microsoft/markuplm-base",
+  "revision": "7b1ef356189e6803bd5b58b305c783fd1d395ae6",
+  "source": "doc",
+  "status": "ok"
+ },
+ "mask2former": {
+  "doc_checkpoint": "facebook/mask2former-swin-small-coco-instance",
+  "doc_status": "ok",
+  "repo": "facebook/mask2former-swin-small-coco-instance",
+  "revision": "1b7ac418a0f3cb5edfc5037e488d53587b8bb76b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "maskformer": {
+  "doc_checkpoint": "facebook/maskformer-swin-base-ade",
+  "doc_status": "ok",
+  "repo": "facebook/maskformer-swin-base-ade",
+  "revision": "b569351e060953d37fd7dfb8b16ab83c360a13d6",
+  "source": "doc",
+  "status": "ok"
+ },
+ "maskformer-swin": {
+  "doc_checkpoint": "microsoft/swin-tiny-patch4-window7-224",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "mbart": {
+  "doc_checkpoint": "facebook/mbart-large-cc25",
+  "doc_status": "ok",
+  "repo": "facebook/mbart-large-cc25",
+  "revision": "f417e5563320b2cc8aabe4329d986b238809067f",
+  "source": "doc",
+  "status": "ok"
+ },
+ "megatron-bert": {
+  "doc_checkpoint": "nvidia/megatron-bert-uncased-345m",
+  "doc_status": "RemoteEntryNotFoundError",
+  "repo": "hf-internal-testing/tiny-random-MegatronBertModel",
+  "revision": "f2457fbe535ba97ea13db049f53618b42e13f047",
+  "source": "hub",
+  "status": "ok"
+ },
+ "mellum": {
+  "doc_checkpoint": "JetBrains/Mellum2-12B-A2.5B-Base",
+  "doc_status": "ok",
+  "repo": "JetBrains/Mellum2-12B-A2.5B-Base",
+  "revision": "271755e48ab6b2ed0ef224eaaabe2d25275fb8ee",
+  "source": "doc",
+  "status": "ok"
+ },
+ "metaclip_2": {
+  "doc_checkpoint": "facebook/metaclip-2-worldwide-huge-quickgelu",
+  "doc_status": "ok",
+  "repo": "facebook/metaclip-2-worldwide-huge-quickgelu",
+  "revision": "c139061af7b10fdb2e754b60d2b1182a3d5526c2",
+  "source": "doc",
+  "status": "ok"
+ },
+ "metaclip_2_text_model": {
+  "doc_checkpoint": "facebook/metaclip-2-worldwide-huge-quickgelu",
+  "doc_status": "ok",
+  "repo": "facebook/metaclip-2-worldwide-huge-quickgelu",
+  "revision": "c139061af7b10fdb2e754b60d2b1182a3d5526c2",
+  "source": "doc",
+  "status": "ok"
+ },
+ "metaclip_2_vision_model": {
+  "doc_checkpoint": "facebook/metaclip-2-worldwide-huge-quickgelu",
+  "doc_status": "ok",
+  "repo": "facebook/metaclip-2-worldwide-huge-quickgelu",
+  "revision": "c139061af7b10fdb2e754b60d2b1182a3d5526c2",
+  "source": "doc",
+  "status": "ok"
+ },
+ "mgp-str": {
+  "doc_checkpoint": "alibaba-damo/mgp-str-base",
+  "doc_status": "ok",
+  "repo": "alibaba-damo/mgp-str-base",
+  "revision": "5d06493b6b2a8c4c023d2c030175c03be30f4202",
+  "source": "doc",
+  "status": "ok"
+ },
+ "mimi": {
+  "doc_checkpoint": "kyutai/mimi",
+  "doc_status": "ok",
+  "repo": "kyutai/mimi",
+  "revision": "89091b3e466eb6a9d11e537bf26b144f194978f7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "mimo_v2_flash": {
+  "doc_checkpoint": "XiaomiMiMo/MiMo-V2-Flash",
+  "doc_status": "ok",
+  "repo": "XiaomiMiMo/MiMo-V2-Flash",
+  "revision": "1afd314a2406c282e0956375c34a676501c78649",
+  "source": "doc",
+  "status": "ok"
+ },
+ "minicpm3": {
+  "doc_checkpoint": "openbmb/MiniCPM3-4B",
+  "doc_status": "ok",
+  "repo": "openbmb/MiniCPM3-4B",
+  "revision": "d6b14ddaefdb11c624dd75c3c779549bc90b08cb",
+  "source": "doc",
+  "status": "ok"
+ },
+ "minicpmv4_6": {
+  "doc_checkpoint": "openbmb/MiniCPM-V-4.6",
+  "doc_status": "ok",
+  "repo": "openbmb/MiniCPM-V-4.6",
+  "revision": "36f34a661a4bd35d0dc2294cb044d2584646c7d3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "minicpmv4_6_vision": {
+  "doc_checkpoint": "openbmb/MiniCPM-V-4.6",
+  "doc_status": "ok",
+  "repo": "openbmb/MiniCPM-V-4.6",
+  "revision": "36f34a661a4bd35d0dc2294cb044d2584646c7d3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "minicpmv4_7": {
+  "doc_checkpoint": "openbmb/MiniCPM-V-4.7",
+  "doc_status": "RepositoryNotFoundError",
+  "status": "no_checkpoint"
+ },
+ "minicpmv4_7_vision": {
+  "doc_checkpoint": "openbmb/MiniCPM-V-4.7",
+  "doc_status": "RepositoryNotFoundError",
+  "status": "no_checkpoint"
+ },
+ "minimax": {
+  "doc_checkpoint": "MiniMaxAI/MiniMax-Text-01-hf",
+  "doc_status": "ok",
+  "repo": "MiniMaxAI/MiniMax-Text-01-hf",
+  "revision": "f7ce01366e8585a8948f19aedc8e20628c6965e5",
+  "source": "doc",
+  "status": "ok"
+ },
+ "minimax_m2": {
+  "doc_checkpoint": "MiniMaxAI/MiniMax-Text-01-hf",
+  "doc_status": "wrong_model_type",
+  "repo": "MiniMaxAI/MiniMax-M2.7",
+  "revision": "d494266a4affc0d2995ba1fa35c8481cbd84294b",
+  "source": "hub",
+  "status": "ok"
+ },
+ "minimax_m3_vl": {
+  "doc_checkpoint": "MiniMaxAI/MiniMax-M3",
+  "doc_status": "ok",
+  "repo": "MiniMaxAI/MiniMax-M3",
+  "revision": "f0e1c1e04d40177e4673a22097036854f536e9c0",
+  "source": "doc",
+  "status": "ok"
+ },
+ "minimax_m3_vl_text": {
+  "doc_checkpoint": "MiniMaxAI/MiniMax-M3",
+  "doc_status": "wrong_model_type",
+  "repo": "ProprietaryLegal/minimax-m3-legal-reap-0.22",
+  "revision": "70875668d2e48b87feda5012ce2f48eca732c551",
+  "source": "hub",
+  "status": "ok"
+ },
+ "minimax_m3_vl_vision": {
+  "doc_checkpoint": "MiniMaxAI/MiniMax-M3",
+  "doc_status": "wrong_model_type",
+  "repo": "immanuelpeter/MiniMax-M3-Vision",
+  "revision": "accba699384384f1ee20b58558f4cd0b4a7c6a59",
+  "source": "hub",
+  "status": "ok"
+ },
+ "ministral": {
+  "doc_checkpoint": "mistralai/Ministral-8B-Instruct-2410",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "ministral3": {
+  "doc_checkpoint": "mistralai/Ministral-3-8B-Base-2512",
+  "doc_status": "ok",
+  "repo": "mistralai/Ministral-3-8B-Base-2512",
+  "revision": "d4883f9b36aa2e5d775730d3fdba3d30de51a8ef",
+  "source": "doc",
+  "status": "ok"
+ },
+ "mistral": {
+  "doc_checkpoint": "mistralai/Mistral-7B-v0.1",
+  "doc_status": "ok",
+  "repo": "mistralai/Mistral-7B-v0.1",
+  "revision": "27d67f1b5f57dc0953326b2601d68371d40ea8da",
+  "source": "doc",
+  "status": "ok"
+ },
+ "mistral3": {
+  "doc_checkpoint": "mistralai/Mistral-Small-3.1-24B-Instruct-2503",
+  "doc_status": "ok",
+  "repo": "mistralai/Mistral-Small-3.1-24B-Instruct-2503",
+  "revision": "68faf511d618ef198fef186659617cfd2eb8e33a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "mistral4": {
+  "doc_checkpoint": "mistralai/Mistral-Small-4-119B-2603",
+  "doc_status": "ok",
+  "repo": "mistralai/Mistral-Small-4-119B-2603",
+  "revision": "a11f36bebf709121056b1dbcc943d1c6afbe494d",
+  "source": "doc",
+  "status": "ok"
+ },
+ "mixtral": {
+  "doc_checkpoint": "mistralai/Mixtral-8x7B-v0.1",
+  "doc_status": "ok",
+  "repo": "mistralai/Mixtral-8x7B-v0.1",
+  "revision": "fc7ac94680e38d7348cfa806e51218e6273104b0",
+  "source": "doc",
+  "status": "ok"
+ },
+ "mlcd": {
+  "doc_checkpoint": "DeepGlint-AI/mlcd-vit-bigG-patch14-336",
+  "doc_status": "ok",
+  "repo": "DeepGlint-AI/mlcd-vit-bigG-patch14-336",
+  "revision": "2ddb78b3b2e5c578aa9afbe1821d11ae3719d749",
+  "source": "doc",
+  "status": "ok"
+ },
+ "mlcd_vision_model": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "status": "no_checkpoint"
+ },
+ "mllama": {
+  "doc_checkpoint": "meta-llama/Llama-3.2-11B-Vision",
+  "doc_status": "GatedRepoError",
+  "repo": "unsloth/Llama-3.2-11B-Vision-Instruct",
+  "revision": "677b0c1b7008230a0fb88708c5550748e72b9a83",
+  "source": "hub",
+  "status": "ok"
+ },
+ "mllama_text_model": {
+  "doc_checkpoint": "meta-llama/Llama-3.2-11B-Vision",
+  "doc_status": "GatedRepoError",
+  "repo": "karthikeyan-r/fine-tuned-llama-vision",
+  "revision": "7eebf1765c51c0e9b22ab6761fed19fa1dd03ece",
+  "source": "hub",
+  "status": "ok"
+ },
+ "mllama_vision_model": {
+  "doc_checkpoint": "meta-llama/Llama-3.2-11B-Vision",
+  "doc_status": "GatedRepoError",
+  "repo": "cminst/Llama-3.2-11B-VisionEncoder",
+  "revision": "621808b242189989ae6970cf4ac4f3307a157bb1",
+  "source": "hub",
+  "status": "ok"
+ },
+ "mm-grounding-dino": {
+  "doc_checkpoint": "openmmlab-community/mm_grounding_dino_tiny_o365v1_goldg_v3det",
+  "doc_status": "ok",
+  "repo": "openmmlab-community/mm_grounding_dino_tiny_o365v1_goldg_v3det",
+  "revision": "ef2053aa1e0cc9d9cee1df31ca919ee9aae4fc8e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "mobilebert": {
+  "doc_checkpoint": "google/mobilebert-uncased",
+  "doc_status": "ok",
+  "repo": "google/mobilebert-uncased",
+  "revision": "1f90a6c24c7879273a291d34a849033eba2dbc0f",
+  "source": "doc",
+  "status": "ok"
+ },
+ "mobilenet_v1": {
+  "doc_checkpoint": "google/mobilenet_v1_1.0_224",
+  "doc_status": "ok",
+  "repo": "google/mobilenet_v1_1.0_224",
+  "revision": "82c74e899e053f9ac5820a574f987d14f8230f10",
+  "source": "doc",
+  "status": "ok"
+ },
+ "mobilenet_v2": {
+  "doc_checkpoint": "google/mobilenet_v2_1.0_224",
+  "doc_status": "ok",
+  "repo": "google/mobilenet_v2_1.0_224",
+  "revision": "75e607b00aeae1297cc89d026a118bce012f5c5a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "mobilevit": {
+  "doc_checkpoint": "google/mobilenet_v2_1.0_224",
+  "doc_status": "wrong_model_type",
+  "repo": "apple/mobilevit-xx-small",
+  "revision": "6703997f9e940e312a04b8b7c26463d631c0d1f8",
+  "source": "hub",
+  "status": "ok"
+ },
+ "mobilevitv2": {
+  "doc_checkpoint": "apple/mobilevitv2-1.0",
+  "doc_status": "RepositoryNotFoundError",
+  "repo": "apple/mobilevitv2-1.0-imagenet1k-256",
+  "revision": "fe97dbe6d3334921e8ca1a8644c27d8ae4e44f76",
+  "source": "hub",
+  "status": "ok"
+ },
+ "modernbert": {
+  "doc_checkpoint": "answerdotai/ModernBERT-base",
+  "doc_status": "ok",
+  "repo": "answerdotai/ModernBERT-base",
+  "revision": "8949b909ec900327062f0ebf497f51aef5e6f0c8",
+  "source": "doc",
+  "status": "ok"
+ },
+ "modernbert-decoder": {
+  "doc_checkpoint": "blab-jhu/test-32m-dec",
+  "doc_status": "ok",
+  "repo": "blab-jhu/test-32m-dec",
+  "revision": "cad16cec272968e717fef59dee34fc33473bf731",
+  "source": "doc",
+  "status": "ok"
+ },
+ "modernvbert": {
+  "doc_checkpoint": "ModernVBERT/modernvbert",
+  "doc_status": "ok",
+  "repo": "ModernVBERT/modernvbert",
+  "revision": "1d1bece9df23cb109642f3ee5d1ceb331a3d1ee5",
+  "source": "doc",
+  "status": "ok"
+ },
+ "moonshine": {
+  "doc_checkpoint": "UsefulSensors/moonshine-tiny",
+  "doc_status": "ok",
+  "repo": "UsefulSensors/moonshine-tiny",
+  "revision": "390624ed33d594443aa4aa221f5b9f283b545b5a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "moonshine_streaming": {
+  "doc_checkpoint": "UsefulSensors/moonshine-streaming-tiny",
+  "doc_status": "ok",
+  "repo": "UsefulSensors/moonshine-streaming-tiny",
+  "revision": "f8e9dfd8c562c257c151a907b7b7f2fe8ff8511a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "moonshine_streaming_encoder": {
+  "doc_checkpoint": "UsefulSensors/moonshine-streaming-tiny",
+  "doc_status": "ok",
+  "repo": "UsefulSensors/moonshine-streaming-tiny",
+  "revision": "f8e9dfd8c562c257c151a907b7b7f2fe8ff8511a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "moshi": {
+  "doc_checkpoint": "kmhf/hf-moshiko",
+  "doc_status": "ok",
+  "repo": "kmhf/hf-moshiko",
+  "revision": "06e3abeb0efb7452a21736d39dcde39411c09982",
+  "source": "doc",
+  "status": "ok"
+ },
+ "moshi_depth": {
+  "doc_checkpoint": "kmhf/hf-moshiko",
+  "doc_status": "ok",
+  "repo": "kmhf/hf-moshiko",
+  "revision": "06e3abeb0efb7452a21736d39dcde39411c09982",
+  "source": "doc",
+  "status": "ok"
+ },
+ "mpnet": {
+  "doc_checkpoint": "microsoft/mpnet-base",
+  "doc_status": "ok",
+  "repo": "microsoft/mpnet-base",
+  "revision": "6996ce1e91bd2a9c7d7f61daec37463394f73f09",
+  "source": "doc",
+  "status": "ok"
+ },
+ "mpt": {
+  "doc_checkpoint": "mosaicml/mpt-7b",
+  "doc_status": "RepositoryNotFoundError",
+  "repo": "hf-internal-testing/tiny-random-MptForCausalLM",
+  "revision": "e6d6c42cfa2c3da83ede6b55fbf8994ee471a19e",
+  "source": "hub",
+  "status": "ok"
+ },
+ "mra": {
+  "doc_checkpoint": "uw-madison/mra-base-512-4",
+  "doc_status": "ok",
+  "repo": "uw-madison/mra-base-512-4",
+  "revision": "48d9b4b087bff439ab901301ca3325799b8d8423",
+  "source": "doc",
+  "status": "ok"
+ },
+ "mt5": {
+  "doc_checkpoint": "google/mt5-small",
+  "doc_status": "ok",
+  "repo": "google/mt5-small",
+  "revision": "73fb5dbe4756edadc8fbe8c769b0a109493acf7a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "muse_glimmer": {
+  "doc_checkpoint": "meta-models/Muse-Glimmer-30B",
+  "doc_status": "ok",
+  "repo": "meta-models/Muse-Glimmer-30B",
+  "revision": "a4e59da52a7bc87ae7251dd5545c0dd437c44b68",
+  "source": "doc",
+  "status": "ok"
+ },
+ "muse_glimmer_assistant": {
+  "doc_checkpoint": "meta-models/Muse-Glimmer-30B-assistant",
+  "doc_status": "ok",
+  "repo": "meta-models/Muse-Glimmer-30B-assistant",
+  "revision": "e8192f3a8f617f74be2ce220360c89ef4789f39f",
+  "source": "doc",
+  "status": "ok"
+ },
+ "muse_glimmer_text": {
+  "doc_checkpoint": "meta-models/Muse-Glimmer-30B",
+  "doc_status": "ok",
+  "repo": "meta-models/Muse-Glimmer-30B",
+  "revision": "a4e59da52a7bc87ae7251dd5545c0dd437c44b68",
+  "source": "doc",
+  "status": "ok"
+ },
+ "muse_glimmer_vision": {
+  "doc_checkpoint": "meta-models/Muse-Glimmer-30B",
+  "doc_status": "ok",
+  "repo": "meta-models/Muse-Glimmer-30B",
+  "revision": "a4e59da52a7bc87ae7251dd5545c0dd437c44b68",
+  "source": "doc",
+  "status": "ok"
+ },
+ "musicflamingo": {
+  "doc_checkpoint": "nvidia/music-flamingo-2601-hf",
+  "doc_status": "ok",
+  "repo": "nvidia/music-flamingo-2601-hf",
+  "revision": "6b5be086d52f65a1e204cb0faf70bf54e2741ecd",
+  "source": "doc",
+  "status": "ok"
+ },
+ "musicgen": {
+  "doc_checkpoint": "facebook/musicgen-small",
+  "doc_status": "ok",
+  "repo": "facebook/musicgen-small",
+  "revision": "4c8334b02c6ec4e8664a91979669a501ec497792",
+  "source": "doc",
+  "status": "ok"
+ },
+ "musicgen_decoder": {
+  "doc_checkpoint": "facebook/musicgen-small",
+  "doc_status": "ok",
+  "repo": "facebook/musicgen-small",
+  "revision": "4c8334b02c6ec4e8664a91979669a501ec497792",
+  "source": "doc",
+  "status": "ok"
+ },
+ "musicgen_melody": {
+  "doc_checkpoint": "facebook/musicgen-melody",
+  "doc_status": "ok",
+  "repo": "facebook/musicgen-melody",
+  "revision": "68d653a95788ec0d2b0abccab22c0b3a200c2d90",
+  "source": "doc",
+  "status": "ok"
+ },
+ "musicgen_melody_decoder": {
+  "doc_checkpoint": "facebook/musicgen-melody",
+  "doc_status": "ok",
+  "repo": "facebook/musicgen-melody",
+  "revision": "68d653a95788ec0d2b0abccab22c0b3a200c2d90",
+  "source": "doc",
+  "status": "ok"
+ },
+ "mvp": {
+  "doc_checkpoint": "RUCAIBox/mvp",
+  "doc_status": "ok",
+  "repo": "RUCAIBox/mvp",
+  "revision": "c1d9aeb879f3079101f716f1f6e7109fdd18b4e9",
+  "source": "doc",
+  "status": "ok"
+ },
+ "nanochat": {
+  "doc_checkpoint": "karpathy/nanochat-d32",
+  "doc_status": "RemoteEntryNotFoundError",
+  "repo": "l0ulan/chinese-babylm-nanochat-d22-step10000",
+  "revision": "7945c2a48ea4b4555509616b6942116782ef6295",
+  "source": "hub",
+  "status": "ok"
+ },
+ "nemotron": {
+  "doc_checkpoint": "thhaus/nemotron3-8b",
+  "doc_status": "ok",
+  "repo": "thhaus/nemotron3-8b",
+  "revision": "0a670790a5876b5afcd232b73ec2a177365d04b1",
+  "source": "doc",
+  "status": "ok"
+ },
+ "nemotron3_5_asr": {
+  "doc_checkpoint": "nvidia/nemotron-3.5-asr-streaming-0.6b",
+  "doc_status": "ok",
+  "repo": "nvidia/nemotron-3.5-asr-streaming-0.6b",
+  "revision": "ea30d66debe3740a08b573244286791d423d6b3e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "nemotron3_diarization": {
+  "doc_checkpoint": "nvidia/Nemotron-3-Diarization",
+  "doc_status": "ok",
+  "repo": "nvidia/Nemotron-3-Diarization",
+  "revision": "f667ed73aee57d40cc39428eb768b4fd87a0a29e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "nemotron3_diarization_audio": {
+  "doc_checkpoint": "nvidia/Nemotron-3-Diarization",
+  "doc_status": "ok",
+  "repo": "nvidia/Nemotron-3-Diarization",
+  "revision": "f667ed73aee57d40cc39428eb768b4fd87a0a29e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "nemotron_asr_streaming": {
+  "doc_checkpoint": "nvidia/nemotron-speech-streaming-en-0.6b",
+  "doc_status": "ok",
+  "repo": "nvidia/nemotron-speech-streaming-en-0.6b",
+  "revision": "ebe59e5a817142986528bbbee5dba8db7b38ed50",
+  "source": "doc",
+  "status": "ok"
+ },
+ "nemotron_asr_streaming_encoder": {
+  "doc_checkpoint": "nvidia/nemotron-speech-streaming-en-0.6b",
+  "doc_status": "ok",
+  "repo": "nvidia/nemotron-speech-streaming-en-0.6b",
+  "revision": "ebe59e5a817142986528bbbee5dba8db7b38ed50",
+  "source": "doc",
+  "status": "ok"
+ },
+ "nemotron_h": {
+  "doc_checkpoint": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16",
+  "doc_status": "ok",
+  "repo": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-BF16",
+  "revision": "bf77c3174f68ad409e1c2aa60daeb46e32d1c606",
+  "source": "doc",
+  "status": "ok"
+ },
+ "nemotron_h_omni": {
+  "doc_checkpoint": "nvidia/Nemotron-3-Nano-Omni-30B-A3B-Reasoning-BF16",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "neomme": {
+  "doc_checkpoint": "Hcompany/NeoMME-260M",
+  "doc_status": "ok",
+  "repo": "Hcompany/NeoMME-260M",
+  "revision": "5ba79fb246e23776d2c2fcead975eae2775ed94b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "neucodec": {
+  "doc_checkpoint": "neuphonic/neucodec",
+  "doc_status": "GatedRepoError",
+  "repo": "bezzam/neucodec-hf",
+  "revision": "11873db8f834e8dc5b132d64b421fc4890ec45fe",
+  "source": "hub",
+  "status": "ok"
+ },
+ "nllb-moe": {
+  "doc_checkpoint": "facebook/nllb-moe-54b",
+  "doc_status": "ok",
+  "repo": "facebook/nllb-moe-54b",
+  "revision": "5a753becf6f2aec7393f2df9defa511d96a4e8ec",
+  "source": "doc",
+  "status": "ok"
+ },
+ "nomic_bert": {
+  "doc_checkpoint": "nomic-ai/nomic-embed-text-v1.5",
+  "doc_status": "ok",
+  "repo": "nomic-ai/nomic-embed-text-v1.5",
+  "revision": "e9b6763023c676ca8431644204f50c2b100d9aab",
+  "source": "doc",
+  "status": "ok"
+ },
+ "nougat": {
+  "doc_checkpoint": "facebook/nougat-base",
+  "doc_status": "wrong_model_type",
+  "repo": "zphilip48/nougat-middle-cn",
+  "revision": "e83c63fad272bc1636881c42b4f7bcc02d128e8a",
+  "source": "hub",
+  "status": "ok"
+ },
+ "nystromformer": {
+  "doc_checkpoint": "uw-madison/nystromformer-512",
+  "doc_status": "ok",
+  "repo": "uw-madison/nystromformer-512",
+  "revision": "405ccb83538dd58b90104d20af1a08d901c103cd",
+  "source": "doc",
+  "status": "ok"
+ },
+ "olmo": {
+  "doc_checkpoint": "allenai/OLMo-7B-hf",
+  "doc_status": "ok",
+  "repo": "allenai/OLMo-7B-hf",
+  "revision": "11fb3186a2e4f681edea621fa8b4345147a9db6a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "olmo2": {
+  "doc_checkpoint": "allenai/OLMo-2-1124-7B",
+  "doc_status": "ok",
+  "repo": "allenai/OLMo-2-1124-7B",
+  "revision": "7df9a82518afdecae4e8c026b27adccc8c1f0032",
+  "source": "doc",
+  "status": "ok"
+ },
+ "olmo3": {
+  "doc_checkpoint": "allenai/Olmo-3-7B-Instruct",
+  "doc_status": "ok",
+  "repo": "allenai/Olmo-3-7B-Instruct",
+  "revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc",
+  "source": "doc",
+  "status": "ok"
+ },
+ "olmo_hybrid": {
+  "doc_checkpoint": "allenai/Olmo-Hybrid-7B",
+  "doc_status": "ok",
+  "repo": "allenai/Olmo-Hybrid-7B",
+  "revision": "4f1cc566f9fdf3ce68da2ab6a788a83d89896dcf",
+  "source": "doc",
+  "status": "ok"
+ },
+ "olmoe": {
+  "doc_checkpoint": "allenai/OLMoE-1B-7B-0924",
+  "doc_status": "ok",
+  "repo": "allenai/OLMoE-1B-7B-0924",
+  "revision": "6d84c48581ece794365f2b8e9cfb043c68ade9c5",
+  "source": "doc",
+  "status": "ok"
+ },
+ "omdet-turbo": {
+  "doc_checkpoint": "omlab/omdet-turbo-swin-tiny-hf",
+  "doc_status": "ok",
+  "repo": "omlab/omdet-turbo-swin-tiny-hf",
+  "revision": "7fe93cecfb770c4d76cf71163956221249cab566",
+  "source": "doc",
+  "status": "ok"
+ },
+ "oneformer": {
+  "doc_checkpoint": "shi-labs/oneformer_ade20k_swin_tiny",
+  "doc_status": "ok",
+  "repo": "shi-labs/oneformer_ade20k_swin_tiny",
+  "revision": "05f2812b1eccf9909b3897777450f8d68148cafc",
+  "source": "doc",
+  "status": "ok"
+ },
+ "openai-gpt": {
+  "doc_checkpoint": "openai-community/openai-gpt",
+  "doc_status": "ok",
+  "repo": "openai-community/openai-gpt",
+  "revision": "1e0d4f3028acbffb47fe933cea64619c5ec1a002",
+  "source": "doc",
+  "status": "ok"
+ },
+ "openai_privacy_filter": {
+  "doc_checkpoint": "openai/privacy-filter",
+  "doc_status": "ok",
+  "repo": "openai/privacy-filter",
+  "revision": "7ffa9a043d54d1be65afb281eddf0ffbe629385b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "opt": {
+  "doc_checkpoint": "facebook/opt-350m",
+  "doc_status": "ok",
+  "repo": "facebook/opt-350m",
+  "revision": "08ab08cc4b72ff5593870b5d527cf4230323703c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "ovis2": {
+  "doc_checkpoint": "thisisiron/Ovis2-1B-hf",
+  "doc_status": "ok",
+  "repo": "thisisiron/Ovis2-1B-hf",
+  "revision": "9d91fce00dd32ac9bc5b53bc93c5d4ef804e0c8b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "owlv2": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "repo": "google/owlv2-base-patch16-ensemble",
+  "revision": "cfd3195ba4ea9592eec887ded089f4c08eff231d",
+  "source": "hub",
+  "status": "ok"
+ },
+ "owlv2_text_model": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "status": "no_checkpoint"
+ },
+ "owlv2_vision_model": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "status": "no_checkpoint"
+ },
+ "owlvit": {
+  "doc_checkpoint": "google/owlvit-base-patch16",
+  "doc_status": "ok",
+  "repo": "google/owlvit-base-patch16",
+  "revision": "4b420debb9c806fc4caf9ecc8efb72208c0db892",
+  "source": "doc",
+  "status": "ok"
+ },
+ "owlvit_text_model": {
+  "doc_checkpoint": "google/owlvit-base-patch16",
+  "doc_status": "ok",
+  "repo": "google/owlvit-base-patch16",
+  "revision": "4b420debb9c806fc4caf9ecc8efb72208c0db892",
+  "source": "doc",
+  "status": "ok"
+ },
+ "owlvit_vision_model": {
+  "doc_checkpoint": "google/owlvit-base-patch16",
+  "doc_status": "ok",
+  "repo": "google/owlvit-base-patch16",
+  "revision": "4b420debb9c806fc4caf9ecc8efb72208c0db892",
+  "source": "doc",
+  "status": "ok"
+ },
+ "paddleocr_vl": {
+  "doc_checkpoint": "PaddlePaddle/PaddleOCR-VL",
+  "doc_status": "ok",
+  "repo": "PaddlePaddle/PaddleOCR-VL",
+  "revision": "7fa00a8c55b735ba51ba49a9058f3f9c57a99a11",
+  "source": "doc",
+  "status": "ok"
+ },
+ "paddleocr_vl_text": {
+  "doc_checkpoint": "PaddlePaddle/PaddleOCR-VL",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "paddleocr_vl_vision": {
+  "doc_checkpoint": "PaddlePaddle/PaddleOCR-VL",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "paligemma": {
+  "doc_checkpoint": "google/paligemma-3b-pt-224",
+  "doc_status": "ok",
+  "repo": "google/paligemma-3b-pt-224",
+  "revision": "35e4f46485b4d07967e7e9935bc3786aad50687c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "parakeet_ctc": {
+  "doc_checkpoint": "nvidia/parakeet-ctc-1.1b",
+  "doc_status": "ok",
+  "repo": "nvidia/parakeet-ctc-1.1b",
+  "revision": "20e63a0fed6aedba145b74b826dbd41df0941730",
+  "source": "doc",
+  "status": "ok"
+ },
+ "parakeet_encoder": {
+  "doc_checkpoint": "nvidia/parakeet-ctc-1.1b",
+  "doc_status": "ok",
+  "repo": "nvidia/parakeet-ctc-1.1b",
+  "revision": "20e63a0fed6aedba145b74b826dbd41df0941730",
+  "source": "doc",
+  "status": "ok"
+ },
+ "parakeet_rnnt": {
+  "doc_checkpoint": "nvidia/parakeet-rnnt-0.6b",
+  "doc_status": "ok",
+  "repo": "nvidia/parakeet-rnnt-0.6b",
+  "revision": "1b6b548f70b93d2410c3d13cc0654cab300f06ef",
+  "source": "doc",
+  "status": "ok"
+ },
+ "parakeet_tdt": {
+  "doc_checkpoint": "nvidia/parakeet-tdt-0.6b-v3",
+  "doc_status": "ok",
+  "repo": "nvidia/parakeet-tdt-0.6b-v3",
+  "revision": "541d1f99c6b0c3cd0b11a95167540bb8edefd82b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "patchtsmixer": {
+  "doc_checkpoint": "ibm/patchtsmixer-etth1-pretrain",
+  "doc_status": "ok",
+  "repo": "ibm/patchtsmixer-etth1-pretrain",
+  "revision": "05513838aadc1ab6b4fa2a851a29c6aceff354b7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "patchtst": {
+  "doc_checkpoint": "ibm-granite/granite-timeseries-patchtst",
+  "doc_status": "ok",
+  "repo": "ibm-granite/granite-timeseries-patchtst",
+  "revision": "7fe295d8bc8fbac8041b60ab351882634165517f",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pe_audio": {
+  "doc_checkpoint": "facebook/pe-av-large",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "pe_audio_encoder": {
+  "doc_checkpoint": "facebook/pe-av-large",
+  "doc_status": "ok",
+  "repo": "facebook/pe-av-large",
+  "revision": "0d24878d4107d64bef49e53602fc34ce6f94f6d8",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pe_audio_video": {
+  "doc_checkpoint": "facebook/pe-av-large",
+  "doc_status": "ok",
+  "repo": "facebook/pe-av-large",
+  "revision": "0d24878d4107d64bef49e53602fc34ce6f94f6d8",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pe_audio_video_encoder": {
+  "doc_checkpoint": "facebook/pe-av-large",
+  "doc_status": "ok",
+  "repo": "facebook/pe-av-large",
+  "revision": "0d24878d4107d64bef49e53602fc34ce6f94f6d8",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pe_video": {
+  "doc_checkpoint": "facebook/pe-av-large",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "pe_video_encoder": {
+  "doc_checkpoint": "facebook/pe-av-large",
+  "doc_status": "ok",
+  "repo": "facebook/pe-av-large",
+  "revision": "0d24878d4107d64bef49e53602fc34ce6f94f6d8",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pegasus": {
+  "doc_checkpoint": "google/pegasus-large",
+  "doc_status": "ok",
+  "repo": "google/pegasus-large",
+  "revision": "dec7796b22f29b7d1c476192313eae8ed57b6b77",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pegasus_x": {
+  "doc_checkpoint": "google/pegasus-x-large",
+  "doc_status": "ok",
+  "repo": "google/pegasus-x-large",
+  "revision": "ff38c5db1f5b97b923dbecdaf58b15c8e213a27a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "perceiver": {
+  "doc_checkpoint": "deepmind/language-perceiver",
+  "doc_status": "ok",
+  "repo": "deepmind/language-perceiver",
+  "revision": "47a1ba43d8198ea10cf9a158fce114953e9441a1",
+  "source": "doc",
+  "status": "ok"
+ },
+ "perception_lm": {
+  "doc_checkpoint": "facebook/Perception-LM-1B",
+  "doc_status": "ok",
+  "repo": "facebook/Perception-LM-1B",
+  "revision": "2b1a854663b80d6c8b9a10e4b229be97c7f6be1f",
+  "source": "doc",
+  "status": "ok"
+ },
+ "persimmon": {
+  "doc_checkpoint": "adept/persimmon-8b-base",
+  "doc_status": "ok",
+  "repo": "adept/persimmon-8b-base",
+  "revision": "94dc4e0bb7eeb26ec521eb3f78c36c91f6fe866b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "phi": {
+  "doc_checkpoint": "microsoft/phi-1",
+  "doc_status": "ok",
+  "repo": "microsoft/phi-1",
+  "revision": "d4c0adcb065e84e00ca814e35cba3012ea9841ab",
+  "source": "doc",
+  "status": "ok"
+ },
+ "phi3": {
+  "doc_checkpoint": "microsoft/Phi-3-mini-4k-instruct",
+  "doc_status": "ok",
+  "repo": "microsoft/Phi-3-mini-4k-instruct",
+  "revision": "f39ac1d28e925b323eae81227eaba4464caced4e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "phi4_multimodal": {
+  "doc_checkpoint": "microsoft/Phi-4-multimodal-instruct",
+  "doc_status": "wrong_model_type",
+  "repo": "JacobLinCool/phi-4-audio",
+  "revision": "66ef9938bf6887dacd127e9a4d6d4f526b73444b",
+  "source": "hub",
+  "status": "ok"
+ },
+ "phi4_multimodal_audio": {
+  "doc_checkpoint": "microsoft/Phi-4-multimodal-instruct",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "phi4_multimodal_vision": {
+  "doc_checkpoint": "microsoft/Phi-4-multimodal-instruct",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "phimoe": {
+  "doc_checkpoint": "microsoft/Phi-3.5-MoE-instruct",
+  "doc_status": "ok",
+  "repo": "microsoft/Phi-3.5-MoE-instruct",
+  "revision": "43688451b462a3351d8580625ebe1931adb3986d",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pi0": {
+  "doc_checkpoint": "lerobot/pi0_base",
+  "doc_status": "wrong_model_type",
+  "repo": "yinchenghust/openpi_libero_all",
+  "revision": "3d4f7b18f369fae2d6a5e4dbc3c26ae17072ba4a",
+  "source": "hub",
+  "status": "ok"
+ },
+ "pix2struct": {
+  "doc_checkpoint": "google/pix2struct-base",
+  "doc_status": "ok",
+  "repo": "google/pix2struct-base",
+  "revision": "4605659ec5d82c985955ebdea8210f32fe54a682",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pix2struct_text_model": {
+  "doc_checkpoint": "google/pix2struct-base",
+  "doc_status": "ok",
+  "repo": "google/pix2struct-base",
+  "revision": "4605659ec5d82c985955ebdea8210f32fe54a682",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pix2struct_vision_model": {
+  "doc_checkpoint": "google/pix2struct-base",
+  "doc_status": "ok",
+  "repo": "google/pix2struct-base",
+  "revision": "4605659ec5d82c985955ebdea8210f32fe54a682",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pixio": {
+  "doc_checkpoint": "facebook/pixio-huge",
+  "doc_status": "RepositoryNotFoundError",
+  "repo": "LiheYoung/pixio-vith16",
+  "revision": "70fdbfacd820136a27419653734ddc48550cfb66",
+  "source": "hub",
+  "status": "ok"
+ },
+ "pixtral": {
+  "doc_checkpoint": "mistral-labs/pixtral-12b",
+  "doc_status": "ok",
+  "repo": "mistral-labs/pixtral-12b",
+  "revision": "c2756cbbb9422eba9f6c5c439a214b0392dfc998",
+  "source": "doc",
+  "status": "ok"
+ },
+ "plbart": {
+  "doc_checkpoint": "uclanlp/plbart-base",
+  "doc_status": "ok",
+  "repo": "uclanlp/plbart-base",
+  "revision": "cf5287241fcff3819f6ade49635dc2d77efee032",
+  "source": "doc",
+  "status": "ok"
+ },
+ "poolformer": {
+  "doc_checkpoint": "sail/poolformer_s12",
+  "doc_status": "ok",
+  "repo": "sail/poolformer_s12",
+  "revision": "01bcf57546aceaccba581172497434bb0b377749",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pop2piano": {
+  "doc_checkpoint": "sweetcocoa/pop2piano",
+  "doc_status": "wrong_model_type",
+  "repo": "Tim-gubski/Audio2Hero",
+  "revision": "0803cae14d077ab3a6e3f1c6c712033d440cb0b4",
+  "source": "hub",
+  "status": "ok"
+ },
+ "pp_chart2table": {
+  "doc_checkpoint": "PaddlePaddle/PP-Chart2Table_safetensors",
+  "doc_status": "ok",
+  "repo": "PaddlePaddle/PP-Chart2Table_safetensors",
+  "revision": "13f9fa591480881e8eba90080dee5f82020007b2",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pp_doclayout_v2": {
+  "doc_checkpoint": "PaddlePaddle/PP-DocLayoutV2_safetensors",
+  "doc_status": "ok",
+  "repo": "PaddlePaddle/PP-DocLayoutV2_safetensors",
+  "revision": "880e8971b88938518611c54fc0f59ad57849c9d4",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pp_doclayout_v3": {
+  "doc_checkpoint": "PaddlePaddle/PP-DocLayoutV3_safetensors",
+  "doc_status": "ok",
+  "repo": "PaddlePaddle/PP-DocLayoutV3_safetensors",
+  "revision": "e4f489dc536556fc1be02b973ba06756e0d4a2ac",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pp_formulanet": {
+  "doc_checkpoint": "PaddlePaddle/PP-FormulaNet_plus-L_safetensors",
+  "doc_status": "ok",
+  "repo": "PaddlePaddle/PP-FormulaNet_plus-L_safetensors",
+  "revision": "6cc004a8e91ea3f3819b05317f40b290cbe99c2b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pp_lcnet": {
+  "doc_checkpoint": "PaddlePaddle/PP-LCNet_x1_0_doc_ori_safetensors",
+  "doc_status": "ok",
+  "repo": "PaddlePaddle/PP-LCNet_x1_0_doc_ori_safetensors",
+  "revision": "b2716954d2e321dd4436400b37584fab641027ab",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pp_lcnet_v3": {
+  "doc_checkpoint": "PaddlePaddle/Not_yet_released",
+  "doc_status": "RepositoryNotFoundError",
+  "status": "no_checkpoint"
+ },
+ "pp_lcnet_v4": {
+  "doc_checkpoint": "PaddlePaddle/Not_yet_released",
+  "doc_status": "RepositoryNotFoundError",
+  "status": "no_checkpoint"
+ },
+ "pp_ocrv5_mobile_det": {
+  "doc_checkpoint": "PaddlePaddle/PP-OCRv5_mobile_det_safetensors",
+  "doc_status": "ok",
+  "repo": "PaddlePaddle/PP-OCRv5_mobile_det_safetensors",
+  "revision": "c5041d225cf951ff06900ab81a3c7d543c45e2ad",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pp_ocrv5_mobile_rec": {
+  "doc_checkpoint": "PaddlePaddle/PP-OCRv5_mobile_rec_safetensors",
+  "doc_status": "ok",
+  "repo": "PaddlePaddle/PP-OCRv5_mobile_rec_safetensors",
+  "revision": "485a9a9781535ad477de3b1eea5f96a2e7300d8d",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pp_ocrv5_server_det": {
+  "doc_checkpoint": "PaddlePaddle/PP-OCRv5_server_det_safetensors",
+  "doc_status": "ok",
+  "repo": "PaddlePaddle/PP-OCRv5_server_det_safetensors",
+  "revision": "cbea9f3c3254c6ff7b0016cfbf90549e1ad4c5bb",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pp_ocrv5_server_rec": {
+  "doc_checkpoint": "PaddlePaddle/PP-OCRv5_server_rec_safetensors",
+  "doc_status": "ok",
+  "repo": "PaddlePaddle/PP-OCRv5_server_rec_safetensors",
+  "revision": "542979d7cc3791732bb12af35313a6840952d79f",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pp_ocrv6_medium_det": {
+  "doc_checkpoint": "PaddlePaddle/PP-OCRv6_medium_det_safetensors",
+  "doc_status": "ok",
+  "repo": "PaddlePaddle/PP-OCRv6_medium_det_safetensors",
+  "revision": "4236c2b61741a259c091fd879dcc4edc339e916c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pp_ocrv6_small_det": {
+  "doc_checkpoint": "PaddlePaddle/PP-OCRv6_small_det_safetensors",
+  "doc_status": "ok",
+  "repo": "PaddlePaddle/PP-OCRv6_small_det_safetensors",
+  "revision": "eae2ee920a39fb3087637d3dbb58df1896ec1f24",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pp_ocrv6_small_rec": {
+  "doc_checkpoint": "PaddlePaddle/PP-OCRv6_small_rec_safetensors",
+  "doc_status": "ok",
+  "repo": "PaddlePaddle/PP-OCRv6_small_rec_safetensors",
+  "revision": "fe049fb103f57443fe8840c54ed06b702f3c1de5",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pp_ocrv6_tiny_rec": {
+  "doc_checkpoint": "PaddlePaddle/PP-OCRv6_tiny_rec_safetensors",
+  "doc_status": "ok",
+  "repo": "PaddlePaddle/PP-OCRv6_tiny_rec_safetensors",
+  "revision": "6f2d2d51b4b4226d7a2329a02f416f4994106f3a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "prompt_depth_anything": {
+  "doc_checkpoint": "LiheYoung/depth-anything-small-hf",
+  "doc_status": "wrong_model_type",
+  "repo": "depth-anything/prompt-depth-anything-vitl-hf",
+  "revision": "abfaa0958bbe7382633e90ffb6373cfee61239ed",
+  "source": "hub",
+  "status": "ok"
+ },
+ "prophetnet": {
+  "doc_checkpoint": "microsoft/prophetnet-large-uncased",
+  "doc_status": "ok",
+  "repo": "microsoft/prophetnet-large-uncased",
+  "revision": "c5b84da76e7f132c85b5b361e508145eaf2c24cd",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pvt": {
+  "doc_checkpoint": "Xrenya/pvt-tiny-224",
+  "doc_status": "ok",
+  "repo": "Xrenya/pvt-tiny-224",
+  "revision": "634950b5fe4a8bb8264f2f1b3c0a89068181f455",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pvt_v2": {
+  "doc_checkpoint": "OpenGVLab/pvt_v2_b0",
+  "doc_status": "ok",
+  "repo": "OpenGVLab/pvt_v2_b0",
+  "revision": "bafa29fe7664535848bf1b64b72ade2ab27b9360",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qianfan_ocr": {
+  "doc_checkpoint": "baidu/Qianfan-OCR",
+  "doc_status": "ok",
+  "repo": "baidu/Qianfan-OCR",
+  "revision": "623bf5d20d446abdb36606aa4547cd0c18886fe5",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qianfan_ocr_vision": {
+  "doc_checkpoint": "baidu/Qianfan-OCR",
+  "doc_status": "ok",
+  "repo": "baidu/Qianfan-OCR",
+  "revision": "623bf5d20d446abdb36606aa4547cd0c18886fe5",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen2": {
+  "doc_checkpoint": "Qwen/Qwen2-7B",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen2-7B",
+  "revision": "453ed1575b739b5b03ce3758b23befdb0967f40e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen2_5_omni": {
+  "doc_checkpoint": "Qwen/Qwen2.5-Omni-7B",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen2.5-Omni-7B",
+  "revision": "ae9e1690543ffd5c0221dc27f79834d0294cba00",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen2_5_omni_audio_encoder": {
+  "doc_checkpoint": "Qwen/Qwen2.5-Omni-7B",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen2.5-Omni-7B",
+  "revision": "ae9e1690543ffd5c0221dc27f79834d0294cba00",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen2_5_omni_bigvgan": {
+  "doc_checkpoint": "Qwen/Qwen2.5-Omni-7B",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen2.5-Omni-7B",
+  "revision": "ae9e1690543ffd5c0221dc27f79834d0294cba00",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen2_5_omni_dit": {
+  "doc_checkpoint": "Qwen/Qwen2.5-Omni-7B",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen2.5-Omni-7B",
+  "revision": "ae9e1690543ffd5c0221dc27f79834d0294cba00",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen2_5_omni_talker": {
+  "doc_checkpoint": "Qwen/Qwen2.5-Omni-7B",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen2.5-Omni-7B",
+  "revision": "ae9e1690543ffd5c0221dc27f79834d0294cba00",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen2_5_omni_text": {
+  "doc_checkpoint": "Qwen/Qwen2.5-Omni-7B",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen2.5-Omni-7B",
+  "revision": "ae9e1690543ffd5c0221dc27f79834d0294cba00",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen2_5_omni_thinker": {
+  "doc_checkpoint": "Qwen/Qwen2.5-Omni-7B",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen2.5-Omni-7B",
+  "revision": "ae9e1690543ffd5c0221dc27f79834d0294cba00",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen2_5_omni_token2wav": {
+  "doc_checkpoint": "Qwen/Qwen2.5-Omni-7B",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen2.5-Omni-7B",
+  "revision": "ae9e1690543ffd5c0221dc27f79834d0294cba00",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen2_5_omni_vision_encoder": {
+  "doc_checkpoint": "Qwen/Qwen2.5-Omni-7B",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen2.5-Omni-7B",
+  "revision": "ae9e1690543ffd5c0221dc27f79834d0294cba00",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen2_5_vl": {
+  "doc_checkpoint": "Qwen/Qwen2-VL-7B-Instruct",
+  "doc_status": "wrong_model_type",
+  "repo": "Qwen/Qwen2.5-VL-7B-Instruct",
+  "revision": "cc594898137f460bfe9f0759e9844b3ce807cfb5",
+  "source": "hub",
+  "status": "ok"
+ },
+ "qwen2_5_vl_text": {
+  "doc_checkpoint": "Qwen/Qwen2-VL-7B-Instruct",
+  "doc_status": "wrong_model_type",
+  "repo": "centralpark/unsloth_Qwen2.5-VL-7B-Instruct_lr_0.0002_linear_adamw_torch_fused_True_fp16_v1_16_32_2_linear",
+  "revision": "863ae6de82a1f71f0e9f43b112c50e58ac93c272",
+  "source": "hub",
+  "status": "ok"
+ },
+ "qwen2_5_vl_vision": {
+  "doc_checkpoint": "Qwen/Qwen2-VL-7B-Instruct",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "qwen2_audio": {
+  "doc_checkpoint": "Qwen/Qwen2-Audio-7B",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen2-Audio-7B",
+  "revision": "dd84470756e6277a71d4d7188773a43cde92696e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen2_audio_encoder": {
+  "doc_checkpoint": "Qwen/Qwen2-Audio-7B",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen2-Audio-7B",
+  "revision": "dd84470756e6277a71d4d7188773a43cde92696e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen2_moe": {
+  "doc_checkpoint": "Qwen/Qwen1.5-MoE-A2.7B",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen1.5-MoE-A2.7B",
+  "revision": "1a758c50ecb6350748b9ce0a99d2352fd9fc11c9",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen2_vl": {
+  "doc_checkpoint": "Qwen/Qwen2-VL-7B-Instruct",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen2-VL-7B-Instruct",
+  "revision": "eed13092ef92e448dd6875b2a00151bd3f7db0ac",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen2_vl_text": {
+  "doc_checkpoint": "Qwen/Qwen2-VL-7B-Instruct",
+  "doc_status": "wrong_model_type",
+  "repo": "Abdullah-123/qwen2vl-2b-hrvqa-merged",
+  "revision": "37a6591981879be13b1a31e23e59f64af507e4ca",
+  "source": "hub",
+  "status": "ok"
+ },
+ "qwen2_vl_vision": {
+  "doc_checkpoint": "Qwen/Qwen2-VL-7B-Instruct",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "qwen3": {
+  "doc_checkpoint": "Qwen/Qwen3-8B",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen3-8B",
+  "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen3_5": {
+  "doc_checkpoint": "Qwen/Qwen3.5-27B",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen3.5-27B",
+  "revision": "fc05daec18b0a78c049392ed2e771dde82bdf654",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen3_5_moe": {
+  "doc_checkpoint": "Qwen/Qwen3.5-35B-A3B",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen3.5-35B-A3B",
+  "revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen3_5_moe_text": {
+  "doc_checkpoint": "Qwen/Qwen3.5-35B-A3B",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen3.5-35B-A3B",
+  "revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen3_5_moe_vision": {
+  "doc_checkpoint": "Qwen/Qwen3.5-35B-A3B",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "qwen3_5_text": {
+  "doc_checkpoint": "Qwen/Qwen3.5-27B",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen3.5-27B",
+  "revision": "fc05daec18b0a78c049392ed2e771dde82bdf654",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen3_5_vision": {
+  "doc_checkpoint": "Qwen/Qwen3.5-27B",
+  "doc_status": "wrong_model_type",
+  "repo": "immanuelpeter/Qwen3.8-27B-Vision",
+  "revision": "60a1bf9336197d19458290fd43f3d527f6cf3078",
+  "source": "hub",
+  "status": "ok"
+ },
+ "qwen3_asr": {
+  "doc_checkpoint": "Qwen/Qwen3-ASR-1.7B-hf",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen3-ASR-1.7B-hf",
+  "revision": "bcd2b5b7f32b480ab5790554cfa8347f246a14f3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen3_asr_encoder": {
+  "doc_checkpoint": "Qwen/Qwen3-ASR-1.7B-hf",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen3-ASR-1.7B-hf",
+  "revision": "bcd2b5b7f32b480ab5790554cfa8347f246a14f3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen3_moe": {
+  "doc_checkpoint": "Qwen/Qwen3-30B-A3B-Base",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen3-30B-A3B-Base",
+  "revision": "1b75feb79f60b8dc6c5bc769a898c206a1c6a4f9",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen3_next": {
+  "doc_checkpoint": "Qwen/Qwen3-Next-80B-A3B-Instruct",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen3-Next-80B-A3B-Instruct",
+  "revision": "9c7f2fbe84465e40164a94cc16cd30b6999b0cc7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen3_omni_moe": {
+  "doc_checkpoint": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+  "revision": "26291f793822fb6be9555850f06dfe95f2d7e695",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen3_omni_moe_audio_encoder": {
+  "doc_checkpoint": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+  "revision": "26291f793822fb6be9555850f06dfe95f2d7e695",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen3_omni_moe_talker_code_predictor": {
+  "doc_checkpoint": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+  "revision": "26291f793822fb6be9555850f06dfe95f2d7e695",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen3_omni_moe_talker_text": {
+  "doc_checkpoint": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "qwen3_omni_moe_text": {
+  "doc_checkpoint": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+  "revision": "26291f793822fb6be9555850f06dfe95f2d7e695",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen3_omni_moe_thinker": {
+  "doc_checkpoint": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+  "revision": "26291f793822fb6be9555850f06dfe95f2d7e695",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen3_omni_moe_vision_encoder": {
+  "doc_checkpoint": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+  "revision": "26291f793822fb6be9555850f06dfe95f2d7e695",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen3_vl": {
+  "doc_checkpoint": "Qwen/Qwen3-VL-4B-Instruct",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen3-VL-4B-Instruct",
+  "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen3_vl_moe": {
+  "doc_checkpoint": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+  "revision": "9c4b90e1e4ba969fd3b5378b57d966d725f1b86c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen3_vl_moe_text": {
+  "doc_checkpoint": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+  "revision": "9c4b90e1e4ba969fd3b5378b57d966d725f1b86c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen3_vl_moe_vision": {
+  "doc_checkpoint": "Qwen/Qwen3-VL-30B-A3B-Instruct",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "qwen3_vl_text": {
+  "doc_checkpoint": "Qwen/Qwen3-VL-4B-Instruct",
+  "doc_status": "ok",
+  "repo": "Qwen/Qwen3-VL-4B-Instruct",
+  "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+  "source": "doc",
+  "status": "ok"
+ },
+ "qwen3_vl_vision": {
+  "doc_checkpoint": "Qwen/Qwen3-VL-4B-Instruct",
+  "doc_status": "wrong_model_type",
+  "repo": "giovannioliveira/Qwen3-VL-32B-vision-encoder",
+  "revision": "3a25bb0029fece248b62e0e72ca387802c563231",
+  "source": "hub",
+  "status": "ok"
+ },
+ "qwen4_exp": {
+  "doc_checkpoint": "Qwen/Qwen4-Exp",
+  "doc_status": "RepositoryNotFoundError",
+  "repo": "Qwen/Qwen3.8-Flash-Next",
+  "revision": "de4b8e4d43b917e7706784d8bb445c9af86a3540",
+  "source": "hub",
+  "status": "ok"
+ },
+ "qwen4_exp_text": {
+  "doc_checkpoint": "Qwen/Qwen4-Exp",
+  "doc_status": "RepositoryNotFoundError",
+  "repo": "logic65/Whittle-Next-27B-A3B",
+  "revision": "458cdfe6e89bfb241b8d487a245d962c5745a7a5",
+  "source": "hub",
+  "status": "ok"
+ },
+ "qwen4_exp_vision": {
+  "doc_checkpoint": "Qwen/Qwen4-Exp",
+  "doc_status": "RepositoryNotFoundError",
+  "status": "no_checkpoint"
+ },
+ "radio": {
+  "doc_checkpoint": "nvidia/C-RADIOv4-H",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "rag": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "status": "no_checkpoint"
+ },
+ "recurrent_gemma": {
+  "doc_checkpoint": "google/recurrentgemma-2b",
+  "doc_status": "ok",
+  "repo": "google/recurrentgemma-2b",
+  "revision": "3620f4ca9c5d16ee56c00180474a3201ec7f734a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "reformer": {
+  "doc_checkpoint": "google/reformer-crime-and-punishment",
+  "doc_status": "ok",
+  "repo": "google/reformer-crime-and-punishment",
+  "revision": "8fcd50a33ea773f3bacf3fecdf193c9ca2c060ac",
+  "source": "doc",
+  "status": "ok"
+ },
+ "regnet": {
+  "doc_checkpoint": "facebook/regnet-y-040",
+  "doc_status": "ok",
+  "repo": "facebook/regnet-y-040",
+  "revision": "29e70d26bce1b86bc90c32ac5fadedfc1b671285",
+  "source": "doc",
+  "status": "ok"
+ },
+ "rembert": {
+  "doc_checkpoint": "google/rembert",
+  "doc_status": "ok",
+  "repo": "google/rembert",
+  "revision": "65da5133da36e29dfca67d4f0dd9f7f9db21b563",
+  "source": "doc",
+  "status": "ok"
+ },
+ "resnet": {
+  "doc_checkpoint": "microsoft/resnet-50",
+  "doc_status": "ok",
+  "repo": "microsoft/resnet-50",
+  "revision": "34c2154c194f829b11125337b98c8f5f9965ff19",
+  "source": "doc",
+  "status": "ok"
+ },
+ "rf_detr": {
+  "doc_checkpoint": "Roboflow/rf-detr-base",
+  "doc_status": "ok",
+  "repo": "Roboflow/rf-detr-base",
+  "revision": "7b95b089788e6c7db56d5ea9b0a07ca08ea6ac0a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "rf_detr_dinov2": {
+  "doc_checkpoint": "Roboflow/rf-detr-base",
+  "doc_status": "ok",
+  "repo": "Roboflow/rf-detr-base",
+  "revision": "7b95b089788e6c7db56d5ea9b0a07ca08ea6ac0a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "roberta": {
+  "doc_checkpoint": "FacebookAI/roberta-base",
+  "doc_status": "ok",
+  "repo": "FacebookAI/roberta-base",
+  "revision": "e2da8e2f811d1448a5b465c236feacd80ffbac7b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "roberta-prelayernorm": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "repo": "andreasmadsen/efficient_mlm_m0.40",
+  "revision": "3924d3fe62a60eb393a809cec55355f2837de173",
+  "source": "hub",
+  "status": "ok"
+ },
+ "roc_bert": {
+  "doc_checkpoint": "weiweishi/roc-bert-base-zh",
+  "doc_status": "ok",
+  "repo": "weiweishi/roc-bert-base-zh",
+  "revision": "0348c672af2fc2aea383cd1275e43398e7a1ebd1",
+  "source": "doc",
+  "status": "ok"
+ },
+ "roformer": {
+  "doc_checkpoint": "junnyu/roformer_chinese_base",
+  "doc_status": "ok",
+  "repo": "junnyu/roformer_chinese_base",
+  "revision": "f780ca57e5eab4627f334bed71a8e5a353b33d69",
+  "source": "doc",
+  "status": "ok"
+ },
+ "rt_detr": {
+  "doc_checkpoint": "PekingU/rtdetr_r50vd",
+  "doc_status": "ok",
+  "repo": "PekingU/rtdetr_r50vd",
+  "revision": "df939e661d8c52e80608d1ec566561aabd25a4e7",
+  "source": "doc",
+  "status": "ok"
+ },
+ "rt_detr_resnet": {
+  "doc_checkpoint": "microsoft/resnet-50",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "rt_detr_v2": {
+  "doc_checkpoint": "PekingU/rtdetr_r18vd",
+  "doc_status": "wrong_model_type",
+  "repo": "PekingU/rtdetr_v2_r18vd",
+  "revision": "5650961749fa93567c0d46fc7f43ea4f9e914107",
+  "source": "hub",
+  "status": "ok"
+ },
+ "rwkv": {
+  "doc_checkpoint": "RWKV/rwkv-4-169m-pile",
+  "doc_status": "ok",
+  "repo": "RWKV/rwkv-4-169m-pile",
+  "revision": "46bdc280eb97b6141d5d51a935e0c4870ecaefcc",
+  "source": "doc",
+  "status": "ok"
+ },
+ "sam": {
+  "doc_checkpoint": "facebook/sam-vit-huge",
+  "doc_status": "ok",
+  "repo": "facebook/sam-vit-huge",
+  "revision": "87aecf0df4ce6b30cd7de76e87673c49644bdf67",
+  "source": "doc",
+  "status": "ok"
+ },
+ "sam2": {
+  "doc_checkpoint": "facebook/sam2.1-hiera-tiny",
+  "doc_status": "wrong_model_type",
+  "repo": "merve/sam2-large-micromat",
+  "revision": "086cab28dddc8a80b739c225e56abf1760739c72",
+  "source": "hub",
+  "status": "ok"
+ },
+ "sam2_hiera_det_model": {
+  "doc_checkpoint": "facebook/sam2.1-hiera-tiny",
+  "doc_status": "ok",
+  "repo": "facebook/sam2.1-hiera-tiny",
+  "revision": "de431c4043854a71d8101e17995dfe596bf101a5",
+  "source": "doc",
+  "status": "ok"
+ },
+ "sam2_video": {
+  "doc_checkpoint": "facebook/sam2.1-hiera-tiny",
+  "doc_status": "ok",
+  "repo": "facebook/sam2.1-hiera-tiny",
+  "revision": "de431c4043854a71d8101e17995dfe596bf101a5",
+  "source": "doc",
+  "status": "ok"
+ },
+ "sam2_vision_model": {
+  "doc_checkpoint": "facebook/sam2.1-hiera-tiny",
+  "doc_status": "ok",
+  "repo": "facebook/sam2.1-hiera-tiny",
+  "revision": "de431c4043854a71d8101e17995dfe596bf101a5",
+  "source": "doc",
+  "status": "ok"
+ },
+ "sam3": {
+  "doc_checkpoint": "facebook/sam3",
+  "doc_status": "GatedRepoError",
+  "repo": "jetjodh/sam3",
+  "revision": "1aa50ce07302cb375f85d8084b68a0fb378b8d85",
+  "source": "hub",
+  "status": "ok"
+ },
+ "sam3_detr_decoder": {
+  "doc_checkpoint": "facebook/sam3",
+  "doc_status": "GatedRepoError",
+  "status": "no_checkpoint"
+ },
+ "sam3_detr_encoder": {
+  "doc_checkpoint": "facebook/sam3",
+  "doc_status": "GatedRepoError",
+  "status": "no_checkpoint"
+ },
+ "sam3_geometry_encoder": {
+  "doc_checkpoint": "facebook/sam3",
+  "doc_status": "GatedRepoError",
+  "status": "no_checkpoint"
+ },
+ "sam3_lite_text": {
+  "doc_checkpoint": "yonigozlan/sam3-litetext-s0",
+  "doc_status": "ok",
+  "repo": "yonigozlan/sam3-litetext-s0",
+  "revision": "b09766e54f5d2eba021119ec7feff13e74c0f8fc",
+  "source": "doc",
+  "status": "ok"
+ },
+ "sam3_lite_text_detr_decoder": {
+  "doc_checkpoint": "yonigozlan/sam3-litetext-s0",
+  "doc_status": "ok",
+  "repo": "yonigozlan/sam3-litetext-s0",
+  "revision": "b09766e54f5d2eba021119ec7feff13e74c0f8fc",
+  "source": "doc",
+  "status": "ok"
+ },
+ "sam3_lite_text_detr_encoder": {
+  "doc_checkpoint": "yonigozlan/sam3-litetext-s0",
+  "doc_status": "ok",
+  "repo": "yonigozlan/sam3-litetext-s0",
+  "revision": "b09766e54f5d2eba021119ec7feff13e74c0f8fc",
+  "source": "doc",
+  "status": "ok"
+ },
+ "sam3_lite_text_geometry_encoder": {
+  "doc_checkpoint": "yonigozlan/sam3-litetext-s0",
+  "doc_status": "ok",
+  "repo": "yonigozlan/sam3-litetext-s0",
+  "revision": "b09766e54f5d2eba021119ec7feff13e74c0f8fc",
+  "source": "doc",
+  "status": "ok"
+ },
+ "sam3_lite_text_mask_decoder": {
+  "doc_checkpoint": "yonigozlan/sam3-litetext-s0",
+  "doc_status": "ok",
+  "repo": "yonigozlan/sam3-litetext-s0",
+  "revision": "b09766e54f5d2eba021119ec7feff13e74c0f8fc",
+  "source": "doc",
+  "status": "ok"
+ },
+ "sam3_lite_text_text_model": {
+  "doc_checkpoint": "yonigozlan/sam3-litetext-s0",
+  "doc_status": "ok",
+  "repo": "yonigozlan/sam3-litetext-s0",
+  "revision": "b09766e54f5d2eba021119ec7feff13e74c0f8fc",
+  "source": "doc",
+  "status": "ok"
+ },
+ "sam3_mask_decoder": {
+  "doc_checkpoint": "facebook/sam3",
+  "doc_status": "GatedRepoError",
+  "status": "no_checkpoint"
+ },
+ "sam3_tracker": {
+  "doc_checkpoint": "facebook/sam3",
+  "doc_status": "GatedRepoError",
+  "status": "no_checkpoint"
+ },
+ "sam3_tracker_video": {
+  "doc_checkpoint": "facebook/sam3",
+  "doc_status": "GatedRepoError",
+  "status": "no_checkpoint"
+ },
+ "sam3_video": {
+  "doc_checkpoint": "facebook/sam3",
+  "doc_status": "GatedRepoError",
+  "repo": "jetjodh/sam3",
+  "revision": "1aa50ce07302cb375f85d8084b68a0fb378b8d85",
+  "source": "hub",
+  "status": "ok"
+ },
+ "sam3_vision_model": {
+  "doc_checkpoint": "facebook/sam3",
+  "doc_status": "GatedRepoError",
+  "status": "no_checkpoint"
+ },
+ "sam3_vit_model": {
+  "doc_checkpoint": "facebook/sam3",
+  "doc_status": "GatedRepoError",
+  "status": "no_checkpoint"
+ },
+ "sam_hq": {
+  "doc_checkpoint": "syscv-community/sam-hq-vit-base",
+  "doc_status": "ok",
+  "repo": "syscv-community/sam-hq-vit-base",
+  "revision": "f906a2e3f60fda2f12eb717cef18614f66c43124",
+  "source": "doc",
+  "status": "ok"
+ },
+ "sam_hq_vision_model": {
+  "doc_checkpoint": "syscv-community/sam-hq-vit-base",
+  "doc_status": "ok",
+  "repo": "syscv-community/sam-hq-vit-base",
+  "revision": "f906a2e3f60fda2f12eb717cef18614f66c43124",
+  "source": "doc",
+  "status": "ok"
+ },
+ "sam_vision_model": {
+  "doc_checkpoint": "facebook/sam-vit-huge",
+  "doc_status": "wrong_model_type",
+  "repo": "BiliSakura/RSBuilding-ViT-L",
+  "revision": "56c9543a4bb660eb3a5a4f9760298fcc8ca5e20e",
+  "source": "hub",
+  "status": "ok"
+ },
+ "sapiens2": {
+  "doc_checkpoint": "facebook/sapiens2-pretrain-0.4b",
+  "doc_status": "ok",
+  "repo": "facebook/sapiens2-pretrain-0.4b",
+  "revision": "ce294175eb49429cb612bd91eb6a4a466fc2c358",
+  "source": "doc",
+  "status": "ok"
+ },
+ "sapiens2_head": {
+  "doc_checkpoint": "facebook/sapiens2-seg-0.4b",
+  "doc_status": "ok",
+  "repo": "facebook/sapiens2-seg-0.4b",
+  "revision": "449b3c5335e6722bb94990abdd1aa6e612432f22",
+  "source": "doc",
+  "status": "ok"
+ },
+ "seamless_m4t": {
+  "doc_checkpoint": "facebook/hf-seamless-m4t-medium",
+  "doc_status": "ok",
+  "repo": "facebook/hf-seamless-m4t-medium",
+  "revision": "ecf60d4df63baaac3f82ae6a7ad7adcb19dcb26c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "seamless_m4t_v2": {
+  "doc_checkpoint": "facebook/hf-seamless-m4t-medium",
+  "doc_status": "wrong_model_type",
+  "repo": "facebook/seamless-m4t-v2-large",
+  "revision": "5f8cc790b19fc3f67a61c105133b20b34e3dcb76",
+  "source": "hub",
+  "status": "ok"
+ },
+ "seed_oss": {
+  "doc_checkpoint": "ByteDance-Seed/Seed-OSS-36B-Instruct",
+  "doc_status": "ok",
+  "repo": "ByteDance-Seed/Seed-OSS-36B-Instruct",
+  "revision": "497f1dca95ebdec98e41d517b9f060ee753c902f",
+  "source": "doc",
+  "status": "ok"
+ },
+ "segformer": {
+  "doc_checkpoint": "ByteDance-Seed/Seed-OSS-36B-Instruct",
+  "doc_status": "wrong_model_type",
+  "repo": "nvidia/segformer-b0-finetuned-ade-512-512",
+  "revision": "489d5cd81a0b59fab9b7ea758d3548ebe99677da",
+  "source": "hub",
+  "status": "ok"
+ },
+ "seggpt": {
+  "doc_checkpoint": "BAAI/seggpt-vit-large",
+  "doc_status": "ok",
+  "repo": "BAAI/seggpt-vit-large",
+  "revision": "77b179b5a1b50a48bd04ef3138804cfacc2ced73",
+  "source": "doc",
+  "status": "ok"
+ },
+ "sew": {
+  "doc_checkpoint": "BAAI/seggpt-vit-large",
+  "doc_status": "wrong_model_type",
+  "repo": "hf-internal-testing/tiny-random-SEWModel",
+  "revision": "0a0fbb844eeefa0dce62bd05db30a2bb91e5dc88",
+  "source": "hub",
+  "status": "ok"
+ },
+ "sew-d": {
+  "doc_checkpoint": "BAAI/seggpt-vit-large",
+  "doc_status": "wrong_model_type",
+  "repo": "asapp/sew-d-tiny-100k-ft-ls100h",
+  "revision": "1966cdcfbd2123ee90b003c2aa6ec6fe204cc4d8",
+  "source": "hub",
+  "status": "ok"
+ },
+ "shieldgemma2": {
+  "doc_checkpoint": "google/shieldgemma-2-4b-it",
+  "doc_status": "ok",
+  "repo": "google/shieldgemma-2-4b-it",
+  "revision": "eaf60452b5fc41a911338a022e628b0c15283897",
+  "source": "doc",
+  "status": "ok"
+ },
+ "siglip": {
+  "doc_checkpoint": "google/siglip-base-patch16-224",
+  "doc_status": "ok",
+  "repo": "google/siglip-base-patch16-224",
+  "revision": "7fd15f0689c79d79e38b1c2e2e2370a7bf2761ed",
+  "source": "doc",
+  "status": "ok"
+ },
+ "siglip2": {
+  "doc_checkpoint": "google/siglip2-base-patch16-naflex",
+  "doc_status": "ok",
+  "repo": "google/siglip2-base-patch16-naflex",
+  "revision": "b53b807d3a2d5e2b3911292f2d69e5341cdc064c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "siglip2_text_model": {
+  "doc_checkpoint": "google/siglip2-base-patch16-naflex",
+  "doc_status": "ok",
+  "repo": "google/siglip2-base-patch16-naflex",
+  "revision": "b53b807d3a2d5e2b3911292f2d69e5341cdc064c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "siglip2_vision_model": {
+  "doc_checkpoint": "google/siglip2-base-patch16-naflex",
+  "doc_status": "ok",
+  "repo": "google/siglip2-base-patch16-naflex",
+  "revision": "b53b807d3a2d5e2b3911292f2d69e5341cdc064c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "siglip_text_model": {
+  "doc_checkpoint": "google/siglip-base-patch16-224",
+  "doc_status": "ok",
+  "repo": "google/siglip-base-patch16-224",
+  "revision": "7fd15f0689c79d79e38b1c2e2e2370a7bf2761ed",
+  "source": "doc",
+  "status": "ok"
+ },
+ "siglip_vision_model": {
+  "doc_checkpoint": "google/siglip-base-patch16-224",
+  "doc_status": "ok",
+  "repo": "google/siglip-base-patch16-224",
+  "revision": "7fd15f0689c79d79e38b1c2e2e2370a7bf2761ed",
+  "source": "doc",
+  "status": "ok"
+ },
+ "slanet": {
+  "doc_checkpoint": "PaddlePaddle/SLANet_plus_safetensors",
+  "doc_status": "ok",
+  "repo": "PaddlePaddle/SLANet_plus_safetensors",
+  "revision": "e44d12b3fe695792170dd46623075f63d8544461",
+  "source": "doc",
+  "status": "ok"
+ },
+ "slanext": {
+  "doc_checkpoint": "PaddlePaddle/SLANeXt_wired_safetensors",
+  "doc_status": "ok",
+  "repo": "PaddlePaddle/SLANeXt_wired_safetensors",
+  "revision": "d97b77b5078951c313807747f77ec07beab07e4e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "smollm3": {
+  "doc_checkpoint": "HuggingFaceTB/SmolLM3-3B",
+  "doc_status": "ok",
+  "repo": "HuggingFaceTB/SmolLM3-3B",
+  "revision": "a07cc9a04f16550a088caea529712d1d335b0ac1",
+  "source": "doc",
+  "status": "ok"
+ },
+ "smolvlm": {
+  "doc_checkpoint": "HuggingFaceTB/SmolVLM2-2.2B-Instruct",
+  "doc_status": "ok",
+  "repo": "HuggingFaceTB/SmolVLM2-2.2B-Instruct",
+  "revision": "482adb537c021c86670beed01cd58990d01e72e4",
+  "source": "doc",
+  "status": "ok"
+ },
+ "smolvlm_vision": {
+  "doc_checkpoint": "HuggingFaceTB/SmolVLM2-2.2B-Instruct",
+  "doc_status": "ok",
+  "repo": "HuggingFaceTB/SmolVLM2-2.2B-Instruct",
+  "revision": "482adb537c021c86670beed01cd58990d01e72e4",
+  "source": "doc",
+  "status": "ok"
+ },
+ "solar_open": {
+  "doc_checkpoint": "upstage/Solar-Open-100B",
+  "doc_status": "ok",
+  "repo": "upstage/Solar-Open-100B",
+  "revision": "1f591439b14055004d1a5d1a975608953a022fea",
+  "source": "doc",
+  "status": "ok"
+ },
+ "speech-encoder-decoder": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "repo": "hf-internal-testing/tiny-random-speech-encoder-decoder",
+  "revision": "880a6041222f5297adfceb3debd1a955d1c48ba5",
+  "source": "hub",
+  "status": "ok"
+ },
+ "speech_to_text": {
+  "doc_checkpoint": "facebook/s2t-small-librispeech-asr",
+  "doc_status": "ok",
+  "repo": "facebook/s2t-small-librispeech-asr",
+  "revision": "256e91a603c013ae09aa1e4c09cfc3f8acdf8d19",
+  "source": "doc",
+  "status": "ok"
+ },
+ "speecht5": {
+  "doc_checkpoint": "microsoft/speecht5_asr",
+  "doc_status": "ok",
+  "repo": "microsoft/speecht5_asr",
+  "revision": "53615c10408485422e09a12cda191a747f4bbe34",
+  "source": "doc",
+  "status": "ok"
+ },
+ "speecht5_hifigan": {
+  "doc_checkpoint": "microsoft/speecht5_asr",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "splinter": {
+  "doc_checkpoint": "tau/splinter-base",
+  "doc_status": "ok",
+  "repo": "tau/splinter-base",
+  "revision": "d6bc929405a27b7502bbab767f615c89b0e52373",
+  "source": "doc",
+  "status": "ok"
+ },
+ "squeezebert": {
+  "doc_checkpoint": "squeezebert/squeezebert-uncased",
+  "doc_status": "ok",
+  "repo": "squeezebert/squeezebert-uncased",
+  "revision": "7978b0c163f11850ec35d5cd541828159313ac41",
+  "source": "doc",
+  "status": "ok"
+ },
+ "stablelm": {
+  "doc_checkpoint": "stabilityai/stablelm-3b-4e1t",
+  "doc_status": "ok",
+  "repo": "stabilityai/stablelm-3b-4e1t",
+  "revision": "fa4a6a92fca83c3b4223a3c9bf792887090ebfba",
+  "source": "doc",
+  "status": "ok"
+ },
+ "starcoder2": {
+  "doc_checkpoint": "bigcode/starcoder2-7b",
+  "doc_status": "ok",
+  "repo": "bigcode/starcoder2-7b",
+  "revision": "bb9afde76d7945da5745592525db122d4d729eb1",
+  "source": "doc",
+  "status": "ok"
+ },
+ "step3p5": {
+  "doc_checkpoint": "stepfun-ai/Step-3.7-Flash",
+  "doc_status": "ok",
+  "repo": "stepfun-ai/Step-3.7-Flash",
+  "revision": "5f6244077ac62e04eec3f320501ff8c2b293373a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "step3p5_vision": {
+  "doc_checkpoint": "stepfun-ai/Step-3.7-Flash",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "step3p7": {
+  "doc_checkpoint": "stepfun-ai/Step-3.7-Flash",
+  "doc_status": "ok",
+  "repo": "stepfun-ai/Step-3.7-Flash",
+  "revision": "5f6244077ac62e04eec3f320501ff8c2b293373a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "superglue": {
+  "doc_checkpoint": "magic-leap-community/superglue_indoor",
+  "doc_status": "ok",
+  "repo": "magic-leap-community/superglue_indoor",
+  "revision": "413dc1d8a2b02aabea6ea6e24c62d9dcf1857705",
+  "source": "doc",
+  "status": "ok"
+ },
+ "superpoint": {
+  "doc_checkpoint": "magic-leap-community/superpoint",
+  "doc_status": "ok",
+  "repo": "magic-leap-community/superpoint",
+  "revision": "734450e9ffe229074f5998494ddc615475cdb20a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "swiftformer": {
+  "doc_checkpoint": "MBZUAI/swiftformer-xs",
+  "doc_status": "ok",
+  "repo": "MBZUAI/swiftformer-xs",
+  "revision": "103d0c70fb0eecade81e47590d194efcd9e62bdf",
+  "source": "doc",
+  "status": "ok"
+ },
+ "swin": {
+  "doc_checkpoint": "microsoft/swin-tiny-patch4-window7-224",
+  "doc_status": "ok",
+  "repo": "microsoft/swin-tiny-patch4-window7-224",
+  "revision": "d00d478bfaf1f417d34a1186673ad4b4be264c51",
+  "source": "doc",
+  "status": "ok"
+ },
+ "swin2sr": {
+  "doc_checkpoint": "caidas/swin2sr-classicalsr-x2-64",
+  "doc_status": "RepositoryNotFoundError",
+  "repo": "caidas/swin2SR-classical-sr-x2-64",
+  "revision": "cee1c923c6a37361c6e5650b65dcf4be821e5d52",
+  "source": "hub",
+  "status": "ok"
+ },
+ "swinv2": {
+  "doc_checkpoint": "microsoft/swinv2-tiny-patch4-window8-256",
+  "doc_status": "ok",
+  "repo": "microsoft/swinv2-tiny-patch4-window8-256",
+  "revision": "40213dad8563a5a916d434a1291443c0fa6358f0",
+  "source": "doc",
+  "status": "ok"
+ },
+ "switch_transformers": {
+  "doc_checkpoint": "google/switch-base-8",
+  "doc_status": "ok",
+  "repo": "google/switch-base-8",
+  "revision": "92fe2d22b024d9937146fe097ba3d3a7ba146e1b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "t5": {
+  "doc_checkpoint": "google-t5/t5-small",
+  "doc_status": "ok",
+  "repo": "google-t5/t5-small",
+  "revision": "df1b051c49625cf57a3d0d8d3863ed4d13564fe4",
+  "source": "doc",
+  "status": "ok"
+ },
+ "t5_gemma_module": {
+  "doc_checkpoint": "google/t5_gemma_module-7b",
+  "doc_status": "RepositoryNotFoundError",
+  "repo": "RE-N-Y/t5gemma-2b-2b-ul2-it",
+  "revision": "c99f320de05883b25aeca165c0ed672957ae20c3",
+  "source": "hub",
+  "status": "ok"
+ },
+ "t5gemma": {
+  "doc_checkpoint": "google/t5_gemma_module-7b",
+  "doc_status": "RepositoryNotFoundError",
+  "status": "no_checkpoint"
+ },
+ "t5gemma2": {
+  "doc_checkpoint": "google/t5gemma-2-270m-270m",
+  "doc_status": "ok",
+  "repo": "google/t5gemma-2-270m-270m",
+  "revision": "7c38f16641f455ef0685b18431faf1b17722d5a1",
+  "source": "doc",
+  "status": "ok"
+ },
+ "t5gemma2_decoder": {
+  "doc_checkpoint": "google/t5gemma-2-270m-270m",
+  "doc_status": "ok",
+  "repo": "google/t5gemma-2-270m-270m",
+  "revision": "7c38f16641f455ef0685b18431faf1b17722d5a1",
+  "source": "doc",
+  "status": "ok"
+ },
+ "t5gemma2_encoder": {
+  "doc_checkpoint": "google/t5gemma-2-270m-270m",
+  "doc_status": "ok",
+  "repo": "google/t5gemma-2-270m-270m",
+  "revision": "7c38f16641f455ef0685b18431faf1b17722d5a1",
+  "source": "doc",
+  "status": "ok"
+ },
+ "t5gemma2_text": {
+  "doc_checkpoint": "google/t5gemma-2-270m-270m",
+  "doc_status": "ok",
+  "repo": "google/t5gemma-2-270m-270m",
+  "revision": "7c38f16641f455ef0685b18431faf1b17722d5a1",
+  "source": "doc",
+  "status": "ok"
+ },
+ "table-transformer": {
+  "doc_checkpoint": "microsoft/table-transformer-detection",
+  "doc_status": "ok",
+  "repo": "microsoft/table-transformer-detection",
+  "revision": "2357cbe2b5a5d1c03e54f32764f06058933b65ab",
+  "source": "doc",
+  "status": "ok"
+ },
+ "tapas": {
+  "doc_checkpoint": "google/tapas-base-finetuned-sqa",
+  "doc_status": "ok",
+  "repo": "google/tapas-base-finetuned-sqa",
+  "revision": "81916d20eef75766aeae71b9487fd615017b0413",
+  "source": "doc",
+  "status": "ok"
+ },
+ "textnet": {
+  "doc_checkpoint": "czczup/textnet-base",
+  "doc_status": "ok",
+  "repo": "czczup/textnet-base",
+  "revision": "6d2531fd3c7cb367bbfd570ca94ea7a0784b3099",
+  "source": "doc",
+  "status": "ok"
+ },
+ "time_series_transformer": {
+  "doc_checkpoint": "huggingface/time-series-transformer-tourism-monthly",
+  "doc_status": "ok",
+  "repo": "huggingface/time-series-transformer-tourism-monthly",
+  "revision": "2a40ad41f6ffe61e7bef6099b08c6c2fce36ac35",
+  "source": "doc",
+  "status": "ok"
+ },
+ "timesfm": {
+  "doc_checkpoint": "google/timesfm-2.0-500m-pytorch",
+  "doc_status": "ok",
+  "repo": "google/timesfm-2.0-500m-pytorch",
+  "revision": "dc2443792ce5516872b89b37cf1bc058c3bf0c10",
+  "source": "doc",
+  "status": "ok"
+ },
+ "timesfm2_5": {
+  "doc_checkpoint": "google/timesfm-2.5-200m-transformers",
+  "doc_status": "ok",
+  "repo": "google/timesfm-2.5-200m-transformers",
+  "revision": "5a9806b9b291fad9233b5249d88263f1846304d3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "timesformer": {
+  "doc_checkpoint": "facebook/timesformer-base-finetuned-k600",
+  "doc_status": "ok",
+  "repo": "facebook/timesformer-base-finetuned-k600",
+  "revision": "8b0484b3e11f898a3ef4ddd8ee3db327e288bb27",
+  "source": "doc",
+  "status": "ok"
+ },
+ "timm_backbone": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "status": "no_checkpoint"
+ },
+ "timm_wrapper": {
+  "doc_checkpoint": "resnet50",
+  "doc_status": "RepositoryNotFoundError",
+  "repo": "Freepik/nsfw_image_detector",
+  "revision": "15b85477e4fd2000db76ae9aae0f89a72f95e2e3",
+  "source": "hub",
+  "status": "ok"
+ },
+ "tipsv2": {
+  "doc_checkpoint": "google/tipsv2-b14",
+  "doc_status": "ok",
+  "repo": "google/tipsv2-b14",
+  "revision": "ed1e4dc6b74bf3935ae099e9d5eb30fa96528454",
+  "source": "doc",
+  "status": "ok"
+ },
+ "tipsv2_dpt": {
+  "doc_checkpoint": "google/tipsv2-b14-dpt",
+  "doc_status": "ok",
+  "repo": "google/tipsv2-b14-dpt",
+  "revision": "da81b552538c453432e7a1efea39737c89580424",
+  "source": "doc",
+  "status": "ok"
+ },
+ "tipsv2_text_model": {
+  "doc_checkpoint": "google/tipsv2-b14",
+  "doc_status": "ok",
+  "repo": "google/tipsv2-b14",
+  "revision": "ed1e4dc6b74bf3935ae099e9d5eb30fa96528454",
+  "source": "doc",
+  "status": "ok"
+ },
+ "tipsv2_vision_model": {
+  "doc_checkpoint": "google/tipsv2-b14",
+  "doc_status": "ok",
+  "repo": "google/tipsv2-b14",
+  "revision": "ed1e4dc6b74bf3935ae099e9d5eb30fa96528454",
+  "source": "doc",
+  "status": "ok"
+ },
+ "trocr": {
+  "doc_checkpoint": "microsoft/trocr-base-handwritten",
+  "doc_status": "ok",
+  "repo": "microsoft/trocr-base-handwritten",
+  "revision": "eaacaf452b06415df8f10bb6fad3a4c11e609406",
+  "source": "doc",
+  "status": "ok"
+ },
+ "tvp": {
+  "doc_checkpoint": "Intel/tvp-base",
+  "doc_status": "ok",
+  "repo": "Intel/tvp-base",
+  "revision": "22c974b53227d1a874a8392f139d5d3d720c3ee8",
+  "source": "doc",
+  "status": "ok"
+ },
+ "udop": {
+  "doc_checkpoint": "microsoft/udop-large",
+  "doc_status": "ok",
+  "repo": "microsoft/udop-large",
+  "revision": "2d5f5b18aa2a3ad6b551933582ca49265f45afcf",
+  "source": "doc",
+  "status": "ok"
+ },
+ "umt5": {
+  "doc_checkpoint": "google/umt5-small",
+  "doc_status": "wrong_model_type",
+  "repo": "hf-internal-testing/tiny-random-umt5",
+  "revision": "ef111e48e6a52dee417671f691cc02e27d7faf99",
+  "source": "hub",
+  "status": "ok"
+ },
+ "unispeech": {
+  "doc_checkpoint": "microsoft/unispeech-large-1500h-cv",
+  "doc_status": "ok",
+  "repo": "microsoft/unispeech-large-1500h-cv",
+  "revision": "4e1a2ace9d4d4ef4bafd208826ef02af0336ad7e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "unispeech-sat": {
+  "doc_checkpoint": "microsoft/unispeech-sat-base-100h-libri-ft",
+  "doc_status": "ok",
+  "repo": "microsoft/unispeech-sat-base-100h-libri-ft",
+  "revision": "b294556d8d77cc539f9d08bef0ddbb0f60985328",
+  "source": "doc",
+  "status": "ok"
+ },
+ "univnet": {
+  "doc_checkpoint": "dg845/univnet-dev",
+  "doc_status": "ok",
+  "repo": "dg845/univnet-dev",
+  "revision": "fbfdd9ac17e7708deb785156e18131e7aee10ee3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "upernet": {
+  "doc_checkpoint": "openmmlab/upernet-convnext-tiny",
+  "doc_status": "ok",
+  "repo": "openmmlab/upernet-convnext-tiny",
+  "revision": "876ffc56b819a829448f7e81e9f8606deef6fb65",
+  "source": "doc",
+  "status": "ok"
+ },
+ "uvdoc": {
+  "doc_checkpoint": "PaddlePaddle/UVDoc_safetensors",
+  "doc_status": "ok",
+  "repo": "PaddlePaddle/UVDoc_safetensors",
+  "revision": "bfa6aad03b549c7e2cf89cefd2fb02ba3bef2ae4",
+  "source": "doc",
+  "status": "ok"
+ },
+ "uvdoc_backbone": {
+  "doc_checkpoint": "PaddlePaddle/UVDoc_safetensors",
+  "doc_status": "ok",
+  "repo": "PaddlePaddle/UVDoc_safetensors",
+  "revision": "bfa6aad03b549c7e2cf89cefd2fb02ba3bef2ae4",
+  "source": "doc",
+  "status": "ok"
+ },
+ "vaultgemma": {
+  "doc_checkpoint": "google/vaultgemma-1b",
+  "doc_status": "ok",
+  "repo": "google/vaultgemma-1b",
+  "revision": "f9624dafc1760cb2f6039e86e12055d6559d7abb",
+  "source": "doc",
+  "status": "ok"
+ },
+ "vibevoice": {
+  "doc_checkpoint": "vibevoice/VibeVoice-1.5B-hf",
+  "doc_status": "ok",
+  "repo": "vibevoice/VibeVoice-1.5B-hf",
+  "revision": "d4cd82eb4371bf3e3d088e1ea7fa4eefb60449bf",
+  "source": "doc",
+  "status": "ok"
+ },
+ "vibevoice_acoustic_tokenizer": {
+  "doc_checkpoint": "microsoft/VibeVoice-1.5B",
+  "doc_status": "ok",
+  "repo": "microsoft/VibeVoice-1.5B",
+  "revision": "c00898d257e6b46004e3e2866a47534085fb685a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "vibevoice_acoustic_tokenizer_decoder": {
+  "doc_checkpoint": "microsoft/VibeVoice-1.5B",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "vibevoice_acoustic_tokenizer_encoder": {
+  "doc_checkpoint": "microsoft/VibeVoice-1.5B",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "vibevoice_asr": {
+  "doc_checkpoint": "microsoft/VibeVoice-ASR-HF",
+  "doc_status": "ok",
+  "repo": "microsoft/VibeVoice-ASR-HF",
+  "revision": "f22241c2062b3b25272bf117397e03d73381037a",
+  "source": "doc",
+  "status": "ok"
+ },
+ "video_llama_3": {
+  "doc_checkpoint": "lkhl/VideoLLaMA3-2B-Image-HF",
+  "doc_status": "ok",
+  "repo": "lkhl/VideoLLaMA3-2B-Image-HF",
+  "revision": "8694f8ccf5df92ac306ed46149e1e96cb319d90e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "video_llama_3_vision": {
+  "doc_checkpoint": "lkhl/VideoLLaMA3-2B-Image-HF",
+  "doc_status": "ok",
+  "repo": "lkhl/VideoLLaMA3-2B-Image-HF",
+  "revision": "8694f8ccf5df92ac306ed46149e1e96cb319d90e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "video_llava": {
+  "doc_checkpoint": "LanguageBind/Video-LLaVA-7B-hf",
+  "doc_status": "ok",
+  "repo": "LanguageBind/Video-LLaVA-7B-hf",
+  "revision": "4cf9d8cfc76a54f46a4cb43be5368b46b7f0d736",
+  "source": "doc",
+  "status": "ok"
+ },
+ "videomae": {
+  "doc_checkpoint": "MCG-NJU/videomae-base",
+  "doc_status": "ok",
+  "repo": "MCG-NJU/videomae-base",
+  "revision": "dc740ceda42fce44faed2ea03c6d447db72f6af9",
+  "source": "doc",
+  "status": "ok"
+ },
+ "videomt": {
+  "doc_checkpoint": "tue-mps/videomt-dinov2-small-ytvis2019",
+  "doc_status": "ok",
+  "repo": "tue-mps/videomt-dinov2-small-ytvis2019",
+  "revision": "a8c9855154c4825bbdc738e5496840cbfa48987c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "videoprism": {
+  "doc_checkpoint": "google/videoprism-lvt-base-f16r288",
+  "doc_status": "RemoteEntryNotFoundError",
+  "repo": "sposiboh/videoprism-base-f16r288-pt",
+  "revision": "82d97c3e1c42b1e960801857541892fb4d7e9aff",
+  "source": "hub",
+  "status": "ok"
+ },
+ "videoprism_text_model": {
+  "doc_checkpoint": "google/videoprism-lvt-base-f16r288",
+  "doc_status": "RemoteEntryNotFoundError",
+  "status": "no_checkpoint"
+ },
+ "videoprism_vision_model": {
+  "doc_checkpoint": "google/videoprism-base-f16r288",
+  "doc_status": "RemoteEntryNotFoundError",
+  "repo": "MHRDYN7/videoprism-base-f16r288",
+  "revision": "c5bb17adeb575aaf1d46b56c5b9dfa1b00465c80",
+  "source": "hub",
+  "status": "ok"
+ },
+ "vilt": {
+  "doc_checkpoint": "dandelin/vilt-b32-mlm",
+  "doc_status": "ok",
+  "repo": "dandelin/vilt-b32-mlm",
+  "revision": "9507e9c3da12076e10f272e942569dc5190edc1c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "vipllava": {
+  "doc_checkpoint": "llava-hf/vip-llava-7b-hf",
+  "doc_status": "ok",
+  "repo": "llava-hf/vip-llava-7b-hf",
+  "revision": "d060fe36b7e550f6884342432561ea6afaea8482",
+  "source": "doc",
+  "status": "ok"
+ },
+ "vision-encoder-decoder": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "repo": "kha-white/manga-ocr-base",
+  "revision": "aa6573bd10b0d446cbf622e29c3e084914df9741",
+  "source": "hub",
+  "status": "ok"
+ },
+ "vision-text-dual-encoder": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "repo": "clip-italian/clip-italian",
+  "revision": "8b1e1e8162f7df366afb8e895fd19af214c78126",
+  "source": "hub",
+  "status": "ok"
+ },
+ "visual_bert": {
+  "doc_checkpoint": "uclanlp/visualbert-vqa-coco-pre",
+  "doc_status": "ok",
+  "repo": "uclanlp/visualbert-vqa-coco-pre",
+  "revision": "884aaef1fb6bed1429cae8c3abc314011a3a429f",
+  "source": "doc",
+  "status": "ok"
+ },
+ "vit": {
+  "doc_checkpoint": "google/vit-base-patch16-224",
+  "doc_status": "ok",
+  "repo": "google/vit-base-patch16-224",
+  "revision": "3f49326eb077187dfe1c2a2bb15fbd74e6ab91e3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "vit_mae": {
+  "doc_checkpoint": "facebook/vit-mae-base",
+  "doc_status": "ok",
+  "repo": "facebook/vit-mae-base",
+  "revision": "25b184bea5538bf5c4c852c79d221195fdd2778d",
+  "source": "doc",
+  "status": "ok"
+ },
+ "vit_msn": {
+  "doc_checkpoint": "facebook/vit_msn_base",
+  "doc_status": "RepositoryNotFoundError",
+  "repo": "hf-internal-testing/tiny-random-ViTMSNForImageClassification",
+  "revision": "1a3a512107271b606f049995d701cf89a991fa9c",
+  "source": "hub",
+  "status": "ok"
+ },
+ "vitdet": {
+  "doc_checkpoint": "google/vitdet-base-patch16-224",
+  "doc_status": "RepositoryNotFoundError",
+  "status": "no_checkpoint"
+ },
+ "vitmatte": {
+  "doc_checkpoint": "hustvl/vitmatte-small-composition-1k",
+  "doc_status": "ok",
+  "repo": "hustvl/vitmatte-small-composition-1k",
+  "revision": "6a58ad7646403c1df626fbd746900aec7361ea1d",
+  "source": "doc",
+  "status": "ok"
+ },
+ "vitpose": {
+  "doc_checkpoint": "usyd-community/vitpose-base-simple",
+  "doc_status": "ok",
+  "repo": "usyd-community/vitpose-base-simple",
+  "revision": "a93ac0c67e0b7e2c55287d21d4c460c8f3c54d45",
+  "source": "doc",
+  "status": "ok"
+ },
+ "vitpose_backbone": {
+  "doc_checkpoint": "usyd-community/vitpose-base-simple",
+  "doc_status": "ok",
+  "repo": "usyd-community/vitpose-base-simple",
+  "revision": "a93ac0c67e0b7e2c55287d21d4c460c8f3c54d45",
+  "source": "doc",
+  "status": "ok"
+ },
+ "vits": {
+  "doc_checkpoint": "facebook/mms-tts-eng",
+  "doc_status": "ok",
+  "repo": "facebook/mms-tts-eng",
+  "revision": "c71de0fe7204c83f1c10820a7d696d0b450048ba",
+  "source": "doc",
+  "status": "ok"
+ },
+ "vivit": {
+  "doc_checkpoint": "google/vivit-b-16x2-kinetics400",
+  "doc_status": "ok",
+  "repo": "google/vivit-b-16x2-kinetics400",
+  "revision": "8a7171a57f79b9aaa58bc8d977c002a0ea0f0d42",
+  "source": "doc",
+  "status": "ok"
+ },
+ "vjepa2": {
+  "doc_checkpoint": "facebook/vjepa2-vitl-fpc64-256",
+  "doc_status": "ok",
+  "repo": "facebook/vjepa2-vitl-fpc64-256",
+  "revision": "b3c1679b7c34d3255ef3547f27c7b226aefab26f",
+  "source": "doc",
+  "status": "ok"
+ },
+ "voxtral": {
+  "doc_checkpoint": "mistralai/Voxtral-Mini-3B-2507",
+  "doc_status": "ok",
+  "repo": "mistralai/Voxtral-Mini-3B-2507",
+  "revision": "3060fe34b35ba5d44202ce9ff3c097642914f8f3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "voxtral_encoder": {
+  "doc_checkpoint": "mistralai/Voxtral-Mini-3B-2507",
+  "doc_status": "ok",
+  "repo": "mistralai/Voxtral-Mini-3B-2507",
+  "revision": "3060fe34b35ba5d44202ce9ff3c097642914f8f3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "voxtral_realtime": {
+  "doc_checkpoint": "mistralai/Voxtral-Mini-4B-Realtime-2602",
+  "doc_status": "ok",
+  "repo": "mistralai/Voxtral-Mini-4B-Realtime-2602",
+  "revision": "2769294da9567371363522aac9bbcfdd19447add",
+  "source": "doc",
+  "status": "ok"
+ },
+ "voxtral_realtime_encoder": {
+  "doc_checkpoint": "mistralai/Voxtral-Mini-4B-Realtime-2602",
+  "doc_status": "ok",
+  "repo": "mistralai/Voxtral-Mini-4B-Realtime-2602",
+  "revision": "2769294da9567371363522aac9bbcfdd19447add",
+  "source": "doc",
+  "status": "ok"
+ },
+ "voxtral_realtime_text": {
+  "doc_checkpoint": "mistralai/Voxtral-Mini-4B-Realtime-2602",
+  "doc_status": "ok",
+  "repo": "mistralai/Voxtral-Mini-4B-Realtime-2602",
+  "revision": "2769294da9567371363522aac9bbcfdd19447add",
+  "source": "doc",
+  "status": "ok"
+ },
+ "wav2vec2": {
+  "doc_checkpoint": "facebook/wav2vec2-base-960h",
+  "doc_status": "ok",
+  "repo": "facebook/wav2vec2-base-960h",
+  "revision": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156",
+  "source": "doc",
+  "status": "ok"
+ },
+ "wav2vec2-bert": {
+  "doc_checkpoint": "facebook/w2v-bert-2.0",
+  "doc_status": "ok",
+  "repo": "facebook/w2v-bert-2.0",
+  "revision": "da985ba0987f70aaeb84a80f2851cfac8c697a7b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "wav2vec2-conformer": {
+  "doc_checkpoint": "facebook/wav2vec2-conformer-rel-pos-large",
+  "doc_status": "ok",
+  "repo": "facebook/wav2vec2-conformer-rel-pos-large",
+  "revision": "1afaab48b41d924fbbcae05d8c5d88836c4a5719",
+  "source": "doc",
+  "status": "ok"
+ },
+ "wavlm": {
+  "doc_checkpoint": "microsoft/wavlm-base",
+  "doc_status": "ok",
+  "repo": "microsoft/wavlm-base",
+  "revision": "efa81aae7ff777e464159e0f877d54eac5b84f81",
+  "source": "doc",
+  "status": "ok"
+ },
+ "whisper": {
+  "doc_checkpoint": "openai/whisper-tiny",
+  "doc_status": "ok",
+  "repo": "openai/whisper-tiny",
+  "revision": "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
+  "source": "doc",
+  "status": "ok"
+ },
+ "xclip": {
+  "doc_checkpoint": "microsoft/xclip-base-patch32",
+  "doc_status": "ok",
+  "repo": "microsoft/xclip-base-patch32",
+  "revision": "a2e27a78a2b5d802e894b8a1ef14f3a8ce490963",
+  "source": "doc",
+  "status": "ok"
+ },
+ "xclip_text_model": {
+  "doc_checkpoint": "microsoft/xclip-base-patch32",
+  "doc_status": "ok",
+  "repo": "microsoft/xclip-base-patch32",
+  "revision": "a2e27a78a2b5d802e894b8a1ef14f3a8ce490963",
+  "source": "doc",
+  "status": "ok"
+ },
+ "xclip_vision_model": {
+  "doc_checkpoint": "microsoft/xclip-base-patch32",
+  "doc_status": "ok",
+  "repo": "microsoft/xclip-base-patch32",
+  "revision": "a2e27a78a2b5d802e894b8a1ef14f3a8ce490963",
+  "source": "doc",
+  "status": "ok"
+ },
+ "xcodec": {
+  "doc_checkpoint": "Manel/X-Codec",
+  "doc_status": "ok",
+  "repo": "Manel/X-Codec",
+  "revision": "12c89aed4c2c6ea9df96ca67e6d3848f8df8069d",
+  "source": "doc",
+  "status": "ok"
+ },
+ "xcodec2": {
+  "doc_checkpoint": "HKUSTAudio/xcodec2-hf",
+  "doc_status": "ok",
+  "repo": "HKUSTAudio/xcodec2-hf",
+  "revision": "64bd034d12d441299cdd535b15c33efd6ccdf252",
+  "source": "doc",
+  "status": "ok"
+ },
+ "xglm": {
+  "doc_checkpoint": "facebook/xglm-564M",
+  "doc_status": "ok",
+  "repo": "facebook/xglm-564M",
+  "revision": "f3059f01b98ccc877c673149e0178c0e957660f9",
+  "source": "doc",
+  "status": "ok"
+ },
+ "xlm": {
+  "doc_checkpoint": "FacebookAI/xlm-mlm-en-2048",
+  "doc_status": "ok",
+  "repo": "FacebookAI/xlm-mlm-en-2048",
+  "revision": "6eb6401a142611ae90f3d6bc606b97384f1c9961",
+  "source": "doc",
+  "status": "ok"
+ },
+ "xlm-roberta": {
+  "doc_checkpoint": "FacebookAI/xlm-mlm-en-2048",
+  "doc_status": "wrong_model_type",
+  "repo": "BAAI/bge-reranker-v2-m3",
+  "revision": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+  "source": "hub",
+  "status": "ok"
+ },
+ "xlm-roberta-xl": {
+  "doc_checkpoint": "facebook/xlm-roberta-xl",
+  "doc_status": "ok",
+  "repo": "facebook/xlm-roberta-xl",
+  "revision": "aa5d120255845efeebc9b7f42822a1dd0f9ece9d",
+  "source": "doc",
+  "status": "ok"
+ },
+ "xlnet": {
+  "doc_checkpoint": "xlnet/xlnet-large-cased",
+  "doc_status": "ok",
+  "repo": "xlnet/xlnet-large-cased",
+  "revision": "37658b4f179eaf971d127d16bfbd9ca676a93034",
+  "source": "doc",
+  "status": "ok"
+ },
+ "xlstm": {
+  "doc_checkpoint": "NX-AI/xLSTM-7b",
+  "doc_status": "ok",
+  "repo": "NX-AI/xLSTM-7b",
+  "revision": "9dc507bd0939cf372a4a4f667335651d8e49dddb",
+  "source": "doc",
+  "status": "ok"
+ },
+ "xmod": {
+  "doc_checkpoint": "facebook/xmod-base",
+  "doc_status": "ok",
+  "repo": "facebook/xmod-base",
+  "revision": "1ff23836a9ee8b9656553630c33506a9a8a59c4f",
+  "source": "doc",
+  "status": "ok"
+ },
+ "yolos": {
+  "doc_checkpoint": "hustvl/yolos-base",
+  "doc_status": "ok",
+  "repo": "hustvl/yolos-base",
+  "revision": "4d5b3df62b18f1d9c6968970ac75941cc6c9a2d1",
+  "source": "doc",
+  "status": "ok"
+ },
+ "yoso": {
+  "doc_checkpoint": "uw-madison/yoso-4096",
+  "doc_status": "ok",
+  "repo": "uw-madison/yoso-4096",
+  "revision": "51a64263ef39d9e633f821a13ec9fafe5711061f",
+  "source": "doc",
+  "status": "ok"
+ },
+ "youtu": {
+  "doc_checkpoint": "tencent/Youtu-LLM-2B",
+  "doc_status": "ok",
+  "repo": "tencent/Youtu-LLM-2B",
+  "revision": "8b0e73594661a945a7f5aafc737b63e3d8ad3f75",
+  "source": "doc",
+  "status": "ok"
+ },
+ "zamba": {
+  "doc_checkpoint": "Zyphra/Zamba-7B-v1",
+  "doc_status": "ok",
+  "repo": "Zyphra/Zamba-7B-v1",
+  "revision": "b8c9e7ede2f60ef36c21328bcf578932318db771",
+  "source": "doc",
+  "status": "ok"
+ },
+ "zamba2": {
+  "doc_checkpoint": "Zyphra/Zamba2-2.7B",
+  "doc_status": "ok",
+  "repo": "Zyphra/Zamba2-2.7B",
+  "revision": "31afeeac4c66b4851a54290ba57c995a68c87861",
+  "source": "doc",
+  "status": "ok"
+ },
+ "zaya": {
+  "doc_checkpoint": "Zyphra/ZAYA1-8B",
+  "doc_status": "ok",
+  "repo": "Zyphra/ZAYA1-8B",
+  "revision": "67d34da515b30409ee8daa67c3605c4402d03f6f",
+  "source": "doc",
+  "status": "ok"
+ },
+ "zoedepth": {
+  "doc_checkpoint": "Intel/zoedepth-nyu",
+  "doc_status": "ok",
+  "repo": "Intel/zoedepth-nyu",
+  "revision": "52ae69caf7896c927909b3ceab4249c235e16dc1",
+  "source": "doc",
+  "status": "ok"
+ }
+}

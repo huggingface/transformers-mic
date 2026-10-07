@@ -12,13 +12,14 @@ PR-level contract checks need a model small enough to run on CPU in seconds that
 - Slim fixtures caught all 8 reproducible historical regressions, once the original processor files were copied and the contract called the affected public API under the default runtime (SDPA).
 - No fixture produced a NaN: 288 load-and-train checks in float32, bfloat16, and float16. Real weights are not needed. Pruned real layers also fix Whisper but are 8–235× larger, and sliced real tensors behave like random ones.
 - Fixtures carry across hardware; baselines do not. Record baselines per platform class (CPU, GPU) and per dtype.
+- One generic shrink rule already builds and runs [56% of Transformers architectures](#does-it-scale-to-every-architecture) (314 of 559), including 15 of the 17 in #49103. Most of the rest need per-architecture rules for coupled size fields, or real processor inputs.
 
 **Proposed recipe:** shrink the real config by layer pattern, seed, overfit, gate on input sensitivity and numeric health, freeze, and record baselines per platform and dtype.
 
 **Next moves:**
 
 1. **Redirect the tiny-model work in Transformers to this recipe** (proposed new direction, see [below](#relation-to-todays-tiny-models)): pause the smoke-only tests in [#49103](https://github.com/huggingface/transformers/pull/49103), and change `create_dummy_models.py` to build from real configs, copy processor files, overfit from a seed, and run the gates.
-2. **Run it across the #49103 model list** to measure the shrink-rule success rate, starting with layer-pattern, MoE, nested multimodal, and Jamba-style configs. Retire the smoke-only tests once the rate is acceptable.
+2. **Close the gap on the [architecture sweep](#does-it-scale-to-every-architecture):** per-architecture rules for coupled size fields (the largest failure group), real processor inputs instead of synthetic ones, and the image path of multimodal models. Retire the smoke-only tests once the rate is acceptable.
 3. **Write training examples per usage path.** Overfitting needs a few labeled inputs and a loss for each task; this is the main new cost of the recipe.
 4. **Publish one fixture per fixture key** as `hf-internal-testing/<name>-slim`, kept out of model discovery, and pin it in the fleet lock.
 5. **Calibrate tolerances** on the CPU-only CI runners and the other GPU types, and record bfloat16 baselines.
@@ -73,6 +74,27 @@ A fixed `num_hidden_layers = 2` is wrong whenever layers differ. 170 Transformer
 
 **Not covered.** Period-based patterns such as Jamba's, and index-dependent logic such as cross-layer KV sharing, need per-architecture rules.
 
+## Does it scale to every architecture?
+
+The recipe was tried on every model type in Transformers (`4d536e1f`, 725 types), with configs only ([script](../experiments/sweep.py), [results](../experiments/results/sweep.json), [checkpoints used](../experiments/results/sweep_sources.json)). For each type, a pinned checkpoint's config was shrunk with **one generic rule**: widths by field name in every sub-config, depth by layer pattern, MoE to 4 experts, backbone stages left to defaults. Then the primary head was built with random weights and run forward and backward on synthetic inputs sized from the config.
+
+| | Model types |
+| --- | ---: |
+| No usable checkpoint (no doc checkpoint and none on the Hub, or only gated) | 86 |
+| Component of a composite model only (`*_vision_model`, `*_text_model`), not a usage path | 80 |
+| **Usage paths tried** | **559** |
+| Built and ran forward and backward, all finite | **314 (56%)** |
+| Failed: coupled size fields and other per-architecture constraints | 167 |
+| Failed: synthetic inputs the model does not accept (video, time series, extra required inputs) | 61 |
+| Failed: config round-trip or optional dependency | 17 |
+
+- **Where it works:** 131 causal LMs, 42 image-text-to-text, 28 image classifiers, 24 masked LMs, 20 seq2seq, and 8 CTC models. That includes 15 of the 17 #49103 models; MusicGen fails a config round-trip, and Qwen2.5-VL its M-RoPE sections. The median fixture has 6.5M parameters. The 11 above 50M keep a large real vocabulary (RemBERT, Gemma 3n) or a component the generic rule does not shrink (PerceptionLM's vision tower, LUKE's entity embeddings).
+- **Coupled fields are the main cost.** Typical cases: M-RoPE sections that must sum to half the head dimension (GLM-4V, Qwen-VL), convolution groups that must divide channels, per-stage widths and heads in hierarchical vision models (Swin v2, PVT), neck sizes tied to backbone stages, and cache layouts in mamba hybrids. Each needs a small per-architecture rule, written once per family and reusable by models that share the family's code.
+- **Input failures are a limitation of the sweep, not of the recipe.** A contract feeds real processor outputs; the sweep only made synthetic tensors. For the same reason, the 62 multimodal models that passed ran text only, and their image path is untested here.
+- **Side finding:** 89 config classes in Transformers document a checkpoint whose config is another model type (for example `segformer` points at Seed-OSS, `granitemoehybrid` at Granite Speech). The sweep used the most downloaded ungated Hub model of the right type instead.
+
+So per-architecture work is unavoidable, but it is bounded: roughly half of all architectures need none, and the rest need a rule per family, not per checkpoint. Contracts multiply by usage path and fixture key, not by checkpoint.
+
 ## Hardware and dtype
 
 The same fixture files ran unchanged on the A10G; only baselines are platform- and dtype-specific ([evidence](evidence.md#on-gpu)):
@@ -106,4 +128,5 @@ python experiments/experiment.py --families bert t5 whisper wav2vec2 --max-steps
   --output experiments/results/more_families.json
 python experiments/fixture_init.py    # random, overfit, pruned, sliced
 python experiments/layer_patterns.py  # needs network for the three configs
+python experiments/sweep.py prefetch && python experiments/sweep.py run  # every architecture
 ```
