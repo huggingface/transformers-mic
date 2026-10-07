@@ -1,6 +1,6 @@
 # Full example: MICs and the runner prototype
 
-A complete, runnable MIC for one usage path, batched greedy text generation, across three SmolLM checkpoints, in Transformers and Transformers.js. It shows every part of the [proposed standard](../README.md#the-proposed-standard) with real files and real outputs. The Hugging Face repositories are not published; their contents are in [`hub/`](hub).
+A complete, runnable MIC for one usage path, batched greedy text generation, across three SmolLM checkpoints, in Transformers and Transformers.js. It shows every part of the [proposed standard](../README.md#the-proposed-standard) with real files and real outputs. The fixture repositories are published as [`hf-internal-testing/proto-*`](https://huggingface.co/hf-internal-testing?search_models=proto-); the integration repositories are not published yet. The contents of both are in [`hub/`](hub).
 
 Five more contracts (CLIP, BERT, T5 with UMT5, Whisper, Wav2Vec2) run through the same [runner prototype](#runner-prototype), with fixtures built by one generic recipe.
 
@@ -10,8 +10,8 @@ Five more contracts (CLIP, BERT, T5 with UMT5, Whisper, Wav2Vec2) run through th
 | --- | --- | --- |
 | `HuggingFaceTB/SmolLM-135M`, `-360M`, `-1.7B` | Creator | not copied: unchanged, pinned in the fleet locks |
 | `hf-internal-testing/SmolLM-integration`: contract and manifest | Hugging Face | [`hub/SmolLM-integration/`](hub/SmolLM-integration) |
-| `hf-internal-testing/proto-SmolLM-slim`: fixture for 135M and 360M | Hugging Face | [`hub/proto-SmolLM-slim/`](hub/proto-SmolLM-slim) |
-| `hf-internal-testing/proto-SmolLM-1.7B-slim`: fixture for 1.7B | Hugging Face | [`hub/proto-SmolLM-1.7B-slim/`](hub/proto-SmolLM-1.7B-slim) |
+| [`hf-internal-testing/proto-SmolLM-slim`](https://huggingface.co/hf-internal-testing/proto-SmolLM-slim): fixture for 135M and 360M | Hugging Face | [`hub/proto-SmolLM-slim/`](hub/proto-SmolLM-slim) |
+| [`hf-internal-testing/proto-SmolLM-1.7B-slim`](https://huggingface.co/hf-internal-testing/proto-SmolLM-1.7B-slim): fixture for 1.7B | Hugging Face | [`hub/proto-SmolLM-1.7B-slim/`](hub/proto-SmolLM-1.7B-slim) |
 | `onnx-community/SmolLM-135M-ONNX`, `-360M-ONNX` | Hugging Face | not copied: the conversions Transformers.js loads |
 | Transformers: fleet lock and expected results | Transformers maintainers | [`transformers/tests/contracts/`](transformers/tests/contracts) |
 | Transformers.js: fleet lock and expected results | Transformers.js maintainers | [`transformers.js/tests/contracts/`](transformers.js/tests/contracts) |
@@ -136,10 +136,10 @@ The same contracts and the same pinned fixtures ran on an NVIDIA A10G (torch 2.1
 ## Not real yet
 
 - The fixtures are published as `hf-internal-testing/proto-*` and pinned by revision in the Transformers fleet lock; the integration repositories are still unpublished, and the fleet locks point at their folders in [`hub/`](hub) (`"revision": "unpublished"`).
-- Contracts run in the runner's own process, with no isolation beyond `--isolate` (one process per target). Selecting contracts from the files a framework PR changes is not implemented.
-- Fixtures built by `build_fixtures.py` are reproducible on one machine only: rebuilt on an x86 CPU, every fixture's weights differed from the pinned bytes. They must be published and pinned rather than rebuilt by each CI job; until then the GPU job downloads them from a release asset.
+- Contracts run in the runner's own process, with no isolation beyond `--isolate` (one process per target). Contracts are selected from the files a framework change touches ([`select_contracts.py`](select_contracts.py), `run.py --changed-files`), but no CI job uses the selection yet.
+- Fixtures built by `build_fixtures.py` are reproducible on one machine only: rebuilt on an x86 CPU, every fixture's weights differed from the pinned bytes. So they are published and pinned rather than rebuilt by each CI job; the GPU job still downloads them from a release asset and is to switch to the Hub.
 - Variants need a second, hidden `from_pretrained` call in the runnable block. A doc-builder hook for passing load arguments to a block would remove it.
-- Baselines here are CPU, plus WebGPU fp32 for Transformers.js. A CUDA GPU job would need its own reviewed baselines: on an A10G, CPU-recorded logits held for text models but not for convolutional ones, and lower precision changed outputs ([evidence](../docs/evidence.md#on-gpu)).
+- Baselines here are CPU (Apple M5) and CUDA (A10G), plus WebGPU fp32 for Transformers.js. Whether the CPU baselines hold on x86 CPU runners is not checked yet.
 
 ## What this example offers an agent
 

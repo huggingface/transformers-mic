@@ -10,12 +10,12 @@
       },
       "fixtures": {
         "hf-internal-testing/proto-SmolLM-slim": {
-          "revision": "06c6299824817b00755e8a0a563d8328e77ce458",
+          "revision": "1c0a3216574bf8471b77d5e559fb009eebeef32d",
           "path": "../../../hub/proto-SmolLM-slim",
           "files_sha256": "e281b7c566cef1885af1a3087b9d590058971b56ab4aa8136aedf089141ff60e"
         },
         "hf-internal-testing/proto-SmolLM-1.7B-slim": {
-          "revision": "a6a321d287eb9b30783b29944e9a86f5c59a890e",
+          "revision": "66ee3c4377a7a539904154828c58616b0fe2caae",
           "path": "../../../hub/proto-SmolLM-1.7B-slim",
           "files_sha256": "d6cb7aae64669f6d15ed9cbc6004396e3c12e1a9c7b2d6b41b5e1c70ca61c48b"
         }
@@ -34,7 +34,7 @@
       },
       "fixtures": {
         "hf-internal-testing/proto-clip-vit-base-patch32-slim": {
-          "revision": "e9c3775beaf79a4c55eae8e763510220c286679e",
+          "revision": "e4fcaf85f17ba0b2cb08a0e33f5465f96b753a1c",
           "path": "../../../hub/proto-clip-vit-base-patch32-slim",
           "files_sha256": "e72402276836e7b27c96687600cde8e3612a82e7b6e9d69a0523626816f99e1d"
         }
@@ -51,7 +51,7 @@
       },
       "fixtures": {
         "hf-internal-testing/proto-bert-base-uncased-slim": {
-          "revision": "9a9df2192eaba8b5a0c77586131c8e1cb224e258",
+          "revision": "ca05f68c78ce2e6778754ae4d33ab0c8abd457a6",
           "path": "../../../hub/proto-bert-base-uncased-slim",
           "files_sha256": "10e7f1627bf4615e202df67f40abbeb5070a88fd9741a257fbf71dee21daf16f"
         }
@@ -68,12 +68,12 @@
       },
       "fixtures": {
         "hf-internal-testing/proto-t5-small-slim": {
-          "revision": "10f2ac2219b3338f7d3c8487f413fa1261a71b1f",
+          "revision": "0a9ae9de5891182e5bce5afef05dbf4bdb8e7bae",
           "path": "../../../hub/proto-t5-small-slim",
           "files_sha256": "530a553b936f1a6c0a68b8e394e30319fd0ae38dc76718fe55c47212d053f8a6"
         },
         "hf-internal-testing/proto-umt5-small-slim": {
-          "revision": "425aa6c869b39c91aeecfd0e85ab2a08f6931272",
+          "revision": "bcf49ff61123021fec581f72120001f396cb0b59",
           "path": "../../../hub/proto-umt5-small-slim",
           "files_sha256": "91a8c18974956cfd1e6e08cb6ec8f056b10d12ada1a3e8d35acee48a995634ac"
         }
@@ -91,7 +91,7 @@
       },
       "fixtures": {
         "hf-internal-testing/proto-whisper-tiny-slim": {
-          "revision": "c9482c05210180fb3eec9ca027fdf6f47dc6a2aa",
+          "revision": "9877529f05b049732196b574d9d5272cb8dae6e0",
           "path": "../../../hub/proto-whisper-tiny-slim",
           "files_sha256": "71e6e2a43065192dd2d535faaf16d2ed5bd2a6d6d7b8e66ef8388a159511ec9f"
         }
@@ -108,7 +108,7 @@
       },
       "fixtures": {
         "hf-internal-testing/proto-wav2vec2-base-960h-slim": {
-          "revision": "9be904eb395e832cfa1520ae93568642a0d8252d",
+          "revision": "6a978df116a926f92c954cfa4a88305d22a10087",
           "path": "../../../hub/proto-wav2vec2-base-960h-slim",
           "files_sha256": "5522f324c0e8bd3e70aa54a57318e4d5016c46df7709120dfb632423f4221c2f"
         }

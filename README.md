@@ -10,7 +10,7 @@ A contract is ordinary user code: load the model, call the public API users call
 
 - `HuggingFaceTB/SmolLM-135M`, `-360M`, and `-1.7B`: the real models, owned by the creator, unchanged;
 - [`hf-internal-testing/SmolLM-integration`](example/hub/SmolLM-integration): one contract for SmolLM text generation covering all three checkpoints, owned by Hugging Face;
-- [`hf-internal-testing/proto-SmolLM-slim`](example/hub/proto-SmolLM-slim) and [`proto-SmolLM-1.7B-slim`](example/hub/proto-SmolLM-1.7B-slim): small fixtures, one per distinct tokenizer and config, owned by Hugging Face;
+- [`hf-internal-testing/proto-SmolLM-slim`](https://huggingface.co/hf-internal-testing/proto-SmolLM-slim) and [`proto-SmolLM-1.7B-slim`](https://huggingface.co/hf-internal-testing/proto-SmolLM-1.7B-slim) (published; sources in [`example/hub/`](example/hub)): small fixtures, one per distinct tokenizer and config, owned by Hugging Face;
 - [`transformers/tests/contracts/`](example/transformers/tests/contracts): the fleet lock and Transformers' expected results, owned by Transformers maintainers.
 
 Framework CI fetches the contract and fixtures at pinned revisions and runs them: against each small fixture on every PR, where it runs on CPU in seconds, and against the real checkpoints after merge, nightly, and before release.

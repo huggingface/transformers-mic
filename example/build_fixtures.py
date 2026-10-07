@@ -275,16 +275,16 @@ base_model: {build['built_from']['repo']}
 
 # Slim fixture: {short(name)}
 
-A {build['parameters'] / 1e6:.1f}M-parameter fixture for the [{contract} MIC](../{contract}-integration), covering {covers}. This unpublished example is a test artifact, not a usable model, and should be excluded from candidate-model search when published.
+A {build['parameters'] / 1e6:.1f}M-parameter fixture for the [{contract} MIC](https://github.com/huggingface/model-integration-contracts/tree/main/example/hub/{contract}-integration), covering {covers}. It is a test artifact, not a usable model, tagged `test-artifact` to keep it out of candidate-model search.
 
 - **Fixture key `{build['key'][:12]}`.** It covers every checkpoint whose processor files are byte-identical and whose config matches after shrinking.
-- **Same architecture, smaller config:** `{cls.__name__}`, shrunk by the generic rule in [`sweep.py`](../../../experiments/sweep.py) ({depth(config)}).
+- **Same architecture, smaller config:** `{cls.__name__}`, shrunk by the generic rule in [`sweep.py`](https://github.com/huggingface/model-integration-contracts/blob/main/experiments/sweep.py) ({depth(config)}).
 - **Processor files copied byte for byte** from `{build['built_from']['repo']}`: {', '.join(f'`{f}`' for f in build['copied_unchanged'])}.
 - {weights}
 - **Same tensor names as the real checkpoint.** {mirror}
 - **Finite in float32, bfloat16, and float16** (forward, loss, gradients).
 
-Built by [`build_fixtures.py`](../../build_fixtures.py); [`build.json`](build.json) records the pinned sources, gate results, and file hashes. Only `README.md` and `build.json` are committed; rebuild the other files with `python example/build_fixtures.py --fixture {short(name)}`.
+Built by [`build_fixtures.py`](https://github.com/huggingface/model-integration-contracts/blob/main/example/build_fixtures.py); [`build.json`](build.json) records the pinned sources, gate results, and file hashes. The source repository commits only `README.md` and `build.json`; rebuild the other files with `python example/build_fixtures.py --fixture {short(name)}`.
 """
 
 

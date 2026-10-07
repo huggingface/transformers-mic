@@ -7,7 +7,7 @@ base_model: HuggingFaceTB/SmolLM-1.7B
 
 # Slim fixture: SmolLM-1.7B
 
-A 3.2M-parameter fixture for the [SmolLM MIC](../SmolLM-integration), covering [`HuggingFaceTB/SmolLM-1.7B`](https://huggingface.co/HuggingFaceTB/SmolLM-1.7B). This unpublished example is a test artifact, not a usable model, and should be excluded from candidate-model search when published.
+A 3.2M-parameter fixture for the [SmolLM MIC](https://github.com/huggingface/model-integration-contracts/tree/main/example/hub/SmolLM-integration), covering [`HuggingFaceTB/SmolLM-1.7B`](https://huggingface.co/HuggingFaceTB/SmolLM-1.7B). It is a test artifact, not a usable model, tagged `test-artifact` to keep it out of candidate-model search.
 
 Its overfit answers are references for this fixture only. A passing check does not establish the real checkpoint's outputs or semantic correctness on new prompts. Agents should use the parent contract to find the requested real checkpoint's tested environment and reviewed result.
 
@@ -16,4 +16,4 @@ Its overfit answers are references for this fixture only. A passing check does n
 - **Processor files copied byte for byte** from `HuggingFaceTB/SmolLM-1.7B`: `tokenizer.json`, `tokenizer_config.json`, `special_tokens_map.json`, `vocab.json`, `merges.txt`.
 - **Overfit to the contract's prompts** ("The capital of France is" → " Paris", …; 50 steps), so its outputs are meaningful and change visibly when a framework change breaks them.
 
-Built by [`build_fixtures.py`](../../build_fixtures.py) from pinned revisions recorded in `build.json`.
+Built by [`build_fixtures.py`](https://github.com/huggingface/model-integration-contracts/blob/main/example/build_fixtures.py) from pinned revisions recorded in `build.json`.
