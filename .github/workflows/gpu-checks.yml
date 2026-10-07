@@ -25,7 +25,7 @@ on:
         type: string
         default: text clip bert t5 whisper wav2vec2
       matrix:
-        description: "full: everything below · tf32: CPU baselines checked on GPU in float32, cuDNN TF32 on vs off"
+        description: "full: everything below · tf32: CPU baselines checked on GPU in float32, cuDNN TF32 on vs off · init: fixture_init.py (random/overfit/pruned/sliced) on GPU"
         required: false
         type: string
         default: full
@@ -104,7 +104,18 @@ jobs:
       - name: Prefetch pinned snapshots
         run: python3 prefetch.py
 
+      - name: Fixture init schemes on GPU
+        if: inputs.matrix == 'init'
+        env:
+          CONTRACT_DEVICE: cuda
+        run: |
+          python3 fixture_init.py --families $FAMILIES --threads 8 \
+            --output "$OUT/fixture_init.json" --artifacts /tmp/init-fixtures > "$OUT/fixture_init.log" 2>&1 \
+            || { tail -50 "$OUT/fixture_init.log"; exit 1; }
+          python3 -c "import json; print(json.dumps(json.load(open('$OUT/fixture_init.json'))['summary'], indent=1))"
+
       - name: Freeze on CPU (float32)
+        if: inputs.matrix != 'init'
         run: |
           python3 replay.py freeze --families $FAMILIES --real --threads 8 \
             --out "$OUT/frozen-cpu" --build "${{ inputs.transformers_sha }}"
@@ -118,6 +129,7 @@ jobs:
             --out "$OUT/frozen-gpu" --build "${{ inputs.transformers_sha }}"
 
       - name: Check on GPU
+        if: inputs.matrix != 'init'
         env:
           CONTRACT_DEVICE: cuda
         run: |
