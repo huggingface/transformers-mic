@@ -1,0 +1,109 @@
+name: Shadow backfill
+
+# The shadow job (shadow.yml) on past Transformers main commits, to get weeks of
+# step-4 data at once: every first-parent commit in [since, until), oldest
+# first, split over parallel chunks. Each chunk installs the fleet lock's pinned
+# environment once, with Transformers editable, and checks each commit out in
+# turn (.github/scripts/backfill.py). Results go to the shadow-results branch
+# as runs/backfill/<since>_<until>-<run id>.jsonl.
+#
+#   gh workflow run shadow-backfill.yml --repo huggingface/model-integration-contracts -f since=2026-09-07 -f until=2026-10-08
+
+on:
+  workflow_dispatch:
+    inputs:
+      since:
+        required: true
+        type: string
+      until:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  SINCE: ${{ inputs.since }}
+  UNTIL: ${{ inputs.until }}
+  CHUNKS: 10
+  HF_HUB_DISABLE_PROGRESS_BARS: "1"
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  chunk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        chunk: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install
+        run: |
+          PY=python FETCH=main .github/scripts/install_pinned.sh
+          rm -rf /tmp/transformers
+          git clone --quiet --filter=blob:none --single-branch -b main \
+            --shallow-since="$(date -u -d "$SINCE -7 days" +%F)" https://github.com/huggingface/transformers /tmp/transformers
+          python -m pip uninstall --quiet -y transformers
+          python -m pip install --quiet --no-deps -e /tmp/transformers
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface/hub
+          key: hf-fixtures-${{ hashFiles('example/transformers/tests/contracts/fleet.lock') }}
+      - name: Run
+        run: |
+          python .github/scripts/backfill.py --repo /tmp/transformers --since "$SINCE" --until "$UNTIL" \
+            --chunk ${{ matrix.chunk }} --chunks "$CHUNKS" --output "out/backfill-${{ matrix.chunk }}.jsonl"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backfill-${{ matrix.chunk }}
+          path: out/
+
+  publish:
+    needs: chunk
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: backfill-*
+          path: chunks
+          merge-multiple: true
+      - name: Summary
+        run: |
+          cat chunks/*.jsonl | jq -s -c 'sort_by(.shadow.position, .target)[]' > results.jsonl
+          {
+            echo "### Backfill $SINCE..$UNTIL"
+            echo
+            echo "$(jq -r '.shadow.transformers_sha' results.jsonl | sort -u | wc -l) commits, $(wc -l < results.jsonl) records"
+            echo
+            echo "| status | records |"
+            echo "| --- | --- |"
+            jq -r '.status' results.jsonl | sort | uniq -c | awk '{print "| " $2 " | " $1 " |"}'
+            echo
+            echo "| commit | target | status | selected by | failures |"
+            echo "| --- | --- | --- | --- | --- |"
+            jq -r 'select(.status != "pass" and .status != "xfail") | "| `\(.shadow.transformers_sha[0:10])` \(.shadow.commit_subject[0:60] | gsub("\\|"; "/")) | \(.target) | \(.status) | \(.selected_by // "not selected") | \((.failures // []) | join("; ") | .[0:200] | gsub("\\|"; "/") | gsub("\n"; " ")) |"' results.jsonl
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Append to shadow-results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch --quiet origin shadow-results:refs/remotes/origin/shadow-results
+          git worktree add --quiet -B shadow-results /tmp/shadow-results origin/shadow-results
+          file="runs/backfill/${SINCE}_${UNTIL}-${{ github.run_id }}.jsonl"
+          mkdir -p "/tmp/shadow-results/runs/backfill"
+          cp results.jsonl "/tmp/shadow-results/$file"
+          cd /tmp/shadow-results
+          git add -A
+          git commit --quiet -m "Backfill $SINCE..$UNTIL (run ${{ github.run_id }})"
+          for i in 1 2 3; do
+            git push --quiet origin shadow-results && break
+            git pull --quiet --rebase origin shadow-results
+          done
