@@ -325,7 +325,7 @@ We should replay documented historical regressions and verify each one against:
 
 A synthetic fault suite is not enough. The [first replay](evidence.md) is a start; the pilot should extend it with GPU-specific regressions and with bugs found by the existing nightly and slow tests.
 
-Replaying contracts on a framework's own history measures the same thing without picking cases: the [shadow backfill](evidence.md#shadow-backfill) ran the fixtures on every `main` commit of a date window, frozen contracts and baselines, and records per commit what failed and what the changed-file selection would have run. Over five months (1,468 commits), the one regression the contracts cover (UMT5) failed from its introducing commit to its fix; four regressions in the same families were missed because no contract makes the affected call; selection picked the affected contract on every commit that changed a result.
+Replaying contracts on a framework's own history measures the same thing without picking cases: the [shadow backfill](evidence.md#shadow-backfill) ran the fixtures on every `main` commit of a date window, frozen contracts and baselines, and records per commit what failed and what the changed-file selection would have run. Over five months (1,468 commits), the one regression the contracts cover (UMT5) failed from its introducing commit to its fix; four regressions in the same families were missed because no contract made the affected call; selection picked the affected contract on every commit that changed a result. Adding those four calls ([improvement loop](improving-contracts.md)) caught all five on the same history, without new false alarms.
 
 ### Cost
 
