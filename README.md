@@ -51,7 +51,7 @@ A MIC is defined per usage path and covers every checkpoint that shares it. A co
 7. **[Fixtures](example/hub/SmolLM-slim) shared by checkpoints that preprocess the same way.** Processor, tokenizer, and preprocessing files are copied byte for byte; only the weights and model config shrink. Checkpoints share a fixture when those files and every config field that shrinking keeps are identical, and the fixture build fails otherwise.
 8. **Everything pinned.** Each framework runs contracts from its [fleet lock](example/transformers/tests/contracts/fleet.lock), listing the contract, fixture, checkpoint, converted artifact, and dependency revisions; its baselines are versioned with it.
 
-The example's [`run.py`](example/run.py) sketches the shared runner. The manifest and result schemas and the real runner are what the pilot builds ([next steps](docs/next-steps.md), step 3). Details are in the [technical design](docs/design.md).
+The example's [`run.py`](example/run.py) sketches the shared runner. The manifest and result schemas and the real runner are what the pilot builds. Details are in the [technical design](docs/design.md).
 
 ## Why on the Hub, owned by Hugging Face
 
@@ -69,5 +69,4 @@ Run a CI-only pilot on 3–5 models, with existing tests kept running in paralle
 - [Evidence](docs/evidence.md): what the local experiments and the historical regression replay show.
 - [Technical design](docs/design.md): contract layout, CI triggers, where code lives, checks, baselines, runner, pilot plan, open questions.
 - [Small fixtures](docs/fixtures.md): the fixture project, from today's tiny models to frozen random and overfit fixtures.
-- [Next steps](docs/next-steps.md): the validation plan and what is done.
 - [Agent walkthrough](docs/agent-walkthrough.md): a recorded run of an agent taking two Hub models to working code, every tool call included, with a prompt to repeat it in other agents.

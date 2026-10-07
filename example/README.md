@@ -75,6 +75,6 @@ What building the example showed:
 ## Not real yet
 
 - The `hf-internal-testing` repositories are unpublished; the fleet locks point at the folders in [`hub/`](hub) (`"revision": "unpublished"`).
-- `run.py` starts a new process per target. The shared runner should batch targets per process, because imports dominate check cost ([evidence](../docs/evidence.md)). It should also add the manifest and result schemas, isolation, and the input-sensitivity gate ([next steps](../docs/next-steps.md), step 3).
+- `run.py` starts a new process per target. The shared runner should batch targets per process, because imports dominate check cost ([evidence](../docs/evidence.md)). It should also add the manifest and result schemas, isolation, and the input-sensitivity gate ([design](../docs/design.md)).
 - Variants need a second, hidden `from_pretrained` call in the runnable block. A doc-builder hook for passing load arguments to a block would remove it.
 - Baselines here are CPU only. A GPU job would need its own reviewed baselines: on an A10G, CPU-recorded logits held for text models but not for convolutional ones, and lower precision changed outputs ([evidence](../docs/evidence.md#on-gpu)).
