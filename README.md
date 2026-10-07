@@ -80,6 +80,7 @@ Measure agent reuse separately with the [controlled walkthrough recipe](docs/age
 - [Problems and opened questions](docs/problems-and-opened-questions.md): limits of the fast checks, fixture sensitivity, baseline reliability, maintenance costs, and validation gaps to resolve during the pilot.
 - [Slim models in Transformers development and CI](docs/slim-models-in-transformers-ci.md): developer and maintainer flows, fast slim checks on PRs, full-model checks in `run-slow`, and the CI integration decisions still to make.
 - [Technical design](docs/design.md): contract layout, CI triggers, where code lives, checks, baselines, runner, pilot plan, open questions.
+- [Improving contracts](docs/improving-contracts.md): the maintenance loop: find what contracts miss, add the user-facing call, prove it on history, keep false alarms down.
 - [End-to-end tests](docs/end-to-end-tests.md): every check this repository runs (contracts, shadow and GPU jobs, regression replays, synthetic faults, stability, cost, sweep, WebGPU), with commands.
 - [Small fixtures](docs/fixtures.md): the fixture recipe (real config shrunk by layer pattern, copied processor files, overfit and frozen) and the experiments behind it.
 - [Agent walkthroughs](docs/agent-walkthrough/README.md): the shared recipe and prompts, with separate Claude Opus and Codex results recording local Hub inference, tool calls, outputs, and failures.

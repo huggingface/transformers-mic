@@ -12,6 +12,8 @@ Choosing representative usage paths remains substantial test-authoring work. A s
 
 Freeze the contract code, inputs, fixtures, assertions, and tolerances before evaluating a set of regressions that was not used to design them. Continue the same measurement on future changes during the shadow trial. The [shadow backfill](evidence.md#shadow-backfill) does this on past history: frozen contracts on all 1,468 `main` commits from 2026-05-02 to 2026-10-07. Of the five regressions in the contracts' families during that time, the frozen suite caught one (UMT5, at its introducing commit) and missed four whose affected calls it does not make; it also flagged one benign change. That is the detection-rate problem stated above, measured: the misses are usage paths, not fixtures. Report detections, misses, unsupported cases, and false alarms separately; distinguish failures caught by the frozen suite from failures caught only after adding a reproduction.
 
+[Improving contracts](improving-contracts.md) describes the loop for closing such gaps over time, and how to count detections after a call is added separately from those of the frozen suite.
+
 Questions to resolve:
 
 - How are representative inputs and API options chosen before a bug is known?

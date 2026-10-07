@@ -335,7 +335,7 @@ Measure actual CI cost, including loading, setup, fixture storage, and runner ov
 
 ### Maintenance
 
-How much work does this create?
+How much work does this create? Contracts also need ongoing improvement, since they catch only the calls they make; the [loop for that](improving-contracts.md) is part of the maintenance to measure.
 
 Track:
 
