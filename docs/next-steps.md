@@ -2,7 +2,7 @@
 
 Validate the [proposed standard](../README.md#the-proposed-standard) before expanding required CI or building Hub features. The decisions are whether slim fixtures catch real regressions, reduce total validation cost, and save maintainer time, and where overfitting earns its extra complexity.
 
-## Status (2026-10-06)
+## Status (2026-10-07)
 
 Most work ran locally on CPU (ARM Mac, float32, Transformers `main` at `4d536e1f`). Stability and cost also ran on one GPU (NVIDIA A10G on the Transformers GPU runners, Transformers `8625785e`, the same tree). Results are in [Evidence](evidence.md) and [Small fixtures](fixtures.md).
 
@@ -11,7 +11,7 @@ Most work ran locally on CPU (ARM Mac, float32, Transformers `main` at `4d536e1f
 | Synthetic faults, random vs overfit | done: 42/42 on SmolLM and CLIP; 78/84 random vs 84/84 overfit on BERT, T5, Whisper, Wav2Vec2 (Whisper's random fixture ignores its audio) |
 | 1. Historical regressions | done on CPU: 11 candidates, 8 reproducible, all 8 caught by slim fixtures through the affected public call with original processor files; 10 benign changes, no false alarms. GPU cases pending |
 | 2. Stability and cost | CPU: no flags in 770 checks across torch 2.12–2.14, tokenizers, numpy 2.x, Pillow. GPU (A10G): GPU baselines stable at `1e-4` over three runs; CPU baselines carry over only for families without convolutions; bfloat16/float16 need their own baselines. Per-check cost measured on both. CPU-only CI runners, other GPUs, the dependency matrix on GPU, downloads, and setup time pending |
-| 3. Contract runner | not started |
+| 3. Contract runner | sketch in the [full example](../example/README.md): grouped manifest, per-framework fleet locks and baselines, runnable-markdown contract, `run.py`. Schemas, batching, isolation, and the input-sensitivity gate not started |
 | 4. Run alongside CI | not started |
 | 5. Hub surfaces | not started |
 
@@ -33,9 +33,21 @@ Side findings already acted on:
 
 ## Immediate next actions
 
-1. **More GPU coverage.** Frozen checks and cost now run on one A10G ([evidence](evidence.md#on-gpu)). Still to do: the dependency-upgrade matrix on GPU (CUDA torch wheels), baselines recorded in bfloat16 and checked run to run, the [full example](../example/README.md) on GPU, and at least one GPU-specific historical regression to replay. Other GPU types and multi-GPU are untested.
-2. **Finish step 1 gaps:** bugs found by nightly/slow tests (needs CI failure history), a larger benign set, and a real Whisper-like regression to test the overfit fallback.
-3. **Step 3, runner prototype**, starting with the schema and one-command execution for the six families already covered.
+1. **Next task: answer Arthur's slim-fixture feedback with measurements.** His review (2026-10-07) of [Small fixtures](fixtures.md), with our current reading of each point:
+   - *Prune or sample the original weights instead of random init.* There are two versions to compare. Keeping a few real layers at full width gives realistic activations and no NaN risk, but size scales with width: SmolLM-135M with 2 of 30 layers is about 32M parameters (~125 MB vs 13 MB today), and Llama-3-8B with 2 layers is about 1B. Slicing real matrices down to the fixture's width keeps the fixture small with realistic weight statistics, but it is not functional.
+   - *Random init without a fixed seed can be slow.* True for stage 1. Stage 2 initializes once at build time with a seed and freezes the weights, so CI never re-initializes. Init speed, init-scheme changes, and hardware only affect a rebuild.
+   - *Shrink by layer pattern, not to a fixed layer count:* 2 layers for alternating sliding/full, 3 for sliding/full/mamba. Today `num_hidden_layers = 2` everywhere, which is wrong for the 170 Transformers configs that define `layer_types`. For dense-then-sparse MoE (his open question: 1 dense + 1 sparse, or 3 + 3): in all 15 modeling files that read `first_k_dense_replace`, it only picks dense or sparse per layer index (`layer_idx >= first_k_dense_replace`), with no count-dependent logic. So 1 + 1 covers both code paths and the boundary.
+   - *Overfit weights avoid catastrophic NaN cases from init (hardware, init schemes, multimodal) and check gradients and convergence once.* No random fixture has gone non-finite in any run so far (0 of 420 GPU checks, including bfloat16 and float16, and none on CPU), but that is six small families. The overfit build is itself a one-time training test, which argues for overfit as the default, with random as the cheap option where training is too slow (Whisper: 23–51 s; one Wav2Vec2 seed did not converge).
+
+   Plan:
+   1. **Experiment:** four fixture builds per family (random, overfit, real layers pruned at full width, real matrices sliced to the fixture's width) on the six families (`text clip bert t5 whisper wav2vec2`). Measure synthetic-fault detection and input sensitivity with the existing faults (`experiments/experiment.py`), finite outputs, loss, and gradients in float32/bfloat16/float16 on CPU and on the A10G (`gpu-checks.yml`), size, and build time.
+   2. **Shrink rule by layer pattern:** keep one period of `layer_types` in order (every layer type and every transition at least once); for first-k-dense MoE keep 1 dense + 1 sparse. Validate on three real configs, Gemma 3 (sliding/full), a mamba hybrid (e.g. Jamba), and DeepSeek-V2-Lite (dense then sparse), checking that every layer type is built and runs.
+   3. **Numeric-health gate at fixture build:** a fixture must give finite outputs, loss, and gradients in every dtype and on every platform it will be checked on; otherwise fall back to overfit (or pruned real weights, depending on step 1).
+   4. **Docs:** update [Small fixtures](fixtures.md) (shrink rules, the gate, the random/overfit/pruned decision rewritten from the results) and [design](design.md); record results in [Evidence](evidence.md) and `experiments/results/`.
+   5. **Reply to Arthur** in French with the numbers (Tarek posts it).
+2. **More GPU coverage.** Frozen checks and cost now run on one A10G ([evidence](evidence.md#on-gpu)). Still to do: the dependency-upgrade matrix on GPU (CUDA torch wheels), baselines recorded in bfloat16 and checked run to run, the [full example](../example/README.md) on GPU, and at least one GPU-specific historical regression to replay. Other GPU types and multi-GPU are untested.
+3. **Finish step 1 gaps:** bugs found by nightly/slow tests (needs CI failure history), a larger benign set, and a real Whisper-like regression to test the overfit fallback.
+4. **Step 3, runner prototype**, starting from the [full example](../example/README.md)'s manifest, fleet lock, and `run.py`, for the six families already covered.
 
 ## How to resume
 
@@ -83,6 +95,7 @@ Pitfalls seen on this machine:
 - **`rtk` hook:** it rewrites `curl`, `grep`, and `git` output; use `rtk proxy <cmd>` when exact output matters (JSON from `curl`, `git log -S`).
 - **Attention:** never call `set_attn_implementation()` after loading for checks ([#49372](https://github.com/huggingface/transformers/issues/49372)); load with `attn_implementation=` instead.
 - **TF32:** on Ampere GPUs cuDNN convolutions default to TF32; `CONTRACT_TF32=0` turns it off for diagnosis. Keep the default for baselines, since users get it.
+- **Full example:** `example/run.py` needs doc-builder from main for runnable markdown (PyPI 0.5.0 lacks it): `pip install git+https://github.com/huggingface/doc-builder`, or put an extracted `src/` on `PYTHONPATH` with `meilisearch` and `camel-converter` installed alongside. Transformers.js needs `npm install` in `example/hub/SmolLM-integration/integrations/transformers.js`. SmolLM-1.7B weights are sharded; download with `allow_patterns=["*.json", "*.txt", "*.safetensors"]`.
 - **Partial HF cache:** `snapshot()` falls back to the cached folder when only some files of a revision were downloaded.
 
 ## 1. Reproduce historical regressions
