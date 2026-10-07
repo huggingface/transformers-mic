@@ -236,7 +236,17 @@ The final stdout line contains structured JSON, including the runtime actually u
 
 Missing fields, invalid numerical values, failed assertions, or expectation mismatches fail the contract.
 
-The manifest should have a schema and must be inspectable without executing the integration code.
+The [runner prototype](../example/README.md#runner-prototype) implements this for six contracts:
+
+- **Schemas.** The manifest, fleet lock, fixture build record, baseline, per-platform tolerances, and result record each have a JSON schema ([`schemas/`](../example/schemas)), validated on every load and before every result is emitted. The manifest is inspectable without running any contract code.
+- **Batching.** Runnable-markdown contracts run in the runner's own process, one target after another, so imports are paid once: 8 fixture checks across 6 contracts take 4.9 s instead of 27.4 s with one process per target. `--isolate` keeps one process per target, and script contracts (Transformers.js) always get their own.
+- **Pinned fixtures.** The fleet lock pins each fixture's file hashes; a missing or different fixture is an error that names the build command, not a skip.
+- **Tolerances per platform.** The manifest sets the default tolerances; `expectations/<contract>/<platform>/tolerances.json` overrides them for one platform, with a required reason, since GPU and lower-precision runs drift more than CPU float32.
+- **Baselines must reproduce.** Non-finite outputs fail without a baseline and are never recorded. `--record` reruns each target in a fresh process and refuses outputs that differ. This caught a contract seeding mistake and an uninitialized-weight bug in Transformers' Wav2Vec2 loading ([details](../example/README.md#runner-prototype)).
+- **Known failures.** A framework can list a target under `known_failures` in its fleet lock, with the issue. A failure is then reported as `xfail`, and a pass fails the run, so the entry is removed once fixed. Alternatively, `local_patches` names a workaround (applied in every contract process and recorded in each result), as for the Wav2Vec2 bug [#49385](https://github.com/huggingface/transformers/issues/49385).
+- **Replays.** [`replay.py`](../example/replay.py) runs the unchanged runner on the bad and fixed builds of a historical regression, against the reviewed fixtures and baselines.
+
+Not implemented yet: selecting contracts from a PR's changed files, execution isolation for untrusted contract code, and private-artifact rules.
 
 ## Converted artifacts
 

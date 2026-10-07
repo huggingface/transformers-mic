@@ -14,24 +14,24 @@ PR-level contract checks need a model small enough to run on CPU in seconds that
 - Fixtures carry across hardware; baselines do not. Record baselines per platform class (CPU, GPU) and per dtype.
 - One generic shrink rule already builds and runs [56% of Transformers architectures](#does-it-scale-to-every-architecture) (314 of 559), including 15 of the 17 in #49103. Most of the rest need per-architecture rules for coupled size fields, or real processor inputs.
 
-**Proposed recipe:** shrink the real config by layer pattern, seed, overfit, gate on input sensitivity and numeric health, freeze, and record baselines per platform and dtype.
+**Proposed recipe:** shrink the real config by layer pattern, seed, keep random weights if they pass an input-sensitivity gate and overfit only if they do not, check numeric health, freeze, and record baselines per platform and dtype. [`example/build_fixtures.py`](../example/build_fixtures.py) implements it generically: the gate's perturbations are defined per input name, and the overfit data is the contract's own training step.
 
 **Next moves:**
 
-1. **Redirect the tiny-model work in Transformers to this recipe** (proposed new direction, see [below](#relation-to-todays-tiny-models)): pause the smoke-only tests in [#49103](https://github.com/huggingface/transformers/pull/49103), and change `create_dummy_models.py` to build from real configs, copy processor files, overfit from a seed, and run the gates.
+1. **Redirect the tiny-model work in Transformers to this recipe** (proposed new direction, see [below](#relation-to-todays-tiny-models)): pause the smoke-only tests in [#49103](https://github.com/huggingface/transformers/pull/49103), and change `create_dummy_models.py` to build from real configs, copy processor files, seed, and run the gates (overfitting where the random weights fail).
 2. **Close the gap on the [architecture sweep](#does-it-scale-to-every-architecture):** per-architecture rules for coupled size fields (the largest failure group), real processor inputs instead of synthetic ones, and the image path of multimodal models. Retire the smoke-only tests once the rate is acceptable.
-3. **Write training examples per usage path.** Overfitting needs a few labeled inputs and a loss for each task; this is the main new cost of the recipe.
+3. **Give every contract a training step.** The builder captures the contract's own training call (inputs and labels by name) and overfits on it when needed, so no separate training data is written per family. Contracts for inference-only usage paths need one added.
 4. **Publish one fixture per fixture key** as `hf-internal-testing/<name>-slim`, kept out of model discovery, and pin it in the fleet lock.
 5. **Calibrate tolerances** on the CPU-only CI runners and the other GPU types, and record bfloat16 baselines.
 6. **Measure upkeep in the pilot:** shrink-rule fixes, non-converging overfits, and baseline reviews.
 
 ## Recipe
 
-1. **Real structure, small weights.** Start from the real config. Shrink width (hidden 64, intermediate 128, 4 heads in the experiments) and depth [by layer pattern](#shrinking-depth-by-layer-pattern). Keep vocabulary, special tokens, image/patch/audio dimensions, RoPE settings, and MoE structure. Disable dropout and SpecAugment.
+1. **Real structure, small weights.** Start from the real config. Shrink width (hidden 64, intermediate 128, 4 heads in the experiments) and depth [by layer pattern](#shrinking-depth-by-layer-pattern). Keep vocabulary, special tokens, image/patch/audio dimensions, RoPE settings, and MoE structure. Disable dropout and SpecAugment in the fixture's config. This has a cost: the [runner prototype](../example/README.md#runner-prototype) found that Wav2Vec2's SpecAugment embedding, absent from the real checkpoint, is left uninitialized on load ([#49385](https://github.com/huggingface/transformers/issues/49385)), and the fixture could not see it because it saves that tensor and turns SpecAugment off. A fixture should also keep the real checkpoint's tensor names, so missing-weight initialization is tested the way users hit it (not yet implemented).
 2. **Real processor files, byte for byte.** Copy them; never re-save them. One fixture serves every checkpoint with the same fixture key: identical processor files and identical config fields wherever shrinking keeps them ([example](../example/README.md#the-parts)).
-3. **Weights:** initialize from a fixed seed, then overfit on a few contrasting examples (AdamW, lr 5e-3, gradient clipping, ≤ 500 steps, until answers are correct and loss < 0.05 twice in a row). If training does not converge, fail the build visibly. Fall back to pruned real layers if their size is acceptable, or to the random fixture if it passes the input-sensitivity gate.
+3. **Weights:** initialize from a fixed seed and run the input-sensitivity gate. Keep the random weights if they pass. Otherwise overfit on the contract's training batch (AdamW, lr 5e-3, gradient clipping, ≤ 500 steps, until loss < 0.05 twice in a row), and require the gate to pass afterwards. If neither works, fail the build visibly. On the six families, the gate keeps random weights for SmolLM, CLIP, BERT, T5, UMT5, and Wav2Vec2 and overfits Whisper, the one family where random weights missed faults.
 4. **Gates, on the saved fixture:**
-   - **Input sensitivity:** perturbing or swapping inputs must move logits well beyond tolerance.
+   - **Input sensitivity:** perturbations defined once per input name (`input_ids`, `attention_mask`, `token_type_ids`, `pixel_values`, `input_features`, `input_values`, ...: swap rows within the batch, reverse, all-ones mask, channel swap, halve) must each move the logits by at least 10× the strictest tolerance the fixture must hold on any platform (1e-3 for CPU float32). A known blind spot can be accepted in the manifest with a reason: Wav2Vec2-base's bias-free first convolution feeds a group norm, so at fixture size the output ignores input amplitude (5e-5) while the real checkpoint moves by 3.9.
    - **Numeric health:** outputs, loss, and gradients must be finite, and a training step must update parameters, in every dtype and on every platform class the fixture will be checked on.
 
    A failed gate is a fixture build failure, visible as missing coverage, not a contract failure.
@@ -59,6 +59,7 @@ Four ways to fill the same fixture were compared on the six families with identi
 | Largest bfloat16 logit drift from float32 | 0.09 | 0.30 | 0.97 | 0.34 |
 
 - **Overfit:** most sensitive, same size as random. Its build is also a one-time check that gradients flow and the model learns.
+- **Overfit is also more stable in lower precision.** Reloaded in bfloat16, random fixtures changed their discrete outputs against float32 (Wav2Vec2 on 3 of 3 seeds, T5 on 2 of 3, CPU and A10G alike); overfit fixtures never did. Random fixtures' smallest input signal can also sit below bfloat16 drift (BERT padding: 1.7e-3 signal, 4e-3 drift; overfit: 1.6–2.2 signal, 0.14 drift). Where a platform needs a looser tolerance, the gate's threshold rises with it and selects overfit there. What is not shown yet is a real historical regression that only an overfit fixture catches: all 8 reproducible ones were caught by random fixtures too.
 - **Random:** enough everywhere except Whisper, whose tiny decoder barely depends on the audio. Reversing the audio moved logits by 5e-5, below the 1e-4 tolerance.
 - **Pruned:** fixes Whisper without training. But size grows with the model: SmolLM-135M at 2 of 30 layers is 142 MB, and Llama-3-8B at 2 layers would be about 1.5B parameters.
 - **Sliced:** real weight statistics without the real function behave like random weights.

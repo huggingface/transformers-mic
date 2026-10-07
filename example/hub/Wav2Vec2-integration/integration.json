@@ -1,0 +1,83 @@
+{
+  "mic": "0.3",
+  "name": "Wav2Vec2 CTC speech recognition",
+  "usage": "Wav2Vec2Processor + Wav2Vec2ForCTC, greedy CTC decoding, batched",
+  "architecture": "Wav2Vec2ForCTC",
+  "checkpoints": {
+    "facebook/wav2vec2-base-960h": {
+      "fixture": "hf-internal-testing/wav2vec2-base-960h-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/wav2vec2-base-960h-slim": {
+      "built_from": "facebook/wav2vec2-base-960h",
+      "covers": [
+        "facebook/wav2vec2-base-960h"
+      ],
+      "build": {
+        "seed": 17,
+        "accept_insensitive": {
+          "input_values:halve": "Wav2Vec2-base's bias-free first convolution feeds a group norm, so at fixture size the output ignores input amplitude (5e-5, random or overfit); the real checkpoint moves by 3.9. Amplitude regressions need the real-checkpoint run."
+        }
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=5",
+        "torch"
+      ],
+      "targets": [
+        "fixtures",
+        "checkpoints"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 1,
+          "download_mb": 20
+        },
+        "facebook/wav2vec2-base-960h": {
+          "memory_gb": 2,
+          "download_mb": 378
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "predicted_ids": {
+      "compare": "exact"
+    },
+    "predicted_text": {
+      "compare": "exact"
+    },
+    "logits": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

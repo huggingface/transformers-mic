@@ -1,6 +1,8 @@
-# Full example: a MIC for SmolLM text generation
+# Full example: MICs and the runner prototype
 
 A complete, runnable MIC for one usage path, batched greedy text generation, across three SmolLM checkpoints, in Transformers and Transformers.js. It shows every part of the [proposed standard](../README.md#the-proposed-standard) with real files and real outputs. The Hugging Face repositories are not published; their contents are in [`hub/`](hub).
+
+Five more contracts (CLIP, BERT, T5 with UMT5, Whisper, Wav2Vec2) run through the same [runner prototype](#runner-prototype), with fixtures built by one generic recipe.
 
 ## Where each piece lives
 
@@ -18,8 +20,12 @@ Tooling:
 
 | File | What it is |
 | --- | --- |
-| [`run.py`](run.py) | Sketch of the shared runner: read a framework's fleet lock, expand targets (each fixture once, then each checkpoint), run the contract in its own process, compare with that framework's reviewed baseline |
-| [`build_fixtures.py`](build_fixtures.py) | Builds the fixtures and enforces the fixture key |
+| [`run.py`](run.py) | The shared runner: read a framework's fleet lock, expand targets (each fixture once, then each checkpoint), run every contract in one process, compare with that framework's reviewed baselines and per-platform tolerances |
+| [`build_fixtures.py`](build_fixtures.py) | Builds fixtures with one recipe for every model, enforces the fixture key, and runs the input-sensitivity and numeric-health gates |
+| [`perturb.py`](perturb.py) | The input-sensitivity gate: perturbations defined per input name |
+| [`patches.py`](patches.py) | Local workarounds for known Transformers bugs, named in the fleet lock's `local_patches` and recorded in each result |
+| [`replay.py`](replay.py) | Replays a historical regression: runs `run.py` unchanged on the bad and fixed Transformers builds |
+| [`schemas/`](schemas) | JSON schemas for the manifest, fleet lock, fixture build, baseline, tolerances, and result record, validated on every load |
 
 ## The parts
 
@@ -51,7 +57,12 @@ $PY example/run.py --framework transformers.js
 $PY example/run.py --framework transformers.js --variant webgpu                    # WebGPU baselines
 $PY example/run.py --framework transformers.js --variant webgpu-fp16 --golden cpu  # tokens vs CPU golden
 $PY example/run.py --framework transformers --target SmolLM-slim --record
+$PY example/run.py --framework transformers --fixtures-only      # what a framework PR runs
+$PY example/build_fixtures.py --fixture whisper-tiny-slim        # rebuild one fixture
+$PY example/replay.py d7ba937671 --contract T5                    # UMT5 #49135, bad vs fixed build
 ```
+
+The new fixtures are not committed (only their `README.md` and `build.json`): build them once with `$PY example/build_fixtures.py`. The fleet lock pins each fixture's file hashes, and the runner refuses a fixture whose files differ. Rebuilding on the same machine gave identical bytes, including the trained Whisper fixture.
 
 Results on CPU (Apple M5, Transformers `5.19.0.dev0`, torch 2.11.0, `@huggingface/transformers` 4.3.0, doc-builder `c69e96c`):
 
@@ -75,10 +86,46 @@ What building the example showed:
 - **CPU golden outputs check WebGPU.** The Transformers.js variants `webgpu`, `webgpu-fp16`, and `webgpu-q4f16` run the same contract through onnxruntime-node's WebGPU backend (1.30, Apple M5). In fp32, WebGPU matched the CPU baseline: identical tokens, logits within 4e-5, deterministic over three runs. In fp16 and q4f16, every logit came back as exactly 0 and generation stopped after one token, with no error. CPU fp16 was fine (logits within 0.012 of fp32). The same happens in Chrome 154, where the GPU offers `shader-f16`, and only for these `torch.onnx`-exported fp16 graphs: the onnxruntime-genai fp16 export of SmolLM2 (fused attention and normalization) is correct on WebGPU. So the fault is in an onnxruntime WebGPU fp16 kernel for an op only the unfused export uses ([repro](../experiments/webgpu_browser/README.md)). `--golden cpu` catches it from tokens alone; WebGPU fp32 has its own reviewed baselines, and no fp16 baseline was recorded, since that would approve the bug. Each record also carries load, generate, and forward timings, which are kept but not compared ([measurements](../experiments/results/webgpu_golden.json)).
 - **The contract can be wrong too.** A first version padded the training batch on the left. Each row's first token was then predicted from a fully masked padding position, where eager and SDPA disagree, so their losses differed by 0.2 on a float32 fixture. Right padding for training fixed it. The eager variant is what exposed the mistake.
 
+## Runner prototype
+
+Six contracts, one per usage path, run through `run.py` on CPU (Apple M5, Transformers `4d536e1f`, torch 2.11.0):
+
+| Contract | Usage path | Fixture (weights, why) | Checkpoints |
+| --- | --- | --- | --- |
+| SmolLM | batched greedy generation | 2 fixtures, overfit (earlier build script) | 135M, 360M, 1.7B |
+| CLIP | zero-shot image-caption matching | random: weakest input move 4.9e-3 | `openai/clip-vit-base-patch32` |
+| BERT | fill-mask | random: weakest 2.8e-3 (padding mask) | `google-bert/bert-base-uncased` |
+| T5 | text-to-text generation | T5 and UMT5 fixtures, random: weakest 1.3 and 3.1 | `google-t5/t5-small`; `google/umt5-small` unsupported (no `model_type`, so Auto classes cannot load it) |
+| Whisper | English transcription with `generate` | **overfit**, 200 steps, 24 s: random weights moved logits by 8.6e-5 when the audio was reversed | `openai/whisper-tiny` |
+| Wav2Vec2 | CTC transcription | random: weakest 0.60; amplitude blind spot accepted with a reason | `facebook/wav2vec2-base-960h`, with a local workaround, see below |
+
+**One recipe for every model.** `build_fixtures.py` has no per-family code. It shrinks the real config with the generic rule from the [architecture sweep](../experiments/sweep.py), copies every non-weight file unchanged, and runs the contract's own runnable markdown against the random fixture while recording the arguments of each model call by name. The gate then perturbs those inputs by name ([`perturb.py`](perturb.py)): random weights are kept if every perturbation moves the logits by at least 10× the comparison tolerance (1e-3), and the fixture is overfit on the contract's own training call otherwise. Numeric health (float32, bfloat16, float16: finite outputs, loss, gradients) is checked on the saved fixture. On these families the gate made the same choice the synthetic-fault study supports: random weights everywhere except Whisper.
+
+**Batching.** Runnable-markdown contracts execute in the runner's process, so imports are paid once:
+
+| Run | Batched | One process per target (`--isolate`) |
+| --- | ---: | ---: |
+| Fixtures only, 8 targets, 6 contracts (median of 3) | **4.9 s** | 27.4 s |
+| Everything, 17 targets including SmolLM-1.7B | 73 s | 90 s |
+
+With the Wav2Vec2 workaround, both variants give 16 passes and 1 unsupported target (`google/umt5-small`).
+
+Results were identical in both modes. With every model loaded in one process, SmolLM-1.7B took 51 s instead of 27 s, probably from memory pressure, so large real checkpoints may still warrant their own process.
+
+**Replaying a regression from recorded inputs.** `replay.py` runs the unchanged runner on the build before and after a fix, against the reviewed fixtures and baselines. UMT5's non-causal decoder under SDPA ([#49135](https://github.com/huggingface/transformers/pull/49135)) is caught on the UMT5 fixture under the default runtime (teacher-forced log-probs off by 1.22, loss by 0.20) and passes on the fixed build. Under eager attention, and on T5, both builds are clean, as in the [earlier replay](../docs/evidence.md#historical-regression-replay). The fixture has random weights. The T5 batch-decode regression ([#47793](https://github.com/huggingface/transformers/pull/47793)) is not caught: it affected `tokenizer.decode()` on a batch, which this contract does not call.
+
+**Baselines must reproduce.** `--record` reruns each target in a fresh process and refuses outputs that differ, and non-finite outputs are never recorded. Recording these contracts found two problems:
+
+- **The contracts' own seeding was wrong.** `torch.manual_seed` does not seed NumPy, which Wav2Vec2's SpecAugment uses for its masks, so the real checkpoint's training loss varied from 73 to 93 between runs. The contracts now call `transformers.set_seed(0)` before loading.
+- **A Transformers bug.** Even then, `facebook/wav2vec2-base-960h` gave a NaN or garbage loss. `wav2vec2.masked_spec_embed` is missing from the checkpoint and is left uninitialized on load (values up to 3e35, sometimes NaN, different each load): `_init_weights` has no branch for it, here and in `wav2vec2_conformer`, `data2vec`, `wavlm`, `unispeech`, `unispeech_sat`, and `sew` (HuBERT, SEW-D, SpeechT5, and Wav2Vec2-BERT do initialize it). Any fine-tuning of these checkpoints with SpecAugment on, the default, feeds that garbage into the encoder. Reported as [#49385](https://github.com/huggingface/transformers/issues/49385). Until it is fixed, the Transformers fleet lock lists a local workaround under `local_patches`: [`patches.py`](patches.py) adds the missing `_init_weights` branch (`init.uniform_`, as HuBERT does), the runner applies it in every contract process, and each result records it in its environment. With it, the real checkpoint's baselines reproduce across processes and were approved; they must be re-recorded once the fix lands. The slim fixture could not see the bug: it saves the tensor, and the recipe disables SpecAugment. (Without a workaround, the fleet lock's `known_failures` reports such a target as `xfail` and fails once it passes again.)
+
+**Per-platform tolerances.** `expectations/<contract>/<platform>/tolerances.json` overrides the manifest's tolerances for one platform, with a required reason. None is recorded yet: GPU and bfloat16 tolerances need the calibration runs listed in [next steps](../docs/next-steps.md).
+
 ## Not real yet
 
 - The `hf-internal-testing` repositories are unpublished; the fleet locks point at the folders in [`hub/`](hub) (`"revision": "unpublished"`).
-- `run.py` starts a new process per target. The shared runner should batch targets per process, because imports dominate check cost ([evidence](../docs/evidence.md)). It should also add the manifest and result schemas, isolation, and the input-sensitivity gate ([design](../docs/design.md)).
+- Contracts run in the runner's own process, with no isolation beyond `--isolate` (one process per target). Selecting contracts from the files a framework PR changes is not implemented.
+- Fixtures built by `build_fixtures.py` are reproducible on one machine; overfit fixtures may not be byte-identical elsewhere, so they must be published and pinned rather than rebuilt by each CI job.
 - Variants need a second, hidden `from_pretrained` call in the runnable block. A doc-builder hook for passing load arguments to a block would remove it.
 - Baselines here are CPU, plus WebGPU fp32 for Transformers.js. A CUDA GPU job would need its own reviewed baselines: on an A10G, CPU-recorded logits held for text models but not for convolutional ones, and lower precision changed outputs ([evidence](../docs/evidence.md#on-gpu)).
 

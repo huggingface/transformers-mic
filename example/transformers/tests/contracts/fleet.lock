@@ -9,15 +9,117 @@
         "path": "../../../hub/SmolLM-integration"
       },
       "fixtures": {
-        "hf-internal-testing/SmolLM-slim": {"revision": "unpublished", "path": "../../../hub/SmolLM-slim"},
-        "hf-internal-testing/SmolLM-1.7B-slim": {"revision": "unpublished", "path": "../../../hub/SmolLM-1.7B-slim"}
+        "hf-internal-testing/SmolLM-slim": {
+          "revision": "unpublished",
+          "path": "../../../hub/SmolLM-slim",
+          "files_sha256": "e281b7c566cef1885af1a3087b9d590058971b56ab4aa8136aedf089141ff60e"
+        },
+        "hf-internal-testing/SmolLM-1.7B-slim": {
+          "revision": "unpublished",
+          "path": "../../../hub/SmolLM-1.7B-slim",
+          "files_sha256": "d6cb7aae64669f6d15ed9cbc6004396e3c12e1a9c7b2d6b41b5e1c70ca61c48b"
+        }
       },
       "checkpoints": {
         "HuggingFaceTB/SmolLM-135M": "1d461723eec654e65efdc40cf49301c89c0c92f4",
         "HuggingFaceTB/SmolLM-360M": "59f7ef243ee09a72cbc14cb054393a3e3b771d41",
         "HuggingFaceTB/SmolLM-1.7B": "d7449ff7241c863f3e8accc475155f0f97afa011"
       }
+    },
+    "CLIP": {
+      "integration": {
+        "repo": "hf-internal-testing/CLIP-integration",
+        "revision": "unpublished",
+        "path": "../../../hub/CLIP-integration"
+      },
+      "fixtures": {
+        "hf-internal-testing/clip-vit-base-patch32-slim": {
+          "revision": "unpublished",
+          "path": "../../../hub/clip-vit-base-patch32-slim",
+          "files_sha256": "e72402276836e7b27c96687600cde8e3612a82e7b6e9d69a0523626816f99e1d"
+        }
+      },
+      "checkpoints": {
+        "openai/clip-vit-base-patch32": "3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268"
+      }
+    },
+    "BERT": {
+      "integration": {
+        "repo": "hf-internal-testing/BERT-integration",
+        "revision": "unpublished",
+        "path": "../../../hub/BERT-integration"
+      },
+      "fixtures": {
+        "hf-internal-testing/bert-base-uncased-slim": {
+          "revision": "unpublished",
+          "path": "../../../hub/bert-base-uncased-slim",
+          "files_sha256": "5d95e31277460b843e05045ba7dc2d622f7f1357713af62a4e777a2fd69da209"
+        }
+      },
+      "checkpoints": {
+        "google-bert/bert-base-uncased": "86b5e0934494bd15c9632b12f734a8a67f723594"
+      }
+    },
+    "T5": {
+      "integration": {
+        "repo": "hf-internal-testing/T5-integration",
+        "revision": "unpublished",
+        "path": "../../../hub/T5-integration"
+      },
+      "fixtures": {
+        "hf-internal-testing/t5-small-slim": {
+          "revision": "unpublished",
+          "path": "../../../hub/t5-small-slim",
+          "files_sha256": "fbe629d2a26306b478dc3d60a420f3d02fca5d3ed626c363cb69b846030abc55"
+        },
+        "hf-internal-testing/umt5-small-slim": {
+          "revision": "unpublished",
+          "path": "../../../hub/umt5-small-slim",
+          "files_sha256": "3200c77eb8ff385e2f0e0acb926cfe771aa49b45fb95afc2ee14aef0f8e5d816"
+        }
+      },
+      "checkpoints": {
+        "google-t5/t5-small": "df1b051c49625cf57a3d0d8d3863ed4d13564fe4",
+        "google/umt5-small": "8c63c2b77efbf8e41206a2c8d994846cc9392360"
+      }
+    },
+    "Whisper": {
+      "integration": {
+        "repo": "hf-internal-testing/Whisper-integration",
+        "revision": "unpublished",
+        "path": "../../../hub/Whisper-integration"
+      },
+      "fixtures": {
+        "hf-internal-testing/whisper-tiny-slim": {
+          "revision": "unpublished",
+          "path": "../../../hub/whisper-tiny-slim",
+          "files_sha256": "a5b57eb36d72c66676a4448a38f5b361034a88c9582afb5373c35507cebdbb04"
+        }
+      },
+      "checkpoints": {
+        "openai/whisper-tiny": "169d4a4341b33bc18d8881c4b69c2e104e1cc0af"
+      }
+    },
+    "Wav2Vec2": {
+      "integration": {
+        "repo": "hf-internal-testing/Wav2Vec2-integration",
+        "revision": "unpublished",
+        "path": "../../../hub/Wav2Vec2-integration"
+      },
+      "fixtures": {
+        "hf-internal-testing/wav2vec2-base-960h-slim": {
+          "revision": "unpublished",
+          "path": "../../../hub/wav2vec2-base-960h-slim",
+          "files_sha256": "6d07b51bc52188505602cadeb463b0519e74b25bb030353e0f02020f2148eb2a"
+        }
+      },
+      "checkpoints": {
+        "facebook/wav2vec2-base-960h": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156"
+      }
     }
+  },
+  "local_patches": {
+    "masked-spec-embed-init": "https://github.com/huggingface/transformers/issues/49385: masked_spec_embed is left uninitialized when a checkpoint lacks it (wav2vec2-base-960h does), so SpecAugment training reads garbage; initialize it with init.uniform_ like HuBERT. Remove and re-record the Wav2Vec2 baselines once fixed upstream."
   },
   "environment": {
     "python": "3.10",

@@ -1,0 +1,97 @@
+{
+  "mic": "0.3",
+  "name": "T5 text-to-text generation",
+  "usage": "AutoTokenizer + AutoModelForSeq2SeqLM.generate, batched",
+  "architecture": "T5ForConditionalGeneration, UMT5ForConditionalGeneration",
+  "checkpoints": {
+    "google-t5/t5-small": {
+      "fixture": "hf-internal-testing/t5-small-slim"
+    },
+    "google/umt5-small": {
+      "fixture": "hf-internal-testing/umt5-small-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/t5-small-slim": {
+      "built_from": "google-t5/t5-small",
+      "covers": [
+        "google-t5/t5-small"
+      ],
+      "build": {
+        "seed": 17
+      }
+    },
+    "hf-internal-testing/umt5-small-slim": {
+      "built_from": "google/umt5-small",
+      "covers": [
+        "google/umt5-small"
+      ],
+      "build": {
+        "seed": 17,
+        "model_class": "UMT5ForConditionalGeneration"
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=5",
+        "torch",
+        "sentencepiece"
+      ],
+      "targets": [
+        "fixtures",
+        "checkpoints"
+      ],
+      "unsupported": {
+        "google/umt5-small": "config.json has no model_type, so AutoModelForSeq2SeqLM cannot load it; the fixture (saved with model_type umt5) covers the UMT5 code path"
+      },
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 1,
+          "download_mb": 150
+        },
+        "google-t5/t5-small": {
+          "memory_gb": 1,
+          "download_mb": 242
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "generated_tokens": {
+      "compare": "exact"
+    },
+    "generated_text": {
+      "compare": "exact"
+    },
+    "label_logprobs": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

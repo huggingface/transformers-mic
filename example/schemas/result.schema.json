@@ -1,0 +1,109 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "title": "Result record (one JSON line per target)",
+ "type": "object",
+ "required": [
+  "contract",
+  "contract_revision",
+  "framework",
+  "variant",
+  "target",
+  "kind",
+  "status"
+ ],
+ "properties": {
+  "contract": {
+   "type": "string",
+   "pattern": "^[\\w.-]+/[\\w.-]+$"
+  },
+  "contract_revision": {
+   "type": "string"
+  },
+  "framework": {
+   "type": "string"
+  },
+  "variant": {
+   "type": "string"
+  },
+  "target": {
+   "type": "string"
+  },
+  "kind": {
+   "enum": [
+    "fixture",
+    "checkpoint"
+   ]
+  },
+  "revision": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "status": {
+   "enum": [
+    "pass",
+    "fail",
+    "error",
+    "unsupported",
+    "recorded",
+    "xfail"
+   ]
+  },
+  "failures": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "platform": {
+   "type": "string"
+  },
+  "baseline": {
+   "type": "string"
+  },
+  "golden": {
+   "type": "string"
+  },
+  "max_delta": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "number"
+   }
+  },
+  "environment": {
+   "type": "object"
+  },
+  "seconds": {
+   "type": "number"
+  },
+  "known_failure": {
+   "type": "string"
+  }
+ },
+ "allOf": [
+  {
+   "if": {
+    "properties": {
+     "status": {
+      "enum": [
+       "fail",
+       "error",
+       "unsupported"
+      ]
+     }
+    }
+   },
+   "then": {
+    "required": [
+     "failures"
+    ],
+    "properties": {
+     "failures": {
+      "minItems": 1
+     }
+    }
+   }
+  }
+ ]
+}
