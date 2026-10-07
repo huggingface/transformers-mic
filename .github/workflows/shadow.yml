@@ -32,9 +32,8 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: shadow-results
-  cancel-in-progress: false
+# No concurrency group: GitHub keeps one pending run per group and cancels the
+# rest. Each run writes its own file, and the push retries on a rebase.
 
 jobs:
   shadow:
