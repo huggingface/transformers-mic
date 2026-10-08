@@ -113,7 +113,7 @@ jobs:
         run: |
           set +e
           python example/run.py --framework transformers --fixtures-only \
-            --changed-files "$OUT/changed-files.txt" --run-all --output "$OUT/raw.jsonl" \
+            --changed-files "$OUT/changed-files.txt" --run-all --require-all --output "$OUT/raw.jsonl" \
             > "$OUT/run.log" 2> "$OUT/run.err"
           echo "exit=$?" >> "$GITHUB_OUTPUT"
           tail -3 "$OUT/run.err"

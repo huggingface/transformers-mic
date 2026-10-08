@@ -57,6 +57,14 @@
     "xfail"
    ]
   },
+  "skip": {
+   "enum": [
+    "declared",
+    "hardware",
+    "variant"
+   ],
+   "description": "why an unsupported target did not run: the manifest declares it unsupported, this host lacks the hardware it needs, or the variant is not defined; --require-all fails on all but declared"
+  },
   "failures": {
    "type": "array",
    "items": {
@@ -117,6 +125,20 @@
       "minItems": 1
      }
     }
+   }
+  },
+  {
+   "if": {
+    "properties": {
+     "status": {
+      "const": "unsupported"
+     }
+    }
+   },
+   "then": {
+    "required": [
+     "skip"
+    ]
    }
   }
  ]

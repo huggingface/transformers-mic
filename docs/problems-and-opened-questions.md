@@ -73,21 +73,19 @@ Questions to resolve:
 
 ## Validation gaps in the prototype
 
-The [runner](../example/run.py) does not yet enforce all the guarantees described in the proposal. The following cases can lose checks without producing a failing result:
+The [runner](../example/run.py) used to lose checks without a failing result in five ways. All five are closed (2026-10-08); each was reproduced before the change and fails after it:
 
-| Gap | Current behavior | Required behavior before required CI |
+| Gap | Before | Now |
 | --- | --- | --- |
-| Missing output fields | A declared numeric field missing from both the baseline and actual output is skipped. | Declare required outputs per framework and reject incomplete candidates and results. |
-| Missing named gradient checks | An empty gradient dictionary passes `all_true`, even when the baseline contains named checks. | Require the expected module names and explicit successful assertions for each. |
-| Changed output shapes | Numeric comparison flattens arrays, accepting different shapes with identical flattened values. | Validate output shapes as well as values. |
-| Non-finite gradients | Contracts check that selected gradients exist and are nonzero, without checking finiteness. | Check gradient finiteness explicitly on the build under test. |
-| Missing execution coverage | A run containing only `unsupported` results can exit successfully. | Enforce the expected set of targets and variants, with explicit permitted skips. |
+| Missing output fields | A declared field missing from both the baseline and the result was skipped. | Every manifest output is required, in results, candidates, and baselines; training outputs only for a framework that declares `training`. A missing output fails, and `--record` refuses an incomplete candidate. |
+| Missing named gradient checks | An empty gradient dictionary passed `all_true`. | An `all_true` output must be a non-empty dict whose names match the baseline's, each exactly `true`. |
+| Changed output shapes | Numeric comparison flattened arrays, accepting a (1, 4) result against a (2, 2) baseline. | `allclose` outputs must have the baseline's shape (ragged lists included) before values are compared. |
+| Non-finite gradients | Contracts checked that gradients exist and are nonzero: a NaN gradient counts as nonzero and passed. | The six training contracts also require `torch.isfinite(grad).all()`. A NaN injected into every gradient before the SGD step now fails BERT's fixture; it passed before. |
+| Missing execution coverage | A run with only `unsupported` results exited successfully. | Each `unsupported` result records its `skip`: `declared` (the manifest's `unsupported`), `hardware` (the host misses the target's `resources`), or `variant` (undefined). A run where no target ran, or `--contract`/`--target` matched nothing, fails. `--require-all` also fails on any skip the manifest does not declare; the shadow, backfill, and nightly check jobs use it. |
 
-The first three cases were reproduced directly against the comparator. The gradient gap is visible in the [Whisper contract](../example/hub/Whisper-integration/integrations/transformers/usage.md) and the other training contracts. The fixture builder's numeric-health gate checks finiteness when a fixture is built, but cannot detect a gradient regression introduced by a later framework build.
+Required outputs are derived from the manifest rather than from whatever a candidate emits: the manifest's `outputs` are the contract, and the framework's `training` flag is the only declared exception. Shapes are taken from the reviewed baseline, and named assertions from the baseline's names. Declared skips are reviewed with the contract; hardware skips stay visible outcomes, and each job decides with `--require-all` whether they are allowed.
 
-Define output requirements independently of whatever a candidate happens to emit. An inference-only framework can legitimately omit training outputs; a framework that declares training support must supply the required training checks. Likewise, insufficient hardware and an unsupported usage path should remain visible outcomes, while the CI policy decides whether either is allowed for a required target.
+Still open:
 
-Questions to resolve:
-
-- Where are required fields, shapes, and named assertions declared for each framework?
-- Which targets and variants must run for a job to count as successful, and how are intentional exceptions reviewed?
+- Baseline recording on a GitHub runner (`cpu-baselines.yml machine=github`) skips SmolLM-1.7B for memory, so it runs without `--require-all`. Choosing runners from `resources` (next action 8) would remove the exception.
+- A framework may need to omit an output other than training (e.g. a runtime field it cannot report). There is no per-framework exception list yet; add one when a case appears.

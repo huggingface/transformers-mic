@@ -86,8 +86,8 @@ jobs:
               | while read -r f; do mkdir -p "$OUT/candidates/$(dirname "$f")"; cp "$f" "$OUT/candidates/$f"; done
             exit 0
           fi
-          for variant in default eager; do CUDA_VISIBLE_DEVICES="" run cpu-$variant --variant $variant; done
-          for variant in default eager bfloat16; do CUDA_VISIBLE_DEVICES=0 run cuda-$variant --variant $variant; done
+          for variant in default eager; do CUDA_VISIBLE_DEVICES="" run cpu-$variant --variant $variant --require-all; done
+          for variant in default eager bfloat16; do CUDA_VISIBLE_DEVICES=0 run cuda-$variant --variant $variant --require-all; done
 
       - name: Annotate results
         if: env.MODE == 'check'

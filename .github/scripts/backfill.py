@@ -123,7 +123,7 @@ def main():
             start = time.perf_counter()
             run = subprocess.run(
                 [sys.executable, str(HERE / "example/run.py"), "--framework", "transformers", "--fixtures-only",
-                 "--changed-files", str(changed_path), "--run-all", "--output", str(raw)],
+                 "--changed-files", str(changed_path), "--run-all", "--require-all", "--output", str(raw)],
                 capture_output=True, text=True, cwd=HERE,
             )
             records = [json.loads(line) for line in raw.read_text().splitlines()] if raw.exists() else []

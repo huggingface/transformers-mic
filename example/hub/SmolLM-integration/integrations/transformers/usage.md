@@ -71,7 +71,7 @@ if os.environ.get("MIC_RUNNER"):  # doc-builder: hide
         "next_token_logits": next_token_logits.tolist(),
         "training": {
             "loss": loss.item(),
-            "gradients": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0) for n in checked},
+            "gradients": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all()) for n in checked},
             "updated": any(not torch.equal(p, before[n]) for n, p in named.items()),
         },
     }

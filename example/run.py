@@ -37,8 +37,13 @@ checked against the file hashes in their build.json, which the lock also pins; a
 manifest, overridden per platform by expectations/<contract>/<platform>/tolerances.json,
 since GPU and lower-precision runs drift more than CPU float32.
 
-Non-finite numeric outputs and failed assertions (all_true, true) fail on
-their own, and are never recorded;
+Every manifest output is required (training outputs only for a framework that
+declares training), in the result and in the baseline: a missing output fails
+rather than being skipped. Numeric outputs are compared by shape as well as
+value. all_true outputs (the contract's named gradient checks: present, nonzero,
+finite) must be a non-empty dict whose names match the baseline's.
+Missing outputs, non-finite numeric outputs, and failed assertions (all_true,
+true) fail on their own, and are never recorded;
 --record also reruns each target in a fresh process and refuses outputs that
 differ. A
 framework can list a target under known_failures in its fleet lock (with the
@@ -54,6 +59,11 @@ The platform is the device the contract reports, with the CPU architecture
 for CPUs (cpu-arm64, cpu-x86_64): numeric outputs differ across CPU
 architectures by more than 1e-4 for some fixtures (Whisper), so each has its
 own baselines. --golden cpu means this machine's CPU platform.
+
+An unsupported target records why it was skipped (skip): declared in the
+manifest, missing hardware on this host, or an undefined variant. A run in
+which no target ran (all unsupported, or nothing matched) fails; with
+--require-all, any skip the manifest does not declare fails too.
 """
 
 import argparse
@@ -309,14 +319,61 @@ def flatten(value):
     return [value]
 
 
-def compare(rules, actual, expected):
+def structure(value):
+    """The nesting of a list output with its leaves blanked: equal for equal shapes, ragged ones included."""
+    return [structure(x) for x in value] if isinstance(value, list) else None
+
+
+def dims(value):
+    """A readable shape, (2, 3) or (2, ragged)."""
+    shape = []
+    while isinstance(value, list):
+        shape.append(len(value))
+        if len({json.dumps(structure(x)) for x in value}) > 1:
+            shape.append("ragged")
+            break
+        value = value[0] if value else None
+    return f"({', '.join(map(str, shape))})"
+
+
+def required_outputs(rules, integration):
+    """The outputs every result and baseline of this framework must hold, whatever a candidate emits:
+    all of the manifest's, minus training outputs for a framework that declares no training."""
+    return {name for name in rules if integration["training"] or name.split(".")[0] != "training"}
+
+
+def missing(required, actual):
+    return [f"{name}: missing" for name in sorted(required) if lookup(actual, name) is None]
+
+
+def check_names(name, got, want=None):
+    """Problems with an all_true output: a non-empty {check: bool}, with the baseline's check names when given."""
+    if not isinstance(got, dict) or not got:
+        return [f"{name}: no named checks ({got!r})"]
+    problems = []
+    if want is not None:
+        if sorted(got) != sorted(want):
+            lost, extra = sorted(set(want) - set(got)), sorted(set(got) - set(want))
+            problems.append(f"{name}: checks differ from the baseline (missing {lost}, unexpected {extra})")
+    failed = [k for k, v in got.items() if v is not True]
+    if failed:
+        problems.append(f"{name}: {failed} false")
+    return problems
+
+
+def compare(rules, actual, expected, required=()):
+    """Failures of actual against expected. A required output is checked even when one side lacks it;
+    an optional one only when either side has it."""
     failures = []
     for name, rule in rules.items():
         got, want = lookup(actual, name), lookup(expected, name)
-        if want is None and got is None:
-            continue  # not produced by this framework (e.g. no training in Transformers.js)
+        if want is None and got is None and name not in required:
+            continue  # optional and not produced
         if got is None:
             failures.append(f"{name}: missing")
+            continue
+        if want is None:
+            failures.append(f"{name}: not in the baseline")
             continue
         kind = rule["compare"]
         if kind == "exact" and got != want:
@@ -325,12 +382,12 @@ def compare(rules, actual, expected):
             a, b = flatten(got), flatten(want)
             if not all(isinstance(x, (int, float)) and math.isfinite(x) for x in a):
                 failures.append(f"{name}: non-finite values")
-            elif len(a) != len(b):
-                failures.append(f"{name}: {len(a)} values, baseline has {len(b)}")
+            elif structure(got) != structure(want):
+                failures.append(f"{name}: shape {dims(got)}, baseline has {dims(want)}")
             elif any(abs(x - y) > rule["atol"] + rule["rtol"] * abs(y) for x, y in zip(a, b)):
                 failures.append(f"{name}: max delta {max(abs(x - y) for x, y in zip(a, b)):.3g} over tolerance")
-        elif kind == "all_true" and not all(got.values()):
-            failures.append(f"{name}: {[k for k, v in got.items() if not v]} false")
+        elif kind == "all_true":
+            failures += check_names(name, got, want if isinstance(want, dict) else None)
         elif kind == "true" and got is not True:
             failures.append(f"{name}: {got!r}")
     return failures
@@ -338,7 +395,16 @@ def compare(rules, actual, expected):
 
 def violated(rules, actual):
     """The contract's own assertions (all_true, true) that fail, with or without a baseline."""
-    return compare({k: r for k, r in rules.items() if r["compare"] in ("all_true", "true")}, actual, actual)
+    failures = []
+    for name, rule in rules.items():
+        got = lookup(actual, name)
+        if got is None:
+            continue  # reported by missing()
+        if rule["compare"] == "all_true":
+            failures += check_names(name, got)
+        elif rule["compare"] == "true" and got is not True:
+            failures.append(f"{name}: {got!r}")
+    return failures
 
 
 def non_finite(rules, actual):
@@ -431,12 +497,17 @@ def main():
                         help="run only the contracts these changed Transformers files can affect (one path per line; - for stdin)")
     parser.add_argument("--run-all", action="store_true",
                         help="with --changed-files: run every contract anyway, recording selected_by (null if not selected)")
+    parser.add_argument("--require-all", action="store_true",
+                        help="fail on targets skipped for this host's hardware or an undefined variant; only skips the manifest declares are allowed")
     args = parser.parse_args()
     if args.golden:
         args.golden = platform_class(args.golden)
 
     lock_dir = HERE / args.framework / "tests/contracts"
     lock = load(lock_dir / "fleet.lock", "fleet-lock")
+    unknown = sorted(set(args.contract or ()) - set(lock["contracts"]))
+    if unknown:
+        raise SystemExit(f"no contract named {unknown} in {args.framework}'s fleet lock ({sorted(lock['contracts'])})")
     started = time.perf_counter()
     counts = {}
     status = 0
@@ -475,6 +546,7 @@ def main():
                 f.write(json.dumps(record) + "\n")
         counts[record["status"]] = counts.get(record["status"], 0) + 1
         status |= record["status"] in ("fail", "error")
+        status |= args.require_all and record["status"] == "unsupported" and record["skip"] != "declared"
 
     with tempfile.TemporaryDirectory() as tmp:
         for name, contract in lock["contracts"].items():
@@ -493,6 +565,7 @@ def main():
                 **({"selected_by": selected_by.get(name)} if selected_by is not None else {}),
             }
             variant = integration["variants"].get(args.variant)
+            required = required_outputs(manifest["outputs"], integration)
             executor = Executor(root / integration["entry_point"], integration["format"], args.isolate, Path(tmp), local_patches, lock.get("environment"))
             env_info = None
             for target, kind, model, revision, problem in targets(lock_dir, contract, manifest, args.framework, args.fixtures_only, args.local_fixtures):
@@ -500,17 +573,20 @@ def main():
                     continue
                 record = {**base, "target": target, "kind": kind, "revision": revision}
                 if variant is None:
-                    emit({**record, "status": "unsupported", "failures": [f"variant {args.variant!r} not defined"]})
+                    emit({**record, "status": "unsupported", "skip": "variant", "failures": [f"variant {args.variant!r} not defined"]})
                     continue
                 if problem:
-                    emit({**record, "status": "unsupported" if model is None else "error", "failures": [problem]})
+                    if model is None:  # the manifest's unsupported entry
+                        emit({**record, "status": "unsupported", "skip": "declared", "failures": [problem]})
+                    else:
+                        emit({**record, "status": "error", "failures": [problem]})
                     continue
                 resources = integration.get("resources", {})
                 short_names = {short(r): r for r in manifest["checkpoints"]}
                 spec = resources.get("fixture") if kind == "fixture" else resources.get(short_names.get(target))
                 too_small = resource_problem(spec, args.variant)
                 if too_small:
-                    emit({**record, "status": "unsupported", "failures": [too_small]})
+                    emit({**record, "status": "unsupported", "skip": "hardware", "failures": [too_small]})
                     continue
                 if callable(model):
                     model = model()
@@ -545,7 +621,7 @@ def main():
                         continue
                     expected = load(baseline, "baseline")["outputs"]
                     exact = {k: r for k, r in manifest["outputs"].items() if r["compare"] == "exact" and k != "runtime"}
-                    failures = compare(exact, actual, expected)
+                    failures = compare(exact, actual, expected, required)
                     deltas = {
                         k: max(abs(x - y) for x, y in zip(flatten(lookup(actual, k)), flatten(lookup(expected, k))))
                         for k, r in manifest["outputs"].items()
@@ -553,16 +629,16 @@ def main():
                     }
                     emit({**record, "golden": args.golden, "status": "fail" if failures else "pass", "failures": failures, "max_delta": deltas})
                     continue
-                broken = non_finite(manifest["outputs"], actual) + violated(manifest["outputs"], actual)
+                broken = missing(required, actual) + non_finite(manifest["outputs"], actual) + violated(manifest["outputs"], actual)
                 if broken:
-                    # Never record non-finite outputs or failed assertions: a baseline would approve the bug.
+                    # Never record incomplete or non-finite outputs or failed assertions: a baseline would approve the bug.
                     emit({**record, "status": "fail", "failures": broken})
                     continue
                 if args.record:
                     ok2, stdout2, _ = executor.run(env, fresh_process=True)  # must reproduce outside this process
                     again = [line for line in stdout2.splitlines() if line.startswith("{")]
                     # Same rules as a check: exact outputs equal, numeric ones within this platform's tolerance.
-                    unstable = compare(rules_for(manifest, platform_dir), json.loads(again[-1]), actual) if again else ["no result record"]
+                    unstable = compare(rules_for(manifest, platform_dir), json.loads(again[-1]), actual, required) if again else ["no result record"]
                     if not ok2 or unstable:
                         emit({**record, "status": "fail", "failures": [f"not recorded: a fresh-process rerun differs: {unstable}"]})
                         continue
@@ -572,9 +648,7 @@ def main():
                     candidate.write_text(json.dumps(validate({"recorded_with": recorded, "outputs": actual}, "baseline", candidate), indent=1) + "\n")
                     emit({**record, "status": "recorded", "baseline": str(candidate.relative_to(HERE))})
                     continue
-                if integration["training"] and "training" not in actual:
-                    failures = ["training: missing"]
-                elif not baseline.exists():
+                if not baseline.exists():
                     failures = [f"no reviewed baseline at {record['baseline']}"]
                 else:
                     reviewed = load(baseline, "baseline")
@@ -583,8 +657,12 @@ def main():
                     if identity.get("platform", platform) != platform:
                         mismatch.append("platform")
                     failures = [f"baseline identity differs: {mismatch}"] if mismatch else []
-                    failures += compare(rules_for(manifest, platform_dir), actual, reviewed["outputs"])
+                    failures += compare(rules_for(manifest, platform_dir), actual, reviewed["outputs"], required)
                 emit({**record, "status": "fail" if failures else "pass", "failures": failures})
+    if not set(counts) - {"unsupported"} and (counts or args.contract or args.target):
+        # Every requested target was skipped, or none matched: nothing was checked, which is not a pass.
+        print(f"no target ran: {counts['unsupported']} unsupported" if counts else "no target matched", file=sys.stderr)
+        status = 1
     summary = {"summary": counts, "seconds": round(time.perf_counter() - started, 1), "isolate": args.isolate}
     print(json.dumps(summary), file=sys.stderr)
     return status
