@@ -1,16 +1,16 @@
 # Agent walkthroughs: recipe, prompts, and results
 
-These runs record how coding agents take a model from the Hugging Face Hub to working local inference: which signals they use, what they infer, where they get stuck, and how they judge the output. The detailed log is the deliverable. This is supporting evidence for the [proposed standard](../../README.md#the-proposed-standard).
+How coding agents take a Hub model to working local inference: signals used, inferences, where they get stuck, how they judge output. The detailed log is the deliverable. Supporting evidence for the [proposed standard](../../README.md#the-proposed-standard).
 
 ## Recipe
 
-1. Start a fresh agent session in an empty scratch directory, outside this repository. Keep the existing machine state, including cached models and packages; let the agent create an isolated environment if needed.
-2. Record the agent and model name/version if available, date, machine, and any access restrictions. Do not give the agent other results or documents about agent walkthroughs or integration contracts before it finishes.
-3. Send the full prompt below unchanged. Task A lets the agent choose a small captioning model; Task B names the model and requests both captioning and detection. Let the agent choose its normal workflow within those rules.
-4. Collect `agent-walkthrough.md` after the run, including failures and abandoned paths. A substituted checkpoint, patched loader, missing timestamp, or unverified output must remain visible in the result rather than being edited into a clean success.
-5. Save the agent's output as a separate file in this directory, such as `claude-opus.md` or `codex.md`. Use an agent/model/date suffix for further runs instead of overwriting earlier results. Keep supporting assets under `assets/<result-name>/`, fix relative links, and add the run to the table below.
+1. Fresh agent session in an empty scratch directory outside this repo. Keep existing machine state (cached models, packages); the agent may create an isolated environment.
+2. Record agent and model name/version if available, date, machine, and access restrictions. Give the agent no walkthrough or integration-contract material before it finishes.
+3. Send the full [prompt](#prompts) unchanged. Task A: agent picks a small captioning model. Task B: named model, captioning and detection. The agent works its normal way within the rules.
+4. Collect `agent-walkthrough.md`, failures and abandoned paths included. Substituted checkpoints, patched loaders, missing timestamps, and unverified outputs stay visible, never edited into a clean success.
+5. Save it as its own file here (`claude-opus.md`, `codex.md`; add an agent/model/date suffix for further runs, never overwrite). Assets go under `assets/<result-name>/`; fix relative links; add the run to the table below.
 
-Keep shared instructions here and each agent's recorded output in its own result file. When varying the model, image, or task, retain the exact changed prompt with that result and label it as a different recipe.
+Shared instructions live here, each agent's output in its own file. If you vary model, image, or task, keep the exact changed prompt with that result and label it a different recipe.
 
 ## Results
 
@@ -19,28 +19,35 @@ Keep shared instructions here and each agent's recorded output in its own result
 | 2026-10-06 | Claude Code, Opus 5.5 | [Claude Opus](claude-opus.md) | `Qwen/Qwen3.5-0.8B` | `florence-community/Florence-2-base`; the requested Microsoft repo was abandoned |
 | 2026-10-07 | Codex; exact serving model/version not recorded | [Codex](codex.md) | `microsoft/Florence-2-base` | `microsoft/Florence-2-base`, with a CPU import-scanner workaround |
 
-The Claude result was moved from `docs/agent-walkthrough.md`; its shared rerun prompt now lives below. The Codex result preserves the output from the separate session, with a navigation note and an updated image link. Historical commands and local paths remain as recorded.
-
-These are observations, not a speed ranking or a controlled benchmark. Existing caches, network access, package versions, agent prior knowledge, and tool-call counting differ between runs. Codex reused cached weights and shared setup between its two tasks; its log distinguishes nested tool calls from orchestration wrappers. Read each result's timing definitions, correctness checks, and limitations before comparing it with another run.
+- Claude's result moved from `docs/agent-walkthrough.md`. Codex's is as produced, plus a navigation note and updated image link. Commands and paths are as recorded.
+- Not a benchmark: caches, network, versions, prior knowledge, and tool-call counting differ. Codex reused cached weights and setup across tasks and separates nested tool calls from wrappers. Check each result's timing definitions and limits before comparing.
 
 ## What the two runs support
 
-Both agents had to reconstruct a working usage path. For the same requested Microsoft Florence checkpoint, Claude substituted a community repository while Codex used an older pinned stack and an import-scanner workaround. Both relied on visual assessment rather than a reviewed model-output baseline. This supports tested examples, explicit environments, revision-specific compatibility, and reference checks as plausible ways to reduce guesswork; neither run measured the benefit of actually having a MIC.
+- Both reconstructed a working path for Microsoft Florence: Claude via a community repo, Codex via an older pinned stack and an import-scanner workaround. Both judged output visually.
+- This supports tested examples, explicit environments, revision-specific compatibility, and reference checks; it doesn't measure a MIC's benefit. The [assessment](../evidence.md#how-agents-use-the-hub-today) separates integration issues from network, sandbox, tooling, and reporting failures.
+- A reference check shows agreement on fixed inputs and runtime, not correctness on new inputs. Agents also need [discovery](../design.md#agent-discovery-and-reproduction), and remote-code models like this one are deferred.
 
-The [evidence assessment](../evidence.md#how-agents-use-the-hub-today) separates these model-integration issues from network, sandbox, package-tool, and reporting failures. A passing reference check would establish agreement on fixed inputs and a recorded runtime, not semantic correctness on arbitrary new inputs. The [design](../design.md#agent-discovery-and-reproduction) also requires a way to discover the contract from the real model; its initial scope defers remote-code models such as this Microsoft checkpoint.
-
-The result files remain historical records. This assessment and the proposed experiment below are subsequent analysis, not instructions the agents received during those runs.
+This analysis and the experiment below came after the runs; the agents never saw them.
 
 ## Controlled comparison with and without a MIC
 
-This experiment has not been run. It tests the agent-reuse hypothesis separately from the CI pilot.
+Not run yet. Tests agent reuse separately from the CI pilot.
 
-1. Start fresh sessions of the same agent/model in both conditions. Use repeated runs with recorded model/version and settings, and avoid carrying conversation history or earlier results between conditions.
-2. Give both conditions comparable machines, permissions, network access, package availability, and initial cache contents. Record cold and warm cache runs separately. Pin the model revisions and reference images used for evaluation; do not let one condition inherit downloads from the other.
-3. Use the two tasks below in both conditions. Expose a discoverable MIC link or lookup from the model only in the treatment condition, with its executable example, tested environment, fixed inputs, and reviewed reference results. Record whether the agent finds it; merely supplying a separate contract repository is not proof of discovery.
-4. Use the same amended prompt in both conditions: replace only the third Rules bullet with the text below. All other task, image, logging, and stopping instructions stay unchanged. The original exploratory prompt prohibited integration-contract documents, so using it unchanged would invalidate a MIC treatment.
-5. Evaluate Task B on the requested repository; label substitutions and workarounds explicitly. For Task A, record the chosen model and resources, and compare its outcome separately. Use an independent evaluator with the approved reference checks for each tested runtime, plus a task-appropriate assessment of the generated output. Distinguish reproduced reference behavior from correctness on other inputs.
-6. Report success/failure for every run, time to the first independently verified result, code adaptations, failed attempts, discovery success, and incorrect or overstated success claims. Define a common tool-call counting unit, and separate model-integration effort from infrastructure failures and report-writing overhead. Report variation across runs rather than one speedup from two sessions.
+1. **Sessions.** Fresh sessions of the same agent/model in both conditions; repeated runs with recorded model/version and settings; no conversation history or results carried between conditions.
+2. **Environment.** Comparable machines, permissions, network, package availability, and initial cache. Record cold and warm cache runs separately. Pin model revisions and reference images; neither condition inherits the other's downloads.
+3. **Treatment.** Same two tasks in both. Only the treatment exposes a discoverable MIC link or lookup from the model, with its executable example, tested environment, fixed inputs, and reviewed results. Record whether the agent finds it; a separate contract repo alone is not proof of discovery.
+4. **Prompt.** Same amended prompt in both: replace only the third Rules bullet with the text below; everything else unchanged. (The original prompt forbids integration-contract documents, which would invalidate the treatment.)
+5. **Evaluation.** Task B on the requested repo, substitutions and workarounds labelled. Task A: record chosen model and resources, compare separately. An independent evaluator uses the approved reference checks per tested runtime plus a task-appropriate assessment, distinguishing reproduced reference behavior from correctness on other inputs.
+6. **Report**, per run:
+   - success/failure;
+   - time to first independently verified result;
+   - code adaptations and failed attempts;
+   - discovery success;
+   - incorrect or overstated success claims;
+   - tool calls in a common counting unit, with integration effort separated from infrastructure failures and report-writing.
+
+   Report variation across runs, not one speedup from two sessions.
 
 Replacement for the third Rules bullet, in both comparison conditions:
 
@@ -51,11 +58,11 @@ Replacement for the third Rules bullet, in both comparison conditions:
   results, if they are available.
 ```
 
-Keep each comparison prompt and result in a new file labeled with its condition and run number. Preserve the exploratory results above and the original prompt below.
+Keep each comparison prompt and result in a new file labelled with condition and run number. Preserve the exploratory results and the original prompt.
 
 ## Prompts
 
-The following is the shared two-task prompt, including both input URLs and the required log format. Copy the entire block into the fresh session; do not supply the results above as context.
+The shared two-task prompt. Copy the whole block into the fresh session; don't supply the results above as context.
 
 ````text
 You are going to do two small tasks that require running a model from the
