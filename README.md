@@ -1,4 +1,4 @@
-# MICs * Model integration contracts
+# MIC * Model Integration Contract
 
 **A proposed standard** for publishing, next to any model on the Hub, an executable check that the model works in a given framework, run by that framework's CI.
 
