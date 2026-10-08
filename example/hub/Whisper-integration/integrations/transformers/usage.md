@@ -50,6 +50,51 @@ feature_config = get_feature_extractor_config(model_id)
 print(sorted(feature_config))
 ```
 
+## Limit the transcript length
+
+For Whisper, `max_length` counts transcript tokens: `generate` adds the forced start, language, and task tokens on top.
+
+```py runnable:transcribe:3
+limited = model.generate(inputs.input_features, language="en", task="transcribe", max_length=1)
+print(processor.batch_decode(limited, skip_special_tokens=True))
+```
+
+## Speculative decoding
+
+A smaller decoder-only Whisper can draft tokens that the full model verifies, as [Distil-Whisper](https://huggingface.co/distil-whisper/distil-large-v3) does. Here the checkpoint's own decoder, loaded as `WhisperForCausalLM`, is the assistant; the transcript must not change. Assisted generation takes one clip at a time.
+
+```py runnable:transcribe:3
+from transformers import WhisperForCausalLM
+
+assistant = WhisperForCausalLM.from_pretrained(model_id).to(device)
+if variant:  # doc-builder: hide
+    assistant = WhisperForCausalLM.from_pretrained(model_id, **variant).to(device)
+assisted = [
+    model.generate(features[None], language="en", task="transcribe", max_new_tokens=8, assistant_model=assistant)[0].tolist()
+    for features in inputs.input_features
+]
+print(processor.batch_decode(assisted, skip_special_tokens=True))
+```
+
+## Transcribe long audio in a batch
+
+Audio longer than 30 seconds is transcribed segment by segment. Keep the full audio (`truncation=False`), pad the batch to its longest clip, and pass the attention mask; `condition_on_prev_tokens=True` prompts each segment with the previous one's text.
+
+```py runnable:transcribe:3
+long_clips = [
+    torch.cat([torch.from_numpy(clips[(start + k) % len(clips)]) for k in range(seconds)]).numpy()
+    for start, seconds in ((0, 36), (1, 32))
+]
+long_inputs = processor(
+    long_clips, sampling_rate=sampling_rate, return_tensors="pt", truncation=False, padding="longest", return_attention_mask=True
+).to(device, model.dtype)
+longform = model.generate(
+    **long_inputs, language="en", task="transcribe", condition_on_prev_tokens=True, return_timestamps=True,
+    temperature=0.0, max_new_tokens=8,
+)
+print(processor.batch_decode(longform, skip_special_tokens=True))
+```
+
 ## One training step
 
 ```py runnable:transcribe:3
@@ -87,6 +132,9 @@ if os.environ.get("MIC_RUNNER"):  # doc-builder: hide
         "timestamped_tokens": timestamped.tolist(),
         "timestamped_text": timestamped_text,
         "feature_extractor_config_keys": sorted(feature_config),
+        "max_length_tokens": limited.tolist(),
+        "assisted_tokens": assisted,
+        "longform_tokens": longform.tolist(),
         "training": {
             "loss": loss.item(),
             "gradients": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all()) for n in checked},

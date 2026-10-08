@@ -77,6 +77,15 @@
     "feature_extractor_config_keys": {
       "compare": "exact"
     },
+    "max_length_tokens": {
+      "compare": "exact"
+    },
+    "assisted_tokens": {
+      "compare": "exact"
+    },
+    "longform_tokens": {
+      "compare": "exact"
+    },
     "training.loss": {
       "compare": "allclose",
       "atol": 0.0001,

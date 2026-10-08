@@ -29,7 +29,7 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 0.3,
+  "seconds": 0.83,
   "platform": "cpu-arm64"
  },
  "outputs": {
@@ -122,6 +122,58 @@
    "processor_class",
    "return_attention_mask",
    "sampling_rate"
+  ],
+  "max_length_tokens": [
+   [
+    2182
+   ],
+   [
+    3092
+   ],
+   [
+    3344
+   ],
+   [
+    5566
+   ]
+  ],
+  "assisted_tokens": [
+   [
+    2182
+   ],
+   [
+    3092
+   ],
+   [
+    3344
+   ],
+   [
+    5566
+   ]
+  ],
+  "longform_tokens": [
+   [
+    50384,
+    50373,
+    2182,
+    2182,
+    2182,
+    2182,
+    2182,
+    2182,
+    2182
+   ],
+   [
+    50384,
+    50373,
+    50259,
+    2182,
+    2182,
+    2182,
+    2182,
+    2182,
+    2182
+   ]
   ],
   "training": {
    "loss": 0.004144715145230293,

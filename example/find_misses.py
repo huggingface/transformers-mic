@@ -51,6 +51,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("results", nargs="+", help="JSON lines files, or - for stdin")
     parser.add_argument("--repo", required=True, help="Transformers clone containing the commits")
+    parser.add_argument("--ref", default="HEAD", help="first-parent history to order the commits by (e.g. origin/main)")
     parser.add_argument("--framework", default="transformers")
     parser.add_argument("--shared", action="store_true", help="also list fixes that only touch shared code")
     args = parser.parse_args()
@@ -61,7 +62,7 @@ def main():
         for line in lines:
             r = json.loads(line)
             records[(r["shadow"]["transformers_sha"], r["contract"], r["target"])] = r
-    order = git(args.repo, "rev-list", "--first-parent", "--reverse", "HEAD").split()
+    order = git(args.repo, "rev-list", "--first-parent", "--reverse", args.ref).split()
     seen = {sha for sha, _, _ in records}
     order = [sha for sha in order if sha in seen]
 
