@@ -6,7 +6,7 @@
 
 For each usage path we support (an architecture and a task, across the checkpoints that share it), publish a small integration contract on the Hub and run it from framework CI.
 
-A contract is ordinary user code: load the model, call the public API, report the result. Transformers CI runs it against small fixtures on every PR (CPU, seconds) and against the real checkpoints after merge, nightly, and before release. Transformers.js has its own entry point and baselines; its CI triggers are still to define.
+A contract is ordinary user code: load the model, call the public API, report the result. Transformers CI runs it against small fixtures on every PR (CPU, seconds) and against the real checkpoints after merge, nightly, and before release. This is not Transformers-specific, Transformers.js could use the same contracts.
 
 **A slim pass is a fast regression signal, not a pass for the real model.** Contracts can replace model-specific integration tests in `run-slow` by running on full checkpoints; other slow tests stay ([CI integration](docs/slim-models-in-transformers-ci.md)).
 
