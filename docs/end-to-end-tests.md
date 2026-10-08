@@ -32,7 +32,10 @@ The [full example](../example/README.md): one contract per usage path, written a
 | [Whisper](../example/hub/Whisper-integration) | `WhisperProcessor` + `WhisperForConditionalGeneration.generate`, English, batched | [`proto-whisper-tiny-slim`](https://huggingface.co/hf-internal-testing/proto-whisper-tiny-slim) → openai/whisper-tiny |
 | [Wav2Vec2](../example/hub/Wav2Vec2-integration) | `Wav2Vec2Processor` + `Wav2Vec2ForCTC`, greedy CTC, batched | [`proto-wav2vec2-base-960h-slim`](https://huggingface.co/hf-internal-testing/proto-wav2vec2-base-960h-slim) → facebook/wav2vec2-base-960h |
 
-8 fixture targets and 9 checkpoints. 16 targets run; `google/umt5-small` is reported `unsupported` because its `config.json` has no `model_type` (its fixture covers the UMT5 code path). SmolLM-1.7B has no Transformers.js conversion.
+8 fixture targets and 9 checkpoints; 16 targets run.
+
+- `google/umt5-small` is reported `unsupported`: its `config.json` has no `model_type`. Its fixture covers the UMT5 code path.
+- SmolLM-1.7B has no Transformers.js conversion.
 
 **What each target checks:**
 
@@ -42,11 +45,24 @@ The [full example](../example/README.md): one contract per usage path, written a
 - **Runtime identity, exact:** device, dtype, attention implementation actually used.
 - Non-finite values and failed assertions fail the check and are never recorded as baselines.
 
-**Minimum hardware:** each target's `resources` in the manifest (devices, GPU count, memory per GPU, RAM, free disk) are checked first; a host that cannot run a target reports it `unsupported` with what is missing, so GPU-only and multi-GPU checkpoints skip cleanly on CPU runners while their fixtures still run.
+**Minimum hardware:** each target's `resources` in the manifest (devices, GPU count, memory per GPU, RAM, free disk) is checked first. A host that cannot run a target reports it `unsupported` with what is missing. GPU-only and multi-GPU checkpoints thus skip cleanly on CPU runners while their fixtures still run.
 
-**Variants:** `default` (the dtype and attention users get, e.g. SDPA), `eager`, `bfloat16`. Transformers.js (SmolLM only): `default` (CPU), `webgpu`, `webgpu-fp16`, `webgpu-q4f16`.
+**Variants:**
 
-**Baselines:** one per target, platform, and variant under `expectations/<contract>/<platform>/<target>[.<variant>].json`; `cpu-arm64` (Apple M5), `cpu-x86_64` (GitHub runners, recorded by [`cpu-baselines.yml`](../.github/workflows/cpu-baselines.yml)), and `cuda` (A10G). CPU baselines are per architecture because Whisper's numbers differ between them by more than `1e-4`; `--golden cpu` means this machine's CPU platform. The `cpu-x86_64` set was recorded on an AMD EPYC 7R32 and matches an EPYC 7763 on all 30 shared targets. bfloat16 runs are the exception: SmolLM-135M and -360M load in bfloat16 by default, and an EPYC 9V45 (Zen 5, native bfloat16) gave different logits (up to 0.25) and, in eager, different tokens; runners now record their CPU flags to confirm whether native bfloat16 support needs its own platform. `--record` writes candidates that must reproduce in a fresh process; a reviewer renames them to approve.
+- Transformers: `default` (the dtype and attention users get, e.g. SDPA), `eager`, `bfloat16`.
+- Transformers.js (SmolLM only): `default` (CPU), `webgpu`, `webgpu-fp16`, `webgpu-q4f16`.
+
+**Baselines:** one per target, platform, and variant, under `expectations/<contract>/<platform>/<target>[.<variant>].json`.
+
+| Platform | Recorded on |
+| --- | --- |
+| `cpu-arm64` | Apple M5 |
+| `cpu-x86_64` | GitHub runners, via [`cpu-baselines.yml`](../.github/workflows/cpu-baselines.yml). Recorded on an AMD EPYC 7R32; matches an EPYC 7763 on all 30 shared targets |
+| `cuda` | A10G |
+
+- CPU baselines are per architecture because Whisper's numbers differ between them by more than `1e-4`. `--golden cpu` means this machine's CPU platform.
+- bfloat16 is the exception on x86. SmolLM-135M and -360M load in bfloat16 by default, and an EPYC 9V45 (Zen 5, native bfloat16) gave different logits (up to 0.25) and, in eager, different tokens. Runners now record their CPU flags, to confirm whether native bfloat16 needs its own platform.
+- `--record` writes candidates that must reproduce in a fresh process. A reviewer renames them to approve.
 
 ```sh
 python example/run.py --framework transformers                       # every contract and target, default variant
@@ -58,9 +74,15 @@ git diff --name-only A B | python example/run.py --framework transformers --fixt
 python example/run.py --framework transformers.js
 ```
 
-[`select_contracts.py`](../example/select_contracts.py) maps changed Transformers files to contracts: a model directory selects the contracts whose fixtures use it, other library code selects all, files outside the library none. `--run-all` runs everything anyway and records `selected_by` per result.
+**Selection.** [`select_contracts.py`](../example/select_contracts.py) maps changed Transformers files to contracts:
 
-Fixtures are downloaded from the Hub at the revisions [`fleet.lock`](../example/transformers/tests/contracts/fleet.lock) pins and checked against its file hashes (`--local-fixtures` uses the build folders). [`patches.py`](../example/patches.py) applies the lock's `local_patches` (currently #49385's `masked_spec_embed` workaround) and records them in each result.
+- a model directory selects the contracts whose fixtures use it;
+- other library code selects all;
+- files outside the library select none.
+
+`--run-all` runs everything anyway and records `selected_by` per result.
+
+**Fixtures and patches.** Fixtures are downloaded from the Hub at the revisions [`fleet.lock`](../example/transformers/tests/contracts/fleet.lock) pins and checked against its file hashes (`--local-fixtures` uses the build folders). [`patches.py`](../example/patches.py) applies the lock's `local_patches` (currently #49385's `masked_spec_embed` workaround) and records them in each result.
 
 ## 2. Fixture build gates
 
@@ -79,12 +101,19 @@ python example/publish_fixtures.py                                  # upload fix
 
 ## 3. Shadow job
 
-[`shadow.yml`](../.github/workflows/shadow.yml) runs the fixture contracts against real Transformers commits and PRs, non-blocking and without touching the Transformers repository. It installs the ref on a GitHub-hosted x86 CPU runner with the fleet lock's pinned torch, tokenizers, and numpy, runs every fixture contract with the selection recorded, and appends one JSONL file per run to the `shadow-results` branch (`runs/<date>/<run id>-<attempt>.jsonl`, run metadata under `shadow`).
+[`shadow.yml`](../.github/workflows/shadow.yml) runs the fixture contracts against real Transformers commits and PRs. It is non-blocking and never touches the Transformers repository.
 
-- **Scheduled:** daily on Transformers `main`; changed files are those since the previous scheduled run.
+- Installs the ref on a GitHub-hosted x86 CPU runner, with the fleet lock's pinned torch, tokenizers, and numpy.
+- Runs every fixture contract and records the selection.
+- Appends one JSONL file per run to the `shadow-results` branch: `runs/<date>/<run id>-<attempt>.jsonl`, run metadata under `shadow`.
+
+Modes:
+
+- **Scheduled:** daily on Transformers `main`. Changed files are those since the previous scheduled run.
 - **Dispatched:** any commit sha, branch, or `pr/<n>`; `pip_overrides` for old builds.
+- **Backfill:** [`shadow-backfill.yml`](../.github/workflows/shadow-backfill.yml) runs the same checks on every first-parent `main` commit in a date window. 10 parallel jobs, one install per job, one checkout per commit. Dependency overrides come from each commit's own requirements.
 
-- **Backfill:** [`shadow-backfill.yml`](../.github/workflows/shadow-backfill.yml) runs the same checks on every first-parent `main` commit in a date window, 10 parallel jobs, one install per job and one checkout per commit ([results](evidence.md#shadow-backfill): 1,468 commits, 2026-05-02 to 2026-10-07: UMT5 caught at its introducing commit, one benign change flagged, four regressions missed for lack of the affected call; per-commit dependency overrides from each commit's own requirements).
+[Backfill results](evidence.md#shadow-backfill) (1,468 commits, 2026-05-02 to 2026-10-07): UMT5 caught at its introducing commit, one benign change flagged, four regressions missed for lack of the affected call.
 
 ```sh
 gh workflow run shadow.yml --repo huggingface/model-integration-contracts -f transformers_ref=pr/49386
@@ -94,7 +123,25 @@ gh workflow run shadow.yml --repo huggingface/model-integration-contracts -f tra
 
 ## 4. GPU checks
 
-[`gpu-checks.yml`](../.github/workflows/gpu-checks.yml) runs on the Transformers ARC group `aws-g5-4xlarge-cache` (one A10G) in the `huggingface/transformers-all-latest-gpu` image. [`gpu-probe.yml`](../.github/workflows/gpu-probe.yml) only checks access and the environment. [`nightly.yml`](../.github/workflows/nightly.yml) runs every target (real checkpoints and fixtures) nightly on Transformers `main` with the fleet lock's environment and CUDA torch: on the runner's CPU with CUDA hidden (`cpu-x86_64`, default and eager) and on the GPU (`cuda`, default, eager, bfloat16), appending to `shadow-results` under `runs/nightly/`; `mode=record` writes `cuda` candidates instead. Its `cuda` baselines were re-recorded in the pinned environment (torch 2.11.0+cu128; versus the image's torch 2.14, only CLIP and Wav2Vec2 numbers moved, no discrete output), and its first run on `main` (`2b727b6d86`) passed all 80 checks ([run](https://github.com/huggingface/model-integration-contracts/actions/runs/37645864098)), including the CPU pass with CUDA torch against baselines recorded with CPU torch. [`cpu-baselines.yml`](../.github/workflows/cpu-baselines.yml) records `cpu-x86_64` candidates, checks against them, and uploads them for review, on a GitHub runner (`machine=github`, 7 GB RAM) or on the CPU of a GPU runner (`machine=gpu-host`, 64 GB, CPU-only torch).
+All GPU workflows run on the Transformers ARC group `aws-g5-4xlarge-cache` (one A10G).
+
+| Workflow | What it does |
+| --- | --- |
+| [`gpu-checks.yml`](../.github/workflows/gpu-checks.yml) | The experiments below, in the `huggingface/transformers-all-latest-gpu` image |
+| [`gpu-probe.yml`](../.github/workflows/gpu-probe.yml) | Checks access and the environment only |
+| [`nightly.yml`](../.github/workflows/nightly.yml) | Every target (real checkpoints and fixtures), nightly on Transformers `main` |
+| [`cpu-baselines.yml`](../.github/workflows/cpu-baselines.yml) | Records `cpu-x86_64` candidates, checks against them, uploads them for review |
+
+**Nightly** uses the fleet lock's environment with CUDA torch.
+
+- Runs on the runner's CPU with CUDA hidden (`cpu-x86_64`: default, eager) and on the GPU (`cuda`: default, eager, bfloat16).
+- Appends to `shadow-results` under `runs/nightly/`. `mode=record` writes `cuda` candidates instead.
+- `cuda` baselines were re-recorded in the pinned environment (torch 2.11.0+cu128). Versus the image's torch 2.14, only CLIP and Wav2Vec2 numbers moved; no discrete output changed.
+- First run on `main` (`2b727b6d86`) passed all 80 checks ([run](https://github.com/huggingface/model-integration-contracts/actions/runs/37645864098)). That includes the CPU pass with CUDA torch against baselines recorded with CPU torch.
+
+**CPU baselines** run on a GitHub runner (`machine=github`, 7 GB RAM) or on the CPU of a GPU runner (`machine=gpu-host`, 64 GB, CPU-only torch).
+
+`gpu-checks.yml` matrices:
 
 | `matrix` | What runs |
 | --- | --- |
@@ -110,7 +157,7 @@ gh run download <run-id> --repo huggingface/model-integration-contracts -n gpu-c
 
 ## 5. Historical regressions
 
-Eleven regressions fixed in Transformers since May 2026 ([`cases.json`](../experiments/cases.json)), each reproduced on the real checkpoint first, then checked on frozen slim fixtures on the bad and fixed builds (extracted with `git archive`, never checked out). Three levels:
+Eleven regressions fixed in Transformers since May 2026 ([`cases.json`](../experiments/cases.json)). Each is reproduced on the real checkpoint first. Frozen slim fixtures are then checked on the bad and fixed builds (extracted with `git archive`, never checked out). Three levels:
 
 - **Real:** the real checkpoint through the affected call.
 - **Generic slim:** frozen fixtures, forward and generate only ([`replay_case.py`](../experiments/replay_case.py)).
@@ -130,7 +177,9 @@ Eleven regressions fixed in Transformers since May 2026 ([`cases.json`](../exper
 | mms-set-target-lang | #47440 | `Wav2Vec2CTCTokenizer.set_target_lang` | not reproduced |
 | clip-conversion-mapping | #46406 | `CLIPTextModelWithProjection.from_pretrained` | not reproduced |
 
-Ten benign changes run the same way to count false alarms (none). [`example/replay.py`](../example/replay.py) replays a case through the contract runner unchanged; UMT5 #49135 is replayed that way end to end.
+Ten benign changes run the same way to count false alarms: none.
+
+[`example/replay.py`](../example/replay.py) replays a case through the contract runner, unchanged. UMT5 #49135 is replayed that way end to end.
 
 ```sh
 export REPLAY_WORKDIR=/tmp/model-integration-replay
@@ -141,26 +190,38 @@ python experiments/usage_repros.py prepare && python experiments/usage_repros.py
 
 ## 6. Synthetic faults
 
-Hand-written per-family faults (for SmolLM: wrong answer token, padding ignored, causal mask removed, RoPE disabled, attention or MLP zeroed or detached, wrong training labels), patched into the model at check time, against paired fixtures.
+Hand-written per-family faults, patched into the model at check time, run against paired fixtures. For SmolLM: wrong answer token, padding ignored, causal mask removed, RoPE disabled, attention or MLP zeroed or detached, wrong training labels.
 
-- [`experiment.py`](../experiments/experiment.py): frozen-random vs overfit fixtures on identical faults. 42/42 on SmolLM and CLIP; 78/84 random vs 84/84 overfit on BERT, T5, Whisper, Wav2Vec2 (Whisper's random fixture ignores its audio). Results: [`smollm_clip.json`](../experiments/results/smollm_clip.json), [`more_families.json`](../experiments/results/more_families.json).
-- [`fixture_init.py`](../experiments/fixture_init.py): four weight schemes (random, overfit, pruned, sliced) on the same faults, plus numeric health in three dtypes; CPU and A10G ([`fixture_init.json`](../experiments/results/fixture_init.json), [`fixture_init_gpu.json`](../experiments/results/fixture_init_gpu.json)).
+- [`experiment.py`](../experiments/experiment.py): frozen-random vs overfit fixtures on identical faults ([`smollm_clip.json`](../experiments/results/smollm_clip.json), [`more_families.json`](../experiments/results/more_families.json)).
+  - SmolLM and CLIP: 42/42.
+  - BERT, T5, Whisper, Wav2Vec2: 78/84 random vs 84/84 overfit. Whisper's random fixture ignores its audio.
+- [`fixture_init.py`](../experiments/fixture_init.py): four weight schemes (random, overfit, pruned, sliced) on the same faults, plus numeric health in three dtypes, on CPU and A10G ([`fixture_init.json`](../experiments/results/fixture_init.json), [`fixture_init_gpu.json`](../experiments/results/fixture_init_gpu.json)).
 
 ## 7. Stability
 
-The frozen fixtures and real baselines checked against benign Transformers changes and dependency upgrades, eager and SDPA: torch 2.12.1, 2.13.0, 2.14.1; tokenizers 0.23.2; numpy 2.2.6; Pillow 12.3.0. No flags in 770 checks on CPU ([`stability.json`](../experiments/results/stability.json)). On the A10G: GPU baselines stable over three runs; CPU baselines flagged on convolutional families; bfloat16/float16 need their own baselines ([`gpu.json`](../experiments/results/gpu.json)).
+Frozen fixtures and real baselines, checked against benign Transformers changes and dependency upgrades, eager and SDPA.
+
+- **CPU:** torch 2.12.1, 2.13.0, 2.14.1; tokenizers 0.23.2; numpy 2.2.6; Pillow 12.3.0. No flags in 770 checks ([`stability.json`](../experiments/results/stability.json)).
+- **A10G** ([`gpu.json`](../experiments/results/gpu.json)): GPU baselines stable over three runs. CPU baselines flagged on convolutional families. bfloat16/float16 need their own baselines.
 
 ## 8. Cost
 
-[`cost.py`](../experiments/cost.py) times one check phase by phase (process start, imports, load, inference, training probe, comparison) with memory and artifact size, slim vs real, on the Mac ([`cost.json`](../experiments/results/cost.json)) and the A10G including peak GPU memory ([`gpu.json`](../experiments/results/gpu.json)). The runner's batched vs isolated timings are in [`runner.json`](../experiments/results/runner.json).
+[`cost.py`](../experiments/cost.py) times one check phase by phase (process start, imports, load, inference, training probe, comparison), with memory and artifact size, slim vs real.
+
+- Mac: [`cost.json`](../experiments/results/cost.json).
+- A10G, including peak GPU memory: [`gpu.json`](../experiments/results/gpu.json).
+- Runner, batched vs isolated: [`runner.json`](../experiments/results/runner.json).
 
 ## 9. Architecture sweep
 
-[`sweep.py`](../experiments/sweep.py) applies the generic shrink rule to every Transformers usage path in the docs (559), builds the fixture from the real config, and runs forward with synthetic inputs, one process per type, offline after `prefetch`. 314 build and run ([`sweep.json`](../experiments/results/sweep.json)). [`layer_patterns.py`](../experiments/layer_patterns.py) checks shrinking depth by layer pattern instead of to a fixed count ([`layer_patterns.json`](../experiments/results/layer_patterns.json)).
+- [`sweep.py`](../experiments/sweep.py) applies the generic shrink rule to every Transformers usage path in the docs (559). It builds the fixture from the real config and runs forward with synthetic inputs, one process per type, offline after `prefetch`. 314 build and run ([`sweep.json`](../experiments/results/sweep.json)).
+- [`layer_patterns.py`](../experiments/layer_patterns.py) checks shrinking depth by layer pattern instead of to a fixed count ([`layer_patterns.json`](../experiments/results/layer_patterns.json)).
 
 ## 10. WebGPU golden
 
-[`webgpu_golden.py`](../experiments/webgpu_golden.py) runs the SmolLM Transformers.js contract on WebGPU in Node (onnxruntime-node 1.30) and compares it with the CPU golden; [`webgpu_browser/`](../experiments/webgpu_browser) does the same in Chrome with `puppeteer-core`. fp32 matches within 4e-5; fp16 and q4f16 return all-zero logits on the onnx-community exports ([`webgpu_golden.json`](../experiments/results/webgpu_golden.json)).
+[`webgpu_golden.py`](../experiments/webgpu_golden.py) runs the SmolLM Transformers.js contract on WebGPU in Node (onnxruntime-node 1.30) and compares it with the CPU golden. [`webgpu_browser/`](../experiments/webgpu_browser) does the same in Chrome with `puppeteer-core`.
+
+Result ([`webgpu_golden.json`](../experiments/results/webgpu_golden.json)): fp32 matches within 4e-5. fp16 and q4f16 return all-zero logits on the onnx-community exports.
 
 ```sh
 python example/run.py --framework transformers.js --variant webgpu-fp16 --golden cpu

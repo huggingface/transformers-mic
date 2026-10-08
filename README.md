@@ -27,9 +27,9 @@ The first goal is CI, not a new Hub feature. If this works, the same contracts c
 
 Model compatibility is expensive to verify. Integration coverage depends on real checkpoints, large downloads, GPUs, framework-specific test code, or manual checks, so only a small part of the model fleet runs on each PR. We find regressions late: after merge, in nightly jobs, during a release, or from users.
 
-The code that validates a model is also separate from the code we show users, which is separate again from Hub snippets and other examples. Each copy drifts on its own. In two [recorded agent runs](docs/agent-walkthrough/README.md), Claude substituted the community Florence-2 checkpoint after the Microsoft path failed; Codex ran the requested Microsoft checkpoint with an older pinned environment and an import-scanner workaround. Both had to reconstruct a working usage path, and neither compared its results with a reviewed baseline.
+The code that validates a model is also separate from the code we show users and from Hub snippets. Each copy drifts on its own.
 
-These observations support tested examples, explicit environments, and reference checks as ways to reduce agent guesswork. They do not yet measure an improvement from MICs: neither agent had one, and network, sandbox, and package-tool failures caused separate delays. The [assessment](docs/evidence.md#how-agents-use-the-hub-today) distinguishes those limits. Direct agent reuse also requires a discoverable link from a model to its tested path; a companion repository alone is not enough.
+Agents feel this. In two [recorded runs](docs/agent-walkthrough/README.md) on Florence-2, Claude fell back to a community checkpoint and Codex rebuilt an old environment with a workaround. Both had to reconstruct a working path; neither could check its result against a reviewed baseline. These runs show the friction, not a measured gain from MICs ([assessment](docs/evidence.md#how-agents-use-the-hub-today)). Agents would also need a discoverable link from a model to its contract.
 
 ## The proposed standard
 
@@ -69,9 +69,14 @@ On the Hub, a contract is one versioned place per usage path that every framewor
 
 ## Pilot run
 
-Run a CI-only pilot on 3–5 models, with existing tests kept running in parallel, and measure whether contracts catch real regressions, what they cost at fleet scale, and how much maintenance they create. Early experiments are encouraging ([evidence](docs/evidence.md)): replayed on all 1,468 Transformers `main` commits of the last five months, the six prototype contracts' fixtures caught the UMT5 regression ([#49135](https://github.com/huggingface/transformers/pull/49135)) on the commit that introduced it, flagged one benign change, and missed four regressions whose affected calls the contracts did not make. With those four calls added ([how](docs/improving-contracts.md)), the same five months show all five regressions caught, each until its fix, no new false alarm, and a new Whisper bug still on `main` ([#49403](https://github.com/huggingface/transformers/issues/49403)), at about 13 s per commit on a CPU runner ([shadow backfill](docs/evidence.md#shadow-backfill)). If the pilot confirms it, expand the fleet and then build the Hub-facing pieces.
+Run a CI-only pilot on 3–5 models, keeping existing tests running in parallel. Measure three things: real regressions caught, cost at fleet scale, and maintenance load. If the pilot confirms it, expand the fleet, then build the Hub-facing pieces.
 
-Measure agent reuse separately with the [controlled walkthrough recipe](docs/agent-walkthrough/README.md#controlled-comparison-with-and-without-a-mic): comparable environments, fresh sessions, and the same tasks with or without a discoverable MIC. Track completion on the requested repository, time to verified output, code changes, failed attempts, and incorrect success claims. Remote-code models such as the Microsoft Florence path are deferred in the initial CI scope; that first version should not be presented as already solving this case.
+Early results ([shadow backfill](docs/evidence.md#shadow-backfill)), on all 1,468 Transformers `main` commits of the last five months:
+
+- The frozen fixture contracts caught the UMT5 regression ([#49135](https://github.com/huggingface/transformers/pull/49135)) on its introducing commit, flagged one benign change, and missed four regressions whose calls no contract made.
+- With those four calls added ([how](docs/improving-contracts.md)), all five are caught, with no new false alarm, at about 13 s per commit on a CPU runner. The new Whisper call also found a bug still on `main` ([#49403](https://github.com/huggingface/transformers/issues/49403)).
+
+Agent reuse is measured separately, with the [controlled walkthrough recipe](docs/agent-walkthrough/README.md#controlled-comparison-with-and-without-a-mic). Remote-code models such as Microsoft's Florence are out of the initial scope.
 
 ## Documents
 

@@ -1,91 +1,133 @@
 # Problems and opened questions
 
-**Slim models provide a fast regression check. A passing slim contract does not mean that the full model passes.** Contracts can replace model-specific integration tests in `run-slow` by executing against full checkpoints. The [CI integration](slim-models-in-transformers-ci.md) keeps the slim and full-model results separate and retains the other slow framework tests.
+Slim contracts are a fast regression signal. **A slim pass does not mean the full model passes.** Contracts can replace model-specific integration tests in `run-slow` only by running against full checkpoints; the other slow tests stay ([CI integration](slim-models-in-transformers-ci.md)).
 
-The [MIC proposal](../README.md) needs to establish how much useful early signal these fast checks provide and what that signal costs to maintain. The experiments support a CI pilot, but changing existing test coverage or making contracts required needs stronger evidence and stricter validation. These six issues distinguish limits of the approach from concrete gaps in the current prototype.
+The experiments support a CI pilot. Removing existing tests or making contracts required needs more evidence. This page lists the six problems that stand between the two, and what would settle each.
 
-## Regression coverage beyond the replay cases
+| # | Problem | Kind |
+| --- | --- | --- |
+| 1 | [Contracts only catch what they call](#1-contracts-only-catch-what-they-call) | Limit of the approach |
+| 2 | [A fixture does not cover every path of its checkpoint](#2-a-fixture-does-not-cover-every-path-of-its-checkpoint) | Limit of the approach |
+| 3 | [The sensitivity gate checks the wrong thing](#3-the-sensitivity-gate-checks-the-wrong-thing) | Prototype gap |
+| 4 | [Baselines multiply and need review rules](#4-baselines-multiply-and-need-review-rules) | Open cost |
+| 5 | [Cross-repository coordination and total cost](#5-cross-repository-coordination-and-total-cost) | Open cost |
+| 6 | [Runner validation gaps](#6-runner-validation-gaps) | Prototype gap, closed |
 
-The [historical replay](evidence.md#historical-regression-replay) caught eight reproducible regressions using slim fixtures once the affected public calls, inputs, processor files, and runtime were included. That establishes that small fixtures can reproduce those failures. It does not establish a future detection rate for the contracts as currently written: generic checks missed most processor and tokenizer bugs, and the [current T5 contract](../example/README.md#runner-prototype) still misses the batch-decode regression because it never makes the affected call.
+## 1. Contracts only catch what they call
 
-Choosing representative usage paths remains substantial test-authoring work. A short documentation example can be useful without covering the options and input combinations that existing integration tests exercise.
+**Problem.** Small fixtures can reproduce real regressions, but only when the contract makes the affected call. We do not know the detection rate on bugs nobody has seen yet.
 
-Freeze the contract code, inputs, fixtures, assertions, and tolerances before evaluating a set of regressions that was not used to design them. Continue the same measurement on future changes during the shadow trial. The [shadow backfill](evidence.md#shadow-backfill) does this on past history: frozen contracts on all 1,468 `main` commits from 2026-05-02 to 2026-10-07. Of the five regressions in the contracts' families during that time, the frozen suite caught one (UMT5, at its introducing commit) and missed four whose affected calls it does not make; it also flagged one benign change. That is the detection-rate problem stated above, measured: the misses are usage paths, not fixtures. With the four calls added, the same window catches all five, each until its fix, without new false alarms; but those checks were written after the bugs were known, so that result is post-hoc and does not estimate detection of unknown bugs. Report detections, misses, unsupported cases, and false alarms separately; distinguish failures caught by the frozen suite from failures caught only after adding a reproduction.
+**What we know.**
 
-[Improving contracts](improving-contracts.md) describes the loop for closing such gaps over time, and how to count detections after a call is added separately from those of the frozen suite.
+- The [replay](evidence.md#historical-regression-replay) caught all eight reproducible regressions once the check made the affected call. Generic forward/generate checks missed most processor and tokenizer bugs.
+- The [shadow backfill](evidence.md#shadow-backfill) ran the frozen contracts on 1,468 `main` commits (five months). Of five regressions in their families, it caught one (UMT5) and missed four whose calls no contract made. One benign change was flagged.
+- With the four calls added, it catches all five and no new false alarm. **This is post-hoc:** the checks were written knowing the bugs.
 
-Questions to resolve:
+**Next.**
 
-- How are representative inputs and API options chosen before a bug is known?
-- What early detection must a contract demonstrate before it can replace a particular existing fast test?
+- Freeze contracts, inputs, fixtures, and tolerances, then measure on regressions not used to design them. The shadow trial does this going forward.
+- Report detections, misses, unsupported cases, and false alarms separately. Count catches by the frozen suite apart from catches after adding a call ([improvement loop](improving-contracts.md)).
 
-## Boundaries of slim coverage
+**Open questions.**
 
-Calling the same public API does not ensure that a fixture and its checkpoint exercise the same implementation paths. Smaller dimensions and depth can change which conditions are reached; CPU execution excludes GPU paths. A fixture's default dtype can also differ from its checkpoint's: the [SmolLM example](../example/README.md#run-it) runs its fixtures in float32 while the 135M and 360M checkpoints default to bfloat16. The fast check therefore does not cover every path used by those checkpoints.
+- How do we choose representative inputs and API options before a bug is known?
+- What must a contract demonstrate before it replaces a given fast test?
 
-The fixture key establishes agreement on copied processor files and retained configuration. It does not establish equivalence for behavior affected by the dimensions that were replaced. Short inputs also leave long-context behavior untested, even when the fixture retains the relevant configuration.
+## 2. A fixture does not cover every path of its checkpoint
 
-These differences are an expected tradeoff of a fast check. The fixture does not need to reproduce all full-model behavior to be useful. For each contract, record the paths covered by the fixture, its known limits, and the full-model or hardware-specific checks that retain the remaining coverage. Choose PR variants for their early detection value and cost, and keep the required variants explicit.
+**Problem.** Same public API, different code paths. Smaller dimensions, shorter inputs, CPU, and a different default dtype can each skip paths the real checkpoint takes.
 
-Questions to resolve:
+**What we know.**
 
-- Which affordable dtype, attention, or input variants add useful signal to the fast check?
-- When should a change also trigger a full-model `run-slow` check before merge?
+- The fixture key guarantees identical processor files and retained config fields. It says nothing about behavior that depends on the shrunk dimensions.
+- CPU runs exclude GPU paths. Short inputs leave long context untested.
+- Dtypes can differ: the [SmolLM fixtures](../example/README.md#run-it) run in float32, the 135M and 360M checkpoints default to bfloat16.
 
-## What the input sensitivity gate establishes
+This is the expected tradeoff of a fast check, not a defect.
 
-The [gate](../example/perturb.py) establishes that perturbing an input changes some numerical output. It does not establish that a broken attention mask, detached module, or wrong preprocessing step will change the outputs the contract actually compares.
+**Next.** For each contract, record what the fixture covers, its known limits, and which full-model or hardware job covers the rest. Keep the required PR variants explicit and chosen for cost versus signal.
 
-There is also a mismatch between the gate and the assertions. The gate measures the maximum absolute movement anywhere in the logits, while contracts may compare selected logits or label log-probabilities. A movement outside those selected outputs can pass the gate without improving the contract's detection. The [builder](../example/build_fixtures.py) derives its default threshold from the manifest's absolute tolerances; it does not incorporate relative tolerances or platform overrides into that calculation.
+**Open questions.**
 
-Evaluate perturbations through the contract's recorded outputs and comparison rules, with a margin above normal variation in the supported runtimes. Retain a small set of representative injected faults to check whether input sensitivity translates into regression detection. Overfitting remains a useful fallback to evaluate: its measured detection gain is currently on synthetic Whisper faults, while random fixtures caught all eight reproducible historical regressions too ([weight comparison](fixtures.md#choosing-the-weights)).
+- Which cheap dtype, attention, or input variants add useful signal?
+- When should a PR also trigger a full-model `run-slow` check before merge?
 
-Questions to resolve:
+## 3. The sensitivity gate checks the wrong thing
 
-- What sensitivity margin is sufficient for the outputs and tolerances a contract uses?
-- Which faults should be tested beyond input perturbations, and when does overfitting add enough detection to justify its cost?
+**Problem.** The [gate](../example/perturb.py) shows that perturbing an input moves *some* logit. It does not show that a broken mask, detached module, or wrong preprocessing step moves the outputs the contract *compares*.
 
-## Baseline reliability and maintenance
+**What we know.**
 
-The baseline set grows with targets, frameworks, hardware classes, dtypes, and attention variants. CPU architecture differences have already required separate expectations for Whisper. The [A10G results](../example/README.md#on-gpu) establish stability on that tested GPU and environment, but do not establish that one `cuda` class will work across other GPUs and software stacks. The claim that platform-specific baselines eliminate the need for looser tolerances should remain scoped to the configurations measured so far.
+- The gate measures max movement over all logits; contracts may compare only selected logits or label log-probabilities.
+- The [builder](../example/build_fixtures.py) derives its threshold from absolute tolerances only, ignoring relative tolerances and platform overrides.
+- Overfitting helps on synthetic Whisper faults, but random fixtures also caught all eight historical regressions ([weights comparison](fixtures.md#choosing-the-weights)).
 
-Reproducing a candidate in a fresh process establishes repeatability. Approving a changed answer still requires evidence that the new behavior is acceptable. The [baseline review process](design.md#revisions-and-baselines) needs practical criteria for distinguishing an intended change, harmless numerical variation, and a regression; repeatedly recording new answers could otherwise hide failures.
+**Next.** Measure perturbations through the contract's own outputs and comparison rules, with a margin above normal variation. Keep a small set of injected faults to check that sensitivity turns into detection.
 
-Define the supported environment classes, calibrate them across representative runners, and measure baseline churn and review time during the pilot. So far: over five months of `main`, the eight `cpu-x86_64` fixture baselines needed one update for a benign change (a load-time RNG shift) and one for an intended one (T5-family SDPA), on GitHub runners with three EPYC models (7763, 9V45, 9V74), with and without native bfloat16; bfloat16 real checkpoints, by contrast, differed on a CPU with native bfloat16 support, which may need its own environment class. Budget the slim PR matrix separately from the full-model validation matrix; every full-model variant need not become a fast check. Each intentional baseline update should explain the behavior change and provide supporting evidence beyond the candidate's repeatability.
+**Open questions.**
 
-Questions to resolve:
+- What margin is enough for a given set of outputs and tolerances?
+- Which faults beyond input perturbations should be tested, and when is overfitting worth its cost?
 
-- How narrowly must hardware and dependency environments be grouped for stable comparisons?
-- What evidence is required to approve an output change, and what level of baseline upkeep is acceptable?
+## 4. Baselines multiply and need review rules
 
-## Coordination and total maintenance cost
+**Problem.** Baselines grow with targets × frameworks × hardware × dtype × attention. And re-recording is easy: without review criteria, a regression can be approved as a new answer.
 
-Keeping contracts on the Hub and expectations in framework repositories creates a review boundary. A change to both the calling code and framework behavior can require a contract revision, fleet-lock updates, and baseline changes across repositories. That arrangement needs a way to test the combined candidate before either part becomes the default, while preserving reproducibility for older framework revisions.
+**What we know.**
 
-The [cost measurements](evidence.md#stability-and-cost) show much smaller fixture artifacts and why batching matters; reduced transfer at fleet scale remains to be measured end to end. The measurements provide less evidence about the cost of authoring contracts, fixing shrink rules, repairing fixtures, reviewing baselines, and coordinating updates. Moving this work does not by itself reduce it.
+- Whisper already needs separate CPU-architecture baselines.
+- The [A10G results](../example/README.md#on-gpu) are stable on that GPU and stack only. "Per-platform baselines remove the need for looser tolerances" holds for the configurations measured, no further.
+- Five months of `main`: the eight `cpu-x86_64` fixture baselines needed two updates, one benign (load-time RNG shift), one intended (T5 SDPA). This held across three EPYC models, with and without native bfloat16.
+- bfloat16 *real* checkpoints did differ on a CPU with native bfloat16; that may need its own environment class.
+- A candidate reproducing in a fresh process proves repeatability, not correctness.
 
-Exercise one complete update involving both a contract and framework code, including review and rollback. Track maintainer time alongside execution, setup, and download costs. Keep existing coverage until each proposed migration has a mapping of retained inputs, assertions, variants, hardware, and run frequency. The proposal to pause or retire smoke-only tests needs that comparison first. Moving a full-model integration test into a contract must retain its full-model execution; a slim pass cannot replace it.
+**Next.**
 
-Questions to resolve:
+- Define environment classes, calibrate them on representative runners, and track churn and review time during the pilot.
+- Budget the slim PR matrix separately from the full-model matrix.
+- Require each baseline update to explain the behavior change, with evidence beyond repeatability ([review process](design.md#revisions-and-baselines)).
 
-- How are candidate contract revisions and framework changes tested and reviewed together?
-- Does the pilot reduce total maintainer effort, and which existing tests can be removed without losing coverage?
+**Open questions.**
 
-## Validation gaps in the prototype
+- How narrowly must hardware and dependency environments be grouped?
+- What evidence approves an output change, and how much upkeep is acceptable?
 
-The [runner](../example/run.py) used to lose checks without a failing result in five ways. All five are closed (2026-10-08); each was reproduced before the change and fails after it:
+## 5. Cross-repository coordination and total cost
+
+**Problem.** Contracts live on the Hub, expectations in framework repos. One behavior change can need a contract revision, a fleet-lock bump, and baseline updates across repos, tested together and still reproducible for old revisions.
+
+**What we know.**
+
+- [Cost measurements](evidence.md#stability-and-cost) show much smaller fixtures and why batching matters. Fleet-scale transfer savings are not measured end to end.
+- Human costs are not measured: authoring contracts, fixing shrink rules, repairing fixtures, reviewing baselines, coordinating updates. Moving this work does not reduce it.
+
+**Next.**
+
+- Run one complete contract + framework update, including review and rollback.
+- Track maintainer time next to execution, setup, and download cost.
+- Before retiring any test, map what it covers (inputs, assertions, variants, hardware, frequency) to what replaces it. Smoke-only tests need this before being paused.
+- A full-model integration test moved into a contract keeps its full-model run.
+
+**Open questions.**
+
+- How are a contract revision and a framework change tested and reviewed together?
+- Does the pilot reduce total maintainer effort, and which tests can go without losing coverage?
+
+## 6. Runner validation gaps
+
+**Closed 2026-10-08.** The [runner](../example/run.py) used to drop checks silently in five ways. Each was reproduced before the fix and fails after it.
 
 | Gap | Before | Now |
 | --- | --- | --- |
-| Missing output fields | A declared field missing from both the baseline and the result was skipped. | Every manifest output is required, in results, candidates, and baselines; training outputs only for a framework that declares `training`. A missing output fails, and `--record` refuses an incomplete candidate. |
-| Missing named gradient checks | An empty gradient dictionary passed `all_true`. | An `all_true` output must be a non-empty dict whose names match the baseline's, each exactly `true`. |
-| Changed output shapes | Numeric comparison flattened arrays, accepting a (1, 4) result against a (2, 2) baseline. | `allclose` outputs must have the baseline's shape (ragged lists included) before values are compared. |
-| Non-finite gradients | Contracts checked that gradients exist and are nonzero: a NaN gradient counts as nonzero and passed. | The six training contracts also require `torch.isfinite(grad).all()`. A NaN injected into every gradient before the SGD step now fails BERT's fixture; it passed before. |
-| Missing execution coverage | A run with only `unsupported` results exited successfully. | Each `unsupported` result records its `skip`: `declared` (the manifest's `unsupported`), `hardware` (the host misses the target's `resources`), or `variant` (undefined). A run where no target ran, or `--contract`/`--target` matched nothing, fails. `--require-all` also fails on any skip the manifest does not declare; the shadow, backfill, and nightly check jobs use it. |
+| Missing output | Skipped if absent from both result and baseline. | Every manifest output is required (training outputs only where the framework declares `training`). `--record` refuses incomplete candidates. |
+| Empty gradient checks | `{}` passed `all_true`. | Must be a non-empty dict, names matching the baseline, each `true`. |
+| Changed shape | Flattened: (1, 4) matched (2, 2). | `allclose` outputs must match the baseline's shape first, ragged lists included. |
+| NaN gradients | NaN counts as nonzero. | The six training contracts also require `torch.isfinite(grad).all()`. |
+| Nothing ran | All-`unsupported` runs exited 0. | Each skip records why: `declared`, `hardware`, or `variant`. No target run, or no `--contract`/`--target` match, fails. `--require-all` fails on any undeclared skip; shadow, backfill, and nightly use it. |
 
-Required outputs are derived from the manifest rather than from whatever a candidate emits: the manifest's `outputs` are the contract, and the framework's `training` flag is the only declared exception. Shapes are taken from the reviewed baseline, and named assertions from the baseline's names. Declared skips are reviewed with the contract; hardware skips stay visible outcomes, and each job decides with `--require-all` whether they are allowed.
+The manifest's `outputs` define what is required, shapes come from the reviewed baseline, and declared skips are reviewed with the contract.
 
-Still open:
+**Still open.**
 
-- Baseline recording on a GitHub runner (`cpu-baselines.yml machine=github`, 7 GB) skips SmolLM-1.7B for memory, so only `machine=gpu-host` (64 GB, the one used for cpu-x86_64 baselines) fails on undeclared skips (`REQUIRE_ALL`). Choosing runners from `resources` (next action 8) would remove the exception.
-- A framework may need to omit an output other than training (e.g. a runtime field it cannot report). There is no per-framework exception list yet; add one when a case appears.
+- GitHub runners (7 GB) skip SmolLM-1.7B when recording baselines, so only `machine=gpu-host` enforces `REQUIRE_ALL`. Choosing runners from `resources` (next action 8) removes the exception.
+- No per-framework exception list for outputs other than training. Add one when a case appears.
