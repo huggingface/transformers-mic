@@ -4,6 +4,10 @@
 #
 #   PY=python3 SHA=<transformers sha> VARIANTS="default eager" OUT=out .github/scripts/cpu_baselines.sh
 #
+# REQUIRE_ALL=1 fails the job when a target was skipped for a reason the manifest
+# does not declare (hardware, variant), after all results are written: set on
+# hosts that can run every target, so a baseline set is never silently partial.
+#
 # Writes to $OUT: pip-freeze.txt, host.txt, record-*/check-*/golden-* .jsonl and
 # .log, and candidates/ (the candidate baselines, at their repository paths).
 set -euo pipefail
@@ -52,3 +56,15 @@ done
 "$PY" example/run.py --framework transformers --golden cpu-arm64 --isolate \
   --output "$OUT/golden-cpu-arm64.jsonl" > /dev/null 2> "$OUT/golden-cpu-arm64.log" || true
 tail -1 "$OUT/golden-cpu-arm64.log"
+
+if [[ -n "${REQUIRE_ALL:-}" ]]; then
+  "$PY" - "$OUT" <<'EOF'
+import json, pathlib, sys
+skipped = sorted({f"{r['target']} {r['variant']}: {r['failures'][0]}" for f in pathlib.Path(sys.argv[1]).glob("*.jsonl")
+                  for r in map(json.loads, f.read_text().splitlines())
+                  if r["status"] == "unsupported" and r.get("skip") != "declared"})
+for s in skipped:
+    print(f"::error::not run: {s}")
+sys.exit(bool(skipped))
+EOF
+fi

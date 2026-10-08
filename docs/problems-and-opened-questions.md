@@ -87,5 +87,5 @@ Required outputs are derived from the manifest rather than from whatever a candi
 
 Still open:
 
-- Baseline recording on a GitHub runner (`cpu-baselines.yml machine=github`) skips SmolLM-1.7B for memory, so it runs without `--require-all`. Choosing runners from `resources` (next action 8) would remove the exception.
+- Baseline recording on a GitHub runner (`cpu-baselines.yml machine=github`, 7 GB) skips SmolLM-1.7B for memory, so only `machine=gpu-host` (64 GB, the one used for cpu-x86_64 baselines) fails on undeclared skips (`REQUIRE_ALL`). Choosing runners from `resources` (next action 8) would remove the exception.
 - A framework may need to omit an output other than training (e.g. a runtime field it cannot report). There is no per-framework exception list yet; add one when a case appears.

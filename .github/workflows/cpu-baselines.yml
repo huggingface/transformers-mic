@@ -86,6 +86,7 @@ jobs:
       - name: Record and check
         env:
           PY: python3
+          REQUIRE_ALL: "1"  # 64 GB: every target fits, so no skip but the manifest's
         run: OUT="$GITHUB_WORKSPACE/out" .github/scripts/cpu_baselines.sh
       - uses: actions/upload-artifact@v4
         if: always()
