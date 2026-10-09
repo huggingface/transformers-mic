@@ -2,7 +2,7 @@
 
 Goal: run the contracts as a non-blocking job in Transformers' own PR CI, with selection, a pinned environment matching the baselines, and an actionable failure report; then ask maintainers whether to adopt it.
 
-Status (2026-10-09): shadow, nightly, and backfill run in this repository; contracts and fixtures are on the Hub, pinned by revision and hash; baselines cover `cpu-arm64`, `cpu-x86_64`, `cpu-x86_64-bf16`, and `cuda`. All five decisions taken. Phases 1–3 done: on the `contracts-proof` branch of `huggingface/transformers`, `.github/workflows/contracts.yml` runs the contracts on the branch's own code in the PR CI runner and image, selected from changed files, with narrowed known failures and a job summary (7 pass + Whisper `xfail` in 17 s). Phase 4 in progress. Nothing runs in Transformers' PR CI for other PRs.
+Status (2026-10-09): shadow, nightly, and backfill run in this repository; contracts and fixtures are on the Hub, pinned by revision and hash; baselines cover `cpu-arm64`, `cpu-x86_64`, `cpu-x86_64-bf16`, and `cuda`. All five decisions taken. Phases 1–3 done: on the `contracts-proof` branch of `huggingface/transformers`, `.github/workflows/contracts.yml` runs the contracts on the branch's own code in the PR CI runner and image, selected from changed files, with narrowed known failures and a job summary (7 pass + Whisper `xfail` in 17 s). Phase 4 done: all five cases behave as intended ([evidence](evidence.md#transformers-ci-proof)). Next: phase 5. Nothing runs in Transformers' PR CI for other PRs.
 
 ## Facts the plan rests on (checked 2026-10-09)
 
@@ -74,13 +74,13 @@ Run [37934829379](https://github.com/huggingface/transformers/actions/runs/37934
 
 Branch pushes, not draft PRs (decided 2026-10-09): a PR, even against `contracts-proof`, also triggers Transformers' full PR CI (`pr-ci-caller.yml`), the docs build, and the PR bots. `proof-*` branches off `contracts-proof` trigger only `contracts.yml` (and the secret scan), selected from their diff as a PR would be; the job summary is the same. Branches: `proof-a-docs`, `proof-b-shared`, `proof-c-clip`, `proof-d-umt5-revert`.
 
-Runs pushed 2026-10-09 ~13:20 UTC, results pending (check each run's summary and `contracts` artifact):
+Runs of 2026-10-09 (each run's summary has the table and repro commands; `contracts` artifact has the records):
 
-- [ ] **A. Clean:** `proof-a-docs` (a docs page), run [37935955253](https://github.com/huggingface/transformers/actions/runs/37935955253): expect no contract selected, green.
-- [ ] **B. Shared code:** `proof-b-shared` (no-op in `generation/utils.py`), run [37935960229](https://github.com/huggingface/transformers/actions/runs/37935960229): expect all 6 selected, 7 pass + Whisper `xfail`; record time.
-- [ ] **C. Model-scoped:** `proof-c-clip` (no-op in `models/clip/modeling_clip.py`), run [37935964228](https://github.com/huggingface/transformers/actions/runs/37935964228): expect only CLIP.
-- [ ] **D. Known regression:** `proof-d-umt5-revert` (reverts `d7ba937671`, #49135), run [37935967981](https://github.com/huggingface/transformers/actions/runs/37935967981): expect T5 selected, `proto-umt5-small-slim` fails (`label_logprobs`, loss), red, the summary alone enough to reproduce.
-- [ ] **E. Live regression:** #49456 shows as `xfail` on the matched message only (a different Whisper failure would still fail); the report names the issue and that Whisper's later checks did not run. Seen in every full run so far (37934829379); confirm in B's summary.
+- [x] **A. Clean:** `proof-a-docs` (a docs page), [run 37935955253](https://github.com/huggingface/transformers/actions/runs/37935955253): no contract selected, green; 11.5 s of runner time (Hub and selection only).
+- [x] **B. Shared code:** `proof-b-shared` (no-op in `generation/utils.py`), [run 37935960229](https://github.com/huggingface/transformers/actions/runs/37935960229): all 6 contracts selected ("shared code"), 7 pass + Whisper `xfail`, green, 17.8 s.
+- [x] **C. Model-scoped:** `proof-c-clip` (no-op in `models/clip/modeling_clip.py`), [run 37935964228](https://github.com/huggingface/transformers/actions/runs/37935964228): only CLIP selected ("models/clip"), pass, 11.5 s.
+- [x] **D. Known regression:** `proof-d-umt5-revert` (reverts `d7ba937671`, #49135), [run 37935967981](https://github.com/huggingface/transformers/actions/runs/37935967981): only T5 selected ("models/umt5"); `proto-t5-small-slim` passes, `proto-umt5-small-slim` fails (`label_logprobs` off by 1.22, `training.loss` by 0.204, the same deltas as in the backfill), red, with the repro command in the summary. 13.4 s.
+- [x] **E. Live regression:** #49456 is `xfail` on the matched message only in B and every full run; the summary names the issue and that Whisper's later checks did not run.
 - [ ] Per PR: selection, run and install time, report link. Add a "Transformers CI proof" section to [evidence](evidence.md).
 
 ## Phase 5: write-up and maintainer decision
@@ -108,7 +108,7 @@ Runs pushed 2026-10-09 ~13:20 UTC, results pending (check each run's summary and
 
 ## Open items
 
-- [ ] **Phase 4 results** (runs above): fill A–D, then add a "Transformers CI proof" section to [evidence](evidence.md) and start phase 5's one-pager.
+- [ ] **Phase 5:** the one-page write-up for maintainers (what ran, cost, catches, what a developer sees, upkeep), then the asks.
 - [ ] Re-vendor `utils/contracts/` on `contracts-proof` whenever `example/run.py`, `report.py`, or the lock changes here (the branch README names the source commit). Keep `proof-*` branches rebased on `contracts-proof`.
 - [ ] Cleanup after the proof: delete `proof-*` branches (and `contracts-proof` once moved to `transformers-ci`, D1b); the worktree lived in a session scratchpad (`git -C ~/Dev/transformers worktree prune`).
 

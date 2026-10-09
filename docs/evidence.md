@@ -93,6 +93,22 @@ Phase 1 of the [CI proof](transformers-ci-proof.md): the eight fixture contracts
 - **Slower than a 2-core GitHub runner** (~13 s) on 128 cores, presumably thread oversubscription on tiny tensors; `OMP_NUM_THREADS` untested.
 - Installing Transformers and the runner's dependencies over the image: 14 s.
 
+### Transformers CI proof
+
+The contracts job on the `contracts-proof` branch of `huggingface/transformers` ([plan](transformers-ci-proof.md)): the branch's own build, PR CI runner and image (`aws-m8i-l-cache`, `transformers-torch-light`), contracts selected from changed files, no `local_patches` (open bugs as narrowed `known_failures`). Demo changes pushed as `proof-*` branches, 2026-10-09:
+
+| Change | Selected | Result | Runner time |
+| --- | --- | --- | ---: |
+| Docs page | none | green | 11.5 s |
+| No-op in `generation/utils.py` | all 6 (shared code) | 7 pass, Whisper `xfail` (#49456) | 17.8 s |
+| No-op in `models/clip/` | CLIP | pass | 11.5 s |
+| Revert of the UMT5 fix #49135 | T5 (`models/umt5`) | **red**: `proto-umt5-small-slim` `label_logprobs` off by 1.22, loss by 0.204; `proto-t5-small-slim` passes | 13.4 s |
+
+- **The reverted regression fails with the backfill's exact deltas**, on another CPU vendor (Intel Xeon 6975P-C vs AMD EPYC) and package set (the image's torch 2.14, numpy 2.3), against baselines recorded on AMD with the lock's pins.
+- **Selection worked as designed** in all four: model-scoped changes ran one contract, shared code all six, docs none.
+- **Known failures without patches:** #49456 is `xfail` on its message; #49385 needs Wav2Vec2's loss and gradients skipped on this runner (non-finite gradients from uninitialized memory, unlike on the M5).
+- Runner time excludes setup; install over the image is ~15 s, and fixtures are cached per lock.
+
 ### On GPU
 
 One run on `aws-g5-4xlarge-cache` (A10G, torch 2.14.0+cu130), Transformers `8625785e` ([workflow](../.github/workflows/gpu-checks.yml), [gpu.json](../experiments/results/gpu.json)). 42 rows: six families, random and overfit fixtures on three seeds, plus real checkpoints; float32 baselines from the runner's CPU and GPU, checked on GPU at `1e-4`.
