@@ -91,7 +91,7 @@ Seven contracts, one per usage path, through `run.py` on CPU (Apple M5, Transfor
 | Wav2Vec2 | CTC transcription | random: weakest 0.60; amplitude blind spot accepted with a reason | `facebook/wav2vec2-base-960h`, with a local workaround (below) |
 | MusicgenMelody | text- and melody-conditioned generation with guidance | **overfit** by reviewed choice, 60 steps: random weights pass the gate (weakest 0.018) but generate the same codes for every prompt, melody or not; EnCodec widths set by `config_overrides` (59M → 3.5M parameters) | `facebook/musicgen-melody` |
 
-`build_fixtures.py` applies one [recipe](../docs/fixtures.md#recipe) with no per-family code; a recipe may set reviewed `config_overrides` where the generic shrink rule misses a coupled or unshrunk field. The contract's own model calls feed the [`perturb.py`](perturb.py) gate and the overfit step. MusicGen Melody's baselines: `cpu-arm64` approved (fixture and checkpoint, three variants, Transformers `8625785e`); `cpu-x86_64` and `cuda` pending in CI.
+`build_fixtures.py` applies one [recipe](../docs/fixtures.md#recipe) with no per-family code; a recipe may set reviewed `config_overrides` where the generic shrink rule misses a coupled or unshrunk field. The contract's own model calls feed the [`perturb.py`](perturb.py) gate and the overfit step. MusicGen Melody's baselines (Transformers `8625785e`): `cpu-arm64` and `cuda` for fixture and checkpoint in three variants, `cpu-x86_64` in two; float32 audio codes agree on all four platforms, and only the real checkpoint in bfloat16 on CUDA generates different ones.
 
 **Batching** (runnable-markdown contracts share the runner's process):
 
