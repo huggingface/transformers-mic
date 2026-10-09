@@ -62,6 +62,7 @@ Early results on 1,468 Transformers `main` commits over five months ([shadow bac
 
 - Frozen contracts caught the UMT5 regression ([#49135](https://github.com/huggingface/transformers/pull/49135)) at its introducing commit, flagged one benign change, and missed four regressions whose calls they didn't make.
 - With those calls added ([how](docs/improving-contracts.md)), all five are caught, no new false alarm, ~13 s per commit on CPU. The new Whisper call found a live bug ([#49403](https://github.com/huggingface/transformers/issues/49403)).
+- The scheduled runs on `main` caught a Whisper regression the night it merged, which its PR's CI had passed ([#49456](https://github.com/huggingface/transformers/issues/49456)).
 
 Agent reuse is measured separately ([recipe](docs/agent-walkthrough/README.md#controlled-comparison-with-and-without-a-mic)). Remote-code models are out of initial scope.
 

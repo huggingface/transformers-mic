@@ -78,7 +78,39 @@ def whisper_decode_tensor_batch():
     return ["WhisperTokenizer"]
 
 
-PATCHES = {"masked-spec-embed-init": masked_spec_embed_init, "whisper-decode-tensor-batch": whisper_decode_tensor_batch}
+def config_field_generation_params():
+    """Do not count a config's own declared fields as user-set generation parameters (#49456, from #48282).
+
+    generate() raises when model.config holds generation parameters. It used to
+    skip every field of the config class; since #48282 it skips only fields
+    whose default is not None, so WhisperConfig.suppress_tokens (default None,
+    set in the OpenAI checkpoints' config.json) makes every generate() raise.
+    Restore the skip for every declared field.
+    """
+    import dataclasses
+
+    from transformers import PreTrainedConfig
+
+    original = PreTrainedConfig._get_generation_parameters
+    if getattr(original, "_mic_patched", False) or not hasattr(PreTrainedConfig, "default_config_fields"):
+        return []  # already patched, or a build before the regression
+
+    def _get_generation_parameters(self, original=original):
+        params = original(self)
+        if dataclasses.is_dataclass(self):
+            declared = {f.name for f in dataclasses.fields(self)}
+            params = {k: v for k, v in params.items() if k not in declared}
+        return params
+
+    _get_generation_parameters._mic_patched = True
+    PreTrainedConfig._get_generation_parameters = _get_generation_parameters
+    return ["PreTrainedConfig"]
+
+PATCHES = {
+    "masked-spec-embed-init": masked_spec_embed_init,
+    "whisper-decode-tensor-batch": whisper_decode_tensor_batch,
+    "config-field-generation-params": config_field_generation_params,
+}
 
 
 def apply(names):
