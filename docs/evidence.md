@@ -79,6 +79,20 @@ SmolLM-135M and -360M ship bfloat16, which users get by default, but fixtures us
 - Emulated bfloat16 on x86 and the M5 generate the same tokens on every SmolLM target. The 24 shared float32 targets agree across the 7763, 9V45, and 7R32.
 - Not tested: Intel (`amx_bf16`) vs AMD (`avx512_bf16`), needed before PR CI uses Intel runners.
 
+### On the Transformers PR CI runner
+
+Phase 1 of the [CI proof](transformers-ci-proof.md): the eight fixture contracts on `aws-m8i-l-cache` in `huggingface/transformers-torch-light`, the runner and image of Transformers' PR test jobs, from the `contracts-proof` branch of `huggingface/transformers` ([run 37932247464](https://github.com/huggingface/transformers/actions/runs/37932247464), 2026-10-09). Transformers `8625785e`, the baselines' build.
+
+| Packages | Differ from the lock | Default | Eager | Run (8 fixtures, one process) |
+| --- | --- | ---: | ---: | ---: |
+| Image as is | Python 3.11.17, torch 2.14.0, numpy 2.3.5, tokenizers 0.23.2, + 8 more | 8/8 | 8/8 | 37–39 s |
+| Lock's pins installed | Python 3.11.17 only | 8/8 | 8/8 | 36–57 s |
+
+- **The `cpu-x86_64` baselines hold on Intel**, recorded on AMD EPYC 7R32/7763/9V45; no pin install needed (16 s if it were).
+- **Intel `amx_bf16` matches AMD `avx512_bf16` on the bfloat16 fixture** (Xeon 6975P-C against the 9V45's `cpu-x86_64-bf16` baseline). Weak evidence: the fixture also matches emulated bfloat16. Real bfloat16 checkpoints on Intel are untested.
+- **Slower than a 2-core GitHub runner** (~13 s) on 128 cores, presumably thread oversubscription on tiny tensors; `OMP_NUM_THREADS` untested.
+- Installing Transformers and the runner's dependencies over the image: 14 s.
+
 ### On GPU
 
 One run on `aws-g5-4xlarge-cache` (A10G, torch 2.14.0+cu130), Transformers `8625785e` ([workflow](../.github/workflows/gpu-checks.yml), [gpu.json](../experiments/results/gpu.json)). 42 rows: six families, random and overfit fixtures on three seeds, plus real checkpoints; float32 baselines from the runner's CPU and GPU, checked on GPU at `1e-4`.

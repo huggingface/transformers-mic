@@ -2,7 +2,7 @@
 
 Goal: run the contracts as a non-blocking job in Transformers' own PR CI, with selection, a pinned environment matching the baselines, and an actionable failure report; then ask maintainers whether to adopt it.
 
-Status (2026-10-09): shadow, nightly, and backfill run in this repository; contracts and fixtures are on the Hub, pinned by revision and hash; baselines cover `cpu-arm64`, `cpu-x86_64`, `cpu-x86_64-bf16`, and `cuda`. Decisions D1, D3, D4, D5 taken; D2 waits on phase 1. Nothing runs inside Transformers CI yet.
+Status (2026-10-09): shadow, nightly, and backfill run in this repository; contracts and fixtures are on the Hub, pinned by revision and hash; baselines cover `cpu-arm64`, `cpu-x86_64`, `cpu-x86_64-bf16`, and `cuda`. All five decisions taken. Phase 1 done: the fixture baselines hold on the PR CI runner and image. Nothing runs in Transformers' PR CI yet; a probe workflow runs on the `contracts-proof` branch of `huggingface/transformers`.
 
 ## Facts the plan rests on (checked 2026-10-09)
 
@@ -18,7 +18,7 @@ Status (2026-10-09): shadow, nightly, and backfill run in this repository; contr
 ## Decisions (taken 2026-10-09 unless noted)
 
 - [x] **D1. Where the proof runs: a same-repository branch on `huggingface/transformers` with its own `.github/workflows/contracts.yml`, opened as a draft PR.** Real runner group (`aws-m8i-l-cache`) and image, no change to shared CI. Branch name must not start with `ci-`. Rejected for now: a `transformers-ci` branch (shared infra before evidence; the target once maintainers accept, D1b) and a fork on GitHub-hosted runners (no m8i or CI image).
-- [ ] **D2. Environment.** Install the lock's pins in the job, or record baselines in the CI image. Decided by phase 1: prefer the image as is; install pins only if the image fails and pins pass; neither passes means an Intel platform class.
+- [x] **D2. Environment: the CI image as is, no pin install** (phase 1: 16/16 pass with the image's packages, which differ from the lock in Python, torch, numpy, and nine more). Results keep recording `environment_differs`; an image rebuild that breaks a baseline shows up as a failure on every PR, so the first move then is to rerun with the pins (16 s) to tell an environment change from a regression.
 - [x] **D3. Runner packaging: vendored into `utils/contracts/`** (`run.py`, `select_contracts.py`, `schemas/`, `report.py`), with a header naming this repository as the source. A published package (the design's shared runner) after the proof.
 - [x] **D4. Open framework bugs: no `local_patches` in Transformers; signature-scoped `known_failures`.** A patch changes the framework under test, acceptable for an outside observer, not for the framework's own CI. Each entry names the issue and either a failure signature (an error substring) or the outputs it skips; any other failure still fails, and a pass reports "fixed, remove the entry". Whole-target xfail rejected: while #49456 is open it would blind every Whisper check. Today's entries:
   - #49456: Whisper targets, signature `You have modified the pretrained model configuration`.
@@ -26,17 +26,15 @@ Status (2026-10-09): shadow, nightly, and backfill run in this repository; contr
   - #49403: none; fixed on `main` by #49419, which the PR builds include.
 - [x] **D5. doc-builder: pinned by SHA**, `git+https://github.com/huggingface/doc-builder@<sha>`, as Transformers already does for doc-builder's workflows. No release needed for the proof.
 
-## Phase 1: validate the environment on the PR CI runner (this repository)
+## Phase 1: validate the environment on the PR CI runner (done 2026-10-09)
 
-Question: do the `cpu-x86_64` fixture baselines hold on `aws-m8i-l-cache` in the CI image, with and without the lock's pins?
+Question: do the `cpu-x86_64` fixture baselines hold on `aws-m8i-l-cache` in the CI image, with and without the lock's pins? **Yes, both** ([evidence](evidence.md#on-the-transformers-pr-ci-runner)).
 
-- [ ] Ask infra for `aws-m8i-l-cache` access (or run phase 1 from the D1a branch).
-- [ ] `ci-image-probe.yml`: container `huggingface/transformers-torch-light`, runner `aws-m8i-l-cache`; install Transformers `8625785e`, then `run.py --fixtures-only --require-all` twice:
-  - [ ] **as is**: image packages, `environment_differs` recorded;
-  - [ ] **pinned**: `.github/scripts/install_pinned.sh` first.
-- [ ] Record CPU model and flags (`avx512_bf16`, `amx_*`), package versions, install and run times.
-- [ ] Decide: *as is* passes → no pin install; only *pinned* passes → install pins (measure cost); neither → an Intel platform class, and decide which runner records required baselines.
-- [ ] Note the result in [evidence](evidence.md#stability-and-cost).
+- [x] Run from the D1 branch: `contracts-proof` on `huggingface/transformers`, `.github/workflows/contracts-probe.yml` on push to that branch only (no PR; only the secret scan also runs), runner vendored in `utils/contracts/` from `b303626`. No infra request needed.
+- [x] Transformers `8625785e`, eight fixtures, default and eager: **as is** 16/16, **pinned** 16/16.
+- [x] Host: Intel Xeon 6975P-C, 128 cores, `avx512_bf16`, `amx_bf16`; Python 3.11.17 in the image. Install over the image 14 s, pins 16 s; run 37–57 s.
+- [x] Decided D2: image as is.
+- Learned on the way: Transformers' `.gitignore` has `*.lock`, so the vendored `fleet.lock` needs `git add -f` (or another name in phase 2). The shared `/mnt/cache` HF cache is read-only in PR jobs; the probe downloads into `/tmp` (~150 MB).
 
 ## Phase 2: package the fleet for Transformers
 
@@ -47,7 +45,7 @@ Question: do the `cpu-x86_64` fixture baselines hold on `aws-m8i-l-cache` in the
   - [ ] Import `patches` only when `local_patches` is non-empty.
   - [ ] Keep `schemas/` beside the runner.
 - [ ] Transformers branch layout:
-  - [ ] `tests/contracts/fleet.lock` (no `path`, no `local_patches`; `known_failures` per D4), `tests/contracts/expectations/` (x86 platform(s) from phase 1, `cpu-x86_64-bf16` if the m8i has `avx512_bf16`/`amx_bf16`; drop `cpu-arm64` and `cuda` unless needed).
+  - [ ] `tests/contracts/fleet.lock` (`*.lock` is gitignored in Transformers: rename, e.g. `fleet-lock.json`, or `git add -f`; no `path`, no `local_patches`; `known_failures` per D4), `tests/contracts/expectations/` (x86 platform(s) from phase 1, `cpu-x86_64-bf16` if the m8i has `avx512_bf16`/`amx_bf16`; drop `cpu-arm64` and `cuda` unless needed).
   - [ ] `utils/contracts/run.py`, `select_contracts.py`, `schemas/`, `report.py` (phase 3), with a header naming this repository as the source.
 - [ ] On the branch, `python utils/contracts/run.py --framework transformers --fixtures-only --lock tests/contracts/fleet.lock` passes on its own build.
 
@@ -64,7 +62,8 @@ Question: do the `cpu-x86_64` fixture baselines hold on `aws-m8i-l-cache` in the
   - [ ] repro: `python utils/contracts/run.py --framework transformers --fixtures-only --contract <C> --target <T>`;
   - [ ] `selected_by` and skipped contracts;
   - [ ] for `fail`/`error`: regression vs intended change, with a link to the baseline update steps.
-- [ ] Budget: under 2 minutes on a warm cache (~13 s for 8 fixtures on a 2-core runner).
+- [ ] Budget: under 2 minutes. On the m8i, 8 fixtures take 37–39 s in one process (vs ~13 s on a 2-core GitHub runner): try `OMP_NUM_THREADS` (PR jobs set it per suite).
+- [ ] HF cache: `/mnt/cache` is read-only; use `actions/cache` keyed on the lock hash, or ask infra to pre-populate the shared cache with the pinned fixtures and contracts.
 
 ## Phase 4: demonstrate on real PRs (drafts against the D1 branch)
 
