@@ -34,7 +34,7 @@ A candidate is a question, not a verdict.
    - `cuda`: [`nightly.yml`](../.github/workflows/nightly.yml) `mode=record`
 7. **Review.** [`review_candidates.py`](../example/review_candidates.py) classifies each candidate **unchanged** (new outputs only), **changed** (needs a reason), or **new**. `--approve` renames only unchanged and new; changed is a person's call.
 8. **Measure on history.** Re-run the backfill; record catches, new false alarms, and per-commit cost in [evidence](evidence.md), post-hoc detections apart.
-9. **Fails on today's `main`?** Live bug: report upstream and keep the check with a `local_patches` workaround (recorded per result), not `known_failures`, which hides the contract's other checks. Drop the patch and re-record once fixed.
+9. **Fails on today's `main`?** Live bug: report upstream and keep the check with a `local_patches` workaround (recorded per result) here. In the framework's own CI, use a narrowed `known_failures` entry instead (`match` on the error, or `skip_outputs`), never the whole-target form, which hides the contract's other checks. Drop the patch and re-record once fixed.
 
 ## Keeping false alarms down
 

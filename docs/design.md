@@ -99,7 +99,7 @@ The last stdout line is a JSON result with the runtime used; the baseline is pic
 | Tolerances per platform | `expectations/<contract>/<platform>/tolerances.json`, with a required reason. |
 | Reproducible baselines | `--record` reruns in a fresh process and refuses differing or non-finite outputs. |
 | Validation | Missing outputs, wrong shapes, non-finite gradients, and empty runs fail ([gaps closed](problems-and-opened-questions.md#6-runner-validation-gaps)). |
-| Known failures | `known_failures` (with issue) reports `xfail` and fails once it passes; `local_patches` applies a workaround in every process, recorded per result. |
+| Known failures | `known_failures` (with issue) reports `xfail` and fails once it passes. An entry can narrow to failures matching a message (`match`; any other failure still fails) or leave outputs out of the comparison (`skip_outputs`, recorded per result). `local_patches` applies a workaround in every process, recorded per result: for observers, not for the framework's own CI. |
 | Replays | [`replay.py`](../example/replay.py): the unchanged runner on a regression's bad and fixed builds. |
 
 Not implemented: isolation for untrusted code, private-artifact rules, picking the CI runner class from `resources`.

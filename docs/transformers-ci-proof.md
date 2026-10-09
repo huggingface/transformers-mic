@@ -12,7 +12,7 @@ Status (2026-10-09): shadow, nightly, and backfill run in this repository; contr
 - This repository can use `aws-g5-4xlarge-cache` only, not `aws-m8i-l-cache`. It was dropped from the group's authorized repositories on 2026-10-09 (jobs queued from 07:14 UTC, no runner requested); infra (Guillaume Legendre) re-added it, and a `gpu-probe.yml` canary ran at 12:05 UTC. Jobs queued for more than ~30 minutes: ask infra whether the repository is still authorized.
 - The runner needs doc-builder's runnable-markdown collector, on doc-builder `main` only. PyPI `hf-doc-builder` is 0.5.0 (2024-03-11). Transformers already installs doc-builder with `git+https://github.com/huggingface/doc-builder.git@main` (`build_pr_documentation.yml`) and pins doc-builder's reusable workflows by SHA.
 - `pr-ci-security-gate.yml` (`pull_request_target`) gates fork PRs only; PRs from members, owners, and collaborators trigger PR CI directly. A same-repository PR runs the workflow files on its own branch. Branches named `ci-*` also trigger push CI.
-- `known_failures` today is per target: one open bug makes the whole target `xfail`, every other check included.
+- `known_failures` was per target (one open bug made the whole target `xfail`); since 2026-10-09 an entry can narrow to a failure message or to skipped outputs. A contract that raises stops there, so a matched error still hides the checks after it; a skipped output hides only itself.
 - Runner today: `example/run.py`, `select_contracts.py`, `patches.py`, `schemas/`, reading `example/transformers/tests/contracts/fleet.lock` and `expectations/`. `local_patches` holds three workarounds (#49385, #49403, #49456).
 
 ## Decisions (taken 2026-10-09 unless noted)
@@ -20,9 +20,9 @@ Status (2026-10-09): shadow, nightly, and backfill run in this repository; contr
 - [x] **D1. Where the proof runs: a same-repository branch on `huggingface/transformers` with its own `.github/workflows/contracts.yml`, opened as a draft PR.** Real runner group (`aws-m8i-l-cache`) and image, no change to shared CI. Branch name must not start with `ci-`. Rejected for now: a `transformers-ci` branch (shared infra before evidence; the target once maintainers accept, D1b) and a fork on GitHub-hosted runners (no m8i or CI image).
 - [x] **D2. Environment: the CI image as is, no pin install** (phase 1: 16/16 pass with the image's packages, which differ from the lock in Python, torch, numpy, and nine more). Results keep recording `environment_differs`; an image rebuild that breaks a baseline shows up as a failure on every PR, so the first move then is to rerun with the pins (16 s) to tell an environment change from a regression.
 - [x] **D3. Runner packaging: vendored into `utils/contracts/`** (`run.py`, `select_contracts.py`, `schemas/`, `report.py`), with a header naming this repository as the source. A published package (the design's shared runner) after the proof.
-- [x] **D4. Open framework bugs: no `local_patches` in Transformers; signature-scoped `known_failures`.** A patch changes the framework under test, acceptable for an outside observer, not for the framework's own CI. Each entry names the issue and either a failure signature (an error substring) or the outputs it skips; any other failure still fails, and a pass reports "fixed, remove the entry". Whole-target xfail rejected: while #49456 is open it would blind every Whisper check. Today's entries:
-  - #49456: Whisper targets, signature `You have modified the pretrained model configuration`.
-  - #49385: Wav2Vec2 targets, skip `training.loss` (depends on uninitialized `masked_spec_embed`) until #49386 lands.
+- [x] **D4. Open framework bugs: no `local_patches` in Transformers; signature-scoped `known_failures`.** A patch changes the framework under test, acceptable for an outside observer, not for the framework's own CI. Each entry names the issue and either a failure message (`match`) or the outputs it skips (`skip_outputs`); any other failure still fails, and a pass with `match` reports "fixed, remove the entry". Whole-target xfail rejected: it would hide a second, unrelated Whisper failure. Today's entries, checked on `main` (`33ab420a77`) without `local_patches` (6 fixtures pass, stable over two isolated runs):
+  - #49456: `Whisper/proto-whisper-tiny-slim`, `match` `You have modified the pretrained model configuration` → `xfail`. The error comes from the first `generate()`, so Whisper's later checks don't run until the fix: a matched raise is narrower than whole-target xfail but no substitute for the fix.
+  - #49385: `Wav2Vec2/proto-wav2vec2-base-960h-slim`, `skip_outputs` `training.loss` (depends on uninitialized `masked_spec_embed`) until #49386 lands → `pass`, everything else compared.
   - #49403: none; fixed on `main` by #49419, which the PR builds include.
 - [x] **D5. doc-builder: pinned by SHA**, `git+https://github.com/huggingface/doc-builder@<sha>`, as Transformers already does for doc-builder's workflows. No release needed for the proof.
 
@@ -40,12 +40,12 @@ Question: do the `cpu-x86_64` fixture baselines hold on `aws-m8i-l-cache` in the
 
 ## Phase 2: package the fleet for Transformers (next)
 
-- [ ] Runner changes here first:
-  - [ ] Signature-scoped `known_failures` (D4): entry `{issue, match | skip_outputs}`; schema bump; a pass or a non-matching failure is reported as such. Keep the plain string form for this repository's lock.
-  - [ ] `--lock PATH` (default unchanged); expectations next to the lock.
-  - [ ] Lock `path` optional: published contracts and fixtures need no source folder (only `--local-*` and script contracts do).
-  - [ ] Import `patches` only when `local_patches` is non-empty.
-  - [ ] Keep `schemas/` beside the runner.
+- [x] Runner changes here first (2026-10-09):
+  - [x] Scoped `known_failures` (D4): a string keeps the whole-target form; an object `{issue, match?, skip_outputs?}` narrows it; results carry `skipped_outputs`. Tested: partial match fails, match plus skip gives `xfail`, skip alone passes, `match` on a passing target asks for removal, an `issue`-only object is rejected by the schema.
+  - [x] `--lock PATH` (default unchanged); `expectations/` next to the lock; baseline paths in results relative to the runner or the working directory.
+  - [x] Lock `path` optional: published contracts and fixtures run from the Hub; a missing `path` is an error only for `--local-*`, unpublished, and script contracts.
+  - [x] `patches` imported only when `local_patches` is non-empty (already the case).
+  - [x] `schemas/` stays beside the runner.
 - [ ] Transformers branch layout:
   - [ ] `tests/contracts/fleet.lock` (`*.lock` is gitignored in Transformers: rename, e.g. `fleet-lock.json`, or `git add -f`; no `path`, no `local_patches`; `known_failures` per D4), `tests/contracts/expectations/` (x86 platform(s) from phase 1, `cpu-x86_64-bf16` if the m8i has `avx512_bf16`/`amx_bf16`; drop `cpu-arm64` and `cuda` unless needed).
   - [ ] `utils/contracts/run.py`, `select_contracts.py`, `schemas/`, `report.py` (phase 3), with a header naming this repository as the source.
@@ -73,7 +73,7 @@ Question: do the `cpu-x86_64` fixture baselines hold on `aws-m8i-l-cache` in the
 - [ ] **B. Shared code:** a no-op in `generation/utils.py` selects every contract; all pass; record time.
 - [ ] **C. Model-scoped:** a change in `models/clip/` selects only CLIP.
 - [ ] **D. Known regression:** revert `d7ba937671` (#49135, UMT5 non-causal under SDPA): T5 fails on `proto-umt5-small-slim` (`label_logprobs`, loss); the summary alone suffices to reproduce.
-- [ ] **E. Live regression:** #49456 shows as `xfail` on the matched signature only; other Whisper checks still run; the report makes the cause obvious.
+- [ ] **E. Live regression:** #49456 shows as `xfail` on the matched message only (a different Whisper failure would still fail); the report names the issue and that Whisper's later checks did not run.
 - [ ] Per PR: selection, run and install time, report link. Add a "Transformers CI proof" section to [evidence](evidence.md).
 
 ## Phase 5: write-up and maintainer decision
