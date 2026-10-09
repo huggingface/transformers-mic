@@ -1,14 +1,14 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/BERT-integration",
-  "contract_revision": "unpublished",
+  "contract_revision": "e8e23b07e9e13bebf6f1f4ba20298157333f279d",
   "framework": "transformers",
   "variant": "eager",
   "target": "bert-base-uncased",
   "kind": "checkpoint",
   "revision": "86b5e0934494bd15c9632b12f734a8a67f723594",
   "environment": {
-   "python": "3.10.12",
+   "python": "3.10.22",
    "transformers": "5.19.0.dev0",
    "torch": "2.11.0+cpu",
    "torchvision": "0.26.0+cpu",
@@ -25,11 +25,12 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 8.93,
+  "seconds": 6.06,
   "platform": "cpu-x86_64"
  },
  "outputs": {
@@ -52,32 +53,32 @@
   ],
   "answer_logits": [
    [
-    12.346076011657715,
-    1.9429785013198853,
-    6.54783821105957,
-    3.6329264640808105
+    12.346078872680664,
+    1.9429855346679688,
+    6.547842979431152,
+    3.6329293251037598
    ],
    [
-    6.064367294311523,
-    12.20838451385498,
-    6.488175868988037,
-    6.152791500091553
+    6.064363479614258,
+    12.208372116088867,
+    6.488170146942139,
+    6.152787208557129
    ],
    [
-    6.255678176879883,
-    4.6371235847473145,
+    6.255681991577148,
+    4.637124061584473,
     12.204490661621094,
-    4.724184989929199
+    4.724185466766357
    ],
    [
-    5.909886837005615,
-    3.585038185119629,
-    4.62980842590332,
-    12.290732383728027
+    5.909882545471191,
+    3.585036277770996,
+    4.629805088043213,
+    12.290727615356445
    ]
   ],
   "training": {
-   "loss": 1.6517921686172485,
+   "loss": 1.6517943143844604,
    "gradients": {
     "bert.encoder.layer.0.attention.self.query.weight": true,
     "bert.encoder.layer.0.intermediate.dense.weight": true

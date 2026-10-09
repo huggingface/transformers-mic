@@ -1,14 +1,14 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/SmolLM-integration",
-  "contract_revision": "unpublished",
+  "contract_revision": "ea5b7a6908a88f30679815d8343dde713778eb86",
   "framework": "transformers",
   "variant": "default",
   "target": "SmolLM-360M",
   "kind": "checkpoint",
   "revision": "59f7ef243ee09a72cbc14cb054393a3e3b771d41",
   "environment": {
-   "python": "3.10.12",
+   "python": "3.10.22",
    "transformers": "5.19.0.dev0",
    "torch": "2.11.0+cpu",
    "torchvision": "0.26.0+cpu",
@@ -25,11 +25,12 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 31.24,
+  "seconds": 28.92,
   "platform": "cpu-x86_64"
  },
  "outputs": {

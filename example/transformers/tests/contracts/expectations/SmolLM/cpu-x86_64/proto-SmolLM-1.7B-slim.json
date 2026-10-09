@@ -1,14 +1,14 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/SmolLM-integration",
-  "contract_revision": "unpublished",
+  "contract_revision": "ea5b7a6908a88f30679815d8343dde713778eb86",
   "framework": "transformers",
   "variant": "default",
   "target": "proto-SmolLM-1.7B-slim",
   "kind": "fixture",
-  "revision": "66ee3c4377a7a539904154828c58616b0fe2caae",
+  "revision": "58a736e869e5f9f59984b467b84e42f1aaa14d08",
   "environment": {
-   "python": "3.10.12",
+   "python": "3.10.22",
    "transformers": "5.19.0.dev0",
    "torch": "2.11.0+cpu",
    "torchvision": "0.26.0+cpu",
@@ -25,11 +25,12 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 6.0,
+  "seconds": 3.5,
   "platform": "cpu-x86_64"
  },
  "outputs": {
@@ -89,7 +90,7 @@
    ]
   ],
   "training": {
-   "loss": 9.490094184875488,
+   "loss": 9.490130424499512,
    "gradients": {
     "model.layers.0.self_attn.q_proj.weight": true,
     "model.layers.0.mlp.down_proj.weight": true

@@ -1,14 +1,14 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/SmolLM-integration",
-  "contract_revision": "unpublished",
+  "contract_revision": "ea5b7a6908a88f30679815d8343dde713778eb86",
   "framework": "transformers",
   "variant": "eager",
   "target": "proto-SmolLM-slim",
   "kind": "fixture",
-  "revision": "1c0a3216574bf8471b77d5e559fb009eebeef32d",
+  "revision": "41989eed59baa8fcbc7745b168d3530c9f1cc150",
   "environment": {
-   "python": "3.10.12",
+   "python": "3.10.22",
    "transformers": "5.19.0.dev0",
    "torch": "2.11.0+cpu",
    "torchvision": "0.26.0+cpu",
@@ -25,71 +25,80 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 6.76,
+  "seconds": 5.48,
   "platform": "cpu-x86_64"
  },
  "outputs": {
   "runtime": {
    "device": "cpu",
-   "dtype": "float32",
+   "dtype": "bfloat16",
    "attn_implementation": "eager"
   },
   "generated_tokens": [
    [
     7042,
-    0
+    7042,
+    7042,
+    7042
    ],
    [
     11452,
-    0
+    11452,
+    11452,
+    282
    ],
    [
     7268,
-    0
+    7268,
+    4528,
+    4528
    ],
    [
     4528,
-    0
+    4528,
+    4528,
+    4528
    ]
   ],
   "generated_text": [
-   " Paris",
-   " Berlin",
-   " Rome",
-   " London"
+   " Paris Paris Paris Paris",
+   " Berlin Berlin Berlin of",
+   " Rome Rome London London",
+   " London London London London"
   ],
   "next_token_logits": [
    [
-    11.667831420898438,
-    3.956547737121582,
-    4.142998695373535,
-    4.093366622924805
+    12.8125,
+    3.0625,
+    7.59375,
+    5.03125
    ],
    [
-    2.8302931785583496,
-    11.563215255737305,
-    3.6803433895111084,
-    3.9845268726348877
+    2.96875,
+    12.6875,
+    6.53125,
+    3.625
    ],
    [
-    3.7851626873016357,
-    3.925633430480957,
-    11.399068832397461,
-    2.7391815185546875
+    8.375,
+    7.75,
+    13.75,
+    6.0
    ],
    [
-    3.4422378540039062,
-    3.4308419227600098,
-    3.1774861812591553,
-    11.49376392364502
+    4.9375,
+    2.9375,
+    5.125,
+    12.75
    ]
   ],
   "training": {
-   "loss": 9.284270286560059,
+   "loss": 0.25672808289527893,
    "gradients": {
     "model.layers.0.self_attn.q_proj.weight": true,
     "model.layers.0.mlp.down_proj.weight": true

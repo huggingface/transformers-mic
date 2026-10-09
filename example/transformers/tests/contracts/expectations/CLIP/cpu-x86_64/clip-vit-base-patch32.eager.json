@@ -1,14 +1,14 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/CLIP-integration",
-  "contract_revision": "unpublished",
+  "contract_revision": "cb2e2abc4c4c992c316ab40d4a3360b1e748fcfe",
   "framework": "transformers",
   "variant": "eager",
   "target": "clip-vit-base-patch32",
   "kind": "checkpoint",
   "revision": "3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268",
   "environment": {
-   "python": "3.10.12",
+   "python": "3.10.22",
    "transformers": "5.19.0.dev0",
    "torch": "2.11.0+cpu",
    "torchvision": "0.26.0+cpu",
@@ -25,11 +25,12 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 23.37,
+  "seconds": 7.3,
   "platform": "cpu-x86_64"
  },
  "outputs": {
@@ -52,27 +53,27 @@
   ],
   "logits_per_image": [
    [
-    29.011186599731445,
+    29.011201858520508,
     23.467313766479492,
-    24.06244468688965,
-    24.897214889526367
+    24.06245231628418,
+    24.897218704223633
    ],
    [
-    24.895200729370117,
-    30.734052658081055,
-    24.83548355102539,
+    24.895204544067383,
+    30.73404884338379,
+    24.835481643676758,
     26.031173706054688
    ],
    [
-    25.769123077392578,
-    24.2020263671875,
-    30.774709701538086,
-    25.207378387451172
+    25.76913070678711,
+    24.2020206451416,
+    30.77471160888672,
+    25.207374572753906
    ],
    [
-    22.961437225341797,
-    23.994426727294922,
-    24.103900909423828,
+    22.961444854736328,
+    23.994422912597656,
+    24.10390853881836,
     31.413105010986328
    ]
   ],
@@ -130,7 +131,7 @@
    "size"
   ],
   "training": {
-   "loss": 0.01594652608036995,
+   "loss": 0.01594645529985428,
    "gradients": {
     "visual_projection.weight": true,
     "text_projection.weight": true

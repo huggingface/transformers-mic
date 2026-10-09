@@ -15,7 +15,7 @@ Companion to the [proposed standard](../README.md#the-proposed-standard). PR che
 | Fixtures carry across hardware; baselines don't | One baseline per platform class and dtype |
 | One generic shrink rule goes far | [56% of architectures](#does-it-scale-to-every-architecture) (314 of 559), 15 of the 17 in #49103 |
 
-**Recipe:** shrink the real config by layer pattern, seed, keep random weights if they pass an input-sensitivity gate, else overfit on the contract's training step; check numeric health, freeze, record baselines per platform and dtype. Implemented in [`build_fixtures.py`](../example/build_fixtures.py).
+**Recipe:** shrink the real config by layer pattern, seed, save in the source checkpoint's dtype, keep random weights if they pass an input-sensitivity gate, else overfit on the contract's training step; check numeric health, freeze, record baselines per platform and dtype. Implemented in [`build_fixtures.py`](../example/build_fixtures.py).
 
 **Next moves:**
 
@@ -28,11 +28,12 @@ Companion to the [proposed standard](../README.md#the-proposed-standard). PR che
 
 ## Recipe
 
-1. **Real structure, small weights.** Shrink width (hidden 64, intermediate 128, 4 heads) and depth [by layer pattern](#shrinking-depth-by-layer-pattern). Keep vocabulary, special tokens, image/patch/audio dimensions, RoPE, MoE structure, and Dropout/LayerDrop/SpecAugment (contracts seed them). Keep the checkpoint's tensor names and drop parameters it lacks, so loading initializes them as for users (how the Wav2Vec2 fixture catches [#49385](https://github.com/huggingface/transformers/issues/49385)).
+1. **Real structure, small weights, real dtype.** Shrink width (hidden 64, intermediate 128, 4 heads) and depth [by layer pattern](#shrinking-depth-by-layer-pattern). Save in the dtype the source checkpoint loads in by default (float32 if its config names none), so checks run the precision users get: proto-SmolLM-slim is bfloat16 like SmolLM-135M/360M; the others are float32 like their sources. Keep vocabulary, special tokens, image/patch/audio dimensions, RoPE, MoE structure, and Dropout/LayerDrop/SpecAugment (contracts seed them). Keep the checkpoint's tensor names and drop parameters it lacks, so loading initializes them as for users (how the Wav2Vec2 fixture catches [#49385](https://github.com/huggingface/transformers/issues/49385)).
 2. **Processor files copied byte for byte**, never re-saved. Checkpoints with identical processor files and kept config fields share one fixture ([example](../example/README.md#the-parts)).
 3. **Weights:** seed, then run the input-sensitivity gate.
-   - Pass: keep random weights (SmolLM, CLIP, BERT, T5, UMT5, Wav2Vec2).
-   - Fail: overfit on the contract's training batch (AdamW, lr 5e-3, clipping, ≤ 500 steps, until loss < 0.05 twice); the gate must then pass (Whisper).
+   - Pass: keep random weights (CLIP, BERT, T5, UMT5, Wav2Vec2).
+   - Fail: overfit on the contract's training batch (AdamW, lr 5e-3, clipping, ≤ 500 steps, until loss < 0.05 twice) in float32, then cast to the fixture's dtype; the gate must then pass (Whisper).
+   - A recipe can require overfitting with a reviewed reason (SmolLM: random weights pass but generate the same tokens for every prompt; its training rows share "The capital of", so it converges at loss 0.3, not 0.05).
    - Neither: fail the build.
 4. **Gates on the saved fixture.** A failed gate is a build failure, not a contract failure.
    - **Input sensitivity:** perturbations per input name (`input_ids`, `attention_mask`, `pixel_values`, `input_features`, ...): swap rows, reverse, all-ones mask, channel swap, halve. Each must move logits ≥ 10× the strictest tolerance (1e-3 for CPU float32).

@@ -1,14 +1,14 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/T5-integration",
-  "contract_revision": "unpublished",
+  "contract_revision": "f3f9d6fc9c219baae452736af8a928c091095c02",
   "framework": "transformers",
   "variant": "eager",
   "target": "proto-umt5-small-slim",
   "kind": "fixture",
-  "revision": "bcf49ff61123021fec581f72120001f396cb0b59",
+  "revision": "5c2db1c75f56bce8b4c200734810eb07f29bfcc3",
   "environment": {
-   "python": "3.10.12",
+   "python": "3.10.22",
    "transformers": "5.19.0.dev0",
    "torch": "2.11.0+cpu",
    "torchvision": "0.26.0+cpu",
@@ -25,11 +25,12 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 10.17,
+  "seconds": 5.16,
   "platform": "cpu-x86_64"
  },
  "outputs": {
@@ -109,35 +110,35 @@
   "label_logprobs": [
    [
     -13.114484786987305,
-    -12.092288970947266,
-    -13.726059913635254,
+    -12.09228801727295,
+    -13.726058006286621,
     -12.221920013427734,
-    -12.133295059204102,
-    -11.019336700439453,
+    -12.133296966552734,
+    -11.019335746765137,
     0.0
    ],
    [
-    -12.420159339904785,
+    -12.420160293579102,
     -12.824440956115723,
-    -13.64756965637207,
-    -13.477914810180664,
-    -12.971186637878418,
-    -9.5980224609375,
+    -13.647568702697754,
+    -13.477912902832031,
+    -12.971185684204102,
+    -9.598020553588867,
     -12.954093933105469
    ],
    [
     -12.4166898727417,
-    -14.56601619720459,
-    -14.671009063720703,
+    -14.566017150878906,
+    -14.67100715637207,
     -12.052459716796875,
-    -13.045361518859863,
+    -13.045360565185547,
     -12.43440055847168,
     0.0
    ],
    [
     -12.31074047088623,
     -13.982269287109375,
-    -11.187507629394531,
+    -11.187505722045898,
     0.0,
     0.0,
     0.0,
@@ -149,7 +150,7 @@
    "Hello, world! How are you?"
   ],
   "training": {
-   "loss": 12.861257553100586,
+   "loss": 12.861258506774902,
    "gradients": {
     "encoder.block.0.layer.0.SelfAttention.q.weight": true,
     "decoder.block.0.layer.1.EncDecAttention.q.weight": true

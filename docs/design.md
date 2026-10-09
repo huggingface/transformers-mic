@@ -56,7 +56,7 @@ Written as [doc-builder runnable blocks](https://github.com/huggingface/doc-buil
 
 ### Grouping checkpoints
 
-Checkpoints share a fixture when they share a **fixture key**: byte-identical processor files plus config fields that survive shrinking (attention layout, RoPE, tied embeddings, vocabulary, special tokens). Checkpoints differing only in size share one.
+Checkpoints share a fixture when they share a **fixture key**: byte-identical processor files plus config fields that survive shrinking (attention layout, RoPE, tied embeddings, vocabulary, special tokens) and the default dtype. Checkpoints differing only in size share one.
 
 - SmolLM-135M and -360M share one.
 - SmolLM-1.7B has its own: different tokenizer files, full multi-head attention, not grouped KV.
@@ -116,7 +116,7 @@ A forward pass that runs is too weak. Where applicable:
 
 Tolerances are calibrated per fixture and environment; exact token equality only where stable.
 
-- **Baselines per platform class and dtype; fixture shared.** Logits drift across both ([evidence](evidence.md#on-gpu)). Baselines record device, dtype, and attention; the [runner](../example/run.py) refuses to compare across them.
+- **Baselines per platform class and dtype; fixture shared.** Logits drift across both ([evidence](evidence.md#on-gpu)). Platform classes: `cpu-arm64`, `cpu-x86_64`, `cuda`, plus `cpu-x86_64-bf16` for bfloat16 runs on x86 CPUs with native bfloat16 (`avx512_bf16`, `amx_bf16`), whose results differ from emulated bfloat16. Baselines record device, dtype, and attention; the [runner](../example/run.py) refuses to compare across them.
 - **A match means agreement with reviewed behavior** on fixed inputs and one runtime, not semantic correctness; a fixture pass says nothing for the real model. Vision records include input identity and checked outputs (labels, boxes).
 - **Run the default configuration.** Users get SDPA, so the contract checks SDPA; eager is an extra variant. Eager-pinned checks missed the UMT5 SDPA regression ([replay](evidence.md#historical-regression-replay)).
 - **Choose inputs deliberately.** Decoding only "Paris" and "Berlin" can't see a punctuation-spacing regression.
