@@ -7,7 +7,7 @@ base_model: HuggingFaceTB/SmolLM-135M
 
 # Slim fixture: SmolLM
 
-A 3.2M-parameter fixture for the [SmolLM MIC](https://github.com/huggingface/model-integration-contracts/tree/main/example/hub/SmolLM-integration), covering [`HuggingFaceTB/SmolLM-135M`](https://huggingface.co/HuggingFaceTB/SmolLM-135M), [`HuggingFaceTB/SmolLM-360M`](https://huggingface.co/HuggingFaceTB/SmolLM-360M). It is a test artifact, not a usable model, tagged `test-artifact` to keep it out of candidate-model search.
+A 3.2M-parameter fixture for the [SmolLM MIC](https://huggingface.co/hf-internal-testing/SmolLM-integration), covering [`HuggingFaceTB/SmolLM-135M`](https://huggingface.co/HuggingFaceTB/SmolLM-135M), [`HuggingFaceTB/SmolLM-360M`](https://huggingface.co/HuggingFaceTB/SmolLM-360M). It is a test artifact, not a usable model, tagged `test-artifact` to keep it out of candidate-model search.
 
 Its overfit answers are references for this fixture only. A passing check does not establish the real checkpoints' outputs or semantic correctness on new prompts. Agents should use the parent contract to find the requested real checkpoint's tested environment and reviewed result.
 

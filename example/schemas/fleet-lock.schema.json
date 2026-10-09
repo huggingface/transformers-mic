@@ -40,10 +40,16 @@
        "revision": {
         "type": "string",
         "minLength": 1,
-        "description": "commit sha, or 'unpublished' for the folders in example/hub"
+        "description": "commit sha of the published contract repository, or 'unpublished' for a folder only in example/hub"
        },
        "path": {
-        "type": "string"
+        "type": "string",
+        "description": "the contract's source folder, published by publish_contracts.py (run with --local-contracts while editing)"
+       },
+       "files_sha256": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$",
+        "description": "sha256 of the contract's {path: sha256} file map (README.md excluded), sorted JSON"
        }
       }
      },

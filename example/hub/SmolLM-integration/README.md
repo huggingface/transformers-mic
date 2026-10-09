@@ -10,7 +10,7 @@ base_model:
 
 # MIC: SmolLM text generation
 
-Model integration contract for one usage path, batched greedy generation, across the SmolLM checkpoints that share it. The proposed owner is Hugging Face; this example has not been published. The model repositories are unchanged. This repository holds the contract code and the manifest; each framework keeps its own expected results. It is a test artifact and should be excluded from candidate-model search when published.
+Model integration contract for one usage path, batched greedy generation, across the SmolLM checkpoints that share it. The proposed owner is Hugging Face; frameworks pin this repository by revision. The model repositories are unchanged. This repository holds the contract code and the manifest; each framework keeps its own expected results. It is a test artifact, not a model: exclude it from model search.
 
 For agent reuse, the real model must link to this contract or expose a lookup, together with a last-passing environment and the reviewed baseline's location. A contract hidden from model search still needs to be discoverable from its covered checkpoints. A fixture pass and a real-checkpoint pass have different scopes; either establishes agreement on fixed inputs and a recorded runtime, not correctness on arbitrary prompts.
 
@@ -22,8 +22,8 @@ For agent reuse, the real model must link to this contract or expose a lookup, t
 
 | Checkpoint | Slim fixture (every framework PR) | Transformers.js artifact |
 | --- | --- | --- |
-| `HuggingFaceTB/SmolLM-135M` | [`hf-internal-testing/proto-SmolLM-slim`](../proto-SmolLM-slim) | `onnx-community/SmolLM-135M-ONNX` |
-| `HuggingFaceTB/SmolLM-360M` | [`hf-internal-testing/proto-SmolLM-slim`](../proto-SmolLM-slim) | `onnx-community/SmolLM-360M-ONNX` |
-| `HuggingFaceTB/SmolLM-1.7B` | [`hf-internal-testing/proto-SmolLM-1.7B-slim`](../proto-SmolLM-1.7B-slim) | unsupported: no `onnx-community` conversion |
+| `HuggingFaceTB/SmolLM-135M` | [`hf-internal-testing/proto-SmolLM-slim`](https://huggingface.co/hf-internal-testing/proto-SmolLM-slim) | `onnx-community/SmolLM-135M-ONNX` |
+| `HuggingFaceTB/SmolLM-360M` | [`hf-internal-testing/proto-SmolLM-slim`](https://huggingface.co/hf-internal-testing/proto-SmolLM-slim) | `onnx-community/SmolLM-360M-ONNX` |
+| `HuggingFaceTB/SmolLM-1.7B` | [`hf-internal-testing/proto-SmolLM-1.7B-slim`](https://huggingface.co/hf-internal-testing/proto-SmolLM-1.7B-slim) | unsupported: no `onnx-community` conversion |
 
 135M and 360M share one fixture because they have the same fixture key: byte-identical processor files and the same config wherever shrinking keeps it. 1.7B ships a different `tokenizer.json` and `tokenizer_config.json` and uses full multi-head attention, so it gets its own fixture.

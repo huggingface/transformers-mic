@@ -30,6 +30,12 @@ fixtures use it, other library code selects all of them, and files outside the
 library select none. With --run-all every contract runs anyway and each record
 carries selected_by (null when not selected), to measure what selection misses.
 
+Contracts are downloaded at the Hub revision the fleet lock pins and checked
+against its files_sha256; --local-contracts runs the folders in example/hub
+instead (while editing a contract; results say "local" when they differ from
+the pin). Script contracts (Transformers.js) run from the local folder, where
+their packages are installed, which must match the pin.
+
 Fixtures are downloaded at the Hub revision the fleet lock pins (or taken
 from their local build folder when unpublished, or with --local-fixtures), and
 checked against the file hashes in their build.json, which the lock also pins; a fixture that is missing or differs is an error, not a skip
@@ -142,6 +148,32 @@ def fixture_problem(folder, pin):
         changed = sorted(set(actual) ^ set(build["sha256"]) | {k for k in actual if actual[k] != build["sha256"].get(k)})
         return f"fixture files differ from build.json: {changed} ({hint})"
     return None
+
+
+def contract_files(folder):
+    """{relative path: sha256} of a contract's files, as the fleet lock pins them (README and installed packages excluded)."""
+    return {
+        f.relative_to(folder).as_posix(): hashlib.sha256(f.read_bytes()).hexdigest()
+        for f in sorted(folder.rglob("*"))
+        if f.is_file() and f.name not in ("README.md", ".gitattributes")
+        and not {"node_modules", ".cache", ".git"} & set(f.relative_to(folder).parts)
+    }
+
+
+def contract_folder(lock_dir, pin, local):
+    """(folder, revision label) of a contract: the pinned Hub revision, or the local folder if unpublished or asked for.
+
+    A local folder is labeled with the pinned revision when its files match the pin, else "local"."""
+    path = (lock_dir / pin["path"]).resolve()
+    if local or pin["revision"] == "unpublished":
+        same = pin.get("files_sha256") and digest(contract_files(path)) == pin["files_sha256"]
+        return path, pin["revision"] if same or pin["revision"] == "unpublished" else "local"
+    from huggingface_hub import snapshot_download
+
+    folder = Path(snapshot_download(pin["repo"], revision=pin["revision"]))
+    if digest(contract_files(folder)) != pin.get("files_sha256"):
+        raise SystemExit(f"{pin['repo']}@{pin['revision'][:10]}: files differ from the fleet lock's files_sha256")
+    return folder, pin["revision"]
 
 
 def checkpoint_path(repo, revision):
@@ -488,6 +520,8 @@ def main():
     parser.add_argument("--target", action="append", help="run only this target, fixture or checkpoint name (repeatable)")
     parser.add_argument("--fixtures-only", action="store_true", help="skip real checkpoints")
     parser.add_argument("--local-fixtures", action="store_true", help="use the local build folders instead of the pinned Hub revisions")
+    parser.add_argument("--local-contracts", action="store_true",
+                        help="run the contracts in example/hub instead of their pinned Hub revisions (records contract_revision 'local' if they differ)")
     parser.add_argument("--variant", default="default")
     parser.add_argument("--isolate", action="store_true", help="run each target in its own process")
     parser.add_argument("--record", action="store_true", help="write candidate baselines for review")
@@ -554,12 +588,17 @@ def main():
                 continue
             if selected_by is not None and name not in selected_by and not args.run_all:
                 continue
-            root = (lock_dir / contract["integration"]["path"]).resolve()
+            root, contract_revision = contract_folder(lock_dir, contract["integration"], args.local_contracts)
             manifest = load(root / "integration.json", "integration")
             integration = manifest["integrations"][args.framework]
+            if integration["format"] == "script" and contract_revision not in ("local", "unpublished"):
+                # Script contracts run where their packages are installed: the local folder, which must match the pin.
+                root, contract_revision = contract_folder(lock_dir, contract["integration"], True)
+                if contract_revision == "local":
+                    raise SystemExit(f"{root}: differs from the pinned {contract['integration']['repo']}; publish it or pass --local-contracts")
             base = {
                 "contract": contract["integration"]["repo"],
-                "contract_revision": contract["integration"]["revision"],
+                "contract_revision": contract_revision,
                 "framework": args.framework,
                 "variant": args.variant,
                 **({"selected_by": selected_by.get(name)} if selected_by is not None else {}),

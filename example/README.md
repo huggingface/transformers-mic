@@ -155,7 +155,7 @@ Same contracts and pinned fixtures on an NVIDIA A10G (torch 2.14.0+cu130, Transf
 
 ## Not real yet
 
-- Integration repos are unpublished; fleet locks point at their [`hub/`](hub) folders (`"revision": "unpublished"`). Fixtures are published and pinned by revision.
+- Contracts and fixtures are published to `hf-internal-testing` and pinned by revision and file hashes; [`hub/`](hub) holds their sources. Edit a contract there, test it with `run.py --local-contracts`, then [`publish_contracts.py`](publish_contracts.py) pins the new revision in every fleet lock that uses it. Transformers.js still runs its contract from the local folder (where `npm install` put its packages), checked against the pin.
 - Contracts run in the runner's process; the only isolation is `--isolate` (one process per target).
 - Shadow, backfill, and nightly jobs run in this repo, not Transformers CI ([backfill results](../docs/evidence.md#shadow-backfill)). Selection from changed files exists ([`select_contracts.py`](select_contracts.py), `run.py --changed-files`) but no CI job uses it.
 - `build_fixtures.py` output is reproducible on one machine only, so fixtures are published and pinned; GPU and shadow jobs download them from the Hub.

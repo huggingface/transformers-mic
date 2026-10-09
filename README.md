@@ -26,7 +26,7 @@ The first goal is CI, not a Hub feature. The same contracts could later back com
 
 A MIC covers one usage path and every checkpoint that shares it. Each part links to the [full example](example/README.md).
 
-1. **Repositories by owner.** Creators' model repos are unchanged. Hugging Face owns an [integration repo](example/hub/SmolLM-integration) (the contract) and [fixture repos](example/hub/proto-SmolLM-slim) (slim models). Each [framework repo](example/transformers/tests/contracts) owns its fleet lock and expected results.
+1. **Repositories by owner.** Creators' model repos are unchanged. Hugging Face owns an [integration repo](https://huggingface.co/hf-internal-testing/SmolLM-integration) (the contract; [source](example/hub/SmolLM-integration)) and [fixture repos](https://huggingface.co/hf-internal-testing/proto-SmolLM-slim) (slim models). Each [framework repo](example/transformers/tests/contracts) owns its fleet lock and expected results.
 2. **Fixed layouts:**
 
    ```text

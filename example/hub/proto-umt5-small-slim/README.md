@@ -7,7 +7,7 @@ base_model: google/umt5-small
 
 # Slim fixture: proto-umt5-small-slim
 
-A 16.6M-parameter fixture for the [T5 MIC](https://github.com/huggingface/model-integration-contracts/tree/main/example/hub/T5-integration), covering [`google/umt5-small`](https://huggingface.co/google/umt5-small). It is a test artifact, not a usable model, tagged `test-artifact` to keep it out of candidate-model search.
+A 16.6M-parameter fixture for the [T5 MIC](https://huggingface.co/hf-internal-testing/T5-integration), covering [`google/umt5-small`](https://huggingface.co/google/umt5-small). It is a test artifact, not a usable model, tagged `test-artifact` to keep it out of candidate-model search.
 
 - **Fixture key `d2f1e2c7f664`.** It covers every checkpoint whose processor files are byte-identical and whose config matches after shrinking.
 - **Same architecture, smaller config:** `UMT5ForConditionalGeneration`, shrunk by the generic rule in [`sweep.py`](https://github.com/huggingface/model-integration-contracts/blob/main/experiments/sweep.py) (num_layers 2, num_decoder_layers 2).
