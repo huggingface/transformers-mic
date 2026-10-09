@@ -1,8 +1,6 @@
 # Problems and opened questions
 
-**A slim pass does not mean the full model passes.** Contracts replace model-specific `run-slow` tests only by running on full checkpoints; other slow tests stay ([CI integration](slim-models-in-transformers-ci.md)).
-
-The experiments support a CI pilot; removing tests or making contracts required needs more evidence. Six problems stand between the two:
+The experiments support a CI pilot; removing tests or requiring contracts needs more evidence. A slim pass never means the full model passes ([CI integration](slim-models-in-transformers-ci.md)). Six problems stand in between:
 
 | # | Problem | Kind |
 | --- | --- | --- |
@@ -19,11 +17,10 @@ The experiments support a CI pilot; removing tests or making contracts required 
 
 **What we know.**
 
-- [Replay](evidence.md#historical-regression-replay): all eight reproducible regressions caught once the affected call was made; generic forward/generate checks missed most processor and tokenizer bugs.
-- [Shadow backfill](evidence.md#shadow-backfill), 1,468 `main` commits: frozen contracts caught 1 of 5 regressions in their families (UMT5), missed 4 they didn't call, flagged 1 benign change.
-- With the 4 calls added: 5 of 5, no new false alarm. **Post-hoc:** written knowing the bugs.
+- [Replay](evidence.md#historical-regression-replay): all eight reproducible regressions caught once the affected call was made; generic forward/generate missed most.
+- [Backfill](evidence.md#shadow-backfill), 1,468 commits: frozen contracts caught 1 of 5 in-family regressions, missed 4 they didn't call; with those calls added, 5 of 5, but post-hoc.
 
-**Next.** Freeze contracts, inputs, fixtures, and tolerances; measure on regressions not used to design them (the shadow trial does this). Report detections, misses, unsupported, and false alarms separately, frozen-suite catches apart from post-hoc ones ([improvement loop](improving-contracts.md)).
+**Next.** Freeze everything and measure on regressions not used to design it (the shadow trial). Report detections, misses, unsupported, and false alarms separately, post-hoc catches apart ([improvement loop](improving-contracts.md)).
 
 **Open questions.**
 
@@ -32,17 +29,15 @@ The experiments support a CI pilot; removing tests or making contracts required 
 
 ## 2. A fixture does not cover every path of its checkpoint
 
-**Problem.** Same API, different code paths: smaller dimensions, short inputs, CPU, and a different default dtype each skip paths the checkpoint takes.
+**Problem.** Same API, different code paths: smaller dimensions, short inputs, and CPU each skip paths the checkpoint takes.
 
 **What we know.**
 
-- The fixture key guarantees identical processor files and retained config, not behavior depending on shrunk dimensions.
+- The fixture key guarantees identical processor files, retained config, and dtype, not behavior that depends on shrunk dimensions.
 - CPU excludes GPU paths; short inputs leave long context untested.
-- [SmolLM fixtures](../example/README.md#run-it) run float32; the 135M and 360M checkpoints default to bfloat16.
+- Fixtures load in their source's dtype, but at hidden size 64 bfloat16 may not reach the native CPU kernels the real checkpoint hits: proto-SmolLM-slim agrees across native and emulated bfloat16 while SmolLM-135M does not ([evidence](evidence.md#bfloat16-on-cpu)).
 
-This is the expected tradeoff of a fast check.
-
-**Next.** Per contract, record what the fixture covers, its limits, and which full-model or hardware job covers the rest. Choose PR variants explicitly, for cost versus signal.
+**Next.** Per contract, record what the fixture covers and which full-model or hardware job covers the rest. Choose PR variants explicitly, for cost versus signal.
 
 **Open questions.**
 
@@ -57,9 +52,9 @@ This is the expected tradeoff of a fast check.
 
 - It measures max movement over all logits; contracts may compare only selected logits or label log-probs.
 - The [builder](../example/build_fixtures.py)'s threshold uses only absolute tolerances, not relative ones or platform overrides.
-- Overfitting helps on synthetic Whisper faults, but random fixtures caught all eight historical regressions too ([weights](fixtures.md#choosing-the-weights)).
+- Overfitting helps on synthetic Whisper faults; random fixtures caught all eight historical regressions too ([weights](fixtures.md#choosing-the-weights)).
 
-**Next.** Measure perturbations through the contract's own outputs and rules, with a margin above normal variation. Keep a few injected faults to check sensitivity becomes detection.
+**Next.** Measure perturbations through the contract's own outputs and rules, with a margin above normal variation; keep a few injected faults to check sensitivity becomes detection.
 
 **Open questions.**
 
@@ -68,17 +63,17 @@ This is the expected tradeoff of a fast check.
 
 ## 4. Baselines multiply and need review rules
 
-**Problem.** Baselines grow with targets × frameworks × hardware × dtype × attention. Re-recording is easy, so without review criteria a regression can be approved as the new answer.
+**Problem.** Baselines grow with targets × frameworks × hardware × dtype × attention. Re-recording is easy, so without review criteria a regression can be approved.
 
 **What we know.**
 
 - Whisper already needs per-CPU-architecture baselines.
-- [A10G results](../example/README.md#on-gpu) hold only for that GPU and stack; "per-platform baselines remove looser tolerances" is scoped to what was measured.
-- Five months of `main`: 8 `cpu-x86_64` fixture baselines needed 2 updates (benign RNG shift, intended T5 SDPA), across three EPYC models with and without native bfloat16.
-- bfloat16 *real* checkpoints differed on a native-bfloat16 CPU, which may need its own environment class.
+- [A10G results](../example/README.md#on-gpu) hold only for that GPU and stack.
+- Five months of `main`: 8 `cpu-x86_64` fixture baselines needed 2 updates (benign RNG shift, intended T5 SDPA).
+- bfloat16 real checkpoints differ on native-bfloat16 CPUs, now a platform of their own (`cpu-x86_64-bf16`). Untested: Intel (`amx_bf16`) vs AMD (`avx512_bf16`).
 - Fresh-process reproduction proves repeatability, not correctness.
 
-**Next.** Define environment classes, calibrate on representative runners, track churn and review time. Budget the slim PR matrix apart from the full-model one. Each baseline update justifies the change with evidence beyond repeatability ([review process](design.md#revisions-and-baselines)).
+**Next.** Define environment classes, calibrate on representative runners, track churn and review time, budget the slim PR matrix apart from the full-model one. Each baseline update needs evidence beyond repeatability ([review process](design.md#revisions-and-baselines)).
 
 **Open questions.**
 
@@ -87,19 +82,18 @@ This is the expected tradeoff of a fast check.
 
 ## 5. Cross-repository coordination and total cost
 
-**Problem.** Contracts live on the Hub, expectations in framework repos: one behavior change can need a contract revision, a fleet-lock bump, and baselines across repos, tested together and reproducible for old revisions.
+**Problem.** Contracts live on the Hub, expectations in framework repos: one change can need a contract revision, a fleet-lock bump, and baselines, tested together and reproducible for old revisions.
 
 **What we know.**
 
-- [Cost measurements](evidence.md#stability-and-cost) show much smaller fixtures and why batching matters; fleet-scale transfer isn't measured end to end.
+- [Cost](evidence.md#stability-and-cost): fixtures are far smaller and batching matters; fleet-scale transfer isn't measured.
 - Human cost (authoring, shrink rules, fixture repair, baseline review, coordination) isn't measured; moving work doesn't reduce it.
 
 **Next.**
 
-- Run one full contract + framework update, with review and rollback.
+- Run one contract + framework update end to end, with review and rollback.
 - Track maintainer time alongside execution, setup, and download cost.
-- Before retiring a test (smoke-only ones included), map its inputs, assertions, variants, hardware, and frequency to the replacement.
-- A full-model test moved into a contract keeps its full-model run.
+- Before retiring a test, map its inputs, assertions, variants, hardware, and frequency to the replacement; a migrated full-model test keeps its full-model run.
 
 **Open questions.**
 
@@ -108,7 +102,7 @@ This is the expected tradeoff of a fast check.
 
 ## 6. Runner validation gaps
 
-**Closed 2026-10-08.** The [runner](../example/run.py) silently dropped checks in five ways; each was reproduced before the fix and fails after.
+**Closed 2026-10-08.** The [runner](../example/run.py) silently dropped checks in five ways; each now fails.
 
 | Gap | Before | Now |
 | --- | --- | --- |
@@ -118,9 +112,7 @@ This is the expected tradeoff of a fast check.
 | NaN gradients | NaN counted as nonzero. | Six training contracts also require `torch.isfinite(grad).all()`. |
 | Nothing ran | All-`unsupported` runs exited 0. | Skips record why (`declared`, `hardware`, `variant`). No target run or no `--contract`/`--target` match fails. `--require-all` (shadow, backfill, nightly) fails on undeclared skips. |
 
-Required outputs come from the manifest, shapes from the reviewed baseline; declared skips are reviewed with the contract.
-
 **Still open.**
 
-- GitHub runners (7 GB) skip SmolLM-1.7B when recording, so only `machine=gpu-host` enforces `REQUIRE_ALL`; choosing runners from `resources` (next action 8) fixes it.
+- GitHub runners (7 GB) skip SmolLM-1.7B when recording, so only `machine=gpu-host` enforces `REQUIRE_ALL`; picking runner classes from [`resources`](design.md#minimum-hardware) (not implemented) fixes it.
 - No per-framework exception list for non-training outputs; add one when needed.

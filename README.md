@@ -1,12 +1,12 @@
 # MIC * Model Integration Contract
 
-**A proposed standard** for publishing, next to any Hub model, an executable check that it works in a given framework, run by that framework's CI.
+**A proposed standard**: next to any Hub model, an executable check that it works in a given framework, run by that framework's CI.
 
 ## Summary
 
-For each supported usage path (an architecture and a task, across the checkpoints that share it), publish a small integration contract on the Hub and run it from framework CI.
+For each usage path (an architecture and a task, across the checkpoints that share it), publish a small integration contract on the Hub and run it from framework CI.
 
-A contract is ordinary user code: load the model, call the public API, report the result. Transformers CI runs it against small fixtures on every PR (CPU, seconds) and against the real checkpoints after merge, nightly, and before release. Nothing here is Transformers-specific: Transformers.js could use the same contracts.
+A contract is ordinary user code: load the model, call the public API, report the result. Transformers CI runs it on small fixtures on every PR (CPU, seconds) and on the real checkpoints after merge, nightly, and before release. Nothing is Transformers-specific: Transformers.js can use the same contracts.
 
 **A slim pass is a fast regression signal, not a pass for the real model.** Run on full checkpoints, contracts can replace model-specific integration tests in `run-slow`; other slow tests stay ([CI integration](docs/slim-models-in-transformers-ci.md)).
 
@@ -18,13 +18,13 @@ The first goal is CI, not a Hub feature. The same contracts could later back com
 
 ## Problem
 
-- **Compatibility is expensive to verify.** Integration tests need real checkpoints, large downloads, and GPUs, so only a small part of the fleet runs on each PR. Regressions surface late: nightly, at release, or from users.
-- **Copies drift.** Test code, documented usage, and Hub snippets are separate and diverge.
-- **Agents guess.** In two [recorded runs](docs/agent-walkthrough/README.md) on Florence-2, both agents had to reconstruct a working path, and neither could check its output against a reviewed baseline. This shows friction, not a measured MIC gain ([assessment](docs/evidence.md#how-agents-use-the-hub-today)).
+- **Compatibility is expensive to verify.** Integration tests need real checkpoints, large downloads, and GPUs, so each PR runs only a small part of the fleet. Regressions surface late: nightly, at release, or from users.
+- **Copies drift.** Test code, documented usage, and Hub snippets diverge.
+- **Agents guess.** In two [recorded runs](docs/agent-walkthrough/README.md) on Florence-2, both agents reconstructed a working path and neither could check output against a reviewed baseline. This shows friction, not a measured MIC gain ([assessment](docs/evidence.md#how-agents-use-the-hub-today)).
 
 ## The proposed standard
 
-A MIC covers one usage path and every checkpoint that shares it. Each part links to the [full example](example/README.md).
+A MIC covers one usage path and every checkpoint on it. Each part links to the [full example](example/README.md).
 
 1. **Repositories by owner.** Creators' model repos are unchanged. Hugging Face owns an [integration repo](https://huggingface.co/hf-internal-testing/SmolLM-integration) (the contract; [source](example/hub/SmolLM-integration)) and [fixture repos](https://huggingface.co/hf-internal-testing/proto-SmolLM-slim) (slim models). Each [framework repo](example/transformers/tests/contracts) owns its fleet lock and expected results.
 2. **Fixed layouts:**
@@ -41,18 +41,18 @@ A MIC covers one usage path and every checkpoint that shares it. Each part links
      expectations/SmolLM/cpu-arm64/SmolLM-135M.eager.json
    ```
 
-3. **A static manifest.** [`integration.json`](example/hub/SmolLM-integration/integration.json) declares checkpoints, the fixture for each, and per framework: entry point, variants, unsupported targets, resources, and a comparison rule per output.
-4. **User code as the contract.** It calls the public API with default settings and prints one JSON line. Written as [doc-builder runnable markdown](example/hub/SmolLM-integration/integrations/transformers/usage.md), it is both documentation and test.
-5. **Checks beyond "it ran".** Generated outputs, logits within tolerance, and where training applies, finite loss and gradients and a parameter update.
+3. **A static manifest.** [`integration.json`](example/hub/SmolLM-integration/integration.json) declares checkpoints, each one's fixture, and per framework: entry point, variants, unsupported targets, resources, and a comparison rule per output.
+4. **User code as the contract**: the public API with default settings, printing one JSON line. As [doc-builder runnable markdown](example/hub/SmolLM-integration/integrations/transformers/usage.md), it is both documentation and test.
+5. **Checks beyond "it ran"**: generated outputs, logits within tolerance, and where training applies, finite loss and gradients and a parameter update.
 6. **Reviewed baselines** ([`expectations/`](example/transformers/tests/contracts/expectations/SmolLM/cpu-arm64)) per target, variant, and platform class. A behavior-changing PR updates them; nothing updates them automatically.
-7. **Shared [fixtures](example/hub/proto-SmolLM-slim).** Processor files are copied byte for byte; only weights and config shrink. Checkpoints share a fixture only if those match.
+7. **Shared [fixtures](example/hub/proto-SmolLM-slim).** Processor files copied byte for byte; only weights and config shrink. Checkpoints share a fixture only if those match.
 8. **Everything pinned** in the framework's [fleet lock](example/transformers/tests/contracts/fleet.lock): contract, fixture, checkpoint, and dependency revisions.
 
 [`run.py`](example/run.py) sketches the runner; the pilot builds the real one and the schemas. See the [technical design](docs/design.md).
 
 ## Why on the Hub, owned by Hugging Face
 
-Contract upkeep shouldn't depend on creators' repos or on creators maintaining framework CI. Hugging Face owns contracts and fixtures; creators change nothing. Expected results change mostly with the framework, so each framework owns its own and the behavior-changing PR shows the diff. On the Hub, one versioned contract per usage path serves every framework and can later display per-checkpoint results.
+Contract upkeep shouldn't depend on creators' repos or on creators maintaining framework CI: Hugging Face owns contracts and fixtures, creators change nothing. Expected results change mostly with the framework, so each framework owns its own and the behavior-changing PR shows the diff. On the Hub, one versioned contract per usage path serves every framework and can later show per-checkpoint results.
 
 ## Pilot run
 
@@ -62,7 +62,7 @@ Early results on 1,468 Transformers `main` commits over five months ([shadow bac
 
 - Frozen contracts caught the UMT5 regression ([#49135](https://github.com/huggingface/transformers/pull/49135)) at its introducing commit, flagged one benign change, and missed four regressions whose calls they didn't make.
 - With those calls added ([how](docs/improving-contracts.md)), all five are caught, no new false alarm, ~13 s per commit on CPU. The new Whisper call found a live bug ([#49403](https://github.com/huggingface/transformers/issues/49403)).
-- Scheduled runs on `main` caught a Whisper regression the night it merged; its PR's CI had passed ([#49456](https://github.com/huggingface/transformers/issues/49456)).
+- Scheduled runs on `main` caught a Whisper regression the night it merged, after its PR's CI had passed ([#49456](https://github.com/huggingface/transformers/issues/49456)).
 
 Agent reuse is measured separately ([recipe](docs/agent-walkthrough/README.md#controlled-comparison-with-and-without-a-mic)). Remote-code models are out of initial scope.
 
@@ -72,6 +72,7 @@ Agent reuse is measured separately ([recipe](docs/agent-walkthrough/README.md#co
 - [Evidence](docs/evidence.md): experiments, regression replay, shadow backfill.
 - [Problems and opened questions](docs/problems-and-opened-questions.md): what the pilot must settle.
 - [Slim models in Transformers CI](docs/slim-models-in-transformers-ci.md): PR and `run-slow` flows.
+- [Transformers CI proof](docs/transformers-ci-proof.md): plan and to-do for running the fleet in Transformers PR CI.
 - [Technical design](docs/design.md): layout, CI, checks, baselines, runner.
 - [Improving contracts](docs/improving-contracts.md): finding and closing coverage gaps.
 - [End-to-end tests](docs/end-to-end-tests.md): every check in this repo, with commands.

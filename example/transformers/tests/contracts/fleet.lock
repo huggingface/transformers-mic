@@ -11,7 +11,7 @@
       },
       "fixtures": {
         "hf-internal-testing/proto-SmolLM-slim": {
-          "revision": "41989eed59baa8fcbc7745b168d3530c9f1cc150",
+          "revision": "50eacd46dbec7d33ef11b930e986399a5a8f1a43",
           "path": "../../../hub/proto-SmolLM-slim",
           "files_sha256": "8562493b1bb64ef7fd81ceb10b47e69aa135afe9ea31385d2b3dfaaf92ba330d"
         },
