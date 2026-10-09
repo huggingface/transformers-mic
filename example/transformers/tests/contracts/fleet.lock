@@ -122,6 +122,24 @@
       "checkpoints": {
         "facebook/wav2vec2-base-960h": "22aad52d435eb6dbaf354bdad9b0da84ce7d6156"
       }
+    },
+    "MusicgenMelody": {
+      "integration": {
+        "repo": "hf-internal-testing/MusicgenMelody-integration",
+        "revision": "108d4db1209ec36717128fecd72d67f1b4c2b338",
+        "path": "../../../hub/MusicgenMelody-integration",
+        "files_sha256": "bac70963753ac02440a831e69e8a10ece8558858ec7591fc8980efb0784589eb"
+      },
+      "fixtures": {
+        "hf-internal-testing/proto-musicgen-melody-slim": {
+          "revision": "1ddd8dcc7977e728c6f6131a484e953075aeb751",
+          "path": "../../../hub/proto-musicgen-melody-slim",
+          "files_sha256": "fea13f71f63edb80ab197589fefb65949b4dd74ea8d81f243cc56b9f41e5de37"
+        }
+      },
+      "checkpoints": {
+        "facebook/musicgen-melody": "68d653a95788ec0d2b0abccab22c0b3a200c2d90"
+      }
     }
   },
   "local_patches": {

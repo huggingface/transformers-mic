@@ -46,6 +46,13 @@ def code_dirs(fixture_folder):
     model_type = config["model_type"]
     names = set(config.get("architectures") or [])
     names.add(configuration_auto.CONFIG_MAPPING_NAMES[model_type])
+    # Composite models run their sub-models' code too (MusicGen Melody: T5 text encoder, EnCodec audio codec).
+    stack = [v for v in config.values() if isinstance(v, dict)]
+    while stack:
+        sub = stack.pop()
+        stack.extend(v for v in sub.values() if isinstance(v, dict))
+        if sub.get("model_type") in configuration_auto.CONFIG_MAPPING_NAMES:
+            names.add(configuration_auto.CONFIG_MAPPING_NAMES[sub["model_type"]])
     for mapping in (
         tokenization_auto.TOKENIZER_MAPPING_NAMES,
         feature_extraction_auto.FEATURE_EXTRACTOR_MAPPING_NAMES,

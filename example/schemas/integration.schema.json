@@ -115,6 +115,16 @@
          "type": "string",
          "minLength": 1
         }
+       },
+       "config_overrides": {
+        "type": "object",
+        "description": "fields set after the generic shrink rule (dotted for sub-configs), with the reviewed reason; part of the fixture key",
+        "required": ["fields", "reason"],
+        "additionalProperties": false,
+        "properties": {
+         "fields": {"type": "object", "minProperties": 1},
+         "reason": {"type": "string", "minLength": 1}
+        }
        }
       }
      }

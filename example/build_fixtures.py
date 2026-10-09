@@ -113,8 +113,21 @@ def model_class(source, recipe):
     return getattr(transformers, AutoConfig.from_pretrained(source).architectures[0])
 
 
-def shrunk_config(source, cls):
-    return shrink(cls.config_class.from_pretrained(source))
+def shrunk_config(source, cls, recipe=None):
+    config = shrink(cls.config_class.from_pretrained(source))
+    overrides = (recipe or {}).get("config_overrides", {}).get("fields", {})
+    if not overrides:
+        return config
+    values = config.to_dict()
+    for dotted, value in overrides.items():
+        *parents, field = dotted.split(".")
+        target = values
+        for key in parents:
+            target = target[key]
+        if field not in target:
+            raise SystemExit(f"config_overrides: the shrunk config has no field {dotted}")
+        target[field] = value
+    return type(config).from_dict(values)
 
 
 def missing_parameters(cls, path):
@@ -131,8 +144,8 @@ def source_dtype(source):
     return config.get("dtype") or config.get("torch_dtype") or "float32"
 
 
-def fixture_key(source, cls, missing):
-    config = {k: v for k, v in shrunk_config(source, cls).to_dict().items() if k not in VOLATILE}
+def fixture_key(source, cls, missing, recipe=None):
+    config = {k: v for k, v in shrunk_config(source, cls, recipe).to_dict().items() if k not in VOLATILE}
     processor = {name: hashlib.sha256((source / name).read_bytes()).hexdigest() for name in copied_files(source)}
     fields = {"config": config, "processor": processor, "missing": missing}
     dtype = source_dtype(source)
@@ -331,14 +344,14 @@ def environment():
     }
 
 
-def build_fixture(name, fixture, contract_name, manifest, root, revisions, out):
+def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, keep_random=False):
     recipe = fixture["build"]
     keys, missing = {}, {}
     for repo in fixture["covers"]:
         source = source_snapshot(repo, revisions[repo])
         cls = model_class(source, recipe)
         missing[repo] = missing_parameters(cls, run.checkpoint_path(repo, revisions[repo]))
-        keys[repo] = fixture_key(source, cls, missing[repo])
+        keys[repo] = fixture_key(source, cls, missing[repo], recipe)
     if len({key for key, _ in keys.values()}) != 1:
         raise SystemExit(f"{name}: covered checkpoints have different fixture keys: { {r: k[:12] for r, (k, _) in keys.items()} }")
     key, config = next(iter(keys.values()))
@@ -354,14 +367,14 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out):
 
     torch.manual_seed(recipe["seed"])
     # Initialized in float32 like every other fixture, then cast: the seed gives the same weights in any dtype.
-    model = cls._from_config(shrunk_config(source, cls), dtype=torch.float32).eval().to(dtype)
+    model = cls._from_config(shrunk_config(source, cls, recipe), dtype=torch.float32).eval().to(dtype)
     copied = save(model, out, source, lacks)
     entry = root / manifest["integrations"]["transformers"]["entry_point"]
     batch, captured = contract_batch(entry, out)
     accepted = recipe.get("accept_insensitive", {})
     gate = {"random": sensitivity(model, as_dtype(batch, dtype), threshold, accepted)}
     weights, training = "random", None
-    if not gate["random"]["pass"] or recipe.get("overfit"):
+    if not keep_random and (not gate["random"]["pass"] or recipe.get("overfit")):
         torch.manual_seed(recipe["seed"])  # dropout and SpecAugment stay on while training
         model = model.float()  # trained in float32, saved in the source dtype
         training = overfit(model, as_dtype(batch, torch.float32), recipe.get("max_steps", 500), recipe.get("target_loss", 0.05))
@@ -411,8 +424,11 @@ def main():
     parser.add_argument("--fixture", action="append", help="build only this fixture (short name, repeatable)")
     parser.add_argument("--keys-only", action="store_true", help="check that covered checkpoints share a key")
     parser.add_argument("--out", type=Path, help="build into this directory instead, leaving the fixtures and lock untouched (reproducibility checks)")
+    parser.add_argument("--keep-random", action="store_true", help="with --out: keep the random weights even where the recipe overfits (random-vs-overfit experiments)")
     parser.add_argument("--threads", type=int, default=2)
     args = parser.parse_args()
+    if args.keep_random and not args.out:
+        parser.error("--keep-random needs --out: it never replaces a published fixture")
     torch.set_num_threads(args.threads)
     torch.use_deterministic_algorithms(True)
     transformers.logging.set_verbosity_error()
@@ -437,12 +453,12 @@ def main():
                     source = source_snapshot(repo, contract["checkpoints"][repo])
                     cls = model_class(source, fixture["build"])
                     lacks = missing_parameters(cls, run.checkpoint_path(repo, contract["checkpoints"][repo]))
-                    keys[repo] = fixture_key(source, cls, lacks)[0][:12]
+                    keys[repo] = fixture_key(source, cls, lacks, fixture["build"])[0][:12]
                 print(json.dumps({"fixture": name, "keys": keys, "shared": len(set(keys.values())) == 1}))
                 continue
             start = time.perf_counter()
             out = args.out / short(name) if args.out else (lock_dir / pin["path"]).resolve()
-            build = build_fixture(name, fixture, contract_name, manifest, root, contract["checkpoints"], out)
+            build = build_fixture(name, fixture, contract_name, manifest, root, contract["checkpoints"], out, args.keep_random)
             if args.out:
                 same = run.digest(build["sha256"]) == pin.get("files_sha256")
                 print(json.dumps({"fixture": name, "matches_pin": same, "differs": [] if same else sorted(

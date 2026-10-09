@@ -1,0 +1,98 @@
+{
+  "mic": "0.3",
+  "name": "MusicGen Melody text- and melody-conditioned music generation",
+  "usage": "AutoProcessor + MusicgenMelodyForConditionalGeneration.generate, text and melody prompts, classifier-free guidance, batched",
+  "architecture": "MusicgenMelodyForConditionalGeneration",
+  "checkpoints": {
+    "facebook/musicgen-melody": {
+      "fixture": "hf-internal-testing/proto-musicgen-melody-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/proto-musicgen-melody-slim": {
+      "built_from": "facebook/musicgen-melody",
+      "covers": [
+        "facebook/musicgen-melody"
+      ],
+      "build": {
+        "seed": 17,
+        "config_overrides": {
+          "fields": {
+            "audio_encoder.num_filters": 4,
+            "audio_encoder.codebook_dim": 64
+          },
+          "reason": "The generic rule shrinks EnCodec's hidden_size but not num_filters, which doubles at each of its four stages (64 filters reach 1024 channels at the LSTM, 56M of 59M parameters), nor codebook_dim, which must equal hidden_size for the decoder to accept the quantizer's output."
+        },
+        "overfit": "Random weights pass the input-sensitivity gate (teacher-forced logits move), but greedy generation ignores the conditioning: both prompts, with or without a melody, give the same audio codes, so a change that drops the text or melody conditioning would go unseen."
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=5",
+        "torch",
+        "sentencepiece"
+      ],
+      "targets": [
+        "fixtures",
+        "checkpoints"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 1,
+          "download_mb": 20
+        },
+        "facebook/musicgen-melody": {
+          "memory_gb": 12,
+          "download_mb": 6230
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "input_feature_shape": {
+      "compare": "exact"
+    },
+    "codes": {
+      "compare": "exact"
+    },
+    "audio_shape": {
+      "compare": "exact"
+    },
+    "audio_head": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "text_only_codes": {
+      "compare": "exact"
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}
