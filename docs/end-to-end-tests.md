@@ -1,15 +1,15 @@
 # End-to-end tests
 
-Every end-to-end check in this repo, where it runs, and how to start it: real user code on Hub-format files, run against a Transformers build, compared with a reviewed baseline. Results are in [Evidence](evidence.md) and [Small fixtures](fixtures.md).
+Every end-to-end check in this repo (real user code on Hub-format files, run against a Transformers build, compared with a reviewed baseline), where it runs, and how to start it. Results: [Evidence](evidence.md), [Small fixtures](fixtures.md).
 
 | Test | What it answers | Runs on | Entry point |
 | --- | --- | --- | --- |
 | [Contract runner](#1-contract-runner) | Do the six MICs still pass on this Transformers build? | Mac CPU, A10G, GitHub CPU | [`example/run.py`](../example/run.py) |
 | [Fixture build gates](#2-fixture-build-gates) | Is a slim fixture good enough to catch faults? | Mac CPU | [`example/build_fixtures.py`](../example/build_fixtures.py) |
 | [Shadow job](#3-shadow-job) | What would contracts have caught on real Transformers commits and PRs? | GitHub CPU (x86) | [`shadow.yml`](../.github/workflows/shadow.yml), [`shadow-backfill.yml`](../.github/workflows/shadow-backfill.yml) |
-| [Nightly checkpoints](#4-gpu-checks) | Do the real checkpoints still pass on `main`, on CPU and GPU? | A10G runner (CPU and GPU) | [`nightly.yml`](../.github/workflows/nightly.yml) |
+| [Nightly checkpoints](#4-gpu-checks) | Do real checkpoints still pass on `main`, CPU and GPU? | A10G runner (CPU and GPU) | [`nightly.yml`](../.github/workflows/nightly.yml) |
 | [GPU checks](#4-gpu-checks) | Do fixtures and baselines hold on CUDA, across dtypes and attention? | A10G | [`gpu-checks.yml`](../.github/workflows/gpu-checks.yml) |
-| [Historical regressions](#5-historical-regressions) | Would slim fixtures have caught bugs that actually shipped? | Mac CPU | [`experiments/replay_case.py`](../experiments/replay_case.py), [`usage_repros.py`](../experiments/usage_repros.py), [`example/replay.py`](../example/replay.py) |
+| [Historical regressions](#5-historical-regressions) | Would slim fixtures have caught bugs that shipped? | Mac CPU | [`experiments/replay_case.py`](../experiments/replay_case.py), [`usage_repros.py`](../experiments/usage_repros.py), [`example/replay.py`](../example/replay.py) |
 | [Synthetic faults](#6-synthetic-faults) | Random vs overfit vs other weight schemes, on injected faults | Mac CPU, A10G | [`experiments/experiment.py`](../experiments/experiment.py), [`fixture_init.py`](../experiments/fixture_init.py) |
 | [Stability](#7-stability) | Do baselines stay quiet on benign changes and dependency upgrades? | Mac CPU, A10G | [`experiments/replay.py`](../experiments/replay.py) |
 | [Cost](#8-cost) | What does one check cost, slim vs real? | Mac CPU, A10G | [`experiments/cost.py`](../experiments/cost.py) |
@@ -39,7 +39,7 @@ The [full example](../example/README.md): one runnable-markdown contract per usa
 - **Training:** finite gradients on named modules (`all_true`), SGD step updates parameters (`true`).
 - Non-finite values and failed assertions fail and are never recorded.
 
-**Minimum hardware:** a target's `resources` (devices, GPU count, GPU memory, RAM, disk) are checked first; a host that lacks them reports `unsupported` with the reason, so GPU-only checkpoints skip on CPU while their fixtures run.
+**Minimum hardware:** a target's `resources` (devices, GPU count, GPU memory, RAM, disk) are checked first; a host lacking them reports `unsupported` with the reason, so GPU-only checkpoints skip on CPU while their fixtures run.
 
 **Variants:**
 
@@ -51,11 +51,11 @@ The [full example](../example/README.md): one runnable-markdown contract per usa
 | Platform | Recorded on |
 | --- | --- |
 | `cpu-arm64` | Apple M5 |
-| `cpu-x86_64` | GitHub runners, via [`cpu-baselines.yml`](../.github/workflows/cpu-baselines.yml). Recorded on an AMD EPYC 7R32; matches an EPYC 7763 on all 30 shared targets |
+| `cpu-x86_64` | GitHub runners via [`cpu-baselines.yml`](../.github/workflows/cpu-baselines.yml): AMD EPYC 7R32, matches an EPYC 7763 on all 30 shared targets |
 | `cuda` | A10G |
 
 - CPU baselines are per architecture: Whisper differs by more than `1e-4`. `--golden cpu` means this machine's CPU platform.
-- x86 bfloat16 exception: SmolLM-135M/-360M (bfloat16 by default) gave logits up to 0.25 apart and, in eager, different tokens on an EPYC 9V45 (native bfloat16). Runners record CPU flags to decide whether that needs its own platform.
+- x86 bfloat16 exception: SmolLM-135M/-360M (bfloat16 by default) gave logits up to 0.25 apart and, in eager, different tokens on an EPYC 9V45 (native bfloat16). Runners record CPU flags to decide if that needs its own platform.
 - `--record` writes candidates that must reproduce in a fresh process; a reviewer renames them to approve.
 
 ```sh
@@ -68,13 +68,13 @@ git diff --name-only A B | python example/run.py --framework transformers --fixt
 python example/run.py --framework transformers.js
 ```
 
-**Selection** ([`select_contracts.py`](../example/select_contracts.py)): a changed model directory selects contracts whose fixtures use it; other library code selects all; files outside the library select none. `--run-all` runs everything and records `selected_by`.
+**Selection** ([`select_contracts.py`](../example/select_contracts.py)): a changed model directory selects the contracts whose fixtures use it, other library code selects all, files outside the library select none. `--run-all` runs everything and records `selected_by`.
 
 **Fixtures and patches:** fixtures download at [`fleet.lock`](../example/transformers/tests/contracts/fleet.lock) revisions and are hash-checked (`--local-fixtures` uses build folders). [`patches.py`](../example/patches.py) applies and records the lock's `local_patches` (#49385's `masked_spec_embed` workaround, Whisper's tensor-batch decode workaround for #49403).
 
 ## 2. Fixture build gates
 
-[`build_fixtures.py`](../example/build_fixtures.py) builds each fixture from its checkpoint ([recipe](fixtures.md#recipe)) and fails unless it passes:
+[`build_fixtures.py`](../example/build_fixtures.py) builds each fixture from its checkpoint ([recipe](fixtures.md#recipe)); the build fails unless it passes:
 
 - **Fixture key:** byte-identical processor files and matching config fields across its checkpoints.
 - **Input sensitivity** ([`perturb.py`](../example/perturb.py)): each per-input perturbation moves logits ≥ `1e-3`; otherwise overfit (only Whisper so far).
@@ -89,7 +89,7 @@ python example/publish_fixtures.py                                  # upload fix
 
 ## 3. Shadow job
 
-[`shadow.yml`](../.github/workflows/shadow.yml): non-blocking; installs a Transformers ref on a GitHub x86 runner with the lock's torch, tokenizers, numpy; runs every fixture contract with selection recorded; appends `runs/<date>/<run id>-<attempt>.jsonl` to the `shadow-results` branch.
+[`shadow.yml`](../.github/workflows/shadow.yml) (non-blocking) installs a Transformers ref on a GitHub x86 runner with the lock's torch, tokenizers, numpy; runs every fixture contract, recording selection; and appends `runs/<date>/<run id>-<attempt>.jsonl` to the `shadow-results` branch.
 
 - **Scheduled:** daily on `main`, changed files since the previous run.
 - **Dispatched:** any sha, branch, or `pr/<n>`; `pip_overrides` for old builds.
@@ -108,11 +108,11 @@ All on the Transformers ARC group `aws-g5-4xlarge-cache` (one A10G).
 | Workflow | What it does |
 | --- | --- |
 | [`gpu-checks.yml`](../.github/workflows/gpu-checks.yml) | The experiments below, in the `huggingface/transformers-all-latest-gpu` image |
-| [`gpu-probe.yml`](../.github/workflows/gpu-probe.yml) | Checks access and the environment only |
+| [`gpu-probe.yml`](../.github/workflows/gpu-probe.yml) | Checks access and environment only |
 | [`nightly.yml`](../.github/workflows/nightly.yml) | Every target (real checkpoints and fixtures), nightly on Transformers `main` |
 | [`cpu-baselines.yml`](../.github/workflows/cpu-baselines.yml) | Records `cpu-x86_64` candidates, checks against them, uploads them for review |
 
-- **Nightly:** lock environment with CUDA torch; runner CPU with CUDA hidden (`cpu-x86_64`: default, eager) and GPU (`cuda`: default, eager, bfloat16); appends to `runs/nightly/`, or writes `cuda` candidates with `mode=record`. `cuda` baselines use torch 2.11.0+cu128 (vs the image's 2.14 only CLIP and Wav2Vec2 numbers moved, no discrete output). First run on `2b727b6d86` passed all 80 checks, including CPU with CUDA torch against CPU-torch baselines ([run](https://github.com/huggingface/model-integration-contracts/actions/runs/37645864098)).
+- **Nightly:** lock environment with CUDA torch; runner CPU with CUDA hidden (`cpu-x86_64`: default, eager) and GPU (`cuda`: default, eager, bfloat16); appends to `runs/nightly/`, or writes `cuda` candidates with `mode=record`. `cuda` baselines use torch 2.11.0+cu128; against the image's 2.14, only CLIP and Wav2Vec2 numbers moved, no discrete output. First run on `2b727b6d86` passed all 80 checks, including CPU with CUDA torch against CPU-torch baselines ([run](https://github.com/huggingface/model-integration-contracts/actions/runs/37645864098)).
 - **CPU baselines:** `machine=github` (7 GB) or `machine=gpu-host` (64 GB, CPU-only torch).
 
 `gpu-checks.yml` matrices:
@@ -122,7 +122,7 @@ All on the Transformers ARC group `aws-g5-4xlarge-cache` (one A10G).
 | `full` | Freeze fixtures and real baselines on the runner's CPU and on CUDA; check both on CUDA in float32 eager and SDPA, bfloat16, float16; per-check cost and peak GPU memory |
 | `tf32` | CPU baselines checked on GPU in float32 with cuDNN TF32 on and off |
 | `init` | [`fixture_init.py`](../experiments/fixture_init.py) on GPU (see [§6](#6-synthetic-faults)) |
-| `contracts` | The contract runner on CUDA: record candidates in three variants (each reproduced in a fresh process), two more default runs and an eager run against them, CPU golden, bfloat16 vs float32 golden, fixtures batched vs isolated; plus an informational fixture rebuild on the runner's CPU |
+| `contracts` | Contract runner on CUDA: candidates recorded in three variants (each reproduced in a fresh process), two more default runs and an eager run against them, CPU golden, bfloat16 vs float32 golden, fixtures batched vs isolated; plus an informational fixture rebuild on the runner's CPU |
 
 ```sh
 gh workflow run gpu-checks.yml --repo huggingface/model-integration-contracts -f matrix=contracts
@@ -181,7 +181,7 @@ Frozen fixtures and real baselines under benign changes and dependency upgrades,
 
 ## 10. WebGPU golden
 
-[`webgpu_golden.py`](../experiments/webgpu_golden.py) checks the SmolLM Transformers.js contract on WebGPU (Node, onnxruntime-node 1.30) against the CPU golden; [`webgpu_browser/`](../experiments/webgpu_browser) does it in Chrome via `puppeteer-core`. fp32 matches within 4e-5; fp16 and q4f16 return all-zero logits on the onnx-community exports ([`webgpu_golden.json`](../experiments/results/webgpu_golden.json)).
+[`webgpu_golden.py`](../experiments/webgpu_golden.py) checks the SmolLM Transformers.js contract on WebGPU (Node, onnxruntime-node 1.30) against the CPU golden; [`webgpu_browser/`](../experiments/webgpu_browser) does the same in Chrome via `puppeteer-core`. fp32 matches within 4e-5; fp16 and q4f16 return all-zero logits on the onnx-community exports ([`webgpu_golden.json`](../experiments/results/webgpu_golden.json)).
 
 ```sh
 python example/run.py --framework transformers.js --variant webgpu-fp16 --golden cpu
@@ -189,4 +189,4 @@ python example/run.py --framework transformers.js --variant webgpu-fp16 --golden
 
 ## 11. Agent walkthroughs
 
-Not a regression test: Claude Opus and Codex given the same task (run a Hub model locally). Scripts in [`experiments/agent_run/`](../experiments/agent_run); recipe and results in [Agent walkthroughs](agent-walkthrough/README.md).
+Not a regression test: Claude Opus and Codex get the same task (run a Hub model locally). Scripts in [`experiments/agent_run/`](../experiments/agent_run); recipe and results in [Agent walkthroughs](agent-walkthrough/README.md).

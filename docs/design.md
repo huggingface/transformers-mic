@@ -4,7 +4,7 @@ Companion to the [proposed standard](../README.md#the-proposed-standard). Result
 
 ## The standard: contract layout
 
-A MIC covers one usage path (architecture + task) and every checkpoint sharing it. The [full example](../example/README.md): SmolLM text generation, three checkpoints, two fixtures, Transformers and Transformers.js.
+A MIC covers one usage path (architecture + task) and every checkpoint on it. [Full example](../example/README.md): SmolLM text generation; three checkpoints, two fixtures, Transformers and Transformers.js.
 
 ```text
 hf-internal-testing/SmolLM-integration       # Hub, owned by Hugging Face: what to run
@@ -21,11 +21,11 @@ transformers/tests/contracts/                # framework repo, owned by its main
   expectations/SmolLM/cpu-arm64/SmolLM-135M.eager.json
 ```
 
-The contract is user code that emits a structured result; the runner compares it with the baseline. No new testing DSL. The manifest is described in the [standard](../README.md#the-proposed-standard), plus a training flag. Reference inputs are pinned by revision and content hash, and recorded in the result with model and processor revisions.
+The contract is user code emitting a structured result, which the runner compares with the baseline; no new testing DSL. Manifest: as in the [standard](../README.md#the-proposed-standard), plus a training flag. Reference inputs are pinned by revision and content hash and recorded in the result with model and processor revisions.
 
 ### Minimum hardware
 
-`resources` gives each target (`fixture` for all fixtures, or a checkpoint repo) its minimum specs, with optional per-variant overrides:
+`resources` sets minimum specs per target (`fixture` for all fixtures, or a checkpoint repo), with optional per-variant overrides:
 
 ```json
 "resources": {
@@ -39,27 +39,27 @@ The contract is user code that emits a structured result; the runner compares it
 | Field | Meaning |
 | --- | --- |
 | `devices` | Where it can run (default CPU and CUDA). |
-| `gpus` | >1 means multi-GPU; the contract handles it (e.g. `device_map="auto"`). |
+| `gpus` | >1 means multi-GPU, handled by the contract (e.g. `device_map="auto"`). |
 | `gpu_memory_gb` | Per GPU. |
 | `memory_gb` | Host RAM. |
-| `disk_gb` | Free disk for the download. |
+| `disk_gb` | Free disk for download. |
 
-Checked before download: an unrunnable target is `unsupported` with a reason (`needs cuda; this host has no GPU`), never a failure. CI picks runner classes from the same numbers. Fixtures run anywhere, so GPU-only checkpoints keep CPU PR coverage. Measure, don't guess: SmolLM-1.7B was guessed at 20 GB, measured at 10.6 GB, and still killed a 16 GB runner holding it twice.
+Checked before download: an unrunnable target is `unsupported` with a reason (`needs cuda; this host has no GPU`), not a failure. CI picks runner classes from the same numbers. Fixtures run anywhere, so GPU-only checkpoints keep CPU PR coverage. Measure, don't guess: SmolLM-1.7B, guessed at 20 GB, measured 10.6 GB and still killed a 16 GB runner holding it twice.
 
 ### Authoring: runnable markdown
 
-Written as [doc-builder runnable blocks](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md) ([example](../example/hub/SmolLM-integration/integrations/transformers/usage.md)), one file is rendered docs, a doc-builder pytest test, and the contract (collected by doc-builder's own collector, so the runner runs exactly what the docs show).
+Written as [doc-builder runnable blocks](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md) ([example](../example/hub/SmolLM-integration/integrations/transformers/usage.md)), one file is rendered docs, a doc-builder pytest test, and the contract. Doc-builder's own collector extracts it, so the runner runs exactly what the docs show.
 
-- Lines hidden with `# doc-builder: hide` carry the target, variant load arguments, and result record. Variants need a second hidden load call; a doc-builder parameterization hook would remove it.
+- Lines hidden with `# doc-builder: hide` carry the target, variant load arguments, and result record. Variants need a second hidden load call, which a doc-builder parameterization hook would remove.
 - Expected answers stay out of the snippet: they differ across fixture/checkpoint, CPU/GPU, and dtypes ([why](evidence.md#on-gpu)).
 - The example names the path actually tested. Workarounds are explicit and reviewed; a patched pass says nothing about the unmodified model-card snippet ([walkthroughs](agent-walkthrough/README.md)).
 
 ### Grouping checkpoints
 
-Checkpoints share a fixture when they share a **fixture key**: processor files byte for byte plus config fields that survive shrinking (attention layout, RoPE, tied embeddings, vocabulary, special tokens). Size-only differences share a fixture.
+Checkpoints share a fixture when they share a **fixture key**: byte-identical processor files plus config fields that survive shrinking (attention layout, RoPE, tied embeddings, vocabulary, special tokens). Checkpoints differing only in size share one.
 
 - SmolLM-135M and -360M share one.
-- SmolLM-1.7B has its own: different tokenizer files, full multi-head attention instead of grouped KV.
+- SmolLM-1.7B has its own: different tokenizer files, full multi-head attention, not grouped KV.
 - The build fails if an assigned checkpoint's key differs.
 
 Real-checkpoint baselines stay per checkpoint. PRs run one check per fixture; merges, nightlies, and releases run the checkpoints (all, or a rotating sample).
@@ -72,7 +72,7 @@ Real-checkpoint baselines stay per checkpoint. PRs run one check per fixture; me
 | Contract and manifest, per usage path | HF integration repo | `hf-internal-testing/SmolLM-integration` | Hugging Face |
 | Small fixture, per fixture key | HF fixture repo | `hf-internal-testing/proto-SmolLM-slim` | Hugging Face |
 | Converted artifacts | HF companion repo | `onnx-community/SmolLM-135M-ONNX` | Hugging Face |
-| Shared runner (fetch, isolate, run, compare) | one package for all frameworks | name to be decided | Hugging Face |
+| Shared runner (fetch, isolate, run, compare) | one package for all frameworks | to be named | Hugging Face |
 | Fleet lock, expected results, adapter, CI workflow | framework repo | `tests/contracts/fleet.lock`, `tests/contracts/expectations/`, `.github/workflows/contracts.yml` | Framework maintainers |
 
 Names are placeholders. Contract work never waits on a creator's repo; expected results live where framework changes are reviewed. Creators may opt into co-owning later.
@@ -89,19 +89,19 @@ Fixtures on PRs (cheap enough to be required); real checkpoints on slower paths.
 | Release candidate | same, full fleet | creator repos, pinned | per-checkpoint baselines |
 | Model update | integration repo | new creator revision | candidate baseline, reviewed before approval |
 
-Same contract on every trigger; only weights change, each with its own baselines. Frameworks needing a conversion (Transformers.js) load the HF one. This tests framework changes against models and model updates against framework versions.
+Same contract on every trigger; only the weights change, each with its own baselines. Frameworks needing a conversion (Transformers.js) load the HF one. Framework changes are tested against models, and model updates against framework versions.
 
 Prototype jobs (this repo, outside Transformers CI):
 
 - [shadow](../.github/workflows/shadow.yml): fixtures on Transformers `main`, daily or on demand for any commit or PR;
 - [shadow backfill](../.github/workflows/shadow-backfill.yml): fixtures on every `main` commit in a past window ([results](evidence.md#shadow-backfill));
-- [nightly](../.github/workflows/nightly.yml): checkpoints and fixtures on an A10G runner's CPU and GPU.
+- [nightly](../.github/workflows/nightly.yml): checkpoints and fixtures on an A10G runner, CPU and GPU.
 
 ## Where the code lives
 
 Contracts and fixtures are fetched from the Hub at pinned revisions; Transformers keeps the lock and expectations. `tests/` keeps framework-behavior tests, and `tests/models/` keeps running during the pilot.
 
-A PR job reads the fleet lock, fetches pinned repos, runs contracts on the PR build, and compares with `tests/contracts/expectations/`. A failure names contract, target, and baseline file, and reproduces locally with the same command.
+A PR job reads the fleet lock, fetches pinned repos, runs contracts on the PR build, and compares with `tests/contracts/expectations/`. A failure names contract, target, and baseline file and reproduces locally with the same command.
 
 - **Intentional framework behavior change:** the same PR updates its baselines; reviewers see the diff.
 - **Contract change** (inputs, checkpoint, variant): Hub PR to the integration repo, reviewed by Hugging Face, then a fleet-lock bump per framework.
@@ -117,19 +117,19 @@ A forward pass that runs is too weak. Where applicable:
 Tolerances are calibrated per fixture and environment; exact token equality only where stable.
 
 - **Baselines per platform class and dtype; fixture shared.** Logits drift across both ([evidence](evidence.md#on-gpu)). Baselines record device, dtype, and attention; the [runner](../example/run.py) refuses to compare across them.
-- **A match means agreement with reviewed behavior** on fixed inputs and one runtime, not semantic correctness, and a fixture pass says nothing for the real model. Vision records include input identity and checked outputs (labels, boxes).
+- **A match means agreement with reviewed behavior** on fixed inputs and one runtime, not semantic correctness; a fixture pass says nothing for the real model. Vision records include input identity and checked outputs (labels, boxes).
 - **Run the default configuration.** Users get SDPA, so the contract checks SDPA; eager is an extra variant. Eager-pinned checks missed the UMT5 SDPA regression ([replay](evidence.md#historical-regression-replay)).
 - **Choose inputs deliberately.** Decoding only "Paris" and "Berlin" can't see a punctuation-spacing regression.
 
 ## Public API coverage
 
-Contracts call the entry point users call, because some regressions sit above `AutoModel` (e.g. the `image-to-text` issue seen through generated Hub usage). In the [replay](evidence.md#historical-regression-replay), only calls through the affected API (`processor(..., text_kwargs=...)`, `batch_decode(..., decode_with_timestamps=True)`, batch `decode`) caught processor and tokenizer regressions.
+Contracts call the entry point users call: some regressions sit above `AutoModel` (e.g. the `image-to-text` issue seen through generated Hub usage). In the [replay](evidence.md#historical-regression-replay), only calls through the affected API (`processor(..., text_kwargs=...)`, `batch_decode(..., decode_with_timestamps=True)`, batch `decode`) caught processor and tokenizer regressions.
 
 Generic pipeline behavior stays in framework tests; the contract covers the model-specific end-to-end path.
 
 ## Revisions and baselines
 
-Each framework's fleet lock pins exact revisions of checkpoints (model and processor), converted artifacts, the contract, fixtures, and the dependency environment. Expected results sit next to it, so re-running an old commit uses its old fleet and expectations.
+Each framework's fleet lock pins exact revisions of checkpoints (model and processor), converted artifacts, the contract, fixtures, and the dependency environment. Expected results sit next to it, so an old commit re-runs with its own fleet and expectations.
 
 **Expected outputs never update automatically**; a build under test never defines its own answer.
 
@@ -143,11 +143,11 @@ Each framework's fleet lock pins exact revisions of checkpoints (model and proce
 
 Good candidates say "this checkpoint, through this public path, produces this output". Framework behavior stays: compile/export, cache, batching, offloading, multi-GPU, speculative decoding, long context, generic pipelines, framework-level attention implementations.
 
-Supported model-specific variants can live in the contract, but one example can't replace several tests of different behavior. A heuristic scan suggests much of the integration suite fits; not a target until reproducible and reviewed.
+Supported model-specific variants can live in the contract, but one example can't replace several tests of different behavior. A heuristic scan suggests much of the integration suite fits; not a target until it is reproducible and reviewed.
 
 ## Runner
 
-Each framework needs a small adapter that installs the build under test and runs the contract per target, fixtures then checkpoints ([example](../example/run.py)). The target comes through the environment:
+Each framework needs a small adapter installing the build under test and running the contract per target, fixtures then checkpoints ([example](../example/run.py)). The target comes through the environment:
 
 ```text
 MIC_MODEL            # local path: the runner resolves the pinned fixture or checkpoint revision
@@ -167,36 +167,36 @@ The [runner prototype](../example/README.md#runner-prototype) covers six contrac
 | Tolerances per platform | Manifest defaults, overridden per platform in `expectations/<contract>/<platform>/tolerances.json` with a required reason. |
 | Reproducible baselines | `--record` reruns in a fresh process and refuses differing or non-finite outputs; this caught a seeding mistake and a Wav2Vec2 bug ([details](../example/README.md#runner-prototype)). |
 | Validation | Missing outputs, wrong shapes, non-finite gradients, and runs where nothing ran fail ([gaps closed](problems-and-opened-questions.md#6-runner-validation-gaps)). |
-| Known failures | `known_failures` (with issue) reports `xfail`, and fails once it passes. `local_patches` applies a workaround in every process and records it per result (e.g. [#49385](https://github.com/huggingface/transformers/issues/49385)). |
+| Known failures | `known_failures` (with issue) reports `xfail` and fails once it passes. `local_patches` applies a workaround in every process and records it per result (e.g. [#49385](https://github.com/huggingface/transformers/issues/49385)). |
 | Replays | [`replay.py`](../example/replay.py) runs the unchanged runner on a regression's bad and fixed builds. |
 
 Not implemented: isolation for untrusted code, private-artifact rules, picking the CI runner class from `resources`.
 
 ## Converted artifacts
 
-Frameworks may consume different repos (PyTorch checkpoint for Transformers, HF ONNX conversion for Transformers.js). A conversion is a distinct artifact; record separately its source revision, artifact revision, exporter version and options, and conversion validation.
+Frameworks may consume different repos (PyTorch checkpoint for Transformers, HF ONNX conversion for Transformers.js). A conversion is a distinct artifact with its own record: source revision, artifact revision, exporter version and options, conversion validation.
 
 ### Golden references for kernels and performance
 
 A reviewed real-checkpoint baseline is a golden reference for backend work (e.g. WebGPU in Transformers.js):
 
 1. Run the contract on the new backend.
-2. Compare discrete outputs with an existing platform's baseline; logits only compare within a platform class, so they're reported as drift ([why](evidence.md#on-gpu)).
+2. Compare discrete outputs with an existing platform's baseline; logits compare only within a platform class, so they're reported as drift ([why](evidence.md#on-gpu)).
 3. Once reviewed, the backend gets its own baselines.
 
 The [example runner](../example/run.py) does this with `--golden cpu`. On Apple M5 it passed WebGPU fp32 and caught fp16 and q4f16 returning all-zero logits ([repro](../experiments/webgpu_browser/README.md)).
 
-Records also store (not compare) timings: load, first and warm generate, forward. Kernel speed is tracked on the inputs that check correctness, on real checkpoints and target hardware.
+Records also store (not compare) timings: load, first and warm generate, forward. Kernel speed is tracked on the correctness inputs, real checkpoints, and target hardware.
 
 ## Pilot
 
-Before any Hub product work, 3–5 usage paths: a standard text model, a processor-heavy or multimodal one, one needing real GPUs, one painful to maintain today, and a Transformers.js integration. For each: contracts, fixtures by key, shared runner, PR/nightly/model-update CI, existing tests kept running, and one contribution tested with a private framework build before upstream merge. Run long enough to see real maintenance.
+Before any Hub product work, 3–5 usage paths: a standard text model, a processor-heavy or multimodal one, one needing real GPUs, one painful to maintain today, and a Transformers.js integration. For each: contracts, fixtures by key, shared runner, PR/nightly/model-update CI, existing tests kept running, and one contribution tested with a private framework build before upstream merge. Run it long enough to see real maintenance.
 
 ## What we need to measure
 
 ### Bug coverage
 
-Verify real regressions on checkpoint, fixture, and checks, not synthetic faults. Extend the [replay](evidence.md#historical-regression-replay) with GPU regressions and nightly/slow-test finds; replay whole history to avoid picking cases, as the [backfill](evidence.md#shadow-backfill) does (with changed-file selection); count [improvement-loop](improving-contracts.md) detections separately.
+Verify on real regressions (checkpoint, fixture, and checks), not synthetic faults. Extend the [replay](evidence.md#historical-regression-replay) with GPU regressions and nightly/slow-test finds; replay whole history to avoid picking cases, as the [backfill](evidence.md#shadow-backfill) does (with changed-file selection); count [improvement-loop](improving-contracts.md) detections separately.
 
 ### Cost
 
@@ -212,7 +212,7 @@ False positives, time to diagnose, time to fix. Classify every failure as the [b
 
 ### Reuse
 
-Can one module back docs, snippets, Colabs, and agents without a second maintenance path? Optional upside. Agents: the [controlled comparison](agent-walkthrough/README.md#controlled-comparison-with-and-without-a-mic) measures discovery, completion on the requested repo, time to verified output, adaptations, failed attempts, and false success claims, excluding infrastructure failures.
+Optional upside: can one module back docs, snippets, Colabs, and agents without a second maintenance path? Agents: the [controlled comparison](agent-walkthrough/README.md#controlled-comparison-with-and-without-a-mic) measures discovery, completion on the requested repo, time to verified output, adaptations, failed attempts, and false success claims, excluding infrastructure failures.
 
 ## Hub follow-up
 
@@ -222,7 +222,7 @@ Not needed to start. Later: revision-specific compatibility status, a Tests tab,
 
 ### Agent discovery and reproduction
 
-From a model page or id, an agent needs a link to the contract and a last-passing record (possible before any Tests tab). The record should let it:
+From a model page or id, an agent needs a link to the contract and the last passing record (possible before any Tests tab), letting it:
 
 1. **Select** the requested checkpoint and task, with resources and unsupported or unvalidated configurations. A different repo is labeled a substitution or conversion.
 2. **Reproduce** the tested environment: framework build, dependency lock, Python/runtime, platform, dtype, attention, any workaround. `config.transformers_version` is not a tested environment.
@@ -254,4 +254,4 @@ Contracts are arbitrary code: the runner needs isolation, resource limits, pinne
 9. Can doc-builder blocks carry runner parameters without hidden reload lines, and should doc pages include contracts from the Hub?
 10. How do fixtures stay out of model discovery (tags, card text, search exclusion, an unlisted org)?
 
-If the pilot shows good coverage at much lower PR cost without heavy maintenance: expand the fleet, then build the Hub-facing pieces.
+If the pilot shows good coverage at much lower PR cost without heavy maintenance, expand the fleet, then build the Hub-facing pieces.

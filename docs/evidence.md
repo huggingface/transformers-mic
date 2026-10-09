@@ -9,7 +9,7 @@ Results from local experiments, the regression replay, and the shadow backfill o
 - **Numerical checks make small fixtures sensitive.** Synthetic faults: overfit caught 126/126, random 120 (misses all Whisper), a bare forward pass none.
 - **Contracts must call what users call.** Generic checks missed every processor and tokenizer bug; the affected API call caught them ([replay](#historical-regression-replay)).
 - **Five months of `main`: 1 caught, 4 missed, 1 false alarm**; the misses were calls no contract made ([backfill](#shadow-backfill)). With those calls added, all five caught, no new false alarm, plus a live bug ([#49403](https://github.com/huggingface/transformers/issues/49403)) ([details](#after-adding-the-missed-calls)).
-- **The scheduled runs caught a regression the day it merged:** #48282 (2026-10-08) made `generate()` raise on every original Whisper checkpoint (`suppress_tokens` in `config.json` read as a user change to the model config). The next nightly and shadow runs failed Whisper on every target, platform, and dtype. Bisected to the commit and reported as [#49456](https://github.com/huggingface/transformers/issues/49456); a `local_patches` workaround keeps the other Whisper checks running. The PR's CI could not see it ([why](https://github.com/huggingface/transformers/issues/49456#issuecomment-6076843277)): Whisper's model tests build configs without `suppress_tokens`; the fast ASR pipeline tests load `openai/whisper-tiny` but went through the pipeline, which passed its own `generation_config` and so skipped the check (they started failing hours later, when #49269 removed that, pointing at the wrong PR); and the slow Whisper tests that call `generate()` were not in the PR's `run-slow` list. The contract calls `model.generate()` directly on the checkpoint's config, as users do.
+- **Scheduled runs caught a regression the day it merged:** #48282 (2026-10-08) made `generate()` raise on every original Whisper checkpoint (`suppress_tokens` in `config.json` read as a user change to the model config). The next nightly and shadow runs failed Whisper on every target, platform, and dtype; bisected to the commit and reported as [#49456](https://github.com/huggingface/transformers/issues/49456), with a `local_patches` workaround keeping the other Whisper checks running. The PR's CI could not see it ([why](https://github.com/huggingface/transformers/issues/49456#issuecomment-6076843277)): Whisper's model tests build configs without `suppress_tokens`; the fast ASR pipeline tests load `openai/whisper-tiny`, but the pipeline passed its own `generation_config`, skipping the check (they failed hours later, when #49269 removed that, pointing at the wrong PR); the slow Whisper tests that call `generate()` were not in the PR's `run-slow` list. The contract calls `model.generate()` directly on the checkpoint's config, as users do.
 - **The runner found a real bug:** seven audio models leave `masked_spec_embed` uninitialized ([#49385](https://github.com/huggingface/transformers/issues/49385), fix [#49386](https://github.com/huggingface/transformers/pull/49386)); the slim Wav2Vec2 fixture catches it every run ([runner](../example/README.md#runner-prototype)).
 - **Golden outputs catch silent backend bugs:** Transformers.js on WebGPU (onnxruntime-node 1.30, Apple M5; Chrome 154) returned all-zero fp16/q4f16 logits with no error, an onnxruntime kernel bug triggered by `onnx-community` exports ([repro](../experiments/webgpu_browser/README.md)).
 
@@ -36,13 +36,13 @@ Two [walkthroughs](agent-walkthrough/README.md) ([Claude Code](agent-walkthrough
 | --- | --- |
 | Claude chose Qwen3.5-0.8B (no in-process snippet on its card). Codex chose BLIP, then reused cached Florence weights when downloads failed. | A tested local example and resource requirements. Availability and cache still matter. |
 | Codex inferred Transformers 4.41.2 from `transformers_version: 4.41.0.dev0` and cached packages. | A last-passing record (revision, build, dependencies, hardware) instead of a guess. |
-| Both hit Florence's `flash_attn` import failure on 4.41.2; Codex filtered it from the import scanner for CPU. | CI on that path exposes the failure, so a fix or workaround variant can be tested. A manifest doesn't repair the loader. |
-| `transformersInfo` suggested a native loader while `config.auto_map` chose custom code (Claude); Codex saw the same conflict and its API requests failed. | Docs and snippets share one tested entry point per checkpoint and environment. |
+| Both hit Florence's `flash_attn` import failure on 4.41.2; Codex filtered it from the import scanner for CPU. | CI on that path exposes the failure so a fix or workaround can be tested as a variant. A manifest doesn't repair the loader. |
+| `transformersInfo` suggested a native loader while `config.auto_map` chose custom code (Claude); Codex saw the same conflict; its API requests failed. | Docs and snippets share one tested entry point per checkpoint and environment. |
 | Both judged output visually; Codex also drew boxes and checked bounds. Neither used a reviewed reference. | Fixed inputs and reviewed real-checkpoint outputs. |
 
 - **Same repo, different outcomes.** Claude finished Task B on `florence-community/Florence-2-base`. Codex ran Microsoft's revision `5ca5edf5bd017b9919c05d08aebef5e4c7ac3bac` with Transformers 4.41.2, torch 2.10.0, CPU float32, eager, plus the scanner workaround. A working combination existed but was undocumented; the unmodified card example is not shown to work.
 - **Reference checks are bounded.** A baseline match shows known behavior on fixed inputs, not correctness on new ones. Agents need the real-checkpoint result, not the slim one.
-- **Not all costs are MIC-addressable.** Codex: ~6m 28s (Task A), ~6m 10s (Task B), overlapping. DNS, sandbox, a `uv` panic, and report mistakes were separate. Differing caches and accounting rule out a speed ranking.
+- **Not all costs are MIC-addressable.** Codex: ~6m 28s (Task A), ~6m 10s (Task B), overlapping; DNS, sandbox, a `uv` panic, and report mistakes were separate. Differing caches and accounting rule out a speed ranking.
 - **Not shown:** overfitting value, CI savings, ownership, maintenance cost. Benefit also needs [discoverability](design.md#agent-discovery-and-reproduction). Remote-code models (this Florence path) are deferred.
 - **Next:** a [controlled comparison](agent-walkthrough/README.md#controlled-comparison-with-and-without-a-mic): matched cache and network, fresh sessions; measure completion on the requested repo, time to verified result, adaptation, failures, false success claims.
 
@@ -65,7 +65,7 @@ Two [walkthroughs](agent-walkthrough/README.md) ([Claude Code](agent-walkthrough
 | UMT5 | 0.76 s | 1.15 s | 66 MB | 1,227 MB |
 
 - **Process start dominates:** run many contracts per process.
-- **Little local time saved** against these smallest, cached checkpoints: real inference 5–20× slower, loading similar.
+- **Little local time saved** on these smallest, cached checkpoints: real inference 5–20× slower, loading similar.
 - **Savings are transfer and size:** slim weights 10–1,300× smaller. Slow tests for these eight families load ~144 GB (two Llama 7–8B, three OLMo ≤7B, Whisper large, twelve Wav2Vec2), mostly not CPU-runnable.
 - **Memory:** 0.5–1.3 GB peak RSS slim (mostly framework), 0.7–2 GB real.
 
@@ -84,7 +84,7 @@ One run on `aws-g5-4xlarge-cache` (A10G, torch 2.14.0+cu130, CUDA 13.0), Transfo
 
 - **Fixtures run unchanged on GPU**; real checkpoints use most of the margin (6.6e-5, Wav2Vec2), slim stays near 1e-5.
 - **CPU baselines carry over only without convolutions:** SmolLM, BERT, T5 within 5e-5; CLIP, Whisper, Wav2Vec2 drift 1e-3–3e-2, slim and real alike.
-- **The cause is TF32,** which cuDNN uses for convolutions by default on Ampere+. With `torch.backends.cudnn.allow_tf32 = False`: 0 of 28 flagged ([run](https://github.com/huggingface/model-integration-contracts/actions/runs/37512092438)). Users get TF32, so keep it and record GPU baselines. float32 tokens and labels never changed.
+- **The cause is TF32,** which cuDNN uses for convolutions by default on Ampere+. With `torch.backends.cudnn.allow_tf32 = False`: 0 of 28 flagged ([run](https://github.com/huggingface/model-integration-contracts/actions/runs/37512092438)). Users get TF32: keep it, record GPU baselines. float32 tokens and labels never changed.
 - **Lower precision needs its own baseline.** Generated outputs changed for real SmolLM (both dtypes), two T5 and three Wav2Vec2 fixtures (bfloat16). The [full example](../example/README.md) hit the same with eager vs SDPA on CPU.
 
 **GPU cost:** float32, SDPA, three fresh processes, weights cached ([gpu.json](../experiments/results/gpu.json), `cost`).
@@ -108,7 +108,7 @@ Not measured: CPU-only CI runners, setup, Hub downloads, cold cache, other GPUs,
 
 - 10–20 parallel jobs, GitHub-hosted x86, `cpu-x86_64` baselines; fleet-lock environment installed once per job (Transformers editable), ~15 s per commit.
 - Where a commit rejects a pin, its newest accepted version is used: `tokenizers` 0.22 on the 893 commits before 2026-08-17, no effect on results.
-- Each result records its selection (`selected_by`); all on `shadow-results` (`runs/backfill/`).
+- Results record their selection (`selected_by`); all on `shadow-results` (`runs/backfill/`).
 
 Every change in outcome (all other results passed on every commit):
 
@@ -162,7 +162,7 @@ Builds before 2026-08-17 need `tokenizers` 0.22.x (before mid-June, an older `ke
 | --- | --- | --- | --- |
 | CLIP processor drops `return_tensors` when `text_kwargs` is passed ([#46195](https://github.com/huggingface/transformers/pull/46195)) | crash | missed | crash, caught |
 | Whisper batch `decode_with_timestamps` ([#47997](https://github.com/huggingface/transformers/pull/47997)) | crash | missed | crash, caught |
-| T5 batch `decode` ignores `clean_up_tokenization_spaces` ([#47793](https://github.com/huggingface/transformers/pull/47793)) | caught | missed | caught only with punctuation in the inputs |
+| T5 batch `decode` ignores `clean_up_tokenization_spaces` ([#47793](https://github.com/huggingface/transformers/pull/47793)) | caught | missed | caught only with punctuated inputs |
 | `additional_special_tokens` lost with legacy tokenizer config ([#47848](https://github.com/huggingface/transformers/pull/47848)) | caught | missed | missed: re-saved tokenizer hides it |
 | OLMo tokenizer appends a stray EOS ([#47988](https://github.com/huggingface/transformers/pull/47988)) | caught | missed: re-saved tokenizer hides it | — |
 | UMT5 decoder self-attention not causal under SDPA ([#49135](https://github.com/huggingface/transformers/pull/49135)) | caught under SDPA only | missed under eager; caught under SDPA on all 6 fixtures (logit delta 1.1–15) | caught under SDPA: future-token leak 2.9–15 vs 2e-6 |
@@ -173,10 +173,10 @@ Builds before 2026-08-17 need `tokenizers` 0.22.x (before mid-June, an older `ke
 | CLIP conversion mapping applied at the wrong nesting level ([#46406](https://github.com/huggingface/transformers/pull/46406)) | not reproduced with `CLIPTextModelWithProjection` | — | not reproduced |
 
 - **Generic checks miss most bugs:** forward + greedy generate caught only UMT5, only under default attention. The rest live in processors, tokenizers, decoding helpers.
-- **Making the affected call is enough;** the fixture then caught every bug the checkpoint did.
+- **Making the affected call is enough:** the fixture then caught every bug the checkpoint did.
 - **Packaging matters:** processor files re-saved by a fixed build hid three loading regressions; copied originals caught the processor-config case on all three families tested.
 - **Runtime defaults matter:** the UMT5 bug exists only under SDPA, the default; eager-pinned checks missed it everywhere.
-- **Choose attention at load time.** `set_attn_implementation("sdpa")` after loading a T5-family model silently leaves encoder and decoder on eager ([#49372](https://github.com/huggingface/transformers/issues/49372)); the first SDPA pass never exercised SDPA. Set it at load and record the one in use.
+- **Choose attention at load time.** `set_attn_implementation("sdpa")` after loading a T5-family model silently leaves encoder and decoder on eager ([#49372](https://github.com/huggingface/transformers/issues/49372)); the first SDPA pass never exercised SDPA. Set it at load; record the one in use.
 - **No false alarms:** 10 benign changes on the same paths (RoPE, greedy decoding, image processing, masking, attention refactors, auto-generated inits), 20 builds × 42 checks, clean under eager and SDPA, including Wav2Vec2's move to SDPA dispatch and a continuous-batching refactor. The May 2026 build lacks T5 SDPA: counted unsupported, not detected.
 - **Bugs are mostly in shared code** (processors, tokenizers, attention), rarely in one family: organize contracts around public usage paths, not per-model forward checks.
 

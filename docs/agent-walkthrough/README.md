@@ -4,13 +4,13 @@ How coding agents take a Hub model to working local inference: signals used, inf
 
 ## Recipe
 
-1. Fresh agent session in an empty scratch directory outside this repo. Keep existing machine state (cached models, packages); the agent may create an isolated environment.
+1. Fresh agent session in an empty scratch directory outside this repo. Keep machine state (cached models, packages); the agent may create an isolated environment.
 2. Record agent and model name/version if available, date, machine, and access restrictions. Give the agent no walkthrough or integration-contract material before it finishes.
-3. Send the full [prompt](#prompts) unchanged. Task A: agent picks a small captioning model. Task B: named model, captioning and detection. The agent works its normal way within the rules.
-4. Collect `agent-walkthrough.md`, failures and abandoned paths included. Substituted checkpoints, patched loaders, missing timestamps, and unverified outputs stay visible, never edited into a clean success.
-5. Save it as its own file here (`claude-opus.md`, `codex.md`; add an agent/model/date suffix for further runs, never overwrite). Assets go under `assets/<result-name>/`; fix relative links; add the run to the table below.
+3. Send the full [prompt](#prompts) unchanged (Task A: agent picks a small captioning model; Task B: named model, captioning and detection). The agent works normally within the rules.
+4. Collect `agent-walkthrough.md` with failures and abandoned paths. Substituted checkpoints, patched loaders, missing timestamps, and unverified outputs stay visible, never edited into a clean success.
+5. Save it as its own file here (`claude-opus.md`, `codex.md`; add an agent/model/date suffix for further runs, never overwrite). Put assets under `assets/<result-name>/`, fix relative links, and add the run to the table below.
 
-Shared instructions live here, each agent's output in its own file. If you vary model, image, or task, keep the exact changed prompt with that result and label it a different recipe.
+If you vary model, image, or task, keep the exact changed prompt with that result and label it a different recipe.
 
 ## Results
 
@@ -19,37 +19,37 @@ Shared instructions live here, each agent's output in its own file. If you vary 
 | 2026-10-06 | Claude Code, Opus 5.5 | [Claude Opus](claude-opus.md) | `Qwen/Qwen3.5-0.8B` | `florence-community/Florence-2-base`; the requested Microsoft repo was abandoned |
 | 2026-10-07 | Codex; exact serving model/version not recorded | [Codex](codex.md) | `microsoft/Florence-2-base` | `microsoft/Florence-2-base`, with a CPU import-scanner workaround |
 
-- Claude's result moved from `docs/agent-walkthrough.md`. Codex's is as produced, plus a navigation note and updated image link. Commands and paths are as recorded.
-- Not a benchmark: caches, network, versions, prior knowledge, and tool-call counting differ. Codex reused cached weights and setup across tasks and separates nested tool calls from wrappers. Check each result's timing definitions and limits before comparing.
+- Claude's result moved from `docs/agent-walkthrough.md`. Codex's is as produced, plus a navigation note and an updated image link. Commands and paths are as recorded.
+- Not a benchmark: caches, network, versions, prior knowledge, and tool-call counting differ. Codex reused cached weights and setup across tasks and counts nested tool calls apart from wrappers. Check each result's timing definitions and limits before comparing.
 
 ## What the two runs support
 
 - Both reconstructed a working path for Microsoft Florence: Claude via a community repo, Codex via an older pinned stack and an import-scanner workaround. Both judged output visually.
-- This supports tested examples, explicit environments, revision-specific compatibility, and reference checks; it doesn't measure a MIC's benefit. The [assessment](../evidence.md#how-agents-use-the-hub-today) separates integration issues from network, sandbox, tooling, and reporting failures.
+- This supports tested examples, explicit environments, revision-specific compatibility, and reference checks, but doesn't measure a MIC's benefit. The [assessment](../evidence.md#how-agents-use-the-hub-today) separates integration issues from network, sandbox, tooling, and reporting failures.
 - A reference check shows agreement on fixed inputs and runtime, not correctness on new inputs. Agents also need [discovery](../design.md#agent-discovery-and-reproduction), and remote-code models like this one are deferred.
 
 This analysis and the experiment below came after the runs; the agents never saw them.
 
 ## Controlled comparison with and without a MIC
 
-Not run yet. Tests agent reuse separately from the CI pilot.
+Not run yet. It tests agent reuse separately from the CI pilot.
 
-1. **Sessions.** Fresh sessions of the same agent/model in both conditions; repeated runs with recorded model/version and settings; no conversation history or results carried between conditions.
-2. **Environment.** Comparable machines, permissions, network, package availability, and initial cache. Record cold and warm cache runs separately. Pin model revisions and reference images; neither condition inherits the other's downloads.
-3. **Treatment.** Same two tasks in both. Only the treatment exposes a discoverable MIC link or lookup from the model, with its executable example, tested environment, fixed inputs, and reviewed results. Record whether the agent finds it; a separate contract repo alone is not proof of discovery.
-4. **Prompt.** Same amended prompt in both: replace only the third Rules bullet with the text below; everything else unchanged. (The original prompt forbids integration-contract documents, which would invalidate the treatment.)
-5. **Evaluation.** Task B on the requested repo, substitutions and workarounds labelled. Task A: record chosen model and resources, compare separately. An independent evaluator uses the approved reference checks per tested runtime plus a task-appropriate assessment, distinguishing reproduced reference behavior from correctness on other inputs.
+1. **Sessions.** Fresh sessions of the same agent/model in both conditions; repeated runs, recording model/version and settings; no history or results carried between conditions.
+2. **Environment.** Comparable machines, permissions, network, package availability, and initial cache. Record cold- and warm-cache runs separately. Pin model revisions and reference images; neither condition inherits the other's downloads.
+3. **Treatment.** Same two tasks in both. Only the treatment exposes a MIC link or lookup discoverable from the model, with its executable example, tested environment, fixed inputs, and reviewed results. Record whether the agent finds it; a separate contract repo alone does not prove discovery.
+4. **Prompt.** Same amended prompt in both: replace only the third Rules bullet with the text below. (The original forbids integration-contract documents, which would invalidate the treatment.)
+5. **Evaluation.** Task B on the requested repo, with substitutions and workarounds labelled. Task A: record chosen model and resources; compare separately. An independent evaluator applies the approved reference checks per tested runtime plus a task-appropriate assessment, separating reproduced reference behavior from correctness on other inputs.
 6. **Report**, per run:
    - success/failure;
    - time to first independently verified result;
    - code adaptations and failed attempts;
    - discovery success;
    - incorrect or overstated success claims;
-   - tool calls in a common counting unit, with integration effort separated from infrastructure failures and report-writing.
+   - tool calls in a common counting unit, integration effort apart from infrastructure failures and report-writing.
 
    Report variation across runs, not one speedup from two sessions.
 
-Replacement for the third Rules bullet, in both comparison conditions:
+Replacement third Rules bullet, for both conditions:
 
 ```text
 - Don't read agent walkthroughs or previous agents' results. You may use
@@ -58,11 +58,11 @@ Replacement for the third Rules bullet, in both comparison conditions:
   results, if they are available.
 ```
 
-Keep each comparison prompt and result in a new file labelled with condition and run number. Preserve the exploratory results and the original prompt.
+Keep each comparison prompt and result in a new file labelled with condition and run number, preserving the exploratory results and original prompt.
 
 ## Prompts
 
-The shared two-task prompt. Copy the whole block into the fresh session; don't supply the results above as context.
+The shared two-task prompt. Copy the whole block into the fresh session, without the results above as context.
 
 ````text
 You are going to do two small tasks that require running a model from the

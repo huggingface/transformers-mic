@@ -22,9 +22,9 @@ A candidate is a question, not a verdict: a typo or speculative-decoding fix may
 
 ## Adding a check
 
-1. **Reproduce on the real checkpoint first**, through the public call, on the bad and fixed builds (fix commit's parent and fix, or the introducing commit; as in the [replay](evidence.md#historical-regression-replay)). No checkpoint failure → stop; the fixture won't show it either.
+1. **Reproduce on the real checkpoint first**, through the public call, on the bad and fixed builds (fix commit's parent and fix, or the introducing commit, as in the [replay](evidence.md#historical-regression-replay)). No checkpoint failure → stop; the fixture won't show it either.
 2. **Write it as user code:** documented API, default settings, short, deterministic, in its own `usage.md` section (renders as docs).
-3. **Don't move existing outputs.** Place it where it draws no random numbers before training (tokenization, decoding, config reads, greedy generation), so existing outputs stay byte-identical. If it needs randomness, put it after the outputs it could affect and re-review them.
+3. **Don't move existing outputs.** Place it before training where it draws no random numbers (tokenization, decoding, config reads, greedy generation), so existing outputs stay byte-identical. If it needs randomness, put it after the outputs it could affect and re-review them.
 4. **Declare its output** in the manifest: `exact` for tokens, text, labels, keys; `allclose` only for floats.
 5. **Prove it on the bug** with [`replay.py`](../example/replay.py): fixture fails on bad, passes on fixed. If only the checkpoint differs, keep it as full-model coverage (nightly, `run-slow`), not PR coverage.
 6. **Record baselines on every platform** (each rerun in a fresh process):
@@ -32,14 +32,14 @@ A candidate is a question, not a verdict: a typo or speculative-decoding fix may
    - `cpu-x86_64`: [`cpu-baselines.yml`](../.github/workflows/cpu-baselines.yml) `machine=gpu-host`
    - `cuda`: [`nightly.yml`](../.github/workflows/nightly.yml) `mode=record`
 7. **Review.** [`review_candidates.py`](../example/review_candidates.py) classifies each candidate: **unchanged** (new outputs only), **changed** (needs a reason), **new**. `--approve` renames only unchanged and new; changed is a person's call.
-8. **Measure on history.** Re-run the backfill; record caught regressions, new false alarms, and cost per commit separately in [evidence](evidence.md). Keep frozen-suite detections apart from post-hoc ones.
-9. **Fails on today's `main`?** It found a live bug: reproduce, report upstream, and keep the check with a `local_patches` workaround in the fleet lock (recorded in every result). Not `known_failures`, which hides the contract's other checks. Drop the patch and re-record when fixed.
+8. **Measure on history.** Re-run the backfill; record caught regressions, new false alarms, and per-commit cost separately in [evidence](evidence.md), frozen-suite detections apart from post-hoc ones.
+9. **Fails on today's `main`?** It found a live bug: reproduce, report upstream, and keep the check with a `local_patches` workaround in the fleet lock (recorded in every result), not `known_failures`, which hides the contract's other checks. Drop the patch and re-record once fixed.
 
 ## Keeping false alarms down
 
-For each benign failure, decide and log the decision with the failure:
+For each benign failure, log one decision with it:
 
-- **Keep, update the baseline** if rare and the check guards something real. Wav2Vec2's training loss depends on load-time randomness because the fixture omits `masked_spec_embed`, like the checkpoint; that's how it catches [#49385](https://github.com/huggingface/transformers/issues/49385). One update in five months.
+- **Keep and update the baseline** if rare and the check guards something real. Wav2Vec2's training loss depends on load-time randomness because the fixture, like the checkpoint, omits `masked_spec_embed`; that's how it catches [#49385](https://github.com/huggingface/transformers/issues/49385). One update in five months.
 - **Make it robust:** seed closer to use, compare a discrete outcome, or move away from unrelated randomness.
 - **Drop it** if it keeps failing benignly and never caught anything.
 
@@ -48,18 +48,18 @@ For each benign failure, decide and log the decision with the failure:
 | When | What |
 | --- | --- |
 | Each shadow/nightly failure | Classify: regression, intended (update baseline with reason), or benign. |
-| Weekly | `find_misses.py` on the week's shadow results; triage model-tier; open contract changes. |
+| Weekly | `find_misses.py` on the week's shadow results; triage model tier; open contract changes. |
 | After a contract change | Re-run the backfill; update evidence. |
 | After an upstream fix of a found bug | Drop the `local_patches`/`known_failures` entry; re-record. |
 
 ## What happened the first time
 
-The four misses' calls were added: CLIP per-modality `text_kwargs` and `get_image_processor_config`; Whisper timestamp generation, `batch_decode(..., decode_with_timestamps=True)`, and `get_feature_extractor_config`; the same config read for Wav2Vec2; T5 `decode` on a punctuated batch.
+Calls added for the four misses: CLIP per-modality `text_kwargs` and `get_image_processor_config`; Whisper timestamp generation, `batch_decode(..., decode_with_timestamps=True)`, and `get_feature_extractor_config`; the same config read for Wav2Vec2; T5 `decode` on a punctuated batch.
 
 - **No existing output moved:** the 18 affected `cpu-arm64` baselines only gained outputs; `review_candidates.py` confirmed all 98 re-recorded baselines.
 - **Live Whisper bug:** `WhisperTokenizer.decode` batches only lists of lists, so the tensor `generate` returns merges rows or raises (#47997 fixed lists only). Reported as [#49403](https://github.com/huggingface/transformers/issues/49403); worked around with `whisper-decode-tensor-batch` in `local_patches`.
 - **`find_misses.py` lists all four misses** from the first backfill's results.
-- **Backfill re-run caught all four**, each until its fix, no new false alarm, no added cost ([details](evidence.md#after-adding-the-missed-calls)). Post-hoc: it shows the loop closes gaps, not the unknown-bug rate.
+- **The backfill re-run caught all four**, each until its fix, with no new false alarm or added cost ([details](evidence.md#after-adding-the-missed-calls)). Post-hoc: it shows the loop closes gaps, not the unknown-bug rate.
 
 ## The second round: triaging the model-tier misses
 
@@ -74,7 +74,7 @@ The four misses' calls were added: CLIP per-modality `text_kwargs` and `get_imag
 | Parked | #48238 | T5 `lm_head` tying for checkpoints with a separate `lm_head` and no `shared.weight` (madlad400): needs such a target | — |
 | Out of path | #47682, #47684 (spelling), #45806 (decorator order), #47459, #47946 (GPT-2 modeling: SmolLM shares only its tokenizer), #49006 (MPS autocast; no MPS platform), #47921 (CLIP with quantized children), #47440 (Wav2Vec2 `set_target_lang` on multilingual vocabularies) | — | — |
 
-Whisper gained three sections before training, drawing no random numbers (checked against RNG state); its 4 `cpu-arm64` baselines only added `max_length_tokens`, `assisted_tokens`, `longform_tokens`. Through the runner:
+Whisper gained three pre-training sections drawing no random numbers (checked against RNG state); its 4 `cpu-arm64` baselines only added `max_length_tokens`, `assisted_tokens`, `longform_tokens`. Through the runner:
 
 - Before #48000: fails on the assisted call.
 - Before #48028: fails `longform_tokens` on `openai/whisper-tiny`; the fixture passes (its output ignores decoder positions).

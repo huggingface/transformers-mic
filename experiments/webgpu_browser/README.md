@@ -8,7 +8,7 @@ Transformers.js 4.3.0 (onnxruntime-web 1.31.0-dev.20260914) in Chrome 154 on an 
 | `onnx-community/SmolLM2-135M-Instruct-ONNX` | `torch.onnx` (PyTorch 2.6), unfused | correct | correct | all logits 0, no error |
 | `HuggingFaceTB/SmolLM2-135M-Instruct` | onnxruntime-genai, fused `GroupQueryAttention`, `RotaryEmbedding`, `SkipSimplifiedLayerNormalization` | correct | correct | correct |
 
-Correct means the same greedy text as fp32 (" Paris. It is" / " Paris. Paris is"). The failing graphs are correct on WASM in Chrome and on onnxruntime-node CPU in fp16, so the fault is in onnxruntime's WebGPU fp16 kernels for one of the ops only the unfused export uses (decomposed RMSNorm in fp16, Trilu/ScatterND/Where causal mask, Softmax). onnxruntime-node 1.30 WebGPU shows the same zeros, and so does `q4f16`. The exact op is not isolated yet.
+Correct means the same greedy text as fp32 (" Paris. It is" / " Paris. Paris is"). The failing graphs are correct in fp16 on WASM in Chrome and on onnxruntime-node CPU, so the fault is in onnxruntime's WebGPU fp16 kernel for an op only the unfused export uses (decomposed RMSNorm in fp16, Trilu/ScatterND/Where causal mask, Softmax). onnxruntime-node 1.30 WebGPU and `q4f16` show the same zeros. The exact op is not isolated yet.
 
 ```sh
 npm install puppeteer-core

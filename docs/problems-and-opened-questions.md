@@ -2,7 +2,7 @@
 
 **A slim pass does not mean the full model passes.** Contracts replace model-specific `run-slow` tests only by running on full checkpoints; other slow tests stay ([CI integration](slim-models-in-transformers-ci.md)).
 
-The experiments support a CI pilot. Removing tests or making contracts required needs more evidence. Six problems stand between the two:
+The experiments support a CI pilot; removing tests or making contracts required needs more evidence. Six problems stand between the two:
 
 | # | Problem | Kind |
 | --- | --- | --- |
@@ -15,7 +15,7 @@ The experiments support a CI pilot. Removing tests or making contracts required 
 
 ## 1. Contracts only catch what they call
 
-**Problem.** Fixtures reproduce real regressions only when the contract makes the affected call. The detection rate on unseen bugs is unknown.
+**Problem.** Fixtures catch real regressions only when the contract makes the affected call. The detection rate on unseen bugs is unknown.
 
 **What we know.**
 
@@ -56,10 +56,10 @@ This is the expected tradeoff of a fast check.
 **What we know.**
 
 - It measures max movement over all logits; contracts may compare only selected logits or label log-probs.
-- The [builder](../example/build_fixtures.py)'s threshold uses absolute tolerances only, not relative ones or platform overrides.
+- The [builder](../example/build_fixtures.py)'s threshold uses only absolute tolerances, not relative ones or platform overrides.
 - Overfitting helps on synthetic Whisper faults, but random fixtures caught all eight historical regressions too ([weights](fixtures.md#choosing-the-weights)).
 
-**Next.** Measure perturbations through the contract's own outputs and rules, with a margin above normal variation. Keep a few injected faults to check sensitivity turns into detection.
+**Next.** Measure perturbations through the contract's own outputs and rules, with a margin above normal variation. Keep a few injected faults to check sensitivity becomes detection.
 
 **Open questions.**
 
@@ -68,17 +68,17 @@ This is the expected tradeoff of a fast check.
 
 ## 4. Baselines multiply and need review rules
 
-**Problem.** Baselines grow with targets × frameworks × hardware × dtype × attention. Re-recording is easy, so without review criteria a regression can be approved as a new answer.
+**Problem.** Baselines grow with targets × frameworks × hardware × dtype × attention. Re-recording is easy, so without review criteria a regression can be approved as the new answer.
 
 **What we know.**
 
 - Whisper already needs per-CPU-architecture baselines.
-- [A10G results](../example/README.md#on-gpu) hold for that GPU and stack only; "per-platform baselines remove looser tolerances" is scoped to what was measured.
+- [A10G results](../example/README.md#on-gpu) hold only for that GPU and stack; "per-platform baselines remove looser tolerances" is scoped to what was measured.
 - Five months of `main`: 8 `cpu-x86_64` fixture baselines needed 2 updates (benign RNG shift, intended T5 SDPA), across three EPYC models with and without native bfloat16.
-- bfloat16 *real* checkpoints differed on a native-bfloat16 CPU; may need its own environment class.
+- bfloat16 *real* checkpoints differed on a native-bfloat16 CPU, which may need its own environment class.
 - Fresh-process reproduction proves repeatability, not correctness.
 
-**Next.** Define environment classes, calibrate on representative runners, track churn and review time. Budget the slim PR matrix apart from the full-model one. Each baseline update explains the change with evidence beyond repeatability ([review process](design.md#revisions-and-baselines)).
+**Next.** Define environment classes, calibrate on representative runners, track churn and review time. Budget the slim PR matrix apart from the full-model one. Each baseline update justifies the change with evidence beyond repeatability ([review process](design.md#revisions-and-baselines)).
 
 **Open questions.**
 
@@ -87,17 +87,17 @@ This is the expected tradeoff of a fast check.
 
 ## 5. Cross-repository coordination and total cost
 
-**Problem.** Contracts on the Hub, expectations in framework repos: one behavior change can need a contract revision, a fleet-lock bump, and baselines across repos, tested together and reproducible for old revisions.
+**Problem.** Contracts live on the Hub, expectations in framework repos: one behavior change can need a contract revision, a fleet-lock bump, and baselines across repos, tested together and reproducible for old revisions.
 
 **What we know.**
 
 - [Cost measurements](evidence.md#stability-and-cost) show much smaller fixtures and why batching matters; fleet-scale transfer isn't measured end to end.
-- Human cost (authoring, shrink rules, fixture repair, baseline review, coordination) isn't measured. Moving work doesn't reduce it.
+- Human cost (authoring, shrink rules, fixture repair, baseline review, coordination) isn't measured; moving work doesn't reduce it.
 
 **Next.**
 
 - Run one full contract + framework update, with review and rollback.
-- Track maintainer time next to execution, setup, and download cost.
+- Track maintainer time alongside execution, setup, and download cost.
 - Before retiring a test (smoke-only ones included), map its inputs, assertions, variants, hardware, and frequency to the replacement.
 - A full-model test moved into a contract keeps its full-model run.
 
@@ -108,7 +108,7 @@ This is the expected tradeoff of a fast check.
 
 ## 6. Runner validation gaps
 
-**Closed 2026-10-08.** The [runner](../example/run.py) dropped checks silently in five ways; each was reproduced before the fix and fails after.
+**Closed 2026-10-08.** The [runner](../example/run.py) silently dropped checks in five ways; each was reproduced before the fix and fails after.
 
 | Gap | Before | Now |
 | --- | --- | --- |
