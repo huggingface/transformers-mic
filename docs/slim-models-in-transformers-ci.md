@@ -65,6 +65,8 @@ In PR summaries and any Hub status, a slim pass never turns an untested checkpoi
 
 In this repo: [shadow](../.github/workflows/shadow.yml) runs every fixture (`--fixtures-only --run-all`) daily on `main` or on a dispatched commit/PR, recording what selection would have chosen; [backfill](../.github/workflows/shadow-backfill.yml) does the same on each `main` commit of a past window ([results](evidence.md#shadow-backfill)); [nightly](../.github/workflows/nightly.yml) runs real checkpoints and fixtures on an A10G runner's CPU and GPU, standing in for full-checkpoint paths; [GPU checks](../.github/workflows/gpu-checks.yml) are one-off experiments.
 
+In `huggingface/transformers`, branch `contracts-proof`: [`contracts.yml`](https://github.com/huggingface/transformers/blob/contracts-proof/.github/workflows/contracts.yml) installs the branch, selects contracts from its changed files, and runs them on `aws-m8i-l-cache` in `transformers-torch-light` with the runner vendored in `utils/contracts/` and the lock and x86 baselines in `tests/contracts/` (8 fixtures in 17 s; [proof plan](transformers-ci-proof.md), phases 1–3 done, phase 4 demos on `proof-*` branches).
+
 Rollout ([proof plan](transformers-ci-proof.md)):
 
 1. Non-blocking slim results in fast PR CI.
