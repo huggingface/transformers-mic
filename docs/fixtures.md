@@ -4,26 +4,26 @@ PR checks need a model that runs on CPU in seconds yet exercises the real integr
 
 ## TL;DR
 
-**Small fixtures work** when built from the real config and processor files, frozen, and checked numerically (SmolLM, CLIP, BERT, T5, Whisper, Wav2Vec2; CPU and one A10G):
+**Small fixtures work** when built from the real config and processor files, frozen, and checked numerically (experiments on SmolLM, CLIP, BERT, T5, Whisper, Wav2Vec2, CPU and one A10G; MusicGen Melody added since):
 
 | Finding | Numbers |
 | --- | --- |
 | "Forward pass runs" catches nothing | 0 synthetic faults caught |
 | Recorded logits, loss, and gradients catch faults | **126/126** overfit, **120/126** random (misses all Whisper); no false alarms |
-| Slim fixtures catch real regressions | All 8 reproducible ones, given original processor files, the affected call, and the default runtime (SDPA) |
+| Slim fixtures catch real regressions | All 8 reproducible ones, given original processor files, the affected call, and the default runtime (SDPA); none has needed overfit weights ([replays](evidence.md#overfit-or-random-weights-on-real-regressions)) |
 | No NaN; real weights not needed | 288 load-and-train checks in three dtypes; pruned real layers are 8–235× larger, sliced ones act like random |
 | Fixtures carry across hardware; baselines don't | One baseline per platform class and dtype |
 | One generic shrink rule goes far | [56% of architectures](#does-it-scale-to-every-architecture) (314 of 559), 15 of the 17 in #49103 |
 
-**Recipe:** shrink the real config by layer pattern, seed, keep random weights if they pass an input-sensitivity gate, else overfit on the contract's training step; save in the source's dtype; check numeric health, freeze, record baselines per platform and dtype. Implemented in [`build_fixtures.py`](../example/build_fixtures.py).
+**Recipe:** shrink the real config by layer pattern, seed, keep random weights if they pass an input-sensitivity gate, else overfit on the contract's training step; save in the source's dtype; check numeric health, freeze, record baselines per platform and dtype. Implemented in [`build_fixtures.py`](../example/build_fixtures.py), with no per-family code beyond reviewed recipe fields.
 
 **Next moves:**
 
 1. Redirect Transformers' tiny models to this recipe and pause the smoke-only tests in [#49103](https://github.com/huggingface/transformers/pull/49103) ([why](#relation-to-todays-tiny-models)).
 2. Close the [sweep](#does-it-scale-to-every-architecture) gap (coupled size fields, real processor inputs, multimodal image paths), then retire the smoke-only tests.
 3. Give every contract a training step, including inference-only ones.
-4. Check that the `test-artifact` tag keeps the eight published `hf-internal-testing/proto-*` fixtures out of search.
-5. Calibrate tolerances on CPU-only CI runners and other GPUs; record `cuda` baselines for bfloat16 proto-SmolLM-slim.
+4. Check that the `test-artifact` tag keeps the nine published `hf-internal-testing/proto-*` fixtures out of search.
+5. Calibrate tolerances on CPU-only CI runners and other GPUs.
 6. Measure upkeep in the pilot: shrink-rule fixes, non-converging overfits, baseline reviews.
 
 ## Recipe
@@ -33,7 +33,7 @@ PR checks need a model that runs on CPU in seconds yet exercises the real integr
 3. **Weights:** seed, then run the input-sensitivity gate.
    - Pass: keep random weights (CLIP, BERT, T5, UMT5, Wav2Vec2).
    - Fail: overfit on the contract's training batch in float32 (AdamW, lr 5e-3, clipping, ≤ 500 steps, until loss < 0.05 twice), cast to the fixture's dtype, and pass the gate (Whisper).
-   - A recipe may require overfitting, with a reviewed reason and its own target loss (SmolLM and MusicGen Melody: random weights generate the same output for every prompt; [why](evidence.md#bfloat16-on-cpu)).
+   - A recipe may require overfitting, with a reviewed reason and its own target loss: the gate reads teacher-forced logits, but random SmolLM and MusicGen Melody generate the same output for every prompt ([SmolLM](evidence.md#bfloat16-on-cpu), [MusicGen Melody](evidence.md#overfit-or-random-weights-on-real-regressions)).
    - Neither: fail the build.
 4. **Gates on the saved fixture** (a failure is a build failure, not a contract failure):
    - **Input sensitivity:** per input name (`input_ids`, `attention_mask`, `pixel_values`, `input_features`, ...): swap rows, reverse, all-ones mask, channel swap, halve. Each must move logits ≥ 10× the strictest tolerance (1e-3 for CPU float32).
@@ -60,7 +60,7 @@ Four ways to fill a fixture, six families, same faults and tolerances, three dty
 | Build | < 0.1 s | 0.3–51 s CPU, 0.5–6 s GPU; 1/18 did not converge | ~1 s + checkpoint load | < 0.1 s + checkpoint load |
 | Largest bfloat16 logit drift vs float32 | 0.09 | 0.30 | 0.97 | 0.34 |
 
-- **Random** is enough except for Whisper, whose tiny decoder barely reads audio. **Overfit** is most sensitive at the same size, and building it checks gradient flow. **Pruned** needs no training but grows with the model (SmolLM-135M at 2/30 layers: 142 MB). **Sliced** acts like random.
+- **Random** is enough except for Whisper, whose tiny decoder barely reads audio, and for generation that ignores the prompt (SmolLM, MusicGen Melody). **Overfit** is most sensitive at the same size, and building it checks gradient flow. **Pruned** needs no training but grows with the model (SmolLM-135M at 2/30 layers: 142 MB). **Sliced** acts like random.
 - **No NaN anywhere** proves little at width 64; the health gate checks each build.
 - **Lower precision favors overfit, but the gate's choice stands.** In bfloat16, random fixtures changed discrete outputs (Wav2Vec2 3/3 seeds, T5 2/3), overfit never. Yet contract fixtures changed no discrete output in bfloat16 on the A10G, per-dtype baselines held at `1e-4`, and no real regression yet needs an overfit fixture ([replays](evidence.md#overfit-or-random-weights-on-real-regressions)).
 - Exact overfit answers alone caught only 1–3 of 6–8 faults per fixture; only loss caught shuffled labels ([smollm_clip.json](../experiments/results/smollm_clip.json), [more_families.json](../experiments/results/more_families.json)).
@@ -92,7 +92,7 @@ Every model type in Transformers (`4d536e1f`, 725), configs only ([script](../ex
 | Failed: config round-trip or optional dependency | 17 |
 
 - **Works for** 131 causal LMs, 42 image-text-to-text, 28 image classifiers, 24 masked LMs, 20 seq2seq, 8 CTC, and 15 of 17 #49103 models (MusicGen fails a config round-trip, Qwen2.5-VL its M-RoPE sections). Median 6.5M parameters.
-- **Coupled fields are the main cost**, one small rule per family: M-RoPE sections (GLM-4V, Qwen-VL), conv groups, per-stage widths in hierarchical vision (Swin v2, PVT), necks tied to backbone stages, mamba-hybrid cache layouts.
+- **Coupled fields are the main cost**, one small rule per family: M-RoPE sections (GLM-4V, Qwen-VL), conv groups, per-stage widths in hierarchical vision (Swin v2, PVT), necks tied to backbone stages, mamba-hybrid cache layouts, EnCodec's `codebook_dim` and doubling `num_filters` (MusicGen Melody's fixture sets both as `config_overrides`).
 - **Input failures are a sweep limit:** contracts use real processor outputs; the 62 passing multimodal models ran text only.
 
 **Bottom line:** about half of architectures need no per-model work; the rest need one rule per family, not per checkpoint.

@@ -1,16 +1,18 @@
 # MICs: evidence so far
 
-Results from local experiments, the regression replay, and the shadow backfill over Transformers `main`. Fixture experiments: [Small fixtures](fixtures.md); mechanics: [technical design](design.md).
+Results from local experiments, the regression replay, the shadow backfill over Transformers `main`, and the job in Transformers' PR CI. Fixture experiments: [Small fixtures](fixtures.md); mechanics: [technical design](design.md).
 
 ## Summary
 
 **Detection**
 
 - **Contracts must call what users call:** generic checks missed every processor and tokenizer bug; the affected call caught all of them ([replay](#historical-regression-replay)).
-- **Five months of `main`: 1 caught, 4 missed, 1 false alarm**; the misses were calls no contract made ([backfill](#shadow-backfill)). With those calls added, all five are caught, with no new false alarm, and the new Whisper call found a live bug, [#49403](https://github.com/huggingface/transformers/issues/49403) ([details](#after-adding-the-missed-calls)). **A call added for one bug caught another nobody targeted:** Whisper's assisted `generate` raised for 41 commits after [#48981](https://github.com/huggingface/transformers/pull/48981), from its introducing commit to the fix [#49075](https://github.com/huggingface/transformers/pull/49075) ([third round](#third-round-second-round-calls-and-bfloat16-smollm)).
-- **Scheduled runs caught a regression the day it merged:** #48282 (2026-10-08) made `generate()` raise on every original Whisper checkpoint; the next nightly and shadow runs failed Whisper everywhere ([#49456](https://github.com/huggingface/transformers/issues/49456), worked around in `local_patches`). The PR's CI could not see it ([why](https://github.com/huggingface/transformers/issues/49456#issuecomment-6076843277)): model tests build configs without `suppress_tokens`, pipeline tests passed their own `generation_config`, and slow `generate()` tests were not in its `run-slow` list. The contract calls `model.generate()` on the checkpoint's config, as users do.
+- **Five months of `main`: 1 caught, 4 missed, 1 false alarm**; the misses were calls no contract made ([backfill](#shadow-backfill)). With those calls added, all five are caught with no new false alarm, and the new Whisper call found a live bug, [#49403](https://github.com/huggingface/transformers/issues/49403) ([details](#after-adding-the-missed-calls)).
+- **A call added for one bug caught another nobody targeted:** Whisper's assisted `generate` raised for 41 commits after [#48981](https://github.com/huggingface/transformers/pull/48981), from its introducing commit to the fix [#49075](https://github.com/huggingface/transformers/pull/49075) ([third round](#third-round-second-round-calls-and-bfloat16-smollm)).
+- **Scheduled runs caught a regression the night it merged:** #48282 (2026-10-08) made `generate()` raise on every original Whisper checkpoint, and the next nightly and shadow runs failed Whisper everywhere ([#49456](https://github.com/huggingface/transformers/issues/49456); a `local_patches` workaround here, a narrowed known failure in the PR CI job). The PR's CI could not see it ([why](https://github.com/huggingface/transformers/issues/49456#issuecomment-6076843277)): model tests build configs without `suppress_tokens`, pipeline tests pass their own `generation_config`, and the slow `generate()` tests were not in its `run-slow` list; the contract calls `generate()` on the checkpoint's config, as users do.
+- **In Transformers' PR CI, a reverted fix fails as in the backfill:** reverting #49135 turns the job red with the same UMT5 deltas, on Intel with the CI image's packages, and the summary's repro command gives the same failure on a Mac ([proof](#transformers-ci-proof)).
 - **The runner found a real bug:** seven audio models leave `masked_spec_embed` uninitialized ([#49385](https://github.com/huggingface/transformers/issues/49385), fix [#49386](https://github.com/huggingface/transformers/pull/49386)); the slim Wav2Vec2 fixture catches it every run ([runner](../example/README.md#runner-prototype)).
-- **No real regression has needed an overfit fixture yet:** random twins caught the MusicGen Melody conditioning drop (#48679) too, and neither weight kind reached the trigger of two silent Whisper generation bugs ([overfit or random](#overfit-or-random-weights-on-real-regressions)).
+- **No real regression has needed an overfit fixture yet:** a random twin caught the MusicGen Melody conditioning drop ([#48679](https://github.com/huggingface/transformers/pull/48679)) as well as the overfit fixture, and neither weight kind reached the trigger of two silent Whisper generation bugs ([overfit or random](#overfit-or-random-weights-on-real-regressions)).
 - **Golden outputs catch silent backend bugs:** Transformers.js on WebGPU returned all-zero fp16/q4f16 logits with no error ([repro](../experiments/webgpu_browser/README.md)).
 
 **Fixtures, baselines, cost**
@@ -19,7 +21,7 @@ Results from local experiments, the regression replay, and the shadow backfill o
 - **Baselines are per platform and dtype; fixtures are shared** ([GPU](#on-gpu), [bfloat16](#bfloat16-on-cpu)). So split, 16 targets × 3 variants reproduced at `1e-4` on A10G ([numbers](../experiments/results/runner.json)); ten benign changes raised no false alarm.
 - **Batching is the cost lever:** eight fixture checks take 4.9 s in one process vs 27.4 s one per process (Mac); 13.1 s vs 81.1 s (GPU runner).
 
-**Scope:** ten families, eleven candidate regressions (eight reproducible), ten benign changes, five months on six contracts; replay and backfill on CPU, one GPU for stability and cost ([cases.json](../experiments/cases.json)).
+**Scope:** ten families, eleven candidate regressions (eight reproducible), ten benign changes, five months on six contracts; replay and backfill on CPU, one GPU for stability and cost ([cases.json](../experiments/cases.json)). The fleet now has seven contracts and nine fixtures: MusicGen Melody was added on 2026-10-09 ([why](#overfit-or-random-weights-on-real-regressions)); the backfill and cost numbers below predate it.
 
 ## How agents use the Hub today
 
@@ -56,13 +58,13 @@ Two [walkthroughs](agent-walkthrough/README.md), same prompt, ARM Mac, no MIC: p
 
 ¹ float32 build; the bfloat16 fixture is 6.1 MB.
 
-- **Process start dominates**, so run many contracts per process. On these small cached checkpoints, little local time is saved.
-- **Savings are transfer and size:** slim weights are 10–1,300× smaller. Slow tests for these families load ~144 GB, mostly not CPU-runnable.
+- **Process start dominates**, so run many contracts per process; on small cached checkpoints, slim saves little local time.
+- **Savings are transfer and size:** slim weights are 10–1,300× smaller; slow tests for these families load ~144 GB, mostly not CPU-runnable.
 - **Memory:** 0.5–1.3 GB peak RSS slim (mostly framework), 0.7–2 GB real.
 
 ### bfloat16 on CPU
 
-SmolLM-135M and -360M ship bfloat16, which users get by default, but fixtures used to be float32. [`build_fixtures.py`](../example/build_fixtures.py) now saves each fixture in its source's dtype; only proto-SmolLM-slim changed (float32 fixtures rebuild byte-identical).
+SmolLM-135M and -360M ship bfloat16, which users get by default; fixtures used to be float32. [`build_fixtures.py`](../example/build_fixtures.py) now saves each fixture in its source's dtype: only proto-SmolLM-slim changed (float32 fixtures rebuild byte-identical).
 
 - **Random weights pass the gate but are useless for generation:** logits moved ≥ 0.24 under every perturbation (gate: 1e-3), yet all four prompts generated " is is is is". Overfit in float32, then cast: " Paris…", " Berlin…", " Rome…", " London…" (80 steps; 3.2M parameters, 6.1 MB).
 - **The training batch has an irreducible loss:** rows share "The capital of" then name a country, so ln 4 at that position can't be learned; training plateaus at 0.25, so the SmolLM recipe sets `target_loss: 0.3`.
@@ -78,11 +80,11 @@ SmolLM-135M and -360M ship bfloat16, which users get by default, but fixtures us
 - bfloat16 runs on x86 CPUs with `avx512_bf16` or `amx_bf16` use the `cpu-x86_64-bf16` platform, which the [runner](../example/run.py) picks from `/proc/cpuinfo`. GitHub's x86 runners are mixed (one of three shadow runs on 2026-10-08/09 had `avx512_bf16`).
 - The fixture agrees across both CPUs (hidden size 64 likely never reaches the native kernels) but follows the same rule.
 - Emulated bfloat16 on x86 and the M5 generate the same tokens on every SmolLM target. The 24 shared float32 targets agree across the 7763, 9V45, and 7R32.
-- Not tested: Intel (`amx_bf16`) vs AMD (`avx512_bf16`), needed before PR CI uses Intel runners.
+- Intel (`amx_bf16`) vs AMD (`avx512_bf16`): the fixture matches ([PR CI runner](#on-the-transformers-pr-ci-runner)); real bfloat16 checkpoints on Intel are untested.
 
 ### On the Transformers PR CI runner
 
-Phase 1 of the [CI proof](transformers-ci-proof.md): the eight fixture contracts on `aws-m8i-l-cache` in `huggingface/transformers-torch-light`, the runner and image of Transformers' PR test jobs, from the `contracts-proof` branch of `huggingface/transformers` ([run 37932247464](https://github.com/huggingface/transformers/actions/runs/37932247464), 2026-10-09). Transformers `8625785e`, the baselines' build.
+Phase 1 of the [CI proof](transformers-ci-proof.md): the eight fixtures on `aws-m8i-l-cache` in `huggingface/transformers-torch-light`, the runner and image of Transformers' PR test jobs, from the `contracts-proof` branch of `huggingface/transformers` ([run 37932247464](https://github.com/huggingface/transformers/actions/runs/37932247464), 2026-10-09), on the baselines' build `8625785e`.
 
 | Packages | Differ from the lock | Default | Eager | Run (8 fixtures, one process) |
 | --- | --- | ---: | ---: | ---: |
@@ -90,8 +92,8 @@ Phase 1 of the [CI proof](transformers-ci-proof.md): the eight fixture contracts
 | Lock's pins installed | Python 3.11.17 only | 8/8 | 8/8 | 36–57 s |
 
 - **The `cpu-x86_64` baselines hold on Intel**, recorded on AMD EPYC 7R32/7763/9V45; no pin install needed (16 s if it were).
-- **Intel `amx_bf16` matches AMD `avx512_bf16` on the bfloat16 fixture** (Xeon 6975P-C against the 9V45's `cpu-x86_64-bf16` baseline). Weak evidence: the fixture also matches emulated bfloat16. Real bfloat16 checkpoints on Intel are untested.
-- **Slower than a 2-core GitHub runner** (~13 s) on 128 cores, presumably thread oversubscription on tiny tensors; `OMP_NUM_THREADS` untested.
+- **Intel `amx_bf16` matches AMD `avx512_bf16` on the bfloat16 fixture** (Xeon 6975P-C against the 9V45's `cpu-x86_64-bf16` baseline). Weak evidence: the fixture also matches emulated bfloat16.
+- **Slower than a 2-core GitHub runner** (~13 s) on 128 cores, from thread oversubscription on tiny tensors: `OMP_NUM_THREADS=8` brings the eight fixtures to 17 s in the [CI job](#transformers-ci-proof).
 - Installing Transformers and the runner's dependencies over the image: 14 s.
 
 ### Transformers CI proof
@@ -105,10 +107,11 @@ The contracts job on the `contracts-proof` branch of `huggingface/transformers` 
 | No-op in `models/clip/` | CLIP | pass | 11.5 s |
 | Revert of the UMT5 fix #49135 | T5 (`models/umt5`) | **red**: `proto-umt5-small-slim` `label_logprobs` off by 1.22, loss by 0.204; `proto-t5-small-slim` passes | 13.4 s |
 
-- **The reverted regression fails with the backfill's exact deltas**, on another CPU vendor (Intel Xeon 6975P-C vs AMD EPYC) and package set (the image's torch 2.14, numpy 2.3), against baselines recorded on AMD with the lock's pins.
-- **Selection worked as designed** in all four: model-scoped changes ran one contract, shared code all six, docs none.
+- **The reverted regression fails with the backfill's exact deltas** on another CPU vendor (Intel Xeon 6975P-C, not AMD EPYC) and package set (the image's torch 2.14, numpy 2.3), against baselines recorded on AMD with the lock's pins.
+- **Selection worked as designed:** model-scoped changes ran one contract, shared code all six, docs none.
 - **Known failures without patches:** #49456 is `xfail` on its message; #49385 needs Wav2Vec2's loss and gradients skipped on this runner (non-finite gradients from uninitialized memory, unlike on the M5).
-- Runner time excludes setup; install over the image is ~15 s, and fixtures are cached per lock.
+- **Failures reproduce on a Mac:** with `cpu-arm64` baselines on the branch (`fd5ecc0768`), the summary's repro command gives 7 pass + Whisper `xfail` on the branch and the same UMT5 deltas (1.22, 0.204) on the revert.
+- Runner time excludes setup; install over the image is ~15 s, and fixtures are cached per lock. A workflow bug broke full runs (pushes to `contracts-proof`, not the `proof-*` runs above) until `46fa53214f` ([run 37938424467](https://github.com/huggingface/transformers/actions/runs/37938424467), green; [details](transformers-ci-proof.md)).
 
 ### On GPU
 
@@ -138,7 +141,7 @@ One run on `aws-g5-4xlarge-cache` (A10G, torch 2.14.0+cu130), Transformers `8625
 | Whisper | 1.4 s | 1.4 s | 193 MB | 302 / 168 MB |
 | Wav2Vec2 | 1.1 s | 1.5 s | 76 MB | 443 / 259 MB |
 
-Imports take ~4.9 s (2× the Mac), so batching matters more; slim fixtures need < 200 MB, so many share a GPU. Not measured: CPU-only CI runners, setup, downloads, cold cache, other GPUs, multi-GPU.
+Imports take ~4.9 s (2× the Mac), so batching matters more; slim fixtures need < 200 MB, so many share a GPU. Not measured: CPU-only CI runners, setup, downloads, cold cache, other GPUs, multi-GPU, MusicGen Melody.
 
 ## Shadow backfill
 
@@ -152,7 +155,7 @@ Every change in outcome (all else passed on every commit):
 | `proto-umt5-small-slim` | 597 | `label_logprobs` off by 1.22, training loss by 0.20 | #47014 | [#49135](https://github.com/huggingface/transformers/pull/49135) (`d7ba937671`, 2026-09-28) | **Regression caught at its introducing commit** (UMT5 decoder not causal under SDPA) |
 | `proto-wav2vec2-base-960h-slim` | 513 | training loss off by 0.39 | window start | [#46259](https://github.com/huggingface/transformers/pull/46259) (`f196737b0c`, 2026-07-03) | **Benign change flagged:** load-time RNG stream shifted |
 
-- **Caught at introduction, two months before the fix:** #47014 touched shared code, so it selected every contract; a reviewer would have seen UMT5 move by 1.22 beside T5's intended runtime change.
+- **Caught at introduction, two months before the fix:** #47014 touched shared code, so it selected every contract; its reviewer would have seen UMT5 move by 1.22 beside T5's intended runtime change.
 - **One false alarm:** the fixture omits `masked_spec_embed`, as the checkpoint does, to catch [#49385](https://github.com/huggingface/transformers/issues/49385), so its loss follows the RNG stream. Cost: one baseline update.
 - **Four misses, one cause: no contract made the call.** CLIP `text_kwargs` ([#46195](https://github.com/huggingface/transformers/pull/46195)), processor config helpers ([#47628](https://github.com/huggingface/transformers/pull/47628)), Whisper timestamp batch decoding ([#47997](https://github.com/huggingface/transformers/pull/47997)), T5 batch decoding ([#47793](https://github.com/huggingface/transformers/pull/47793)).
 - **Selection missed nothing:** all three outcome-changing commits selected the affected contract. It selected none on 768 commits (52%), all on 679 (46%), some on 21.
@@ -181,13 +184,13 @@ After the [second round](improving-contracts.md#the-second-round-triaging-the-mo
 | #47997 fix (`64b6595f0c`) to [#48000](https://github.com/huggingface/transformers/pull/48000) (`a5f41e095a`), 2026-08-16/17 | 2 | `proto-whisper-tiny-slim` errors in the assisted call: `UnboundLocalError: is_updated` | Caught; the call was added for this bug (post-hoc) |
 | [#48981](https://github.com/huggingface/transformers/pull/48981) (`87d34bfa80`, 2026-09-22, "Always correctly restrict assisted decoding with max length/eos token") to [#49075](https://github.com/huggingface/transformers/pull/49075) (`010f0ca2ec`, 2026-09-24, "Fix assisted eos token condition") | 41 | same call errors: `RuntimeError: a Tensor with 2 elements cannot be converted to Scalar` in `_assisted_decoding` | **New catch, not targeted: caught at its introducing commit** |
 
-- **Not post-hoc for #48981:** `assisted_tokens` was added for #48000; #49075 touches only shared generation code, so `find_misses.py`'s model tier never listed it. #48981 changes `generation/` (shared), so selection would have run Whisper on that PR; it also deleted 9 lines from `tests/generation/test_utils.py`.
+- **Not post-hoc for #48981:** `assisted_tokens` was added for #48000, and `find_misses.py`'s model tier never listed #49075 (shared generation code only). #48981 changes `generation/`, so selection would have run Whisper on that PR; it also deleted 9 lines from `tests/generation/test_utils.py`.
 - **bfloat16 SmolLM fixture: no false alarm**, all 1,480 commits, on `cpu-x86_64` (888: EPYC 7763, 9V74 without native bfloat16, Xeon 8370C/8573C) and `cpu-x86_64-bf16` (592: EPYC 9V45, 9V74 with `avx512_bf16`).
 - **Cost:** 6.7 s per commit summed over targets, vs 6.2 s (the three added Whisper calls).
 
 ## Historical regression replay
 
-Regressions fixed since May 2026 ([freeze/check](../experiments/replay.py), [per-case driver](../experiments/replay_case.py), [usage repros](../experiments/usage_repros.py)): freeze fixtures and real-checkpoint baselines on a good build (`4d536e1f`); run them unchanged on the bad build (fix's parent) and the fixed build (caught = bad flagged, fixed clean); separately run the affected public call on both. Builds before 2026-08-17 need older `tokenizers` (and before mid-June, `kernels`): the fleet lock must pin dependencies, not just models.
+Regressions fixed since May 2026 ([freeze/check](../experiments/replay.py), [per-case driver](../experiments/replay_case.py), [usage repros](../experiments/usage_repros.py)): fixtures and real-checkpoint baselines frozen on a good build (`4d536e1f`), run unchanged on the bad build (the fix's parent) and the fixed one (caught = bad flagged, fixed clean); separately, the affected public call on both. Builds before 2026-08-17 need older `tokenizers` (before mid-June, also `kernels`): the fleet lock must pin dependencies, not just models.
 
 | Regression (fix PR) | Real checkpoint | Generic slim checks | Slim fixture, affected public call |
 | --- | --- | --- | --- |
@@ -213,7 +216,7 @@ Sample: CPU only, no GPU-specific case.
 
 ## Overfit or random weights on real regressions
 
-Does a real regression need an overfit fixture, or would random weights have caught it too? (2026-10-09; random twins built with `build_fixtures.py --keep-random --out`, same seed and recipe; each fix replayed against its parent, baselines recorded on the fix, CPU.)
+Does a real regression need an overfit fixture, or would random weights catch it too? 2026-10-09, CPU: random twins built with `build_fixtures.py --keep-random --out` (same seed and recipe); each fix replayed against its parent, baselines recorded on the fix.
 
 | Regression | Path | Overfit fixture | Random fixture |
 | --- | --- | --- | --- |
@@ -222,7 +225,7 @@ Does a real regression need an overfit fixture, or would random weights have cau
 | Whisper long-form position ids with left-padded previous-segment prompts ([#48028](https://github.com/huggingface/transformers/pull/48028)) | batched long-form, `condition_on_prev_tokens=True` | missed | missed |
 | Whisper assisted decoding re-applies `begin_suppress_tokens` ([#48108](https://github.com/huggingface/transformers/pull/48108)) | `generate(assistant_model=...)` | missed | missed |
 
-- **Still no overfit-only catch.** Five months of backfill had none either: every Whisper failure there was an exception, and the SmolLM fixtures never failed. A history search (2025-10..2026-10) found no silent bug on Whisper's input side (feature extraction, encoder, cross-attention); the silent candidates are in generation.
-- **Random weights ignore conditioning, yet see it vanish.** Random Whisper gives every batch row the same tokens, and random MusicGen Melody the same codes for every prompt, melody or not. Dropping the conditioning still changes their outputs, because the prompt's presence matters even when its content doesn't. A bug that swaps or mixes conditioning between rows, or drops only the melody, would be overfit-only; none is known yet.
-- **An overfit fixture only covers what it was trained on.** The Whisper fixture is trained on short-form, no-timestamp answers: in long-form timestamp mode it repeats one word to the token cap, and assisted, it answers one token and stops, so neither bug's trigger occurs. Retrained on timestamped targets (`<|0.00|> red<|1.00|>`, then targets of 1–4 words), segments close on timestamps and rows differ in length, but #48028 still did not fire: no call, in nine input variants and with either fixture, produced a left-padded decoder mask (instrumented). Its trigger needs per-row prompt lengths that the synthetic audio does not create.
-- **What the MusicGen Melody contract adds** ([contract](../example/hub/MusicgenMelody-integration/integrations/transformers/usage.md)): a composite model (T5 text encoder, EnCodec, decoder) and classifier-free guidance. The generic shrink rule left EnCodec at 56M of 59M parameters (`num_filters` doubles per stage) and `codebook_dim` coupled to the old width; two reviewed `config_overrides` bring the fixture to 3.5M.
+- **Still no overfit-only catch.** The backfill had none either: every Whisper failure there was an exception, and the SmolLM fixtures never failed. A history search (2025-10..2026-10) found no silent bug on Whisper's input side (feature extraction, encoder, cross-attention); the silent candidates are in generation.
+- **Random weights ignore conditioning, yet see it vanish.** Random Whisper gives every batch row the same tokens, random MusicGen Melody the same codes for every prompt, melody or not. Dropping the conditioning still changes their outputs: the prompt's presence matters even when its content doesn't. A bug that mixes conditioning between rows, or drops only the melody, would be overfit-only; none is known yet.
+- **An overfit fixture covers only what it was trained on.** The Whisper fixture learned short-form, no-timestamp answers: in long-form timestamp mode it repeats one word to the token cap, and assisted it answers one token and stops, so neither trigger occurs. Retrained on timestamped targets (`<|0.00|> red<|1.00|>`, then 1–4 words), segments close on timestamps and rows differ in length, yet #48028 still did not fire: instrumented, no call in nine input variants, with either fixture, produced a left-padded decoder mask. Its trigger needs per-row prompt lengths the synthetic audio does not create.
+- **What the MusicGen Melody contract adds** ([contract](../example/hub/MusicgenMelody-integration/integrations/transformers/usage.md), [fixture](https://huggingface.co/hf-internal-testing/proto-musicgen-melody-slim)): a composite model (T5 text encoder, EnCodec, decoder) and classifier-free guidance. The generic shrink rule left EnCodec at 56M of 59M parameters (`num_filters` doubles per stage) and `codebook_dim` coupled to the old width; two reviewed `config_overrides` bring the fixture to 3.5M (17.5 MB). Random weights pass the gate (weakest 0.018) but generate the same codes for every prompt, so the fixture is overfit by reviewed choice (60 steps). On the M5, the fixture runs in ~1 s; the real `facebook/musicgen-melody` (1.5B) takes ~430 s per variant, training step included.

@@ -24,7 +24,7 @@ Ownership is as in the [design](design.md#ownership); cross-repo changes need an
 2. The report names contract, fixture, variant, failure, and repro command.
 3. For full-model validation, maintainers request `run-slow`: migrated tests run as contracts on real checkpoints, reported apart from slim results. A slim pass never satisfies a pending full-model requirement.
 
-The prototype [selector](../example/select_contracts.py) maps model directories to contracts (a UMT5 change selects T5) and selects all for shared code or dependency changes. The shadow job runs everything and records the selection, to measure missed dependencies first.
+The prototype [selector](../example/select_contracts.py) maps model directories to contracts, sub-models included (a UMT5 change selects T5; an EnCodec change selects MusicGen Melody), and selects all for shared code or dependency changes. The shadow job runs everything and records the selection, to measure missed dependencies first.
 
 ## Handling a contract failure
 
@@ -65,7 +65,7 @@ In PR summaries and any Hub status, a slim pass never turns an untested checkpoi
 
 In this repo: [shadow](../.github/workflows/shadow.yml) runs every fixture (`--fixtures-only --run-all`) daily on `main` or on a dispatched commit/PR, recording what selection would have chosen; [backfill](../.github/workflows/shadow-backfill.yml) does the same on each `main` commit of a past window ([results](evidence.md#shadow-backfill)); [nightly](../.github/workflows/nightly.yml) runs real checkpoints and fixtures on an A10G runner's CPU and GPU, standing in for full-checkpoint paths; [GPU checks](../.github/workflows/gpu-checks.yml) are one-off experiments.
 
-In `huggingface/transformers`, branch `contracts-proof`: [`contracts.yml`](https://github.com/huggingface/transformers/blob/contracts-proof/.github/workflows/contracts.yml) installs the branch, selects contracts from its changed files, and runs them on `aws-m8i-l-cache` in `transformers-torch-light` with the runner vendored in `utils/contracts/` and the lock and x86 baselines in `tests/contracts/` (8 fixtures in 17 s; [proof plan](transformers-ci-proof.md), phases 1–3 done, phase 4 demos on `proof-*` branches).
+In `huggingface/transformers`, branch `contracts-proof`: [`contracts.yml`](https://github.com/huggingface/transformers/blob/contracts-proof/.github/workflows/contracts.yml) installs the branch, selects contracts from its changed files, and runs them on `aws-m8i-l-cache` in `transformers-torch-light`, with the runner vendored in `utils/contracts/` and the lock and baselines (x86, plus `cpu-arm64` for Mac repro) in `tests/contracts/`: six contracts, 8 fixtures in 17 s. All proof phases are done, including demos on `proof-*` branches and a maintainer write-up ([proof plan](transformers-ci-proof.md)).
 
 Rollout ([proof plan](transformers-ci-proof.md)):
 

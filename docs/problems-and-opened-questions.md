@@ -19,6 +19,7 @@ The experiments support a CI pilot; removing tests or requiring contracts needs 
 
 - [Replay](evidence.md#historical-regression-replay): all eight reproducible regressions caught once the affected call was made; generic forward/generate missed most.
 - [Backfill](evidence.md#shadow-backfill), 1,468 commits: frozen contracts caught 1 of 5 in-family regressions, missed 4 they didn't call; with those calls added, 5 of 5, but post-hoc.
+- One catch was not post-hoc: a call added for #48000 caught #48981 from its introducing commit ([third round](evidence.md#third-round-second-round-calls-and-bfloat16-smollm)). Scheduled runs caught #48282 the night it merged ([#49456](https://github.com/huggingface/transformers/issues/49456)).
 
 **Next.** Freeze everything and measure on regressions not used to design it (the shadow trial). Report detections, misses, unsupported, and false alarms separately, post-hoc catches apart ([improvement loop](improving-contracts.md)).
 
@@ -53,13 +54,15 @@ The experiments support a CI pilot; removing tests or requiring contracts needs 
 - It measures max movement over all logits; contracts may compare only selected logits or label log-probs.
 - The [builder](../example/build_fixtures.py)'s threshold uses only absolute tolerances, not relative ones or platform overrides.
 - Overfitting helps on synthetic Whisper faults; random fixtures caught all eight historical regressions too ([weights](fixtures.md#choosing-the-weights)).
+- On real bugs, still no overfit-only catch ([replays](evidence.md#overfit-or-random-weights-on-real-regressions)): random twins also caught MusicGen Melody's dropped conditioning (#48679); two silent Whisper generation bugs (#48028, #48108) reach neither, because the contract's inputs never trigger them. An overfit fixture covers only what it was trained on.
+- The gate can pass while generation ignores the input: random SmolLM and MusicGen Melody fixtures move their logits yet generate one answer for every prompt, so both are overfit by reviewed choice.
 
 **Next.** Measure perturbations through the contract's own outputs and rules, with a margin above normal variation; keep a few injected faults to check sensitivity becomes detection.
 
 **Open questions.**
 
 - What margin suffices for given outputs and tolerances?
-- Which faults beyond perturbations should be tested, and when is overfitting worth it?
+- Which faults beyond perturbations should be tested, and when is overfitting worth it? Candidate: a bug that mixes conditioning between batch rows, which random weights cannot see.
 
 ## 4. Baselines multiply and need review rules
 
@@ -70,7 +73,8 @@ The experiments support a CI pilot; removing tests or requiring contracts needs 
 - Whisper already needs per-CPU-architecture baselines.
 - [A10G results](../example/README.md#on-gpu) hold only for that GPU and stack.
 - Five months of `main`: 8 `cpu-x86_64` fixture baselines needed 2 updates (benign RNG shift, intended T5 SDPA).
-- bfloat16 real checkpoints differ on native-bfloat16 CPUs, now a platform of their own (`cpu-x86_64-bf16`). Untested: Intel (`amx_bf16`) vs AMD (`avx512_bf16`).
+- bfloat16 real checkpoints differ on native-bfloat16 CPUs, now a platform of their own (`cpu-x86_64-bf16`). Intel `amx_bf16` (the PR CI runner) matched the AMD `avx512_bf16` baseline on the bfloat16 fixture; real bfloat16 checkpoints on Intel are untested.
+- Each new contract adds baselines on four platforms and three variants: MusicGen Melody's real checkpoint needs a large runner even for `cpu-x86_64`.
 - Fresh-process reproduction proves repeatability, not correctness.
 
 **Next.** Define environment classes, calibrate on representative runners, track churn and review time, budget the slim PR matrix apart from the full-model one. Each baseline update needs evidence beyond repeatability ([review process](design.md#revisions-and-baselines)).
@@ -109,10 +113,10 @@ The experiments support a CI pilot; removing tests or requiring contracts needs 
 | Missing output | Skipped if absent from result and baseline. | Every manifest output required (training ones only where the framework declares `training`); `--record` refuses incomplete candidates. |
 | Empty gradient checks | `{}` passed `all_true`. | Non-empty dict, names matching the baseline, each `true`. |
 | Changed shape | Flattened: (1, 4) matched (2, 2). | `allclose` outputs must match the baseline's shape, ragged lists included. |
-| NaN gradients | NaN counted as nonzero. | Six training contracts also require `torch.isfinite(grad).all()`. |
+| NaN gradients | NaN counted as nonzero. | Every training contract also requires `torch.isfinite(grad).all()`. |
 | Nothing ran | All-`unsupported` runs exited 0. | Skips record why (`declared`, `hardware`, `variant`). No target run or no `--contract`/`--target` match fails. `--require-all` (shadow, backfill, nightly) fails on undeclared skips. |
 
 **Still open.**
 
-- GitHub runners (7 GB) skip SmolLM-1.7B when recording, so only `machine=gpu-host` enforces `REQUIRE_ALL`; picking runner classes from [`resources`](design.md#minimum-hardware) (not implemented) fixes it.
+- GitHub runners (7 GB) skip SmolLM-1.7B and MusicGen Melody's checkpoint when recording, so only `machine=gpu-host` enforces `REQUIRE_ALL`; picking runner classes from [`resources`](design.md#minimum-hardware) (not implemented) fixes it.
 - No per-framework exception list for non-training outputs; add one when needed.

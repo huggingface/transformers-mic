@@ -48,7 +48,7 @@ One contract per usage path ([full example](../example/README.md)), run on each 
 
 ```sh
 python example/run.py --framework transformers                       # every contract and target, default variant
-python example/run.py --framework transformers --fixtures-only       # what a framework PR would run (~5 s for all 8 on CPU)
+python example/run.py --framework transformers --fixtures-only       # what a framework PR would run (~5 s for 8 fixtures on CPU)
 python example/run.py --framework transformers --contract T5 --variant eager
 python example/run.py --framework transformers --isolate             # one process per target
 python example/run.py --framework transformers --golden cpu          # discrete outputs vs another platform's baseline
@@ -56,20 +56,22 @@ git diff --name-only A B | python example/run.py --framework transformers --fixt
 python example/run.py --framework transformers.js
 ```
 
-[`select_contracts.py`](../example/select_contracts.py): a changed model dir selects the contracts whose fixtures use it, other library code all, other files none; `--run-all` runs everything and records `selected_by`. Fixtures download at [`fleet.lock`](../example/transformers/tests/contracts/fleet.lock) revisions, hash-checked (`--local-fixtures` uses build folders); [`patches.py`](../example/patches.py) applies the lock's `local_patches` (#49385, #49403, #49456).
+[`select_contracts.py`](../example/select_contracts.py): a changed model dir selects the contracts whose fixtures use it (sub-models included: MusicGen Melody's `encodec`, `t5`), other library code all, other files none; `--run-all` runs everything and records `selected_by`. Fixtures download at [`fleet.lock`](../example/transformers/tests/contracts/fleet.lock) revisions, hash-checked (`--local-fixtures` uses build folders); [`patches.py`](../example/patches.py) applies the lock's `local_patches` (#49385, #49403, #49456).
 
 ## 2. Fixture build gates
 
 [`build_fixtures.py`](../example/build_fixtures.py) builds each fixture from its checkpoint ([recipe](fixtures.md#recipe)) and fails unless it passes:
 
 - **Fixture key:** byte-identical processor files and matching config fields across its checkpoints.
-- **Input sensitivity** ([`perturb.py`](../example/perturb.py)): each perturbation moves logits ≥ `1e-3`, else overfit. Overfit: Whisper (gate failed), SmolLM (reviewed choice: random weights repeat one answer).
+- **Input sensitivity** ([`perturb.py`](../example/perturb.py)): each perturbation moves logits ≥ `1e-3`, else overfit. Overfit: Whisper (gate failed); SmolLM and MusicGen Melody (reviewed choice: random weights generate the same output for every prompt).
+- **Reviewed `config_overrides`** where the generic shrink misses a field (MusicGen Melody: EnCodec `num_filters`, `codebook_dim`).
 - **Numeric health:** finite forward, loss, gradients in float32, bfloat16, float16.
 
 ```sh
 python example/build_fixtures.py                                    # all fixtures, ~45 s
 python example/build_fixtures.py --fixture proto-whisper-tiny-slim
 python example/build_fixtures.py --out /tmp/rebuilt                 # rebuild and compare with the pins
+python example/build_fixtures.py --out /tmp/random --keep-random    # random-weight twins, for overfit-vs-random replays
 python example/publish_fixtures.py                                  # upload fixtures that match their pin
 ```
 
@@ -112,7 +114,7 @@ gh run download <run-id> --repo huggingface/model-integration-contracts -n gpu-c
 
 ## 5. Historical regressions
 
-Eleven regressions since May 2026 ([`cases.json`](../experiments/cases.json)) and ten benign changes, on bad and fixed builds (`git archive`) at three levels: **real** checkpoint through the affected call; **generic slim**, forward and generate ([`replay_case.py`](../experiments/replay_case.py)); **usage slim**, fixtures through the affected call with re-saved or copied processor files ([`usage_repros.py`](../experiments/usage_repros.py)). [`example/replay.py`](../example/replay.py) replays a case through the runner. Verdicts: [evidence](evidence.md#historical-regression-replay).
+Eleven regressions since May 2026 ([`cases.json`](../experiments/cases.json)) and ten benign changes, on bad and fixed builds (`git archive`) at three levels: **real** checkpoint through the affected call; **generic slim**, forward and generate ([`replay_case.py`](../experiments/replay_case.py)); **usage slim**, fixtures through the affected call with re-saved or copied processor files ([`usage_repros.py`](../experiments/usage_repros.py)). [`example/replay.py`](../example/replay.py) replays a case through the runner. Verdicts: [evidence](evidence.md#historical-regression-replay); overfit fixtures vs random twins on #48679, #48028, #48108: [evidence](evidence.md#overfit-or-random-weights-on-real-regressions).
 
 ```sh
 export REPLAY_WORKDIR=/tmp/model-integration-replay

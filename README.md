@@ -12,7 +12,7 @@ A contract is ordinary user code: load the model, call the public API, report th
 
 ![A proposed link lets agents discover a model's MIC on the Hub. Transformers checks slim fixtures on PRs and real checkpoints in run-slow or nightly jobs; Transformers.js has its own contract entry point and baseline, with CI triggers still to define.](docs/assets/mic-overview.svg)
 
-**[Full example](example/README.md):** a runnable MIC for SmolLM text generation in Transformers and Transformers.js.
+**[Full example](example/README.md):** a runnable MIC for SmolLM text generation in Transformers and Transformers.js, plus six more contracts (CLIP, BERT, T5/UMT5, Whisper, Wav2Vec2, MusicGen Melody) on the same runner.
 
 The first goal is CI, not a Hub feature. The same contracts could later back compatibility status, tested snippets, Colabs, or agent usage.
 
@@ -64,17 +64,18 @@ Early results on 1,468 Transformers `main` commits over five months ([shadow bac
 - With those calls added ([how](docs/improving-contracts.md)), all five are caught, no new false alarm, ~13 s per commit on CPU. The new Whisper call found a live bug ([#49403](https://github.com/huggingface/transformers/issues/49403)).
 - Scheduled runs on `main` caught a Whisper regression the night it merged, after its PR's CI had passed ([#49456](https://github.com/huggingface/transformers/issues/49456)).
 - A call added for one bug caught another nobody targeted: Whisper's assisted `generate` broken by [#48981](https://github.com/huggingface/transformers/pull/48981) for 41 commits, from its introducing commit ([third round](docs/evidence.md#third-round-second-round-calls-and-bfloat16-smollm)).
-- A proof job runs in Transformers' own PR CI runner and image, on a branch of `huggingface/transformers`: 8 fixtures in 17 s, selected from changed files, open bugs as narrowed known failures ([proof plan](docs/transformers-ci-proof.md)).
+- A proof job runs in Transformers' own PR CI runner and image, on a branch of `huggingface/transformers`: 8 fixtures in 17 s, selected from changed files, open bugs as narrowed known failures. A reverted UMT5 fix fails it with the backfill's exact deltas, and the repro command in the job summary gives the same failure on a Mac ([proof](docs/transformers-ci-proof.md)).
+- No real regression has needed an overfit fixture yet: random-weight twins also caught MusicGen Melody's dropped conditioning ([#48679](https://github.com/huggingface/transformers/pull/48679)) from its introducing commit, and two silent Whisper generation bugs reached neither ([overfit or random](docs/evidence.md#overfit-or-random-weights-on-real-regressions)).
 
 Agent reuse is measured separately ([recipe](docs/agent-walkthrough/README.md#controlled-comparison-with-and-without-a-mic)). Remote-code models are out of initial scope.
 
 ## Documents
 
-- [Full example](example/README.md): runnable SmolLM MIC, every part of the standard.
-- [Evidence](docs/evidence.md): experiments, regression replay, shadow backfill.
+- [Full example](example/README.md): runnable SmolLM MIC, every part of the standard; the runner on seven contracts.
+- [Evidence](docs/evidence.md): experiments, regression replay, shadow backfill, overfit vs random.
 - [Problems and opened questions](docs/problems-and-opened-questions.md): what the pilot must settle.
 - [Slim models in Transformers CI](docs/slim-models-in-transformers-ci.md): PR and `run-slow` flows.
-- [Transformers CI proof](docs/transformers-ci-proof.md): plan and to-do for running the fleet in Transformers PR CI.
+- [Transformers CI proof](docs/transformers-ci-proof.md): the fleet in Transformers PR CI, with a one-page write-up for maintainers.
 - [Technical design](docs/design.md): layout, CI, checks, baselines, runner.
 - [Improving contracts](docs/improving-contracts.md): finding and closing coverage gaps.
 - [End-to-end tests](docs/end-to-end-tests.md): every check in this repo, with commands.

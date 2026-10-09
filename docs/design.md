@@ -35,6 +35,8 @@ With [doc-builder runnable blocks](https://github.com/huggingface/doc-builder/bl
 
 Checkpoints share a fixture when they share a **fixture key**: byte-identical processor files, config fields that survive shrinking (attention layout, RoPE, tied embeddings, vocabulary, special tokens), and default dtype. The build fails on a mismatch. Baselines stay per checkpoint.
 
+The manifest's per-fixture `build` recipe holds the seed and reviewed exceptions, each with its reason: `overfit` (train even when random weights pass the gate), `accept_insensitive` (known blind spots), and `config_overrides` (fields the generic shrink rule misses, e.g. MusicGen Melody's EnCodec `num_filters` and `codebook_dim`). Overrides are part of the fixture key.
+
 ## Ownership
 
 | Piece | Example | Owner |
@@ -57,7 +59,7 @@ Contract work never waits on a creator; expected results live where framework ch
 | Nightly, release candidate | full fleet, pinned | per-checkpoint baselines |
 | Model update | new creator revision | candidate baseline, reviewed before approval |
 
-Same contract on every trigger; only the weights and baselines change. A PR job fetches the pinned repos, runs contracts on the PR build, and compares with `tests/contracts/expectations/`; a failure names contract, target, and baseline file, with a local repro command. A contract change is a Hub PR to the integration repo, then a fleet-lock bump per framework. `tests/models/` keeps running during the pilot. Prototype jobs: [CI integration](slim-models-in-transformers-ci.md#current-prototype-and-rollout).
+Same contract on every trigger; only the weights and baselines change. A PR job fetches the pinned repos, runs contracts on the PR build, and compares with `tests/contracts/expectations/`; a failure names contract, target, and baseline file, with a local repro command. A contract change is a Hub PR to the integration repo, then a fleet-lock bump per framework. `tests/models/` keeps running during the pilot. Prototype jobs: [CI integration](slim-models-in-transformers-ci.md#current-prototype-and-rollout); the PR job proven in Transformers' own CI: [proof](transformers-ci-proof.md).
 
 ## What we should check
 
@@ -94,12 +96,14 @@ The last stdout line is a JSON result with the runtime used; the baseline is pic
 | Feature | What it does |
 | --- | --- |
 | Schemas | [`schemas/`](../example/schemas) for manifest, lock, fixture build, baseline, tolerances, result; validated on load and per result. |
+| Selection | [`select_contracts.py`](../example/select_contracts.py): a change under `models/<dir>` selects the contracts whose fixtures use that directory (model type, sub-config model types such as MusicGen Melody's T5 and EnCodec, processor classes); other library code selects all; files outside `src/` none. |
 | Batching | Runnable-markdown contracts share one process ([cost](evidence.md#stability-and-cost)); `--isolate` and script contracts get one per target. |
 | Pinned fixtures | File hashes in the lock; a mismatch is an error naming the build command. |
 | Tolerances per platform | `expectations/<contract>/<platform>/tolerances.json`, with a required reason. |
 | Reproducible baselines | `--record` reruns in a fresh process and refuses differing or non-finite outputs. |
 | Validation | Missing outputs, wrong shapes, non-finite gradients, and empty runs fail ([gaps closed](problems-and-opened-questions.md#6-runner-validation-gaps)). |
 | Known failures | `known_failures` (with issue) reports `xfail` and fails once it passes. An entry can narrow to failures matching a message (`match`; any other failure still fails) or leave outputs out of the comparison (`skip_outputs`, recorded per result). `local_patches` applies a workaround in every process, recorded per result: for observers, not for the framework's own CI. |
+| Report | [`report.py`](../example/report.py): job summary per target with the first failure line, baseline path, selection reason, and a repro command. |
 | Replays | [`replay.py`](../example/replay.py): the unchanged runner on a regression's bad and fixed builds. |
 
 Not implemented: isolation for untrusted code, private-artifact rules, picking the CI runner class from `resources`.
@@ -153,7 +157,7 @@ Contracts are arbitrary code: the runner needs isolation, resource limits, secre
 
 1. How many architectures shrink reliably? One generic rule covers 314 of 559 usage paths ([sweep](fixtures.md#does-it-scale-to-every-architecture)).
 2. Which failures need the real checkpoint or real hardware?
-3. What unit selects affected contracts on a PR?
+3. Is model directory the right selection unit? Prototype: it runs nothing on 52% of `main` commits and everything on 46% (shared code).
 4. How expensive is baseline review in practice?
 5. Which expectations are stable across hardware ([so far](evidence.md#on-gpu))?
 6. How to handle licensed, gated, or private models?

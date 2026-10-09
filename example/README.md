@@ -1,6 +1,6 @@
 # Full example: MICs and the runner prototype
 
-A runnable MIC for batched greedy generation on three SmolLM checkpoints, in Transformers and Transformers.js, covering every part of the [proposed standard](../README.md#the-proposed-standard). Published [fixtures](https://huggingface.co/hf-internal-testing?search_models=proto-) and [contracts](https://huggingface.co/hf-internal-testing?search_models=-integration) have their sources in [`hub/`](hub). Five more contracts (CLIP, BERT, T5/UMT5, Whisper, Wav2Vec2) use the same [runner](#runner-prototype).
+A runnable MIC for batched greedy generation on three SmolLM checkpoints, in Transformers and Transformers.js, covering every part of the [proposed standard](../README.md#the-proposed-standard). Published [fixtures](https://huggingface.co/hf-internal-testing?search_models=proto-) and [contracts](https://huggingface.co/hf-internal-testing?search_models=-integration) have their sources in [`hub/`](hub). Six more contracts (CLIP, BERT, T5/UMT5, Whisper, Wav2Vec2, MusicGen Melody) use the same [runner](#runner-prototype).
 
 ## Where each piece lives
 
@@ -15,10 +15,14 @@ A runnable MIC for batched greedy generation on three SmolLM checkpoints, in Tra
 | Tool | What it does |
 | --- | --- |
 | [`run.py`](run.py) | Runner: lock → targets (fixtures, then checkpoints) → one process → compare with baselines |
-| [`build_fixtures.py`](build_fixtures.py) | Fixture recipe, fixture key, gates |
+| [`build_fixtures.py`](build_fixtures.py) | Fixture recipe, fixture key, gates; `--out --keep-random` builds a random-weight twin for experiments |
 | [`perturb.py`](perturb.py) | Input-sensitivity gate |
 | [`patches.py`](patches.py) | `local_patches` workarounds for known Transformers bugs |
 | [`replay.py`](replay.py) | `run.py` on a regression's bad and fixed builds |
+| [`select_contracts.py`](select_contracts.py) | Contracts a change can affect, from each fixture's model types (sub-configs included) and processor classes |
+| [`review_candidates.py`](review_candidates.py) | Diff `--record` candidates against approved baselines; `--approve` accepts unchanged and new |
+| [`publish_contracts.py`](publish_contracts.py), [`publish_fixtures.py`](publish_fixtures.py) | Upload to the Hub and pin the new revision and file hashes in the locks |
+| [`report.py`](report.py) | Markdown job summary of a run, with repro commands |
 | [`schemas/`](schemas) | JSON schemas, validated on load |
 
 ## The parts
@@ -48,6 +52,7 @@ $PY example/run.py --framework transformers.js --variant webgpu-fp16 --golden cp
 $PY example/run.py --framework transformers --target proto-SmolLM-slim --record
 $PY example/run.py --framework transformers --fixtures-only      # what a framework PR runs
 $PY example/build_fixtures.py --fixture proto-whisper-tiny-slim        # rebuild one fixture
+$PY example/build_fixtures.py --fixture proto-whisper-tiny-slim --out /tmp/twin --keep-random  # random-weight twin
 $PY example/replay.py d7ba937671 --contract T5                    # UMT5 #49135, bad vs fixed build
 ```
 
@@ -86,18 +91,18 @@ Seven contracts, one per usage path, through `run.py` on CPU (Apple M5, Transfor
 | Wav2Vec2 | CTC transcription | random: weakest 0.60; amplitude blind spot accepted with a reason | `facebook/wav2vec2-base-960h`, with a local workaround (below) |
 | MusicgenMelody | text- and melody-conditioned generation with guidance | **overfit** by reviewed choice, 60 steps: random weights pass the gate (weakest 0.018) but generate the same codes for every prompt, melody or not; EnCodec widths set by `config_overrides` (59M → 3.5M parameters) | `facebook/musicgen-melody` |
 
-`build_fixtures.py` applies one [recipe](../docs/fixtures.md#recipe) with no per-family code (a recipe may set reviewed `config_overrides` where the generic shrink rule misses a coupled or unshrunk field); the contract's own model calls feed the [`perturb.py`](perturb.py) gate and the overfit step.
+`build_fixtures.py` applies one [recipe](../docs/fixtures.md#recipe) with no per-family code; a recipe may set reviewed `config_overrides` where the generic shrink rule misses a coupled or unshrunk field. The contract's own model calls feed the [`perturb.py`](perturb.py) gate and the overfit step. MusicGen Melody's baselines: `cpu-arm64` approved (fixture and checkpoint, three variants, Transformers `8625785e`); `cpu-x86_64` and `cuda` pending in CI.
 
 **Batching** (runnable-markdown contracts share the runner's process):
 
 | Run | Batched | One process per target (`--isolate`) |
 | --- | ---: | ---: |
-| Fixtures only, 8 targets, 6 contracts (median of 3) | **4.9 s** | 27.4 s |
+| Fixtures only, 8 targets, 6 contracts (median of 3, before MusicGen Melody) | **4.9 s** | 27.4 s |
 | Everything, 17 targets including SmolLM-1.7B | 73 s | 90 s |
 
 Both: 16 pass, 1 unsupported (`google/umt5-small`). Batched, SmolLM-1.7B took 51 s vs 27 s (likely memory pressure), so large checkpoints may want their own process.
 
-**Replay** (`replay.py`): UMT5 [#49135](https://github.com/huggingface/transformers/pull/49135) caught on the random fixture (log-probs off 1.22, loss 0.20), fixed build passes; T5 batch decode [#47793](https://github.com/huggingface/transformers/pull/47793) missed until the call was [added](../docs/improving-contracts.md).
+**Replay** (`replay.py`): UMT5 [#49135](https://github.com/huggingface/transformers/pull/49135) caught on the random fixture (log-probs off 1.22, loss 0.20), fixed build passes; T5 batch decode [#47793](https://github.com/huggingface/transformers/pull/47793) missed until the call was [added](../docs/improving-contracts.md). MusicGen Melody [#48679](https://github.com/huggingface/transformers/pull/48679) (conditioning dropped at generation step 0) is caught from its introducing commit by the overfit fixture and by its random twin ([overfit or random](../docs/evidence.md#overfit-or-random-weights-on-real-regressions)).
 
 **Reproducible baselines** (`--record` reruns in a fresh process) found:
 
@@ -118,7 +123,7 @@ A10G (torch 2.14.0+cu130, Transformers `8625785e`), `contracts` mode of [`gpu-ch
 
 - Contract edits: change [`hub/`](hub), test with `run.py --local-contracts`, then [`publish_contracts.py`](publish_contracts.py) pins the new revision in every lock. Transformers.js runs its contract from the local folder (for its `npm` packages), checked against the pin.
 - Isolation is only `--isolate` (one process per target).
-- CI jobs run in this repo, not Transformers ([results](../docs/evidence.md#shadow-backfill)); [`select_contracts.py`](select_contracts.py) selection is recorded but gates nothing.
+- Scheduled CI runs in this repo ([results](../docs/evidence.md#shadow-backfill)); in Transformers, only a non-required proof job on the `contracts-proof` branch, which vendors the runner and lock and does not include MusicGen Melody yet ([proof](../docs/transformers-ci-proof.md)).
 - `build_fixtures.py` output reproduces on one machine only, so CI downloads the pinned fixtures.
 - Variants need a second, hidden `from_pretrained`; a doc-builder load-argument hook would remove it.
 
