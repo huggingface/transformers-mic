@@ -44,7 +44,7 @@ The contract is user code emitting a structured result, which the runner compare
 | `memory_gb` | Host RAM. |
 | `disk_gb` | Free disk for download. |
 
-Checked before download: an unrunnable target is `unsupported` with a reason (`needs cuda; this host has no GPU`), not a failure. CI picks runner classes from the same numbers. Fixtures run anywhere, so GPU-only checkpoints keep CPU PR coverage. Measure, don't guess: SmolLM-1.7B, guessed at 20 GB, measured 10.6 GB and still killed a 16 GB runner holding it twice.
+Checked before download: an unrunnable target is `unsupported` with a reason (`needs cuda; this host has no GPU`), not a failure. CI is meant to pick runner classes from the same numbers (not implemented yet). Fixtures run anywhere, so GPU-only checkpoints keep CPU PR coverage. Measure, don't guess: SmolLM-1.7B, guessed at 20 GB, measured 10.6 GB and still killed a 16 GB runner holding it twice.
 
 ### Authoring: runnable markdown
 
