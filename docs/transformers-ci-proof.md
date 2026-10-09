@@ -2,7 +2,7 @@
 
 Goal: run the contracts as a non-blocking job in Transformers' own PR CI, with selection, a pinned environment matching the baselines, and an actionable failure report; then ask maintainers whether to adopt it.
 
-Status (2026-10-09): shadow, nightly, and backfill run in this repository; contracts and fixtures are on the Hub, pinned by revision and hash; baselines cover `cpu-arm64`, `cpu-x86_64`, `cpu-x86_64-bf16`, and `cuda`. All five decisions taken. Phase 1 done: the fixture baselines hold on the PR CI runner and image. Nothing runs in Transformers' PR CI yet; a probe workflow runs on the `contracts-proof` branch of `huggingface/transformers`.
+Status (2026-10-09): shadow, nightly, and backfill run in this repository; contracts and fixtures are on the Hub, pinned by revision and hash; baselines cover `cpu-arm64`, `cpu-x86_64`, `cpu-x86_64-bf16`, and `cuda`. All five decisions taken. Phases 1–3 done: on the `contracts-proof` branch of `huggingface/transformers`, `.github/workflows/contracts.yml` runs the contracts on the branch's own code in the PR CI runner and image, selected from changed files, with narrowed known failures and a job summary (7 pass + Whisper `xfail` in 17 s). Phase 4 in progress. Nothing runs in Transformers' PR CI for other PRs.
 
 ## Facts the plan rests on (checked 2026-10-09)
 
@@ -22,7 +22,7 @@ Status (2026-10-09): shadow, nightly, and backfill run in this repository; contr
 - [x] **D3. Runner packaging: vendored into `utils/contracts/`** (`run.py`, `select_contracts.py`, `schemas/`, `report.py`), with a header naming this repository as the source. A published package (the design's shared runner) after the proof.
 - [x] **D4. Open framework bugs: no `local_patches` in Transformers; signature-scoped `known_failures`.** A patch changes the framework under test, acceptable for an outside observer, not for the framework's own CI. Each entry names the issue and either a failure message (`match`) or the outputs it skips (`skip_outputs`); any other failure still fails, and a pass with `match` reports "fixed, remove the entry". Whole-target xfail rejected: it would hide a second, unrelated Whisper failure. Today's entries, checked on `main` (`33ab420a77`) without `local_patches` (6 fixtures pass, stable over two isolated runs):
   - #49456: `Whisper/proto-whisper-tiny-slim`, `match` `You have modified the pretrained model configuration` → `xfail`. The error comes from the first `generate()`, so Whisper's later checks don't run until the fix: a matched raise is narrower than whole-target xfail but no substitute for the fix.
-  - #49385: `Wav2Vec2/proto-wav2vec2-base-960h-slim`, `skip_outputs` `training.loss` (depends on uninitialized `masked_spec_embed`) until #49386 lands → `pass`, everything else compared.
+  - #49385: `Wav2Vec2/proto-wav2vec2-base-960h-slim`, `skip_outputs` `training.loss` and `training.gradients` until #49386 lands → `pass`, inference outputs compared. The uninitialized `masked_spec_embed` made the gradients non-finite on the m8i runner (first run, 37934608391), not on the M5: what uninitialized memory holds depends on the machine. Wav2Vec2's training step is unchecked in Transformers CI until the fix.
   - #49403: none; fixed on `main` by #49419, which the PR builds include.
 - [x] **D5. doc-builder: pinned by SHA**, `git+https://github.com/huggingface/doc-builder@<sha>`, as Transformers already does for doc-builder's workflows. No release needed for the proof.
 
@@ -38,7 +38,7 @@ Question: do the `cpu-x86_64` fixture baselines hold on `aws-m8i-l-cache` in the
 - [x] Decided D2: image as is.
 - Learned on the way: Transformers' `.gitignore` has `*.lock`, so the vendored `fleet.lock` needs `git add -f` (or another name in phase 2). The shared `/mnt/cache` HF cache is read-only in PR jobs; the probe downloads into `/tmp` (~150 MB).
 
-## Phase 2: package the fleet for Transformers (next)
+## Phase 2: package the fleet for Transformers (done 2026-10-09)
 
 - [x] Runner changes here first (2026-10-09):
   - [x] Scoped `known_failures` (D4): a string keeps the whole-target form; an object `{issue, match?, skip_outputs?}` narrows it; results carry `skipped_outputs`. Tested: partial match fails, match plus skip gives `xfail`, skip alone passes, `match` on a passing target asks for removal, an `issue`-only object is rejected by the schema.
@@ -46,34 +46,41 @@ Question: do the `cpu-x86_64` fixture baselines hold on `aws-m8i-l-cache` in the
   - [x] Lock `path` optional: published contracts and fixtures run from the Hub; a missing `path` is an error only for `--local-*`, unpublished, and script contracts.
   - [x] `patches` imported only when `local_patches` is non-empty (already the case).
   - [x] `schemas/` stays beside the runner.
-- [ ] Transformers branch layout:
-  - [ ] `tests/contracts/fleet.lock` (`*.lock` is gitignored in Transformers: rename, e.g. `fleet-lock.json`, or `git add -f`; no `path`, no `local_patches`; `known_failures` per D4), `tests/contracts/expectations/` (x86 platform(s) from phase 1, `cpu-x86_64-bf16` if the m8i has `avx512_bf16`/`amx_bf16`; drop `cpu-arm64` and `cuda` unless needed).
-  - [ ] `utils/contracts/run.py`, `select_contracts.py`, `schemas/`, `report.py` (phase 3), with a header naming this repository as the source.
-- [ ] On the branch, `python utils/contracts/run.py --framework transformers --fixtures-only --lock tests/contracts/fleet.lock` passes on its own build.
+- [x] Transformers branch layout (`contracts-proof`):
+  - [x] `tests/contracts/fleet-lock.json` (renamed: Transformers ignores `*.lock`), no `path`, no `local_patches`, `known_failures` per D4; `tests/contracts/expectations/` with `cpu-x86_64` and `cpu-x86_64-bf16` only (the m8i has `amx_bf16`).
+  - [x] `utils/contracts/run.py`, `select_contracts.py`, `report.py`, `schemas/`, and a README naming this repository and commit as the source.
+- [x] On the branch, `python utils/contracts/run.py --framework transformers --fixtures-only --lock tests/contracts/fleet-lock.json` passes on its own build (`main` at `90ef040d40`).
 
-## Phase 3: the CI job (non-blocking)
+## Phase 3: the CI job (non-blocking; done 2026-10-09)
 
-- [ ] `.github/workflows/contracts.yml` on `pull_request` (per D1):
-  - [ ] container and runner from phase 1; checkout with history for `git diff origin/main...HEAD`;
-  - [ ] install `uv pip install -e .`, runner deps (jsonschema, doc-builder at a pinned SHA per D5), pins per D2;
-  - [ ] cache `~/.cache/huggingface/hub` keyed on the lock hash (~150 MB of fixtures and contracts);
-  - [ ] run `git diff --name-only origin/main...HEAD | python utils/contracts/run.py --framework transformers --fixtures-only --changed-files - --require-all --output results.jsonl` (first real use of selection without `--run-all`);
-  - [ ] `continue-on-error: true`; upload `results.jsonl`.
-- [ ] `utils/contracts/report.py` → `$GITHUB_STEP_SUMMARY`:
-  - [ ] per target: contract, fixture, status, first failure line, baseline path;
-  - [ ] repro: `python utils/contracts/run.py --framework transformers --fixtures-only --contract <C> --target <T>`;
-  - [ ] `selected_by` and skipped contracts;
-  - [ ] for `fail`/`error`: regression vs intended change, with a link to the baseline update steps.
-- [ ] Budget: under 2 minutes. On the m8i, 8 fixtures take 37–39 s in one process (vs ~13 s on a 2-core GitHub runner): try `OMP_NUM_THREADS` (PR jobs set it per suite).
-- [ ] HF cache: `/mnt/cache` is read-only; use `actions/cache` keyed on the lock hash, or ask infra to pre-populate the shared cache with the pinned fixtures and contracts.
+Run [37934829379](https://github.com/huggingface/transformers/actions/runs/37934829379): 7 pass, Whisper `xfail` on #49456, 17.3 s for 8 fixtures with `OMP_NUM_THREADS=8` (37 s without). The first run (37934608391) failed Wav2Vec2's gradient check: see D4.
 
-## Phase 4: demonstrate on real PRs (drafts against the D1 branch)
+- [x] `.github/workflows/contracts.yml` on `pull_request` (per D1):
+  - [x] container and runner from phase 1; checkout with history for `git diff origin/main...HEAD`;
+  - [x] install `uv pip install -e .`, runner deps (jsonschema, doc-builder at a pinned SHA per D5), pins per D2;
+  - [x] cache `~/.cache/huggingface/hub` keyed on the lock hash (~150 MB of fixtures and contracts);
+  - [x] run with `--changed-files` from `git diff --name-only origin/<base>...HEAD` (first real use of selection without `--run-all`); pushes to `contracts-proof` run every contract, pushes to `proof-*` select from their diff against it;
+  - [x] `continue-on-error: true`; upload `results.jsonl`.
+- [x] `utils/contracts/report.py` → `$GITHUB_STEP_SUMMARY`:
+  - [x] per target: contract, fixture, status, first failure line, baseline path;
+  - [x] repro: `python utils/contracts/run.py --framework transformers --fixtures-only --lock tests/contracts/fleet-lock.json --contract <C> --target <T>`;
+  - [x] `selected_by` and skipped contracts;
+  - [x] for `fail`/`error`: regression vs intended change, with a link to the baseline update steps.
+- [x] Budget: under 2 minutes. 8 fixtures in 17 s with `OMP_NUM_THREADS=8` (37–39 s with all 128 cores).
+- [x] HF cache: `/mnt/cache` is read-only; `actions/cache` on `/tmp/hf_home/hub`, keyed on the lock hash. Later: ask infra to pre-populate the shared cache.
+- The job fails (red, not required) when a contract fails; the run step itself continues so the summary and artifact are always written.
 
-- [ ] **A. Clean:** an unrelated change runs no contract, or all pass, with a readable summary.
-- [ ] **B. Shared code:** a no-op in `generation/utils.py` selects every contract; all pass; record time.
-- [ ] **C. Model-scoped:** a change in `models/clip/` selects only CLIP.
-- [ ] **D. Known regression:** revert `d7ba937671` (#49135, UMT5 non-causal under SDPA): T5 fails on `proto-umt5-small-slim` (`label_logprobs`, loss); the summary alone suffices to reproduce.
-- [ ] **E. Live regression:** #49456 shows as `xfail` on the matched message only (a different Whisper failure would still fail); the report names the issue and that Whisper's later checks did not run.
+## Phase 4: demonstrate (branch pushes against the D1 branch)
+
+Branch pushes, not draft PRs (decided 2026-10-09): a PR, even against `contracts-proof`, also triggers Transformers' full PR CI (`pr-ci-caller.yml`), the docs build, and the PR bots. `proof-*` branches off `contracts-proof` trigger only `contracts.yml` (and the secret scan), selected from their diff as a PR would be; the job summary is the same. Branches: `proof-a-docs`, `proof-b-shared`, `proof-c-clip`, `proof-d-umt5-revert`.
+
+Runs pushed 2026-10-09 ~13:20 UTC, results pending (check each run's summary and `contracts` artifact):
+
+- [ ] **A. Clean:** `proof-a-docs` (a docs page), run [37935955253](https://github.com/huggingface/transformers/actions/runs/37935955253): expect no contract selected, green.
+- [ ] **B. Shared code:** `proof-b-shared` (no-op in `generation/utils.py`), run [37935960229](https://github.com/huggingface/transformers/actions/runs/37935960229): expect all 6 selected, 7 pass + Whisper `xfail`; record time.
+- [ ] **C. Model-scoped:** `proof-c-clip` (no-op in `models/clip/modeling_clip.py`), run [37935964228](https://github.com/huggingface/transformers/actions/runs/37935964228): expect only CLIP.
+- [ ] **D. Known regression:** `proof-d-umt5-revert` (reverts `d7ba937671`, #49135), run [37935967981](https://github.com/huggingface/transformers/actions/runs/37935967981): expect T5 selected, `proto-umt5-small-slim` fails (`label_logprobs`, loss), red, the summary alone enough to reproduce.
+- [ ] **E. Live regression:** #49456 shows as `xfail` on the matched message only (a different Whisper failure would still fail); the report names the issue and that Whisper's later checks did not run. Seen in every full run so far (37934829379); confirm in B's summary.
 - [ ] Per PR: selection, run and install time, report link. Add a "Transformers CI proof" section to [evidence](evidence.md).
 
 ## Phase 5: write-up and maintainer decision
@@ -100,6 +107,10 @@ Question: do the `cpu-x86_64` fixture baselines hold on `aws-m8i-l-cache` in the
 - [x] **Baselines re-recorded and approved** on `cpu-arm64` (M5), `cpu-x86_64` (EPYC 7763), `cpu-x86_64-bf16` (EPYC 9V45), and `cuda` (A10G, run 37927847268): every float32 target unchanged; Whisper gains `max_length_tokens`, `assisted_tokens`, `longform_tokens` on every platform; only proto-SmolLM-slim changed. Merged to `main` (`f5b6b79`) ahead of the 02:41 UTC nightly.
 
 ## Open items
+
+- [ ] **Phase 4 results** (runs above): fill A–D, then add a "Transformers CI proof" section to [evidence](evidence.md) and start phase 5's one-pager.
+- [ ] Re-vendor `utils/contracts/` on `contracts-proof` whenever `example/run.py`, `report.py`, or the lock changes here (the branch README names the source commit). Keep `proof-*` branches rebased on `contracts-proof`.
+- [ ] Cleanup after the proof: delete `proof-*` branches (and `contracts-proof` once moved to `transformers-ci`, D1b); the worktree lived in a session scratchpad (`git -C ~/Dev/transformers worktree prune`).
 
 - [x] **Backfill third round** (run 37930845944; shadow check on `main` 37930841449 passed): a call added for #48000 caught #48981 at its introducing commit, a regression no triage listed; no new false alarm, including the bfloat16 SmolLM fixture on both x86 platforms ([evidence](evidence.md#third-round-second-round-calls-and-bfloat16-smollm)).
 - [ ] Track #49456 (Whisper `generate()` since #48282): drop `config-field-generation-params` once fixed. #49419 fixed #49403: drop `whisper-decode-tensor-batch` at the next pinned-build bump, with #49386 (Wav2Vec2) when it lands.
