@@ -52,10 +52,11 @@ The [full example](../example/README.md): one runnable-markdown contract per usa
 | --- | --- |
 | `cpu-arm64` | Apple M5 |
 | `cpu-x86_64` | GitHub runners via [`cpu-baselines.yml`](../.github/workflows/cpu-baselines.yml): AMD EPYC 7R32, matches an EPYC 7763 on all 30 shared targets |
+| `cpu-x86_64-bf16` | bfloat16 targets on x86 CPUs with native bfloat16: AMD EPYC 9V45 (GitHub runner) |
 | `cuda` | A10G |
 
 - CPU baselines are per architecture: Whisper differs by more than `1e-4`. `--golden cpu` means this machine's CPU platform.
-- x86 bfloat16 exception: SmolLM-135M/-360M (bfloat16 by default) gave logits up to 0.25 apart and, in eager, different tokens on an EPYC 9V45 (native bfloat16). Runners record CPU flags to decide if that needs its own platform.
+- x86 bfloat16: SmolLM-135M/-360M and proto-SmolLM-slim (bfloat16 by default) use `cpu-x86_64-bf16` on CPUs with `avx512_bf16` or `amx_bf16`: the real checkpoints' logits move up to 0.25 there, and 135M eager generates different tokens ([evidence](evidence.md#bfloat16-on-cpu)).
 - `--record` writes candidates that must reproduce in a fresh process; a reviewer renames them to approve.
 
 ```sh

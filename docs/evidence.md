@@ -16,14 +16,15 @@ Results from local experiments, the regression replay, and the shadow backfill o
 **Fixtures**
 
 - **Real weights are not needed.** 288 load-and-train checks across weight kinds, dtypes, CPU and A10G, all finite; pruned real layers caught 42/42 at 8–235× the size ([details](fixtures.md#choosing-the-weights)).
-- **Random weights pass the sensitivity gate on five of six families**; only Whisper needed overfitting. UMT5 #49135 was caught on a random fixture.
+- **Random weights pass the sensitivity gate on all six families except Whisper**, but the gate is not enough for generation: random bfloat16 SmolLM weights passed it yet generated the same tokens for every prompt, so that fixture is overfit by choice ([bfloat16](#bfloat16-on-cpu)). UMT5 #49135 was caught on a random fixture.
 - **The recipe covers ~half of architectures unaided:** 314 of 559 usage paths built and ran, all finite; most failures are coupled size fields ([details](fixtures.md#does-it-scale-to-every-architecture)).
 - **Publish fixtures, don't rebuild them:** rebuilt on x86, every fixture's weights differed from the M5 build. Now `hf-internal-testing/proto-*`, pinned by revision and hashes.
 
 **Baselines and cost**
 
 - **No false alarms on ten benign changes**, eager and SDPA.
-- **Fixtures carry across hardware; baselines don't** ([GPU](#on-gpu)). Per platform and dtype, 16 targets × 3 variants reproduced at `1e-4` on A10G, so no looser tolerance is needed ([numbers](../experiments/results/runner.json)).
+- **Fixtures load in their source checkpoint's dtype**, so checks run the precision users get; only proto-SmolLM-slim is bfloat16 ([bfloat16](#bfloat16-on-cpu)).
+- **Fixtures carry across hardware; baselines don't** ([GPU](#on-gpu)). bfloat16 on x86 CPUs with native bfloat16 needs its own baselines (`cpu-x86_64-bf16`). Per platform and dtype, 16 targets × 3 variants reproduced at `1e-4` on A10G, so no looser tolerance is needed ([numbers](../experiments/results/runner.json)).
 - **Batching is the cost lever:** eight fixture checks take 4.9 s in one process vs 27.4 s one-per-process (Mac); 13.1 s vs 81.1 s (GPU runner).
 
 **Scope:** ten families, eleven candidate regressions (eight reproducible), ten benign changes, five months on six contracts; CPU only for replay and backfill, one GPU for stability and cost. Cases: [cases.json](../experiments/cases.json).
@@ -68,6 +69,28 @@ Two [walkthroughs](agent-walkthrough/README.md) ([Claude Code](agent-walkthrough
 - **Little local time saved** on these smallest, cached checkpoints: real inference 5–20× slower, loading similar.
 - **Savings are transfer and size:** slim weights 10–1,300× smaller. Slow tests for these eight families load ~144 GB (two Llama 7–8B, three OLMo ≤7B, Whisper large, twelve Wav2Vec2), mostly not CPU-runnable.
 - **Memory:** 0.5–1.3 GB peak RSS slim (mostly framework), 0.7–2 GB real.
+
+### bfloat16 on CPU
+
+Fixtures used to be float32 for every family, while SmolLM-135M and -360M ship bfloat16, which is what users load by default (`dtype="auto"`). The other sources are float32 (or name no dtype), so only proto-SmolLM-slim changed ([`build_fixtures.py`](../example/build_fixtures.py) now saves each fixture in its source's dtype; float32 fixtures keep their keys and rebuild byte-identical). Built on the M5 at Transformers `4d536e1f`, 2026-10-09.
+
+**The gate passes on random weights, but generation is useless.** Random bfloat16 weights moved the logits by at least 0.24 under every perturbation (gate: 1e-3), yet generated " is is is is" for all four prompts, so `generated_tokens` could not tell them apart. Overfitting in float32, then casting, gives " Paris…", " Berlin…", " Rome…", " London…" (80 steps; 3.2M parameters, 6.1 MB). The recipe now takes `overfit` with a reviewed reason.
+
+**The training batch has an irreducible loss.** The four rows share "The capital of" and then name a country, so ln 4 at that position (≈0.2 per token) cannot be learned: training plateaued at 0.25 against the default target of 0.05. The SmolLM recipe sets `target_loss: 0.3`.
+
+**Native bfloat16 changes results on real checkpoints, not on the fixture.** Recorded on GitHub runners at `8625785e`: EPYC 7763 (`avx2` only; runs 37916317747) and EPYC 9V45 (`avx512_bf16`; 37916321632), compared with each other:
+
+| Target (bfloat16) | Max logit delta | Loss delta | Generated tokens |
+| --- | ---: | ---: | --- |
+| proto-SmolLM-slim, SDPA / eager | 0 / 0 | 1.5e-5 / 1.9e-5 | same |
+| SmolLM-135M, SDPA / eager | 0.25 / 0.25 | 0.0074 / 0.011 | same / **differ** |
+| SmolLM-360M, SDPA / eager | 0.125 / 0.25 | 0.010 / 0.013 | same |
+
+- bfloat16 runs on x86 CPUs with `avx512_bf16` or `amx_bf16` use a separate platform, `cpu-x86_64-bf16`, picked by the [runner](../example/run.py) from `/proc/cpuinfo`. GitHub's x86 runners are mixed (one of three shadow runs on 2026-10-08/09 had `avx512_bf16`), so without it these targets would fail on whichever kind did not record them.
+- The fixture agrees across both CPUs, presumably because hidden size 64 does not reach the native kernels; it follows the same rule anyway.
+- Emulated bfloat16 on x86 and the M5 generate the same tokens on every SmolLM target.
+- Every float32 target (24 shared) was unchanged across the 7763, the 9V45, and the earlier 7R32 baselines.
+- Not tested: Intel (`amx_bf16`) against AMD (`avx512_bf16`), which matters before PR CI uses Intel runners.
 
 ### On GPU
 
