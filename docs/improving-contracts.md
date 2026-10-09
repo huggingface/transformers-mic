@@ -80,3 +80,5 @@ Whisper gained three sections drawing no random numbers; its 4 `cpu-arm64` basel
 - Before #48000: fails on the assisted call.
 - Before #48028: fails `longform_tokens` on `openai/whisper-tiny`; the fixture passes (its output ignores decoder positions).
 - Before #47150/#46795 (July): already fails on the #47997 timestamp bug (fixed 2026-08-16), so `max_length` adds no detection in the window; it guards the next regression.
+
+**Measured on history** (third backfill, [details](evidence.md#third-round-second-round-calls-and-bfloat16-smollm)): the assisted call fails the 2 commits before #48000, as intended, and **caught a regression no triage listed**: #48981 broke Whisper's assisted `generate` for 41 commits until #49075 (2026-09-22 to 09-24), from its introducing commit. No new false alarm. A call added for one bug guarding the next one is the loop's point; it is still a single case.

@@ -7,7 +7,7 @@ Results from local experiments, the regression replay, and the shadow backfill o
 **Detection**
 
 - **Contracts must call what users call:** generic checks missed every processor and tokenizer bug; the affected call caught all of them ([replay](#historical-regression-replay)).
-- **Five months of `main`: 1 caught, 4 missed, 1 false alarm**; the misses were calls no contract made ([backfill](#shadow-backfill)). With those calls added, all five are caught, with no new false alarm, and the new Whisper call found a live bug, [#49403](https://github.com/huggingface/transformers/issues/49403) ([details](#after-adding-the-missed-calls)).
+- **Five months of `main`: 1 caught, 4 missed, 1 false alarm**; the misses were calls no contract made ([backfill](#shadow-backfill)). With those calls added, all five are caught, with no new false alarm, and the new Whisper call found a live bug, [#49403](https://github.com/huggingface/transformers/issues/49403) ([details](#after-adding-the-missed-calls)). **A call added for one bug caught another nobody targeted:** Whisper's assisted `generate` raised for 41 commits after [#48981](https://github.com/huggingface/transformers/pull/48981), from its introducing commit to the fix [#49075](https://github.com/huggingface/transformers/pull/49075) ([third round](#third-round-second-round-calls-and-bfloat16-smollm)).
 - **Scheduled runs caught a regression the day it merged:** #48282 (2026-10-08) made `generate()` raise on every original Whisper checkpoint; the next nightly and shadow runs failed Whisper everywhere ([#49456](https://github.com/huggingface/transformers/issues/49456), worked around in `local_patches`). The PR's CI could not see it ([why](https://github.com/huggingface/transformers/issues/49456#issuecomment-6076843277)): model tests build configs without `suppress_tokens`, pipeline tests passed their own `generation_config`, and slow `generate()` tests were not in its `run-slow` list. The contract calls `model.generate()` on the checkpoint's config, as users do.
 - **The runner found a real bug:** seven audio models leave `masked_spec_embed` uninitialized ([#49385](https://github.com/huggingface/transformers/issues/49385), fix [#49386](https://github.com/huggingface/transformers/pull/49386)); the slim Wav2Vec2 fixture catches it every run ([runner](../example/README.md#runner-prototype)).
 - **Golden outputs catch silent backend bugs:** Transformers.js on WebGPU returned all-zero fp16/q4f16 logits with no error ([repro](../experiments/webgpu_browser/README.md)).
@@ -154,6 +154,19 @@ Calls added via the [improvement loop](improving-contracts.md#what-happened-the-
 | UMT5 causal mask ([#49135](https://github.com/huggingface/transformers/pull/49135)) | caught from its introducing commit #47014 | `d7ba937671` |
 
 Each fails exactly until its fix (four predate the window); no new false alarm, no added cost (~13 s per commit). **Post-hoc:** the calls were written knowing the bugs, so this shows the loop closes gaps, not the rate on unknown bugs.
+
+### Third round: second-round calls and bfloat16 SmolLM
+
+After the [second round](improving-contracts.md#the-second-round-triaging-the-model-tier-misses) added Whisper `max_length_tokens`, `assisted_tokens`, `longform_tokens`, and proto-SmolLM-slim moved to bfloat16 ([why](#bfloat16-on-cpu)). 1,480 commits, 2026-05-01 to 2026-10-08 ([run](https://github.com/huggingface/model-integration-contracts/actions/runs/37930845944)); every other segment as in the second round.
+
+| Window | Commits | Fixture result | Verdict |
+| --- | ---: | --- | --- |
+| #47997 fix (`64b6595f0c`) to [#48000](https://github.com/huggingface/transformers/pull/48000) (`a5f41e095a`), 2026-08-16/17 | 2 | `proto-whisper-tiny-slim` errors in the assisted call: `UnboundLocalError: is_updated` | Caught; the call was added for this bug (post-hoc) |
+| [#48981](https://github.com/huggingface/transformers/pull/48981) (`87d34bfa80`, 2026-09-22, "Always correctly restrict assisted decoding with max length/eos token") to [#49075](https://github.com/huggingface/transformers/pull/49075) (`010f0ca2ec`, 2026-09-24, "Fix assisted eos token condition") | 41 | same call errors: `RuntimeError: a Tensor with 2 elements cannot be converted to Scalar` in `_assisted_decoding` | **New catch, not targeted: caught at its introducing commit** |
+
+- **Not post-hoc for #48981:** `assisted_tokens` was added for #48000; #49075 touches only shared generation code, so `find_misses.py`'s model tier never listed it. #48981 changes `generation/` (shared), so selection would have run Whisper on that PR; it also deleted 9 lines from `tests/generation/test_utils.py`.
+- **bfloat16 SmolLM fixture: no false alarm**, all 1,480 commits, on `cpu-x86_64` (888: EPYC 7763, 9V74 without native bfloat16, Xeon 8370C/8573C) and `cpu-x86_64-bf16` (592: EPYC 9V45, 9V74 with `avx512_bf16`).
+- **Cost:** 6.7 s per commit summed over targets, vs 6.2 s (the three added Whisper calls).
 
 ## Historical regression replay
 

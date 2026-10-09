@@ -33,10 +33,12 @@ Question: do the `cpu-x86_64` fixture baselines hold on `aws-m8i-l-cache` in the
 - [x] Run from the D1 branch: `contracts-proof` on `huggingface/transformers`, `.github/workflows/contracts-probe.yml` on push to that branch only (no PR; only the secret scan also runs), runner vendored in `utils/contracts/` from `b303626`. No infra request needed.
 - [x] Transformers `8625785e`, eight fixtures, default and eager: **as is** 16/16, **pinned** 16/16.
 - [x] Host: Intel Xeon 6975P-C, 128 cores, `avx512_bf16`, `amx_bf16`; Python 3.11.17 in the image. Install over the image 14 s, pins 16 s; run 37–57 s.
+- [x] Scope: 6 contracts (SmolLM, CLIP, BERT, T5 + UMT5, Whisper, Wav2Vec2), 7 architectures, 8 fixtures; 32 checks (2 variants × 2 package sets). Whole job 3 min 55 s, 9 s queued; the part a PR job needs (setup, install over the image, 16 checks with cold Hub downloads) ~1 min 45 s.
+- Not yet a PR check: it installs `8625785e`, not the branch; runs on push to `contracts-proof` only; runs every contract (no selection); still applies `local_patches`; reports no repro. Phases 2 and 3 close these.
 - [x] Decided D2: image as is.
 - Learned on the way: Transformers' `.gitignore` has `*.lock`, so the vendored `fleet.lock` needs `git add -f` (or another name in phase 2). The shared `/mnt/cache` HF cache is read-only in PR jobs; the probe downloads into `/tmp` (~150 MB).
 
-## Phase 2: package the fleet for Transformers
+## Phase 2: package the fleet for Transformers (next)
 
 - [ ] Runner changes here first:
   - [ ] Signature-scoped `known_failures` (D4): entry `{issue, match | skip_outputs}`; schema bump; a pass or a non-matching failure is reported as such. Keep the plain string form for this repository's lock.
@@ -99,5 +101,5 @@ Question: do the `cpu-x86_64` fixture baselines hold on `aws-m8i-l-cache` in the
 
 ## Open items
 
-- [ ] **Backfill second round** (run 37930845944, `since=2026-05-01 until=2026-10-08`, dispatched 2026-10-09 12:33 UTC, with a shadow check on `main`, 37930841449): compare with the first round and record the detections in [improving contracts](improving-contracts.md).
+- [x] **Backfill third round** (run 37930845944; shadow check on `main` 37930841449 passed): a call added for #48000 caught #48981 at its introducing commit, a regression no triage listed; no new false alarm, including the bfloat16 SmolLM fixture on both x86 platforms ([evidence](evidence.md#third-round-second-round-calls-and-bfloat16-smollm)).
 - [ ] Track #49456 (Whisper `generate()` since #48282): drop `config-field-generation-params` once fixed. #49419 fixed #49403: drop `whisper-decode-tensor-batch` at the next pinned-build bump, with #49386 (Wav2Vec2) when it lands.
