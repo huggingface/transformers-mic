@@ -28,12 +28,12 @@ PR checks need a model that runs on CPU in seconds yet exercises the real integr
 
 ## Recipe
 
-1. **Real structure, small weights, real dtype.** Shrink width (hidden 64, intermediate 128, 4 heads) and depth [by layer pattern](#shrinking-depth-by-layer-pattern). Save in the source's default dtype (float32 if unnamed): proto-SmolLM-slim is bfloat16, the others float32. Keep vocabulary, special tokens, image/patch/audio dimensions, RoPE, MoE structure, and Dropout/LayerDrop/SpecAugment (contracts seed them). Keep the checkpoint's tensor names and omit parameters it lacks, so loading initializes them as for users (how the Wav2Vec2 fixture catches [#49385](https://github.com/huggingface/transformers/issues/49385)).
+1. **Real structure, small weights, real dtype.** Shrink width (hidden 64, intermediate 128, 4 heads) and depth [by layer pattern](#shrinking-depth-by-layer-pattern). A recipe may set reviewed `config_overrides` where the generic rule misses a field (MusicGen Melody: EnCodec's `num_filters`, and `codebook_dim`, which must match the shrunk width). Save in the source's default dtype (float32 if unnamed): proto-SmolLM-slim is bfloat16, the others float32. Keep vocabulary, special tokens, image/patch/audio dimensions, RoPE, MoE structure, and Dropout/LayerDrop/SpecAugment (contracts seed them). Keep the checkpoint's tensor names and omit parameters it lacks, so loading initializes them as for users (how the Wav2Vec2 fixture catches [#49385](https://github.com/huggingface/transformers/issues/49385)).
 2. **Processor files copied byte for byte**, never re-saved. Checkpoints with identical processor files, kept config fields, and dtype share one fixture ([example](../example/README.md#the-parts)).
 3. **Weights:** seed, then run the input-sensitivity gate.
    - Pass: keep random weights (CLIP, BERT, T5, UMT5, Wav2Vec2).
    - Fail: overfit on the contract's training batch in float32 (AdamW, lr 5e-3, clipping, ≤ 500 steps, until loss < 0.05 twice), cast to the fixture's dtype, and pass the gate (Whisper).
-   - A recipe may require overfitting, with a reviewed reason and its own target loss (SmolLM: random weights generate the same tokens for every prompt; [why](evidence.md#bfloat16-on-cpu)).
+   - A recipe may require overfitting, with a reviewed reason and its own target loss (SmolLM and MusicGen Melody: random weights generate the same output for every prompt; [why](evidence.md#bfloat16-on-cpu)).
    - Neither: fail the build.
 4. **Gates on the saved fixture** (a failure is a build failure, not a contract failure):
    - **Input sensitivity:** per input name (`input_ids`, `attention_mask`, `pixel_values`, `input_features`, ...): swap rows, reverse, all-ones mask, channel swap, halve. Each must move logits ≥ 10× the strictest tolerance (1e-3 for CPU float32).
@@ -62,7 +62,7 @@ Four ways to fill a fixture, six families, same faults and tolerances, three dty
 
 - **Random** is enough except for Whisper, whose tiny decoder barely reads audio. **Overfit** is most sensitive at the same size, and building it checks gradient flow. **Pruned** needs no training but grows with the model (SmolLM-135M at 2/30 layers: 142 MB). **Sliced** acts like random.
 - **No NaN anywhere** proves little at width 64; the health gate checks each build.
-- **Lower precision favors overfit, but the gate's choice stands.** In bfloat16, random fixtures changed discrete outputs (Wav2Vec2 3/3 seeds, T5 2/3), overfit never. Yet contract fixtures changed no discrete output in bfloat16 on the A10G, per-dtype baselines held at `1e-4`, and no real regression yet needs an overfit fixture.
+- **Lower precision favors overfit, but the gate's choice stands.** In bfloat16, random fixtures changed discrete outputs (Wav2Vec2 3/3 seeds, T5 2/3), overfit never. Yet contract fixtures changed no discrete output in bfloat16 on the A10G, per-dtype baselines held at `1e-4`, and no real regression yet needs an overfit fixture ([replays](evidence.md#overfit-or-random-weights-on-real-regressions)).
 - Exact overfit answers alone caught only 1–3 of 6–8 faults per fixture; only loss caught shuffled labels ([smollm_clip.json](../experiments/results/smollm_clip.json), [more_families.json](../experiments/results/more_families.json)).
 
 ## Shrinking depth by layer pattern

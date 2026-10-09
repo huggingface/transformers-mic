@@ -29,8 +29,9 @@ One contract per usage path ([full example](../example/README.md)), run on each 
 | [T5](../example/hub/T5-integration) | `AutoTokenizer` + `AutoModelForSeq2SeqLM.generate`, batched | [`proto-t5-small-slim`](https://huggingface.co/hf-internal-testing/proto-t5-small-slim) → google-t5/t5-small; [`proto-umt5-small-slim`](https://huggingface.co/hf-internal-testing/proto-umt5-small-slim) → google/umt5-small |
 | [Whisper](../example/hub/Whisper-integration) | `WhisperProcessor` + `WhisperForConditionalGeneration.generate`, English, batched | [`proto-whisper-tiny-slim`](https://huggingface.co/hf-internal-testing/proto-whisper-tiny-slim) → openai/whisper-tiny |
 | [Wav2Vec2](../example/hub/Wav2Vec2-integration) | `Wav2Vec2Processor` + `Wav2Vec2ForCTC`, greedy CTC, batched | [`proto-wav2vec2-base-960h-slim`](https://huggingface.co/hf-internal-testing/proto-wav2vec2-base-960h-slim) → facebook/wav2vec2-base-960h |
+| [MusicgenMelody](../example/hub/MusicgenMelody-integration) | `AutoProcessor` + `MusicgenMelodyForConditionalGeneration.generate`, text + melody prompts, classifier-free guidance, batched | [`proto-musicgen-melody-slim`](https://huggingface.co/hf-internal-testing/proto-musicgen-melody-slim) → facebook/musicgen-melody |
 
-8 fixtures + 9 checkpoints; 16 run (`google/umt5-small` is `unsupported`: no `model_type`).
+9 fixtures + 10 checkpoints; 18 run (`google/umt5-small` is `unsupported`: no `model_type`).
 
 - **Checks:** exact tokens, text, and runtime; `allclose` at `1e-4` on selected logits and training loss; finite gradients on named modules; an SGD step updates parameters. Non-finite values fail and are never recorded. A host lacking a target's [`resources`](design.md#minimum-hardware) reports it `unsupported`.
 - **Variants:** Transformers `default` (users' dtype and attention), `eager`, `bfloat16`; Transformers.js (SmolLM) `default` (CPU), `webgpu`, `webgpu-fp16`, `webgpu-q4f16`.

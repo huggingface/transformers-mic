@@ -74,7 +74,7 @@ A framework PR runs two fixture checks (~5 s) instead of three checkpoint checks
 
 ## Runner prototype
 
-Six contracts, one per usage path, through `run.py` on CPU (Apple M5, Transformers `4d536e1f`, torch 2.11.0):
+Seven contracts, one per usage path, through `run.py` on CPU (Apple M5, Transformers `4d536e1f`, torch 2.11.0):
 
 | Contract | Usage path | Fixture (weights, why) | Checkpoints |
 | --- | --- | --- | --- |
@@ -84,8 +84,9 @@ Six contracts, one per usage path, through `run.py` on CPU (Apple M5, Transforme
 | T5 | text-to-text generation | T5 and UMT5 fixtures, random: weakest 1.3 and 3.1 | `google-t5/t5-small`; `google/umt5-small` unsupported (no `model_type`; Auto classes cannot load it) |
 | Whisper | English transcription with `generate` | **overfit**, 200 steps, 24 s: random weights moved logits 8.6e-5 on reversed audio | `openai/whisper-tiny` |
 | Wav2Vec2 | CTC transcription | random: weakest 0.60; amplitude blind spot accepted with a reason | `facebook/wav2vec2-base-960h`, with a local workaround (below) |
+| MusicgenMelody | text- and melody-conditioned generation with guidance | **overfit** by reviewed choice, 60 steps: random weights pass the gate (weakest 0.018) but generate the same codes for every prompt, melody or not; EnCodec widths set by `config_overrides` (59M → 3.5M parameters) | `facebook/musicgen-melody` |
 
-`build_fixtures.py` applies one [recipe](../docs/fixtures.md#recipe) with no per-family code; the contract's own model calls feed the [`perturb.py`](perturb.py) gate and the overfit step.
+`build_fixtures.py` applies one [recipe](../docs/fixtures.md#recipe) with no per-family code (a recipe may set reviewed `config_overrides` where the generic shrink rule misses a coupled or unshrunk field); the contract's own model calls feed the [`perturb.py`](perturb.py) gate and the overfit step.
 
 **Batching** (runnable-markdown contracts share the runner's process):
 
