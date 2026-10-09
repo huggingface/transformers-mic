@@ -1,8 +1,53 @@
 # Plugging the fleet into Transformers CI: proof plan and to-do
 
+## For Transformers maintainers: model integration contracts in PR CI
+
+**What it is.** A contract is a model's documented usage page (load, preprocess, generate or predict, decode, one training step) written as runnable doc-builder blocks, plus a manifest of the checkpoints it covers. In CI it runs on a slim fixture: the real config shrunk, the real tokenizer and processor files copied byte for byte, published on the Hub and pinned by revision and hash. Outputs (tokens, text, selected logits, loss, named gradient checks) are compared with reviewed baselines in `tests/contracts/expectations/`. Design: [design](design.md); fixtures: [Small fixtures](fixtures.md).
+
+**What ran.** Branch `contracts-proof` of `huggingface/transformers`, [`contracts.yml`](https://github.com/huggingface/transformers/blob/contracts-proof/.github/workflows/contracts.yml): the branch's own build, on the PR test jobs' runner group and image (`aws-m8i-l-cache`, `transformers-torch-light`), with the image's packages as they are. 6 contracts, 7 architectures, 8 fixtures (SmolLM/Llama, CLIP, BERT, T5 + UMT5, Whisper, Wav2Vec2). Contracts are selected from the changed files: a model directory selects the contracts whose fixtures use it; other library code selects all; files outside `src/` select none.
+
+| Change (demo branch) | Selected | Result | Runner time |
+| --- | --- | --- | ---: |
+| Docs page | none | green | 11.5 s |
+| No-op in `generation/utils.py` | all 6 | 7 pass, Whisper expected failure (#49456) | 17.8 s |
+| No-op in `models/clip/` | CLIP | green | 11.5 s |
+| Revert of the UMT5 fix [#49135](https://github.com/huggingface/transformers/pull/49135) | T5 | **red**: UMT5 `label_logprobs` off by 1.22, loss by 0.20 | 13.4 s |
+
+**Cost.** ~15 s to install the PR and the runner over the image, then 11–18 s of runner time with `OMP_NUM_THREADS=8`, about 1 min 45 s of job time with a cold cache. Fixtures and contracts are ~150 MB, cached per lock. Over five months of `main`, selection ran nothing on 52% of commits, everything on 46%, some contracts on 1%. CPU only; no GPU in the PR path.
+
+**What it caught** (on history unless noted; [evidence](evidence.md)):
+
+- UMT5 decoder not causal under SDPA: from its introducing commit (#47014, 2026-07-30), two months before the fix #49135.
+- Whisper assisted `generate()` raising for 41 commits after #48981, from its introducing commit, by a call added for a different bug: the one catch no triage aimed at.
+- Whisper `generate()` raising on every original checkpoint after #48282: caught by the nightly the night it merged, after the PR's own CI passed; reported as [#49456](https://github.com/huggingface/transformers/issues/49456).
+- Four processor and tokenizer regressions, once the contracts made the calls users make (post-hoc: those calls were added knowing the bugs).
+- Live bugs found while writing contracts: #49385 (Wav2Vec2-family `masked_spec_embed` uninitialized; fix #49386 open), #49403 (fixed by #49419), #49372.
+- False alarms: one in five months (a benign load-time RNG shift, #46259), one baseline update.
+
+**What a developer sees.** A non-required check. The job summary lists the selected contracts and why, one row per fixture, known failures labelled with their issue, and for each failure the output that moved, by how much, and the command to reproduce it. The decision is theirs: a regression is fixed in the PR; an intended change re-records the baseline and gets it reviewed.
+
+**Upkeep.**
+
+- **Baselines:** 2 updates in five months across 8 fixtures (one intended: T5 moved to SDPA; one benign). Each is a reviewed JSON change under `tests/contracts/expectations/`, per platform (`cpu-x86_64`, plus `cpu-x86_64-bf16` for bfloat16 fixtures on native-bfloat16 CPUs, which the m8i is). Recording is manual today (run with `--record` on the platform); a CI recording job is the first follow-up.
+- **Known failures:** an open framework bug becomes a lock entry naming the issue and either the error message (expected failure only on that message) or the outputs to skip; a fixed bug makes the entry fail until removed. Today: #49456 (Whisper stops at `generate()`, so its later checks don't run) and #49385 (Wav2Vec2 loss and gradients skipped).
+- **Fixtures and contracts:** maintained in the contracts repository and on the Hub, bumped here by a lock change; not rebuilt in CI. Rebuilds depend on hardware, so fixtures are published, not regenerated.
+- **Runner:** vendored in `utils/contracts/` for the proof; a package later.
+
+**Limits.** Six families is a pilot, not coverage: the generic shrink rule reaches 314 of 559 usage paths, but each contract is hand-written and reviewed. Most catches are post-hoc; one is not. Fixtures run on CPU only; real checkpoints and GPUs stay in nightly and slow jobs. The branch also carries `cpu-arm64` baselines, so the repro command in a failing job's summary works unchanged on a Mac: the UMT5 revert fails there with the same deltas as in CI.
+
+**Asks, with proposals:**
+
+1. **Runtime and noise budget.** Proposed: non-required on every PR for four weeks, at most ~2 min of job time; promote a contract to required once it has had no unexplained failure in that window.
+2. **Owners.** A maintainer per contract family (Llama/SmolLM, CLIP, BERT, T5/UMT5, Whisper, Wav2Vec2) to review baseline changes and known-failure entries.
+3. **Where the job lives (D1b).** Proposed: a `tests_contracts` job in `transformers-ci`'s dynamic caller, after the four weeks; the runner as a package or kept vendored.
+4. **Known-failure policy (D4).** Proposed: no workarounds patched into the framework under test; entries narrowed to a message or outputs, each linked to an open issue, removed when it closes (the job enforces it).
+5. **Baseline recording.** Proposed: a CI job that records candidate baselines on the CI platform when a PR changes outputs on purpose, posted for review (replaces the manual `--record`).
+
+## The proof plan
+
 Goal: run the contracts as a non-blocking job in Transformers' own PR CI, with selection, a pinned environment matching the baselines, and an actionable failure report; then ask maintainers whether to adopt it.
 
-Status (2026-10-09): shadow, nightly, and backfill run in this repository; contracts and fixtures are on the Hub, pinned by revision and hash; baselines cover `cpu-arm64`, `cpu-x86_64`, `cpu-x86_64-bf16`, and `cuda`. All five decisions taken. Phases 1–3 done: on the `contracts-proof` branch of `huggingface/transformers`, `.github/workflows/contracts.yml` runs the contracts on the branch's own code in the PR CI runner and image, selected from changed files, with narrowed known failures and a job summary (7 pass + Whisper `xfail` in 17 s). Phase 4 done: all five cases behave as intended ([evidence](evidence.md#transformers-ci-proof)). Phase 5 write-up done ([below](#for-transformers-maintainers-model-integration-contracts-in-pr-ci)); next: share it and collect the maintainers' answers. Nothing runs in Transformers' PR CI for other PRs.
+Status (2026-10-09): shadow, nightly, and backfill run in this repository; contracts and fixtures are on the Hub, pinned by revision and hash; baselines cover `cpu-arm64`, `cpu-x86_64`, `cpu-x86_64-bf16`, and `cuda`. All five decisions taken. Phases 1–3 done: on the `contracts-proof` branch of `huggingface/transformers`, `.github/workflows/contracts.yml` runs the contracts on the branch's own code in the PR CI runner and image, selected from changed files, with narrowed known failures and a job summary (7 pass + Whisper `xfail` in 17 s). Phase 4 done: all five cases behave as intended ([evidence](evidence.md#transformers-ci-proof)). Phase 5 write-up done ([above](#for-transformers-maintainers-model-integration-contracts-in-pr-ci)); next: share it and collect the maintainers' answers. Nothing runs in Transformers' PR CI for other PRs.
 
 ## Facts the plan rests on (checked 2026-10-09)
 
@@ -87,51 +132,8 @@ Runs of 2026-10-09 (each run's summary has the table and repro commands; `contra
 
 ## Phase 5: write-up and maintainer decision
 
-- [x] One page for maintainers (below), 2026-10-09.
+- [x] One page for maintainers ([top of this doc](#for-transformers-maintainers-model-integration-contracts-in-pr-ci)), 2026-10-09.
 - [ ] Share it with the Transformers CI maintainers and collect answers to the asks; record them here.
-
-### For Transformers maintainers: model integration contracts in PR CI
-
-**What it is.** A contract is a model's documented usage page (load, preprocess, generate or predict, decode, one training step) written as runnable doc-builder blocks, plus a manifest of the checkpoints it covers. In CI it runs on a slim fixture: the real config shrunk, the real tokenizer and processor files copied byte for byte, published on the Hub and pinned by revision and hash. Outputs (tokens, text, selected logits, loss, named gradient checks) are compared with reviewed baselines in `tests/contracts/expectations/`. Design: [design](design.md); fixtures: [Small fixtures](fixtures.md).
-
-**What ran.** Branch `contracts-proof` of `huggingface/transformers`, [`contracts.yml`](https://github.com/huggingface/transformers/blob/contracts-proof/.github/workflows/contracts.yml): the branch's own build, on the PR test jobs' runner group and image (`aws-m8i-l-cache`, `transformers-torch-light`), with the image's packages as they are. 6 contracts, 7 architectures, 8 fixtures (SmolLM/Llama, CLIP, BERT, T5 + UMT5, Whisper, Wav2Vec2). Contracts are selected from the changed files: a model directory selects the contracts whose fixtures use it; other library code selects all; files outside `src/` select none.
-
-| Change (demo branch) | Selected | Result | Runner time |
-| --- | --- | --- | ---: |
-| Docs page | none | green | 11.5 s |
-| No-op in `generation/utils.py` | all 6 | 7 pass, Whisper expected failure (#49456) | 17.8 s |
-| No-op in `models/clip/` | CLIP | green | 11.5 s |
-| Revert of the UMT5 fix [#49135](https://github.com/huggingface/transformers/pull/49135) | T5 | **red**: UMT5 `label_logprobs` off by 1.22, loss by 0.20 | 13.4 s |
-
-**Cost.** ~15 s to install the PR and the runner over the image, then 11–18 s of runner time with `OMP_NUM_THREADS=8`, about 1 min 45 s of job time with a cold cache. Fixtures and contracts are ~150 MB, cached per lock. Over five months of `main`, selection ran nothing on 52% of commits, everything on 46%, some contracts on 1%. CPU only; no GPU in the PR path.
-
-**What it caught** (on history unless noted; [evidence](evidence.md)):
-
-- UMT5 decoder not causal under SDPA: from its introducing commit (#47014, 2026-07-30), two months before the fix #49135.
-- Whisper assisted `generate()` raising for 41 commits after #48981, from its introducing commit, by a call added for a different bug: the one catch no triage aimed at.
-- Whisper `generate()` raising on every original checkpoint after #48282: caught by the nightly the night it merged, after the PR's own CI passed; reported as [#49456](https://github.com/huggingface/transformers/issues/49456).
-- Four processor and tokenizer regressions, once the contracts made the calls users make (post-hoc: those calls were added knowing the bugs).
-- Live bugs found while writing contracts: #49385 (Wav2Vec2-family `masked_spec_embed` uninitialized; fix #49386 open), #49403 (fixed by #49419), #49372.
-- False alarms: one in five months (a benign load-time RNG shift, #46259), one baseline update.
-
-**What a developer sees.** A non-required check. The job summary lists the selected contracts and why, one row per fixture, known failures labelled with their issue, and for each failure the output that moved, by how much, and the command to reproduce it. The decision is theirs: a regression is fixed in the PR; an intended change re-records the baseline and gets it reviewed.
-
-**Upkeep.**
-
-- **Baselines:** 2 updates in five months across 8 fixtures (one intended: T5 moved to SDPA; one benign). Each is a reviewed JSON change under `tests/contracts/expectations/`, per platform (`cpu-x86_64`, plus `cpu-x86_64-bf16` for bfloat16 fixtures on native-bfloat16 CPUs, which the m8i is). Recording is manual today (run with `--record` on the platform); a CI recording job is the first follow-up.
-- **Known failures:** an open framework bug becomes a lock entry naming the issue and either the error message (expected failure only on that message) or the outputs to skip; a fixed bug makes the entry fail until removed. Today: #49456 (Whisper stops at `generate()`, so its later checks don't run) and #49385 (Wav2Vec2 loss and gradients skipped).
-- **Fixtures and contracts:** maintained in the contracts repository and on the Hub, bumped here by a lock change; not rebuilt in CI. Rebuilds depend on hardware, so fixtures are published, not regenerated.
-- **Runner:** vendored in `utils/contracts/` for the proof; a package later.
-
-**Limits.** Six families is a pilot, not coverage: the generic shrink rule reaches 314 of 559 usage paths, but each contract is hand-written and reviewed. Most catches are post-hoc; one is not. Fixtures run on CPU only; real checkpoints and GPUs stay in nightly and slow jobs. The branch also carries `cpu-arm64` baselines, so the repro command in a failing job's summary works unchanged on a Mac: the UMT5 revert fails there with the same deltas as in CI.
-
-**Asks, with proposals:**
-
-1. **Runtime and noise budget.** Proposed: non-required on every PR for four weeks, at most ~2 min of job time; promote a contract to required once it has had no unexplained failure in that window.
-2. **Owners.** A maintainer per contract family (Llama/SmolLM, CLIP, BERT, T5/UMT5, Whisper, Wav2Vec2) to review baseline changes and known-failure entries.
-3. **Where the job lives (D1b).** Proposed: a `tests_contracts` job in `transformers-ci`'s dynamic caller, after the four weeks; the runner as a package or kept vendored.
-4. **Known-failure policy (D4).** Proposed: no workarounds patched into the framework under test; entries narrowed to a message or outputs, each linked to an open issue, removed when it closes (the job enforces it).
-5. **Baseline recording.** Proposed: a CI job that records candidate baselines on the CI platform when a PR changes outputs on purpose, posted for review (replaces the manual `--record`).
 
 ## After the proof
 
