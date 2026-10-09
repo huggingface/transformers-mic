@@ -69,6 +69,7 @@ Run [37934829379](https://github.com/huggingface/transformers/actions/runs/37934
 - [x] Budget: under 2 minutes. 8 fixtures in 17 s with `OMP_NUM_THREADS=8` (37–39 s with all 128 cores).
 - [x] HF cache: `/mnt/cache` is read-only; `actions/cache` on `/tmp/hf_home/hub`, keyed on the lock hash. Later: ask infra to pre-populate the shared cache.
 - The job fails (red, not required) when a contract fails; the run step itself continues so the summary and artifact are always written.
+- Fixed 2026-10-09 (`46fa53214f`): from `22d49c28` (the `proof-*` trigger) to `fd5ecc0768`, pushes to `contracts-proof` failed before the runner started, because a log line read the changed-files list, which full runs don't write (runs 37935918629, 37938153499). `proof-*` runs always have the list and were unaffected. Full run after the fix: [37938424467](https://github.com/huggingface/transformers/actions/runs/37938424467), 7 pass + Whisper `xfail`, green.
 
 ## Phase 4: demonstrate (branch pushes against the D1 branch)
 
@@ -81,7 +82,8 @@ Runs of 2026-10-09 (each run's summary has the table and repro commands; `contra
 - [x] **C. Model-scoped:** `proof-c-clip` (no-op in `models/clip/modeling_clip.py`), [run 37935964228](https://github.com/huggingface/transformers/actions/runs/37935964228): only CLIP selected ("models/clip"), pass, 11.5 s.
 - [x] **D. Known regression:** `proof-d-umt5-revert` (reverts `d7ba937671`, #49135), [run 37935967981](https://github.com/huggingface/transformers/actions/runs/37935967981): only T5 selected ("models/umt5"); `proto-t5-small-slim` passes, `proto-umt5-small-slim` fails (`label_logprobs` off by 1.22, `training.loss` by 0.204, the same deltas as in the backfill), red, with the repro command in the summary. 13.4 s.
 - [x] **E. Live regression:** #49456 is `xfail` on the matched message only in B and every full run; the summary names the issue and that Whisper's later checks did not run.
-- [ ] Per PR: selection, run and install time, report link. Add a "Transformers CI proof" section to [evidence](evidence.md).
+- [x] Per run: selection, runner time, run link, in [evidence](evidence.md#transformers-ci-proof) (install over the image ~15 s, same on every run).
+- [x] **Mac repro** (`fd5ecc0768`): `cpu-arm64` baselines added to the branch, copied from here. On an M5 with the branch's build: 7 pass + Whisper `xfail`, as in CI; on `proof-d-umt5-revert`, `proto-umt5-small-slim` fails with CI's deltas (1.22, 0.204), `proto-t5-small-slim` passes.
 
 ## Phase 5: write-up and maintainer decision
 
@@ -121,7 +123,7 @@ Runs of 2026-10-09 (each run's summary has the table and repro commands; `contra
 - **Fixtures and contracts:** maintained in the contracts repository and on the Hub, bumped here by a lock change; not rebuilt in CI. Rebuilds depend on hardware, so fixtures are published, not regenerated.
 - **Runner:** vendored in `utils/contracts/` for the proof; a package later.
 
-**Limits.** Six families is a pilot, not coverage: the generic shrink rule reaches 314 of 559 usage paths, but each contract is hand-written and reviewed. Most catches are post-hoc; one is not. Fixtures run on CPU only; real checkpoints and GPUs stay in nightly and slow jobs. A failure reproduced on a Mac needs `cpu-arm64` baselines, which the branch doesn't carry yet (`--golden cpu-x86_64` checks the discrete outputs meanwhile).
+**Limits.** Six families is a pilot, not coverage: the generic shrink rule reaches 314 of 559 usage paths, but each contract is hand-written and reviewed. Most catches are post-hoc; one is not. Fixtures run on CPU only; real checkpoints and GPUs stay in nightly and slow jobs. The branch also carries `cpu-arm64` baselines, so the repro command in a failing job's summary works unchanged on a Mac: the UMT5 revert fails there with the same deltas as in CI.
 
 **Asks, with proposals:**
 
@@ -151,7 +153,7 @@ Runs of 2026-10-09 (each run's summary has the table and repro commands; `contra
 
 ## Open items
 
-- [ ] **Share the phase 5 write-up** with the Transformers CI maintainers; record their answers to the five asks here, then plan the follow-ups (CI baseline recording first, `cpu-arm64` baselines on the branch for Mac repro).
+- [ ] **Share the phase 5 write-up** with the Transformers CI maintainers; record their answers to the five asks here, then plan the follow-ups (CI baseline recording first). `cpu-arm64` baselines are on the branch (`fd5ecc0768`).
 - [ ] Re-vendor `utils/contracts/` on `contracts-proof` whenever `example/run.py`, `report.py`, or the lock changes here (the branch README names the source commit). Keep `proof-*` branches rebased on `contracts-proof`.
 - [ ] Cleanup after the proof: delete `proof-*` branches (and `contracts-proof` once moved to `transformers-ci`, D1b); the worktree lived in a session scratchpad (`git -C ~/Dev/transformers worktree prune`).
 
