@@ -1,7 +1,7 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/SmolLM-integration",
-  "contract_revision": "unpublished",
+  "contract_revision": "ea5b7a6908a88f30679815d8343dde713778eb86",
   "framework": "transformers",
   "variant": "eager",
   "target": "SmolLM-135M",
@@ -25,11 +25,12 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 9.2,
+  "seconds": 9.16,
   "platform": "cuda"
  },
  "outputs": {

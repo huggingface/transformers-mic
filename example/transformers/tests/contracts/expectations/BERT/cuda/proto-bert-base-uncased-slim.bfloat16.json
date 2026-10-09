@@ -1,12 +1,12 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/BERT-integration",
-  "contract_revision": "unpublished",
+  "contract_revision": "e8e23b07e9e13bebf6f1f4ba20298157333f279d",
   "framework": "transformers",
   "variant": "bfloat16",
   "target": "proto-bert-base-uncased-slim",
   "kind": "fixture",
-  "revision": "ca05f68c78ce2e6778754ae4d33ab0c8abd457a6",
+  "revision": "a1f96617d0b6c9f76ed6822ec843c922da95878b",
   "environment": {
    "python": "3.10.12",
    "transformers": "5.19.0.dev0",
@@ -25,11 +25,12 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 6.88,
+  "seconds": 7.19,
   "platform": "cuda"
  },
  "outputs": {

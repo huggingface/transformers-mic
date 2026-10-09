@@ -1,12 +1,12 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/Whisper-integration",
-  "contract_revision": "unpublished",
+  "contract_revision": "3c3b55b0246a19c805cbf0f8a0c09d50d8fbd9a3",
   "framework": "transformers",
   "variant": "eager",
   "target": "proto-whisper-tiny-slim",
   "kind": "fixture",
-  "revision": "9877529f05b049732196b574d9d5272cb8dae6e0",
+  "revision": "7acfb01aa91f05eb0a1507e00878c3e42901e2cc",
   "environment": {
    "python": "3.10.12",
    "transformers": "5.19.0.dev0",
@@ -25,11 +25,12 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 8.8,
+  "seconds": 8.17,
   "platform": "cuda"
  },
  "outputs": {
@@ -122,6 +123,58 @@
    "processor_class",
    "return_attention_mask",
    "sampling_rate"
+  ],
+  "max_length_tokens": [
+   [
+    2182
+   ],
+   [
+    3092
+   ],
+   [
+    3344
+   ],
+   [
+    5566
+   ]
+  ],
+  "assisted_tokens": [
+   [
+    2182
+   ],
+   [
+    3092
+   ],
+   [
+    3344
+   ],
+   [
+    5566
+   ]
+  ],
+  "longform_tokens": [
+   [
+    50384,
+    50373,
+    2182,
+    2182,
+    2182,
+    2182,
+    2182,
+    2182,
+    2182
+   ],
+   [
+    50384,
+    50373,
+    50259,
+    2182,
+    2182,
+    2182,
+    2182,
+    2182,
+    2182
+   ]
   ],
   "training": {
    "loss": 0.0041640279814600945,

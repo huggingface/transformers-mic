@@ -1,7 +1,7 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/Whisper-integration",
-  "contract_revision": "unpublished",
+  "contract_revision": "3c3b55b0246a19c805cbf0f8a0c09d50d8fbd9a3",
   "framework": "transformers",
   "variant": "default",
   "target": "whisper-tiny",
@@ -25,11 +25,12 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 9.22,
+  "seconds": 9.85,
   "platform": "cuda"
  },
  "outputs": {
@@ -138,6 +139,72 @@
    "processor_class",
    "return_attention_mask",
    "sampling_rate"
+  ],
+  "max_length_tokens": [
+   [
+    509
+   ],
+   [
+    509
+   ],
+   [
+    291
+   ],
+   [
+    509
+   ]
+  ],
+  "assisted_tokens": [
+   [
+    509
+   ],
+   [
+    509
+   ],
+   [
+    291
+   ],
+   [
+    509
+   ]
+  ],
+  "longform_tokens": [
+   [
+    50364,
+    286,
+    478,
+    516,
+    281,
+    360,
+    257,
+    707,
+    50364,
+    286,
+    478,
+    516,
+    281,
+    360,
+    257,
+    707
+   ],
+   [
+    50364,
+    1044,
+    291,
+    13,
+    50464,
+    50364,
+    1044,
+    291,
+    13,
+    50464,
+    50257,
+    50257,
+    50257,
+    50257,
+    50257,
+    50257
+   ]
   ],
   "training": {
    "loss": 3.3646080493927,

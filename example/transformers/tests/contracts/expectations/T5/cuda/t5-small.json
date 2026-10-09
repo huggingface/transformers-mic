@@ -1,7 +1,7 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/T5-integration",
-  "contract_revision": "unpublished",
+  "contract_revision": "f3f9d6fc9c219baae452736af8a928c091095c02",
   "framework": "transformers",
   "variant": "default",
   "target": "t5-small",
@@ -25,11 +25,12 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 9.29,
+  "seconds": 9.14,
   "platform": "cuda"
  },
  "outputs": {

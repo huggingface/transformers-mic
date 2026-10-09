@@ -1,12 +1,12 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/T5-integration",
-  "contract_revision": "unpublished",
+  "contract_revision": "f3f9d6fc9c219baae452736af8a928c091095c02",
   "framework": "transformers",
   "variant": "eager",
   "target": "proto-umt5-small-slim",
   "kind": "fixture",
-  "revision": "bcf49ff61123021fec581f72120001f396cb0b59",
+  "revision": "5c2db1c75f56bce8b4c200734810eb07f29bfcc3",
   "environment": {
    "python": "3.10.12",
    "transformers": "5.19.0.dev0",
@@ -25,11 +25,12 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 11.04,
+  "seconds": 9.22,
   "platform": "cuda"
  },
  "outputs": {

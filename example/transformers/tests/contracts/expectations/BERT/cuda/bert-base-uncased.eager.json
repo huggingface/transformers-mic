@@ -1,7 +1,7 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/BERT-integration",
-  "contract_revision": "unpublished",
+  "contract_revision": "e8e23b07e9e13bebf6f1f4ba20298157333f279d",
   "framework": "transformers",
   "variant": "eager",
   "target": "bert-base-uncased",
@@ -25,11 +25,12 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 8.41,
+  "seconds": 8.07,
   "platform": "cuda"
  },
  "outputs": {

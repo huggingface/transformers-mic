@@ -1,12 +1,12 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/SmolLM-integration",
-  "contract_revision": "unpublished",
+  "contract_revision": "ea5b7a6908a88f30679815d8343dde713778eb86",
   "framework": "transformers",
   "variant": "bfloat16",
   "target": "proto-SmolLM-1.7B-slim",
   "kind": "fixture",
-  "revision": "66ee3c4377a7a539904154828c58616b0fe2caae",
+  "revision": "58a736e869e5f9f59984b467b84e42f1aaa14d08",
   "environment": {
    "python": "3.10.12",
    "transformers": "5.19.0.dev0",
@@ -25,11 +25,12 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 7.04,
+  "seconds": 6.82,
   "platform": "cuda"
  },
  "outputs": {

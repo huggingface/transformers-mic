@@ -1,12 +1,12 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/CLIP-integration",
-  "contract_revision": "unpublished",
+  "contract_revision": "cb2e2abc4c4c992c316ab40d4a3360b1e748fcfe",
   "framework": "transformers",
   "variant": "eager",
   "target": "proto-clip-vit-base-patch32-slim",
   "kind": "fixture",
-  "revision": "e4fcaf85f17ba0b2cb08a0e33f5465f96b753a1c",
+  "revision": "adad0f30de071148ab0b55bb2263ac909e58cc5b",
   "environment": {
    "python": "3.10.12",
    "transformers": "5.19.0.dev0",
@@ -25,11 +25,12 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 7.53,
+  "seconds": 7.55,
   "platform": "cuda"
  },
  "outputs": {

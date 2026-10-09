@@ -1,12 +1,12 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/Wav2Vec2-integration",
-  "contract_revision": "unpublished",
+  "contract_revision": "e3da1ed845f002de4f1ebce84b7c86a0988d62c8",
   "framework": "transformers",
   "variant": "eager",
   "target": "proto-wav2vec2-base-960h-slim",
   "kind": "fixture",
-  "revision": "6a978df116a926f92c954cfa4a88305d22a10087",
+  "revision": "69a1a6127c38056c7e7e2053e1d208b6380b152b",
   "environment": {
    "python": "3.10.12",
    "transformers": "5.19.0.dev0",
@@ -25,11 +25,12 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 8.13,
+  "seconds": 7.39,
   "platform": "cuda"
  },
  "outputs": {

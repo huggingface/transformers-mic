@@ -1,7 +1,7 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/Wav2Vec2-integration",
-  "contract_revision": "unpublished",
+  "contract_revision": "e3da1ed845f002de4f1ebce84b7c86a0988d62c8",
   "framework": "transformers",
   "variant": "default",
   "target": "wav2vec2-base-960h",
@@ -25,11 +25,12 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 9.94,
+  "seconds": 10.41,
   "platform": "cuda"
  },
  "outputs": {

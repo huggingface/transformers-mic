@@ -1,7 +1,7 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/CLIP-integration",
-  "contract_revision": "unpublished",
+  "contract_revision": "cb2e2abc4c4c992c316ab40d4a3360b1e748fcfe",
   "framework": "transformers",
   "variant": "default",
   "target": "clip-vit-base-patch32",
@@ -25,11 +25,12 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 26.39,
+  "seconds": 25.0,
   "platform": "cuda"
  },
  "outputs": {
