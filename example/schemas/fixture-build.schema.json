@@ -51,6 +51,13 @@
   "seed": {
    "type": "integer"
   },
+  "dtype": {
+   "enum": [
+    "float32",
+    "bfloat16",
+    "float16"
+   ]
+  },
   "builder": {
    "type": "string"
   },
@@ -150,6 +157,9 @@
   },
   "training": {
    "type": "object"
+  },
+  "overfit_reason": {
+   "type": "string"
   },
   "numeric_health": {
    "type": "object",

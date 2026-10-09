@@ -13,7 +13,9 @@ For each fixture in a contract's manifest that has a `build` recipe:
 2. Shrink. The real config goes through the generic rule from
    experiments/sweep.py (widths by field name in every sub-config, depth by
    layer pattern, MoE to 4 experts); nothing else changes, so dropout and
-   SpecAugment stay as configured (contracts seed them). Seeded random weights.
+   SpecAugment stay as configured (contracts seed them). Seeded random weights,
+   saved in the source checkpoint's dtype (float32 when its config names none),
+   so the fixture loads in the dtype users of the checkpoint get by default.
 3. Copy. Every non-weight file of the source checkpoint (tokenizer,
    processor, generation config) is copied unchanged; only config.json and the
    weights are new. The weights mirror the real checkpoint's tensor names:
@@ -27,15 +29,18 @@ For each fixture in a contract's manifest that has a `build` recipe:
    name, not per model. Random weights are kept if every perturbation moves
    the logits by at least 10x the strictest tolerance the fixture must hold.
    Otherwise the fixture is overfit on the contract's training batch and must
-   then pass the gate; a fixture that does neither is a build failure.
+   then pass the gate; a fixture that does neither is a build failure. A
+   recipe can ask for overfitting anyway (`overfit`, with the reason), e.g.
+   when random weights generate the same text for every prompt.
 6. Numeric health. The saved fixture is reloaded in float32, bfloat16, and
    float16; outputs, loss, and gradients must be finite.
 
-build.json records the key, the gate results for random weights (and for the
+build.json records the key, the dtype, the gate results for random weights (and for the
 overfit weights when training was needed), the training run, the health
 checks, the copied files, and every file's sha256. The fleet lock pins that
 hash map; the runner refuses fixtures whose files differ from it. Fixtures
-without a recipe (the SmolLM ones, built by an earlier script) are left alone.
+without a recipe (proto-SmolLM-1.7B-slim, built by an earlier script) are left
+alone.
 """
 
 import argparse
@@ -120,11 +125,25 @@ def missing_parameters(cls, path):
     return sorted(info["missing_keys"])
 
 
+def source_dtype(source):
+    """The dtype the checkpoint loads in by default (dtype="auto"): its config's, else float32."""
+    config = json.loads((source / "config.json").read_text())
+    return config.get("dtype") or config.get("torch_dtype") or "float32"
+
+
 def fixture_key(source, cls, missing):
     config = {k: v for k, v in shrunk_config(source, cls).to_dict().items() if k not in VOLATILE}
     processor = {name: hashlib.sha256((source / name).read_bytes()).hexdigest() for name in copied_files(source)}
-    blob = json.dumps({"config": config, "processor": processor, "missing": missing}, sort_keys=True, default=str)
+    fields = {"config": config, "processor": processor, "missing": missing}
+    dtype = source_dtype(source)
+    if dtype != "float32":  # float32 is implied, so the keys of float32 fixtures stay as built
+        fields["dtype"] = config["dtype"] = dtype
+    blob = json.dumps(fields, sort_keys=True, default=str)
     return hashlib.sha256(blob.encode()).hexdigest(), config
+
+
+def as_dtype(batch, dtype):
+    return {k: v.to(dtype) if isinstance(v, torch.Tensor) and v.is_floating_point() else v for k, v in batch.items()}
 
 
 def save(model, out, source, missing):
@@ -189,7 +208,7 @@ def contract_batch(entry, fixture_dir):
     return batch, {"call": "training step" if training else "first inference call", "inputs": sorted(batch)}
 
 
-def overfit(model, batch, max_steps):
+def overfit(model, batch, max_steps, target_loss=0.05):
     start = time.perf_counter()
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.005, weight_decay=0.0)
     stable = 0
@@ -203,7 +222,7 @@ def overfit(model, batch, max_steps):
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         optimizer.step()
         if step % 10 == 0:
-            stable = stable + 1 if loss.item() < 0.05 else 0
+            stable = stable + 1 if loss.item() < target_loss else 0
             if stable == 2:
                 break
     model.zero_grad(set_to_none=True)
@@ -219,8 +238,7 @@ def numeric_health(cls, folder, batch):
         row = {}
         try:
             model = cls.from_pretrained(folder, dtype=dtype).train()
-            inputs = {k: v.to(dtype) if isinstance(v, torch.Tensor) and v.is_floating_point() else v for k, v in batch.items()}
-            output = model(**inputs)
+            output = model(**as_dtype(batch, dtype))
             logits = logits_of(output)
             row["outputs_finite"] = all(bool(torch.isfinite(t).all()) for t in logits.values())
             if output.get("loss") is not None:
@@ -260,6 +278,11 @@ def readme(name, contract, build, cls, config):
             f"of the contract's inputs moved the logits by at least {gate['threshold']:g} (weakest: `{gate['weakest']}`, "
             f"{gate['deltas'][gate['weakest']]:.3g}), so no training was needed."
         )
+    elif gate["pass"]:
+        weights = (
+            f"**Overfit to the contract's training step** ({build['training']['steps']} steps), although random weights "
+            f"passed the input-sensitivity gate: {recipe_reason(build)}"
+        )
     else:
         weights = (
             f"**Overfit to the contract's training step** ({build['training']['steps']} steps). Random weights failed "
@@ -282,10 +305,16 @@ A {build['parameters'] / 1e6:.1f}M-parameter fixture for the [{contract} MIC](ht
 - **Processor files copied byte for byte** from `{build['built_from']['repo']}`: {', '.join(f'`{f}`' for f in build['copied_unchanged'])}.
 - {weights}
 - **Same tensor names as the real checkpoint.** {mirror}
+- **Saved in {build['dtype']}**, the dtype `{build['built_from']['repo']}` loads in by default.
 - **Finite in float32, bfloat16, and float16** (forward, loss, gradients).
 
 Built by [`build_fixtures.py`](https://github.com/huggingface/model-integration-contracts/blob/main/example/build_fixtures.py); [`build.json`](build.json) records the pinned sources, gate results, and file hashes. The source repository commits only `README.md` and `build.json`; rebuild the other files with `python example/build_fixtures.py --fixture {short(name)}`.
 """
+
+
+def recipe_reason(build):
+    reason = build["overfit_reason"]
+    return reason if reason.endswith(".") else reason + "."
 
 
 def short(repo):
@@ -321,19 +350,23 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out):
         r["atol"] for r in manifest["outputs"].values() if r["compare"] == "allclose"
     )
     threshold = GATE_FACTOR * tolerance
+    dtype = getattr(torch, source_dtype(source))
 
     torch.manual_seed(recipe["seed"])
-    model = cls._from_config(shrunk_config(source, cls), dtype=torch.float32).eval()
+    # Initialized in float32 like every other fixture, then cast: the seed gives the same weights in any dtype.
+    model = cls._from_config(shrunk_config(source, cls), dtype=torch.float32).eval().to(dtype)
     copied = save(model, out, source, lacks)
     entry = root / manifest["integrations"]["transformers"]["entry_point"]
     batch, captured = contract_batch(entry, out)
     accepted = recipe.get("accept_insensitive", {})
-    gate = {"random": sensitivity(model, batch, threshold, accepted)}
+    gate = {"random": sensitivity(model, as_dtype(batch, dtype), threshold, accepted)}
     weights, training = "random", None
-    if not gate["random"]["pass"]:
+    if not gate["random"]["pass"] or recipe.get("overfit"):
         torch.manual_seed(recipe["seed"])  # dropout and SpecAugment stay on while training
-        training = overfit(model, batch, recipe.get("max_steps", 500))
-        gate["overfit"] = sensitivity(model, batch, threshold, accepted)
+        model = model.float()  # trained in float32, saved in the source dtype
+        training = overfit(model, as_dtype(batch, torch.float32), recipe.get("max_steps", 500), recipe.get("target_loss", 0.05))
+        model = model.to(dtype)
+        gate["overfit"] = sensitivity(model, as_dtype(batch, dtype), threshold, accepted)
         if not training["converged"] or not gate["overfit"]["pass"]:
             raise SystemExit(f"{name}: random weights fail the gate and overfitting did not fix it: {training}, {gate}")
         weights = "overfit"
@@ -351,6 +384,7 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out):
         "covers": {repo: revisions[repo] for repo in fixture["covers"]},
         "built_from": {"repo": source_repo, "revision": revisions[source_repo]},
         "seed": recipe["seed"],
+        "dtype": str(dtype).removeprefix("torch."),
         "builder": "example/build_fixtures.py",
         "model_class": cls.__name__,
         "parameters": sum(p.numel() for p in model.parameters()),
@@ -359,6 +393,7 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out):
         "weights": weights,
         "gate": gate,
         **({"training": training} if training else {}),
+        **({"overfit_reason": recipe["overfit"]} if recipe.get("overfit") else {}),
         "numeric_health": health,
         "copied_unchanged": copied,
         "environment": environment(),

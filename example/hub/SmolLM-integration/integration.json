@@ -20,7 +20,12 @@
       "covers": [
         "HuggingFaceTB/SmolLM-135M",
         "HuggingFaceTB/SmolLM-360M"
-      ]
+      ],
+      "build": {
+        "seed": 17,
+        "overfit": "random weights generate the same tokens for every prompt, so generated_tokens cannot tell the prompts apart. The training rows share 'The capital of' and then name four countries, so ln 4 at that position (about 0.2 per token) cannot be learned: target_loss 0.3",
+        "target_loss": 0.3
+      }
     },
     "hf-internal-testing/proto-SmolLM-1.7B-slim": {
       "built_from": "HuggingFaceTB/SmolLM-1.7B",

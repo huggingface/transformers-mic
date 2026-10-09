@@ -6,5 +6,4 @@ docs/next-steps.md
 example/hub/*-slim/*
 !example/hub/*-slim/README.md
 !example/hub/*-slim/build.json
-!example/hub/proto-SmolLM-slim/*
 !example/hub/proto-SmolLM-1.7B-slim/*

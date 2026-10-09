@@ -5,15 +5,16 @@ tags:
 base_model: HuggingFaceTB/SmolLM-135M
 ---
 
-# Slim fixture: SmolLM
+# Slim fixture: proto-SmolLM-slim
 
-A 3.2M-parameter fixture for the [SmolLM MIC](https://huggingface.co/hf-internal-testing/SmolLM-integration), covering [`HuggingFaceTB/SmolLM-135M`](https://huggingface.co/HuggingFaceTB/SmolLM-135M), [`HuggingFaceTB/SmolLM-360M`](https://huggingface.co/HuggingFaceTB/SmolLM-360M). It is a test artifact, not a usable model, tagged `test-artifact` to keep it out of candidate-model search.
+A 3.2M-parameter fixture for the [SmolLM MIC](https://github.com/huggingface/model-integration-contracts/tree/main/example/hub/SmolLM-integration), covering [`HuggingFaceTB/SmolLM-135M`](https://huggingface.co/HuggingFaceTB/SmolLM-135M), [`HuggingFaceTB/SmolLM-360M`](https://huggingface.co/HuggingFaceTB/SmolLM-360M). It is a test artifact, not a usable model, tagged `test-artifact` to keep it out of candidate-model search.
 
-Its overfit answers are references for this fixture only. A passing check does not establish the real checkpoints' outputs or semantic correctness on new prompts. Agents should use the parent contract to find the requested real checkpoint's tested environment and reviewed result.
+- **Fixture key `a186080c7a70`.** It covers every checkpoint whose processor files are byte-identical and whose config matches after shrinking.
+- **Same architecture, smaller config:** `LlamaForCausalLM`, shrunk by the generic rule in [`sweep.py`](https://github.com/huggingface/model-integration-contracts/blob/main/experiments/sweep.py) (num_hidden_layers 2).
+- **Processor files copied byte for byte** from `HuggingFaceTB/SmolLM-135M`: `generation_config.json`, `merges.txt`, `special_tokens_map.json`, `tokenizer.json`, `tokenizer_config.json`, `vocab.json`.
+- **Overfit to the contract's training step** (80 steps), although random weights passed the input-sensitivity gate: random weights generate the same tokens for every prompt, so generated_tokens cannot tell the prompts apart. The training rows share 'The capital of' and then name four countries, so ln 4 at that position (about 0.2 per token) cannot be learned: target_loss 0.3.
+- **Same tensor names as the real checkpoint.** The real checkpoint has every parameter, and so does the fixture.
+- **Saved in bfloat16**, the dtype `HuggingFaceTB/SmolLM-135M` loads in by default.
+- **Finite in float32, bfloat16, and float16** (forward, loss, gradients).
 
-- **Fixture key `5fe5094035d3`.** It covers every checkpoint whose processor files are byte-identical and whose config matches in every field that shrinking keeps ([`build.json`](build.json) lists them). The build fails if a checkpoint assigned here has a different key.
-- **Same architecture, smaller config:** `LlamaForCausalLM`, 2 layers, hidden size 64, grouped key/value heads (4 query, 2 key/value), like the real checkpoints. Most of the 13 MB is the full 49,152-token embedding table, which stays full size because the tokenizer is unchanged.
-- **Processor files copied byte for byte** from `HuggingFaceTB/SmolLM-135M`: `tokenizer.json`, `tokenizer_config.json`, `special_tokens_map.json`, `vocab.json`, `merges.txt`.
-- **Overfit to the contract's prompts** ("The capital of France is" → " Paris", …; 50 steps), so its outputs are meaningful and change visibly when a framework change breaks them.
-
-Built by [`build_fixtures.py`](https://github.com/huggingface/model-integration-contracts/blob/main/example/build_fixtures.py) from pinned revisions recorded in `build.json`.
+Built by [`build_fixtures.py`](https://github.com/huggingface/model-integration-contracts/blob/main/example/build_fixtures.py); [`build.json`](build.json) records the pinned sources, gate results, and file hashes. The source repository commits only `README.md` and `build.json`; rebuild the other files with `python example/build_fixtures.py --fixture proto-SmolLM-slim`.

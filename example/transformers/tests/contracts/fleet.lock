@@ -5,15 +5,15 @@
     "SmolLM": {
       "integration": {
         "repo": "hf-internal-testing/SmolLM-integration",
-        "revision": "ad271a34c5e377f88ed89397ac822cff94c3beea",
+        "revision": "ea5b7a6908a88f30679815d8343dde713778eb86",
         "path": "../../../hub/SmolLM-integration",
-        "files_sha256": "ec9749992669ffa1862b6350d1b96c953091175ce6fd7c6fcc400bbfc959a1fb"
+        "files_sha256": "b5660454ba3f1996124f489e19364f30b93993aa5288d17a697f090188210805"
       },
       "fixtures": {
         "hf-internal-testing/proto-SmolLM-slim": {
-          "revision": "2a061e66b1f0831e810566845b9f900dcef55074",
+          "revision": "41989eed59baa8fcbc7745b168d3530c9f1cc150",
           "path": "../../../hub/proto-SmolLM-slim",
-          "files_sha256": "e281b7c566cef1885af1a3087b9d590058971b56ab4aa8136aedf089141ff60e"
+          "files_sha256": "8562493b1bb64ef7fd81ceb10b47e69aa135afe9ea31385d2b3dfaaf92ba330d"
         },
         "hf-internal-testing/proto-SmolLM-1.7B-slim": {
           "revision": "58a736e869e5f9f59984b467b84e42f1aaa14d08",

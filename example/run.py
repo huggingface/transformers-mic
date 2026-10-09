@@ -64,7 +64,10 @@ logits are reported as max delta, not compared.
 The platform is the device the contract reports, with the CPU architecture
 for CPUs (cpu-arm64, cpu-x86_64): numeric outputs differ across CPU
 architectures by more than 1e-4 for some fixtures (Whisper), so each has its
-own baselines. --golden cpu means this machine's CPU platform.
+own baselines. bfloat16 targets on x86 CPUs with native bfloat16 (avx512_bf16,
+amx_bf16) use cpu-x86_64-bf16: their logits differ from emulated bfloat16 by
+up to 0.25 (SmolLM-135M), and their tokens can differ. --golden cpu means this
+machine's CPU platform.
 
 An unsupported target records why it was skipped (skip): declared in the
 manifest, missing hardware on this host, or an undefined variant. A run in
@@ -493,12 +496,25 @@ def resource_problem(spec, variant):
     return f"needs {', '.join(problems)}" if problems else None
 
 
-def platform_class(device):
-    """The baseline platform: the device, with the architecture for CPUs."""
+def native_bfloat16():
+    """Whether this x86 CPU computes bfloat16 natively (Linux only)."""
+    try:
+        flags = set(Path("/proc/cpuinfo").read_text().split())
+    except OSError:
+        return False
+    return bool(flags & {"avx512_bf16", "amx_bf16"})
+
+
+def platform_class(device, dtype=None):
+    """The baseline platform: the device, with the architecture for CPUs, and
+    native bfloat16 support for bfloat16 runs on x86."""
     if device != "cpu":
         return device
     machine = os.uname().machine.lower()
-    return f"cpu-{ {'aarch64': 'arm64', 'amd64': 'x86_64'}.get(machine, machine) }"
+    arch = {"aarch64": "arm64", "amd64": "x86_64"}.get(machine, machine)
+    if arch == "x86_64" and dtype == "bfloat16" and native_bfloat16():
+        return "cpu-x86_64-bf16"
+    return f"cpu-{arch}"
 
 
 def rules_for(manifest, platform_dir):
@@ -648,7 +664,7 @@ def main():
                     emit({**record, "status": "error", "failures": [stderr.strip()[-1500:] or "no result record"]})
                     continue
                 actual = json.loads(lines[-1])
-                platform = platform_class(actual["runtime"]["device"])
+                platform = platform_class(actual["runtime"]["device"], actual["runtime"].get("dtype"))
                 record["platform"] = platform
                 suffix = "" if args.variant == "default" or args.golden else f".{args.variant}"
                 platform_dir = lock_dir / "expectations" / name / (args.golden or platform)

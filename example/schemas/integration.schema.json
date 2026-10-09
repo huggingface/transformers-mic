@@ -98,6 +98,16 @@
         "type": "integer",
         "minimum": 1
        },
+       "target_loss": {
+        "type": "number",
+        "exclusiveMinimum": 0,
+        "description": "training loss that counts as converged (default 0.05); raise it only when the training batch has an irreducible loss, with the reason in overfit"
+       },
+       "overfit": {
+        "type": "string",
+        "minLength": 1,
+        "description": "overfit even when random weights pass the input-sensitivity gate, with the reviewed reason"
+       },
        "accept_insensitive": {
         "type": "object",
         "description": "perturbations (input:perturbation) the fixture may ignore, with the reviewed reason; still measured and reported",

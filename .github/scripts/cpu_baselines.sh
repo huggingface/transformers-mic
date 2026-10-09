@@ -40,7 +40,7 @@ for variant in "${variants[@]}"; do
   tail -1 "$OUT/record-$variant.log"
 done
 mkdir -p "$OUT/candidates"
-find "$EXPECTATIONS" -name '*.candidate.json' -path '*/cpu-x86_64/*' | while read -r f; do
+find "$EXPECTATIONS" -name '*.candidate.json' \( -path '*/cpu-x86_64/*' -o -path '*/cpu-x86_64-bf16/*' \) | while read -r f; do
   mkdir -p "$OUT/candidates/$(dirname "$f")"
   cp "$f" "$OUT/candidates/$f"
   mv "$f" "${f%.candidate.json}.json"  # approved here only, so the checks below have baselines

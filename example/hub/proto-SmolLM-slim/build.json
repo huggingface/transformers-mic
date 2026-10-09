@@ -1,23 +1,50 @@
 {
  "fixture": "hf-internal-testing/proto-SmolLM-slim",
- "key": "5fe5094035d3b760e5fece7218637c822044d7726e58b0537ea0175ef4eb3084",
+ "key": "a186080c7a70d036807d4cb02a3ca1068faa9371d75db21f0f33e95059a694cc",
  "key_fields": {
-  "model_type": "llama",
   "architectures": [
    "LlamaForCausalLM"
   ],
+  "output_hidden_states": false,
+  "return_dict": true,
+  "chunk_size_feed_forward": 0,
+  "is_encoder_decoder": false,
+  "id2label": {
+   "0": "LABEL_0",
+   "1": "LABEL_1"
+  },
+  "label2id": {
+   "LABEL_0": 0,
+   "LABEL_1": 1
+  },
+  "problem_type": null,
   "vocab_size": 49152,
-  "tie_word_embeddings": true,
-  "rope_theta": 10000.0,
-  "rope_scaling": null,
+  "hidden_size": 64,
+  "intermediate_size": 128,
+  "num_hidden_layers": 2,
+  "num_attention_heads": 4,
+  "num_key_value_heads": 2,
+  "hidden_act": "silu",
   "max_position_embeddings": 2048,
+  "initializer_range": 0.02,
+  "rms_norm_eps": 1e-05,
+  "use_cache": true,
+  "pad_token_id": null,
   "bos_token_id": 0,
   "eos_token_id": 0,
-  "rms_norm_eps": 1e-05,
-  "hidden_act": "silu",
+  "pretraining_tp": 1,
+  "tie_word_embeddings": true,
+  "rope_parameters": {
+   "rope_theta": 10000.0,
+   "rope_type": "default"
+  },
   "attention_bias": false,
+  "attention_dropout": 0.0,
   "mlp_bias": false,
-  "grouped_kv_heads": true
+  "head_dim": 16,
+  "model_type": "llama",
+  "output_attentions": false,
+  "dtype": "bfloat16"
  },
  "covers": {
   "HuggingFaceTB/SmolLM-135M": "1d461723eec654e65efdc40cf49301c89c0c92f4",
@@ -28,24 +55,93 @@
   "revision": "1d461723eec654e65efdc40cf49301c89c0c92f4"
  },
  "seed": 17,
+ "dtype": "bfloat16",
+ "builder": "example/build_fixtures.py",
+ "model_class": "LlamaForCausalLM",
+ "parameters": 3219776,
+ "missing_parameters": [],
+ "captured": {
+  "call": "training step",
+  "inputs": [
+   "attention_mask",
+   "input_ids",
+   "labels"
+  ]
+ },
+ "weights": "overfit",
+ "gate": {
+  "random": {
+   "pass": true,
+   "accepted_insensitive": {},
+   "threshold": 0.001,
+   "deltas": {
+    "input_ids:roll_batch": 1.3857421875,
+    "input_ids:reverse": 1.5,
+    "attention_mask:all_ones": 0.2445068359375
+   },
+   "weakest": "attention_mask:all_ones",
+   "no_perturbation_defined": []
+  },
+  "overfit": {
+   "pass": true,
+   "accepted_insensitive": {},
+   "threshold": 0.001,
+   "deltas": {
+    "input_ids:roll_batch": 13.29296875,
+    "input_ids:reverse": 12.9375,
+    "attention_mask:all_ones": 0.8125
+   },
+   "weakest": "attention_mask:all_ones",
+   "no_perturbation_defined": []
+  }
+ },
  "training": {
-  "seconds": 0.43305258301552385,
-  "steps": 50,
-  "loss": 0.003646926721557975,
+  "seconds": 0.72,
+  "steps": 80,
+  "loss": 0.2569873631000519,
   "converged": true
  },
+ "overfit_reason": "random weights generate the same tokens for every prompt, so generated_tokens cannot tell the prompts apart. The training rows share 'The capital of' and then name four countries, so ln 4 at that position (about 0.2 per token) cannot be learned: target_loss 0.3",
+ "numeric_health": {
+  "float32": {
+   "outputs_finite": true,
+   "loss_finite": true,
+   "gradients_finite": true,
+   "finite": true
+  },
+  "bfloat16": {
+   "outputs_finite": true,
+   "loss_finite": true,
+   "gradients_finite": true,
+   "finite": true
+  },
+  "float16": {
+   "outputs_finite": true,
+   "loss_finite": true,
+   "gradients_finite": true,
+   "finite": true
+  }
+ },
  "copied_unchanged": [
+  "generation_config.json",
+  "merges.txt",
+  "special_tokens_map.json",
   "tokenizer.json",
   "tokenizer_config.json",
-  "special_tokens_map.json",
-  "vocab.json",
-  "merges.txt"
+  "vocab.json"
  ],
+ "environment": {
+  "python": "3.10.19",
+  "machine": "arm64",
+  "torch": "2.11.0",
+  "transformers": "5.19.0.dev0",
+  "tokenizers": "0.23.1"
+ },
  "sha256": {
-  "config.json": "c8226cace2f107b8e723740717c0168f9e7ea096e3de2b897e13ddd7affc59f9",
-  "generation_config.json": "793cfc022261e51f1a9f923d7c5d7c8bc6b1e0ed3dabda2f60f097d4ff693f2c",
+  "config.json": "9e034554f906ad49e4d3434c1a65025ce7f89edef4037f6a2aced258179ebe4a",
+  "generation_config.json": "d0df27778d7caa8acc0c2d8eb5cfc11135da6226dbae8c12cc85d0ce6067faaa",
   "merges.txt": "0b54e8aa4e53d5383e2e4bc635a56b43f9647f7b13832d5d9ecd8f82dac4f510",
-  "model.safetensors": "613fa0bfc527b44166af8da3c70217999c78c9da746090048bf13485e8c5041d",
+  "model.safetensors": "59c2ee97741816229336d919977c9bc7276db25957cbbfeb9d7af385d7f5878d",
   "special_tokens_map.json": "e786b595b9a23148bf1630df78d9037a048ea671e48bfd3549a1e3c233742bb3",
   "tokenizer.json": "9ca9acddb6525a194ec8ac7a87f24fbba7232a9a15ffa1af0c1224fcd888e47c",
   "tokenizer_config.json": "238ad6b60d48e471624ea70bc79e92f2611844d5016471fee8c167854bcb98e8",
