@@ -12,7 +12,7 @@ Results from local experiments, the regression replay, the shadow backfill over 
 - **Scheduled runs caught a regression the night it merged:** #48282 (2026-10-08) made `generate()` raise on every original Whisper checkpoint, and the next nightly and shadow runs failed Whisper everywhere ([#49456](https://github.com/huggingface/transformers/issues/49456); a `local_patches` workaround here, a narrowed known failure in the PR CI job). The PR's CI could not see it ([why](https://github.com/huggingface/transformers/issues/49456#issuecomment-6076843277)): model tests build configs without `suppress_tokens`, pipeline tests pass their own `generation_config`, and the slow `generate()` tests were not in its `run-slow` list; the contract calls `generate()` on the checkpoint's config, as users do.
 - **In Transformers' PR CI, a reverted fix fails as in the backfill:** reverting #49135 turns the job red with the same UMT5 deltas, on Intel with the CI image's packages, and the summary's repro command gives the same failure on a Mac ([proof](#transformers-ci-proof)).
 - **The runner found a real bug:** seven audio models leave `masked_spec_embed` uninitialized ([#49385](https://github.com/huggingface/transformers/issues/49385), fix [#49386](https://github.com/huggingface/transformers/pull/49386)); the slim Wav2Vec2 fixture catches it every run ([runner](../example/README.md#runner-prototype)).
-- **No real regression has needed an overfit fixture yet:** a random twin caught the MusicGen Melody conditioning drop ([#48679](https://github.com/huggingface/transformers/pull/48679)) as well as the overfit fixture, and neither weight kind reached the trigger of two silent Whisper generation bugs ([overfit or random](#overfit-or-random-weights-on-real-regressions)).
+- **No real regression has needed an overfit fixture yet:** random twins caught the MusicGen Melody conditioning drop ([#48679](https://github.com/huggingface/transformers/pull/48679)) and Whisper's left-padded long-form bug ([#48028](https://github.com/huggingface/transformers/pull/48028)) as well as the overfit fixtures. Whisper needed controlled unequal first-segment lengths to reach the trigger ([follow-up](#whisper-left-padded-previous-segment-prompts)); assisted decoding #48108 remains missed.
 - **Golden outputs catch silent backend bugs:** Transformers.js on WebGPU returned all-zero fp16/q4f16 logits with no error ([repro](../experiments/webgpu_browser/README.md)).
 
 **Fixtures, baselines, cost**
@@ -188,6 +188,25 @@ After the [second round](improving-contracts.md#the-second-round-triaging-the-mo
 - **bfloat16 SmolLM fixture: no false alarm**, all 1,480 commits, on `cpu-x86_64` (888: EPYC 7763, 9V74 without native bfloat16, Xeon 8370C/8573C) and `cpu-x86_64-bf16` (592: EPYC 9V45, 9V74 with `avx512_bf16`).
 - **Cost:** 6.7 s per commit summed over targets, vs 6.2 s (the three added Whisper calls).
 
+### Weekly check: 2026-10-11
+
+The scheduled [shadow](https://github.com/huggingface/model-integration-contracts/actions/runs/38109078172) passed 9/9; [nightly](https://github.com/huggingface/model-integration-contracts/actions/runs/38106887222) passed 90 checks with the same 5 declared `umt5-small` exclusions (`config.json` lacks `model_type`). Both tested Transformers `536ecc0073`, the same commit as 2026-10-10. Target sets and statuses matched the previous day, with no `environment_differs`: another repeatability sample, no new commit coverage.
+
+`find_misses.py` on the six shadow runs of 2026-10-08..11 found no candidates across five distinct commits, with or without `--shared`. The daily samples omit intervening commits, so the [weekly backfill](https://github.com/huggingface/model-integration-contracts/actions/runs/38134921721) checked every first-parent commit in `[2026-10-05, 2026-10-12)`: **75 commits × 9 fixtures = 675 passes**, no missing commits or runner errors, no dependency overrides or `environment_differs`. Result platforms: 636 `cpu-x86_64`, 39 `cpu-x86_64-bf16`. Records: `shadow-results:runs/backfill/2026-10-05_2026-10-12-38134921721.jsonl`.
+
+Miss triage: one model-tier candidate and 35 shared-tier rows (five fixes matched to all seven contracts). Read the diffs and the contracts' calls:
+
+| Fix | Verdict | Reason |
+| --- | --- | --- |
+| [#49419](https://github.com/huggingface/transformers/pull/49419), `9167f73f23` | Known bug, workaround masks the transition | Whisper timestamp batch decoding is already called; `whisper-decode-tensor-batch` fixes it on the older builds. This is not a new missing call. |
+| [#48700](https://github.com/huggingface/transformers/pull/48700), `492f240432` | Outside current usage | Quantized cache configuration and beam reordering; contracts use default caches. |
+| [#49276](https://github.com/huggingface/transformers/pull/49276), `9d68278db7` | Outside current usage | Multi-image feature ordering during generation expansion; no current contract uses that VLM path. CLIP does not generate. |
+| [#49319](https://github.com/huggingface/transformers/pull/49319), `2c8526daa3` | Outside current usage | Chunked prefill with multi-axis position IDs; no current contract exercises it. |
+| [#49315](https://github.com/huggingface/transformers/pull/49315), `3758eba846` | Outside current usage | `WatermarkDetector` repeated-ngram counting; no contract calls the detector. |
+| [#49149](https://github.com/huggingface/transformers/pull/49149), `59150f0435` | Outside current usage | Shared AutoTokenizer changes are documentation; runtime change is the MistralCommon backend, absent from this fleet. |
+
+**Limits:** all backfill records declare the three current `local_patches`, including the workarounds for #49403 and #49456. Green patched history does not establish that the unpatched bugs were absent; their original scheduled failures remain the detection evidence. No new regression or baseline update from this weekly check. The five shared fixes identify paths outside current coverage, not bugs caught by this fleet.
+
 ## Historical regression replay
 
 Regressions fixed since May 2026 ([freeze/check](../experiments/replay.py), [per-case driver](../experiments/replay_case.py), [usage repros](../experiments/usage_repros.py)): fixtures and real-checkpoint baselines frozen on a good build (`4d536e1f`), run unchanged on the bad build (the fix's parent) and the fixed one (caught = bad flagged, fixed clean); separately, the affected public call on both. Builds before 2026-08-17 need older `tokenizers` (before mid-June, also `kernels`): the fleet lock must pin dependencies, not just models.
@@ -226,6 +245,93 @@ Does a real regression need an overfit fixture, or would random weights catch it
 | Whisper assisted decoding re-applies `begin_suppress_tokens` ([#48108](https://github.com/huggingface/transformers/pull/48108)) | `generate(assistant_model=...)` | missed | missed |
 
 - **Still no overfit-only catch.** The backfill had none either: every Whisper failure there was an exception, and the SmolLM fixtures never failed. A history search (2025-10..2026-10) found no silent bug on Whisper's input side (feature extraction, encoder, cross-attention); the silent candidates are in generation.
-- **Random weights ignore conditioning, yet see it vanish.** Random Whisper gives every batch row the same tokens, random MusicGen Melody the same codes for every prompt, melody or not. Dropping the conditioning still changes their outputs: the prompt's presence matters even when its content doesn't. A bug that mixes conditioning between rows, or drops only the melody, would be overfit-only; none is known yet.
-- **An overfit fixture covers only what it was trained on.** The Whisper fixture learned short-form, no-timestamp answers: in long-form timestamp mode it repeats one word to the token cap, and assisted it answers one token and stops, so neither trigger occurs. Retrained on timestamped targets (`<|0.00|> red<|1.00|>`, then 1–4 words), segments close on timestamps and rows differ in length, yet #48028 still did not fire: instrumented, no call in nine input variants, with either fixture, produced a left-padded decoder mask. Its trigger needs per-row prompt lengths the synthetic audio does not create.
+- **Random weights ignore conditioning, yet see it vanish.** Random Whisper gives every batch row the same tokens, random MusicGen Melody the same codes for every prompt, melody or not. Dropping the conditioning still changes their outputs: the prompt's presence matters even when its content doesn't. Melody swaps and drops show extra overfit sensitivity on selected inputs, but no real overfit-only catch ([controls](#musicgen-melody-conditioning-controls)).
+- **An overfit fixture covers only what it was trained on.** The Whisper fixture learned short-form, no-timestamp answers: in long-form timestamp mode it repeats one word to the token cap, and assisted it answers one token and stops, so neither trigger occurred in the initial replay. Retrained on timestamped targets (`<|0.00|> red<|1.00|>`, then 1–4 words), segments close on timestamps and rows differ in length, yet #48028 still did not fire: instrumented, no call in nine input variants, with either fixture, produced a left-padded decoder mask. Controlled unequal first-segment lengths subsequently reached that trigger with both weight kinds ([follow-up](#whisper-left-padded-previous-segment-prompts)).
 - **What the MusicGen Melody contract adds** ([contract](../example/hub/MusicgenMelody-integration/integrations/transformers/usage.md), [fixture](https://huggingface.co/hf-internal-testing/proto-musicgen-melody-slim)): a composite model (T5 text encoder, EnCodec, decoder) and classifier-free guidance. The generic shrink rule left EnCodec at 56M of 59M parameters (`num_filters` doubles per stage) and `codebook_dim` coupled to the old width; two reviewed `config_overrides` bring the fixture to 3.5M (17.5 MB). Random weights pass the gate (weakest 0.018) but generate the same codes for every prompt, so the fixture is overfit by reviewed choice (60 steps). On the M5, the fixture runs in ~1 s; the real `facebook/musicgen-melody` (1.5B) takes ~430 s per variant, training step included.
+
+### MusicGen Melody conditioning controls
+
+2026-10-11: [A10G run](https://github.com/huggingface/model-integration-contracts/actions/runs/38136857327), float32, pinned torch 2.11.0+cu128. Replayed #48679 on fix `5bed62964c` and parent `93ebf6b111`, using the real checkpoint, published overfit fixture, and a random twin built on the pinned `8625785e` with seed 17. Six input cases × guidance 1 and 3 × two builds × three weight sets = 72 generation calls, plus two fresh-process fixture repeats. The four fixture runs were also checked on M5 CPU (48 calls). Random twins share the recipe and fixture key but differ in bytes across build platforms; each is reused unchanged within its bad/fix pair. [Raw records, comparisons, and build metadata](../experiments/results/melody_conditioning.json); [harness](../experiments/melody_conditioning.py).
+
+The model-history and issue search found no known MusicGen Melody fix that swaps conditioning rows or drops only the melody. Those changes are **input-perturbation controls**, not historical bugs. Cases use the contract's two prompts and melodies, crossed text/melody pairs, or identical text in both rows. We observe both the contract's score argmaxes and the codes actually sent to EnCodec: generation removes some score positions with its delay mask.
+
+| Comparison | Real checkpoint (A10G) | Overfit fixture (M5 and A10G) | Random twin (M5 and A10G) |
+| --- | --- | --- | --- |
+| Real #48679, original/crossed prompts, guidance 1 or 3 | caught | caught | caught |
+| Real #48679, identical text across rows, guidance 1 or 3 | caught | **missed** | caught |
+| Swap melodies, original prompts, guidance 3 | 39/40 decoded code IDs change | 1/40 changes | no change |
+| Drop melody, original prompts, guidance 3 | 40/40 decoded code IDs change | 1/40 changes | no change |
+| Swap or drop melody, original prompts, guidance 1 | codes change | no change | no change |
+| Swap melodies, identical text, guidance 1 or 3 | codes change | no change | no change |
+
+**No real overfit-only catch.** The random twin catches the historical bug in all 12 input/guidance cases; the overfit fixture catches 8 and misses the 4 identical-text cases, on both platforms. Overfitting adds selected conditioning sensitivity but does not improve detection uniformly. The two default CUDA fixture repeats match exactly in scores' code IDs, decoded code IDs, audio heads, and teacher-forced eval loss.
+
+The eval loss is unchanged across the historical fix because its code changes generation only; this is not the contract's training probe. In the controls, original-prompt melody swaps/drops keep both fixtures' eval-loss deltas within `atol=rtol=1e-4`. Their recorded audio heads are all zero throughout the experiment, so they do not establish waveform sensitivity. The observed extra signal is in decoded code IDs; the real checkpoint's guided melody controls also change its waveform head.
+
+Re-run on the experiment branch (workflow and harness at `ff93deb`):
+
+```sh
+gh workflow run gpu-checks.yml --repo huggingface/model-integration-contracts \
+    --ref experiment/melody-conditioning -f matrix=melody
+gh run download <run-id> --repo huggingface/model-integration-contracts -n melody-conditioning
+```
+
+### Whisper left-padded previous-segment prompts
+
+2026-10-11: [A10G run](https://github.com/huggingface/model-integration-contracts/actions/runs/38138130043), float32, eager attention, torch 2.11.0+cu128. Replayed [#48028](https://github.com/huggingface/transformers/pull/48028) on fix `e12c79c582` and parent `f9b76f2dfc`, with pinned `openai/whisper-tiny`, the published overfit fixture, and a seed-17 random twin built on the pinned `8625785e`. Four input cases × two builds × three weight sets = **24 generation calls**, plus **12 fixed-build calls in fresh processes**. Each weight file is reused unchanged across its pair and repeat. [Raw records and comparisons](../experiments/results/whisper_left_padding.json); [harness](../experiments/whisper_left_padding.py); [analysis](../experiments/summarize_whisper_left_padding.py).
+
+The controlled long-form case uses two 36-second tone inputs, `condition_on_prev_tokens=True`, and timestamps. A public `logits_processor` constrains only the first segment to `<|0.00|> red<|30.00|>` in one row and `<|0.00|> green blue yellow<|30.00|>` in the other. The second segment generates freely. These identical first-segment outputs create previous-token prompts of different lengths without requiring the weights to learn timestamp closure. Observers capture the actual decoder inputs, attention masks, position IDs, and a subset of raw prefill logits; they do not alter the model computation.
+
+| Input case | Real checkpoint: tokens change | Overfit fixture: tokens change | Random twin: tokens change |
+| --- | --- | --- | --- |
+| Short-form, ordinary unpadded prefix | no | no | no |
+| Short-form, caller-supplied left-padded decoder prompts | yes | **no** | yes |
+| Long-form, unforced repeated tones | no | no | no |
+| Long-form, controlled unequal first segments | **yes** | **yes** | **yes** |
+
+Both padded cases reach one left-padded decoder prefill per model on each build. In controlled long-form, the first segments match exactly across builds. Only the shorter-prompt row's next segment changes; the longer row is unchanged. Its sampled prefill-logit delta is **12.923 checkpoint, 2.468 overfit, 0.418 random**, all outside `atol=rtol=1e-4`. The fixed build supplies position IDs equal to the decoder mask's cumulative token count minus one, with zero at padding positions; the bad build supplies none. The unpadded short-form control has exactly zero logit delta. Unforced repeated tones reach no left-padding in any weight set.
+
+**No overfit-only catch:** both fixtures catch this real bug in freely generated long-form tokens once the input setup reaches its trigger. The shorter caller-supplied prompt probe changes overfit logits (delta 1.271) but leaves its generated tokens unchanged, while checkpoint and random tokens change. Token and logit detection are reported separately. All 12 fixed-build repeats match exactly in tokens, segment metadata, decoder traces, and sampled logits (excluding timing).
+
+**Limits:** this is a targeted historical replay with a constrained first segment, not evidence that natural audio reliably reaches the trigger or that random weights transcribe usefully. Caller-supplied `decoder_input_ids` is supported but deprecated by Whisper's public `generate`; the controlled long-form case exercises its internally constructed previous-segment prompts. No fixture retraining, published contract change, or baseline update was needed for the experiment.
+
+Re-run the GPU generation job (workflow and harness at `90ae402`):
+
+```sh
+gh workflow run gpu-checks.yml --repo huggingface/model-integration-contracts \
+    --ref experiment/whisper-left-padding -f matrix=whisper-padding
+gh run download <run-id> --repo huggingface/model-integration-contracts \
+    -n whisper-left-padding --dir /tmp/whisper-results
+python experiments/summarize_whisper_left_padding.py /tmp/whisper-results \
+    --run-url https://github.com/huggingface/model-integration-contracts/actions/runs/<run-id> \
+    --harness-commit 90ae402a882992624121838687311c822f1158d4 --output /tmp/whisper-summary.json
+```
+
+The controlled continuation is now in the [Whisper contract](../example/hub/Whisper-integration/integrations/transformers/usage.md), as `continued_longform_tokens`. Published contract revision: `a4ed88605df499c8d655eff2838001279c3fe5e5`; fixture weights are unchanged. **14 baselines** (two targets × CPU ARM default/eager, CPU x86 default/eager, CUDA default/eager/bfloat16) preserve all old outputs and add the new one. Each recording includes a fresh-process stability check; additional isolated checks pass on ARM and the [A10G worker](https://github.com/huggingface/model-integration-contracts/actions/runs/38140685813). The contract itself, through `run.py`, passes on historical fix `e12c79c582` and fails only `continued_longform_tokens` on parent `f9b76f2dfc` with the published fixture. [Validation records](../experiments/results/whisper_contract_validation.json). Baselines honestly retain `contract_revision: local` where recorded before publication; the fleet pins the identical published source.
+
+### Whisper assisted-decoding suppression
+
+2026-10-11: replayed [#48108](https://github.com/huggingface/transformers/pull/48108), fix `b6688043ff` and parent `2b296305d7`. The earlier contract probe uses `WhisperForCausalLM`; the upstream test uses `WhisperForConditionalGeneration` as its assistant. The latter gives the assistant its own encoder, which also permits an assistant of a different hidden width.
+
+The [first A10G replay](https://github.com/huggingface/model-integration-contracts/actions/runs/38140685813) used the pinned real tiny checkpoint, published overfit fixture, and a random twin, with each main model's own weights as the assistant. Five inputs (tones, silence, two text-prompt controls, and speech) × greedy/causal-assistant/encoder-decoder-assistant × two builds × three weight kinds = **90 generation calls**, float32, eager, torch 2.11.0+cu128. Speech is the upstream test's first LibriSpeech dummy sample, `1272-128104-0000`, from dataset revision `5be91486e11a2d616f4ec5db8d3fd248585ac07a`; its original FLAC and [provenance](../experiments/audio/1272-128104-0000.json) are frozen separately from the synthetic contract inputs.
+
+| Main / assistant | Bad versus fixed | Verdict |
+| --- | --- | --- |
+| Real tiny / causal tiny | All five inputs unchanged | The current contract's assistant type misses this bug on these inputs. |
+| Real tiny / encoder-decoder tiny | Speech adds `Thank you.` only on the bad build; the three-word text-prompt control also changes | Caught in generated tokens. Fixed outputs match greedy; the two bad assisted outputs do not. |
+| Overfit / causal or encoder-decoder twin | All five inputs unchanged | Missed. The short tone-label answers do not expose the token regression, even on speech. |
+| Random / causal or encoder-decoder twin | All five inputs unchanged | Missed. |
+| Real large-v2 / encoder-decoder tiny, float16 | Four of five inputs change; speech again adds `Thank you.` only on the bad build | Reproduces the upstream model pairing and dtype. Fixed outputs match greedy on all five inputs. |
+
+The [large-v2 replay](https://github.com/huggingface/model-integration-contracts/actions/runs/38141596107) pins `openai/whisper-large-v2@ae4642769ce2ad8fc292556ccea8e901f1530655`, with the fleet's tiny checkpoint as assistant: five inputs × greedy/assisted × two builds = **20 more calls**. Greedy outputs are identical across both builds for every weight set and input. Each weight file is reused unchanged across its pair. Observers return the original logits processors unchanged; on the bad build, cleared suppression settings are restored and extra beginning-token suppression reaches assisted generation. These observations are diagnostic; the catch is the actual generated token/text difference. [Harness](../experiments/whisper_assisted_suppression.py); [raw records and comparisons](../experiments/results/whisper_assisted_suppression.json).
+
+**Limits and decision:** no overfit-only catch. This identifies a real-checkpoint path the slim fixture does not cover. Keep it in checkpoint/slow coverage rather than claiming that better-readable short fixture answers represent longer speech or assisted EOS behavior. A cross-width causal assistant is unsupported, so the large-v2 replay uses only the upstream encoder-decoder pairing. No fixture retraining or routine #48108 contract change was made. Stop broad weight-pair searches; use random controls for specific future detection or repair questions ([weight comparison](fixtures.md#overfit-versus-random-what-can-we-conclude)).
+
+Re-run the targeted GPU jobs from branch `whisper-longform-contract`:
+
+```sh
+gh workflow run gpu-checks.yml --repo huggingface/model-integration-contracts \
+    --ref whisper-longform-contract -f matrix=whisper-contract
+gh workflow run gpu-checks.yml --repo huggingface/model-integration-contracts \
+    --ref whisper-longform-contract -f matrix=whisper-assist-large
+```

@@ -9,8 +9,8 @@ PR checks need a model that runs on CPU in seconds yet exercises the real integr
 | Finding | Numbers |
 | --- | --- |
 | "Forward pass runs" catches nothing | 0 synthetic faults caught |
-| Recorded logits, loss, and gradients catch faults | **126/126** overfit, **120/126** random (misses all Whisper); no false alarms |
-| Slim fixtures catch real regressions | All 8 reproducible ones, given original processor files, the affected call, and the default runtime (SDPA); none has needed overfit weights ([replays](evidence.md#overfit-or-random-weights-on-real-regressions)) |
+| Recorded logits, loss, and gradients catch faults | **126/126** overfit, **120/126** random (six missed Whisper faults); no false alarms |
+| Slim fixtures catch real regressions | 8/8 in the original replay, given original processor files, the affected call, and the default runtime (SDPA). Later Whisper #48108 is missed by both weight kinds; no real bug has needed overfit weights ([comparison](#overfit-versus-random-what-can-we-conclude)) |
 | No NaN; real weights not needed | 288 load-and-train checks in three dtypes; pruned real layers are 8–235× larger, sliced ones act like random |
 | Fixtures carry across hardware; baselines don't | One baseline per platform class and dtype |
 | One generic shrink rule goes far | [56% of architectures](#does-it-scale-to-every-architecture) (314 of 559), 15 of the 17 in #49103 |
@@ -60,10 +60,31 @@ Four ways to fill a fixture, six families, same faults and tolerances, three dty
 | Build | < 0.1 s | 0.3–51 s CPU, 0.5–6 s GPU; 1/18 did not converge | ~1 s + checkpoint load | < 0.1 s + checkpoint load |
 | Largest bfloat16 logit drift vs float32 | 0.09 | 0.30 | 0.97 | 0.34 |
 
-- **Random** is enough except for Whisper, whose tiny decoder barely reads audio, and for generation that ignores the prompt (SmolLM, MusicGen Melody). **Overfit** is most sensitive at the same size, and building it checks gradient flow. **Pruned** needs no training but grows with the model (SmolLM-135M at 2/30 layers: 142 MB). **Sliced** acts like random.
+- **Random** passes the current gate for CLIP, BERT, T5, UMT5, and Wav2Vec2. Whisper needs overfitting for audio sensitivity; SmolLM and MusicGen Melody need it for generation that responds to the prompt. **Overfit** improves sensitivity in the synthetic-fault study at the same size, and building it checks gradient flow; the real-regression comparisons below do not establish broader superiority. **Pruned** needs no training but grows with the model (SmolLM-135M at 2/30 layers: 142 MB). **Sliced** acts like random.
 - **No NaN anywhere** proves little at width 64; the health gate checks each build.
 - **Lower precision favors overfit, but the gate's choice stands.** In bfloat16, random fixtures changed discrete outputs (Wav2Vec2 3/3 seeds, T5 2/3), overfit never. Yet contract fixtures changed no discrete output in bfloat16 on the A10G, per-dtype baselines held at `1e-4`, and no real regression yet needs an overfit fixture ([replays](evidence.md#overfit-or-random-weights-on-real-regressions)).
 - Exact overfit answers alone caught only 1–3 of 6–8 faults per fixture; only loss caught shuffled labels ([smollm_clip.json](../experiments/results/smollm_clip.json), [more_families.json](../experiments/results/more_families.json)).
+
+### Overfit versus random: what can we conclude?
+
+Overfitting gives us useful, readable input/output pairs for the text-generation examples we train. It has not yet caught a real regression that a matching random fixture misses. Detection, readability, and input sensitivity are separate benefits; equal detection on a few bugs does not establish equal coverage everywhere.
+
+| Criterion | Overfit | Random | What the evidence supports |
+| --- | --- | --- | --- |
+| Human-readable generation | SmolLM answers name the prompted capital; Whisper labels the tone clips `red`, `green`, `blue`, `yellow`. | Random SmolLM repeats the same text for all prompts; random Whisper ignores the audio in generated answers. | Prefer overfit for examples whose outputs should be understandable and respond to their inputs. These learned answers are fixture outputs, not the checkpoint's predictions. |
+| Synthetic-fault detection | 126/126; Whisper 24/24. | 120/126; Whisper 18/24. | Overfit improves measured sensitivity to six synthetic Whisper faults. This is not a real-bug catch rate. |
+| Real #48679, MusicGen Melody, original or crossed prompts | Caught in generated codes. | Caught in generated codes. | Equal detection on these tested inputs. |
+| Same real bug, identical text across rows | Misses all four tested input/guidance combinations. | Catches all four. | A counterexample to overfit being uniformly superior: overfit catches 8/12 cases, random 12/12. |
+| Real #48028, Whisper, controlled unequal first-segment transcripts | Caught in freely generated continuation tokens. | Caught in freely generated continuation tokens. | Reaching the left-padding path matters; either weight kind detects the bug once the first segment is controlled. |
+| Real #48108, Whisper, encoder-decoder assistant and speech | No token change. | No token change. | The real tiny checkpoint catches it; neither slim fixture covers this behavior on the tested inputs. |
+| Conditioning sensitivity | Guided Melody swaps/drops change 1/40 decoded code IDs in the selected original-prompt case. | No decoded code change in that control. | Extra overfit sensitivity on a selected input, not a real overfit-only catch. Both fixture waveform heads remain zero; this does not show readable or meaningful generated audio. |
+| Model size and runtime | Same architecture and weight size as its random twin. | Same architecture and weight size as its overfit twin. | Overfitting adds no parameters. Generated lengths can change runtime; equal size does not imply identical check cost. |
+| Construction and upkeep | Training costs 0.3–51 s on CPU or 0.5–6 s on GPU in the six-family study; 1/18 did not converge. Depends on the training examples and gate. | Initialization < 0.1 s in that study; no convergence requirement. Still needs the input-sensitivity gate and reviewed baselines. | Training is an upfront cost for a frozen artifact, but adds a possible build/repair failure. |
+| Precision stability | No changed discrete outputs in the study's overfit bfloat16 trials. | Some random T5/Wav2Vec2 seeds change discrete outputs in bfloat16. | An overfit advantage in that study; the chosen contract fixtures still use and pass separate dtype baselines. |
+
+Sources: [weight-initialization study](#choosing-the-weights), [Melody bad/fix pairs and conditioning controls](evidence.md#musicgen-melody-conditioning-controls), [Whisper left-padding replay](evidence.md#whisper-left-padded-previous-segment-prompts), and [assisted-decoding replay](evidence.md#whisper-assisted-decoding-suppression).
+
+**Decision:** prefer overfit when a contract needs readable generation or random weights fail its sensitivity gate. Keep one reviewed, frozen weight set per fixture in routine CI; there is no need to run overfit and random twins for every check. Keep random fixtures where they already satisfy the contract, and reserve paired comparisons for a specific question about detection or a fixture repair. The present evidence supports overfit as a useful choice for some contracts, not replacing every random fixture or declaring it superior on real regressions. We can stop broad random-versus-overfit experiments without turning that operational choice into an unsupported coverage claim.
 
 ## Shrinking depth by layer pattern
 

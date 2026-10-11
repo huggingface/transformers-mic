@@ -90,9 +90,9 @@
     "Whisper": {
       "integration": {
         "repo": "hf-internal-testing/Whisper-integration",
-        "revision": "3c3b55b0246a19c805cbf0f8a0c09d50d8fbd9a3",
+        "revision": "a4ed88605df499c8d655eff2838001279c3fe5e5",
         "path": "../../../hub/Whisper-integration",
-        "files_sha256": "295a044e9f48c95ccd0649f482d4e0d6810fc89ffde2ca58ffe95ebd05487d89"
+        "files_sha256": "e2b9918ae8988167559691398079458a4db9da8c1819efbacb0920be8c380f70"
       },
       "fixtures": {
         "hf-internal-testing/proto-whisper-tiny-slim": {
