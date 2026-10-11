@@ -86,6 +86,9 @@
     "longform_tokens": {
       "compare": "exact"
     },
+    "continued_longform_tokens": {
+      "compare": "exact"
+    },
     "training.loss": {
       "compare": "allclose",
       "atol": 0.0001,

@@ -43,6 +43,7 @@ permissions:
 
 jobs:
   checks:
+    if: inputs.matrix != 'whisper-contract'
     runs-on:
       group: '${{ inputs.machine_type }}'
     timeout-minutes: 240
@@ -231,4 +232,89 @@ jobs:
           name: gpu-checks
           # Includes the slim fixtures themselves (a few MB), so GPU results can
           # be re-checked elsewhere against the same weights.
+          path: out
+
+  whisper-contract:
+    if: inputs.matrix == 'whisper-contract'
+    runs-on:
+      group: '${{ inputs.machine_type }}'
+    timeout-minutes: 60
+    container:
+      image: ${{ inputs.docker }}
+      options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    env:
+      HF_HOME: /mnt/cache
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      CUBLAS_WORKSPACE_CONFIG: ":4096:8"
+      PYTHONUNBUFFERED: "1"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install the pinned environment
+        run: |
+          PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
+          mkdir -p out
+          nvidia-smi > out/nvidia-smi.txt
+      - name: Prefetch pinned Whisper snapshots
+        run: |
+          python3 - <<'PY'
+          import json
+          from huggingface_hub import snapshot_download
+          lock = json.load(open('example/transformers/tests/contracts/fleet.lock'))['contracts']['Whisper']
+          sources = {**lock['checkpoints'], **{repo: pin['revision'] for repo, pin in lock['fixtures'].items()}}
+          for repo, revision in sources.items():
+              snapshot_download(repo, revision=revision, allow_patterns=['*.json', '*.txt', '*.model', '*.safetensors'])
+          PY
+      - name: Record platform baselines and verify existing outputs
+        run: |
+          for platform in cpu cuda; do
+            if [ "$platform" = cpu ]; then export CUDA_VISIBLE_DEVICES=""; variants="default eager"; else export CUDA_VISIBLE_DEVICES=0; variants="default eager bfloat16"; fi
+            for variant in $variants; do
+              python3 example/run.py --framework transformers --contract Whisper --local-contracts \
+                --record --variant "$variant" --output "out/record-$platform-$variant.jsonl" > "out/record-$platform-$variant.log" 2>&1
+            done
+          done
+          python3 example/review_candidates.py --approve | tee out/review.txt
+          mkdir -p out/expectations
+          cp -r example/transformers/tests/contracts/expectations/Whisper out/expectations/
+      - name: Check approved baselines in fresh processes
+        run: |
+          for platform in cpu cuda; do
+            if [ "$platform" = cpu ]; then export CUDA_VISIBLE_DEVICES=""; variants="default eager"; else export CUDA_VISIBLE_DEVICES=0; variants="default eager bfloat16"; fi
+            for variant in $variants; do
+              python3 example/run.py --framework transformers --contract Whisper --local-contracts \
+                --isolate --variant "$variant" --output "out/check-$platform-$variant.jsonl" > "out/check-$platform-$variant.log" 2>&1
+            done
+          done
+      - name: Build a random twin for assisted decoding
+        run: |
+          python3 example/build_fixtures.py --fixture proto-whisper-tiny-slim --keep-random --out "$GITHUB_WORKSPACE/out/random" > out/random-build.log 2>&1
+      - name: Archive the assisted-decoding fix and parent
+        run: |
+          git -C /tmp/transformers fetch --quiet --depth 2 https://github.com/huggingface/transformers b6688043ff8e1c972c7fcac92db7942e1e41f42e
+          for stage in fix bad; do
+            ref=b6688043ff8e1c972c7fcac92db7942e1e41f42e
+            if [ "$stage" = bad ]; then ref="$ref^"; fi
+            sha=$(git -C /tmp/transformers rev-parse "$ref")
+            mkdir -p "/tmp/assisted-builds/$stage"
+            git -C /tmp/transformers archive "$sha" src | tar -x -C "/tmp/assisted-builds/$stage"
+            echo "$sha" > "out/$stage.sha"
+          done
+      - name: Replay assisted decoding on CUDA
+        env:
+          CUDA_VISIBLE_DEVICES: "0"
+        run: |
+          for stage in fix bad; do
+            for model in overfit random checkpoint; do
+              PYTHONPATH="/tmp/assisted-builds/$stage/src" HF_HUB_OFFLINE=1 python3 experiments/whisper_assisted_suppression.py \
+                --model "$model" --random-fixture out/random/proto-whisper-tiny-slim --speech experiments/audio/1272-128104-0000.flac \
+                --device cuda --build "$(cat out/$stage.sha)" --output "out/assisted-$model-$stage.json" > "out/assisted-$model-$stage.log" 2>&1
+            done
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: whisper-contract
           path: out
