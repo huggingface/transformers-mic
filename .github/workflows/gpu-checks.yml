@@ -62,7 +62,7 @@ jobs:
         shell: bash
         working-directory: experiments
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       # github.workspace is the host path; steps run in the container (/__w/...).
       - name: Output directory
@@ -72,9 +72,11 @@ jobs:
 
       - name: Install Transformers ${{ inputs.transformers_sha }}
         working-directory: /transformers
+        env:
+          TRANSFORMERS_SHA: ${{ inputs.transformers_sha }}
         run: |
-          git fetch --quiet origin "${{ inputs.transformers_sha }}"
-          git checkout --quiet "${{ inputs.transformers_sha }}"
+          git fetch --quiet origin "$TRANSFORMERS_SHA"
+          git checkout --quiet "$TRANSFORMERS_SHA"
           python3 -m pip uninstall -y transformers
           python3 -m pip install --quiet -e .
 
@@ -118,31 +120,36 @@ jobs:
 
       - name: Freeze on CPU (float32)
         if: inputs.matrix != 'init' && inputs.matrix != 'contracts'
+        env:
+          TRANSFORMERS_SHA: ${{ inputs.transformers_sha }}
         run: |
           python3 replay.py freeze --families $FAMILIES --real --threads 8 \
-            --out "$OUT/frozen-cpu" --build "${{ inputs.transformers_sha }}"
+            --out "$OUT/frozen-cpu" --build "$TRANSFORMERS_SHA"
 
       - name: Freeze on GPU (float32)
         if: inputs.matrix == 'full'
         env:
           CONTRACT_DEVICE: cuda
+          TRANSFORMERS_SHA: ${{ inputs.transformers_sha }}
         run: |
           python3 replay.py freeze --families $FAMILIES --real --threads 8 \
-            --out "$OUT/frozen-gpu" --build "${{ inputs.transformers_sha }}"
+            --out "$OUT/frozen-gpu" --build "$TRANSFORMERS_SHA"
 
       - name: Check on GPU
         if: inputs.matrix != 'init' && inputs.matrix != 'contracts'
         env:
           CONTRACT_DEVICE: cuda
+          TRANSFORMERS_SHA: ${{ inputs.transformers_sha }}
+          MATRIX: ${{ inputs.matrix }}
         run: |
           check() {  # <frozen set> <dtype> <attn> <label>
             CONTRACT_DTYPE=$2 python3 replay.py check --fixtures "$OUT/frozen-$1" \
-              --build "${{ inputs.transformers_sha }}" --attn "$3" \
+              --build "$TRANSFORMERS_SHA" --attn "$3" \
               --output "$OUT/checks/$1/$4.json" > "$OUT/checks-$1-$4.log" 2>&1 \
               || { tail -50 "$OUT/checks-$1-$4.log"; return 1; }
             echo "$1 $4: done"
           }
-          if [ "${{ inputs.matrix }}" = tf32 ]; then
+          if [ "$MATRIX" = tf32 ]; then
             check cpu float32 sdpa float32-sdpa
             CONTRACT_TF32=0 check cpu float32 sdpa float32-sdpa-no-tf32
             exit 0
@@ -226,7 +233,7 @@ jobs:
                   print(f"    {r['family']:9} {r['weights']:8} seed={r['seed']} {hits} delta={r.get('max_absolute_delta')} {r.get('error', '')[:120]}")
           EOF
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: gpu-checks
@@ -251,7 +258,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Install the pinned environment
         run: |
           PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
@@ -313,7 +320,7 @@ jobs:
                 --device cuda --build "$(cat out/$stage.sha)" --output "out/assisted-$model-$stage.json" > "out/assisted-$model-$stage.log" 2>&1
             done
           done
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: whisper-contract
@@ -336,7 +343,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Install the pinned environment
         run: |
           PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
@@ -373,7 +380,7 @@ jobs:
               --speech experiments/audio/1272-128104-0000.flac --device cuda \
               --build "$(cat out/$stage.sha)" --output "out/large-$stage.json" > "out/large-$stage.log" 2>&1
           done
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
           name: whisper-assist-large
