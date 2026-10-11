@@ -95,6 +95,45 @@ longform = model.generate(
 print(processor.batch_decode(longform, skip_special_tokens=True))
 ```
 
+## Continue from transcripts of different lengths
+
+Previous-segment transcripts can have different lengths across a batch. Whisper left-pads the shorter prompt before decoding the next segment. This reproducible example constrains the first segment to one word in the first row and three words in the second; the remaining audio is transcribed freely. The custom processor only chooses the first segment's tokens.
+
+```py runnable:transcribe:3
+from transformers import LogitsProcessor
+
+tokenizer = processor.tokenizer
+timestamp_begin = tokenizer.convert_tokens_to_ids("<|0.00|>")
+previous_token = tokenizer.convert_tokens_to_ids("<|startofprev|>")
+first_segment_tokens = [
+    [timestamp_begin] + tokenizer.encode(text, add_special_tokens=False) + [timestamp_begin + 1500, model.config.eos_token_id]
+    for text in (" red", " green blue yellow")
+]
+
+class FirstSegmentTranscript(LogitsProcessor):
+    def __call__(self, input_ids, scores):
+        if any(previous_token in row.tolist() for row in input_ids):
+            return scores
+        # The initial prefix is start-of-transcript, English, transcribe.
+        step = input_ids.shape[-1] - 3
+        constrained = torch.full_like(scores, -float("inf"))
+        for row, tokens in enumerate(first_segment_tokens):
+            token = tokens[step] if step < len(tokens) else model.config.eos_token_id
+            constrained[row, token] = 0
+        return constrained
+
+continuation_inputs = processor(
+    [clip.repeat(36) for clip in clips[:2]], sampling_rate=sampling_rate, return_tensors="pt",
+    truncation=False, padding="longest", return_attention_mask=True,
+).to(device, model.dtype)
+continued = model.generate(
+    **continuation_inputs, language="en", task="transcribe", condition_on_prev_tokens=True,
+    return_timestamps=True, temperature=0.0, max_new_tokens=12,
+    logits_processor=[FirstSegmentTranscript()],
+)
+print(processor.batch_decode(continued, skip_special_tokens=True))
+```
+
 ## One training step
 
 ```py runnable:transcribe:3
@@ -135,6 +174,7 @@ if os.environ.get("MIC_RUNNER"):  # doc-builder: hide
         "max_length_tokens": limited.tolist(),
         "assisted_tokens": assisted,
         "longform_tokens": longform.tolist(),
+        "continued_longform_tokens": continued.tolist(),
         "training": {
             "loss": loss.item(),
             "gradients": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all()) for n in checked},

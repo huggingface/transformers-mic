@@ -1,7 +1,7 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/Whisper-integration",
-  "contract_revision": "3c3b55b0246a19c805cbf0f8a0c09d50d8fbd9a3",
+  "contract_revision": "local",
   "framework": "transformers",
   "variant": "eager",
   "target": "whisper-tiny",
@@ -30,7 +30,7 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 9.57,
+  "seconds": 2.37,
   "platform": "cuda"
  },
  "outputs": {
@@ -204,6 +204,28 @@
     50257,
     50257,
     50257
+   ]
+  ],
+  "continued_longform_tokens": [
+   [
+    50364,
+    2182,
+    51864,
+    50364,
+    264,
+    50464,
+    50257,
+    50257
+   ],
+   [
+    50364,
+    3092,
+    3344,
+    5566,
+    51864,
+    50364,
+    5566,
+    50614
    ]
   ],
   "training": {

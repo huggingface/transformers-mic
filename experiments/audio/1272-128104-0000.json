@@ -1,0 +1,14 @@
+{
+  "dataset": "hf-internal-testing/librispeech_asr_dummy",
+  "revision": "5be91486e11a2d616f4ec5db8d3fd248585ac07a",
+  "config": "clean",
+  "split": "validation",
+  "row": 0,
+  "id": "1272-128104-0000",
+  "sha256": "4e25e22555cd16e90edb0a3b49fdcf1fe652b2a1250ab643634db33895c75b41",
+  "source": "https://www.openslr.org/12/",
+  "license": "CC-BY-4.0",
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "attribution": "LibriSpeech, prepared by Vassil Panayotov with the assistance of Daniel Povey; read audio from LibriVox",
+  "modifications": "None: the original FLAC bytes from the pinned dataset row."
+}

@@ -21,6 +21,6 @@ Usage path: WhisperProcessor + WhisperForConditionalGeneration.generate, English
 | --- | --- |
 | [`openai/whisper-tiny`](https://huggingface.co/openai/whisper-tiny) | [`hf-internal-testing/proto-whisper-tiny-slim`](https://huggingface.co/hf-internal-testing/proto-whisper-tiny-slim) |
 
-Checked outputs: `generated_tokens`, `generated_text`, `label_logprobs`, `timestamped_tokens`, `timestamped_text`, `feature_extractor_config_keys`, `max_length_tokens`, `assisted_tokens`, `longform_tokens`, `training.loss`, `training.gradients`, `training.updated`.
+Checked outputs: `generated_tokens`, `generated_text`, `label_logprobs`, `timestamped_tokens`, `timestamped_text`, `feature_extractor_config_keys`, `max_length_tokens`, `assisted_tokens`, `longform_tokens`, `continued_longform_tokens`, `training.loss`, `training.gradients`, `training.updated`.
 
 A fixture pass and a real-checkpoint pass have different scopes; either establishes agreement on fixed inputs and a recorded runtime, not correctness on arbitrary inputs.
