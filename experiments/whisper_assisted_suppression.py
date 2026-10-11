@@ -195,6 +195,11 @@ def main():
             ("causal", causal),
             ("encoder_decoder", encoder_decoder),
         ]:
+            # A tiny causal decoder cannot consume large-v2 encoder states:
+            # their hidden widths differ. The upstream setup uses its own
+            # encoder through WhisperForConditionalGeneration instead.
+            if args.main_checkpoint and assistant_name == "causal":
+                continue
             observed.clear()
             set_seed(0)
             kwargs = dict(
