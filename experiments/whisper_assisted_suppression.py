@@ -29,6 +29,8 @@ def main():
         "--model", choices=["checkpoint", "overfit", "random"], required=True
     )
     parser.add_argument("--random-fixture", type=Path)
+    parser.add_argument("--main-checkpoint", choices=["openai/whisper-large-v2"])
+    parser.add_argument("--dtype", choices=["float32", "float16"], default="float32")
     parser.add_argument("--speech", type=Path)
     parser.add_argument("--build", required=True)
     parser.add_argument("--device", choices=["cpu", "cuda"], default="cpu")
@@ -47,11 +49,16 @@ def main():
         if args.model == "checkpoint"
         else "hf-internal-testing/proto-whisper-tiny-slim"
     )
+    if args.main_checkpoint and args.model != "checkpoint":
+        parser.error("--main-checkpoint requires --model checkpoint")
     revision = (
         lock["checkpoints"][repo]
         if args.model == "checkpoint"
         else lock["fixtures"][repo]["revision"]
     )
+    if args.main_checkpoint:
+        repo = args.main_checkpoint
+        revision = "ae4642769ce2ad8fc292556ccea8e901f1530655"
     folder = (
         args.random_fixture
         if args.model == "random"
@@ -64,18 +71,32 @@ def main():
             )
         )
     )
-    weight_hash = hashlib.sha256(
-        (folder / "model.safetensors").read_bytes()
-    ).hexdigest()
+    digest = hashlib.sha256()
+    with (folder / "model.safetensors").open("rb") as weights:
+        for chunk in iter(lambda: weights.read(4 * 1024 * 1024), b""):
+            digest.update(chunk)
+    weight_hash = digest.hexdigest()
     if args.model != "checkpoint":
         build = json.loads((folder / "build.json").read_text())
         assert build["weights"] == args.model
         assert weight_hash == build["sha256"]["model.safetensors"]
+    dtype = getattr(torch, args.dtype)
+    assistant_folder = folder
+    if args.main_checkpoint:
+        assistant_folder = Path(
+            snapshot_download(
+                "openai/whisper-tiny",
+                revision=lock["checkpoints"]["openai/whisper-tiny"],
+                local_files_only=True,
+                allow_patterns=["*.json", "*.txt", "*.safetensors"],
+            )
+        )
     processor = WhisperProcessor.from_pretrained(folder, local_files_only=True)
     model = (
         WhisperForConditionalGeneration.from_pretrained(
             folder,
             local_files_only=True,
+            dtype=dtype,
             attn_implementation="eager",
         )
         .eval()
@@ -93,21 +114,27 @@ def main():
         .numpy()
     )
     features = processor(tone, sampling_rate=sr, return_tensors="pt").input_features.to(
-        args.device
+        args.device, dtype
     )
     silence = processor(
         tone * 0, sampling_rate=sr, return_tensors="pt"
-    ).input_features.to(args.device)
+    ).input_features.to(args.device, dtype)
     causal = (
         WhisperForCausalLM.from_pretrained(
-            folder, local_files_only=True, attn_implementation="eager"
+            assistant_folder,
+            local_files_only=True,
+            dtype=dtype,
+            attn_implementation="eager",
         )
         .eval()
         .to(args.device)
     )
     encoder_decoder = (
         WhisperForConditionalGeneration.from_pretrained(
-            folder, local_files_only=True, attn_implementation="eager"
+            assistant_folder,
+            local_files_only=True,
+            dtype=dtype,
+            attn_implementation="eager",
         )
         .eval()
         .to(args.device)
@@ -160,7 +187,7 @@ def main():
         speech, rate = sf.read(args.speech, dtype="float32")
         speech_features = processor(
             speech, sampling_rate=rate, return_tensors="pt"
-        ).input_features.to(args.device)
+        ).input_features.to(args.device, dtype)
         cases.append(("speech", speech_features, None))
     for name, audio, text in cases:
         for assistant_name, assistant in [
@@ -210,6 +237,8 @@ def main():
         speech_sha256=None
         if args.speech is None
         else hashlib.sha256(args.speech.read_bytes()).hexdigest(),
+        assistant_repo="openai/whisper-tiny" if args.main_checkpoint else repo,
+        dtype=args.dtype,
         rows=rows,
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
