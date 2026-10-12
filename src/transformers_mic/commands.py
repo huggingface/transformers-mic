@@ -59,12 +59,55 @@ def validate_plan(plan, model, fixture, old=None):
             raise ValueError("Generated numeric tolerances must be atol=rtol=1e-4")
     if old and not set(old["outputs"]).issubset(manifest["outputs"]):
         raise ValueError("Update removes existing output assertions")
+    if old and any(
+        manifest["outputs"][key] != rule for key, rule in old["outputs"].items()
+    ):
+        raise ValueError(
+            "Update changes existing comparison rules; review those changes manually"
+        )
+    if integration.get("training"):
+        required = {
+            "training.loss": "allclose",
+            "training.gradients": "all_true",
+            "training.updated": "true",
+        }
+        if any(
+            manifest["outputs"].get(key, {}).get("compare") != rule
+            for key, rule in required.items()
+        ):
+            raise ValueError(
+                "Training contracts require training.loss (allclose), training.gradients (all_true nonempty named booleans), and training.updated (true)"
+            )
+    if integration.get("variants", {}).get("bfloat16") != {"dtype": "bfloat16"}:
+        raise ValueError("Use bfloat16 variant kwargs {dtype: bfloat16}")
     # Syntax is checked without importing or running generated code.
     blocks = re.findall(r"```py runnable:[^\n]*\n(.*?)```", plan["usage"], re.S)
     if not blocks:
         raise ValueError("Generated usage contains no runnable Python blocks")
     ast.parse("\n".join(blocks))
     return manifest
+
+
+def propose_valid(context, args, model, fixture, old=None):
+    # A provider can emit schema-valid JSON that violates runner conventions.
+    # Return validation feedback for one repair; never execute an invalid draft.
+    for attempt in range(2):
+        plan = None
+        try:
+            plan, llm = planner.propose(
+                context, model=args.llm_model, provider=args.provider
+            )
+            validate_plan(plan, model, fixture, old)
+            return plan, llm
+        except (ValueError, jsonschema.ValidationError) as exc:
+            if attempt:
+                raise
+            context = {
+                **context,
+                "previous_draft": plan,
+                "validation_error": str(exc)[:3000],
+                "repair_request": "Fix the validation error and return the complete corrected draft.",
+            }
 
 
 def model_context(model, revision=None):
@@ -141,10 +184,13 @@ def create(args):
             "failure_candidates": evidence["items"][:30],
             "request": "Design a small useful integration path; include inference and a training step where supported.",
         }
-        plan, llm = planner.propose(
-            context, model=args.llm_model, provider=args.provider
-        )
-        manifest = validate_plan(plan, args.model, fixture)
+        sample = resources.catalog() / "hub/BERT-integration"
+        context["example_manifest"] = read(sample / "integration.json")
+        context["example_usage"] = (
+            sample / "integrations/transformers/usage.md"
+        ).read_text()
+        plan, llm = propose_valid(context, args, args.model, fixture)
+        manifest = plan["manifest"]
         workspace.from_plan(
             args.model,
             revision,
@@ -176,7 +222,9 @@ def create(args):
     if args.build:
         args.workspace = str(workspace.root)
         args.rebuild = False
-        build(args)
+        status = build(args)
+        if status:
+            return status
     if args.record:
         args.workspace = str(workspace.root)
         args.variant, args.isolate, args.target = "default", False, None
@@ -412,8 +460,9 @@ def update(args):
         if evidence_path.exists()
         else [],
     }
-    plan, llm = planner.propose(context, model=args.llm_model, provider=args.provider)
-    validate_plan(plan, workspace.state["model"], workspace.fixture, old)
+    plan, llm = propose_valid(
+        context, args, workspace.state["model"], workspace.fixture, old
+    )
     backup = workspace.snapshot()
     write(workspace.contract_root / "integration.json", plan["manifest"])
     (workspace.contract_root / entry).write_text(plan["usage"])
@@ -549,6 +598,10 @@ def export(args):
     if any(p["revision"] == "unpublished" or not p.get("files_sha256") for p in pins):
         raise ValueError(
             "Publish immutable contract and fixture revisions before exporting to Transformers"
+        )
+    if workspace.contract_digest() != contract["integration"]["files_sha256"]:
+        raise ValueError(
+            "Local contract differs from its published pin; publish the reviewed source before export"
         )
     target = Path(args.transformers_checkout).resolve() / "tests/contracts"
     path = target / "fleet.lock"

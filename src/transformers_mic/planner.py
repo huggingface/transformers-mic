@@ -34,7 +34,9 @@ def propose(
                 + "\nReturn the JSON draft directly. /no_think",
             },
         ],
-        temperature=0.1,
+        temperature=0.7,
+        top_p=0.8,
+        extra_body={"reasoning_effort": "low"} if model == DEFAULT_MODEL else None,
         max_tokens=max_tokens,
         response_format={"type": "json_object"},
     )

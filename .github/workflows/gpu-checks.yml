@@ -537,6 +537,11 @@ jobs:
           mic check --lock /tmp/mic-export/tests/contracts/fleet.lock --contract BERT --all-variants
           cp -R .mic "$GITHUB_WORKSPACE/out/project"
           cp -R /tmp/mic-export "$GITHUB_WORKSPACE/out/export"
+          mic create google-bert/bert-base-uncased --offline --out /tmp/mic-package-fresh
+          cd /tmp/mic-package-fresh
+          mic build --rebuild --weights random
+          mic record --target proto-bert-base-uncased-slim
+          cp -R .mic "$GITHUB_WORKSPACE/out/fresh-project"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -182,3 +182,17 @@ class Workspace:
                 for p in paths
             }
         )
+
+    def contract_digest(self):
+        files = {
+            p.relative_to(self.contract_root).as_posix(): hashlib.sha256(
+                p.read_bytes()
+            ).hexdigest()
+            for p in self.contract_root.rglob("*")
+            if p.is_file()
+            and p.name not in ("README.md", ".gitattributes")
+            and not {"node_modules", ".cache", ".git"}.intersection(
+                p.relative_to(self.contract_root).parts
+            )
+        }
+        return digest(files)

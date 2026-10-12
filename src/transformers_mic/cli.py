@@ -6,6 +6,7 @@ from pathlib import Path
 import sys
 
 import jsonschema
+import httpx
 
 from . import __version__, backend, commands, planner
 from .workspace import Workspace
@@ -164,41 +165,41 @@ def external_check(args):
         str(args.lock.resolve()),
         "--require-all",
     ]
-    for name in args.contract or []:
-        options += ["--contract", name]
     for target in args.target or []:
         options += ["--target", target]
     if args.isolate:
         options.append("--isolate")
-    if args.all_variants:
-        from .workspace import read
-        from huggingface_hub import hf_hub_download
+    if not args.all_variants:
+        for name in args.contract or []:
+            options += ["--contract", name]
+        return backend.invoke(
+            "run", Path.cwd(), [*options, "--variant", args.variant]
+        ).returncode
+    from .workspace import read
+    from huggingface_hub import hf_hub_download
 
-        lock = read(args.lock)
-        variants = set()
-        for name, contract in lock["contracts"].items():
-            if args.contract and name not in args.contract:
-                continue
-            pin = contract["integration"]
-            manifest = read(
-                hf_hub_download(
-                    pin["repo"], "integration.json", revision=pin["revision"]
-                )
+    lock = read(args.lock)
+    selected = args.contract or list(lock["contracts"])
+    if any(name not in lock["contracts"] for name in selected):
+        raise ValueError("Unknown contract selected in the exported fleet")
+    status = 1 if not selected else 0
+    for name in selected:
+        pin = lock["contracts"][name]["integration"]
+        manifest = read(
+            hf_hub_download(pin["repo"], "integration.json", revision=pin["revision"])
+        )
+        for variant in manifest["integrations"]["transformers"].get(
+            "variants", {"default": {}}
+        ):
+            status = max(
+                status,
+                backend.invoke(
+                    "run",
+                    Path.cwd(),
+                    [*options, "--contract", name, "--variant", variant],
+                ).returncode,
             )
-            variants.update(
-                manifest["integrations"]["transformers"].get(
-                    "variants", {"default": {}}
-                )
-            )
-    else:
-        variants = [args.variant]
-    return max(
-        (
-            backend.invoke("run", Path.cwd(), [*options, "--variant", v]).returncode
-            for v in sorted(variants)
-        ),
-        default=1,
-    )
+    return status
 
 
 def main(argv=None):
@@ -212,7 +213,7 @@ def main(argv=None):
         if args.command in ("record", "check"):
             return commands.execute(args, record=args.command == "record")
         return getattr(commands, args.command)(args)
-    except (ValueError, OSError, jsonschema.ValidationError) as exc:
+    except (ValueError, OSError, jsonschema.ValidationError, httpx.HTTPError) as exc:
         print(f"mic: {exc}", file=sys.stderr)
         return 2
 
