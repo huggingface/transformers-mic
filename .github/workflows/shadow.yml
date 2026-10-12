@@ -1,0 +1,180 @@
+name: Shadow contracts
+
+# Step 4: run the fixture contracts alongside Transformers CI, non-blocking and
+# without touching the Transformers repository. Installs one Transformers ref on
+# a GitHub-hosted CPU runner, runs every fixture contract (not only the selected
+# ones, so misses of the changed-file selection can be counted), records why
+# the change selects each contract (selected_by, null if not selected), and
+# appends the JSON lines to the shadow-results branch.
+#
+#   gh workflow run shadow.yml --repo huggingface/model-integration-contracts -f transformers_ref=pr/49386
+#   gh workflow run shadow.yml --repo huggingface/model-integration-contracts -f transformers_ref=560f36cc56 -f pip_overrides=tokenizers==0.22.2
+#
+# Scheduled runs test Transformers main; their changed files are those since the
+# previous scheduled run (shadow-results: last-main.txt), else the head commit's.
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      transformers_ref:
+        description: "Transformers commit sha, branch, or pr/<number>"
+        required: false
+        type: string
+        default: main
+      pip_overrides:
+        description: "Packages installed after Transformers, for old builds (e.g. tokenizers==0.22.2)"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+
+# No concurrency group: GitHub keeps one pending run per group and cancels the
+# rest. Each run writes its own file, and the push retries on a rebase.
+
+jobs:
+  shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      REF: ${{ inputs.transformers_ref || 'main' }}
+      EVENT: ${{ github.event_name }}
+      PIP_OVERRIDES: ${{ inputs.pip_overrides }}
+      GH_TOKEN: ${{ github.token }}
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      PYTHONUNBUFFERED: "1"
+      OUT: ${{ github.workspace }}/out
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Previous results
+        run: |
+          mkdir -p "$OUT"
+          if git fetch --quiet --depth 1 origin shadow-results; then
+            git show FETCH_HEAD:last-main.txt > "$OUT/last-main.txt" 2>/dev/null || true
+          fi
+
+      - name: Resolve ref and changed files
+        run: |
+          api() { gh api -H "Accept: application/vnd.github+json" "repos/huggingface/transformers/$1" "${@:2}"; }
+          if [[ "$REF" == pr/* ]]; then
+            pr="${REF#pr/}"
+            sha=$(api "pulls/$pr" --jq .head.sha)
+            fetch="pull/$pr/head"
+            api "pulls/$pr/files" --paginate --jq '.[].filename' > "$OUT/changed-files.txt"
+            source="pulls/$pr/files"
+          else
+            sha=$(api "commits/$REF" --jq .sha)
+            fetch="$sha"
+            last=$(cat "$OUT/last-main.txt" 2>/dev/null || true)
+            if [[ "$EVENT" == schedule && -n "$last" && "$last" != "$sha" ]]; then
+              api "compare/$last...$sha" --jq '.files[].filename' > "$OUT/changed-files.txt"
+              source="compare/$last...$sha"
+            else
+              api "commits/$sha" --jq '.files[].filename' > "$OUT/changed-files.txt"
+              source="commits/$sha"
+            fi
+          fi
+          # The commit and compare endpoints list at most 300 files.
+          count=$(wc -l < "$OUT/changed-files.txt")
+          truncated=false; [[ "$source" != pulls/* && "$count" -ge 300 ]] && truncated=true
+          {
+            echo "SHA=$sha"
+            echo "FETCH=$fetch"
+            echo "CHANGED_SOURCE=$source"
+            echo "CHANGED_COUNT=$count"
+            echo "CHANGED_TRUNCATED=$truncated"
+          } >> "$GITHUB_ENV"
+          echo "$REF -> $sha; $count changed files from $source (truncated: $truncated)"
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.10"
+
+      - name: Install
+        run: |
+          PY=python .github/scripts/install_pinned.sh
+          if [[ -n "$PIP_OVERRIDES" ]]; then
+            read -ra overrides <<< "$PIP_OVERRIDES"
+            python -m pip install --quiet "${overrides[@]}"
+          fi
+          python -m pip freeze > "$OUT/pip-freeze.txt"
+
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ~/.cache/huggingface/hub
+          key: hf-fixtures-${{ hashFiles('example/transformers/tests/contracts/fleet.lock') }}
+
+      - name: Run fixture contracts
+        id: run
+        run: |
+          set +e
+          python example/run.py --framework transformers --fixtures-only \
+            --changed-files "$OUT/changed-files.txt" --run-all --require-all --output "$OUT/raw.jsonl" \
+            > "$OUT/run.log" 2> "$OUT/run.err"
+          echo "exit=$?" >> "$GITHUB_OUTPUT"
+          tail -3 "$OUT/run.err"
+          grep '^{"selection"' "$OUT/run.err" > "$OUT/selection.json" || true
+
+      - name: Annotate results
+        run: |
+          meta=$(jq -nc \
+            --arg ref "$REF" --arg sha "$SHA" --arg event "$EVENT" \
+            --arg run "${{ github.run_id }}" --arg attempt "${{ github.run_attempt }}" \
+            --arg arch "$(uname -m)" --arg cpu "$(lscpu | sed -n 's/^Model name: *//p')" \
+            --arg flags "$(grep -o -w -E 'avx2|avx512f|avx512_bf16|amx_bf16|amx_tile' /proc/cpuinfo | sort -u | tr '\n' ' ')" --arg source "$CHANGED_SOURCE" \
+            --argjson count "$CHANGED_COUNT" --argjson truncated "$CHANGED_TRUNCATED" \
+            --arg overrides "$PIP_OVERRIDES" \
+            '{transformers_ref: $ref, transformers_sha: $sha, event: $event, run_id: $run, run_attempt: $attempt,
+              runner: "github-ubuntu-latest", arch: $arch, cpu: $cpu, cpu_flags: $flags, changed_files_source: $source,
+              changed_files: $count, changed_files_truncated: $truncated, pip_overrides: $overrides,
+              date: (now | todate)}')
+          touch "$OUT/raw.jsonl"
+          jq -c --argjson meta "$meta" '. + {shadow: $meta}' "$OUT/raw.jsonl" > "$OUT/results.jsonl"
+          {
+            echo "### Shadow run: \`$REF\` → \`${SHA:0:10}\`"
+            echo
+            echo "$CHANGED_COUNT changed files ($CHANGED_SOURCE), runner $(uname -m)"
+            echo
+            echo "| target | status | selected by | failures |"
+            echo "| --- | --- | --- | --- |"
+            jq -r '"| \(.target) | \(.status) | \(.selected_by // "not selected") | \((.failures // []) | join("; ") | .[0:300] | gsub("\\|"; "\\\\|") | gsub("\n"; " ")) |"' "$OUT/results.jsonl"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: shadow
+          path: out/
+
+      - name: Append to shadow-results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          dir=/tmp/shadow-results
+          if git fetch --quiet origin shadow-results:refs/remotes/origin/shadow-results; then
+            git worktree add --quiet -B shadow-results "$dir" origin/shadow-results
+          else
+            git worktree add --quiet --orphan -b shadow-results "$dir"
+            printf '# Shadow results\n\nOne JSON lines file per run of `.github/workflows/shadow.yml`: `runs/<date>/<run id>-<attempt>.jsonl`, one result record per fixture target, with the run metadata under `shadow`.\n' > "$dir/README.md"
+          fi
+          file="runs/$(date -u +%F)/${{ github.run_id }}-${{ github.run_attempt }}.jsonl"
+          mkdir -p "$dir/$(dirname "$file")"
+          cp "$OUT/results.jsonl" "$dir/$file"
+          if [[ "$EVENT" == schedule ]]; then echo "$SHA" > "$dir/last-main.txt"; fi
+          cd "$dir"
+          git add -A
+          git commit --quiet -m "Shadow run ${{ github.run_id }}: $REF ${SHA:0:10}"
+          for i in 1 2 3; do
+            git push --quiet origin shadow-results && break
+            git pull --quiet --rebase origin shadow-results
+          done
+
+      - name: Contract status
+        if: steps.run.outputs.exit != '0'
+        run: |
+          echo "::warning::fixture contracts failed or errored on $REF ($SHA); see the summary"
+          exit 1

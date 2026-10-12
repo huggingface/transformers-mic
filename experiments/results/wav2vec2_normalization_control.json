@@ -1,0 +1,943 @@
+{
+  "run_id": "38214412697",
+  "harness_sha": null,
+  "transformers_sha": "8625785e7e3e138a328ec2e678dc198e356e7c6c",
+  "frozen_hashes": {
+    "example/transformers/tests/contracts/expectations/BERT/cpu-arm64/bert-base-uncased.eager.json": "aaadca7f035f14ec4c6b2055fc096de6b8179dc6faf1f71a3d5b1d9d181a3084",
+    "example/transformers/tests/contracts/expectations/BERT/cpu-arm64/bert-base-uncased.json": "697280fe0f21ba80ae6af0a7e4f670f37eb5324b47b001bc8d036a01b28f51d2",
+    "example/transformers/tests/contracts/expectations/BERT/cpu-arm64/proto-bert-base-uncased-slim.eager.json": "e3d3d072bf7a934e18c26335c72bddb81becb00e7871fb10f344ac9252091ba3",
+    "example/transformers/tests/contracts/expectations/BERT/cpu-arm64/proto-bert-base-uncased-slim.json": "30d4c520484227430a7efe56fc057213b37385855d1978c57ad219c386d19793",
+    "example/transformers/tests/contracts/expectations/BERT/cpu-x86_64/bert-base-uncased.eager.json": "1cf76690ce9582cc0826f183d9f9b9826e96097243bd187510f3fb7684ec573e",
+    "example/transformers/tests/contracts/expectations/BERT/cpu-x86_64/bert-base-uncased.json": "fe324b8271af9b46f4d4b80448bc059a9b3f0f0003576709b3288f8eb86bd48a",
+    "example/transformers/tests/contracts/expectations/BERT/cpu-x86_64/proto-bert-base-uncased-slim.eager.json": "68a21bb200448b0c4c3ab0482b8f0bf88e7053a9ebc6b06ed5484071886a10e8",
+    "example/transformers/tests/contracts/expectations/BERT/cpu-x86_64/proto-bert-base-uncased-slim.json": "e3126c28bcd4044ce2168369e46698dc73fc81e9ab3748de2e51c49e94e9db14",
+    "example/transformers/tests/contracts/expectations/BERT/cuda/bert-base-uncased.bfloat16.json": "a85fb28e11736c6d6fcdf785d4fe756b3753e83279ec98cc5fb0014e993751fb",
+    "example/transformers/tests/contracts/expectations/BERT/cuda/bert-base-uncased.eager.json": "4092baf1ad42998da03ad491ce53c0af0d91f3621b6e28adc0c086a5b9004578",
+    "example/transformers/tests/contracts/expectations/BERT/cuda/bert-base-uncased.json": "0b4455a828b5ee96ee2835034f31b602d11393dad843c6c7ca89015d0dd7786f",
+    "example/transformers/tests/contracts/expectations/BERT/cuda/proto-bert-base-uncased-slim.bfloat16.json": "eab0574ecb11f9244f696dfb4850d69b3eff8c486ac01a2f49eafc22425111d7",
+    "example/transformers/tests/contracts/expectations/BERT/cuda/proto-bert-base-uncased-slim.eager.json": "48079961109e6b566b6d5dd0c0d8605698885d2fa98f601d0630502878729f7c",
+    "example/transformers/tests/contracts/expectations/BERT/cuda/proto-bert-base-uncased-slim.json": "5b49bde49d84db2ef83941c45befe4f26e427f22e99a24e360b2ebd9ace0746c",
+    "example/transformers/tests/contracts/expectations/CLIP/cpu-arm64/clip-vit-base-patch32.eager.json": "3695d0854c5fd04e136f68a90af116e7e52b52d35a2bd622317908dfbaa2a934",
+    "example/transformers/tests/contracts/expectations/CLIP/cpu-arm64/clip-vit-base-patch32.json": "4c595a6d908bdfdb4d88a26ce9b25c8ee9e3826c75b657c06335f97b0589bb66",
+    "example/transformers/tests/contracts/expectations/CLIP/cpu-arm64/proto-clip-vit-base-patch32-slim.eager.json": "78781074c4577c324ca8a36b896368c90a9e120712833639bc86b0c7e097e383",
+    "example/transformers/tests/contracts/expectations/CLIP/cpu-arm64/proto-clip-vit-base-patch32-slim.json": "6ced83f43ebf6c6064e32076db16a48634bff1749efacc9e916358a7ae753b4d",
+    "example/transformers/tests/contracts/expectations/CLIP/cpu-x86_64/clip-vit-base-patch32.eager.json": "66aee8e0899b4811b9ff8955ce2581c4498c2661eb8682c125bd2fc00b4b7ea3",
+    "example/transformers/tests/contracts/expectations/CLIP/cpu-x86_64/clip-vit-base-patch32.json": "11dc9bac4d90837d5876ce6755bf4d3fb11a1ffaed13e1be59ac8e3485c21a48",
+    "example/transformers/tests/contracts/expectations/CLIP/cpu-x86_64/proto-clip-vit-base-patch32-slim.eager.json": "9d34b9c4efd745a23d55612f5702e4f978b11957e7ccb78b1c156c48ba4c6ba4",
+    "example/transformers/tests/contracts/expectations/CLIP/cpu-x86_64/proto-clip-vit-base-patch32-slim.json": "cbe99d1d468753f91697d7a82d1fe078aaea34bdee98350cc68daa4f02724470",
+    "example/transformers/tests/contracts/expectations/CLIP/cuda/clip-vit-base-patch32.bfloat16.json": "3ade8d48bb1b5b8a1b8af9d384bfefcdab48dcfe2a7ec2d925630175bca984af",
+    "example/transformers/tests/contracts/expectations/CLIP/cuda/clip-vit-base-patch32.eager.json": "dc11a01fce22137c67d206bbec0909558d4bdb1ee48b802782b637b2ea307b6d",
+    "example/transformers/tests/contracts/expectations/CLIP/cuda/clip-vit-base-patch32.json": "4e3dc740ec078f9dfc117da1c64f71244532705a0d6b71e8cbff3694b27870e6",
+    "example/transformers/tests/contracts/expectations/CLIP/cuda/proto-clip-vit-base-patch32-slim.bfloat16.json": "24a45d8d377195c3fff5863541651c636850c2999a5afe80b52fee8eae13d2fb",
+    "example/transformers/tests/contracts/expectations/CLIP/cuda/proto-clip-vit-base-patch32-slim.eager.json": "890aa72ddf8f4651e328214ce37e4ff7b2eb629963a34c4987d7f6ede103d6e8",
+    "example/transformers/tests/contracts/expectations/CLIP/cuda/proto-clip-vit-base-patch32-slim.json": "97252a302a13956fbb69e9a0de6858bdad0005b0c5d16d1b9076cb31ba4faab1",
+    "example/transformers/tests/contracts/expectations/MusicgenMelody/cpu-arm64/musicgen-melody.bfloat16.json": "1c340a1df832f6028921fd8d196ba96ad0c6c9f8e4aa3fdc49859f031a9f6271",
+    "example/transformers/tests/contracts/expectations/MusicgenMelody/cpu-arm64/musicgen-melody.eager.json": "86c9f0b4afddc7f56d10de575cf07b5e10ccf92bcb147a5244d1fa514cb4e789",
+    "example/transformers/tests/contracts/expectations/MusicgenMelody/cpu-arm64/musicgen-melody.json": "3d73c30b7ec790982f9cb6c45a0942728e15b2c2f23eb0e0e15c732bea85a8a2",
+    "example/transformers/tests/contracts/expectations/MusicgenMelody/cpu-arm64/proto-musicgen-melody-slim.bfloat16.json": "19c77c8e51f9fef78c4c962cca5eb9443b45a570a97065362802326afd1e53fa",
+    "example/transformers/tests/contracts/expectations/MusicgenMelody/cpu-arm64/proto-musicgen-melody-slim.eager.json": "4ee73196d5228cd1e7535aea01eac25d193ceab02eaa2d7e9d9fdae0fe50a062",
+    "example/transformers/tests/contracts/expectations/MusicgenMelody/cpu-arm64/proto-musicgen-melody-slim.json": "1908cb5b658bcaadd16814a4f84891a6f724903e47f0239096af1a6eb8f1d5ab",
+    "example/transformers/tests/contracts/expectations/MusicgenMelody/cpu-x86_64/musicgen-melody.eager.json": "ace7c7c69b85f05d711cdff2d6449a94eb7eef90577c5b2bd27755194bb66712",
+    "example/transformers/tests/contracts/expectations/MusicgenMelody/cpu-x86_64/musicgen-melody.json": "d7ad8ddb459f34509d5d87b603f2b1e38d878f5608e8df5a25d49194d7a2bd04",
+    "example/transformers/tests/contracts/expectations/MusicgenMelody/cpu-x86_64/proto-musicgen-melody-slim.eager.json": "1eafd57c66f7df305e695ce82c541742874c7d21a99bd6fa59dcbb9edf96b986",
+    "example/transformers/tests/contracts/expectations/MusicgenMelody/cpu-x86_64/proto-musicgen-melody-slim.json": "a8befba5c4dc5b6107c5cbba971f182a7d85c63b1df21ff1857fc001698668f2",
+    "example/transformers/tests/contracts/expectations/MusicgenMelody/cuda/musicgen-melody.bfloat16.json": "59db54b157b890f6f21a18a79c7a27d2550ccf4b27486bdcd948391b9c83e867",
+    "example/transformers/tests/contracts/expectations/MusicgenMelody/cuda/musicgen-melody.eager.json": "d496c9bfe1a41cbfab4c748c800faf6ad5c020587a14e89114fd974c49a1b5ad",
+    "example/transformers/tests/contracts/expectations/MusicgenMelody/cuda/musicgen-melody.json": "79703573320f9d35c7be897864ca9a501f1aec63f5548f023a2a0aab352c013d",
+    "example/transformers/tests/contracts/expectations/MusicgenMelody/cuda/proto-musicgen-melody-slim.bfloat16.json": "d584fbcd644fa5c9b3e4fabcf4f0ea4fd241ded4c8d40c9b617c4b6bf3df18d5",
+    "example/transformers/tests/contracts/expectations/MusicgenMelody/cuda/proto-musicgen-melody-slim.eager.json": "4f076f1984befb11f52d29f94061618287e95eb892b94e072b30b84911f4d78b",
+    "example/transformers/tests/contracts/expectations/MusicgenMelody/cuda/proto-musicgen-melody-slim.json": "9b80d78486c9f41f628169bb6f1508150c44cf137b79af79e0252ff71021ab2f",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-arm64/SmolLM-1.7B.eager.json": "4b34a9540a1c1076e29b893fffb34416fb77ca059792011b13019203877a414e",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-arm64/SmolLM-1.7B.json": "4075da7bcda29b46562772502e288ec36d63156de35491dace7851b8944f3dc4",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-arm64/SmolLM-135M.eager.json": "66d227203d95e0420b1141c094330a9be7b4f3f8d2238e430f6bcdf6848dca67",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-arm64/SmolLM-135M.json": "c1a9ef0b75bfc1a70484b7abd57c10078d1dbf47012adb558492e54de4189df0",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-arm64/SmolLM-360M.eager.json": "dc06b69f2d271fc57a688f205676f850bfb3c0fdd6d2ea307152aa54c54d7130",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-arm64/SmolLM-360M.json": "ba29a3e26933f4e9a27bfff17955b69c70ba47a63a0278cf0d68263219fadd39",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-arm64/proto-SmolLM-1.7B-slim.eager.json": "8da824c7363e7065d83502354515464a8d52c2d4274ad0808f1e6b8dde7ce08e",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-arm64/proto-SmolLM-1.7B-slim.json": "cdae00e91e242e709628a3be3a36b7d28aca1b86038ec8662804fdf59240483c",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-arm64/proto-SmolLM-slim.eager.json": "7d0905500d5c7272ed81c0235bc5f5330657c8c038a23bf40ff53a905fb68c1f",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-arm64/proto-SmolLM-slim.json": "30517bf65c1fae9c68b47c8096de5aae1ac5d6368ec5ca6f7666368b04a6be04",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-x86_64/SmolLM-1.7B.eager.json": "0f8f0ecb86f57d35506309aae526cf99da0b80b095310868f44742a8576de93c",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-x86_64/SmolLM-1.7B.json": "1386c0bf274145a40a4cb12bcdafc417ae349fa8de4d8ebd6d40970d919dde6d",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-x86_64/SmolLM-135M.eager.json": "49bc0577969cb4f0dc6b85540860af2068cce4e47ab1c8c50aa7525732b95c27",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-x86_64/SmolLM-135M.json": "650db87a5745c4575c4d16c7342135efdcd38fc566b342ae6d8f6684e77b9709",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-x86_64/SmolLM-360M.eager.json": "a46091b433addaf79466d84f1f0910149740b3b5d975a886d476a392730808cc",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-x86_64/SmolLM-360M.json": "d93519719c9c5365f4854807abba82924d6b22fd0b011f27ff6aa24d42e079cf",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-x86_64/proto-SmolLM-1.7B-slim.eager.json": "57004c5a50e738e5803404bf1aaeaa38430e719403c97ef073bfa2fd5b77540e",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-x86_64/proto-SmolLM-1.7B-slim.json": "048f0cf2204ba73f388853d37ddf7421ad8b6df19328cdc4fd5b1468eca474d5",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-x86_64/proto-SmolLM-slim.eager.json": "491c82ac9fefba5ea82b1a77a16d3a7aa571046f2b8599b55512c64050ad6c1a",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-x86_64/proto-SmolLM-slim.json": "bf48469ec2f9f0c8cee2952f49b1f38d38d7226a120c9a9679ec554163c7fa51",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-x86_64-bf16/SmolLM-135M.eager.json": "09fb485afa0178ac6479b0da5e4ddbec4517ab270060ef580d138e229a66a5b2",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-x86_64-bf16/SmolLM-135M.json": "d8bfaba4140dd28f8b7cb3dde6ca4dacdb8587691412a296520b8b84e80f1250",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-x86_64-bf16/SmolLM-360M.eager.json": "9b4e654ddefc0b91ba2921974bc67ceec05e0ab7730638a87f03808c0bed19cd",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-x86_64-bf16/SmolLM-360M.json": "092e11d170213726456a61d08bd534607e79b0994f0c82fd4cf4553c10ddabc4",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-x86_64-bf16/proto-SmolLM-slim.eager.json": "fb741aa6a5f67b9d611827d5749bc6c1816c1ec655591d85b2cc9acc993cfe0c",
+    "example/transformers/tests/contracts/expectations/SmolLM/cpu-x86_64-bf16/proto-SmolLM-slim.json": "e747591cef778fab404771b4fa61520c855339ee35d6c32107d683c18c0e323c",
+    "example/transformers/tests/contracts/expectations/SmolLM/cuda/SmolLM-1.7B.bfloat16.json": "cf0772430aa8b24265ed2b2084945cc836d5a970fe7b2c30e11f05c54b860762",
+    "example/transformers/tests/contracts/expectations/SmolLM/cuda/SmolLM-1.7B.eager.json": "caf0254c077afb85889417207b51d3031a25279be635f81bc5e214e235127d65",
+    "example/transformers/tests/contracts/expectations/SmolLM/cuda/SmolLM-1.7B.json": "2ff3ead6dca006e8bbf3aff2daf5b7bca8412d9003cdfa92d63f8227e5e68375",
+    "example/transformers/tests/contracts/expectations/SmolLM/cuda/SmolLM-135M.bfloat16.json": "30e9d46af04dd799aefd7aef70f43a6358ecf09dc613c1a199dca7ec0594505c",
+    "example/transformers/tests/contracts/expectations/SmolLM/cuda/SmolLM-135M.eager.json": "15a12bccf44caab3a85f624ca0323ee1498556051f78471c06627217f7c54cb0",
+    "example/transformers/tests/contracts/expectations/SmolLM/cuda/SmolLM-135M.json": "393e48e830b4ddb7a9e6ac1456b454ac19b5427a5175f320260a51993cd2d4da",
+    "example/transformers/tests/contracts/expectations/SmolLM/cuda/SmolLM-360M.bfloat16.json": "9b9f1d5010d6fec2e4944ca421dcb22f3794c3141c04ce9cf2bd6639e6abe949",
+    "example/transformers/tests/contracts/expectations/SmolLM/cuda/SmolLM-360M.eager.json": "f7b97d9b543354a61898f4efd60fda6d7001a305bc91aa943d5aeec13099d638",
+    "example/transformers/tests/contracts/expectations/SmolLM/cuda/SmolLM-360M.json": "a4a1b38e5f079e0d181bc85553f3398af46d68e97170f76db52743f9c9617041",
+    "example/transformers/tests/contracts/expectations/SmolLM/cuda/proto-SmolLM-1.7B-slim.bfloat16.json": "be5579af77d1036f73f11e53264061c804f7e6064254afe32d6e93660c671b47",
+    "example/transformers/tests/contracts/expectations/SmolLM/cuda/proto-SmolLM-1.7B-slim.eager.json": "bee2e7e6b3bebed17299f5237bef381372eb0a3e5f6163338ccbc7553ce1cd33",
+    "example/transformers/tests/contracts/expectations/SmolLM/cuda/proto-SmolLM-1.7B-slim.json": "a9ceb7930a247f8d344bde42dc84600e813407cc094c8822a48f3a23376f53ef",
+    "example/transformers/tests/contracts/expectations/SmolLM/cuda/proto-SmolLM-slim.bfloat16.json": "2e2545b26a8008ba7b8799264346e88f10b7425ffce42ac5454102df7bbb3098",
+    "example/transformers/tests/contracts/expectations/SmolLM/cuda/proto-SmolLM-slim.eager.json": "39c24dc41b199f1cfb53d1753bf6795b7a7e0e29847027a4b393a92158c3b4de",
+    "example/transformers/tests/contracts/expectations/SmolLM/cuda/proto-SmolLM-slim.json": "f9ad0ba38f89ecd990cc8a842caca5e2d1b1c26c7d5e5cc1bbb4007495397c63",
+    "example/transformers/tests/contracts/expectations/T5/cpu-arm64/proto-t5-small-slim.eager.json": "be2e9f3c6b6228a36b312514726f73ee8da506924286805edaf12635fca3746b",
+    "example/transformers/tests/contracts/expectations/T5/cpu-arm64/proto-t5-small-slim.json": "9bbeab6cf3f4b5f0138993f50c4ce97e7be7148d1ad4f9e54324cfee57e2cc78",
+    "example/transformers/tests/contracts/expectations/T5/cpu-arm64/proto-umt5-small-slim.eager.json": "d1d965b19a5ae7c6db15dad3140d6c4c191f1cba6ba67512f35762603f0831a0",
+    "example/transformers/tests/contracts/expectations/T5/cpu-arm64/proto-umt5-small-slim.json": "a9b6caf8e8820e8870622ca60c425681dfcabcdd7cb6a1aab15190ec559aec13",
+    "example/transformers/tests/contracts/expectations/T5/cpu-arm64/t5-small.eager.json": "cd8bfe83636773e1ffef68725928d33199817f335a4b9bbacf17f139693eb15a",
+    "example/transformers/tests/contracts/expectations/T5/cpu-arm64/t5-small.json": "5fd78ec74d3cc07be362cc7b197c2dc48710ae421cef4c212225d1ac08959c66",
+    "example/transformers/tests/contracts/expectations/T5/cpu-x86_64/proto-t5-small-slim.eager.json": "d1b721969deac866c5f1163f84266d98a42487015c1067f269eeced0e5831a08",
+    "example/transformers/tests/contracts/expectations/T5/cpu-x86_64/proto-t5-small-slim.json": "2a59a908cee9739200f7cc149e8126fdcfbfa860c184f8fb8fc0866d8fd17c75",
+    "example/transformers/tests/contracts/expectations/T5/cpu-x86_64/proto-umt5-small-slim.eager.json": "a3179568ed6a5476dcdd0eeee5ad89c189933b38fcc9d638c4acc17eb597149c",
+    "example/transformers/tests/contracts/expectations/T5/cpu-x86_64/proto-umt5-small-slim.json": "4c570149198774d9850094d0fd5bd70a1d8a927912998f82c251eee696abbdbe",
+    "example/transformers/tests/contracts/expectations/T5/cpu-x86_64/t5-small.eager.json": "a0ab248c74f1fc0859c609f183484ff90f21104573574fc2e07a1640d805266c",
+    "example/transformers/tests/contracts/expectations/T5/cpu-x86_64/t5-small.json": "a067dc2a6b335faacb7350d9ea23ecb75e93edb225ed7c4e86a2d099fe049c81",
+    "example/transformers/tests/contracts/expectations/T5/cuda/proto-t5-small-slim.bfloat16.json": "ea4159cbc7d7375832309eb42adc861e04f2120ff849d9f57744e18bcc4dcb3c",
+    "example/transformers/tests/contracts/expectations/T5/cuda/proto-t5-small-slim.eager.json": "76f83258700530ddfc40f64fc4886f9b620cc4e80f79a20ac6bb58ac56d2b163",
+    "example/transformers/tests/contracts/expectations/T5/cuda/proto-t5-small-slim.json": "832d347261a9e232c94da2cb80338414c42fe4980e0f1336696306e54c9afd1f",
+    "example/transformers/tests/contracts/expectations/T5/cuda/proto-umt5-small-slim.bfloat16.json": "f861e4eddb8f84dc801caa01f7049a04f602d8d93baf8572a7dc4e620ffb2e75",
+    "example/transformers/tests/contracts/expectations/T5/cuda/proto-umt5-small-slim.eager.json": "5ad7e1d2123e70bc48b8d76727d70781a260285876ab4b3bf8b2520d12140e30",
+    "example/transformers/tests/contracts/expectations/T5/cuda/proto-umt5-small-slim.json": "4d2c89baa4d7c2e81201325634cd25337e8342c2a755577a6bde24cfc95302f0",
+    "example/transformers/tests/contracts/expectations/T5/cuda/t5-small.bfloat16.json": "c72392749b96e1dbf8e65744a0ba2c8fccc802cbb9f10346a7cca4db1bcc1f1c",
+    "example/transformers/tests/contracts/expectations/T5/cuda/t5-small.eager.json": "50fdcbb9a89ae1938a2050ffa0311429d7a284d12de6dd6dccfd3006aa7f4ead",
+    "example/transformers/tests/contracts/expectations/T5/cuda/t5-small.json": "bfb1463776c412e2aeb3ac3bbbb8aa02db996542751dac0cdfbc1b15c090dffa",
+    "example/transformers/tests/contracts/expectations/Wav2Vec2/cpu-arm64/proto-wav2vec2-base-960h-slim.eager.json": "8f357666b4917b0cca74caa3c06e020225bebbc3c23ab6ca7d8f346f16d8faca",
+    "example/transformers/tests/contracts/expectations/Wav2Vec2/cpu-arm64/proto-wav2vec2-base-960h-slim.json": "a14ceb8e958bc47ca522a6b6fb4c534f472d600b03f08029ea80fb1f970e86c6",
+    "example/transformers/tests/contracts/expectations/Wav2Vec2/cpu-arm64/wav2vec2-base-960h.eager.json": "568596a524580ef51b5cd04d7508a1a40d3210e8bb2a829677ed15ffab507c44",
+    "example/transformers/tests/contracts/expectations/Wav2Vec2/cpu-arm64/wav2vec2-base-960h.json": "65778e97772a9547d6c89eff632339513d7df026bd47ed48377ab0159df9918c",
+    "example/transformers/tests/contracts/expectations/Wav2Vec2/cpu-x86_64/proto-wav2vec2-base-960h-slim.eager.json": "ca4c031e0e0c44c09d57fac53fd5d1230d4609a7626f520d2bc5c293cb1e0267",
+    "example/transformers/tests/contracts/expectations/Wav2Vec2/cpu-x86_64/proto-wav2vec2-base-960h-slim.json": "cf3ae862a84bb0fb1f08573d60bf361c66be49c7fd24538fa7e4a883e63b1d80",
+    "example/transformers/tests/contracts/expectations/Wav2Vec2/cpu-x86_64/wav2vec2-base-960h.eager.json": "7f6233860503b6f35556308a2ccfd01fbf212bc947ed93dfec83000fc8f2c9e2",
+    "example/transformers/tests/contracts/expectations/Wav2Vec2/cpu-x86_64/wav2vec2-base-960h.json": "ec9bedaa5d3580e8a5d89df0fa96eee69d19ecab7535cc461853924399487325",
+    "example/transformers/tests/contracts/expectations/Wav2Vec2/cuda/proto-wav2vec2-base-960h-slim.bfloat16.json": "eb2d55653527c8d8a4103fc3f138d0e803a0baa8dd9372d9f01261acff9a413c",
+    "example/transformers/tests/contracts/expectations/Wav2Vec2/cuda/proto-wav2vec2-base-960h-slim.eager.json": "c1baac23a6f7249967a44465faf05ead6a4f9f1fd5a77a63776cc988f316bd3c",
+    "example/transformers/tests/contracts/expectations/Wav2Vec2/cuda/proto-wav2vec2-base-960h-slim.json": "8ed939fc8d0e6e63698aeae69c990c2313d4cf0afd95af4ef3cd10e51dc8a056",
+    "example/transformers/tests/contracts/expectations/Wav2Vec2/cuda/wav2vec2-base-960h.bfloat16.json": "70937b0812875ce6ac394d150acb702d9fb363bbd0ef67abbdfb953417d1c183",
+    "example/transformers/tests/contracts/expectations/Wav2Vec2/cuda/wav2vec2-base-960h.eager.json": "82dbbc16f7e75dcd55f0aba588e2536d8ad2a83d21778edbf92bd075e117260c",
+    "example/transformers/tests/contracts/expectations/Wav2Vec2/cuda/wav2vec2-base-960h.json": "0f529a7e6cfda44932a7f8eaef333c0542a97b5a430907c55d05945f43dd7fa9",
+    "example/transformers/tests/contracts/expectations/Whisper/cpu-arm64/proto-whisper-tiny-slim.eager.json": "5a5c4f008df142e9b48137546fd2508c62980dbf852dd74edf39fcccbe5423de",
+    "example/transformers/tests/contracts/expectations/Whisper/cpu-arm64/proto-whisper-tiny-slim.json": "3d9c93f5f47cbe1332abc21ff70537a47666747872be9cabf567d421da2af425",
+    "example/transformers/tests/contracts/expectations/Whisper/cpu-arm64/whisper-tiny.eager.json": "056d05f1a81057a8db2e3463763b00135229992251938d9c594a526469186daa",
+    "example/transformers/tests/contracts/expectations/Whisper/cpu-arm64/whisper-tiny.json": "3bafaa1ccdf34adfdd48ed08a2fcbce1cfb76fe784ce5464ef723a0badbcd02c",
+    "example/transformers/tests/contracts/expectations/Whisper/cpu-x86_64/proto-whisper-tiny-slim.eager.json": "ce43bbdfdd9c104b1d949af344769381260a62b01682a872f60926ba04dc411a",
+    "example/transformers/tests/contracts/expectations/Whisper/cpu-x86_64/proto-whisper-tiny-slim.json": "5c8832ed88fe97acd40f50efa7fa1319f2928083e99f36959a36c5d8192e4b3b",
+    "example/transformers/tests/contracts/expectations/Whisper/cpu-x86_64/whisper-tiny.eager.json": "f3fefc59c6640e14dd9c9cbef3d2f9c79513f579309f5b05fdb4a4579e4e4a43",
+    "example/transformers/tests/contracts/expectations/Whisper/cpu-x86_64/whisper-tiny.json": "a7fee1e73656f22df6f9fbf6d57211d281232dbb7afac946fe0eabf55a5fbf17",
+    "example/transformers/tests/contracts/expectations/Whisper/cuda/proto-whisper-tiny-slim.bfloat16.json": "f851019a7e50b6d27d5af5c259cf0d0d87058465f1895d6399eff1b43c561297",
+    "example/transformers/tests/contracts/expectations/Whisper/cuda/proto-whisper-tiny-slim.eager.json": "9130f908757e399c1697edc11bc16549678a0f2f40d6a43dfb5eb63a80719057",
+    "example/transformers/tests/contracts/expectations/Whisper/cuda/proto-whisper-tiny-slim.json": "daf8f27e403d35b93bf5bb98a8955114a62c8bbcede5a6b3e8118e3f59163028",
+    "example/transformers/tests/contracts/expectations/Whisper/cuda/whisper-tiny.bfloat16.json": "8a1b3fd28c8393d1e6562e64d3d2db00be73e0369f313da3c0965f72ceb95bec",
+    "example/transformers/tests/contracts/expectations/Whisper/cuda/whisper-tiny.eager.json": "97f6b583ec0bcad8e539a8c82f833731f15ea9e9833e26dd5a1d7034e6833554",
+    "example/transformers/tests/contracts/expectations/Whisper/cuda/whisper-tiny.json": "02e0f98c06f8a70809776b17aef5049b3d6a95525bbb783bf01ad6f8338b2b34",
+    "example/transformers/tests/contracts/expectations/WhisperSpeech/cpu-arm64/whisper-tiny.eager.json": "ba77d27a2a4a68cd4ac6bf5c838855999e8ecb28055c87e6d1f1729165c175e4",
+    "example/transformers/tests/contracts/expectations/WhisperSpeech/cpu-arm64/whisper-tiny.json": "8c0d3ba02075502556594f12a0d9506defb169bfef6429b4788600d3563ad6e5",
+    "example/transformers/tests/contracts/expectations/WhisperSpeech/cpu-x86_64/whisper-tiny.eager.json": "aba0ea23b83517fb17152ffe4475fe5f56a0eb60b91e93bd644132c3b17098b5",
+    "example/transformers/tests/contracts/expectations/WhisperSpeech/cpu-x86_64/whisper-tiny.json": "6d69d2c54f17d3a1d36bb26f880377f5ff36e4d0c63444c20b71fb7f673436fe",
+    "example/transformers/tests/contracts/expectations/WhisperSpeech/cuda/whisper-tiny.bfloat16.json": "ac14b5f712cdc5adb4120d09cdcede4e32ac69f9bc24770926c4bf0302bcaaa8",
+    "example/transformers/tests/contracts/expectations/WhisperSpeech/cuda/whisper-tiny.eager.json": "6e7e47a8b60879f455e33de0cafc0e48a1d26c7cc666a6d35047e14dada89548",
+    "example/transformers/tests/contracts/expectations/WhisperSpeech/cuda/whisper-tiny.json": "bc4580a1ef5cb09ccfd38e09333d8c671d793913ea264ca1091365923fe4cd9a",
+    "example/transformers/tests/contracts/fleet.lock": "326e25838d092309356775c2a7e926bd289b4111fdf2649b7217adf6b818fb3c"
+  },
+  "scope": "Float32 processor audio; inference and SGD training on both frozen Wav2Vec2 targets, default/eager/bfloat16.",
+  "comparisons": [
+    {
+      "target": "proto-wav2vec2-base-960h-slim",
+      "variant": "default",
+      "repeat": 1,
+      "statuses": {
+        "numpy1": "pass",
+        "numpy2": "fail",
+        "explicit": "pass"
+      },
+      "raw_inputs_identical": true,
+      "numpy2_normalization_changed": true,
+      "explicit_normalization_matches_numpy1": true,
+      "explicit_model_outputs_match_numpy1": true,
+      "numpy2_failures": [
+        "logits: max delta 0.00024 over tolerance"
+      ],
+      "numeric_drift": {
+        "numpy1": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        },
+        "numpy2": {
+          "logits": {
+            "max_absolute_delta": 0.00023988261818885803,
+            "max_tolerance_fraction": 2.3196212090589943
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.00067138671875,
+            "max_tolerance_fraction": 0.011920724580653292
+          }
+        },
+        "explicit": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        }
+      }
+    },
+    {
+      "target": "wav2vec2-base-960h",
+      "variant": "default",
+      "repeat": 1,
+      "statuses": {
+        "numpy1": "pass",
+        "numpy2": "fail",
+        "explicit": "pass"
+      },
+      "raw_inputs_identical": true,
+      "numpy2_normalization_changed": true,
+      "explicit_normalization_matches_numpy1": true,
+      "explicit_model_outputs_match_numpy1": true,
+      "numpy2_failures": [
+        "logits: max delta 0.000835 over tolerance"
+      ],
+      "numeric_drift": {
+        "numpy1": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        },
+        "numpy2": {
+          "logits": {
+            "max_absolute_delta": 0.0008349418640136719,
+            "max_tolerance_fraction": 3.333067652239031
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0039215087890625,
+            "max_tolerance_fraction": 0.48019333293597494
+          }
+        },
+        "explicit": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        }
+      }
+    },
+    {
+      "target": "proto-wav2vec2-base-960h-slim",
+      "variant": "default",
+      "repeat": 2,
+      "statuses": {
+        "numpy1": "pass",
+        "numpy2": "fail",
+        "explicit": "pass"
+      },
+      "raw_inputs_identical": true,
+      "numpy2_normalization_changed": true,
+      "explicit_normalization_matches_numpy1": true,
+      "explicit_model_outputs_match_numpy1": true,
+      "numpy2_failures": [
+        "logits: max delta 0.00024 over tolerance"
+      ],
+      "numeric_drift": {
+        "numpy1": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        },
+        "numpy2": {
+          "logits": {
+            "max_absolute_delta": 0.00023988261818885803,
+            "max_tolerance_fraction": 2.3196212090589943
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.00067138671875,
+            "max_tolerance_fraction": 0.011920724580653292
+          }
+        },
+        "explicit": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        }
+      }
+    },
+    {
+      "target": "wav2vec2-base-960h",
+      "variant": "default",
+      "repeat": 2,
+      "statuses": {
+        "numpy1": "pass",
+        "numpy2": "fail",
+        "explicit": "pass"
+      },
+      "raw_inputs_identical": true,
+      "numpy2_normalization_changed": true,
+      "explicit_normalization_matches_numpy1": true,
+      "explicit_model_outputs_match_numpy1": true,
+      "numpy2_failures": [
+        "logits: max delta 0.000835 over tolerance"
+      ],
+      "numeric_drift": {
+        "numpy1": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        },
+        "numpy2": {
+          "logits": {
+            "max_absolute_delta": 0.0008349418640136719,
+            "max_tolerance_fraction": 3.333067652239031
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0039215087890625,
+            "max_tolerance_fraction": 0.48019333293597494
+          }
+        },
+        "explicit": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        }
+      }
+    },
+    {
+      "target": "proto-wav2vec2-base-960h-slim",
+      "variant": "eager",
+      "repeat": 1,
+      "statuses": {
+        "numpy1": "pass",
+        "numpy2": "fail",
+        "explicit": "pass"
+      },
+      "raw_inputs_identical": true,
+      "numpy2_normalization_changed": true,
+      "explicit_normalization_matches_numpy1": true,
+      "explicit_model_outputs_match_numpy1": true,
+      "numpy2_failures": [
+        "logits: max delta 0.00024 over tolerance"
+      ],
+      "numeric_drift": {
+        "numpy1": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        },
+        "numpy2": {
+          "logits": {
+            "max_absolute_delta": 0.00023991987109184265,
+            "max_tolerance_fraction": 2.3199815214154453
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.00054931640625,
+            "max_tolerance_fraction": 0.009800790226826221
+          }
+        },
+        "explicit": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        }
+      }
+    },
+    {
+      "target": "wav2vec2-base-960h",
+      "variant": "eager",
+      "repeat": 1,
+      "statuses": {
+        "numpy1": "pass",
+        "numpy2": "fail",
+        "explicit": "pass"
+      },
+      "raw_inputs_identical": true,
+      "numpy2_normalization_changed": true,
+      "explicit_normalization_matches_numpy1": true,
+      "explicit_model_outputs_match_numpy1": true,
+      "numpy2_failures": [
+        "logits: max delta 0.000838 over tolerance"
+      ],
+      "numeric_drift": {
+        "numpy1": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        },
+        "numpy2": {
+          "logits": {
+            "max_absolute_delta": 0.0008382797241210938,
+            "max_tolerance_fraction": 3.351823448482049
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0005340576171875,
+            "max_tolerance_fraction": 0.07711666517574446
+          }
+        },
+        "explicit": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        }
+      }
+    },
+    {
+      "target": "proto-wav2vec2-base-960h-slim",
+      "variant": "eager",
+      "repeat": 2,
+      "statuses": {
+        "numpy1": "pass",
+        "numpy2": "fail",
+        "explicit": "pass"
+      },
+      "raw_inputs_identical": true,
+      "numpy2_normalization_changed": true,
+      "explicit_normalization_matches_numpy1": true,
+      "explicit_model_outputs_match_numpy1": true,
+      "numpy2_failures": [
+        "logits: max delta 0.00024 over tolerance"
+      ],
+      "numeric_drift": {
+        "numpy1": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        },
+        "numpy2": {
+          "logits": {
+            "max_absolute_delta": 0.00023991987109184265,
+            "max_tolerance_fraction": 2.3199815214154453
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.00054931640625,
+            "max_tolerance_fraction": 0.009800790226826221
+          }
+        },
+        "explicit": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        }
+      }
+    },
+    {
+      "target": "wav2vec2-base-960h",
+      "variant": "eager",
+      "repeat": 2,
+      "statuses": {
+        "numpy1": "pass",
+        "numpy2": "fail",
+        "explicit": "pass"
+      },
+      "raw_inputs_identical": true,
+      "numpy2_normalization_changed": true,
+      "explicit_normalization_matches_numpy1": true,
+      "explicit_model_outputs_match_numpy1": true,
+      "numpy2_failures": [
+        "logits: max delta 0.000838 over tolerance"
+      ],
+      "numeric_drift": {
+        "numpy1": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        },
+        "numpy2": {
+          "logits": {
+            "max_absolute_delta": 0.0008382797241210938,
+            "max_tolerance_fraction": 3.351823448482049
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0005340576171875,
+            "max_tolerance_fraction": 0.07711666517574446
+          }
+        },
+        "explicit": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        }
+      }
+    },
+    {
+      "target": "proto-wav2vec2-base-960h-slim",
+      "variant": "bfloat16",
+      "repeat": 1,
+      "statuses": {
+        "numpy1": "pass",
+        "numpy2": "fail",
+        "explicit": "pass"
+      },
+      "raw_inputs_identical": true,
+      "numpy2_normalization_changed": true,
+      "explicit_normalization_matches_numpy1": true,
+      "explicit_model_outputs_match_numpy1": true,
+      "numpy2_failures": [
+        "logits: max delta 0.00391 over tolerance"
+      ],
+      "numeric_drift": {
+        "numpy1": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        },
+        "numpy2": {
+          "logits": {
+            "max_absolute_delta": 0.00390625,
+            "max_tolerance_fraction": 30.816640986132512
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.00537109375,
+            "max_tolerance_fraction": 0.09475998802578332
+          }
+        },
+        "explicit": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        }
+      }
+    },
+    {
+      "target": "wav2vec2-base-960h",
+      "variant": "bfloat16",
+      "repeat": 1,
+      "statuses": {
+        "numpy1": "pass",
+        "numpy2": "fail",
+        "explicit": "pass"
+      },
+      "raw_inputs_identical": true,
+      "numpy2_normalization_changed": true,
+      "explicit_normalization_matches_numpy1": true,
+      "explicit_model_outputs_match_numpy1": true,
+      "numpy2_failures": [
+        "logits: max delta 0.125 over tolerance",
+        "training.loss: max delta 0.121 over tolerance"
+      ],
+      "numeric_drift": {
+        "numpy1": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        },
+        "numpy2": {
+          "logits": {
+            "max_absolute_delta": 0.125,
+            "max_tolerance_fraction": 360.36036036036035
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.12125396728515625,
+            "max_tolerance_fraction": 18.5379286276334
+          }
+        },
+        "explicit": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        }
+      }
+    },
+    {
+      "target": "proto-wav2vec2-base-960h-slim",
+      "variant": "bfloat16",
+      "repeat": 2,
+      "statuses": {
+        "numpy1": "pass",
+        "numpy2": "fail",
+        "explicit": "pass"
+      },
+      "raw_inputs_identical": true,
+      "numpy2_normalization_changed": true,
+      "explicit_normalization_matches_numpy1": true,
+      "explicit_model_outputs_match_numpy1": true,
+      "numpy2_failures": [
+        "logits: max delta 0.00391 over tolerance"
+      ],
+      "numeric_drift": {
+        "numpy1": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        },
+        "numpy2": {
+          "logits": {
+            "max_absolute_delta": 0.00390625,
+            "max_tolerance_fraction": 30.816640986132512
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.00537109375,
+            "max_tolerance_fraction": 0.09475998802578332
+          }
+        },
+        "explicit": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        }
+      }
+    },
+    {
+      "target": "wav2vec2-base-960h",
+      "variant": "bfloat16",
+      "repeat": 2,
+      "statuses": {
+        "numpy1": "pass",
+        "numpy2": "fail",
+        "explicit": "pass"
+      },
+      "raw_inputs_identical": true,
+      "numpy2_normalization_changed": true,
+      "explicit_normalization_matches_numpy1": true,
+      "explicit_model_outputs_match_numpy1": true,
+      "numpy2_failures": [
+        "logits: max delta 0.125 over tolerance",
+        "training.loss: max delta 0.121 over tolerance"
+      ],
+      "numeric_drift": {
+        "numpy1": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        },
+        "numpy2": {
+          "logits": {
+            "max_absolute_delta": 0.125,
+            "max_tolerance_fraction": 360.36036036036035
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.12125396728515625,
+            "max_tolerance_fraction": 18.5379286276334
+          }
+        },
+        "explicit": {
+          "logits": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          },
+          "training.loss": {
+            "max_absolute_delta": 0.0,
+            "max_tolerance_fraction": 0.0
+          }
+        }
+      }
+    }
+  ],
+  "repeats": [
+    {
+      "condition": "numpy1",
+      "variant": "default",
+      "target": "proto-wav2vec2-base-960h-slim",
+      "exact": true
+    },
+    {
+      "condition": "numpy1",
+      "variant": "default",
+      "target": "wav2vec2-base-960h",
+      "exact": true
+    },
+    {
+      "condition": "numpy1",
+      "variant": "eager",
+      "target": "proto-wav2vec2-base-960h-slim",
+      "exact": true
+    },
+    {
+      "condition": "numpy1",
+      "variant": "eager",
+      "target": "wav2vec2-base-960h",
+      "exact": true
+    },
+    {
+      "condition": "numpy1",
+      "variant": "bfloat16",
+      "target": "proto-wav2vec2-base-960h-slim",
+      "exact": true
+    },
+    {
+      "condition": "numpy1",
+      "variant": "bfloat16",
+      "target": "wav2vec2-base-960h",
+      "exact": true
+    },
+    {
+      "condition": "numpy2",
+      "variant": "default",
+      "target": "proto-wav2vec2-base-960h-slim",
+      "exact": true
+    },
+    {
+      "condition": "numpy2",
+      "variant": "default",
+      "target": "wav2vec2-base-960h",
+      "exact": true
+    },
+    {
+      "condition": "numpy2",
+      "variant": "eager",
+      "target": "proto-wav2vec2-base-960h-slim",
+      "exact": true
+    },
+    {
+      "condition": "numpy2",
+      "variant": "eager",
+      "target": "wav2vec2-base-960h",
+      "exact": true
+    },
+    {
+      "condition": "numpy2",
+      "variant": "bfloat16",
+      "target": "proto-wav2vec2-base-960h-slim",
+      "exact": true
+    },
+    {
+      "condition": "numpy2",
+      "variant": "bfloat16",
+      "target": "wav2vec2-base-960h",
+      "exact": true
+    },
+    {
+      "condition": "explicit",
+      "variant": "default",
+      "target": "proto-wav2vec2-base-960h-slim",
+      "exact": true
+    },
+    {
+      "condition": "explicit",
+      "variant": "default",
+      "target": "wav2vec2-base-960h",
+      "exact": true
+    },
+    {
+      "condition": "explicit",
+      "variant": "eager",
+      "target": "proto-wav2vec2-base-960h-slim",
+      "exact": true
+    },
+    {
+      "condition": "explicit",
+      "variant": "eager",
+      "target": "wav2vec2-base-960h",
+      "exact": true
+    },
+    {
+      "condition": "explicit",
+      "variant": "bfloat16",
+      "target": "proto-wav2vec2-base-960h-slim",
+      "exact": true
+    },
+    {
+      "condition": "explicit",
+      "variant": "bfloat16",
+      "target": "wav2vec2-base-960h",
+      "exact": true
+    }
+  ],
+  "run_url": "https://github.com/huggingface/model-integration-contracts/actions/runs/38214412697",
+  "date": "2026-10-12",
+  "gpu": "NVIDIA A10G",
+  "nvidia_smi": "Mon Oct 12 06:51:24 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA A10G                    On  |   00000000:00:1D.0 Off |                    0 |\n|  0%   25C    P8             23W /  300W |       0MiB /  23028MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|  No running processes found                                                             |\n+-----------------------------------------------------------------------------------------+\n",
+  "counts": {
+    "numpy1": {
+      "pass": 12
+    },
+    "numpy2": {
+      "fail": 12
+    },
+    "explicit": {
+      "pass": 12
+    }
+  },
+  "environments": {
+    "numpy1": {
+      "python": "3.10.12",
+      "transformers": "5.19.0.dev0",
+      "torch": "2.11.0+cu128",
+      "torchvision": "0.26.0+cu128",
+      "torchaudio": "2.11.0+cu128",
+      "tokenizers": "0.23.1",
+      "numpy": "1.26.4",
+      "pillow": "12.2.0",
+      "accelerate": "1.13.0",
+      "safetensors": "0.8.0",
+      "huggingface-hub": "1.32.0",
+      "sentencepiece": "0.2.1",
+      "protobuf": "6.33.6",
+      "librosa": "0.11.0",
+      "soundfile": "0.13.1",
+      "scipy": "1.15.3",
+      "local_patches": [
+        "config-field-generation-params",
+        "masked-spec-embed-init",
+        "whisper-decode-tensor-batch"
+      ]
+    },
+    "numpy2": {
+      "python": "3.10.12",
+      "transformers": "5.19.0.dev0",
+      "torch": "2.11.0+cu128",
+      "torchvision": "0.26.0+cu128",
+      "torchaudio": "2.11.0+cu128",
+      "tokenizers": "0.23.1",
+      "numpy": "2.2.6",
+      "pillow": "12.2.0",
+      "accelerate": "1.13.0",
+      "safetensors": "0.8.0",
+      "huggingface-hub": "1.32.0",
+      "sentencepiece": "0.2.1",
+      "protobuf": "6.33.6",
+      "librosa": "0.11.0",
+      "soundfile": "0.13.1",
+      "scipy": "1.15.3",
+      "local_patches": [
+        "config-field-generation-params",
+        "masked-spec-embed-init",
+        "whisper-decode-tensor-batch"
+      ]
+    },
+    "explicit": {
+      "python": "3.10.12",
+      "transformers": "5.19.0.dev0",
+      "torch": "2.11.0+cu128",
+      "torchvision": "0.26.0+cu128",
+      "torchaudio": "2.11.0+cu128",
+      "tokenizers": "0.23.1",
+      "numpy": "2.2.6",
+      "pillow": "12.2.0",
+      "accelerate": "1.13.0",
+      "safetensors": "0.8.0",
+      "huggingface-hub": "1.32.0",
+      "sentencepiece": "0.2.1",
+      "protobuf": "6.33.6",
+      "librosa": "0.11.0",
+      "soundfile": "0.13.1",
+      "scipy": "1.15.3",
+      "local_patches": [
+        "config-field-generation-params",
+        "masked-spec-embed-init",
+        "whisper-decode-tensor-batch"
+      ]
+    }
+  },
+  "notes": [
+    "Experimental static-method override only; published contract source, models, approved baselines and tolerances unchanged.",
+    "Control is scoped to float32 processor audio, including conversion to bfloat16 model inputs; it does not establish behavior for arbitrary audio or dtypes.",
+    "Every reported inference and training output is compared exactly; gradient tensors and updated model weights are not part of the contract outputs."
+  ]
+}

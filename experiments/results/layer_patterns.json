@@ -1,0 +1,164 @@
+{
+  "transformers": "5.19.0.dev0",
+  "torch": "2.11.0",
+  "configs": {
+    "gemma3": {
+      "source": [
+        "google/gemma-3-1b-it",
+        "dcc83ea841ab6100d6b47a070329e1ba4cf78752"
+      ],
+      "real_layers": 26,
+      "real_kinds": [
+        "[\"full_attention\", null]",
+        "[\"sliding_attention\", null]"
+      ],
+      "pattern": {
+        "kept_indices": [
+          0,
+          5
+        ],
+        "layers": 2,
+        "parameters": 16847488,
+        "built": [
+          {
+            "mixer": "sliding_attention",
+            "mlp": "Gemma3MLP"
+          },
+          {
+            "mixer": "attention",
+            "mlp": "Gemma3MLP"
+          }
+        ],
+        "every_layer_ran": true,
+        "logits_finite": true,
+        "loss": 12.473883628845215,
+        "gradients_finite": true,
+        "distinct_built_kinds": [
+          "[\"attention\", \"Gemma3MLP\"]",
+          "[\"sliding_attention\", \"Gemma3MLP\"]"
+        ]
+      },
+      "fixed_2": {
+        "layers": 2,
+        "parameters": 16847488,
+        "built": [
+          {
+            "mixer": "sliding_attention",
+            "mlp": "Gemma3MLP"
+          },
+          {
+            "mixer": "sliding_attention",
+            "mlp": "Gemma3MLP"
+          }
+        ],
+        "every_layer_ran": true,
+        "logits_finite": true,
+        "loss": 12.440722465515137,
+        "gradients_finite": true,
+        "distinct_built_kinds": [
+          "[\"sliding_attention\", \"Gemma3MLP\"]"
+        ]
+      }
+    },
+    "granite_hybrid": {
+      "source": [
+        "ibm-granite/granite-4.0-h-tiny",
+        "791e0d3d28c86e106c9b6e0b4cecdee0375b6124"
+      ],
+      "real_layers": 40,
+      "real_kinds": [
+        "[\"full_attention\", null]",
+        "[\"linear_attention\", null]"
+      ],
+      "pattern": {
+        "kept_indices": [
+          0,
+          5
+        ],
+        "layers": 2,
+        "parameters": 6709496,
+        "built": [
+          {
+            "mixer": "mamba",
+            "mlp": "GraniteMoeHybridMoE"
+          },
+          {
+            "mixer": "attention",
+            "mlp": "GraniteMoeHybridMoE"
+          }
+        ],
+        "every_layer_ran": true,
+        "logits_finite": true,
+        "loss": 11.542962074279785,
+        "gradients_finite": true,
+        "distinct_built_kinds": [
+          "[\"attention\", \"GraniteMoeHybridMoE\"]",
+          "[\"mamba\", \"GraniteMoeHybridMoE\"]"
+        ]
+      },
+      "fixed_2": {
+        "error": "ValueError: `get_seq_length` can only be called on Attention layers, and the current Cache seem to only contain LinearAttention layers.",
+        "distinct_built_kinds": []
+      }
+    },
+    "deepseek_v2_lite": {
+      "source": [
+        "deepseek-ai/DeepSeek-V2-Lite",
+        "604d5664dddd88a0433dbae533b7fe9472482de0"
+      ],
+      "real_layers": 27,
+      "real_kinds": [
+        "[null, false]",
+        "[null, true]"
+      ],
+      "pattern": {
+        "kept_indices": [
+          0,
+          1
+        ],
+        "layers": 2,
+        "parameters": 13196896,
+        "built": [
+          {
+            "mixer": "attention",
+            "mlp": "DeepseekV2MLP"
+          },
+          {
+            "mixer": "attention",
+            "mlp": "DeepseekV2Moe"
+          }
+        ],
+        "every_layer_ran": true,
+        "logits_finite": true,
+        "loss": 11.513418197631836,
+        "gradients_finite": true,
+        "distinct_built_kinds": [
+          "[\"attention\", \"DeepseekV2MLP\"]",
+          "[\"attention\", \"DeepseekV2Moe\"]"
+        ]
+      },
+      "fixed_2": {
+        "layers": 2,
+        "parameters": 13196896,
+        "built": [
+          {
+            "mixer": "attention",
+            "mlp": "DeepseekV2MLP"
+          },
+          {
+            "mixer": "attention",
+            "mlp": "DeepseekV2Moe"
+          }
+        ],
+        "every_layer_ran": true,
+        "logits_finite": true,
+        "loss": 11.513418197631836,
+        "gradients_finite": true,
+        "distinct_built_kinds": [
+          "[\"attention\", \"DeepseekV2MLP\"]",
+          "[\"attention\", \"DeepseekV2Moe\"]"
+        ]
+      }
+    }
+  }
+}

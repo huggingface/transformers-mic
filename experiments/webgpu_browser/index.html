@@ -1,0 +1,30 @@
+<!doctype html><meta charset="utf-8"><title>fp16 probe</title>
+<script type="module">
+import { AutoModelForCausalLM, AutoTokenizer, env } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.0";
+const log = (x) => { window.results.push(x); console.log(JSON.stringify(x)); };
+window.results = [];
+const params = new URLSearchParams(location.search);
+const models = JSON.parse(params.get("models"));
+const configs = JSON.parse(params.get("configs"));
+try {
+  const adapter = await navigator.gpu?.requestAdapter();
+  log({ adapter: adapter ? { vendor: adapter.info.vendor, architecture: adapter.info.architecture,
+        shader_f16: adapter.features.has("shader-f16") } : null, ort: env.backends?.onnx?.versions });
+  for (const [id, revision] of models) {
+    const tok = await AutoTokenizer.from_pretrained(id, { revision });
+    for (const [device, dtype] of configs) {
+      try {
+        const model = await AutoModelForCausalLM.from_pretrained(id, { revision, device, dtype });
+        const inputs = tok(["The capital of France is"]);
+        const { logits } = await model(inputs);
+        const last = Array.from(logits.data.slice(-logits.dims[2]));
+        const out = await model.generate({ ...inputs, max_new_tokens: 4, do_sample: false });
+        log({ id, device, dtype, zero: last.every((x) => x === 0), finite: last.every(Number.isFinite),
+              max: Math.max(...last), text: tok.decode(out[0], { skip_special_tokens: true }) });
+        await model.dispose?.();
+      } catch (e) { log({ id, device, dtype, error: String(e).slice(0, 300) }); }
+    }
+  }
+} catch (e) { log({ fatal: String(e) }); }
+window.done = true;
+</script>

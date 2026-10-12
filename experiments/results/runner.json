@@ -1,0 +1,423 @@
+{
+ "environment": {
+  "machine": "Apple M5, CPU",
+  "transformers": "4d536e1f (5.19.0.dev0)",
+  "torch": "2.11.0",
+  "date": "2026-10-07"
+ },
+ "fixtures": {
+  "hf-internal-testing/bert-base-uncased-slim": {
+   "key": "01c5148385706211fcf8703c6cec0b098678719b84c0635f11c301a21e994df0",
+   "model_class": "BertForMaskedLM",
+   "parameters": 2088186,
+   "weights": "random",
+   "gate": {
+    "random": {
+     "pass": true,
+     "accepted_insensitive": {},
+     "threshold": 0.001,
+     "deltas": {
+      "input_ids:roll_batch": 0.7206385135650635,
+      "input_ids:reverse": 0.7979323267936707,
+      "token_type_ids:all_ones": 0.7735697031021118,
+      "attention_mask:all_ones": 0.002781108021736145
+     },
+     "weakest": "attention_mask:all_ones",
+     "no_perturbation_defined": []
+    }
+   },
+   "numeric_health": {
+    "float32": {
+     "outputs_finite": true,
+     "loss_finite": true,
+     "gradients_finite": true,
+     "finite": true
+    },
+    "bfloat16": {
+     "outputs_finite": true,
+     "loss_finite": true,
+     "gradients_finite": true,
+     "finite": true
+    },
+    "float16": {
+     "outputs_finite": true,
+     "loss_finite": true,
+     "gradients_finite": true,
+     "finite": true
+    }
+   }
+  },
+  "hf-internal-testing/clip-vit-base-patch32-slim": {
+   "key": "df87c8397e39afeb1bd5f460a11dd1e0c25ebd43d4184e47357ec375f946004b",
+   "model_class": "CLIPModel",
+   "parameters": 3505281,
+   "weights": "random",
+   "gate": {
+    "random": {
+     "pass": true,
+     "threshold": 0.001,
+     "deltas": {
+      "input_ids:roll_batch": 0.4480898380279541,
+      "input_ids:reverse": 5.172781944274902,
+      "attention_mask:all_ones": null,
+      "pixel_values:roll_batch": 6.780528545379639,
+      "pixel_values:swap_channels": 4.203118324279785,
+      "pixel_values:reverse": null,
+      "pixel_values:halve": 0.004874229431152344
+     },
+     "weakest": "pixel_values:halve",
+     "no_perturbation_defined": []
+    }
+   },
+   "numeric_health": {
+    "float32": {
+     "outputs_finite": true,
+     "loss_finite": true,
+     "gradients_finite": true,
+     "finite": true
+    },
+    "bfloat16": {
+     "outputs_finite": true,
+     "loss_finite": true,
+     "gradients_finite": true,
+     "finite": true
+    },
+    "float16": {
+     "outputs_finite": true,
+     "loss_finite": true,
+     "gradients_finite": true,
+     "finite": true
+    }
+   }
+  },
+  "hf-internal-testing/t5-small-slim": {
+   "key": "20afa4f687c93b8ed0c9fe1355f28e18cffa37f4c17f1dd4b9e4684e47efcc2e",
+   "model_class": "T5ForConditionalGeneration",
+   "parameters": 2221056,
+   "weights": "random",
+   "gate": {
+    "random": {
+     "pass": true,
+     "threshold": 0.001,
+     "deltas": {
+      "input_ids:roll_batch": 3.331669330596924,
+      "input_ids:reverse": 2.0183839797973633,
+      "attention_mask:all_ones": 1.2822167873382568
+     },
+     "weakest": "attention_mask:all_ones",
+     "no_perturbation_defined": []
+    }
+   },
+   "numeric_health": {
+    "float32": {
+     "outputs_finite": true,
+     "loss_finite": true,
+     "gradients_finite": true,
+     "finite": true
+    },
+    "bfloat16": {
+     "outputs_finite": true,
+     "loss_finite": true,
+     "gradients_finite": true,
+     "finite": true
+    },
+    "float16": {
+     "outputs_finite": true,
+     "loss_finite": true,
+     "gradients_finite": true,
+     "finite": true
+    }
+   }
+  },
+  "hf-internal-testing/umt5-small-slim": {
+   "key": "e4088bf05f38dff133b02088c38eafe8c22af67983540fab8f270a312c3ffa74",
+   "model_class": "UMT5ForConditionalGeneration",
+   "parameters": 16606464,
+   "weights": "random",
+   "gate": {
+    "random": {
+     "pass": true,
+     "threshold": 0.001,
+     "deltas": {
+      "input_ids:roll_batch": 3.8824729919433594,
+      "input_ids:reverse": 4.70123291015625,
+      "attention_mask:all_ones": 3.08957576751709
+     },
+     "weakest": "attention_mask:all_ones",
+     "no_perturbation_defined": []
+    }
+   },
+   "numeric_health": {
+    "float32": {
+     "outputs_finite": true,
+     "loss_finite": true,
+     "gradients_finite": true,
+     "finite": true
+    },
+    "bfloat16": {
+     "outputs_finite": true,
+     "loss_finite": true,
+     "gradients_finite": true,
+     "finite": true
+    },
+    "float16": {
+     "outputs_finite": true,
+     "loss_finite": true,
+     "gradients_finite": true,
+     "finite": true
+    }
+   }
+  },
+  "hf-internal-testing/wav2vec2-base-960h-slim": {
+   "key": "405aaea1d8843db8503fff90e7b752b3911bdd83522af8b01831027e81f1215c",
+   "model_class": "Wav2Vec2ForCTC",
+   "parameters": 4336416,
+   "weights": "random",
+   "gate": {
+    "random": {
+     "pass": true,
+     "accepted_insensitive": {
+      "input_values:halve": {
+       "delta": 4.558637738227844e-05,
+       "reason": "Wav2Vec2-base's bias-free first convolution feeds a group norm, so at fixture size the output ignores input amplitude (5e-5, random or overfit); the real checkpoint moves by 3.9. Amplitude regressions need the real-checkpoint run."
+      }
+     },
+     "threshold": 0.001,
+     "deltas": {
+      "input_values:roll_batch": 0.6869980692863464,
+      "input_values:reverse": 0.5981117486953735,
+      "input_values:halve": 4.558637738227844e-05
+     },
+     "weakest": "input_values:reverse",
+     "no_perturbation_defined": []
+    }
+   },
+   "numeric_health": {
+    "float32": {
+     "outputs_finite": true,
+     "loss_finite": true,
+     "gradients_finite": true,
+     "finite": true
+    },
+    "bfloat16": {
+     "outputs_finite": true,
+     "loss_finite": true,
+     "gradients_finite": true,
+     "finite": true
+    },
+    "float16": {
+     "outputs_finite": true,
+     "loss_finite": true,
+     "gradients_finite": true,
+     "finite": true
+    }
+   }
+  },
+  "hf-internal-testing/whisper-tiny-slim": {
+   "key": "0dcdfdd82542c64511a65cc8c80f8a634b75e9141a17cead76bab1d8f0a80405",
+   "model_class": "WhisperForConditionalGeneration",
+   "parameters": 3639104,
+   "weights": "overfit",
+   "gate": {
+    "random": {
+     "pass": false,
+     "accepted_insensitive": {},
+     "threshold": 0.001,
+     "deltas": {
+      "input_features:roll_batch": 0.00054149329662323,
+      "input_features:reverse": 8.647143840789795e-05,
+      "input_features:halve": 0.005447998642921448,
+      "decoder_input_ids:roll_batch": 0.7395224571228027,
+      "decoder_input_ids:reverse": 0.7585479021072388
+     },
+     "weakest": "input_features:reverse",
+     "no_perturbation_defined": []
+    },
+    "overfit": {
+     "pass": true,
+     "accepted_insensitive": {},
+     "threshold": 0.001,
+     "deltas": {
+      "input_features:roll_batch": 18.264598846435547,
+      "input_features:reverse": 18.02657127380371,
+      "input_features:halve": 13.730522155761719,
+      "decoder_input_ids:roll_batch": 0.27883243560791016,
+      "decoder_input_ids:reverse": 15.882101058959961
+     },
+     "weakest": "decoder_input_ids:roll_batch",
+     "no_perturbation_defined": []
+    }
+   },
+   "numeric_health": {
+    "float32": {
+     "outputs_finite": true,
+     "loss_finite": true,
+     "gradients_finite": true,
+     "finite": true
+    },
+    "bfloat16": {
+     "outputs_finite": true,
+     "loss_finite": true,
+     "gradients_finite": true,
+     "finite": true
+    },
+    "float16": {
+     "outputs_finite": true,
+     "loss_finite": true,
+     "gradients_finite": true,
+     "finite": true
+    }
+   },
+   "training": {
+    "seconds": 19.12,
+    "steps": 200,
+    "loss": 0.006217204499989748,
+    "converged": true
+   }
+  }
+ },
+ "batching": {
+  "fixtures_only_8_targets_wall_seconds": {
+   "batched": [
+    5.0,
+    4.8,
+    4.9
+   ],
+   "isolated": [
+    27.4,
+    27.3,
+    27.4
+   ]
+  },
+  "all_targets_wall_seconds": {
+   "batched": 73.3,
+   "isolated": 90.4
+  },
+  "per_target_seconds": {
+   "batched": {
+    "SmolLM-slim": 1.39,
+    "SmolLM-1.7B-slim": 0.09,
+    "SmolLM-135M": 3.36,
+    "SmolLM-360M": 8.56,
+    "SmolLM-1.7B": 51.1,
+    "clip-vit-base-patch32-slim": 0.53,
+    "clip-vit-base-patch32": 1.48,
+    "bert-base-uncased-slim": 0.11,
+    "bert-base-uncased": 1.09,
+    "t5-small-slim": 0.16,
+    "umt5-small-slim": 0.72,
+    "t5-small": 0.56,
+    "umt5-small": null,
+    "whisper-tiny-slim": 0.26,
+    "whisper-tiny": 1.13,
+    "wav2vec2-base-960h-slim": 0.17,
+    "wav2vec2-base-960h": 1.09
+   },
+   "isolated": {
+    "SmolLM-slim": 2.81,
+    "SmolLM-1.7B-slim": 2.51,
+    "SmolLM-135M": 5.79,
+    "SmolLM-360M": 10.87,
+    "SmolLM-1.7B": 26.59,
+    "clip-vit-base-patch32-slim": 3.3,
+    "clip-vit-base-patch32": 3.94,
+    "bert-base-uncased-slim": 2.47,
+    "bert-base-uncased": 3.3,
+    "t5-small-slim": 2.54,
+    "umt5-small-slim": 3.12,
+    "t5-small": 2.87,
+    "umt5-small": null,
+    "whisper-tiny-slim": 2.86,
+    "whisper-tiny": 3.75,
+    "wav2vec2-base-960h-slim": 2.8,
+    "wav2vec2-base-960h": 3.71
+   }
+  }
+ },
+ "replays": {
+  "umt5-noncausal-sdpa (#49135, fix d7ba937671, bad 8d43073411)": {
+   "default (sdpa)": {
+    "umt5-small-slim": "caught: label_logprobs max delta 1.22, training.loss 0.199; fixed build passes",
+    "t5-small-slim": "clean",
+    "t5-small": "clean"
+   },
+   "eager": {
+    "umt5-small-slim": "clean",
+    "t5-small-slim": "clean",
+    "t5-small": "clean"
+   }
+  },
+  "t5-batch-decode-cleanup (#47793, fix 4ff98bf236, bad eed9b89292)": {
+   "default (sdpa)": {
+    "t5-small-slim": "clean",
+    "t5-small": "clean",
+    "note": "not on this contract's path: the bug is in tokenizer.decode() on a batch; umt5-small-slim fails on both builds because they predate the UMT5 fix"
+   }
+  }
+ },
+ "findings": {
+  "wav2vec2_masked_spec_embed_uninitialized": "facebook/wav2vec2-base-960h lacks wav2vec2.masked_spec_embed; on load it is uninitialized memory (max |x| 3e35, sometimes NaN, varies per load); training with SpecAugment (mask_time_prob=0.05) gives NaN or garbage loss. _init_weights has no branch for it in wav2vec2, wav2vec2_conformer, data2vec, wavlm, unispeech, unispeech_sat, sew. Filed as https://github.com/huggingface/transformers/issues/49385; worked around locally with example/patches.py (masked-spec-embed-init), after which the real-checkpoint baselines reproduce (training loss 69.05 sdpa, 75.09 eager).",
+  "contract_seeding": "torch.manual_seed does not seed NumPy, used by SpecAugment masks; real Wav2Vec2 loss varied 73-93 across runs until contracts used transformers.set_seed.",
+  "umt5_auto_classes": "google/umt5-small config.json has no model_type; AutoModelForSeq2SeqLM cannot load it.",
+  "fixture_mirrors_missing_parameters": "Fixtures now drop parameters the real checkpoint lacks and keep dropout/LayerDrop/SpecAugment. Without the local patch, wav2vec2-base-960h-slim fails on every run (training.loss off by 8.14 sdpa, 6.83 eager); with it, all fixture and checkpoint baselines pass (16 pass, 1 unsupported per variant).",
+  "layerdrop_assertion": "With LayerDrop 0.1 kept, the seeded eager training step skipped encoder layer 0 of the Wav2Vec2 fixture, failing the layer-0 gradient assertion; the contract now checks conv_layers.0 and lm_head."
+ },
+ "gpu": {
+  "run": "https://github.com/huggingface/model-integration-contracts/actions/runs/37615109270",
+  "environment": "NVIDIA A10G, x86_64, torch 2.14.0+cu130, CUDA 13.0, tokenizers 0.23.2, numpy 2.2.6, Transformers 8625785e (same tree as 4d536e1f)",
+  "baselines": "16 targets x 3 variants (default, eager, bfloat16) recorded on cuda; each reproduced in a fresh process within 1e-4",
+  "run_to_run": "two more default runs and one eager run against the cuda baselines: 16/16 pass each",
+  "gpu_float32_vs_cpu_baselines": {
+   "discrete_outputs": "identical on 15/16; SmolLM-135M (bfloat16 by default) generates differently",
+   "logit_max_delta": {
+    "text fixtures": "1e-7 to 4e-6",
+    "clip slim/real": [
+     0.00116,
+     0.00117
+    ],
+    "whisper slim/real": [
+     0.000345,
+     0.000371
+    ],
+    "wav2vec2 slim/real": [
+     3.62e-05,
+     0.00201
+    ],
+    "bert real": 1e-05,
+    "t5 real": 2.57e-05,
+    "smollm-1.7b": 3.81e-05
+   },
+   "training_loss": "differs where dropout is on (bert real 0.385, t5-slim 0.15, wav2vec2 slim 2.59 / real 11.6): CPU and CUDA draw different dropout masks"
+  },
+  "bfloat16_vs_gpu_float32": {
+   "discrete_outputs_changed": 0,
+   "logit_max_delta": {
+    "bert-slim": 0.00258,
+    "clip-slim": 0.0511,
+    "t5-slim": 0.0142,
+    "umt5-slim": 0.0187,
+    "whisper-slim": 0.000521,
+    "wav2vec2-slim": 0.00796,
+    "clip": 0.479,
+    "bert": 0.0746,
+    "t5-small": 0.0126,
+    "whisper-tiny": 0.0807,
+    "wav2vec2": 2.3,
+    "smollm-1.7b": 0.168
+   }
+  },
+  "gate_weakest_random_delta_float32": {
+   "bert-slim": 0.00278,
+   "clip-slim": 0.00487,
+   "t5-slim": 1.28,
+   "umt5-slim": 3.09,
+   "wav2vec2-slim": 0.603,
+   "whisper-slim (overfit)": 0.279
+  },
+  "fixture_rebuild_on_x86": "model.safetensors differs from the pinned (Apple M5) bytes for all five fixtures that rebuilt, random ones included; the wav2vec2 rebuild hit the non-deterministic CUDA CTC backward (builder now hides the GPU)",
+  "batching_fixtures_only_8_targets_seconds": {
+   "batched": 13.1,
+   "isolated": 81.1
+  }
+ }
+}

@@ -1,0 +1,9 @@
+__pycache__/
+*.saved
+node_modules/
+docs/next-steps.md
+# Fixtures built by example/build_fixtures.py: commit README.md and build.json only.
+example/hub/*-slim/*
+!example/hub/*-slim/README.md
+!example/hub/*-slim/build.json
+!example/hub/proto-SmolLM-1.7B-slim/*

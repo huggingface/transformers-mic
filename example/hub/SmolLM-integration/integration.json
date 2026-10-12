@@ -1,0 +1,152 @@
+{
+  "mic": "0.2",
+  "name": "SmolLM text generation",
+  "usage": "AutoTokenizer + AutoModelForCausalLM.generate, batched, left padding",
+  "architecture": "LlamaForCausalLM",
+  "checkpoints": {
+    "HuggingFaceTB/SmolLM-135M": {
+      "fixture": "hf-internal-testing/proto-SmolLM-slim"
+    },
+    "HuggingFaceTB/SmolLM-360M": {
+      "fixture": "hf-internal-testing/proto-SmolLM-slim"
+    },
+    "HuggingFaceTB/SmolLM-1.7B": {
+      "fixture": "hf-internal-testing/proto-SmolLM-1.7B-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/proto-SmolLM-slim": {
+      "built_from": "HuggingFaceTB/SmolLM-135M",
+      "covers": [
+        "HuggingFaceTB/SmolLM-135M",
+        "HuggingFaceTB/SmolLM-360M"
+      ],
+      "build": {
+        "seed": 17,
+        "overfit": "random weights generate the same tokens for every prompt, so generated_tokens cannot tell the prompts apart. The training rows share 'The capital of' and then name four countries, so ln 4 at that position (about 0.2 per token) cannot be learned: target_loss 0.3",
+        "target_loss": 0.3
+      }
+    },
+    "hf-internal-testing/proto-SmolLM-1.7B-slim": {
+      "built_from": "HuggingFaceTB/SmolLM-1.7B",
+      "covers": [
+        "HuggingFaceTB/SmolLM-1.7B"
+      ],
+      "why_separate": "different tokenizer.json and tokenizer_config.json; full multi-head attention instead of grouped key/value heads"
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=5",
+        "torch",
+        "accelerate"
+      ],
+      "targets": [
+        "fixtures",
+        "checkpoints"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 1,
+          "download_mb": 16
+        },
+        "HuggingFaceTB/SmolLM-135M": {
+          "memory_gb": 2,
+          "download_mb": 513
+        },
+        "HuggingFaceTB/SmolLM-360M": {
+          "memory_gb": 3,
+          "download_mb": 1300
+        },
+        "HuggingFaceTB/SmolLM-1.7B": {
+          "memory_gb": 12,
+          "disk_gb": 8,
+          "download_mb": 6400,
+          "measured": "peak RSS 10.6 GB (default) and 11.3 GB (bfloat16: the variant reload holds two copies), one process, Apple M5, 2026-10-07"
+        }
+      }
+    },
+    "transformers.js": {
+      "entry_point": "integrations/transformers.js/integration.js",
+      "format": "script",
+      "requires": [
+        "@huggingface/transformers@4.3.0"
+      ],
+      "targets": [
+        "checkpoints"
+      ],
+      "artifacts": {
+        "HuggingFaceTB/SmolLM-135M": {
+          "repo": "onnx-community/SmolLM-135M-ONNX",
+          "file": "onnx/model.onnx"
+        },
+        "HuggingFaceTB/SmolLM-360M": {
+          "repo": "onnx-community/SmolLM-360M-ONNX",
+          "file": "onnx/model.onnx"
+        }
+      },
+      "unsupported": {
+        "fixtures": "no ONNX conversion of the fixtures yet",
+        "HuggingFaceTB/SmolLM-1.7B": "no onnx-community conversion; the creator's float32 ONNX is 6.8 GB"
+      },
+      "variants": {
+        "default": {
+          "dtype": "fp32"
+        },
+        "webgpu": {
+          "dtype": "fp32",
+          "device": "webgpu"
+        },
+        "webgpu-fp16": {
+          "dtype": "fp16",
+          "device": "webgpu"
+        },
+        "webgpu-q4f16": {
+          "dtype": "q4f16",
+          "device": "webgpu"
+        }
+      },
+      "training": false
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "generated_tokens": {
+      "compare": "exact"
+    },
+    "generated_text": {
+      "compare": "exact"
+    },
+    "next_token_logits": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

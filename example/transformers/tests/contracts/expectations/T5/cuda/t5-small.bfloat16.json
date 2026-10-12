@@ -1,0 +1,157 @@
+{
+ "recorded_with": {
+  "contract": "hf-internal-testing/T5-integration",
+  "contract_revision": "f3f9d6fc9c219baae452736af8a928c091095c02",
+  "framework": "transformers",
+  "variant": "bfloat16",
+  "target": "t5-small",
+  "kind": "checkpoint",
+  "revision": "df1b051c49625cf57a3d0d8d3863ed4d13564fe4",
+  "environment": {
+   "python": "3.10.12",
+   "transformers": "5.19.0.dev0",
+   "torch": "2.11.0+cu128",
+   "torchvision": "0.26.0+cu128",
+   "torchaudio": "2.11.0+cu128",
+   "tokenizers": "0.23.1",
+   "numpy": "1.26.4",
+   "pillow": "12.2.0",
+   "accelerate": "1.13.0",
+   "safetensors": "0.8.0",
+   "huggingface-hub": "1.32.0",
+   "sentencepiece": "0.2.1",
+   "protobuf": "6.33.6",
+   "librosa": "0.11.0",
+   "soundfile": "0.13.1",
+   "scipy": "1.15.3",
+   "local_patches": [
+    "config-field-generation-params",
+    "masked-spec-embed-init",
+    "whisper-decode-tensor-batch"
+   ]
+  },
+  "seconds": 8.61,
+  "platform": "cuda"
+ },
+ "outputs": {
+  "runtime": {
+   "device": "cuda",
+   "dtype": "bfloat16",
+   "attn_implementation": "sdpa"
+  },
+  "generated_tokens": [
+   [
+    0,
+    644,
+    4598,
+    229,
+    19250,
+    5,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    1674,
+    3,
+    13147,
+    15,
+    5462,
+    19219,
+    170,
+    110,
+    35,
+    5,
+    1
+   ],
+   [
+    0,
+    3488,
+    229,
+    74,
+    26989,
+    58,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    3,
+    26114,
+    9458,
+    55,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  ],
+  "generated_text": [
+   "Das Haus ist wunderbar.",
+   "Ich nehme gerne B\u00fccher zu lesen.",
+   "Wo ist der Bahnhof?",
+   "Vielen Dank!"
+  ],
+  "label_logprobs": [
+   [
+    -0.6632052063941956,
+    -0.1519274115562439,
+    -0.05480748787522316,
+    -0.5596649646759033,
+    -0.07598794996738434,
+    -0.017964044585824013,
+    0.0
+   ],
+   [
+    -0.2754304111003876,
+    -2.113213062286377,
+    -0.00537213496863842,
+    -0.7194929122924805,
+    -0.03415753319859505,
+    -0.028230851516127586,
+    -0.002645090688019991
+   ],
+   [
+    -0.15568266808986664,
+    -0.6509096622467041,
+    -0.05256815254688263,
+    -0.07581181824207306,
+    -0.020327692851424217,
+    -0.002642831765115261,
+    0.0
+   ],
+   [
+    -1.926424503326416,
+    -0.05356060341000557,
+    -0.0028370865620672703,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ]
+  ],
+  "decoded_roundtrip": [
+   "Yes, it is.",
+   "Hello, world! How are you?"
+  ],
+  "training": {
+   "loss": 0.5859375,
+   "gradients": {
+    "encoder.block.0.layer.0.SelfAttention.q.weight": true,
+    "decoder.block.0.layer.1.EncDecAttention.q.weight": true
+   },
+   "updated": true
+  }
+ }
+}

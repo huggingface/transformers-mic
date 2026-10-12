@@ -1,0 +1,109 @@
+{
+ "recorded_with": {
+  "contract": "hf-internal-testing/SmolLM-integration",
+  "contract_revision": "ea5b7a6908a88f30679815d8343dde713778eb86",
+  "framework": "transformers",
+  "variant": "default",
+  "target": "SmolLM-1.7B",
+  "kind": "checkpoint",
+  "revision": "d7449ff7241c863f3e8accc475155f0f97afa011",
+  "environment": {
+   "python": "3.10.12",
+   "transformers": "5.19.0.dev0",
+   "torch": "2.11.0+cu128",
+   "torchvision": "0.26.0+cu128",
+   "torchaudio": "2.11.0+cu128",
+   "tokenizers": "0.23.1",
+   "numpy": "1.26.4",
+   "pillow": "12.2.0",
+   "accelerate": "1.13.0",
+   "safetensors": "0.8.0",
+   "huggingface-hub": "1.32.0",
+   "sentencepiece": "0.2.1",
+   "protobuf": "6.33.6",
+   "librosa": "0.11.0",
+   "soundfile": "0.13.1",
+   "scipy": "1.15.3",
+   "local_patches": [
+    "config-field-generation-params",
+    "masked-spec-embed-init",
+    "whisper-decode-tensor-batch"
+   ]
+  },
+  "seconds": 29.33,
+  "platform": "cuda"
+ },
+ "outputs": {
+  "runtime": {
+   "device": "cuda",
+   "dtype": "float32",
+   "attn_implementation": "sdpa"
+  },
+  "generated_tokens": [
+   [
+    7042,
+    30,
+    198,
+    504
+   ],
+   [
+    11452,
+    30,
+    198,
+    31810
+   ],
+   [
+    7268,
+    30,
+    198,
+    504
+   ],
+   [
+    4528,
+    30,
+    198,
+    504
+   ]
+  ],
+  "generated_text": [
+   " Paris.\nThe",
+   " Berlin.\nGermany",
+   " Rome.\nThe",
+   " London.\nThe"
+  ],
+  "next_token_logits": [
+   [
+    22.58429527282715,
+    15.275426864624023,
+    14.443519592285156,
+    14.985063552856445
+   ],
+   [
+    13.445399284362793,
+    22.911861419677734,
+    13.620928764343262,
+    14.29275131225586
+   ],
+   [
+    13.462979316711426,
+    14.646646499633789,
+    22.840137481689453,
+    13.735428810119629
+   ],
+   [
+    13.871356010437012,
+    13.494152069091797,
+    13.873069763183594,
+    23.26820945739746
+   ]
+  ],
+  "training": {
+   "loss": 2.9605674743652344,
+   "gradients": {
+    "model.layers.0.self_attn.q_proj.weight": true,
+    "model.layers.0.mlp.down_proj.weight": true
+   },
+   "updated": true
+  }
+ }
+}

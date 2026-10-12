@@ -1,0 +1,105 @@
+{
+ "recorded_with": {
+  "contract": "hf-internal-testing/WhisperSpeech-integration",
+  "contract_revision": "unpublished",
+  "framework": "transformers",
+  "variant": "eager",
+  "target": "whisper-tiny",
+  "kind": "checkpoint",
+  "revision": "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
+  "environment": {
+   "python": "3.10.12",
+   "transformers": "5.19.0.dev0",
+   "torch": "2.11.0+cu128",
+   "torchvision": "0.26.0+cu128",
+   "torchaudio": "2.11.0+cu128",
+   "tokenizers": "0.23.1",
+   "numpy": "1.26.4",
+   "pillow": "12.2.0",
+   "accelerate": "1.13.0",
+   "safetensors": "0.8.0",
+   "huggingface-hub": "1.32.0",
+   "sentencepiece": "0.2.1",
+   "protobuf": "6.33.6",
+   "librosa": "0.11.0",
+   "soundfile": "0.13.1",
+   "scipy": "1.15.3",
+   "local_patches": [
+    "config-field-generation-params",
+    "masked-spec-embed-init",
+    "whisper-decode-tensor-batch"
+   ]
+  },
+  "seconds": 16.71,
+  "platform": "cpu-x86_64"
+ },
+ "outputs": {
+  "runtime": {
+   "device": "cpu",
+   "dtype": "float32",
+   "attn_implementation": "eager"
+  },
+  "speech": {
+   "id": "1272-128104-0000",
+   "sha256": "4e25e22555cd16e90edb0a3b49fdcf1fe652b2a1250ab643634db33895c75b41",
+   "sampling_rate": 16000
+  },
+  "greedy_tokens": [
+   [
+    2221,
+    13,
+    2326,
+    388,
+    391,
+    307,
+    264,
+    50244,
+    295,
+    264,
+    2808,
+    5359,
+    293,
+    321,
+    366,
+    5404,
+    281,
+    2928,
+    702,
+    14943,
+    13
+   ]
+  ],
+  "greedy_text": [
+   " Mr. Quilter is the apostle of the middle classes and we are glad to welcome his gospel."
+  ],
+  "assisted_tokens": [
+   [
+    2221,
+    13,
+    2326,
+    388,
+    391,
+    307,
+    264,
+    50244,
+    295,
+    264,
+    2808,
+    5359,
+    293,
+    321,
+    366,
+    5404,
+    281,
+    2928,
+    702,
+    14943,
+    13
+   ]
+  ],
+  "assisted_text": [
+   " Mr. Quilter is the apostle of the middle classes and we are glad to welcome his gospel."
+  ],
+  "assisted_matches_greedy": true
+ }
+}

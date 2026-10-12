@@ -1,0 +1,85 @@
+{
+ "recorded_with": {
+  "contract": "hf-internal-testing/SmolLM-integration",
+  "target": "SmolLM-360M",
+  "variant": "webgpu",
+  "revision": "d0bace75f3a7fa849bf7a7082801c7d3a9b90169",
+  "framework": "transformers.js",
+  "contract_revision": "unpublished",
+  "environment": {
+   "node": "v25.6.1",
+   "@huggingface/transformers": "4.3.0"
+  },
+  "seconds": 2.85
+ },
+ "outputs": {
+  "runtime": {
+   "device": "webgpu",
+   "dtype": "fp32"
+  },
+  "generated_tokens": [
+   [
+    7042,
+    30,
+    198,
+    504
+   ],
+   [
+    11452,
+    30,
+    198,
+    504
+   ],
+   [
+    7268,
+    30,
+    198,
+    504
+   ],
+   [
+    4528,
+    30,
+    198,
+    504
+   ]
+  ],
+  "generated_text": [
+   " Paris.\nThe",
+   " Berlin.\nThe",
+   " Rome.\nThe",
+   " London.\nThe"
+  ],
+  "next_token_logits": [
+   [
+    19.349506378173828,
+    12.148783683776855,
+    12.20781135559082,
+    14.15896224975586
+   ],
+   [
+    11.530745506286621,
+    18.403079986572266,
+    8.83045768737793,
+    11.411991119384766
+   ],
+   [
+    12.230953216552734,
+    10.609118461608887,
+    16.796491622924805,
+    12.458264350891113
+   ],
+   [
+    11.662940979003906,
+    11.060019493103027,
+    9.078292846679688,
+    20.248851776123047
+   ]
+  ],
+  "timing": {
+   "load_ms": 844.956834,
+   "first_generate_ms": 148.87891600000012,
+   "generate_ms": 123.28845899999988,
+   "forward_ms": 35.946166000000176
+  }
+ }
+}

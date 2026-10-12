@@ -1,0 +1,453 @@
+{
+  "date": "2026-10-11",
+  "contract_revision": "77fb2ffa32645b4e02243c7a149edf218602684b",
+  "baseline_transformers_sha": "8625785e7e3e138a328ec2e678dc198e356e7c6c",
+  "worker_run": "https://github.com/huggingface/model-integration-contracts/actions/runs/38145323837",
+  "worker_harness_commit": null,
+  "baseline_provenance": "Recorded before publication; contract_revision unpublished is retained. The published source has identical file hashes.",
+  "worker_checks": {
+    "check-cpu-default": [
+      {
+        "contract": "hf-internal-testing/WhisperSpeech-integration",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "default",
+        "target": "proto-whisper-tiny-slim",
+        "kind": "fixture",
+        "revision": null,
+        "status": "unsupported",
+        "skip": "declared",
+        "failures": [
+          "Checkpoint-only speech coverage: neither slim weight kind exposes the assisted-suppression regression #48108 on this input."
+        ]
+      },
+      {
+        "contract": "hf-internal-testing/WhisperSpeech-integration",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "default",
+        "target": "whisper-tiny",
+        "kind": "checkpoint",
+        "revision": "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3",
+          "local_patches": [
+            "config-field-generation-params",
+            "masked-spec-embed-init",
+            "whisper-decode-tensor-batch"
+          ]
+        },
+        "seconds": 15.08,
+        "platform": "cpu-x86_64",
+        "baseline": "transformers/tests/contracts/expectations/WhisperSpeech/cpu-x86_64/whisper-tiny.json",
+        "status": "pass",
+        "failures": []
+      }
+    ],
+    "check-cpu-eager": [
+      {
+        "contract": "hf-internal-testing/WhisperSpeech-integration",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "eager",
+        "target": "proto-whisper-tiny-slim",
+        "kind": "fixture",
+        "revision": null,
+        "status": "unsupported",
+        "skip": "declared",
+        "failures": [
+          "Checkpoint-only speech coverage: neither slim weight kind exposes the assisted-suppression regression #48108 on this input."
+        ]
+      },
+      {
+        "contract": "hf-internal-testing/WhisperSpeech-integration",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "eager",
+        "target": "whisper-tiny",
+        "kind": "checkpoint",
+        "revision": "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3",
+          "local_patches": [
+            "config-field-generation-params",
+            "masked-spec-embed-init",
+            "whisper-decode-tensor-batch"
+          ]
+        },
+        "seconds": 16.34,
+        "platform": "cpu-x86_64",
+        "baseline": "transformers/tests/contracts/expectations/WhisperSpeech/cpu-x86_64/whisper-tiny.eager.json",
+        "status": "pass",
+        "failures": []
+      }
+    ],
+    "check-cuda-bfloat16": [
+      {
+        "contract": "hf-internal-testing/WhisperSpeech-integration",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "bfloat16",
+        "target": "proto-whisper-tiny-slim",
+        "kind": "fixture",
+        "revision": null,
+        "status": "unsupported",
+        "skip": "declared",
+        "failures": [
+          "Checkpoint-only speech coverage: neither slim weight kind exposes the assisted-suppression regression #48108 on this input."
+        ]
+      },
+      {
+        "contract": "hf-internal-testing/WhisperSpeech-integration",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "bfloat16",
+        "target": "whisper-tiny",
+        "kind": "checkpoint",
+        "revision": "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3",
+          "local_patches": [
+            "config-field-generation-params",
+            "masked-spec-embed-init",
+            "whisper-decode-tensor-batch"
+          ]
+        },
+        "seconds": 9.44,
+        "platform": "cuda",
+        "baseline": "transformers/tests/contracts/expectations/WhisperSpeech/cuda/whisper-tiny.bfloat16.json",
+        "status": "pass",
+        "failures": []
+      }
+    ],
+    "check-cuda-default": [
+      {
+        "contract": "hf-internal-testing/WhisperSpeech-integration",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "default",
+        "target": "proto-whisper-tiny-slim",
+        "kind": "fixture",
+        "revision": null,
+        "status": "unsupported",
+        "skip": "declared",
+        "failures": [
+          "Checkpoint-only speech coverage: neither slim weight kind exposes the assisted-suppression regression #48108 on this input."
+        ]
+      },
+      {
+        "contract": "hf-internal-testing/WhisperSpeech-integration",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "default",
+        "target": "whisper-tiny",
+        "kind": "checkpoint",
+        "revision": "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3",
+          "local_patches": [
+            "config-field-generation-params",
+            "masked-spec-embed-init",
+            "whisper-decode-tensor-batch"
+          ]
+        },
+        "seconds": 8.73,
+        "platform": "cuda",
+        "baseline": "transformers/tests/contracts/expectations/WhisperSpeech/cuda/whisper-tiny.json",
+        "status": "pass",
+        "failures": []
+      }
+    ],
+    "check-cuda-eager": [
+      {
+        "contract": "hf-internal-testing/WhisperSpeech-integration",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "eager",
+        "target": "proto-whisper-tiny-slim",
+        "kind": "fixture",
+        "revision": null,
+        "status": "unsupported",
+        "skip": "declared",
+        "failures": [
+          "Checkpoint-only speech coverage: neither slim weight kind exposes the assisted-suppression regression #48108 on this input."
+        ]
+      },
+      {
+        "contract": "hf-internal-testing/WhisperSpeech-integration",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "eager",
+        "target": "whisper-tiny",
+        "kind": "checkpoint",
+        "revision": "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3",
+          "local_patches": [
+            "config-field-generation-params",
+            "masked-spec-embed-init",
+            "whisper-decode-tensor-batch"
+          ]
+        },
+        "seconds": 9.44,
+        "platform": "cuda",
+        "baseline": "transformers/tests/contracts/expectations/WhisperSpeech/cuda/whisper-tiny.eager.json",
+        "status": "pass",
+        "failures": []
+      }
+    ]
+  },
+  "historical_replays": {
+    "cpu": [
+      {
+        "fix": "b6688043ff",
+        "bad": "2b296305d7",
+        "options": [
+          "--contract",
+          "WhisperSpeech",
+          "--target",
+          "whisper-tiny",
+          "--variant",
+          "eager",
+          "--isolate"
+        ]
+      },
+      {
+        "target": "whisper-tiny",
+        "verdict": "caught",
+        "bad": "fail",
+        "fix": "pass",
+        "bad_failures": [
+          "assisted_matches_greedy: False"
+        ],
+        "fix_failures": []
+      }
+    ],
+    "cuda": [
+      {
+        "fix": "b6688043ff",
+        "bad": "2b296305d7",
+        "options": [
+          "--contract",
+          "WhisperSpeech",
+          "--target",
+          "whisper-tiny",
+          "--variant",
+          "eager",
+          "--isolate"
+        ]
+      },
+      {
+        "target": "whisper-tiny",
+        "verdict": "caught",
+        "bad": "fail",
+        "fix": "pass",
+        "bad_failures": [
+          "assisted_matches_greedy: False"
+        ],
+        "fix_failures": []
+      }
+    ],
+    "cpu-arm64": [
+      {
+        "fix": "b6688043ff",
+        "bad": "2b296305d7",
+        "options": [
+          "--contract",
+          "WhisperSpeech",
+          "--target",
+          "whisper-tiny",
+          "--variant",
+          "eager",
+          "--isolate"
+        ]
+      },
+      {
+        "target": "whisper-tiny",
+        "verdict": "caught",
+        "bad": "fail",
+        "fix": "pass",
+        "bad_failures": [
+          "assisted_matches_greedy: False"
+        ],
+        "fix_failures": []
+      }
+    ]
+  },
+  "published_arm_check": [
+    {
+      "contract": "hf-internal-testing/WhisperSpeech-integration",
+      "contract_revision": "77fb2ffa32645b4e02243c7a149edf218602684b",
+      "framework": "transformers",
+      "variant": "default",
+      "target": "proto-whisper-tiny-slim",
+      "kind": "fixture",
+      "revision": null,
+      "status": "unsupported",
+      "skip": "declared",
+      "failures": [
+        "Checkpoint-only speech coverage: neither slim weight kind exposes the assisted-suppression regression #48108 on this input."
+      ]
+    },
+    {
+      "contract": "hf-internal-testing/WhisperSpeech-integration",
+      "contract_revision": "77fb2ffa32645b4e02243c7a149edf218602684b",
+      "framework": "transformers",
+      "variant": "default",
+      "target": "whisper-tiny",
+      "kind": "checkpoint",
+      "revision": "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
+      "environment": {
+        "python": "3.10.19",
+        "transformers": "5.16.0.dev0",
+        "torch": "2.11.0",
+        "torchvision": "0.26.0",
+        "torchaudio": "2.11.0",
+        "tokenizers": "0.23.1",
+        "numpy": "1.26.4",
+        "pillow": "12.2.0",
+        "accelerate": "1.13.0",
+        "safetensors": "0.8.0",
+        "huggingface-hub": "1.32.0",
+        "sentencepiece": "0.2.1",
+        "protobuf": "6.33.6",
+        "librosa": "0.11.0",
+        "soundfile": "0.13.1",
+        "scipy": "1.15.3",
+        "local_patches": [
+          "config-field-generation-params",
+          "masked-spec-embed-init",
+          "whisper-decode-tensor-batch"
+        ]
+      },
+      "seconds": 3.87,
+      "platform": "cpu-arm64",
+      "baseline": "transformers/tests/contracts/expectations/WhisperSpeech/cpu-arm64/whisper-tiny.json",
+      "status": "pass",
+      "failures": []
+    }
+  ],
+  "latest_nightly_build_arm_check": {
+    "transformers_sha": "536ecc007387a50e77603bb5d92100e9b07514cc",
+    "records": [
+      {
+        "contract": "hf-internal-testing/WhisperSpeech-integration",
+        "contract_revision": "77fb2ffa32645b4e02243c7a149edf218602684b",
+        "framework": "transformers",
+        "variant": "default",
+        "target": "whisper-tiny",
+        "kind": "checkpoint",
+        "revision": "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
+        "environment": {
+          "python": "3.10.19",
+          "transformers": "5.16.0.dev0",
+          "torch": "2.11.0",
+          "torchvision": "0.26.0",
+          "torchaudio": "2.11.0",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3",
+          "local_patches": [
+            "config-field-generation-params",
+            "masked-spec-embed-init",
+            "whisper-decode-tensor-batch"
+          ]
+        },
+        "seconds": 3.95,
+        "platform": "cpu-arm64",
+        "baseline": "transformers/tests/contracts/expectations/WhisperSpeech/cpu-arm64/whisper-tiny.json",
+        "status": "pass",
+        "failures": []
+      }
+    ]
+  },
+  "full_fixture_fleet": {
+    "pass": 9,
+    "declared_unsupported": 1,
+    "seconds": 8.1,
+    "platform": "cpu-arm64"
+  }
+}

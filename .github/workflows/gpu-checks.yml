@@ -1,0 +1,496 @@
+name: GPU checks
+
+# Step 2 on GPU: freeze the slim fixtures and real-checkpoint baselines, then
+# check them on CUDA under the dtypes and attention backends users get, and
+# measure per-check cost. Same runner group, image, and node-local HF cache as
+# transformers-ci's serge-verify-slow.yml. Results are uploaded as an artifact.
+#
+# Two frozen sets answer different questions:
+#   frozen-cpu  float32 on the runner's CPU: do CPU baselines and tolerances
+#               carry over to GPU?
+#   frozen-gpu  float32 on CUDA: how stable is a GPU baseline on GPU, run to run
+#               and across dtype/attention?
+
+on:
+  workflow_dispatch:
+    inputs:
+      transformers_sha:
+        # Same tree as 4d536e1f, the local build of the CPU study (not on GitHub).
+        description: "Transformers commit to install"
+        required: false
+        type: string
+        default: 8625785e7e3e138a328ec2e678dc198e356e7c6c
+      families:
+        required: false
+        type: string
+        default: text clip bert t5 whisper wav2vec2
+      matrix:
+        description: "full: everything below · tf32: CPU baselines checked on GPU in float32, cuDNN TF32 on vs off · init: fixture_init.py (random/overfit/pruned/sliced) on GPU · contracts: the original contract fleet on GPU (record, stability, CPU golden, bfloat16) · dependency-stability: frozen current fleet, dependency upgrades and fresh-process repeats"
+        required: false
+        type: string
+        default: full
+      dependency_profiles:
+        description: "Dependency study environments to run (empty runs all; use torch-cu130 for a focused retry)"
+        required: false
+        type: string
+        default: ""
+      machine_type:
+        required: false
+        type: string
+        default: aws-g5-4xlarge-cache
+      docker:
+        required: false
+        type: string
+        default: huggingface/transformers-all-latest-gpu
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    if: inputs.matrix != 'whisper-contract' && inputs.matrix != 'whisper-assist-large' && inputs.matrix != 'whisper-speech' && inputs.matrix != 'dependency-stability' && inputs.matrix != 'wav2vec2-normalization'
+    runs-on:
+      group: '${{ inputs.machine_type }}'
+    timeout-minutes: 240
+    container:
+      image: ${{ inputs.docker }}
+      options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    env:
+      HF_HOME: /mnt/cache
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      CUBLAS_WORKSPACE_CONFIG: ":4096:8"
+      CUDA_VISIBLE_DEVICES: "0"
+      PYTHONUNBUFFERED: "1"
+      FAMILIES: ${{ inputs.families }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: experiments
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      # github.workspace is the host path; steps run in the container (/__w/...).
+      - name: Output directory
+        run: |
+          echo "OUT=$GITHUB_WORKSPACE/out" >> "$GITHUB_ENV"
+          mkdir -p "$GITHUB_WORKSPACE/out"
+
+      - name: Install Transformers ${{ inputs.transformers_sha }}
+        working-directory: /transformers
+        env:
+          TRANSFORMERS_SHA: ${{ inputs.transformers_sha }}
+        run: |
+          git fetch --quiet origin "$TRANSFORMERS_SHA"
+          git checkout --quiet "$TRANSFORMERS_SHA"
+          python3 -m pip uninstall -y transformers
+          python3 -m pip install --quiet -e .
+
+      - name: Environment
+        run: |
+          nvidia-smi | tee "$OUT/nvidia-smi.txt"
+          python3 - <<'EOF' | tee "$OUT/environment.json"
+          import importlib.metadata as md, json, platform, torch, transformers
+          names = ["torch", "tokenizers", "numpy", "pillow", "safetensors", "huggingface-hub", "accelerate", "kernels"]
+          versions = {}
+          for name in names:
+              try:
+                  versions[name] = md.version(name)
+              except md.PackageNotFoundError:
+                  versions[name] = None
+          print(json.dumps({
+              "python": platform.python_version(),
+              "cpu": platform.processor() or platform.machine(),
+              "cuda": torch.version.cuda,
+              "cudnn": torch.backends.cudnn.version(),
+              "gpu": torch.cuda.get_device_name(0),
+              "transformers": transformers.__version__,
+              "transformers_file": transformers.__file__,
+              "packages": versions,
+          }, indent=1))
+          EOF
+
+      - name: Prefetch pinned snapshots
+        if: inputs.matrix != 'contracts'
+        run: python3 prefetch.py
+
+      - name: Fixture init schemes on GPU
+        if: inputs.matrix == 'init'
+        env:
+          CONTRACT_DEVICE: cuda
+        run: |
+          python3 fixture_init.py --families $FAMILIES --threads 8 \
+            --output "$OUT/fixture_init.json" --artifacts /tmp/init-fixtures > "$OUT/fixture_init.log" 2>&1 \
+            || { tail -50 "$OUT/fixture_init.log"; exit 1; }
+          python3 -c "import json; print(json.dumps(json.load(open('$OUT/fixture_init.json'))['summary'], indent=1))"
+
+      - name: Freeze on CPU (float32)
+        if: inputs.matrix != 'init' && inputs.matrix != 'contracts'
+        env:
+          TRANSFORMERS_SHA: ${{ inputs.transformers_sha }}
+        run: |
+          python3 replay.py freeze --families $FAMILIES --real --threads 8 \
+            --out "$OUT/frozen-cpu" --build "$TRANSFORMERS_SHA"
+
+      - name: Freeze on GPU (float32)
+        if: inputs.matrix == 'full'
+        env:
+          CONTRACT_DEVICE: cuda
+          TRANSFORMERS_SHA: ${{ inputs.transformers_sha }}
+        run: |
+          python3 replay.py freeze --families $FAMILIES --real --threads 8 \
+            --out "$OUT/frozen-gpu" --build "$TRANSFORMERS_SHA"
+
+      - name: Check on GPU
+        if: inputs.matrix != 'init' && inputs.matrix != 'contracts'
+        env:
+          CONTRACT_DEVICE: cuda
+          TRANSFORMERS_SHA: ${{ inputs.transformers_sha }}
+          MATRIX: ${{ inputs.matrix }}
+        run: |
+          check() {  # <frozen set> <dtype> <attn> <label>
+            CONTRACT_DTYPE=$2 python3 replay.py check --fixtures "$OUT/frozen-$1" \
+              --build "$TRANSFORMERS_SHA" --attn "$3" \
+              --output "$OUT/checks/$1/$4.json" > "$OUT/checks-$1-$4.log" 2>&1 \
+              || { tail -50 "$OUT/checks-$1-$4.log"; return 1; }
+            echo "$1 $4: done"
+          }
+          if [ "$MATRIX" = tf32 ]; then
+            check cpu float32 sdpa float32-sdpa
+            CONTRACT_TF32=0 check cpu float32 sdpa float32-sdpa-no-tf32
+            exit 0
+          fi
+          for frozen in cpu gpu; do
+            check $frozen float32 eager float32-eager
+            check $frozen float32 sdpa float32-sdpa
+            check $frozen bfloat16 sdpa bfloat16-sdpa
+            check $frozen float16 sdpa float16-sdpa
+          done
+          # Run to run on the same GPU, same process setup.
+          for run in 2 3; do
+            check gpu float32 sdpa float32-sdpa-run$run
+          done
+
+      - name: Cost per check on GPU
+        if: inputs.matrix == 'full'
+        env:
+          CONTRACT_DEVICE: cuda
+        run: |
+          python3 cost.py --fixtures "$OUT/frozen-gpu" --attn sdpa --output "$OUT/cost-float32.json"
+          CONTRACT_DTYPE=bfloat16 python3 cost.py --fixtures "$OUT/frozen-gpu" --attn sdpa \
+            --targets real --output "$OUT/cost-bfloat16.json"
+
+      # ---- contracts: the example runner on GPU -------------------------------
+      - name: Contract runner dependencies
+        if: inputs.matrix == 'contracts'
+        working-directory: .
+        run: |
+          python3 -m pip install --quiet "git+https://github.com/huggingface/doc-builder" jsonschema
+          # The runner downloads the fixtures from the Hub at the revisions the fleet lock pins.
+          python3 example/run.py --help > /dev/null
+
+      - name: Rebuild fixtures on this machine's CPU (are they reproducible?)
+        if: inputs.matrix == 'contracts'
+        continue-on-error: true  # informational: the checks below use the pinned bytes
+        working-directory: .
+        run: |
+          python3 example/build_fixtures.py --out /tmp/rebuilt --threads 2 > "$OUT/fixture-rebuild.log" 2>&1 \
+            || { tail -40 "$OUT/fixture-rebuild.log"; exit 1; }
+          grep '^{' "$OUT/fixture-rebuild.log"
+
+      - name: Contracts on GPU
+        if: inputs.matrix == 'contracts'
+        working-directory: .
+        run: |
+          run() {  # <label> <run.py options...>
+            python3 example/run.py --framework transformers "${@:2}" --output "$OUT/contracts/$1.jsonl" \
+              > /dev/null 2> "$OUT/contracts/$1.log" || true
+            tail -1 "$OUT/contracts/$1.log"
+          }
+          mkdir -p "$OUT/contracts"
+          # Candidates; each is rerun in a fresh process and must agree within tolerance.
+          for variant in default eager bfloat16; do run record-$variant --variant $variant --record; done
+          # Approve inside the job so the checks below have GPU baselines; reviewed again before committing.
+          for f in example/transformers/tests/contracts/expectations/*/cuda/*.candidate.json; do mv "$f" "${f%.candidate.json}.json"; done
+          for n in 2 3; do run check-default-run$n; done
+          run check-eager --variant eager
+          run golden-cpu --golden cpu-arm64                          # GPU float32 vs the CPU baselines
+          run golden-cuda-bfloat16 --variant bfloat16 --golden cuda  # bfloat16 vs GPU float32
+          run fixtures-batched --fixtures-only
+          run fixtures-isolated --fixtures-only --isolate
+          mkdir -p "$OUT/expectations"
+          cp -r example/transformers/tests/contracts/expectations/. "$OUT/expectations/"
+
+      - name: Summarize
+        if: always() && inputs.matrix != 'contracts'
+        run: |
+          python3 - <<'EOF' | tee "$OUT/summary.txt"
+          import json, os
+          from pathlib import Path
+          root = Path(os.environ["OUT"]) / "checks"
+          keys = ("smoke_detected", "numerical_detected", "recorded_output_detected", "training_detected", "loss_detected")
+          for path in sorted(root.glob("*/*.json")):
+              rows = json.loads(path.read_text())["rows"]
+              flagged = [r for r in rows if any(r.get(k) for k in keys)]
+              worst = max((r.get("max_absolute_delta") or 0) for r in rows)
+              print(f"{path.parent.name:4} {path.stem:24} rows={len(rows):3} flagged={len(flagged):3} max_delta={worst:.3g}")
+              for r in flagged:
+                  hits = [k for k in keys if r.get(k)]
+                  print(f"    {r['family']:9} {r['weights']:8} seed={r['seed']} {hits} delta={r.get('max_absolute_delta')} {r.get('error', '')[:120]}")
+          EOF
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: gpu-checks
+          # Includes the slim fixtures themselves (a few MB), so GPU results can
+          # be re-checked elsewhere against the same weights.
+          path: out
+
+  whisper-contract:
+    if: inputs.matrix == 'whisper-contract'
+    runs-on:
+      group: '${{ inputs.machine_type }}'
+    timeout-minutes: 60
+    container:
+      image: ${{ inputs.docker }}
+      options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    env:
+      HF_HOME: /mnt/cache
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      CUBLAS_WORKSPACE_CONFIG: ":4096:8"
+      PYTHONUNBUFFERED: "1"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Install the pinned environment
+        run: |
+          PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
+          mkdir -p out
+          nvidia-smi > out/nvidia-smi.txt
+      - name: Prefetch pinned Whisper snapshots
+        run: |
+          python3 - <<'PY'
+          import json
+          from huggingface_hub import snapshot_download
+          lock = json.load(open('example/transformers/tests/contracts/fleet.lock'))['contracts']['Whisper']
+          sources = {**lock['checkpoints'], **{repo: pin['revision'] for repo, pin in lock['fixtures'].items()}}
+          for repo, revision in sources.items():
+              snapshot_download(repo, revision=revision, allow_patterns=['*.json', '*.txt', '*.model', '*.safetensors'])
+          PY
+      - name: Record platform baselines and verify existing outputs
+        run: |
+          for platform in cpu cuda; do
+            if [ "$platform" = cpu ]; then export CUDA_VISIBLE_DEVICES=""; variants="default eager"; else export CUDA_VISIBLE_DEVICES=0; variants="default eager bfloat16"; fi
+            for variant in $variants; do
+              python3 example/run.py --framework transformers --contract Whisper --local-contracts \
+                --record --variant "$variant" --output "out/record-$platform-$variant.jsonl" > "out/record-$platform-$variant.log" 2>&1
+            done
+          done
+          python3 example/review_candidates.py --approve | tee out/review.txt
+          mkdir -p out/expectations
+          cp -r example/transformers/tests/contracts/expectations/Whisper out/expectations/
+      - name: Check approved baselines in fresh processes
+        run: |
+          for platform in cpu cuda; do
+            if [ "$platform" = cpu ]; then export CUDA_VISIBLE_DEVICES=""; variants="default eager"; else export CUDA_VISIBLE_DEVICES=0; variants="default eager bfloat16"; fi
+            for variant in $variants; do
+              python3 example/run.py --framework transformers --contract Whisper --local-contracts \
+                --isolate --variant "$variant" --output "out/check-$platform-$variant.jsonl" > "out/check-$platform-$variant.log" 2>&1
+            done
+          done
+      - name: Build a random twin for assisted decoding
+        run: |
+          python3 example/build_fixtures.py --fixture proto-whisper-tiny-slim --keep-random --out "$GITHUB_WORKSPACE/out/random" > out/random-build.log 2>&1
+      - name: Archive the assisted-decoding fix and parent
+        run: |
+          git -C /tmp/transformers fetch --quiet --depth 2 https://github.com/huggingface/transformers b6688043ff8e1c972c7fcac92db7942e1e41f42e
+          for stage in fix bad; do
+            ref=b6688043ff8e1c972c7fcac92db7942e1e41f42e
+            if [ "$stage" = bad ]; then ref="$ref^"; fi
+            sha=$(git -C /tmp/transformers rev-parse "$ref")
+            mkdir -p "/tmp/assisted-builds/$stage"
+            git -C /tmp/transformers archive "$sha" src | tar -x -C "/tmp/assisted-builds/$stage"
+            echo "$sha" > "out/$stage.sha"
+          done
+      - name: Replay assisted decoding on CUDA
+        env:
+          CUDA_VISIBLE_DEVICES: "0"
+        run: |
+          for stage in fix bad; do
+            for model in overfit random checkpoint; do
+              PYTHONPATH="/tmp/assisted-builds/$stage/src" HF_HUB_OFFLINE=1 python3 experiments/whisper_assisted_suppression.py \
+                --model "$model" --random-fixture out/random/proto-whisper-tiny-slim --speech experiments/audio/1272-128104-0000.flac \
+                --device cuda --build "$(cat out/$stage.sha)" --output "out/assisted-$model-$stage.json" > "out/assisted-$model-$stage.log" 2>&1
+            done
+          done
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: whisper-contract
+          path: out
+
+  whisper-assist-large:
+    if: inputs.matrix == 'whisper-assist-large'
+    runs-on:
+      group: '${{ inputs.machine_type }}'
+    timeout-minutes: 60
+    container:
+      image: ${{ inputs.docker }}
+      options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    env:
+      HF_HOME: /mnt/cache
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      CUBLAS_WORKSPACE_CONFIG: ":4096:8"
+      PYTHONUNBUFFERED: "1"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Install the pinned environment
+        run: |
+          PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
+          mkdir -p out
+          nvidia-smi > out/nvidia-smi.txt
+      - name: Prefetch pinned Whisper snapshots
+        run: |
+          python3 - <<'PY'
+          import json
+          from huggingface_hub import snapshot_download
+          lock = json.load(open('example/transformers/tests/contracts/fleet.lock'))['contracts']['Whisper']
+          sources = {'openai/whisper-large-v2': 'ae4642769ce2ad8fc292556ccea8e901f1530655', **lock['checkpoints'], **{repo: pin['revision'] for repo, pin in lock['fixtures'].items()}}
+          for repo, revision in sources.items():
+              snapshot_download(repo, revision=revision, allow_patterns=['*.json', '*.txt', '*.model', '*.safetensors'])
+          PY
+      - name: Archive the assisted-decoding fix and parent
+        run: |
+          git -C /tmp/transformers fetch --quiet --depth 2 https://github.com/huggingface/transformers b6688043ff8e1c972c7fcac92db7942e1e41f42e
+          for stage in fix bad; do
+            ref=b6688043ff8e1c972c7fcac92db7942e1e41f42e
+            if [ "$stage" = bad ]; then ref="$ref^"; fi
+            sha=$(git -C /tmp/transformers rev-parse "$ref")
+            mkdir -p "/tmp/assisted-builds/$stage"
+            git -C /tmp/transformers archive "$sha" src | tar -x -C "/tmp/assisted-builds/$stage"
+            echo "$sha" > "out/$stage.sha"
+          done
+      - name: Replay the upstream large-v2 and tiny assistant configuration
+        env:
+          CUDA_VISIBLE_DEVICES: "0"
+        run: |
+          for stage in fix bad; do
+            PYTHONPATH="/tmp/assisted-builds/$stage/src" HF_HUB_OFFLINE=1 python3 experiments/whisper_assisted_suppression.py \
+              --model checkpoint --main-checkpoint openai/whisper-large-v2 --dtype float16 \
+              --speech experiments/audio/1272-128104-0000.flac --device cuda \
+              --build "$(cat out/$stage.sha)" --output "out/large-$stage.json" > "out/large-$stage.log" 2>&1
+          done
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: whisper-assist-large
+          path: out
+
+  whisper-speech:
+    if: inputs.matrix == 'whisper-speech'
+    runs-on:
+      group: '${{ inputs.machine_type }}'
+    timeout-minutes: 60
+    container:
+      image: ${{ inputs.docker }}
+      options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    env:
+      HF_HOME: /mnt/cache
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      CUBLAS_WORKSPACE_CONFIG: ":4096:8"
+      PYTHONUNBUFFERED: "1"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Install the pinned environment
+        run: |
+          PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
+          mkdir -p out
+          nvidia-smi > out/nvidia-smi.txt
+          python3 -m pip freeze > out/pip-freeze.txt
+      - name: Record, check and replay Whisper speech
+        run: bash .github/scripts/whisper_speech.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: whisper-speech
+          path: out
+
+  dependency-stability:
+    if: inputs.matrix == 'dependency-stability'
+    runs-on:
+      group: '${{ inputs.machine_type }}'
+    timeout-minutes: 180
+    container:
+      image: ${{ inputs.docker }}
+      options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    env:
+      HF_HOME: /mnt/cache
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      CUBLAS_WORKSPACE_CONFIG: ":4096:8"
+      CUDA_VISIBLE_DEVICES: "0"
+      PYTHONUNBUFFERED: "1"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Install the pinned control
+        run: |
+          PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
+          mkdir -p out
+          nvidia-smi > out/nvidia-smi.txt
+      - name: Run dependency upgrades and fresh-process repeats
+        env:
+          PROFILES: ${{ inputs.dependency_profiles }}
+        run: |
+          args=()
+          if [[ -n "$PROFILES" ]]; then
+            read -r -a profiles <<< "$PROFILES"
+            args=(--profiles "${profiles[@]}")
+          fi
+          python3 experiments/dependency_study.py --out out/dependency-stability "${args[@]}"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: dependency-stability
+          path: out
+
+  wav2vec2-normalization:
+    if: inputs.matrix == 'wav2vec2-normalization'
+    runs-on:
+      group: '${{ inputs.machine_type }}'
+    timeout-minutes: 60
+    container:
+      image: ${{ inputs.docker }}
+      options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    env:
+      HF_HOME: /mnt/cache
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      CUBLAS_WORKSPACE_CONFIG: ":4096:8"
+      CUDA_VISIBLE_DEVICES: "0"
+      PYTHONUNBUFFERED: "1"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Install the pinned GPU environment
+        run: |
+          PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
+          mkdir -p out
+          nvidia-smi > out/nvidia-smi.txt
+      - name: Validate explicit normalization through full model calls
+        run: python3 experiments/wav2vec2_normalization_control.py --out out/normalization
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: wav2vec2-normalization
+          path: out

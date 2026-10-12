@@ -1,0 +1,78 @@
+{
+  "mic": "0.3",
+  "name": "Whisper assisted speech recognition",
+  "usage": "WhisperProcessor + WhisperForConditionalGeneration.generate, speech with an encoder-decoder assistant",
+  "architecture": "WhisperForConditionalGeneration",
+  "checkpoints": {
+    "openai/whisper-tiny": {
+      "fixture": "hf-internal-testing/proto-whisper-tiny-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/proto-whisper-tiny-slim": {
+      "built_from": "openai/whisper-tiny",
+      "covers": [
+        "openai/whisper-tiny"
+      ],
+      "build": {
+        "seed": 17
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=5",
+        "torch",
+        "soundfile"
+      ],
+      "targets": [
+        "checkpoints"
+      ],
+      "unsupported": {
+        "fixtures": "Checkpoint-only speech coverage: neither slim weight kind exposes the assisted-suppression regression #48108 on this input."
+      },
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": false,
+      "resources": {
+        "openai/whisper-tiny": {
+          "memory_gb": 2,
+          "download_mb": 151
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "speech": {
+      "compare": "exact"
+    },
+    "greedy_tokens": {
+      "compare": "exact"
+    },
+    "greedy_text": {
+      "compare": "exact"
+    },
+    "assisted_tokens": {
+      "compare": "exact"
+    },
+    "assisted_text": {
+      "compare": "exact"
+    },
+    "assisted_matches_greedy": {
+      "compare": "true"
+    }
+  }
+}

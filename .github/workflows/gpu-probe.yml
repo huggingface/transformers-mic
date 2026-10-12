@@ -1,0 +1,42 @@
+name: GPU probe
+
+# Checks that this repo can reach the transformers GPU runner groups (the ARC
+# scale sets the slow-test verify loop and run-slow use) and reports the environment
+# contract checks would run in. Same image and node-local cache mount as
+# transformers-ci's serge-verify-slow.yml.
+
+on:
+  workflow_dispatch:
+    inputs:
+      machine_type:
+        description: "Runner group: aws-g5-4xlarge-cache (single) / aws-g5-12xlarge-cache (multi)"
+        required: false
+        type: string
+        default: aws-g5-4xlarge-cache
+      docker:
+        required: false
+        type: string
+        default: huggingface/transformers-all-latest-gpu
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on:
+      group: '${{ inputs.machine_type }}'
+    timeout-minutes: 60
+    container:
+      image: ${{ inputs.docker }}
+      options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    env:
+      HF_HOME: /mnt/cache
+    steps:
+      - name: Environment
+        run: |
+          nvidia-smi
+          python3 --version
+          python3 -c "import torch, transformers; print('torch', torch.__version__, 'cuda', torch.version.cuda, torch.cuda.is_available(), torch.cuda.device_count(), torch.cuda.get_device_name(0)); print('transformers', transformers.__version__, transformers.__file__)"
+          python3 -m pip list 2>/dev/null | grep -iE "^(torch|tokenizers|numpy|pillow|accelerate|kernels|flash|safetensors|huggingface)" || true
+          git -C /transformers log -1 --format='%H %cd' || true
+          ls /mnt/cache/hub 2>/dev/null | head -50 || true
