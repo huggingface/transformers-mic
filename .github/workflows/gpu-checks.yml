@@ -25,7 +25,7 @@ on:
         type: string
         default: text clip bert t5 whisper wav2vec2
       matrix:
-        description: "full: everything below · tf32: CPU baselines checked on GPU in float32, cuDNN TF32 on vs off · init: fixture_init.py (random/overfit/pruned/sliced) on GPU · contracts: the original contract fleet on GPU (record, stability, CPU golden, bfloat16) · dependency-stability: frozen current fleet, dependency upgrades and fresh-process repeats"
+        description: "mic-package: installed CLI on GPU · full: everything below · tf32: CPU baselines checked on GPU in float32, cuDNN TF32 on vs off · init: fixture_init.py (random/overfit/pruned/sliced) on GPU · contracts: the original contract fleet on GPU (record, stability, CPU golden, bfloat16) · dependency-stability: frozen current fleet, dependency upgrades and fresh-process repeats"
         required: false
         type: string
         default: full
@@ -48,7 +48,7 @@ permissions:
 
 jobs:
   checks:
-    if: inputs.matrix != 'whisper-contract' && inputs.matrix != 'whisper-assist-large' && inputs.matrix != 'whisper-speech' && inputs.matrix != 'dependency-stability' && inputs.matrix != 'wav2vec2-normalization'
+    if: inputs.matrix != 'whisper-contract' && inputs.matrix != 'whisper-assist-large' && inputs.matrix != 'whisper-speech' && inputs.matrix != 'dependency-stability' && inputs.matrix != 'wav2vec2-normalization' && inputs.matrix != 'mic-package'
     runs-on:
       group: '${{ inputs.machine_type }}'
     timeout-minutes: 240
@@ -493,4 +493,52 @@ jobs:
         if: always()
         with:
           name: wav2vec2-normalization
+          path: out
+
+  mic-package:
+    if: inputs.matrix == 'mic-package'
+    runs-on:
+      group: '${{ inputs.machine_type }}'
+    timeout-minutes: 60
+    container:
+      image: ${{ inputs.docker }}
+      options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    env:
+      HF_HOME: /mnt/cache
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      CUBLAS_WORKSPACE_CONFIG: ":4096:8"
+      CUDA_VISIBLE_DEVICES: "0"
+      PYTHONUNBUFFERED: "1"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Install the pinned environment and standalone wheel
+        run: |
+          PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
+          python3 -m pip wheel . --no-deps --wheel-dir /tmp/mic-wheels
+          python3 -m pip install --no-deps /tmp/mic-wheels/transformers_mic-*.whl
+          python3 -m pip install pytest
+          mkdir -p out
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q tests > out/package-tests.txt
+      - name: Exercise the installed CLI outside the checkout
+        run: |
+          cd /tmp
+          mic create google-bert/bert-base-uncased --offline --out /tmp/mic-package-bert
+          cd /tmp/mic-package-bert
+          mic build
+          mic check --all-variants
+          mic record --all-variants
+          mic review --approve
+          mic check --all-variants
+          mic publish
+          mic export --transformers-checkout /tmp/mic-export
+          mic check --lock /tmp/mic-export/tests/contracts/fleet.lock --contract BERT --all-variants
+          cp -R .mic "$GITHUB_WORKSPACE/out/project"
+          cp -R /tmp/mic-export "$GITHUB_WORKSPACE/out/export"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: mic-package
           path: out

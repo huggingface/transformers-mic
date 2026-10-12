@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "transformers-mic"
+version = "0.1.0"
+description = "Build and validate model integration contracts and slim fixtures for Transformers"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["huggingface-hub>=1.0", "jsonschema>=4.23"]
+
+[project.optional-dependencies]
+runtime = ["transformers>=5", "torch>=2.11", "numpy", "pillow", "soundfile", "librosa", "scipy", "safetensors"]
+dev = ["pytest>=8", "build"]
+
+[project.scripts]
+mic = "transformers_mic.cli:main"
+transformers-mic = "transformers_mic.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

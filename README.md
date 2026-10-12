@@ -1,4 +1,10 @@
-# MIC * Model Integration Contract
+# transformers-mic
+
+Python package and CLI for model integration contracts, slim fixtures, and measured
+expectations. See the [CLI guide](docs/cli.md) for installation, HF Inference
+Providers (default `Qwen/Qwen3.8-27B`), and the create/update/publish workflow.
+
+## Model Integration Contract
 
 **A proposed standard**: next to any Hub model, an executable check that it works in a given framework, run by that framework's CI.
 
