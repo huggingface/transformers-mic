@@ -41,7 +41,8 @@ def weights_options(parser, default=None):
 
 def parser():
     root = argparse.ArgumentParser(
-        description="Build, measure and review Transformers model integration contracts."
+        prog="tmic",
+        description="Build, measure and review Transformers model integration contracts.",
     )
     root.add_argument("--version", action="version", version=__version__)
     root.add_argument(
@@ -214,7 +215,7 @@ def main(argv=None):
             return commands.execute(args, record=args.command == "record")
         return getattr(commands, args.command)(args)
     except (ValueError, OSError, jsonschema.ValidationError, HfHubHTTPError) as exc:
-        print(f"mic: {exc}", file=sys.stderr)
+        print(f"tmic: {exc}", file=sys.stderr)
         return 2
 
 

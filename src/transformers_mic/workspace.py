@@ -34,7 +34,7 @@ class Workspace:
     def state(self):
         if not self.state_path.exists():
             raise ValueError(
-                f"No MIC workspace at {self.root}; run mic create MODEL --out {self.root}"
+                f"No MIC workspace at {self.root}; run tmic create MODEL --out {self.root}"
             )
         return read(self.state_path)
 
@@ -62,7 +62,7 @@ class Workspace:
 
     def ensure_new(self):
         if self.state_path.exists():
-            raise ValueError(f"Workspace already exists: {self.root}; use mic update")
+            raise ValueError(f"Workspace already exists: {self.root}; use tmic update")
 
     def from_catalog(self, model, name, weights, readable):
         self.ensure_new()

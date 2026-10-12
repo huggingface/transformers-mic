@@ -227,11 +227,11 @@ def create(args):
                 "contract": workspace.state["contract"],
                 "origin": workspace.state["origin"],
                 "next": [
-                    "mic build",
-                    "mic record",
-                    "mic review",
-                    "mic check",
-                    "mic publish",
+                    "tmic build",
+                    "tmic record",
+                    "tmic review",
+                    "tmic check",
+                    "tmic publish",
                 ],
             }
         )
@@ -356,7 +356,7 @@ def build(args):
                     {
                         **choice,
                         "artifact": str(target),
-                        "next": "mic record; review the new candidates before publishing",
+                        "next": "tmic record; review the new candidates before publishing",
                     }
                 )
             )
@@ -553,11 +553,11 @@ def publication_ready(workspace):
         for key, path in paths.items()
     ):
         raise ValueError(
-            "Run mic check on all declared targets after reviewing candidates; source or lock changes invalidate validation"
+            "Run tmic check on all declared targets after reviewing candidates; source or lock changes invalidate validation"
         )
     if list(workspace.lock_path.parent.glob("expectations/**/*.candidate.json")):
         raise ValueError(
-            "Unreviewed candidate baselines remain; run mic review before publishing"
+            "Unreviewed candidate baselines remain; run tmic review before publishing"
         )
     fingerprint = workspace.validation_fingerprint()
     variants = workspace.manifest["integrations"]["transformers"].get(
@@ -568,7 +568,7 @@ def publication_ready(workspace):
         for v in variants
     ):
         raise ValueError(
-            "Every declared variant needs a successful check on the current sources and approved expectations; use mic check --all-variants"
+            "Every declared variant needs a successful check on the current sources and approved expectations; use tmic check --all-variants"
         )
 
 
@@ -581,7 +581,7 @@ def publish(args):
                 "contract": workspace.state["contract"],
                 "fixture": workspace.fixture,
                 "execute": args.execute,
-                "next": "mic publish --execute, then mic export --transformers-checkout PATH",
+                "next": "tmic publish --execute, then tmic export --transformers-checkout PATH",
             }
         )
     )
@@ -602,7 +602,7 @@ def publish(args):
         ["--contract", name] + (["--private"] if args.private else []),
     )
     workspace.save_state(validated=False)
-    print("Run mic check --all-variants on the published pins before export.")
+    print("Run tmic check --all-variants on the published pins before export.")
     return result.returncode
 
 
@@ -655,7 +655,7 @@ def export(args):
             {
                 "exported": str(target),
                 "contract": name,
-                "next": "Review git diff, install transformers-mic, and invoke mic check --lock tests/contracts/fleet.lock in CI.",
+                "next": "Review git diff, install transformers-mic, and invoke tmic check --lock tests/contracts/fleet.lock in CI.",
             }
         )
     )

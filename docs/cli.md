@@ -1,7 +1,7 @@
 # transformers-mic CLI
 
 `transformers-mic` packages the existing MIC runner, fixture builder, replay tools,
-and reviewed catalog. The `mic` command creates a working directory for a model,
+and reviewed catalog. The `tmic` command creates a working directory for a model,
 proposes additional usage paths when needed, and measures expectations there.
 It is an alpha implementation: generated plans still need code review and a
 working model-specific build recipe. Repository renaming does not change the
@@ -15,17 +15,17 @@ From this repository (Python 3.10+):
 python -m pip install -e '.[runtime,dev]'
 python -m pip install 'hf-doc-builder @ git+https://github.com/huggingface/doc-builder.git'
 hf auth login
-mic create google-bert/bert-base-uncased --out work/bert
+tmic create google-bert/bert-base-uncased --out work/bert
 cd work/bert
-mic build
-mic record --all-variants
-mic review
-mic review --approve
-mic check --all-variants
-mic publish                         # preview
-mic publish --execute               # upload to the logged-in Hub account
-mic check --all-variants             # check the published pins
-mic export --transformers-checkout /path/to/transformers
+tmic build
+tmic record --all-variants
+tmic review
+tmic review --approve
+tmic check --all-variants
+tmic publish                         # preview
+tmic publish --execute               # upload to the logged-in Hub account
+tmic check --all-variants             # check the published pins
+tmic export --transformers-checkout /path/to/transformers
 ```
 
 Use a checkout pinned to the workspace's `fleet.lock` dependency environment for
@@ -36,7 +36,7 @@ install its Git version as above. The installed wheel bundles the backend and
 catalog, so it also works outside this checkout; model weights download from the
 immutable Hub pins.
 
-`mic create --offline` reuses a catalog contract without network requests.
+`tmic create --offline` reuses a catalog contract without network requests.
 Otherwise, `gh` must be installed and authenticated for GitHub history searches.
 `--no-history` skips them; `--history-file failures.json` imports a normalized JSON
 list from relore or another source. A failure object can contain `url`, `title`,
@@ -83,11 +83,11 @@ builds must pass the current gates.
 ## Add paths and prove regressions
 
 ```sh
-mic update 'Add a padded batch through the public pipeline API'
-mic record --all-variants
-mic review
-mic check --all-variants
-mic replay FIX_SHA --repo /path/to/transformers --match-output answer_logits
+tmic update 'Add a padded batch through the public pipeline API'
+tmic record --all-variants
+tmic review
+tmic check --all-variants
+tmic replay FIX_SHA --repo /path/to/transformers --match-output answer_logits
 ```
 
 Update retains the old source under `.mic/history/` and keeps the fixture pin.
@@ -126,10 +126,10 @@ provided checkout, preserves other contracts, and removes workspace paths from
 pins. It does not commit, open a PR, or merge Transformers changes. CI can run:
 
 ```sh
-mic check --lock tests/contracts/fleet.lock --contract BERT --all-variants
+tmic check --lock tests/contracts/fleet.lock --contract BERT --all-variants
 ```
 
-`mic status` shows project state. Workspaces contain source, history, candidate
+`tmic status` shows project state. Workspaces contain source, history, candidate
 expectations, checks and artifacts; keep them outside versioned source or ignore
 `work/`. The current release implements Transformers orchestration; the bundled
 prototype still includes Transformers.js contracts, but the CLI does not publish

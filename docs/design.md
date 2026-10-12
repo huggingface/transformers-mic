@@ -45,7 +45,7 @@ The manifest's per-fixture `build` recipe holds the seed and reviewed exceptions
 | Contract and manifest, per usage path | `hf-internal-testing/SmolLM-integration` | Hugging Face |
 | Fixture, per fixture key | `hf-internal-testing/proto-SmolLM-slim` | Hugging Face |
 | Converted artifacts | `onnx-community/SmolLM-135M-ONNX` | Hugging Face |
-| Shared runner, one package | [`transformers-mic`](cli.md), `mic` CLI | Hugging Face |
+| Shared runner, one package | [`transformers-mic`](cli.md), `tmic` CLI | Hugging Face |
 | Fleet lock, expected results, adapter, CI workflow | `tests/contracts/`, `.github/workflows/contracts.yml` | Framework maintainers |
 
 Contract work never waits on a creator; expected results live where framework changes are reviewed. Creators may co-own later.

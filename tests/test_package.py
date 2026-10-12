@@ -144,7 +144,7 @@ def approve_receipts(workspace):
 
 
 def test_publish_requires_all_variants_and_invalidates_baseline_edits(workspace):
-    with pytest.raises(ValueError, match="Run mic check"):
+    with pytest.raises(ValueError, match="Run tmic check"):
         commands.publication_ready(workspace)
     approve_receipts(workspace)
     commands.publication_ready(workspace)

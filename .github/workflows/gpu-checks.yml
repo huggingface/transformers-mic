@@ -525,22 +525,22 @@ jobs:
       - name: Exercise the installed CLI outside the checkout
         run: |
           cd /tmp
-          mic create google-bert/bert-base-uncased --offline --out /tmp/mic-package-bert
+          tmic create google-bert/bert-base-uncased --offline --out /tmp/mic-package-bert
           cd /tmp/mic-package-bert
-          mic build
-          mic check --all-variants
-          mic record --all-variants
-          mic review --approve
-          mic check --all-variants
-          mic publish
-          mic export --transformers-checkout /tmp/mic-export
-          mic check --lock /tmp/mic-export/tests/contracts/fleet.lock --contract BERT --all-variants
+          tmic build
+          tmic check --all-variants
+          tmic record --all-variants
+          tmic review --approve
+          tmic check --all-variants
+          tmic publish
+          tmic export --transformers-checkout /tmp/mic-export
+          tmic check --lock /tmp/mic-export/tests/contracts/fleet.lock --contract BERT --all-variants
           cp -R .mic "$GITHUB_WORKSPACE/out/project"
           cp -R /tmp/mic-export "$GITHUB_WORKSPACE/out/export"
-          mic create google-bert/bert-base-uncased --offline --out /tmp/mic-package-fresh
+          tmic create google-bert/bert-base-uncased --offline --out /tmp/mic-package-fresh
           cd /tmp/mic-package-fresh
-          mic build --rebuild --weights random
-          mic record --target proto-bert-base-uncased-slim
+          tmic build --rebuild --weights random
+          tmic record --target proto-bert-base-uncased-slim
           cp -R .mic "$GITHUB_WORKSPACE/out/fresh-project"
       - uses: actions/upload-artifact@v4
         if: always()
