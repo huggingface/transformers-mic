@@ -19,7 +19,7 @@ Usage path: AutoTokenizer + AutoModelForMaskedLM, batched, right padding.
 
 | Checkpoint | Slim fixture (every framework PR) |
 | --- | --- |
-| [`google-bert/bert-base-uncased`](https://huggingface.co/google-bert/bert-base-uncased) | [`hf-internal-testing/proto-bert-base-uncased-slim`](https://huggingface.co/hf-internal-testing/proto-bert-base-uncased-slim) |
+| [`google-bert/bert-base-uncased`](https://huggingface.co/google-bert/bert-base-uncased) | [`hf-internal-testing/mic-bert-base-uncased-slim`](https://huggingface.co/hf-internal-testing/mic-bert-base-uncased-slim) |
 
 Checked outputs: `predicted_tokens`, `predicted_text`, `answer_logits`, `training.loss`, `training.gradients`, `training.updated`.
 

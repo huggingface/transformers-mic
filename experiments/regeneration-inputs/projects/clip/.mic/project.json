@@ -1,0 +1,10 @@
+{
+  "model": "openai/clip-vit-base-patch32",
+  "contract": "clip",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "catalog-regenerated",
+  "validated": false,
+  "validation": null,
+  "validations": {}
+}

@@ -1,4 +1,113 @@
-# Plugging the fleet into Transformers CI: proof plan and to-do
+# Transformers CI proof
+
+## Current prototype proof (2026-10-12)
+
+The existing `contracts-proof` branch now installs the **transformers-mic package**
+at an immutable Git commit and runs two separate locks: the original six-contract,
+eight-fixture historical control (default variant) and the **23-architecture
+prototype fleet** (default, eager, bfloat16: 69 cases). Full proof runs explicitly
+use `--run-all`; a coverage guard fails if any prototype case is missing.
+Model-selection greens that ran zero cases are not model-validation evidence.
+The proof is not adopted for unrelated Transformers PRs.
+
+The prototype fleet is fixture-only and was generated without historical replay.
+It adds GPT2, ModernBERT, ViT, Table Transformer, GOT-OCR2, Qwen2-Audio,
+SpeechT5, Gemma3, Qwen2, Mistral3, Qwen2.5-VL, LLaVA, SmolVLM, InternVL,
+GPT-OSS, DETR and Qwen2.5-Omni to the overlapping historical families.
+Auto contracts use Auto classes for BERT/T5/ViT. The full requested catalog has
+26 concrete architectures; CSM, Gemma3n and PI0 remain rejected. Their gate
+failures are recorded in [the per-model report](../experiments/results/prototype-regeneration.json).
+GPT-OSS coverage uses a dense slim and does not exercise quantized kernels.
+DETR/SpeechT5 recipes explicitly exempt amplitude scaling canceled by input
+normalization; required remaining probes and the .001 threshold stay fixed.
+[Original failed probes](../experiments/results/prototype-normalization-probes.json)
+are retained rather than relabeled as passes.
+
+CPU jobs use four threads (matching native reference recording), pin
+torch/torchvision/torchaudio 2.11/0.26/2.11 and scientific dependencies
+including NumPy 1.26.4. Python comes from the runner image and is reported as an
+environment difference (native recording used 3.11.17 versus the catalog's 3.10).
+A rolling-image attempt genuinely executed 59 cases, with 23 pass and 36 fail:
+missing native precision references and numeric deltas under torch 2.14/NumPy
+2.3.5 exposed why GPU-worker CPU references alone were insufficient. Tolerances
+were not loosened.
+
+The [native CPU recording run](https://github.com/huggingface/transformers/actions/runs/38281747657)
+on Intel m8i checked and exported **22 models / 66 variants**. Review accepted
+only new or unchanged candidates; native BF16/FP16 profiles have their own files.
+Imported outputs also compare within existing tolerances against the previous
+proof references. [Recording/review evidence](../experiments/results/native-cpu-review.json)
+and [import comparison](../experiments/results/native-cpu-import-comparison.json)
+retain those checks. Recording and subsequent checks used independent processes;
+the full fleet also checks both locks through the packaged CLI and verifies
+case counts. Prototype variants currently launch a backend process per case.
+
+No runtime framework patches enter the Transformers integration. Two narrow
+exceptions preserve unresolved signals:
+
+- **Prototype Whisper:** #49456's generation error is matched by its message.
+  All three variants remain blocked, with no native CPU export or downstream
+  checks claimed. The historical Whisper control also reproduces that signature
+  against the explicitly selected source, so its message match is retained.
+- **Wav2Vec2:** #49385 skips only `training.loss` and `training.gradients`.
+  Reference recording initializes the missing SpecAugment parameter in a
+  controlled run; final checks run unpatched and retain the explicit skips.
+
+Some published GPU validation runs likewise used model-scoped patches. These
+are controlled results, not evidence of unpatched upstream behavior. Immutable
+Hub fixture/contract pins are checked after publication; build success alone
+is not a published-pin check. No historical catch is attributed to this expanded
+prototype fleet. Wider checkpoint validation, rejected fixtures, repeated native
+CPU noise measurements and maintainer adoption remain follow-up work.
+
+The [first full integration run](https://github.com/huggingface/transformers/actions/runs/38286964684)
+executed all **77 cases** (69 prototypes plus eight historical controls):
+**74 pass, three Whisper failures**. Whisper reached generation but then exceeded
+its old F32 reference by 0.000112 and lacked a native BF16 reference. Those
+failures were not approved or converted to expected numeric failures.
+[First full-run evidence](../experiments/results/native-cpu-full-first.json).
+
+The [focused Whisper recorder](https://github.com/huggingface/transformers/actions/runs/38293434434)
+reproduced the generation error in all variants and verified the same source
+module and configuration hash from both working directories.
+[Provenance evidence](../experiments/results/native-whisper-provenance.json).
+Both workflows now explicitly set checkout `src` on `PYTHONPATH`; full checks
+also assert the framework import path. The source-verified
+[full rerun](https://github.com/huggingface/transformers/actions/runs/38293434373)
+executed all **77 cases**: **73 pass, three prototype Whisper xfails and one
+historical Whisper error**. Every numeric comparison passed. The historical
+Whisper error has the same #49456 signature, so its exact match was restored.
+[Source-verified results](../experiments/results/native-cpu-source-verified.json).
+The source-verified path changes the outcome from the first full run; that
+first run is an environment observation, not validation of the reviewed source.
+The verified suite took about **12 minutes** in the contract step, including
+per-case subprocess startup; the eight historical controls take about 20 seconds.
+These timings describe the expanded alpha CLI, not the small pilot's PR budget.
+A subsequent [full run](https://github.com/huggingface/transformers/actions/runs/38296023340)
+executed 77 cases with **72 pass, four Whisper xfails and one Table Transformer
+BF16 numeric failure** (score delta 0.00195). It used eight threads, while native
+references used four. [Thread/noise evidence](../experiments/results/native-cpu-thread-noise.json).
+The proof now uses and asserts the four-thread reference profile. The
+[focused native Table Transformer repeat](https://github.com/huggingface/transformers/actions/runs/38298142514)
+passed fresh-process recording and all three checks; its checked outputs match
+the original native references **exactly**. No replacement baseline was imported.
+[Repeatability comparison](../experiments/results/native-table-repeatability.json).
+The [aligned full rerun](https://github.com/huggingface/transformers/actions/runs/38298088861)
+**passed: 77 executed cases, 73 pass and four exact Whisper xfails**. The coverage
+guard verified all 69 prototype cases. Every non-Whisper comparison passed;
+Wav2Vec2 retains only its stated loss/gradient skips. No runtime patches,
+tolerance changes or changed reference approvals were made.
+[Final full-run records](../experiments/results/native-cpu-final.json).
+
+Final three published GPU pin checks:
+[run 38286933326](https://github.com/huggingface/transformers-mic/actions/runs/38286933326),
+**9/9 pass**, without runtime patches (DETR, SpeechT5, Qwen2.5-Omni).
+
+## Historical pilot (2026-10-09)
+
+The remaining plan, timings, issue states and results are the original pilot
+snapshot. They describe the smaller vendored runner before the package and
+prototype fleet updates above, and are retained as historical evidence.
 
 ## For Transformers maintainers: model integration contracts in PR CI
 

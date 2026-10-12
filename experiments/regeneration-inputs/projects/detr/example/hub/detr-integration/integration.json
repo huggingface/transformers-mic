@@ -1,0 +1,89 @@
+{
+  "mic": "0.3",
+  "name": "DETR object detection",
+  "usage": "DetrImageProcessor + DetrForObjectDetection, batched synthetic images, training with target boxes and class ids",
+  "architecture": "DetrForObjectDetection",
+  "checkpoints": {
+    "facebook/detr-resnet-50": {
+      "fixture": "hf-internal-testing/mic-detr-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/mic-detr-slim": {
+      "built_from": "facebook/detr-resnet-50",
+      "covers": [
+        "facebook/detr-resnet-50"
+      ],
+      "build": {
+        "seed": 17,
+        "accept_insensitive": {
+          "pixel_values:halve": "The random convolutional backbone and layer normalization remove positive intensity scaling. The measured half-amplitude delta is 1.03e-6; batch, channel and spatial perturbations remain required and each exceeds 0.09."
+        }
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=5",
+        "torch"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 2,
+          "download_mb": 100
+        },
+        "facebook/detr-resnet-50": {
+          "memory_gb": 5,
+          "download_mb": 1000,
+          "variants": {
+            "bfloat16": {
+              "memory_gb": 3
+            }
+          }
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "top_class_logits": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "pred_boxes": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

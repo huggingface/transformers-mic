@@ -1,0 +1,39 @@
+{
+  "framework": "transformers",
+  "environment": {
+    "python": "3.10",
+    "torch": "2.11.0",
+    "torchvision": "0.26.0",
+    "torchaudio": "2.11.0",
+    "tokenizers": "0.23.1",
+    "numpy": "1.26.4",
+    "pillow": "12.2.0",
+    "accelerate": "1.13.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.32.0",
+    "sentencepiece": "0.2.1",
+    "protobuf": "6.33.6",
+    "librosa": "0.11.0",
+    "soundfile": "0.13.1",
+    "scipy": "1.15.3"
+  },
+  "contracts": {
+    "gpt_oss": {
+      "integration": {
+        "repo": "hf-internal-testing/mic-gpt_oss-integration",
+        "revision": "b1d63fd734710c163e46edf24c313ec537d7b881",
+        "path": "../../../hub/gpt_oss-integration",
+        "files_sha256": "68ba0e71987b453070357c7c7276a9176f57ce14607e3b7e8ed40bb78d6911e4"
+      },
+      "fixtures": {
+        "hf-internal-testing/mic-gpt_oss-slim": {
+          "revision": "31a4cd7021a54fcbfddb884a6b6937eb364b203c",
+          "files_sha256": "2a9272b5d5a27a2cc84ec6510697fa037bf79d36330fca7bfab3855a36de08c4"
+        }
+      },
+      "checkpoints": {
+        "openai/gpt-oss-20b": "6cee5e81ee83917806bbde320786a8fb61efebee"
+      }
+    }
+  }
+}

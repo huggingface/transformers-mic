@@ -1,0 +1,39 @@
+{
+  "framework": "transformers",
+  "environment": {
+    "python": "3.10",
+    "torch": "2.11.0",
+    "torchvision": "0.26.0",
+    "torchaudio": "2.11.0",
+    "tokenizers": "0.23.1",
+    "numpy": "1.26.4",
+    "pillow": "12.2.0",
+    "accelerate": "1.13.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.32.0",
+    "sentencepiece": "0.2.1",
+    "protobuf": "6.33.6",
+    "librosa": "0.11.0",
+    "soundfile": "0.13.1",
+    "scipy": "1.15.3"
+  },
+  "contracts": {
+    "speech_t5": {
+      "integration": {
+        "repo": "hf-internal-testing/mic-speech_t5-integration",
+        "revision": "d95f24b7fdc730cbfd5689c09788a22be8868434",
+        "path": "../../../hub/speech_t5-integration",
+        "files_sha256": "6d2ad39e554a192da83fd0d2ee5e406243acfadfd11acff3fb0bbd15fb4b6862"
+      },
+      "fixtures": {
+        "hf-internal-testing/mic-speech_t5-slim": {
+          "revision": "c79f63c5decffb9fe2e288a251d337096964142a",
+          "files_sha256": "75759c7279cdbc38b318ffd59fe3c957651ee989e2a8338244c6f4b9c013865d"
+        }
+      },
+      "checkpoints": {
+        "microsoft/speecht5_asr": "53615c10408485422e09a12cda191a747f4bbe34"
+      }
+    }
+  }
+}

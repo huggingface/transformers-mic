@@ -1,0 +1,86 @@
+{
+  "mic": "0.3",
+  "name": "SpeechT5-ASR",
+  "usage": "AutoProcessor + AutoModelForSpeechSeq2Seq, batched synthetic audio, greedy decode, one SGD step",
+  "architecture": "SpeechT5ForSpeechToText",
+  "checkpoints": {
+    "microsoft/speecht5_asr": {
+      "fixture": "hf-internal-testing/mic-speech_t5-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/mic-speech_t5-slim": {
+      "built_from": "microsoft/speecht5_asr",
+      "covers": [
+        "microsoft/speecht5_asr"
+      ],
+      "build": {
+        "seed": 17,
+        "accept_insensitive": {
+          "input_values:halve": "The speech prenet applies per-channel GroupNorm after convolution, making positive amplitude scaling invariant up to epsilon. The measured half-amplitude delta is 2.09e-7; batch, reversal and padding-mask perturbations remain required and each exceeds 0.003."
+        }
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=4.30",
+        "torch",
+        "numpy"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 2,
+          "download_mb": 50
+        },
+        "microsoft/speecht5_asr": {
+          "memory_gb": 4,
+          "download_mb": 1100
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "predicted_tokens": {
+      "compare": "exact"
+    },
+    "predicted_text": {
+      "compare": "exact"
+    },
+    "selected_logits": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

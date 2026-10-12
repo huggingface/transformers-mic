@@ -1,0 +1,10 @@
+{
+  "model": "Qwen/Qwen2.5-VL-3B-Instruct",
+  "contract": "qwen2_5_vl",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": null,
+  "validations": {}
+}

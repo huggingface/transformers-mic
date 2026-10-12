@@ -1,0 +1,202 @@
+{
+  "model": "google-t5/t5-small",
+  "contract": "t5",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "catalog-regenerated",
+  "validated": false,
+  "validation": {
+    "variant": "bfloat16",
+    "records": [
+      {
+        "contract": "hf-internal-testing/mic-t5-integration",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "bfloat16",
+        "target": "mic-t5-slim",
+        "kind": "fixture",
+        "revision": "unpublished",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3",
+          "local_patches": [
+            "config-field-generation-params",
+            "masked-spec-embed-init",
+            "whisper-decode-tensor-batch"
+          ]
+        },
+        "seconds": 1.68,
+        "platform": "cuda",
+        "baseline": "transformers/tests/contracts/expectations/t5/cuda/mic-t5-slim.bfloat16.json",
+        "status": "pass",
+        "failures": []
+      }
+    ],
+    "lock_sha256": "df20c4067890f54378f811217d75659f9d349855438615e08080446c3dcbb142",
+    "manifest_sha256": "4d255f6d97fdd5797a7669b8fd34e138f411cc82b1eff1aa6c876c23b78e48a4",
+    "usage_sha256": "4ccc724ddf9c0e686f9df841de1e6b430978019e5ce6e3d8cc279d82d4aa3cd1"
+  },
+  "validations": {
+    "default": {
+      "variant": "default",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-t5-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "default",
+          "target": "mic-t5-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3",
+            "local_patches": [
+              "config-field-generation-params",
+              "masked-spec-embed-init",
+              "whisper-decode-tensor-batch"
+            ]
+          },
+          "seconds": 1.27,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/t5/cuda/mic-t5-slim.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "df20c4067890f54378f811217d75659f9d349855438615e08080446c3dcbb142",
+      "manifest_sha256": "4d255f6d97fdd5797a7669b8fd34e138f411cc82b1eff1aa6c876c23b78e48a4",
+      "usage_sha256": "4ccc724ddf9c0e686f9df841de1e6b430978019e5ce6e3d8cc279d82d4aa3cd1",
+      "fingerprint": "8c65269ac884b9228adcd42dcc459632e3fc7fee0c31a11ae9d24911e65cfcb3"
+    },
+    "eager": {
+      "variant": "eager",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-t5-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "eager",
+          "target": "mic-t5-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3",
+            "local_patches": [
+              "config-field-generation-params",
+              "masked-spec-embed-init",
+              "whisper-decode-tensor-batch"
+            ]
+          },
+          "seconds": 1.33,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/t5/cuda/mic-t5-slim.eager.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "df20c4067890f54378f811217d75659f9d349855438615e08080446c3dcbb142",
+      "manifest_sha256": "4d255f6d97fdd5797a7669b8fd34e138f411cc82b1eff1aa6c876c23b78e48a4",
+      "usage_sha256": "4ccc724ddf9c0e686f9df841de1e6b430978019e5ce6e3d8cc279d82d4aa3cd1",
+      "fingerprint": "8c65269ac884b9228adcd42dcc459632e3fc7fee0c31a11ae9d24911e65cfcb3"
+    },
+    "bfloat16": {
+      "variant": "bfloat16",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-t5-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "bfloat16",
+          "target": "mic-t5-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3",
+            "local_patches": [
+              "config-field-generation-params",
+              "masked-spec-embed-init",
+              "whisper-decode-tensor-batch"
+            ]
+          },
+          "seconds": 1.68,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/t5/cuda/mic-t5-slim.bfloat16.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "df20c4067890f54378f811217d75659f9d349855438615e08080446c3dcbb142",
+      "manifest_sha256": "4d255f6d97fdd5797a7669b8fd34e138f411cc82b1eff1aa6c876c23b78e48a4",
+      "usage_sha256": "4ccc724ddf9c0e686f9df841de1e6b430978019e5ce6e3d8cc279d82d4aa3cd1",
+      "fingerprint": "8c65269ac884b9228adcd42dcc459632e3fc7fee0c31a11ae9d24911e65cfcb3"
+    }
+  },
+  "weight_decision": {
+    "requested": "auto",
+    "weights": "random",
+    "accepted": true,
+    "reused": false,
+    "reason": "Random weights pass the measured sensitivity and numeric-health gates; training is unnecessary.",
+    "readability_requested": false,
+    "historical_detection": "unverified until replayed; a gate pass is not a regression catch"
+  }
+}

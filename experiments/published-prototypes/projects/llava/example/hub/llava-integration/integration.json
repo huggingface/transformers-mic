@@ -1,0 +1,81 @@
+{
+  "mic": "0.3",
+  "name": "LLaVA vision-language",
+  "usage": "LlavaProcessor + LlavaForConditionalGeneration, batched with padding, synthetic images",
+  "architecture": "LlavaForConditionalGeneration",
+  "checkpoints": {
+    "llava-hf/llava-1.5-7b-hf": {
+      "fixture": "hf-internal-testing/mic-llava-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/mic-llava-slim": {
+      "built_from": "llava-hf/llava-1.5-7b-hf",
+      "covers": [
+        "llava-hf/llava-1.5-7b-hf"
+      ],
+      "build": {
+        "seed": 17
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=4.36",
+        "torch",
+        "Pillow",
+        "numpy"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 2,
+          "download_mb": 50
+        },
+        "llava-hf/llava-1.5-7b-hf": {
+          "memory_gb": 20,
+          "download_mb": 14000
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "predicted_tokens": {
+      "compare": "exact"
+    },
+    "probe_logits": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "framework": "transformers",
+  "environment": {
+    "python": "3.10",
+    "torch": "2.11.0",
+    "torchvision": "0.26.0",
+    "torchaudio": "2.11.0",
+    "tokenizers": "0.23.1",
+    "numpy": "1.26.4",
+    "pillow": "12.2.0",
+    "accelerate": "1.13.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.32.0",
+    "sentencepiece": "0.2.1",
+    "protobuf": "6.33.6",
+    "librosa": "0.11.0",
+    "soundfile": "0.13.1",
+    "scipy": "1.15.3"
+  },
+  "contracts": {
+    "gpt2": {
+      "integration": {
+        "repo": "hf-internal-testing/mic-gpt2-integration",
+        "revision": "40ebf651d607b8b5b7c3c1e9855f4d7b55e74b2d",
+        "files_sha256": "e327a466f9f3d4ba99dd19efd9dbdfcae66cb4bd648d2f82ec432b7352c6445c",
+        "path": "../../../hub/gpt2-integration"
+      },
+      "fixtures": {
+        "hf-internal-testing/mic-gpt2-slim": {
+          "revision": "0b13f059bc38002cfde203fb3a1be4aaeef3ccc7",
+          "files_sha256": "e56fc4f7878a200291c4e817c51f40c9987d0b5f70fef553033e2f0c795b3de8"
+        }
+      },
+      "checkpoints": {
+        "openai-community/gpt2": "607a30d783dfa663caf39e06633721c8d4cfcd7e"
+      }
+    }
+  }
+}

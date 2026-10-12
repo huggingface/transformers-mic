@@ -1,0 +1,39 @@
+{
+  "framework": "transformers",
+  "environment": {
+    "python": "3.10",
+    "torch": "2.11.0",
+    "torchvision": "0.26.0",
+    "torchaudio": "2.11.0",
+    "tokenizers": "0.23.1",
+    "numpy": "1.26.4",
+    "pillow": "12.2.0",
+    "accelerate": "1.13.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.32.0",
+    "sentencepiece": "0.2.1",
+    "protobuf": "6.33.6",
+    "librosa": "0.11.0",
+    "soundfile": "0.13.1",
+    "scipy": "1.15.3"
+  },
+  "contracts": {
+    "table_transformer": {
+      "integration": {
+        "repo": "hf-internal-testing/mic-table_transformer-integration",
+        "revision": "526a6608540f09cb9243420e83ac433d8b0a2ec3",
+        "path": "../../../hub/table_transformer-integration",
+        "files_sha256": "250899d99cef0d7587be109f282f9a5f0656793bca5394f33950aa51b703c31a"
+      },
+      "fixtures": {
+        "hf-internal-testing/mic-table_transformer-slim": {
+          "revision": "a0616d0368291a2730b5499af39909926ff9382e",
+          "files_sha256": "6972d9c59e49604df44b6cab597309f48390bfc4797419beecfb5709a5d24413"
+        }
+      },
+      "checkpoints": {
+        "microsoft/table-transformer-detection": "2357cbe2b5a5d1c03e54f32764f06058933b65ab"
+      }
+    }
+  }
+}

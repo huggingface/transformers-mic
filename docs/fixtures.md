@@ -19,7 +19,7 @@ PR checks need models that run on CPU in seconds and exercise real integration p
 
 ## Recipe
 
-1. **Shrink the real config:** hidden 64, intermediate 128, 4 heads; depth [by layer pattern](#shrinking-depth-by-layer-pattern). Reviewed `config_overrides` handle missed fields (MusicGen Melody: EnCodec `num_filters`, `codebook_dim`; the latter must match shrunk width). Preserve vocabulary, special tokens, image/patch/audio dimensions, RoPE, MoE structure, and seeded Dropout/LayerDrop/SpecAugment. Preserve checkpoint tensor names and missing parameters, so loading initializes omissions as for users (Wav2Vec2 [#49385](https://github.com/huggingface/transformers/issues/49385)). Save in the source's default dtype, float32 if unspecified: proto-SmolLM-slim is bfloat16, others float32.
+1. **Shrink the real config:** hidden 64, intermediate 128, 4 heads; depth [by layer pattern](#shrinking-depth-by-layer-pattern). Reviewed `config_overrides` handle missed fields (MusicGen Melody: EnCodec `num_filters`, `codebook_dim`; the latter must match shrunk width). Preserve vocabulary, special tokens, image/patch/audio dimensions, RoPE, MoE structure, and seeded Dropout/LayerDrop/SpecAugment. Preserve checkpoint tensor names and missing parameters, so loading initializes omissions as for users (Wav2Vec2 [#49385](https://github.com/huggingface/transformers/issues/49385)). Save in the source's default dtype, float32 if unspecified: mic-SmolLM-slim is bfloat16, others float32.
 2. **Copy processors byte for byte.** Identical processor files, preserved config fields, and dtype permit sharing a fixture ([example](../example/README.md#the-parts)).
 3. **Weights:** seed, then run the input-sensitivity gate.
    - Pass: keep random weights (CLIP, BERT, T5, UMT5, Wav2Vec2).

@@ -1,0 +1,182 @@
+{
+  "model": "answerdotai/ModernBERT-base",
+  "contract": "modernbert",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": {
+    "variant": "bfloat16",
+    "records": [
+      {
+        "contract": "hf-internal-testing/mic-modernbert-integration",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "bfloat16",
+        "target": "mic-modernbert-slim",
+        "kind": "fixture",
+        "revision": "unpublished",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3"
+        },
+        "seconds": 4.52,
+        "platform": "cuda",
+        "baseline": "transformers/tests/contracts/expectations/modernbert/cuda/mic-modernbert-slim.bfloat16.json",
+        "status": "pass",
+        "failures": []
+      }
+    ],
+    "lock_sha256": "a947456b0988a585e683592a6e99aa2c9722e230e7d4f4f7eba129a6e07d447e",
+    "manifest_sha256": "cb2b2007097dc2a1562e47362be27faf97c45589b3f709aa7e764e58f8329078",
+    "usage_sha256": "8887535144b2d693a5eb649fe6c66fe608bdc652cd27cb57b395a7c6003d9324"
+  },
+  "validations": {
+    "default": {
+      "variant": "default",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-modernbert-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "default",
+          "target": "mic-modernbert-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 4.46,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/modernbert/cuda/mic-modernbert-slim.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "a947456b0988a585e683592a6e99aa2c9722e230e7d4f4f7eba129a6e07d447e",
+      "manifest_sha256": "cb2b2007097dc2a1562e47362be27faf97c45589b3f709aa7e764e58f8329078",
+      "usage_sha256": "8887535144b2d693a5eb649fe6c66fe608bdc652cd27cb57b395a7c6003d9324",
+      "fingerprint": "0e4858630bd891cc0dde174e7b6c3c255bec89033890da439142471f00e34b68"
+    },
+    "eager": {
+      "variant": "eager",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-modernbert-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "eager",
+          "target": "mic-modernbert-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 4.16,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/modernbert/cuda/mic-modernbert-slim.eager.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "a947456b0988a585e683592a6e99aa2c9722e230e7d4f4f7eba129a6e07d447e",
+      "manifest_sha256": "cb2b2007097dc2a1562e47362be27faf97c45589b3f709aa7e764e58f8329078",
+      "usage_sha256": "8887535144b2d693a5eb649fe6c66fe608bdc652cd27cb57b395a7c6003d9324",
+      "fingerprint": "0e4858630bd891cc0dde174e7b6c3c255bec89033890da439142471f00e34b68"
+    },
+    "bfloat16": {
+      "variant": "bfloat16",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-modernbert-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "bfloat16",
+          "target": "mic-modernbert-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 4.52,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/modernbert/cuda/mic-modernbert-slim.bfloat16.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "a947456b0988a585e683592a6e99aa2c9722e230e7d4f4f7eba129a6e07d447e",
+      "manifest_sha256": "cb2b2007097dc2a1562e47362be27faf97c45589b3f709aa7e764e58f8329078",
+      "usage_sha256": "8887535144b2d693a5eb649fe6c66fe608bdc652cd27cb57b395a7c6003d9324",
+      "fingerprint": "0e4858630bd891cc0dde174e7b6c3c255bec89033890da439142471f00e34b68"
+    }
+  },
+  "weight_decision": {
+    "requested": "auto",
+    "weights": "random",
+    "accepted": true,
+    "reused": false,
+    "reason": "Random weights pass the measured sensitivity and numeric-health gates; training is unnecessary.",
+    "readability_requested": false,
+    "historical_detection": "unverified until replayed; a gate pass is not a regression catch"
+  }
+}

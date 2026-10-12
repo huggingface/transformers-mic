@@ -5,9 +5,9 @@
     "SmolLM": {
       "integration": {
         "repo": "hf-internal-testing/SmolLM-integration",
-        "revision": "ea5b7a6908a88f30679815d8343dde713778eb86",
+        "revision": "d52a4cb53b22c728c547919e9a3549ce6e620aac",
         "path": "../../../hub/SmolLM-integration",
-        "files_sha256": "b5660454ba3f1996124f489e19364f30b93993aa5288d17a697f090188210805"
+        "files_sha256": "62f72590b7bec062126bde87aa3446fbb3369eef38cee0d26ab1e08d9ea42fb8"
       },
       "checkpoints": {
         "HuggingFaceTB/SmolLM-135M": "1d461723eec654e65efdc40cf49301c89c0c92f4",

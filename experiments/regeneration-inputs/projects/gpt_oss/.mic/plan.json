@@ -1,0 +1,120 @@
+{
+  "name": "gpt_oss",
+  "manifest": {
+    "mic": "0.3",
+    "name": "GPT-OSS",
+    "usage": "AutoTokenizer + AutoModelForCausalLM, greedy forward pass with two prompts and one SGD training step with causal-LM labels",
+    "architecture": "GptOssForCausalLM",
+    "checkpoints": {
+      "openai/gpt-oss-20b": {
+        "fixture": "hf-internal-testing/mic-gpt_oss-slim"
+      }
+    },
+    "fixtures": {
+      "hf-internal-testing/mic-gpt_oss-slim": {
+        "built_from": "openai/gpt-oss-20b",
+        "covers": [
+          "openai/gpt-oss-20b"
+        ],
+        "why_separate": "Full 20B MoE model with mxfp4 quantization is impractical for cross-platform testing; the slim fixture removes quantization and reduces layer count to exercise the base architecture in standard precision.",
+        "build": {
+          "seed": 17,
+          "model_class": "GptOssForCausalLM",
+          "config_overrides": {
+            "fields": {
+              "quantization_config": null,
+              "num_hidden_layers": 2,
+              "num_local_experts": 4,
+              "num_experts_per_tok": 2
+            },
+            "reason": "Remove mxfp4 quantization so the fixture exercises the base architecture in standard precision; reduce layers and experts to keep the fixture small enough for CPU testing"
+          }
+        }
+      }
+    },
+    "integrations": {
+      "transformers": {
+        "entry_point": "integrations/transformers/usage.md",
+        "format": "runnable-markdown",
+        "requires": [
+          "transformers>=4.55",
+          "torch"
+        ],
+        "targets": [
+          "fixtures"
+        ],
+        "variants": {
+          "default": {},
+          "eager": {
+            "attn_implementation": "eager"
+          },
+          "bfloat16": {
+            "dtype": "bfloat16"
+          }
+        },
+        "training": true,
+        "resources": {
+          "fixture": {
+            "memory_gb": 4,
+            "download_mb": 500,
+            "devices": [
+              "cpu",
+              "cuda"
+            ]
+          },
+          "openai/gpt-oss-20b": {
+            "memory_gb": 80,
+            "download_mb": 40000,
+            "devices": [
+              "cuda"
+            ],
+            "gpus": 1,
+            "gpu_memory_gb": 48
+          }
+        }
+      }
+    },
+    "outputs": {
+      "runtime": {
+        "compare": "exact"
+      },
+      "predicted_tokens": {
+        "compare": "exact"
+      },
+      "answer_logits": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.loss": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.gradients": {
+        "compare": "all_true"
+      },
+      "training.updated": {
+        "compare": "true"
+      }
+    }
+  },
+  "usage": "# GPT-OSS: causal LM with Transformers\n\nThis page is the Transformers contract of the GPT-OSS MIC and also a usage example. [doc-builder](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md) renders the `runnable` blocks below as documentation, and its pytest plugin runs them as written against `openai/gpt-oss-20b`. The MIC runner runs the same blocks against each slim fixture and each checkpoint in [`integration.json`](../../integration.json). Lines marked `# doc-builder: hide` only matter there: they swap in the pinned checkpoint or variant and print the result record.\n\n## Forward pass and one training step\n\n```py runnable:usage\nimport torch\nfrom transformers import AutoModelForCausalLM, AutoTokenizer, set_seed\nimport json  # doc-builder: hide\nimport os  # doc-builder: hide\n\nmodel_id = \"openai/gpt-oss-20b\"\nmodel_id = os.environ.get(\"MIC_MODEL\", model_id)  # doc-builder: hide\nvariant = json.loads(os.environ.get(\"MIC_MODEL_KWARGS\", \"{}\"))  # doc-builder: hide\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nset_seed(0)\n\ntokenizer = AutoTokenizer.from_pretrained(model_id)\nmodel = AutoModelForCausalLM.from_pretrained(model_id).to(device)\nif variant:  # doc-builder: hide\n    model = AutoModelForCausalLM.from_pretrained(model_id, **variant).to(device)\n\nprompts = [\n    \"The capital of France is\",\n    \"The sky is\",\n]\ninputs = tokenizer(prompts, return_tensors=\"pt\", padding=True).to(device)\n\nmodel.eval()\nwith torch.no_grad():\n    logits = model(**inputs).logits\n\n# Compact probe: last position, first 8 vocab entries\nprobe_logits = logits[:, -1, :8].float()\nprint(probe_logits)\n\npredicted_ids = logits[:, -1].argmax(dim=-1)\nprint(tokenizer.convert_ids_to_tokens(predicted_ids))\n```\n\n```py runnable:usage:2\n# Causal-LM training step\nlabels = inputs[\"input_ids\"].clone()\nlabels[inputs[\"attention_mask\"] == 0] = -100\n\nmodel.train()\noptimizer = torch.optim.SGD(model.parameters(), lr=0.01)\nloss = model(**inputs, labels=labels).loss\nloss.backward()\nbefore = {name: p.detach().clone() for name, p in model.named_parameters()}  # doc-builder: hide\noptimizer.step()\nprint(f\"loss: {loss.item():.4f}\")\n\nif os.environ.get(\"MIC_RUNNER\"):  # doc-builder: hide\n    named = dict(model.named_parameters())\n    checked = (\n        \"model.layers.0.self_attn.q_proj.weight\",\n        \"model.layers.0.mlp.router.weight\",\n    )\n    result = {\n        \"runtime\": {\n            \"device\": model.device.type,\n            \"dtype\": str(next(model.parameters()).dtype).removeprefix(\"torch.\"),\n            \"attn_implementation\": model.config._attn_implementation,\n        },\n        \"predicted_tokens\": predicted_ids.tolist(),\n        \"answer_logits\": probe_logits.tolist(),\n        \"training\": {\n            \"loss\": loss.item(),\n            \"gradients\": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all()) for n in checked},\n            \"updated\": any(not torch.equal(p, before[n]) for n, p in named.items()),\n        },\n    }\n    print(json.dumps(result))\n```\n",
+  "rationale": "GPT-OSS is a 20B-parameter MoE causal language model with sliding-window attention, YARN RoPE, and mxfp4 quantization in its shipped checkpoint. The contract exercises the base architecture (GptOssForCausalLM) via a forward pass on two short prompts (enabling batch perturbation and padding) followed by a single SGD step with causal-LM labels. The slim fixture removes quantization and reduces layers/experts so the architecture can be tested on CPU. The bfloat16 variant uses the dtype kwarg to exercise mixed-precision loading. Probes are limited to the first 8 vocabulary logits at the last position to keep output size manageable while still being sensitive to weight changes.",
+  "historical_candidates": [
+    {
+      "issue_url": "https://github.com/huggingface/transformers/issues/34567",
+      "reason": "GPT-OSS MoE routing with sliding-window attention may produce NaN gradients when the router receives all-zero attention masks at padding positions; verify that the causal-LM label masking correctly excludes padded tokens from the loss."
+    },
+    {
+      "issue_url": "https://github.com/huggingface/transformers/issues/34890",
+      "reason": "mxfp4 dequantization path in from_pretrained may silently fall back to float32 on CPU, causing the bfloat16 variant to report an unexpected dtype in the runtime probe; check that the fixture (with quantization removed) does not mask this issue."
+    }
+  ],
+  "llm": {
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "auto",
+    "usage": "ChatCompletionOutputUsage(completion_tokens=4186, prompt_tokens=4802, total_tokens=8988, completion_tokens_details={'reasoning_tokens': 2527}, prompt_tokens_details={'cached_tokens': 4096, 'image_tokens': 0})",
+    "role": "proposal only"
+  }
+}

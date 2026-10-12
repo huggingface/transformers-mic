@@ -1,7 +1,7 @@
 """Publish the locally built fixtures to the Hub and pin their revisions in the fleet lock.
 
     python example/publish_fixtures.py                      # every fixture whose local files match its pin
-    python example/publish_fixtures.py --fixture proto-whisper-tiny-slim
+    python example/publish_fixtures.py --fixture mic-whisper-tiny-slim
 
 A fixture is published only if its local files match the file hashes the fleet
 lock pins (the bytes its baselines were recorded with). The whole folder is

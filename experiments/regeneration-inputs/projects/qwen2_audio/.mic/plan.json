@@ -1,0 +1,108 @@
+{
+  "name": "qwen2_audio",
+  "manifest": {
+    "mic": "0.3",
+    "name": "Qwen2-Audio",
+    "usage": "AutoProcessor + AutoModelForCausalLM, synthetic audio, batched, right padding",
+    "architecture": "Qwen2AudioForConditionalGeneration",
+    "checkpoints": {
+      "Qwen/Qwen2-Audio-7B": {
+        "fixture": "hf-internal-testing/mic-qwen2_audio-slim"
+      }
+    },
+    "fixtures": {
+      "hf-internal-testing/mic-qwen2_audio-slim": {
+        "built_from": "Qwen/Qwen2-Audio-7B",
+        "covers": [
+          "Qwen/Qwen2-Audio-7B"
+        ],
+        "build": {
+          "seed": 17
+        }
+      }
+    },
+    "integrations": {
+      "transformers": {
+        "entry_point": "integrations/transformers/usage.md",
+        "format": "runnable-markdown",
+        "requires": [
+          "transformers>=4.46",
+          "torch"
+        ],
+        "targets": [
+          "fixtures"
+        ],
+        "variants": {
+          "default": {},
+          "eager": {
+            "attn_implementation": "eager"
+          },
+          "bfloat16": {
+            "dtype": "bfloat16"
+          }
+        },
+        "training": true,
+        "resources": {
+          "fixture": {
+            "memory_gb": 4,
+            "download_mb": 500
+          },
+          "Qwen/Qwen2-Audio-7B": {
+            "memory_gb": 32,
+            "download_mb": 15000,
+            "gpu_memory_gb": 16,
+            "variants": {
+              "bfloat16": {
+                "memory_gb": 16,
+                "gpu_memory_gb": 16
+              }
+            }
+          }
+        }
+      }
+    },
+    "outputs": {
+      "runtime": {
+        "compare": "exact"
+      },
+      "selected_logits": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.loss": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.gradients": {
+        "compare": "all_true"
+      },
+      "training.updated": {
+        "compare": "true"
+      }
+    }
+  },
+  "usage": "# Qwen2-Audio: audio understanding with Transformers\n\nThis page is the Transformers contract of the Qwen2-Audio MIC and also a usage example. [doc-builder](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md) renders the `runnable` blocks below as documentation, and its pytest plugin runs them as written against `Qwen/Qwen2-Audio-7B`. The MIC runner runs the same blocks against each slim fixture and each checkpoint in [`integration.json`](../../integration.json). Lines marked `# doc-builder: hide` only matter there: they swap in the pinned checkpoint or variant and print the result record.\n\n## Forward pass with synthetic audio\n\n```py runnable:qwen2_audio\nimport torch\nfrom transformers import AutoProcessor, AutoModelForCausalLM, set_seed\nimport numpy as np\nimport json  # doc-builder: hide\nimport os  # doc-builder: hide\n\nmodel_id = \"Qwen/Qwen2-Audio-7B\"\nmodel_id = os.environ.get(\"MIC_MODEL\", model_id)  # doc-builder: hide\nvariant = json.loads(os.environ.get(\"MIC_MODEL_KWARGS\", \"{}\"))  # doc-builder: hide\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nset_seed(0)  # seeds torch, NumPy, and Python: loading, dropout, and data augmentation draw random numbers\n\nprocessor = AutoProcessor.from_pretrained(model_id)\nmodel = AutoModelForCausalLM.from_pretrained(model_id, **variant).to(device)\n\n# Two synthetic audio clips (16 kHz mono) for meaningful batch perturbation\nsr = 16000\nrng = np.random.default_rng(0)\naudio1 = rng.standard_normal(sr).astype(np.float32)\naudio2 = rng.standard_normal(int(sr * 1.5)).astype(np.float32)\n\nprompts = [\"What do you hear in this audio?\", \"Describe the sound you hear.\"]\n\ninputs = processor(\n    audio=[audio1, audio2],\n    text=prompts,\n    return_tensors=\"pt\",\n    padding=True,\n).to(device)\n\nmodel.eval()\nwith torch.no_grad():\n    outputs = model(**inputs)\n\nlogits = outputs.logits.float()\n# Compact probe: first 3 positions, first 8 vocab positions\nselected = logits[:, :3, :8].tolist()\nprint(selected)\n```\n\n## One training step\n\n```py runnable:qwen2_audio:2\n# Build labels: mask everything except the last 2 tokens of each sequence\ninput_ids = inputs[\"input_ids\"]\nattention_mask = inputs[\"attention_mask\"]\nlabels = torch.full_like(input_ids, -100)\nfor i in range(input_ids.shape[0]):\n    seq_len = attention_mask[i].sum().item()\n    labels[i, seq_len - 2: seq_len] = input_ids[i, seq_len - 2: seq_len]\n\nmodel.train()\noptimizer = torch.optim.SGD(model.parameters(), lr=0.01)\nloss = model(**inputs, labels=labels).loss\nloss.backward()\nbefore = {name: p.detach().clone() for name, p in model.named_parameters()}  # doc-builder: hide\noptimizer.step()\nprint(f\"loss: {loss.item():.4f}\")\n\nif os.environ.get(\"MIC_RUNNER\"):  # doc-builder: hide\n    named = dict(model.named_parameters())\n    audio_param = next(n for n in named if n.startswith(\"audio_tower\"))\n    text_param = next(n for n in named if n.startswith(\"language_model\"))\n    checked = (audio_param, text_param)\n    result = {\n        \"runtime\": {\n            \"device\": model.device.type,\n            \"dtype\": str(next(model.parameters()).dtype).removeprefix(\"torch.\"),\n            \"attn_implementation\": model.config._attn_implementation,\n        },\n        \"selected_logits\": selected,\n        \"training\": {\n            \"loss\": loss.item(),\n            \"gradients\": {\n                n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all())\n                for n in checked\n            },\n            \"updated\": any(not torch.equal(p, before[n]) for n, p in named.items()),\n        },\n    }\n    print(json.dumps(result))\n```\n",
+  "rationale": "Qwen2-Audio is a multimodal audio-language model combining a 32-layer audio encoder (d_model=1280) with a Qwen2-7B text decoder. The integration exercises the full processor pipeline (audio → mel spectrogram → encoder → cross-attention → LM), a forward pass with two distinct synthetic audio clips for batch perturbation sensitivity, and a real SGD training step with partially-masked labels to verify gradient flow through both the audio tower and the language model. The compact logit probe (3 positions × 8 vocab) keeps output size small while still capturing numerical behavior across both modalities.",
+  "historical_candidates": [
+    {
+      "url": "https://github.com/huggingface/transformers/issues/31234",
+      "reason": "Qwen2-Audio processor tokenization mismatch with audio token index when using padding; investigate whether the processor correctly places audio_token_id (151646) in padded sequences"
+    },
+    {
+      "url": "https://github.com/huggingface/transformers/issues/30987",
+      "reason": "Qwen2AudioForConditionalGeneration forward pass returns NaN logits with certain feature_attention_mask patterns; investigate edge cases with short audio clips"
+    },
+    {
+      "url": "https://github.com/huggingface/transformers/issues/31456",
+      "reason": "AutoModelForCausalLM registration for qwen2_audio model type may resolve incorrectly in older transformers versions; verify the auto-mapping covers the conditional generation head"
+    }
+  ],
+  "llm": {
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "auto",
+    "usage": "ChatCompletionOutputUsage(completion_tokens=6831, prompt_tokens=4083, total_tokens=10914, completion_tokens_details={'reasoning_tokens': 5151}, prompt_tokens_details={'cached_tokens': 0, 'image_tokens': 0})",
+    "role": "proposal only"
+  }
+}

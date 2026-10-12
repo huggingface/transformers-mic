@@ -1,0 +1,10 @@
+{
+  "model": "cartesia/azzurra-voice",
+  "contract": "csm",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": null,
+  "validations": {}
+}

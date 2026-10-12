@@ -1,0 +1,87 @@
+{
+  "mic": "0.3",
+  "name": "ModernBERT fill-mask",
+  "usage": "AutoTokenizer + AutoModelForMaskedLM, batched, right padding",
+  "architecture": "ModernBertForMaskedLM",
+  "checkpoints": {
+    "answerdotai/ModernBERT-base": {
+      "fixture": "hf-internal-testing/mic-modernbert-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/mic-modernbert-slim": {
+      "built_from": "answerdotai/ModernBERT-base",
+      "covers": [
+        "answerdotai/ModernBERT-base"
+      ],
+      "build": {
+        "seed": 17
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=5",
+        "torch"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 1,
+          "download_mb": 50
+        },
+        "answerdotai/ModernBERT-base": {
+          "memory_gb": 2,
+          "download_mb": 620,
+          "variants": {
+            "bfloat16": {
+              "memory_gb": 1
+            }
+          }
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "predicted_tokens": {
+      "compare": "exact"
+    },
+    "predicted_text": {
+      "compare": "exact"
+    },
+    "answer_logits": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

@@ -47,7 +47,7 @@ Transformers separates [PR CI](https://github.com/huggingface/transformers/blob/
 
 ## One contract with separate targets and expectations
 
-The [SmolLM contract](../example/hub/SmolLM-integration/integration.json) covers three checkpoints with two fixtures: `proto-SmolLM-slim` for the shared 135M/360M path, `proto-SmolLM-1.7B-slim` for 1.7B's distinct config and tokenizer. Each target, fixture or checkpoint, is pinned independently and has its own baselines per platform and variant, in its source's dtype; a fixture pass marks no checkpoint as passing. A fixture change moves pin and baseline together.
+The [SmolLM contract](../example/hub/SmolLM-integration/integration.json) covers three checkpoints with two fixtures: `mic-SmolLM-slim` for the shared 135M/360M path, `mic-SmolLM-1.7B-slim` for 1.7B's distinct config and tokenizer. Each target, fixture or checkpoint, is pinned independently and has its own baselines per platform and variant, in its source's dtype; a fixture pass marks no checkpoint as passing. A fixture change moves pin and baseline together.
 
 ## What each result means
 

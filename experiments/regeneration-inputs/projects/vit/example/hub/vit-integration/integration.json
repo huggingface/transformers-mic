@@ -1,0 +1,79 @@
+{
+  "mic": "0.3",
+  "name": "ViT image classification",
+  "usage": "AutoImageProcessor + AutoModelForImageClassification, batched synthetic images",
+  "architecture": "ViTForImageClassification",
+  "checkpoints": {
+    "google/vit-base-patch16-224": {
+      "fixture": "hf-internal-testing/mic-vit-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/mic-vit-slim": {
+      "built_from": "google/vit-base-patch16-224",
+      "covers": [
+        "google/vit-base-patch16-224"
+      ],
+      "build": {
+        "seed": 17
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=5",
+        "torch"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 2,
+          "download_mb": 50
+        },
+        "google/vit-base-patch16-224": {
+          "memory_gb": 4,
+          "download_mb": 340
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "top5_labels": {
+      "compare": "exact"
+    },
+    "top5_probs": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

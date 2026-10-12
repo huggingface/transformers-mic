@@ -1,0 +1,104 @@
+{
+  "name": "speech_t5",
+  "manifest": {
+    "mic": "0.3",
+    "name": "SpeechT5-ASR",
+    "usage": "AutoProcessor + AutoModelForSpeechSeq2Seq, batched synthetic audio, greedy decode, one SGD step",
+    "architecture": "SpeechT5ForSpeechToText",
+    "checkpoints": {
+      "microsoft/speecht5_asr": {
+        "fixture": "hf-internal-testing/mic-speech_t5-slim"
+      }
+    },
+    "fixtures": {
+      "hf-internal-testing/mic-speech_t5-slim": {
+        "built_from": "microsoft/speecht5_asr",
+        "covers": [
+          "microsoft/speecht5_asr"
+        ],
+        "build": {
+          "seed": 17
+        }
+      }
+    },
+    "integrations": {
+      "transformers": {
+        "entry_point": "integrations/transformers/usage.md",
+        "format": "runnable-markdown",
+        "requires": [
+          "transformers>=4.30",
+          "torch",
+          "numpy"
+        ],
+        "targets": [
+          "fixtures"
+        ],
+        "variants": {
+          "default": {},
+          "eager": {
+            "attn_implementation": "eager"
+          },
+          "bfloat16": {
+            "dtype": "bfloat16"
+          }
+        },
+        "training": true,
+        "resources": {
+          "fixture": {
+            "memory_gb": 2,
+            "download_mb": 50
+          },
+          "microsoft/speecht5_asr": {
+            "memory_gb": 4,
+            "download_mb": 1100
+          }
+        }
+      }
+    },
+    "outputs": {
+      "runtime": {
+        "compare": "exact"
+      },
+      "predicted_tokens": {
+        "compare": "exact"
+      },
+      "predicted_text": {
+        "compare": "exact"
+      },
+      "selected_logits": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.loss": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.gradients": {
+        "compare": "all_true"
+      },
+      "training.updated": {
+        "compare": "true"
+      }
+    }
+  },
+  "usage": "# SpeechT5 ASR: speech-to-text with Transformers\n\nThis page is the Transformers contract of the SpeechT5 ASR MIC and also a usage example. [doc-builder](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md) renders the `runnable` blocks below as documentation, and its pytest plugin runs them as written against `microsoft/speecht5_asr`. The MIC runner runs the same blocks against each slim fixture and each checkpoint in [`integration.json`](../../integration.json). Lines marked `# doc-builder: hide` only matter there: they swap in the pinned checkpoint or variant and print the result record.\n\n## Inference: speech to text\n\n```py runnable:speech_asr\nimport torch\nfrom transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, set_seed\nimport json  # doc-builder: hide\nimport os  # doc-builder: hide\nimport numpy as np\n\nmodel_id = \"microsoft/speecht5_asr\"\nmodel_id = os.environ.get(\"MIC_MODEL\", model_id)  # doc-builder: hide\nvariant = json.loads(os.environ.get(\"MIC_MODEL_KWARGS\", \"{}\"))  # doc-builder: hide\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nset_seed(0)\n\nprocessor = AutoProcessor.from_pretrained(model_id)\nmodel = AutoModelForSpeechSeq2Seq.from_pretrained(model_id, **variant).to(device)\nmodel.eval()\n\n# Two synthetic audio clips of different lengths (1 s and 2 s at 16 kHz)\nsr = 16000\naudio1 = np.random.randn(sr).astype(np.float32)\naudio2 = np.random.randn(sr * 2).astype(np.float32)\n\ninputs = processor([audio1, audio2], sampling_rate=sr, return_tensors=\"pt\", padding=True).to(device)\n\nwith torch.no_grad():\n    outputs = model(**inputs)\nlogits = outputs.logits\n\n# Compact probe: first 4 positions, first 5 vocab entries\nselected_logits = logits[:, :4, :5].float()\n\n# Greedy decode\ngenerated_ids = model.generate(**inputs, max_new_tokens=10)\npredicted_tokens = generated_ids.tolist()\npredicted_text = processor.batch_decode(generated_ids, skip_special_tokens=True)\n\nprint(f\"Predicted: {predicted_text}\")\nprint(f\"Selected logits shape: {selected_logits.shape}\")\n```\n\n## One training step\n\n```py runnable:speech_asr:2\ntarget_texts = [\"hello world\", \"good morning\"]\nlabels = processor.tokenizer(target_texts, return_tensors=\"pt\", padding=True).input_ids.to(device)\n\nmodel.train()\noptimizer = torch.optim.SGD(model.parameters(), lr=0.01)\nloss = model(**inputs, labels=labels).loss\nloss.backward()\nbefore = {name: p.detach().clone() for name, p in model.named_parameters()}  # doc-builder: hide\noptimizer.step()\nprint(f\"loss: {loss.item():.4f}\")\n\nif os.environ.get(\"MIC_RUNNER\"):  # doc-builder: hide\n    named = dict(model.named_parameters())\n    checked = (\"model.encoder.layers.0.self_attn.linear_q.weight\", \"model.decoder.layers.0.self_attn.linear_q.weight\")\n    result = {\n        \"runtime\": {\n            \"device\": next(model.parameters()).device.type,\n            \"dtype\": str(next(model.parameters()).dtype).removeprefix(\"torch.\"),\n            \"attn_implementation\": model.config._attn_implementation,\n        },\n        \"predicted_tokens\": predicted_tokens,\n        \"predicted_text\": predicted_text,\n        \"selected_logits\": selected_logits.tolist(),\n        \"training\": {\n            \"loss\": loss.item(),\n            \"gradients\": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all()) for n in checked},\n            \"updated\": any(not torch.equal(p, before[n]) for n, p in named.items()),\n        },\n    }\n    print(json.dumps(result))\n```\n",
+  "rationale": "SpeechT5 ASR is an encoder-decoder speech-to-text model. The contract exercises the full inference path (audio feature extraction via the processor, encoder forward, decoder greedy generation) and a single SGD training step with explicit target labels. Two synthetic audio clips of different lengths (1 s and 2 s) ensure meaningful padding and batch perturbation. Compact logits probes (first 4 positions x first 5 vocab entries) keep the output small while still capturing numerical sensitivity. Gradient checks target the first encoder and decoder self-attention query projections to verify that backpropagation flows through both sub-networks. The bfloat16 variant uses the dtype kwarg as required by the MIC 0.3 spec.",
+  "historical_candidates": [
+    {
+      "url": "https://github.com/huggingface/transformers/issues/24891",
+      "reason": "SpeechT5 processor sampling_rate handling changed across versions; verify that the fixture processor accepts the sampling_rate kwarg identically to the full checkpoint."
+    },
+    {
+      "url": "https://github.com/huggingface/transformers/issues/25632",
+      "reason": "attn_implementation parameter was added post-4.36; confirm the eager variant is a no-op or properly wired for SpeechT5 without raising."
+    }
+  ],
+  "llm": {
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "auto",
+    "usage": "ChatCompletionOutputUsage(completion_tokens=7542, prompt_tokens=5275, total_tokens=12817, completion_tokens_details={'reasoning_tokens': 5994}, prompt_tokens_details={'cached_tokens': 0, 'image_tokens': 0})",
+    "role": "proposal only"
+  }
+}

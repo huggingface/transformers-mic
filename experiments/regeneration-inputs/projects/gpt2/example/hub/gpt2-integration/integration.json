@@ -1,0 +1,82 @@
+{
+  "mic": "0.3",
+  "name": "GPT-2 next-token",
+  "usage": "AutoTokenizer + AutoModelForCausalLM, batched, right padding",
+  "architecture": "GPT2LMHeadModel",
+  "checkpoints": {
+    "openai-community/gpt2": {
+      "fixture": "hf-internal-testing/mic-gpt2-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/mic-gpt2-slim": {
+      "built_from": "openai-community/gpt2",
+      "covers": [
+        "openai-community/gpt2"
+      ],
+      "build": {
+        "seed": 17
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=5",
+        "torch"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 1,
+          "download_mb": 20
+        },
+        "openai-community/gpt2": {
+          "memory_gb": 5,
+          "download_mb": 548
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "predicted_tokens": {
+      "compare": "exact"
+    },
+    "predicted_text": {
+      "compare": "exact"
+    },
+    "next_token_logits": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

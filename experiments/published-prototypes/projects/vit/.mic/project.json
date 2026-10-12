@@ -1,0 +1,182 @@
+{
+  "model": "google/vit-base-patch16-224",
+  "contract": "vit",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": {
+    "variant": "bfloat16",
+    "records": [
+      {
+        "contract": "hf-internal-testing/mic-vit-integration",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "bfloat16",
+        "target": "mic-vit-slim",
+        "kind": "fixture",
+        "revision": "unpublished",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3"
+        },
+        "seconds": 4.49,
+        "platform": "cuda",
+        "baseline": "transformers/tests/contracts/expectations/vit/cuda/mic-vit-slim.bfloat16.json",
+        "status": "pass",
+        "failures": []
+      }
+    ],
+    "lock_sha256": "6b833212c4001c7e20aef39b4223c50bb7154c8325cc6f0f20b5b71b2230c15c",
+    "manifest_sha256": "fdde99195d30f68683cad8c409855e5f048d680126f328d5f0da943831826e99",
+    "usage_sha256": "2c31ffe3600d69e1803b008f42e610d37e9d15471d723eb8046b7eba6b19a4ff"
+  },
+  "validations": {
+    "default": {
+      "variant": "default",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-vit-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "default",
+          "target": "mic-vit-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 4.29,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/vit/cuda/mic-vit-slim.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "6b833212c4001c7e20aef39b4223c50bb7154c8325cc6f0f20b5b71b2230c15c",
+      "manifest_sha256": "fdde99195d30f68683cad8c409855e5f048d680126f328d5f0da943831826e99",
+      "usage_sha256": "2c31ffe3600d69e1803b008f42e610d37e9d15471d723eb8046b7eba6b19a4ff",
+      "fingerprint": "6b14a458801518666ec2b3f5a2891ca5bfaa24098ace0f1d90c2049774202398"
+    },
+    "eager": {
+      "variant": "eager",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-vit-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "eager",
+          "target": "mic-vit-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 4.48,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/vit/cuda/mic-vit-slim.eager.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "6b833212c4001c7e20aef39b4223c50bb7154c8325cc6f0f20b5b71b2230c15c",
+      "manifest_sha256": "fdde99195d30f68683cad8c409855e5f048d680126f328d5f0da943831826e99",
+      "usage_sha256": "2c31ffe3600d69e1803b008f42e610d37e9d15471d723eb8046b7eba6b19a4ff",
+      "fingerprint": "6b14a458801518666ec2b3f5a2891ca5bfaa24098ace0f1d90c2049774202398"
+    },
+    "bfloat16": {
+      "variant": "bfloat16",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-vit-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "bfloat16",
+          "target": "mic-vit-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 4.49,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/vit/cuda/mic-vit-slim.bfloat16.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "6b833212c4001c7e20aef39b4223c50bb7154c8325cc6f0f20b5b71b2230c15c",
+      "manifest_sha256": "fdde99195d30f68683cad8c409855e5f048d680126f328d5f0da943831826e99",
+      "usage_sha256": "2c31ffe3600d69e1803b008f42e610d37e9d15471d723eb8046b7eba6b19a4ff",
+      "fingerprint": "6b14a458801518666ec2b3f5a2891ca5bfaa24098ace0f1d90c2049774202398"
+    }
+  },
+  "weight_decision": {
+    "requested": "auto",
+    "weights": "overfit",
+    "accepted": true,
+    "reused": false,
+    "reason": "Random failed the sensitivity gate; overfit passed the gate after bounded training.",
+    "readability_requested": false,
+    "historical_detection": "unverified until replayed; a gate pass is not a regression catch"
+  }
+}

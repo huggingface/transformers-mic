@@ -1,0 +1,96 @@
+{
+  "name": "qwen2_5_vl",
+  "manifest": {
+    "mic": "0.3",
+    "name": "Qwen2.5-VL image+text",
+    "usage": "AutoProcessor + Qwen2_5_VLForConditionalGeneration, synthetic images, causal LM training step",
+    "architecture": "Qwen2_5_VLForConditionalGeneration",
+    "checkpoints": {
+      "Qwen/Qwen2.5-VL-3B-Instruct": {
+        "fixture": "hf-internal-testing/mic-qwen2_5_vl-slim"
+      }
+    },
+    "fixtures": {
+      "hf-internal-testing/mic-qwen2_5_vl-slim": {
+        "built_from": "Qwen/Qwen2.5-VL-3B-Instruct",
+        "covers": [
+          "Qwen/Qwen2.5-VL-3B-Instruct"
+        ],
+        "build": {
+          "seed": 17,
+          "model_class": "Qwen2_5_VLForConditionalGeneration"
+        }
+      }
+    },
+    "integrations": {
+      "transformers": {
+        "entry_point": "integrations/transformers/usage.md",
+        "format": "runnable-markdown",
+        "requires": [
+          "transformers>=4.46",
+          "torch",
+          "Pillow",
+          "numpy"
+        ],
+        "targets": [
+          "fixtures"
+        ],
+        "variants": {
+          "default": {},
+          "eager": {
+            "attn_implementation": "eager"
+          },
+          "bfloat16": {
+            "dtype": "bfloat16"
+          }
+        },
+        "training": true,
+        "resources": {
+          "fixture": {
+            "memory_gb": 4,
+            "download_mb": 50
+          },
+          "Qwen/Qwen2.5-VL-3B-Instruct": {
+            "memory_gb": 12,
+            "download_mb": 6500,
+            "variants": {
+              "bfloat16": {
+                "memory_gb": 8
+              }
+            }
+          }
+        }
+      }
+    },
+    "outputs": {
+      "runtime": {
+        "compare": "exact"
+      },
+      "inference.selected_logits": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.loss": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.gradients": {
+        "compare": "all_true"
+      },
+      "training.updated": {
+        "compare": "true"
+      }
+    }
+  },
+  "usage": "# Qwen2.5-VL: image + text with Transformers\n\nThis page is the Transformers contract of the Qwen2.5-VL MIC and also a usage example. [doc-builder](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md) renders the `runnable` blocks below as documentation, and its pytest plugin runs them as written against `Qwen/Qwen2.5-VL-3B-Instruct`. The MIC runner runs the same blocks against each slim fixture and each checkpoint in [`integration.json`](../../integration.json). Lines marked `# doc-builder: hide` only matter there: they swap in the pinned checkpoint or variant and print the result record.\n\n## Inference with synthetic images\n\n```py runnable:usage\nimport torch\nfrom transformers import Qwen2_5_VLForConditionalGeneration, AutoProcessor, set_seed\nfrom PIL import Image\nimport numpy as np\nimport json  # doc-builder: hide\nimport os  # doc-builder: hide\n\nmodel_id = \"Qwen/Qwen2.5-VL-3B-Instruct\"\nmodel_id = os.environ.get(\"MIC_MODEL\", model_id)  # doc-builder: hide\nvariant = json.loads(os.environ.get(\"MIC_MODEL_KWARGS\", \"{}\"))  # doc-builder: hide\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nset_seed(0)\n\nprocessor = AutoProcessor.from_pretrained(model_id, min_pixels=28*28, max_pixels=112*112)\nmodel = Qwen2_5_VLForConditionalGeneration.from_pretrained(model_id).to(device)\nif variant:  # doc-builder: hide\n    model = Qwen2_5_VLForConditionalGeneration.from_pretrained(model_id, **variant).to(device)\n\n# Two distinct synthetic images\nimg1 = Image.fromarray(np.random.randint(0, 255, (56, 56, 3), dtype=np.uint8))\nimg2 = Image.fromarray(np.random.randint(0, 255, (56, 56, 3), dtype=np.uint8))\n\nmessages1 = [{\"role\": \"user\", \"content\": [{\"type\": \"image\", \"image\": img1}, {\"type\": \"text\", \"text\": \"What color is this?\"}]}]\nmessages2 = [{\"role\": \"user\", \"content\": [{\"type\": \"image\", \"image\": img2}, {\"type\": \"text\", \"text\": \"Describe this.\"}]}]\n\ntexts = [\n    processor.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True)\n    for msgs in [messages1, messages2]\n]\n\ninputs = processor(\n    text=texts,\n    images=[img1, img2],\n    padding=True,\n    return_tensors=\"pt\",\n).to(device)\n\nmodel.eval()\nwith torch.no_grad():\n    outputs = model(**inputs)\nlogits = outputs.logits\n\n# Compact probes: last 2 positions, first 5 token logits\nprobe_pos = range(-2, 0)\nprobe_tok = range(5)\nselected_logits = [logits[0, p, probe_tok].float().tolist() for p in probe_pos]\nprint(f\"selected_logits: {len(selected_logits)}x{len(probe_tok)}\")\nprint(f\"sample: {selected_logits[0][:3]}\")\n```\n\n## One training step\n\n```py runnable:usage:2\nlabels = inputs[\"input_ids\"].clone()\nif processor.tokenizer.pad_token_id is not None:\n    labels[labels == processor.tokenizer.pad_token_id] = -100\nlabels[:, 0] = -100\n\nmodel.train()\noptimizer = torch.optim.SGD(model.parameters(), lr=0.01)\nloss = model(**inputs, labels=labels).loss\nloss.backward()\nbefore = {name: p.detach().clone() for name, p in model.named_parameters()}  # doc-builder: hide\noptimizer.step()\nprint(f\"loss: {loss.item():.4f}\")\n\nif os.environ.get(\"MIC_RUNNER\"):  # doc-builder: hide\n    named = dict(model.named_parameters())\n    checked = (\"model.language_model.layers.0.self_attn.q_proj.weight\", \"model.language_model.layers.0.mlp.gate_proj.weight\")\n    result = {\n        \"runtime\": {\n            \"device\": model.device.type,\n            \"dtype\": str(next(model.parameters()).dtype).removeprefix(\"torch.\"),\n            \"attn_implementation\": model.config._attn_implementation,\n        },\n        \"inference\": {\n            \"selected_logits\": selected_logits,\n        },\n        \"training\": {\n            \"loss\": loss.item(),\n            \"gradients\": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all()) for n in checked},\n            \"updated\": any(not torch.equal(p, before[n]) for n, p in named.items()),\n        },\n    }\n    print(json.dumps(result))\n```\n",
+  "rationale": "Qwen2.5-VL is a vision-language model that processes images and text jointly. The integration uses AutoProcessor to handle image resizing, grid computation, and tokenization. Two distinct synthetic 56x56 images are used to ensure batch perturbation is meaningful. The processor is configured with small min_pixels/max_pixels to avoid excessive upscaling of the small test images. Inference is run in eval mode with compact logit probes (last 2 positions, first 5 tokens) to keep outputs small. A causal LM training step uses the standard labels approach (input_ids with -100 for padding and the first position). Gradient checks target the first language model attention and MLP layers, which are guaranteed to exist in any Qwen2-based architecture. The bfloat16 variant uses the dtype kwarg as specified.",
+  "historical_candidates": [],
+  "llm": {
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "auto",
+    "usage": "ChatCompletionOutputUsage(completion_tokens=8532, prompt_tokens=7357, total_tokens=15889, completion_tokens_details={'reasoning_tokens': 6783}, prompt_tokens_details={'cached_tokens': 0, 'image_tokens': 0})",
+    "role": "proposal only"
+  }
+}

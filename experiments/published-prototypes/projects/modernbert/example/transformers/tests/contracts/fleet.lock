@@ -1,0 +1,39 @@
+{
+  "framework": "transformers",
+  "environment": {
+    "python": "3.10",
+    "torch": "2.11.0",
+    "torchvision": "0.26.0",
+    "torchaudio": "2.11.0",
+    "tokenizers": "0.23.1",
+    "numpy": "1.26.4",
+    "pillow": "12.2.0",
+    "accelerate": "1.13.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.32.0",
+    "sentencepiece": "0.2.1",
+    "protobuf": "6.33.6",
+    "librosa": "0.11.0",
+    "soundfile": "0.13.1",
+    "scipy": "1.15.3"
+  },
+  "contracts": {
+    "modernbert": {
+      "integration": {
+        "repo": "hf-internal-testing/mic-modernbert-integration",
+        "revision": "1c0a5edbc36aaf0a2190cf1a3b297058b242c386",
+        "files_sha256": "7e8a72ed7d4f15231f9a5dd3b4a234f697c1f31d4bfbe13831bed814dc908b3a",
+        "path": "../../../hub/modernbert-integration"
+      },
+      "fixtures": {
+        "hf-internal-testing/mic-modernbert-slim": {
+          "revision": "4bd43e1d801756f8a231e6ec4bad85f5e46b9f63",
+          "files_sha256": "cd9316607f78870f9f6ec027cd6b848c1d4b87e852aafe80a719e68fa7e53d7b"
+        }
+      },
+      "checkpoints": {
+        "answerdotai/ModernBERT-base": "8949b909ec900327062f0ebf497f51aef5e6f0c8"
+      }
+    }
+  }
+}

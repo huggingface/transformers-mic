@@ -1,0 +1,93 @@
+{
+  "name": "table_transformer",
+  "manifest": {
+    "mic": "0.3",
+    "name": "Table Transformer Detection",
+    "usage": "AutoProcessor + AutoModelForObjectDetection, batched synthetic images, object detection with training step",
+    "architecture": "TableTransformerForObjectDetection",
+    "checkpoints": {
+      "microsoft/table-transformer-detection": {
+        "fixture": "hf-internal-testing/mic-table_transformer-slim"
+      }
+    },
+    "fixtures": {
+      "hf-internal-testing/mic-table_transformer-slim": {
+        "built_from": "microsoft/table-transformer-detection",
+        "covers": [
+          "microsoft/table-transformer-detection"
+        ],
+        "build": {
+          "seed": 17
+        }
+      }
+    },
+    "integrations": {
+      "transformers": {
+        "entry_point": "integrations/transformers/usage.md",
+        "format": "runnable-markdown",
+        "requires": [
+          "transformers>=5",
+          "torch"
+        ],
+        "targets": [
+          "fixtures"
+        ],
+        "variants": {
+          "default": {},
+          "eager": {
+            "attn_implementation": "eager"
+          },
+          "bfloat16": {
+            "dtype": "bfloat16"
+          }
+        },
+        "training": true,
+        "resources": {
+          "fixture": {
+            "memory_gb": 1,
+            "download_mb": 20
+          },
+          "microsoft/table-transformer-detection": {
+            "memory_gb": 2,
+            "download_mb": 150
+          }
+        }
+      }
+    },
+    "outputs": {
+      "runtime": {
+        "compare": "exact"
+      },
+      "inference_scores": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "inference_boxes": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.loss": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.gradients": {
+        "compare": "all_true"
+      },
+      "training.updated": {
+        "compare": "true"
+      }
+    }
+  },
+  "usage": "# Table Transformer Detection with Transformers\n\nThis page is the Transformers contract of the Table Transformer Detection MIC and also a usage example. [doc-builder](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md) renders the `runnable` blocks below as documentation, and its pytest plugin runs them as written against `microsoft/table-transformer-detection`. The MIC runner runs the same blocks against each slim fixture and each checkpoint in [`integration.json`](../../integration.json). Lines marked `# doc-builder: hide` only matter there: they swap in the pinned checkpoint or variant and print the result record.\n\n## Detect tables in synthetic images\n\n```py runnable:table_detection\nimport torch\nfrom transformers import AutoModelForObjectDetection, AutoProcessor, set_seed\nimport json  # doc-builder: hide\nimport os  # doc-builder: hide\nimport numpy as np\nfrom PIL import Image\n\nmodel_id = \"microsoft/table-transformer-detection\"\nmodel_id = os.environ.get(\"MIC_MODEL\", model_id)  # doc-builder: hide\nvariant = json.loads(os.environ.get(\"MIC_MODEL_KWARGS\", \"{}\"))  # doc-builder: hide\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nset_seed(0)\n\nprocessor = AutoProcessor.from_pretrained(model_id)\nmodel = AutoModelForObjectDetection.from_pretrained(model_id).to(device)\nif variant:  # doc-builder: hide\n    model = AutoModelForObjectDetection.from_pretrained(model_id, **variant).to(device)\n\n# Two distinct synthetic images\nnp.random.seed(0)\nimg1 = Image.fromarray(np.random.randint(0, 255, (224, 224, 3), dtype=np.uint8))\nimg2 = Image.fromarray(np.random.randint(0, 255, (224, 224, 3), dtype=np.uint8))\n\ninputs = processor(images=[img1, img2], return_tensors=\"pt\").to(device)\n\nmodel.eval()\nwith torch.no_grad():\n    outputs = model(**inputs)\n\n# Compact probes: top-3 scores and first 2 boxes for image 0\nscores = outputs.logits[0][:3].float()\nboxes = outputs.pred_boxes[0][:2].float()\nprint(f\"scores: {scores.tolist()}\")\nprint(f\"boxes: {boxes.tolist()}\")\n```\n\n## One training step\n\n```py runnable:table_detection:2\n# Training targets: one box per image\nlabels = [\n    {\"class_labels\": torch.tensor([0], device=device), \"boxes\": torch.tensor([[0.1, 0.1, 0.5, 0.5]], device=device)},\n    {\"class_labels\": torch.tensor([1], device=device), \"boxes\": torch.tensor([[0.2, 0.2, 0.6, 0.6]], device=device)},\n]\n\nmodel.train()\noptimizer = torch.optim.SGD(model.parameters(), lr=0.01)\nloss = model(pixel_values=inputs[\"pixel_values\"], labels=labels).loss\nloss.backward()\nbefore = {name: p.detach().clone() for name, p in model.named_parameters()}  # doc-builder: hide\noptimizer.step()\nprint(f\"loss: {loss.item():.4f}\")\n\nif os.environ.get(\"MIC_RUNNER\"):  # doc-builder: hide\n    named = dict(model.named_parameters())\n    checked = (\n        \"encoder.layer.0.attention.self.weight\",\n        \"decoder.layer.0.attention.self.weight\",\n    )\n    result = {\n        \"runtime\": {\n            \"device\": next(model.parameters()).device.type,\n            \"dtype\": str(next(model.parameters()).dtype).removeprefix(\"torch.\"),\n            \"attn_implementation\": model.config._attn_implementation,\n        },\n        \"inference_scores\": scores.tolist(),\n        \"inference_boxes\": boxes.tolist(),\n        \"training\": {\n            \"loss\": loss.item(),\n            \"gradients\": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all()) for n in checked},\n            \"updated\": any(not torch.equal(p, before[n]) for n, p in named.items()),\n        },\n    }\n    print(json.dumps(result))\n```\n",
+  "rationale": "TableTransformerForObjectDetection is a DETR-style detection model with a ResNet18 backbone and 6 encoder/decoder layers. The integration exercises the full detection pipeline: image processing via AutoProcessor, batched inference with eval mode, and a real SGD training step using the model's built-in Hungarian-matching loss. Two distinct synthetic 224x224 images ensure batch perturbation is meaningful. Compact probes (top-3 scores, first 2 boxes) keep outputs small while still capturing model behavior. The bfloat16 variant uses the dtype kwarg to exercise mixed-precision loading. Gradient checks target encoder and decoder self-attention weights to confirm backpropagation reaches both sub-networks.",
+  "historical_candidates": [],
+  "llm": {
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "auto",
+    "usage": "ChatCompletionOutputUsage(completion_tokens=1680, prompt_tokens=5773, total_tokens=7453, completion_tokens_details={'reasoning_tokens': 193}, prompt_tokens_details={'cached_tokens': 4096, 'image_tokens': 0})",
+    "role": "proposal only"
+  }
+}

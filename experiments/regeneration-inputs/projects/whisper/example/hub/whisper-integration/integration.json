@@ -1,0 +1,103 @@
+{
+  "mic": "0.3",
+  "name": "Whisper speech recognition",
+  "usage": "WhisperProcessor + WhisperForConditionalGeneration.generate, English transcription, batched",
+  "architecture": "WhisperForConditionalGeneration",
+  "checkpoints": {
+    "openai/whisper-tiny": {
+      "fixture": "hf-internal-testing/mic-whisper-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/mic-whisper-slim": {
+      "built_from": "openai/whisper-tiny",
+      "covers": [
+        "openai/whisper-tiny"
+      ],
+      "build": {
+        "seed": 17
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=5",
+        "torch"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 1,
+          "download_mb": 20
+        },
+        "openai/whisper-tiny": {
+          "memory_gb": 1,
+          "download_mb": 151
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "generated_tokens": {
+      "compare": "exact"
+    },
+    "generated_text": {
+      "compare": "exact"
+    },
+    "label_logprobs": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "timestamped_tokens": {
+      "compare": "exact"
+    },
+    "timestamped_text": {
+      "compare": "exact"
+    },
+    "feature_extractor_config_keys": {
+      "compare": "exact"
+    },
+    "max_length_tokens": {
+      "compare": "exact"
+    },
+    "assisted_tokens": {
+      "compare": "exact"
+    },
+    "longform_tokens": {
+      "compare": "exact"
+    },
+    "continued_longform_tokens": {
+      "compare": "exact"
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

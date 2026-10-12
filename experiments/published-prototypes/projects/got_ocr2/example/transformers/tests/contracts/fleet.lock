@@ -1,0 +1,39 @@
+{
+  "framework": "transformers",
+  "environment": {
+    "python": "3.10",
+    "torch": "2.11.0",
+    "torchvision": "0.26.0",
+    "torchaudio": "2.11.0",
+    "tokenizers": "0.23.1",
+    "numpy": "1.26.4",
+    "pillow": "12.2.0",
+    "accelerate": "1.13.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.32.0",
+    "sentencepiece": "0.2.1",
+    "protobuf": "6.33.6",
+    "librosa": "0.11.0",
+    "soundfile": "0.13.1",
+    "scipy": "1.15.3"
+  },
+  "contracts": {
+    "got_ocr2": {
+      "integration": {
+        "repo": "hf-internal-testing/mic-got_ocr2-integration",
+        "revision": "e5c722f255c8e4fe30ad6b80847aa9ae8e2d59ca",
+        "path": "../../../hub/got_ocr2-integration",
+        "files_sha256": "15ef6be0454f25158d91e01a8506ffd42acebf4a1eca16d1241deccd8219e7f2"
+      },
+      "fixtures": {
+        "hf-internal-testing/mic-got_ocr2-slim": {
+          "revision": "89a32bdbaf5e9b07b22400ef24e2c0e94a6cc050",
+          "files_sha256": "a53662ce54e807e7fb3305e64397b58f1000eb2ad04c0846c36207ea90d4c44d"
+        }
+      },
+      "checkpoints": {
+        "stepfun-ai/GOT-OCR-2.0-hf": "d3017ef2c2c1395888c8d635c5e0508bcb0ac78d"
+      }
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/38270509057",
+  "models": [
+    {
+      "model": "detr",
+      "random": {
+        "pass": false,
+        "accepted_insensitive": {},
+        "threshold": 0.001,
+        "deltas": {
+          "pixel_values:roll_batch": 0.10425928980112076,
+          "pixel_values:swap_channels": 0.0991537868976593,
+          "pixel_values:reverse": 0.121373251080513,
+          "pixel_values:halve": 1.0281801223754883e-06
+        },
+        "weakest": "pixel_values:halve",
+        "no_perturbation_defined": [
+          "pixel_mask"
+        ]
+      },
+      "overfit": {
+        "pass": false,
+        "accepted_insensitive": {},
+        "threshold": 0.001,
+        "deltas": {
+          "pixel_values:roll_batch": 1.537799835205078e-05,
+          "pixel_values:swap_channels": 1.9431114196777344e-05,
+          "pixel_values:reverse": 2.0503997802734375e-05,
+          "pixel_values:halve": 1.9073486328125e-06
+        },
+        "weakest": "pixel_values:halve",
+        "no_perturbation_defined": [
+          "pixel_mask"
+        ]
+      },
+      "conclusion": "Random preserves more of the required input sensitivity; positive amplitude scaling is explicitly exempted as normalization-invariant in the reviewed recipe. The original rejection is retained as evidence."
+    },
+    {
+      "model": "speech_t5",
+      "random": {
+        "pass": false,
+        "accepted_insensitive": {},
+        "threshold": 0.001,
+        "deltas": {
+          "input_values:roll_batch": 0.0037068724632263184,
+          "input_values:reverse": 0.009858012199401855,
+          "input_values:halve": 2.086162567138672e-07,
+          "attention_mask:all_ones": 0.007565826177597046
+        },
+        "weakest": "input_values:halve",
+        "no_perturbation_defined": []
+      },
+      "overfit": {
+        "pass": false,
+        "accepted_insensitive": {},
+        "threshold": 0.001,
+        "deltas": {
+          "input_values:roll_batch": 5.91278076171875e-05,
+          "input_values:reverse": 1.0967254638671875e-05,
+          "input_values:halve": 2.86102294921875e-06,
+          "attention_mask:all_ones": 12.971599578857422
+        },
+        "weakest": "input_values:halve",
+        "no_perturbation_defined": []
+      },
+      "conclusion": "Random preserves more of the required input sensitivity; positive amplitude scaling is explicitly exempted as normalization-invariant in the reviewed recipe. The original rejection is retained as evidence."
+    }
+  ]
+}

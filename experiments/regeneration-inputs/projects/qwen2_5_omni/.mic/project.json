@@ -1,0 +1,8 @@
+{
+  "model": "Qwen/Qwen2.5-Omni-7B",
+  "contract": "qwen2_5_omni",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false
+}

@@ -1,0 +1,39 @@
+{
+  "framework": "transformers",
+  "environment": {
+    "python": "3.10",
+    "torch": "2.11.0",
+    "torchvision": "0.26.0",
+    "torchaudio": "2.11.0",
+    "tokenizers": "0.23.1",
+    "numpy": "1.26.4",
+    "pillow": "12.2.0",
+    "accelerate": "1.13.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.32.0",
+    "sentencepiece": "0.2.1",
+    "protobuf": "6.33.6",
+    "librosa": "0.11.0",
+    "soundfile": "0.13.1",
+    "scipy": "1.15.3"
+  },
+  "contracts": {
+    "mistral3": {
+      "integration": {
+        "repo": "hf-internal-testing/mic-mistral3-integration",
+        "revision": "fff1507583e4df5bb65151122f8e3b5d1f372862",
+        "files_sha256": "4341d368495f77de639f7554e399a7174ace8ecb00ef0489d109f9866baaf7c9",
+        "path": "../../../hub/mistral3-integration"
+      },
+      "fixtures": {
+        "hf-internal-testing/mic-mistral3-slim": {
+          "revision": "5142c7df12a0ee40caabcf91c8c6bfda517ade06",
+          "files_sha256": "e1ff61844c87c8150ada71205f60c96b9aaf1782f951ea8377a0555446e6d41a"
+        }
+      },
+      "checkpoints": {
+        "mistralai/Mistral-Small-3.1-24B-Instruct-2503": "68faf511d618ef198fef186659617cfd2eb8e33a"
+      }
+    }
+  }
+}

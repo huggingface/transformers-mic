@@ -1,7 +1,7 @@
 """Build slim fixtures for the contracts in a fleet lock, with the same recipe for every model.
 
     python example/build_fixtures.py                                   # every fixture with a build recipe
-    python example/build_fixtures.py --fixture proto-whisper-tiny-slim
+    python example/build_fixtures.py --fixture mic-whisper-tiny-slim
     python example/build_fixtures.py --keys-only                       # check fixture keys, build nothing
 
 For each fixture in a contract's manifest that has a `build` recipe:
@@ -39,7 +39,7 @@ build.json records the key, the dtype, the gate results for random weights (and 
 overfit weights when training was needed), the training run, the health
 checks, the copied files, and every file's sha256. The fleet lock pins that
 hash map; the runner refuses fixtures whose files differ from it. Fixtures
-without a recipe (proto-SmolLM-1.7B-slim, built by an earlier script) are left
+without a recipe (mic-SmolLM-1.7B-slim, built by an earlier script) are left
 alone.
 """
 
@@ -88,7 +88,16 @@ def source_snapshot(repo, revision):
     """Config and processor files of a pinned checkpoint, without its weights."""
     try:
         ignore = [f"*{suffix}" for suffix in WEIGHTS] + run.WEIGHT_PATTERNS
-        return Path(snapshot_download(repo, revision=revision, ignore_patterns=ignore))
+        source = Path(snapshot_download(repo, revision=revision, ignore_patterns=ignore))
+        if json.loads((source / "config.json").read_text()).get("model_type") == "qwen2_5_omni":
+            # The full Omni loader needs this small speaker asset, even for text.
+            from huggingface_hub import HfApi, hf_hub_download
+            info = HfApi().model_info(repo, revision=revision, files_metadata=True)
+            asset = next(file for file in info.siblings if file.rfilename == "spk_dict.pt")
+            if asset.size is None or asset.size > 1024**2:
+                raise ValueError("Omni speaker asset exceeds the 1 MiB copy limit")
+            hf_hub_download(repo, "spk_dict.pt", revision=revision)
+        return source
     except Exception:
         cached = Path(HF_HUB_CACHE) / f"models--{repo.replace('/', '--')}" / "snapshots" / revision
         if (cached / "config.json").exists():
@@ -102,7 +111,7 @@ def copied_files(source):
         for f in source.iterdir()
         if f.is_file()
         and f.name not in NOT_COPIED
-        and not f.name.endswith(WEIGHTS)
+        and (not f.name.endswith(WEIGHTS) or f.name == "spk_dict.pt")
         and not f.name.endswith(".index.json")
     )
 
@@ -110,7 +119,18 @@ def copied_files(source):
 def model_class(source, recipe):
     if "model_class" in recipe:
         return getattr(transformers, recipe["model_class"])
-    return getattr(transformers, AutoConfig.from_pretrained(source).architectures[0])
+    config = AutoConfig.from_pretrained(source)
+    for name in config.architectures or []:
+        cls = getattr(transformers, name, None)
+        if cls is not None and isinstance(config, cls.config_class):
+            return cls
+    # Legacy cards can name removed classes (e.g. PI0Policy) or a head for a
+    # different config family (Idefics3 on SmolVLM). Resolve the actual config.
+    from sweep import primary_head
+    _, name = primary_head(config)
+    if not name:
+        raise ValueError(f"No supported model head for {config.model_type}")
+    return getattr(transformers, name)
 
 
 def shrunk_config(source, cls, recipe=None):
@@ -133,7 +153,13 @@ def shrunk_config(source, cls, recipe=None):
 def missing_parameters(cls, path):
     """Parameters a checkpoint's weights lack, in the model's own names, as loading reports them."""
     with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
-        model, info = cls.from_pretrained(path, output_loading_info=True)
+        if cls.__name__ == "Qwen2_5OmniForConditionalGeneration":
+            # Its override assumes a model return and cannot unpack loading info.
+            # Inspect tensor loading through the base method; the contract and
+            # health checks still exercise the full loader and speaker asset.
+            model, info = PreTrainedModel.from_pretrained.__func__(cls, path, output_loading_info=True)
+        else:
+            model, info = cls.from_pretrained(path, output_loading_info=True)
     del model
     return sorted(info["missing_keys"])
 
@@ -155,8 +181,18 @@ def fixture_key(source, cls, missing, recipe=None):
     return hashlib.sha256(blob.encode()).hexdigest(), config
 
 
+def tensor_tree(value, function):
+    if isinstance(value, torch.Tensor):
+        return function(value)
+    if isinstance(value, dict):
+        return {key: tensor_tree(item, function) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return type(value)(tensor_tree(item, function) for item in value)
+    return value
+
+
 def as_dtype(batch, dtype):
-    return {k: v.to(dtype) if isinstance(v, torch.Tensor) and v.is_floating_point() else v for k, v in batch.items()}
+    return tensor_tree(batch, lambda value: value.to(dtype) if value.is_floating_point() else value)
 
 
 def save(model, out, source, missing):
@@ -217,8 +253,9 @@ def contract_batch(entry, fixture_dir):
     training = [c for c in calls if c["training"]]
     chosen = training[0] if training else calls[0]
     # Fixtures are built on the CPU; the contract may have put its inputs on a GPU.
-    batch = {k: v.cpu() if isinstance(v, torch.Tensor) else v for k, v in chosen["kwargs"].items() if isinstance(v, (torch.Tensor, bool))}
-    return batch, {"call": "training step" if training else "first inference call", "inputs": sorted(batch)}
+    batch = {k: tensor_tree(v, lambda tensor: tensor.detach().cpu()) for k, v in chosen["kwargs"].items()
+             if isinstance(v, (torch.Tensor, bool, list, tuple, dict))}
+    return batch, {"call": "training step" if training else "first inference call", "inputs": sorted(batch), "class": chosen["class"]}
 
 
 def overfit(model, batch, max_steps, target_loss=0.05):
@@ -243,15 +280,27 @@ def overfit(model, batch, max_steps, target_loss=0.05):
     return {"seconds": round(time.perf_counter() - start, 2), "steps": step, "loss": loss.item(), "converged": stable == 2}
 
 
-def numeric_health(cls, folder, batch):
+def called_module(model, captured):
+    """Probe the module called by the contract, including composite heads."""
+    name = captured.get("class", type(model).__name__)
+    if type(model).__name__ == name:
+        return model
+    matches = [module for module in model.modules() if type(module).__name__ == name]
+    if len(matches) != 1:
+        raise ValueError(f"Captured {name}: expected one matching module, found {len(matches)}")
+    return matches[0]
+
+
+def numeric_health(cls, folder, batch, captured=None):
     """Reload the saved fixture per dtype; forward and backward must stay finite."""
     rows = {}
     for name in DTYPES:
         dtype = getattr(torch, name)
         row = {}
         try:
-            model = cls.from_pretrained(folder, dtype=dtype).train()
-            output = model(**as_dtype(batch, dtype))
+            model = called_module(cls.from_pretrained(folder, dtype=dtype), captured or {}).train()
+            with torch.autocast("cpu", dtype=dtype, enabled=dtype != torch.float32):
+                output = model(**as_dtype(batch, dtype))
             logits = logits_of(output)
             row["outputs_finite"] = all(bool(torch.isfinite(t).all()) for t in logits.values())
             if output.get("loss") is not None:
@@ -321,7 +370,7 @@ A {build['parameters'] / 1e6:.1f}M-parameter fixture for the [{contract} MIC](ht
 - **Saved in {build['dtype']}**, the dtype `{build['built_from']['repo']}` loads in by default.
 - **Finite in float32, bfloat16, and float16** (forward, loss, gradients).
 
-Built by [`build_fixtures.py`](https://github.com/huggingface/model-integration-contracts/blob/main/example/build_fixtures.py); [`build.json`](build.json) records the pinned sources, gate results, and file hashes. The source repository commits only `README.md` and `build.json`; rebuild the other files with `python example/build_fixtures.py --fixture {short(name)}`.
+Built by [`build_fixtures.py`](https://github.com/huggingface/transformers-mic/blob/main/example/build_fixtures.py); [`build.json`](build.json) records the pinned sources, gate results, and file hashes. The source repository commits only `README.md` and `build.json`; rebuild the other files with `python example/build_fixtures.py --fixture {short(name)}`.
 """
 
 
@@ -344,13 +393,14 @@ def environment():
     }
 
 
-def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, keep_random=False):
+def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, keep_random=False, inspect_checkpoint=None):
     recipe = fixture["build"]
     keys, missing = {}, {}
     for repo in fixture["covers"]:
         source = source_snapshot(repo, revisions[repo])
         cls = model_class(source, recipe)
-        missing[repo] = missing_parameters(cls, run.checkpoint_path(repo, revisions[repo]))
+        missing[repo] = (inspect_checkpoint(cls, source, repo, revisions[repo]) if inspect_checkpoint
+                         else missing_parameters(cls, run.checkpoint_path(repo, revisions[repo])))
         keys[repo] = fixture_key(source, cls, missing[repo], recipe)
     if len({key for key, _ in keys.values()}) != 1:
         raise SystemExit(f"{name}: covered checkpoints have different fixture keys: { {r: k[:12] for r, (k, _) in keys.items()} }")
@@ -372,14 +422,14 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
     entry = root / manifest["integrations"]["transformers"]["entry_point"]
     batch, captured = contract_batch(entry, out)
     accepted = recipe.get("accept_insensitive", {})
-    gate = {"random": sensitivity(model, as_dtype(batch, dtype), threshold, accepted)}
+    gate = {"random": sensitivity(called_module(model, captured), as_dtype(batch, dtype), threshold, accepted)}
     weights, training = "random", None
     if not keep_random and (not gate["random"]["pass"] or recipe.get("overfit")):
         torch.manual_seed(recipe["seed"])  # dropout and SpecAugment stay on while training
         model = model.float()  # trained in float32, saved in the source dtype
-        training = overfit(model, as_dtype(batch, torch.float32), recipe.get("max_steps", 500), recipe.get("target_loss", 0.05))
+        training = overfit(called_module(model, captured), as_dtype(batch, torch.float32), recipe.get("max_steps", 500), recipe.get("target_loss", 0.05))
         model = model.to(dtype)
-        gate["overfit"] = sensitivity(model, as_dtype(batch, dtype), threshold, accepted)
+        gate["overfit"] = sensitivity(called_module(model, captured), as_dtype(batch, dtype), threshold, accepted)
         if not training["converged"] or not gate["overfit"]["pass"]:
             raise SystemExit(f"{name}: random weights fail the gate and overfitting did not fix it: {training}, {gate}")
         weights = "overfit"
@@ -387,7 +437,7 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
     mirrored = missing_parameters(cls, out)
     if mirrored != lacks:
         raise SystemExit(f"{name}: fixture lacks {mirrored}, the real checkpoint lacks {lacks}")
-    health = numeric_health(cls, out, batch)
+    health = numeric_health(cls, out, batch, captured)
     if not all(row["finite"] for row in health.values()):
         raise SystemExit(f"{name}: numeric health check failed: {health}")
     build = {
@@ -402,6 +452,8 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
         "model_class": cls.__name__,
         "parameters": sum(p.numel() for p in model.parameters()),
         "missing_parameters": lacks,
+        "checkpoint_inspection": "parameter headers/indexes; bounded binary fallback" if inspect_checkpoint else "full checkpoint load",
+        "numeric_health_scope": "CPU float32/bfloat16/float16; autocast for low-precision losses",
         "captured": captured,
         "weights": weights,
         "gate": gate,

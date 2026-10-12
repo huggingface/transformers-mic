@@ -1,0 +1,186 @@
+{
+  "model": "stepfun-ai/GOT-OCR-2.0-hf",
+  "contract": "got_ocr2",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": {
+    "variant": "bfloat16",
+    "records": [
+      {
+        "contract": "hf-internal-testing/mic-got_ocr2-integration",
+        "contract_name": "got_ocr2",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "bfloat16",
+        "target": "mic-got_ocr2-slim",
+        "kind": "fixture",
+        "revision": "unpublished",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3"
+        },
+        "seconds": 5.82,
+        "platform": "cuda",
+        "baseline": "transformers/tests/contracts/expectations/got_ocr2/cuda/mic-got_ocr2-slim.bfloat16.json",
+        "status": "pass",
+        "failures": []
+      }
+    ],
+    "lock_sha256": "34b3c8e4eaeb9401b03202906d56a688978eb47095089da7a6b2103ce52fbab3",
+    "manifest_sha256": "26ddebfa09550fd455a7052a28b0aa9a3745cd3f3d67560c2b2cd04d4b601374",
+    "usage_sha256": "851b9676221f997a000f0b338d55997b8758096aa2a8f4777594190a5c33995e"
+  },
+  "validations": {
+    "default": {
+      "variant": "default",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-got_ocr2-integration",
+          "contract_name": "got_ocr2",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "default",
+          "target": "mic-got_ocr2-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 5.84,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/got_ocr2/cuda/mic-got_ocr2-slim.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "34b3c8e4eaeb9401b03202906d56a688978eb47095089da7a6b2103ce52fbab3",
+      "manifest_sha256": "26ddebfa09550fd455a7052a28b0aa9a3745cd3f3d67560c2b2cd04d4b601374",
+      "usage_sha256": "851b9676221f997a000f0b338d55997b8758096aa2a8f4777594190a5c33995e",
+      "fingerprint": "22d710c1d04ff65bc309c36202069f9e345f824bd6008b0cf502eff3c08d0b84"
+    },
+    "eager": {
+      "variant": "eager",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-got_ocr2-integration",
+          "contract_name": "got_ocr2",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "eager",
+          "target": "mic-got_ocr2-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 5.89,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/got_ocr2/cuda/mic-got_ocr2-slim.eager.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "34b3c8e4eaeb9401b03202906d56a688978eb47095089da7a6b2103ce52fbab3",
+      "manifest_sha256": "26ddebfa09550fd455a7052a28b0aa9a3745cd3f3d67560c2b2cd04d4b601374",
+      "usage_sha256": "851b9676221f997a000f0b338d55997b8758096aa2a8f4777594190a5c33995e",
+      "fingerprint": "22d710c1d04ff65bc309c36202069f9e345f824bd6008b0cf502eff3c08d0b84"
+    },
+    "bfloat16": {
+      "variant": "bfloat16",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-got_ocr2-integration",
+          "contract_name": "got_ocr2",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "bfloat16",
+          "target": "mic-got_ocr2-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 5.82,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/got_ocr2/cuda/mic-got_ocr2-slim.bfloat16.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "34b3c8e4eaeb9401b03202906d56a688978eb47095089da7a6b2103ce52fbab3",
+      "manifest_sha256": "26ddebfa09550fd455a7052a28b0aa9a3745cd3f3d67560c2b2cd04d4b601374",
+      "usage_sha256": "851b9676221f997a000f0b338d55997b8758096aa2a8f4777594190a5c33995e",
+      "fingerprint": "22d710c1d04ff65bc309c36202069f9e345f824bd6008b0cf502eff3c08d0b84"
+    }
+  },
+  "weight_decision": {
+    "requested": "auto",
+    "weights": "overfit",
+    "accepted": true,
+    "reused": false,
+    "reason": "Random failed the sensitivity gate; overfit passed the gate after bounded training.",
+    "readability_requested": false,
+    "historical_detection": "unverified until replayed; a gate pass is not a regression catch"
+  }
+}

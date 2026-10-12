@@ -1,0 +1,87 @@
+{
+  "mic": "0.3",
+  "name": "Gemma3 causal LM",
+  "usage": "AutoProcessor + AutoModelForCausalLM, text-only batched with padding, one training step",
+  "architecture": "Gemma3ForConditionalGeneration",
+  "checkpoints": {
+    "google/gemma-3-4b-it": {
+      "fixture": "hf-internal-testing/mic-gemma3-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/mic-gemma3-slim": {
+      "built_from": "google/gemma-3-4b-it",
+      "covers": [
+        "google/gemma-3-4b-it"
+      ],
+      "build": {
+        "seed": 17
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=5",
+        "torch"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 1,
+          "download_mb": 50
+        },
+        "google/gemma-3-4b-it": {
+          "memory_gb": 16,
+          "download_mb": 8500,
+          "variants": {
+            "bfloat16": {
+              "memory_gb": 8
+            }
+          }
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "predicted_tokens": {
+      "compare": "exact"
+    },
+    "predicted_text": {
+      "compare": "exact"
+    },
+    "answer_logits": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

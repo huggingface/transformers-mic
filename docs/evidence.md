@@ -64,7 +64,7 @@ Two [walkthroughs](agent-walkthrough/README.md), same prompt, ARM Mac, no MIC: p
 
 ### bfloat16 on CPU
 
-SmolLM-135M and -360M ship bfloat16, which users get by default; fixtures used to be float32. [`build_fixtures.py`](../example/build_fixtures.py) now saves each fixture in its source's dtype: only proto-SmolLM-slim changed (float32 fixtures rebuild byte-identical).
+SmolLM-135M and -360M ship bfloat16, which users get by default; fixtures used to be float32. [`build_fixtures.py`](../example/build_fixtures.py) now saves each fixture in its source's dtype: only mic-SmolLM-slim changed (float32 fixtures rebuild byte-identical).
 
 - **Random weights pass the gate but are useless for generation:** logits moved ≥ 0.24 under every perturbation (gate: 1e-3), yet all four prompts generated " is is is is". Overfit in float32, then cast: " Paris…", " Berlin…", " Rome…", " London…" (80 steps; 3.2M parameters, 6.1 MB).
 - **The training batch has an irreducible loss:** rows share "The capital of" then name a country, so ln 4 at that position can't be learned; training plateaus at 0.25, so the SmolLM recipe sets `target_loss: 0.3`.
@@ -73,7 +73,7 @@ SmolLM-135M and -360M ship bfloat16, which users get by default; fixtures used t
 
 | Target (bfloat16) | Max logit delta | Loss delta | Generated tokens |
 | --- | ---: | ---: | --- |
-| proto-SmolLM-slim, SDPA / eager | 0 / 0 | 1.5e-5 / 1.9e-5 | same |
+| mic-SmolLM-slim, SDPA / eager | 0 / 0 | 1.5e-5 / 1.9e-5 | same |
 | SmolLM-135M, SDPA / eager | 0.25 / 0.25 | 0.0074 / 0.011 | same / **differ** |
 | SmolLM-360M, SDPA / eager | 0.125 / 0.25 | 0.010 / 0.013 | same |
 
@@ -105,7 +105,7 @@ The contracts job on the `contracts-proof` branch of `huggingface/transformers` 
 | Docs page | none | green | 11.5 s |
 | No-op in `generation/utils.py` | all 6 (shared code) | 7 pass, Whisper `xfail` (#49456) | 17.8 s |
 | No-op in `models/clip/` | CLIP | pass | 11.5 s |
-| Revert of the UMT5 fix #49135 | T5 (`models/umt5`) | **red**: `proto-umt5-small-slim` `label_logprobs` off by 1.22, loss by 0.204; `proto-t5-small-slim` passes | 13.4 s |
+| Revert of the UMT5 fix #49135 | T5 (`models/umt5`) | **red**: `mic-umt5-small-slim` `label_logprobs` off by 1.22, loss by 0.204; `mic-t5-small-slim` passes | 13.4 s |
 
 - **The reverted regression fails with the backfill's exact deltas** on another CPU vendor (Intel Xeon 6975P-C, not AMD EPYC) and package set (the image's torch 2.14, numpy 2.3), against baselines recorded on AMD with the lock's pins.
 - **Selection worked as designed:** model-scoped changes ran one contract, shared code all six, docs none.
@@ -185,9 +185,9 @@ Every change in outcome (all else passed on every commit):
 
 | Fixture | Commits | Differs from today's baseline | Starts | Ends | Verdict |
 | --- | --- | --- | --- | --- | --- |
-| `proto-t5-small-slim`, `proto-umt5-small-slim` | 761 | `runtime`: eager, not SDPA | window start | [#47014](https://github.com/huggingface/transformers/pull/47014) (`560f36cc56`, 2026-07-30), "Enable SDPA for T5" | Intended |
-| `proto-umt5-small-slim` | 597 | `label_logprobs` off by 1.22, training loss by 0.20 | #47014 | [#49135](https://github.com/huggingface/transformers/pull/49135) (`d7ba937671`, 2026-09-28) | **Regression caught at its introducing commit** (UMT5 decoder not causal under SDPA) |
-| `proto-wav2vec2-base-960h-slim` | 513 | training loss off by 0.39 | window start | [#46259](https://github.com/huggingface/transformers/pull/46259) (`f196737b0c`, 2026-07-03) | **Benign change flagged:** load-time RNG stream shifted |
+| `mic-t5-small-slim`, `mic-umt5-small-slim` | 761 | `runtime`: eager, not SDPA | window start | [#47014](https://github.com/huggingface/transformers/pull/47014) (`560f36cc56`, 2026-07-30), "Enable SDPA for T5" | Intended |
+| `mic-umt5-small-slim` | 597 | `label_logprobs` off by 1.22, training loss by 0.20 | #47014 | [#49135](https://github.com/huggingface/transformers/pull/49135) (`d7ba937671`, 2026-09-28) | **Regression caught at its introducing commit** (UMT5 decoder not causal under SDPA) |
+| `mic-wav2vec2-base-960h-slim` | 513 | training loss off by 0.39 | window start | [#46259](https://github.com/huggingface/transformers/pull/46259) (`f196737b0c`, 2026-07-03) | **Benign change flagged:** load-time RNG stream shifted |
 
 - **Caught at introduction, two months before the fix:** #47014 touched shared code, so it selected every contract; its reviewer would have seen UMT5 move by 1.22 beside T5's intended runtime change.
 - **One false alarm:** the fixture omits `masked_spec_embed`, as the checkpoint does, to catch [#49385](https://github.com/huggingface/transformers/issues/49385), so its loss follows the RNG stream. Cost: one baseline update.
@@ -201,9 +201,9 @@ Calls added via the [improvement loop](improving-contracts.md#what-happened-the-
 
 | Regression | Fixture result while present | Ends at (fix) |
 | --- | --- | --- |
-| CLIP `text_kwargs` ([#46195](https://github.com/huggingface/transformers/pull/46195)) | `proto-clip-vit-base-patch32-slim` errors, 206 commits | `420c80aad0` |
+| CLIP `text_kwargs` ([#46195](https://github.com/huggingface/transformers/pull/46195)) | `mic-clip-vit-base-patch32-slim` errors, 206 commits | `420c80aad0` |
 | Processor config helpers ([#47628](https://github.com/huggingface/transformers/pull/47628)) | CLIP and Wav2Vec2 config keys empty, 595 and 801 commits | `c62820a73c` |
-| Whisper timestamp decoding ([#47997](https://github.com/huggingface/transformers/pull/47997)) | `proto-whisper-tiny-slim` errors, 890 commits | `64b6595f0c` |
+| Whisper timestamp decoding ([#47997](https://github.com/huggingface/transformers/pull/47997)) | `mic-whisper-tiny-slim` errors, 890 commits | `64b6595f0c` |
 | T5 batch decoding ([#47793](https://github.com/huggingface/transformers/pull/47793)) | T5 and UMT5 `decoded_roundtrip` keeps spaces before punctuation, 1,067 commits | `4ff98bf236` |
 | UMT5 causal mask ([#49135](https://github.com/huggingface/transformers/pull/49135)) | caught from its introducing commit #47014 | `d7ba937671` |
 
@@ -211,11 +211,11 @@ Each fails exactly until its fix (four predate the window); no new false alarm, 
 
 ### Third round: second-round calls and bfloat16 SmolLM
 
-After the [second round](improving-contracts.md#the-second-round-triaging-the-model-tier-misses) added Whisper `max_length_tokens`, `assisted_tokens`, `longform_tokens`, and proto-SmolLM-slim moved to bfloat16 ([why](#bfloat16-on-cpu)). 1,480 commits, 2026-05-01 to 2026-10-08 ([run](https://github.com/huggingface/model-integration-contracts/actions/runs/37930845944)); every other segment as in the second round.
+After the [second round](improving-contracts.md#the-second-round-triaging-the-model-tier-misses) added Whisper `max_length_tokens`, `assisted_tokens`, `longform_tokens`, and mic-SmolLM-slim moved to bfloat16 ([why](#bfloat16-on-cpu)). 1,480 commits, 2026-05-01 to 2026-10-08 ([run](https://github.com/huggingface/model-integration-contracts/actions/runs/37930845944)); every other segment as in the second round.
 
 | Window | Commits | Fixture result | Verdict |
 | --- | ---: | --- | --- |
-| #47997 fix (`64b6595f0c`) to [#48000](https://github.com/huggingface/transformers/pull/48000) (`a5f41e095a`), 2026-08-16/17 | 2 | `proto-whisper-tiny-slim` errors in the assisted call: `UnboundLocalError: is_updated` | Caught; the call was added for this bug (post-hoc) |
+| #47997 fix (`64b6595f0c`) to [#48000](https://github.com/huggingface/transformers/pull/48000) (`a5f41e095a`), 2026-08-16/17 | 2 | `mic-whisper-tiny-slim` errors in the assisted call: `UnboundLocalError: is_updated` | Caught; the call was added for this bug (post-hoc) |
 | [#48981](https://github.com/huggingface/transformers/pull/48981) (`87d34bfa80`, 2026-09-22, "Always correctly restrict assisted decoding with max length/eos token") to [#49075](https://github.com/huggingface/transformers/pull/49075) (`010f0ca2ec`, 2026-09-24, "Fix assisted eos token condition") | 41 | same call errors: `RuntimeError: a Tensor with 2 elements cannot be converted to Scalar` in `_assisted_decoding` | **New catch, not targeted: caught at its introducing commit** |
 
 - **Not post-hoc for #48981:** `assisted_tokens` was added for #48000, and `find_misses.py`'s model tier never listed #49075 (shared generation code only). #48981 changes `generation/`, so selection would have run Whisper on that PR; it also deleted 9 lines from `tests/generation/test_utils.py`.
@@ -281,7 +281,7 @@ Does a real regression need an overfit fixture, or would random weights catch it
 - **Still no overfit-only catch.** The backfill had none either: every Whisper failure there was an exception, and the SmolLM fixtures never failed. A history search (2025-10..2026-10) found no silent bug on Whisper's input side (feature extraction, encoder, cross-attention); the silent candidates are in generation.
 - **Random weights ignore conditioning, yet see it vanish.** Random Whisper gives every batch row the same tokens, random MusicGen Melody the same codes for every prompt, melody or not. Dropping the conditioning still changes their outputs: the prompt's presence matters even when its content doesn't. Melody swaps and drops show extra overfit sensitivity on selected inputs, but no real overfit-only catch ([controls](#musicgen-melody-conditioning-controls)).
 - **An overfit fixture covers only what it was trained on.** The Whisper fixture learned short-form, no-timestamp answers: in long-form timestamp mode it repeats one word to the token cap, and assisted it answers one token and stops, so neither trigger occurred in the initial replay. Retrained on timestamped targets (`<|0.00|> red<|1.00|>`, then 1–4 words), segments close on timestamps and rows differ in length, yet #48028 still did not fire: instrumented, no call in nine input variants, with either fixture, produced a left-padded decoder mask. Controlled unequal first-segment lengths subsequently reached that trigger with both weight kinds ([follow-up](#whisper-left-padded-previous-segment-prompts)).
-- **What the MusicGen Melody contract adds** ([contract](../example/hub/MusicgenMelody-integration/integrations/transformers/usage.md), [fixture](https://huggingface.co/hf-internal-testing/proto-musicgen-melody-slim)): a composite model (T5 text encoder, EnCodec, decoder) and classifier-free guidance. The generic shrink rule left EnCodec at 56M of 59M parameters (`num_filters` doubles per stage) and `codebook_dim` coupled to the old width; two reviewed `config_overrides` bring the fixture to 3.5M (17.5 MB). Random weights pass the gate (weakest 0.018) but generate the same codes for every prompt, so the fixture is overfit by reviewed choice (60 steps). On the M5, the fixture runs in ~1 s; the real `facebook/musicgen-melody` (1.5B) takes ~430 s per variant, training step included.
+- **What the MusicGen Melody contract adds** ([contract](../example/hub/MusicgenMelody-integration/integrations/transformers/usage.md), [fixture](https://huggingface.co/hf-internal-testing/mic-musicgen-melody-slim)): a composite model (T5 text encoder, EnCodec, decoder) and classifier-free guidance. The generic shrink rule left EnCodec at 56M of 59M parameters (`num_filters` doubles per stage) and `codebook_dim` coupled to the old width; two reviewed `config_overrides` bring the fixture to 3.5M (17.5 MB). Random weights pass the gate (weakest 0.018) but generate the same codes for every prompt, so the fixture is overfit by reviewed choice (60 steps). On the M5, the fixture runs in ~1 s; the real `facebook/musicgen-melody` (1.5B) takes ~430 s per variant, training step included.
 
 ### MusicGen Melody conditioning controls
 

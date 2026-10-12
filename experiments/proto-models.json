@@ -1,0 +1,173 @@
+{
+  "requested": [
+    "auto",
+    "bert",
+    "gpt2",
+    "t5",
+    "modernbert",
+    "vit",
+    "clip",
+    "detr",
+    "table_transformer",
+    "got_ocr2",
+    "whisper",
+    "wav2vec2",
+    "qwen2_audio",
+    "speech_t5",
+    "csm",
+    "llama",
+    "gemma3",
+    "qwen2",
+    "mistral3",
+    "qwen2_5_vl",
+    "llava",
+    "smolvlm",
+    "internvl",
+    "gemma3n",
+    "gpt_oss",
+    "qwen2_5_omni",
+    "pi0",
+    "speech_t5"
+  ],
+  "auto": {
+    "checkpoints": [
+      "bert",
+      "t5",
+      "vit"
+    ],
+    "requirement": "These three contracts must use AutoConfig and Auto classes for model/processor loading; no separate architecture."
+  },
+  "scope": "fixtures",
+  "models": [
+    {
+      "name": "bert",
+      "model_type": "bert",
+      "checkpoint": "google-bert/bert-base-uncased"
+    },
+    {
+      "name": "gpt2",
+      "model_type": "gpt2",
+      "checkpoint": "openai-community/gpt2"
+    },
+    {
+      "name": "t5",
+      "model_type": "t5",
+      "checkpoint": "google-t5/t5-small"
+    },
+    {
+      "name": "modernbert",
+      "model_type": "modernbert",
+      "checkpoint": "answerdotai/ModernBERT-base"
+    },
+    {
+      "name": "vit",
+      "model_type": "vit",
+      "checkpoint": "google/vit-base-patch16-224"
+    },
+    {
+      "name": "clip",
+      "model_type": "clip",
+      "checkpoint": "openai/clip-vit-base-patch32"
+    },
+    {
+      "name": "detr",
+      "model_type": "detr",
+      "checkpoint": "facebook/detr-resnet-50"
+    },
+    {
+      "name": "table_transformer",
+      "model_type": "table-transformer",
+      "checkpoint": "microsoft/table-transformer-detection"
+    },
+    {
+      "name": "got_ocr2",
+      "model_type": "got_ocr2",
+      "checkpoint": "stepfun-ai/GOT-OCR-2.0-hf"
+    },
+    {
+      "name": "whisper",
+      "model_type": "whisper",
+      "checkpoint": "openai/whisper-tiny"
+    },
+    {
+      "name": "wav2vec2",
+      "model_type": "wav2vec2",
+      "checkpoint": "facebook/wav2vec2-base-960h"
+    },
+    {
+      "name": "qwen2_audio",
+      "model_type": "qwen2_audio",
+      "checkpoint": "Qwen/Qwen2-Audio-7B"
+    },
+    {
+      "name": "speech_t5",
+      "model_type": "speecht5",
+      "checkpoint": "microsoft/speecht5_asr"
+    },
+    {
+      "name": "csm",
+      "model_type": "csm",
+      "checkpoint": "cartesia/azzurra-voice"
+    },
+    {
+      "name": "llama",
+      "model_type": "llama",
+      "checkpoint": "HuggingFaceTB/SmolLM2-135M"
+    },
+    {
+      "name": "gemma3",
+      "model_type": "gemma3",
+      "checkpoint": "google/gemma-3-4b-it"
+    },
+    {
+      "name": "qwen2",
+      "model_type": "qwen2",
+      "checkpoint": "Qwen/Qwen2-0.5B"
+    },
+    {
+      "name": "mistral3",
+      "model_type": "mistral3",
+      "checkpoint": "mistralai/Mistral-Small-3.1-24B-Instruct-2503"
+    },
+    {
+      "name": "qwen2_5_vl",
+      "model_type": "qwen2_5_vl",
+      "checkpoint": "Qwen/Qwen2.5-VL-3B-Instruct"
+    },
+    {
+      "name": "llava",
+      "model_type": "llava",
+      "checkpoint": "llava-hf/llava-1.5-7b-hf"
+    },
+    {
+      "name": "smolvlm",
+      "model_type": "smolvlm",
+      "checkpoint": "HuggingFaceTB/SmolVLM2-2.2B-Instruct"
+    },
+    {
+      "name": "internvl",
+      "model_type": "internvl",
+      "checkpoint": "OpenGVLab/InternVL3-1B-hf"
+    },
+    {
+      "name": "gemma3n",
+      "model_type": "gemma3n",
+      "checkpoint": "google/gemma-3n-E2B-it"
+    },
+    {
+      "name": "gpt_oss",
+      "model_type": "gpt_oss",
+      "checkpoint": "openai/gpt-oss-20b"
+    },
+    {
+      "name": "qwen2_5_omni",
+      "model_type": "qwen2_5_omni",
+      "checkpoint": "Qwen/Qwen2.5-Omni-7B"
+    },
+    {
+      "name": "pi0",
+      "model_type": "pi0",
+      "checkpoint": "lerobot/pi0_base"
+    }
+  ]
+}

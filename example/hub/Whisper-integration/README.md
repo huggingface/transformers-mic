@@ -19,7 +19,7 @@ Usage path: WhisperProcessor + WhisperForConditionalGeneration.generate, English
 
 | Checkpoint | Slim fixture (every framework PR) |
 | --- | --- |
-| [`openai/whisper-tiny`](https://huggingface.co/openai/whisper-tiny) | [`hf-internal-testing/proto-whisper-tiny-slim`](https://huggingface.co/hf-internal-testing/proto-whisper-tiny-slim) |
+| [`openai/whisper-tiny`](https://huggingface.co/openai/whisper-tiny) | [`hf-internal-testing/mic-whisper-tiny-slim`](https://huggingface.co/hf-internal-testing/mic-whisper-tiny-slim) |
 
 Checked outputs: `generated_tokens`, `generated_text`, `label_logprobs`, `timestamped_tokens`, `timestamped_text`, `feature_extractor_config_keys`, `max_length_tokens`, `assisted_tokens`, `longform_tokens`, `continued_longform_tokens`, `training.loss`, `training.gradients`, `training.updated`.
 

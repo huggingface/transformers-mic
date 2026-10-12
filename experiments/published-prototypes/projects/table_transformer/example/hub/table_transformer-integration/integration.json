@@ -1,0 +1,81 @@
+{
+  "mic": "0.3",
+  "name": "Table Transformer Detection",
+  "usage": "AutoProcessor + AutoModelForObjectDetection, batched synthetic images, object detection with training step",
+  "architecture": "TableTransformerForObjectDetection",
+  "checkpoints": {
+    "microsoft/table-transformer-detection": {
+      "fixture": "hf-internal-testing/mic-table_transformer-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/mic-table_transformer-slim": {
+      "built_from": "microsoft/table-transformer-detection",
+      "covers": [
+        "microsoft/table-transformer-detection"
+      ],
+      "build": {
+        "seed": 17
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=5",
+        "torch"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 1,
+          "download_mb": 20
+        },
+        "microsoft/table-transformer-detection": {
+          "memory_gb": 2,
+          "download_mb": 150
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "inference_scores": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "inference_boxes": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

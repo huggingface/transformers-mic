@@ -1,0 +1,186 @@
+{
+  "model": "microsoft/speecht5_asr",
+  "contract": "speech_t5",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": {
+    "variant": "bfloat16",
+    "records": [
+      {
+        "contract": "hf-internal-testing/mic-speech_t5-integration",
+        "contract_name": "speech_t5",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "bfloat16",
+        "target": "mic-speech_t5-slim",
+        "kind": "fixture",
+        "revision": "unpublished",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3"
+        },
+        "seconds": 4.58,
+        "platform": "cuda",
+        "baseline": "transformers/tests/contracts/expectations/speech_t5/cuda/mic-speech_t5-slim.bfloat16.json",
+        "status": "pass",
+        "failures": []
+      }
+    ],
+    "lock_sha256": "85e8b9b680b0c404cb5eee08210aa9e8f508e87399bb71f49bdcdba64c7fdd8c",
+    "manifest_sha256": "544ac9cce751db0def598a4e7240d340de92828eb92fa748d4edffd8dc01cd8a",
+    "usage_sha256": "261cd80e12dd3277e75d8edd3e290adbc7b20a65be643ff64456225fab1a7c07"
+  },
+  "validations": {
+    "default": {
+      "variant": "default",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-speech_t5-integration",
+          "contract_name": "speech_t5",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "default",
+          "target": "mic-speech_t5-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 4.51,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/speech_t5/cuda/mic-speech_t5-slim.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "85e8b9b680b0c404cb5eee08210aa9e8f508e87399bb71f49bdcdba64c7fdd8c",
+      "manifest_sha256": "544ac9cce751db0def598a4e7240d340de92828eb92fa748d4edffd8dc01cd8a",
+      "usage_sha256": "261cd80e12dd3277e75d8edd3e290adbc7b20a65be643ff64456225fab1a7c07",
+      "fingerprint": "9b67d2b77f80c0c74a6b41ef2851279bb15f08a29f5408fb6951566966f4a8d9"
+    },
+    "eager": {
+      "variant": "eager",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-speech_t5-integration",
+          "contract_name": "speech_t5",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "eager",
+          "target": "mic-speech_t5-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 4.61,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/speech_t5/cuda/mic-speech_t5-slim.eager.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "85e8b9b680b0c404cb5eee08210aa9e8f508e87399bb71f49bdcdba64c7fdd8c",
+      "manifest_sha256": "544ac9cce751db0def598a4e7240d340de92828eb92fa748d4edffd8dc01cd8a",
+      "usage_sha256": "261cd80e12dd3277e75d8edd3e290adbc7b20a65be643ff64456225fab1a7c07",
+      "fingerprint": "9b67d2b77f80c0c74a6b41ef2851279bb15f08a29f5408fb6951566966f4a8d9"
+    },
+    "bfloat16": {
+      "variant": "bfloat16",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-speech_t5-integration",
+          "contract_name": "speech_t5",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "bfloat16",
+          "target": "mic-speech_t5-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 4.58,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/speech_t5/cuda/mic-speech_t5-slim.bfloat16.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "85e8b9b680b0c404cb5eee08210aa9e8f508e87399bb71f49bdcdba64c7fdd8c",
+      "manifest_sha256": "544ac9cce751db0def598a4e7240d340de92828eb92fa748d4edffd8dc01cd8a",
+      "usage_sha256": "261cd80e12dd3277e75d8edd3e290adbc7b20a65be643ff64456225fab1a7c07",
+      "fingerprint": "9b67d2b77f80c0c74a6b41ef2851279bb15f08a29f5408fb6951566966f4a8d9"
+    }
+  },
+  "weight_decision": {
+    "requested": "auto",
+    "weights": "random",
+    "accepted": true,
+    "reused": false,
+    "reason": "Random weights pass the measured sensitivity and numeric-health gates; training is unnecessary.",
+    "readability_requested": false,
+    "historical_detection": "unverified until replayed; a gate pass is not a regression catch"
+  }
+}

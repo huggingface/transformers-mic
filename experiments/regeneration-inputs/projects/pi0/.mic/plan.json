@@ -1,0 +1,83 @@
+{
+  "name": "pi0",
+  "manifest": {
+    "mic": "0.3",
+    "name": "PI0 policy",
+    "usage": "AutoModel PI0Policy, diffusion (flow-matching) policy: image+state observations → action sequence",
+    "architecture": "PI0Policy",
+    "checkpoints": {
+      "lerobot/pi0_base": {
+        "fixture": "hf-internal-testing/mic-pi0-slim"
+      }
+    },
+    "fixtures": {
+      "hf-internal-testing/mic-pi0-slim": {
+        "built_from": "lerobot/pi0_base",
+        "covers": [
+          "lerobot/pi0_base"
+        ],
+        "build": {
+          "seed": 17
+        }
+      }
+    },
+    "integrations": {
+      "transformers": {
+        "entry_point": "integrations/transformers/usage.md",
+        "format": "runnable-markdown",
+        "requires": [
+          "transformers>=4.48",
+          "torch"
+        ],
+        "targets": [
+          "fixtures"
+        ],
+        "variants": {
+          "default": {},
+          "eager": {
+            "attn_implementation": "eager"
+          },
+          "bfloat16": {
+            "dtype": "bfloat16"
+          }
+        },
+        "training": true
+      }
+    },
+    "outputs": {
+      "runtime": {
+        "compare": "exact"
+      },
+      "action_first_step": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "action_last_step": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.loss": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.gradients": {
+        "compare": "all_true"
+      },
+      "training.updated": {
+        "compare": "true"
+      }
+    }
+  },
+  "usage": "# PI0: diffusion policy with Transformers\n\nThis page is the Transformers contract of the PI0 MIC and also a usage example. [doc-builder](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md) renders the `runnable` blocks below as documentation, and its pytest plugin runs them as written against `lerobot/pi0_base`. The MIC runner runs the same blocks against each slim fixture and each checkpoint in [`integration.json`](../../integration.json). Lines marked `# doc-builder: hide` only matter there: they swap in the pinned checkpoint or variant and print the result record.\n\n## Inference: predict actions from observations\n\n```py runnable:pi0_policy\nimport torch\nfrom transformers import AutoModel, set_seed\nimport json  # doc-builder: hide\nimport os  # doc-builder: hide\n\nmodel_id = \"lerobot/pi0_base\"\nmodel_id = os.environ.get(\"MIC_MODEL\", model_id)  # doc-builder: hide\nvariant = json.loads(os.environ.get(\"MIC_MODEL_KWARGS\", \"{}\"))  # doc-builder: hide\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nset_seed(0)\n\nmodel = AutoModel.from_pretrained(model_id).to(device)\nif variant:  # doc-builder: hide\n    model = AutoModel.from_pretrained(model_id, **variant).to(device)\nmodel.eval()\n\n# Two distinct synthetic observations: (batch=2, channels=3, H=256, W=256)\nimages = torch.rand(2, 3, 256, 256, device=device)\nwrist_images = torch.rand(2, 3, 256, 256, device=device)\nstate = torch.rand(2, 8, device=device)\n\nwith torch.no_grad():\n    outputs = model(\n        observation_images=images,\n        observation_wrist_images=wrist_images,\n        observation_state=state,\n    )\nactions = outputs.actions  # [2, 50, 7]\nprint(f\"actions shape: {actions.shape}\")\nprint(f\"action[0,0,:3] = {actions[0, 0, :3].tolist()}\")\nprint(f\"action[0,-1,:3] = {actions[0, -1, :3].tolist()}\")\n```\n\n## One training step (flow-matching loss)\n\n```py runnable:pi0_policy:2\n# Target actions for the training step: [batch, n_action_steps, action_dim]\ntarget_actions = torch.rand(2, 50, 7, device=device)\n\nmodel.train()\noptimizer = torch.optim.SGD(model.parameters(), lr=0.01)\nloss = model(\n    observation_images=images,\n    observation_wrist_images=wrist_images,\n    observation_state=state,\n    actions=target_actions,\n).loss\nloss.backward()\nbefore = {name: p.detach().clone() for name, p in model.named_parameters()}  # doc-builder: hide\noptimizer.step()\nprint(f\"loss: {loss.item():.4f}\")\n\nif os.environ.get(\"MIC_RUNNER\"):  # doc-builder: hide\n    named = dict(model.named_parameters())\n    checked = (\n        \"language_model.model.layers.0.self_attn.q_proj.weight\",\n        \"action_expert.model.layers.0.self_attn.q_proj.weight\",\n    )\n    result = {\n        \"runtime\": {\n            \"device\": model.device.type,\n            \"dtype\": str(next(model.parameters()).dtype).removeprefix(\"torch.\"),\n            \"attn_implementation\": model.config._attn_implementation,\n        },\n        \"action_first_step\": actions[0, 0, :3].float().tolist(),\n        \"action_last_step\": actions[0, -1, :3].float().tolist(),\n        \"training\": {\n            \"loss\": loss.item(),\n            \"gradients\": {\n                n: bool(\n                    named[n].grad is not None\n                    and torch.count_nonzero(named[n].grad) > 0\n                    and torch.isfinite(named[n].grad).all()\n                )\n                for n in checked\n            },\n            \"updated\": any(not torch.equal(p, before[n]) for n, p in named.items()),\n        },\n    }\n    print(json.dumps(result))\n```\n",
+  "rationale": "PI0 is a flow-matching (diffusion) policy that maps robot observations (two camera images + proprioceptive state) to a sequence of 50 actions. The integration exercises the full forward path: (1) inference with the iterative denoising loop producing an action sequence, and (2) a single training step computing the flow-matching loss against target actions. Two distinct synthetic observation pairs ensure batch perturbation is meaningful. The vision encoder is frozen (freeze_vision_encoder=true), so gradients flow through the language model and action expert. Compact probes report the first and last action steps (3 dims each) rather than the full 50×7 tensor. The bfloat16 variant halves memory for the large vision backbone.",
+  "historical_candidates": [],
+  "llm": {
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "auto",
+    "usage": "ChatCompletionOutputUsage(completion_tokens=4485, prompt_tokens=4441, total_tokens=8926, completion_tokens_details={'reasoning_tokens': 3000}, prompt_tokens_details={'cached_tokens': 0, 'image_tokens': 0})",
+    "role": "proposal only"
+  }
+}

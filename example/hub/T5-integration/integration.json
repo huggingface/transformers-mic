@@ -5,14 +5,14 @@
   "architecture": "T5ForConditionalGeneration, UMT5ForConditionalGeneration",
   "checkpoints": {
     "google-t5/t5-small": {
-      "fixture": "hf-internal-testing/proto-t5-small-slim"
+      "fixture": "hf-internal-testing/mic-t5-small-slim"
     },
     "google/umt5-small": {
-      "fixture": "hf-internal-testing/proto-umt5-small-slim"
+      "fixture": "hf-internal-testing/mic-umt5-small-slim"
     }
   },
   "fixtures": {
-    "hf-internal-testing/proto-t5-small-slim": {
+    "hf-internal-testing/mic-t5-small-slim": {
       "built_from": "google-t5/t5-small",
       "covers": [
         "google-t5/t5-small"
@@ -21,7 +21,7 @@
         "seed": 17
       }
     },
-    "hf-internal-testing/proto-umt5-small-slim": {
+    "hf-internal-testing/mic-umt5-small-slim": {
       "built_from": "google/umt5-small",
       "covers": [
         "google/umt5-small"

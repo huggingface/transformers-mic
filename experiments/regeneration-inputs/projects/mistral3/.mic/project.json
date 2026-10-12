@@ -1,0 +1,10 @@
+{
+  "model": "mistralai/Mistral-Small-3.1-24B-Instruct-2503",
+  "contract": "mistral3",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": null,
+  "validations": {}
+}

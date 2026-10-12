@@ -1,0 +1,19 @@
+{
+  "model": "google-bert/bert-base-uncased",
+  "contract": "bert",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "catalog-regenerated",
+  "validated": false,
+  "weight_decision": {
+    "requested": "auto",
+    "weights": "random",
+    "accepted": true,
+    "reused": false,
+    "reason": "Random weights pass the measured sensitivity and numeric-health gates; training is unnecessary.",
+    "readability_requested": false,
+    "historical_detection": "unverified until replayed; a gate pass is not a regression catch"
+  },
+  "validation": null,
+  "validations": {}
+}

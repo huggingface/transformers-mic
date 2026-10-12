@@ -1,0 +1,39 @@
+{
+  "framework": "transformers",
+  "environment": {
+    "python": "3.10",
+    "torch": "2.11.0",
+    "torchvision": "0.26.0",
+    "torchaudio": "2.11.0",
+    "tokenizers": "0.23.1",
+    "numpy": "1.26.4",
+    "pillow": "12.2.0",
+    "accelerate": "1.13.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.32.0",
+    "sentencepiece": "0.2.1",
+    "protobuf": "6.33.6",
+    "librosa": "0.11.0",
+    "soundfile": "0.13.1",
+    "scipy": "1.15.3"
+  },
+  "contracts": {
+    "llava": {
+      "integration": {
+        "repo": "hf-internal-testing/mic-llava-integration",
+        "revision": "5003194065e7851b52df8c2b3c86d1ac2a527111",
+        "path": "../../../hub/llava-integration",
+        "files_sha256": "8d339cb3e353d943ab9e2058820bd119210c7c25842a2a8daf9d72646f199c64"
+      },
+      "fixtures": {
+        "hf-internal-testing/mic-llava-slim": {
+          "revision": "25b00bd747517cb5fa61b48ef9817fbbcfa42f46",
+          "files_sha256": "eebcc2537637f5dc942131626562ff0b6d995329b8a03af39dc2bdf2d6db9660"
+        }
+      },
+      "checkpoints": {
+        "llava-hf/llava-1.5-7b-hf": "b234b804b114d9e37bb655e11cbbb5f5e971b7a9"
+      }
+    }
+  }
+}

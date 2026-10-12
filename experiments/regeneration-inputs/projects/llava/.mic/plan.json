@@ -1,0 +1,93 @@
+{
+  "name": "llava",
+  "manifest": {
+    "mic": "0.3",
+    "name": "LLaVA vision-language",
+    "usage": "LlavaProcessor + LlavaForConditionalGeneration, batched with padding, synthetic images",
+    "architecture": "LlavaForConditionalGeneration",
+    "checkpoints": {
+      "llava-hf/llava-1.5-7b-hf": {
+        "fixture": "hf-internal-testing/mic-llava-slim"
+      }
+    },
+    "fixtures": {
+      "hf-internal-testing/mic-llava-slim": {
+        "built_from": "llava-hf/llava-1.5-7b-hf",
+        "covers": [
+          "llava-hf/llava-1.5-7b-hf"
+        ],
+        "build": {
+          "seed": 17
+        }
+      }
+    },
+    "integrations": {
+      "transformers": {
+        "entry_point": "integrations/transformers/usage.md",
+        "format": "runnable-markdown",
+        "requires": [
+          "transformers>=4.36",
+          "torch",
+          "Pillow",
+          "numpy"
+        ],
+        "targets": [
+          "fixtures"
+        ],
+        "variants": {
+          "default": {},
+          "eager": {
+            "attn_implementation": "eager"
+          },
+          "bfloat16": {
+            "dtype": "bfloat16"
+          }
+        },
+        "training": true,
+        "resources": {
+          "fixture": {
+            "memory_gb": 2,
+            "download_mb": 50
+          },
+          "llava-hf/llava-1.5-7b-hf": {
+            "memory_gb": 20,
+            "download_mb": 14000
+          }
+        }
+      }
+    },
+    "outputs": {
+      "runtime": {
+        "compare": "exact"
+      },
+      "predicted_tokens": {
+        "compare": "exact"
+      },
+      "probe_logits": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.loss": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.gradients": {
+        "compare": "all_true"
+      },
+      "training.updated": {
+        "compare": "true"
+      }
+    }
+  },
+  "usage": "# LLaVA: vision-language with Transformers\n\nThis page is the Transformers contract of the LLaVA MIC and also a usage example. [doc-builder](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md) renders the `runnable` blocks below as documentation, and its pytest plugin runs them as written against `llava-hf/llava-1.5-7b-hf`. The MIC runner runs the same blocks against each slim fixture and each checkpoint in [`integration.json`](../../integration.json). Lines marked `# doc-builder: hide` only matter there: they swap in the pinned checkpoint or variant and print the result record.\n\n## Inference\n\n```py runnable:usage\nimport torch\nfrom transformers import LlavaForConditionalGeneration, LlavaProcessor, set_seed\nfrom PIL import Image\nimport numpy as np\nimport json  # doc-builder: hide\nimport os  # doc-builder: hide\n\nmodel_id = \"llava-hf/llava-1.5-7b-hf\"\nmodel_id = os.environ.get(\"MIC_MODEL\", model_id)  # doc-builder: hide\nvariant = json.loads(os.environ.get(\"MIC_MODEL_KWARGS\", \"{}\"))  # doc-builder: hide\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nset_seed(0)\n\nprocessor = LlavaProcessor.from_pretrained(model_id)\nmodel = LlavaForConditionalGeneration.from_pretrained(model_id).to(device)\nif variant:  # doc-builder: hide\n    model = LlavaForConditionalGeneration.from_pretrained(model_id, **variant).to(device)\nmodel.eval()\n\nnp.random.seed(0)\nimg1 = Image.fromarray(np.random.randint(0, 255, (336, 336, 3), dtype=np.uint8))\nimg2 = Image.fromarray(np.random.randint(0, 255, (336, 336, 3), dtype=np.uint8))\n\ntexts = [\n    \"<image>\\nUSER: What do you see in this image?\\nASSISTANT: A\",\n    \"<image>\\nUSER: Describe the colors in this image.\\nASSISTANT: A\",\n]\n\ninputs = processor(images=[img1, img2], text=texts, return_tensors=\"pt\", padding=True).to(device)\n\nwith torch.no_grad():\n    outputs = model(**inputs)\nlogits = outputs.logits\n\nprobe_positions = [0, 1, 2, 3, 4]\nprobe = logits[:, -1, probe_positions].float()\npredicted = logits[:, -1].argmax(dim=-1)\nprint(f\"predicted: {predicted.tolist()}\")\nprint(f\"probe: {probe.tolist()}\")\n```\n\n## One training step\n\n```py runnable:usage:2\n# Fixed target tokens to ensure a meaningful loss\ntarget_tokens = torch.tensor([100, 200], device=device)\nlabels = torch.full_like(inputs[\"input_ids\"], -100)\nlabels[:, -1] = target_tokens\n\nmodel.train()\noptimizer = torch.optim.SGD(model.parameters(), lr=0.01)\nloss = model(**inputs, labels=labels).loss\nloss.backward()\n\n# doc-builder: hide\nchecked = (\n    \"language_model.model.layers.0.self_attn.q_proj.weight\",\n    \"multi_modal_projector.linear_1.weight\",\n)\nbefore = {n: p.detach().clone() for n, p in model.named_parameters() if n in checked}\noptimizer.step()\nprint(f\"loss: {loss.item():.4f}\")\n\nif os.environ.get(\"MIC_RUNNER\"):  # doc-builder: hide\n    named = dict(model.named_parameters())\n    result = {\n        \"runtime\": {\n            \"device\": next(model.parameters()).device.type,\n            \"dtype\": str(next(model.parameters()).dtype).removeprefix(\"torch.\"),\n            \"attn_implementation\": model.config._attn_implementation,\n        },\n        \"predicted_tokens\": predicted.tolist(),\n        \"probe_logits\": probe.tolist(),\n        \"training\": {\n            \"loss\": loss.item(),\n            \"gradients\": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all()) for n in checked},\n            \"updated\": any(not torch.equal(named[n], before[n]) for n in checked),\n        },\n    }\n    print(json.dumps(result))\n```\n",
+  "rationale": "LLaVA 1.5 is a vision-language model combining a CLIP vision tower, a multimodal projector, and a Llama language model. The integration exercises the full forward pass (image + text to logits) and a single SGD training step with labels on the last token position. Two distinct synthetic 336x336 images with different prompts provide batch perturbation coverage. The probe reports 5 selected logit positions at the last token for compact numeric comparison. Gradient checks target the first Llama attention query projection and the first projector linear layer, covering both the language and vision pathways. The bfloat16 variant exercises the dtype path without changing architecture.",
+  "historical_candidates": [],
+  "llm": {
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "auto",
+    "usage": "ChatCompletionOutputUsage(completion_tokens=10477, prompt_tokens=4149, total_tokens=14626, completion_tokens_details={'reasoning_tokens': 8925}, prompt_tokens_details={'cached_tokens': 3072, 'image_tokens': 0})",
+    "role": "proposal only"
+  }
+}

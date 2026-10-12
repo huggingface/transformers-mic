@@ -19,7 +19,7 @@ Usage path: AutoProcessor + MusicgenMelodyForConditionalGeneration.generate, tex
 
 | Checkpoint | Slim fixture (every framework PR) |
 | --- | --- |
-| [`facebook/musicgen-melody`](https://huggingface.co/facebook/musicgen-melody) | [`hf-internal-testing/proto-musicgen-melody-slim`](https://huggingface.co/hf-internal-testing/proto-musicgen-melody-slim) |
+| [`facebook/musicgen-melody`](https://huggingface.co/facebook/musicgen-melody) | [`hf-internal-testing/mic-musicgen-melody-slim`](https://huggingface.co/hf-internal-testing/mic-musicgen-melody-slim) |
 
 Checked outputs: `input_feature_shape`, `codes`, `audio_shape`, `audio_head`, `text_only_codes`, `training.loss`, `training.gradients`, `training.updated`.
 

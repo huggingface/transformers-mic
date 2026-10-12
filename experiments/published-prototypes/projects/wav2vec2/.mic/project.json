@@ -1,0 +1,202 @@
+{
+  "model": "facebook/wav2vec2-base-960h",
+  "contract": "wav2vec2",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "catalog-regenerated",
+  "validated": false,
+  "validation": {
+    "variant": "bfloat16",
+    "records": [
+      {
+        "contract": "hf-internal-testing/mic-wav2vec2-integration",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "bfloat16",
+        "target": "mic-wav2vec2-slim",
+        "kind": "fixture",
+        "revision": "unpublished",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3",
+          "local_patches": [
+            "config-field-generation-params",
+            "masked-spec-embed-init",
+            "whisper-decode-tensor-batch"
+          ]
+        },
+        "seconds": 1.6,
+        "platform": "cuda",
+        "baseline": "transformers/tests/contracts/expectations/wav2vec2/cuda/mic-wav2vec2-slim.bfloat16.json",
+        "status": "pass",
+        "failures": []
+      }
+    ],
+    "lock_sha256": "1f0dea8fb0358a78d41786d5a63c436caaa8129fba7a3a1cb9be4a25338a58f1",
+    "manifest_sha256": "fd1f2f488a53c3929cc2388c76b31c4a9f5bf4a0d4b9a875cd23fe0a4a9a7578",
+    "usage_sha256": "cc162bba8bd1ff4f4ec788e99d2f794a694196c27904eef5245717c71b87816e"
+  },
+  "validations": {
+    "default": {
+      "variant": "default",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-wav2vec2-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "default",
+          "target": "mic-wav2vec2-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3",
+            "local_patches": [
+              "config-field-generation-params",
+              "masked-spec-embed-init",
+              "whisper-decode-tensor-batch"
+            ]
+          },
+          "seconds": 1.26,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/wav2vec2/cuda/mic-wav2vec2-slim.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "1f0dea8fb0358a78d41786d5a63c436caaa8129fba7a3a1cb9be4a25338a58f1",
+      "manifest_sha256": "fd1f2f488a53c3929cc2388c76b31c4a9f5bf4a0d4b9a875cd23fe0a4a9a7578",
+      "usage_sha256": "cc162bba8bd1ff4f4ec788e99d2f794a694196c27904eef5245717c71b87816e",
+      "fingerprint": "0ea1fbcfeab831351bafddf8f77b3fd9fc3b29c8c898a06183def8ca92d71df9"
+    },
+    "eager": {
+      "variant": "eager",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-wav2vec2-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "eager",
+          "target": "mic-wav2vec2-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3",
+            "local_patches": [
+              "config-field-generation-params",
+              "masked-spec-embed-init",
+              "whisper-decode-tensor-batch"
+            ]
+          },
+          "seconds": 1.43,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/wav2vec2/cuda/mic-wav2vec2-slim.eager.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "1f0dea8fb0358a78d41786d5a63c436caaa8129fba7a3a1cb9be4a25338a58f1",
+      "manifest_sha256": "fd1f2f488a53c3929cc2388c76b31c4a9f5bf4a0d4b9a875cd23fe0a4a9a7578",
+      "usage_sha256": "cc162bba8bd1ff4f4ec788e99d2f794a694196c27904eef5245717c71b87816e",
+      "fingerprint": "0ea1fbcfeab831351bafddf8f77b3fd9fc3b29c8c898a06183def8ca92d71df9"
+    },
+    "bfloat16": {
+      "variant": "bfloat16",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-wav2vec2-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "bfloat16",
+          "target": "mic-wav2vec2-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3",
+            "local_patches": [
+              "config-field-generation-params",
+              "masked-spec-embed-init",
+              "whisper-decode-tensor-batch"
+            ]
+          },
+          "seconds": 1.6,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/wav2vec2/cuda/mic-wav2vec2-slim.bfloat16.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "1f0dea8fb0358a78d41786d5a63c436caaa8129fba7a3a1cb9be4a25338a58f1",
+      "manifest_sha256": "fd1f2f488a53c3929cc2388c76b31c4a9f5bf4a0d4b9a875cd23fe0a4a9a7578",
+      "usage_sha256": "cc162bba8bd1ff4f4ec788e99d2f794a694196c27904eef5245717c71b87816e",
+      "fingerprint": "0ea1fbcfeab831351bafddf8f77b3fd9fc3b29c8c898a06183def8ca92d71df9"
+    }
+  },
+  "weight_decision": {
+    "requested": "auto",
+    "weights": "random",
+    "accepted": true,
+    "reused": false,
+    "reason": "Random weights pass the measured sensitivity and numeric-health gates; training is unnecessary.",
+    "readability_requested": false,
+    "historical_detection": "unverified until replayed; a gate pass is not a regression catch"
+  }
+}

@@ -23,14 +23,14 @@ One contract per usage path ([full example](../example/README.md)), run on each 
 
 | Contract | Usage path | Targets (fixture → checkpoints) |
 | --- | --- | --- |
-| [SmolLM](../example/hub/SmolLM-integration) | `AutoTokenizer` + `AutoModelForCausalLM.generate`, batched, left padding | [`proto-SmolLM-slim`](https://huggingface.co/hf-internal-testing/proto-SmolLM-slim) → SmolLM-135M, -360M; [`proto-SmolLM-1.7B-slim`](https://huggingface.co/hf-internal-testing/proto-SmolLM-1.7B-slim) → SmolLM-1.7B |
-| [CLIP](../example/hub/CLIP-integration) | `CLIPProcessor` + `CLIPModel`, image-caption matching, batched | [`proto-clip-vit-base-patch32-slim`](https://huggingface.co/hf-internal-testing/proto-clip-vit-base-patch32-slim) → openai/clip-vit-base-patch32 |
-| [BERT](../example/hub/BERT-integration) | `AutoTokenizer` + `AutoModelForMaskedLM`, batched, right padding | [`proto-bert-base-uncased-slim`](https://huggingface.co/hf-internal-testing/proto-bert-base-uncased-slim) → google-bert/bert-base-uncased |
-| [T5](../example/hub/T5-integration) | `AutoTokenizer` + `AutoModelForSeq2SeqLM.generate`, batched | [`proto-t5-small-slim`](https://huggingface.co/hf-internal-testing/proto-t5-small-slim) → google-t5/t5-small; [`proto-umt5-small-slim`](https://huggingface.co/hf-internal-testing/proto-umt5-small-slim) → google/umt5-small |
-| [Whisper](../example/hub/Whisper-integration) | `WhisperProcessor` + `WhisperForConditionalGeneration.generate`, English, batched | [`proto-whisper-tiny-slim`](https://huggingface.co/hf-internal-testing/proto-whisper-tiny-slim) → openai/whisper-tiny |
+| [SmolLM](../example/hub/SmolLM-integration) | `AutoTokenizer` + `AutoModelForCausalLM.generate`, batched, left padding | [`mic-SmolLM-slim`](https://huggingface.co/hf-internal-testing/mic-SmolLM-slim) → SmolLM-135M, -360M; [`mic-SmolLM-1.7B-slim`](https://huggingface.co/hf-internal-testing/mic-SmolLM-1.7B-slim) → SmolLM-1.7B |
+| [CLIP](../example/hub/CLIP-integration) | `CLIPProcessor` + `CLIPModel`, image-caption matching, batched | [`mic-clip-vit-base-patch32-slim`](https://huggingface.co/hf-internal-testing/mic-clip-vit-base-patch32-slim) → openai/clip-vit-base-patch32 |
+| [BERT](../example/hub/BERT-integration) | `AutoTokenizer` + `AutoModelForMaskedLM`, batched, right padding | [`mic-bert-base-uncased-slim`](https://huggingface.co/hf-internal-testing/mic-bert-base-uncased-slim) → google-bert/bert-base-uncased |
+| [T5](../example/hub/T5-integration) | `AutoTokenizer` + `AutoModelForSeq2SeqLM.generate`, batched | [`mic-t5-small-slim`](https://huggingface.co/hf-internal-testing/mic-t5-small-slim) → google-t5/t5-small; [`mic-umt5-small-slim`](https://huggingface.co/hf-internal-testing/mic-umt5-small-slim) → google/umt5-small |
+| [Whisper](../example/hub/Whisper-integration) | `WhisperProcessor` + `WhisperForConditionalGeneration.generate`, English, batched | [`mic-whisper-tiny-slim`](https://huggingface.co/hf-internal-testing/mic-whisper-tiny-slim) → openai/whisper-tiny |
 | [WhisperSpeech](../example/hub/WhisperSpeech-integration) | Frozen speech: greedy versus encoder-decoder assisted generation | Checkpoint-only: openai/whisper-tiny; slim path declared unsupported |
-| [Wav2Vec2](../example/hub/Wav2Vec2-integration) | `Wav2Vec2Processor` + `Wav2Vec2ForCTC`, greedy CTC, batched | [`proto-wav2vec2-base-960h-slim`](https://huggingface.co/hf-internal-testing/proto-wav2vec2-base-960h-slim) → facebook/wav2vec2-base-960h |
-| [MusicgenMelody](../example/hub/MusicgenMelody-integration) | `AutoProcessor` + `MusicgenMelodyForConditionalGeneration.generate`, text + melody prompts, classifier-free guidance, batched | [`proto-musicgen-melody-slim`](https://huggingface.co/hf-internal-testing/proto-musicgen-melody-slim) → facebook/musicgen-melody |
+| [Wav2Vec2](../example/hub/Wav2Vec2-integration) | `Wav2Vec2Processor` + `Wav2Vec2ForCTC`, greedy CTC, batched | [`mic-wav2vec2-base-960h-slim`](https://huggingface.co/hf-internal-testing/mic-wav2vec2-base-960h-slim) → facebook/wav2vec2-base-960h |
+| [MusicgenMelody](../example/hub/MusicgenMelody-integration) | `AutoProcessor` + `MusicgenMelodyForConditionalGeneration.generate`, text + melody prompts, classifier-free guidance, batched | [`mic-musicgen-melody-slim`](https://huggingface.co/hf-internal-testing/mic-musicgen-melody-slim) → facebook/musicgen-melody |
 
 Eight contracts use 9 unique fixtures and 10 unique checkpoints. Per variant, 19 checks run (Whisper tiny has two usage paths), with two declared exclusions: `google/umt5-small` has no `model_type`, and WhisperSpeech has no fixture coverage. Nightly runs 95 checks across its five platform/variant combinations, plus 10 declared exclusions.
 
@@ -42,7 +42,7 @@ Eight contracts use 9 unique fixtures and 10 unique checkpoints. Per variant, 19
 | --- | --- |
 | `cpu-arm64` | Apple M5 |
 | `cpu-x86_64` | [`cpu-baselines.yml`](../.github/workflows/cpu-baselines.yml): AMD EPYC 7R32; float32 targets agree on the 7763 and 9V45 ([evidence](evidence.md#bfloat16-on-cpu)) |
-| `cpu-x86_64-bf16` | bfloat16 targets (SmolLM-135M/-360M, proto-SmolLM-slim) on CPUs with `avx512_bf16`/`amx_bf16`: AMD EPYC 9V45 |
+| `cpu-x86_64-bf16` | bfloat16 targets (SmolLM-135M/-360M, mic-SmolLM-slim) on CPUs with `avx512_bf16`/`amx_bf16`: AMD EPYC 9V45 |
 | `cuda` | A10G |
 
 `--record` writes candidates that must reproduce in a fresh process; a reviewer renames them to approve.
@@ -70,7 +70,7 @@ python example/run.py --framework transformers.js
 
 ```sh
 python example/build_fixtures.py                                    # all fixtures, ~45 s
-python example/build_fixtures.py --fixture proto-whisper-tiny-slim
+python example/build_fixtures.py --fixture mic-whisper-tiny-slim
 python example/build_fixtures.py --out /tmp/rebuilt                 # rebuild and compare with the pins
 python example/build_fixtures.py --out /tmp/random --keep-random    # random-weight twins, for overfit-vs-random replays
 python example/publish_fixtures.py                                  # upload fixtures that match their pin

@@ -35,7 +35,7 @@ RESULTS = HERE / "results" / "sweep.json"
 # Generic width rule: field name -> fixture value, applied in every (sub-)config.
 WIDTHS = {
     "hidden_size": 64, "intermediate_size": 128, "d_model": 64, "d_ff": 128,
-    "embed_dim": 64, "ffn_dim": 128, "encoder_ffn_dim": 128, "decoder_ffn_dim": 128,
+    "embed_dim": 64, "out_hidden_size": 64, "ffn_dim": 128, "encoder_ffn_dim": 128, "decoder_ffn_dim": 128,
     "num_attention_heads": 4, "num_heads": 4, "encoder_attention_heads": 4,
     "decoder_attention_heads": 4, "head_dim": 16, "d_kv": 16, "attention_head_dim": 16,
     "moe_intermediate_size": 32, "shared_intermediate_size": 128,
@@ -207,6 +207,8 @@ def shrink(config):
             for key, value in cfg.to_dict().items():
                 if isinstance(value, list) and len(value) == values["num_hidden_layers"]:
                     values[key] = [value[i] for i in kept if i < len(value)]
+            if getattr(cfg, "num_kv_shared_layers", None) is not None:
+                values["num_kv_shared_layers"] = sum(i >= cfg.num_hidden_layers - cfg.num_kv_shared_layers for i in kept)
             if getattr(cfg, "first_k_dense_replace", None) is not None:
                 values["first_k_dense_replace"] = sum(i < cfg.first_k_dense_replace for i in kept)
             per_layer = values.get("per_layer_config")
@@ -218,6 +220,23 @@ def shrink(config):
             if getattr(cfg, "mlp_only_layers", None):
                 values["mlp_only_layers"] = [n for n, i in enumerate(kept) if i in cfg.mlp_only_layers]
             values["num_hidden_layers"] = len(kept)
+        if isinstance(values.get("intermediate_size"), list):
+            values["intermediate_size"] = [min(size, 128) for size in values["intermediate_size"]]
+        if values.get("upsample_groups") and values.get("hidden_size"):
+            from math import gcd
+            values["upsample_groups"] = gcd(values["upsample_groups"], values["hidden_size"])
+        if values.get("model_type") == "paligemma":
+            values["projection_dim"] = values["text_config"]["hidden_size"]
+        # Multimodal RoPE partitions must still cover half the resized head.
+        rope = values.get("rope_parameters")
+        if isinstance(rope, dict) and rope.get("mrope_section"):
+            sections = rope["mrope_section"]
+            half_head = values.get("head_dim", values["hidden_size"] // values["num_attention_heads"]) // 2
+            scaled = [size * half_head / sum(sections) for size in sections]
+            kept = [int(size) for size in scaled]
+            for i in sorted(range(len(kept)), key=lambda i: scaled[i] - kept[i], reverse=True)[:half_head - sum(kept)]:
+                kept[i] += 1
+            rope["mrope_section"] = kept
         return type(cfg).from_dict(values)
 
     return rebuilt(config)

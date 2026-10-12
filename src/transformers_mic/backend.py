@@ -39,6 +39,46 @@ def dispatch(tool, workspace, args):
         return f"import sys\nsys.path.insert(0, {str(source)!r})\nimport patches\npatches.apply({sorted(names)!r})\n\n"
 
     runner.patch_prelude = patch_prelude
+    if tool == "auto-stage":
+        import json
+        from transformers import AutoConfig
+        from transformers.models.auto import modeling_auto
+        from .workspace import Workspace, write
+
+        project = Workspace(workspace)
+        pin = project.lock["contracts"][project.state["contract"]]["fixtures"][
+            project.fixture
+        ]
+        folder = runner.fixture_folder(
+            project.lock_path.parent, project.fixture, pin, False
+        )
+        config = AutoConfig.from_pretrained(folder)
+        resolved = {}
+        for name in dir(modeling_auto):
+            factory = getattr(modeling_auto, name)
+            if (
+                name.startswith("AutoModel")
+                and isinstance(factory, type)
+                and hasattr(factory, "_model_mapping")
+            ):
+                try:
+                    mapped = factory._model_mapping[type(config)]
+                except KeyError:
+                    continue
+                resolved[name] = (
+                    [cls.__name__ for cls in mapped]
+                    if isinstance(mapped, tuple)
+                    else mapped.__name__
+                )
+        result = {
+            "model_type": config.model_type,
+            "config_class": type(config).__name__,
+            "model_factories": resolved,
+            "scope": "AutoConfig load and registered factory resolution; inference/training are checked by the contract",
+        }
+        write(workspace / ".mic/auto.json", result)
+        print(json.dumps(result))
+        return 0
     if tool == "build-stage":
         builder = importlib.import_module("build_fixtures")
         builder.HERE = runner.HERE
@@ -66,6 +106,9 @@ def dispatch(tool, workspace, args):
             entry["checkpoints"],
             Path(out),
             keep_random=bool(selection),
+            inspect_checkpoint=importlib.import_module(
+                "transformers_mic.inspection"
+            ).inspect_checkpoint,
         )
         return 0
     module = runner if tool == "run" else importlib.import_module(tool)

@@ -1,0 +1,39 @@
+{
+  "framework": "transformers",
+  "environment": {
+    "python": "3.10",
+    "torch": "2.11.0",
+    "torchvision": "0.26.0",
+    "torchaudio": "2.11.0",
+    "tokenizers": "0.23.1",
+    "numpy": "1.26.4",
+    "pillow": "12.2.0",
+    "accelerate": "1.13.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.32.0",
+    "sentencepiece": "0.2.1",
+    "protobuf": "6.33.6",
+    "librosa": "0.11.0",
+    "soundfile": "0.13.1",
+    "scipy": "1.15.3"
+  },
+  "contracts": {
+    "detr": {
+      "integration": {
+        "repo": "hf-internal-testing/mic-detr-integration",
+        "revision": "f3a79837574f4bc72ca3201bb01b85696fe37a0c",
+        "path": "../../../hub/detr-integration",
+        "files_sha256": "1354231e3f81046daa4ca25632e9ac18058d3deaa9a915dd6189e0ceb00815dd"
+      },
+      "fixtures": {
+        "hf-internal-testing/mic-detr-slim": {
+          "revision": "3a3a1420126e33823f073575fdb3bbac07037b52",
+          "files_sha256": "5ea58813db1f02c506fea5e4e774af5b1de8a329b85be95d6dcd54d17f50b8ed"
+        }
+      },
+      "checkpoints": {
+        "facebook/detr-resnet-50": "1d5f47bd3bdd2c4bbfa585418ffe6da5028b4c0b"
+      }
+    }
+  }
+}

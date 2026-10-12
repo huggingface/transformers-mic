@@ -1,0 +1,127 @@
+{
+  "run": "https://github.com/huggingface/transformers/actions/runs/38286964684",
+  "summary": {
+    "pass": 74,
+    "fail": 3
+  },
+  "executed": 77,
+  "prototype_cases": 69,
+  "control_cases": 8,
+  "failures": [
+    {
+      "contract": "hf-internal-testing/mic-whisper-integration",
+      "contract_name": "mic-whisper",
+      "contract_revision": "0e9904dea2784797b5a8b998a32ad0384b5b375a",
+      "framework": "transformers",
+      "variant": "default",
+      "target": "mic-whisper-slim",
+      "kind": "fixture",
+      "revision": "bb225853a3b2b2079639de9cdb5af3cbfa87fe48",
+      "environment": {
+        "python": "3.11.17",
+        "transformers": "5.19.0.dev0",
+        "torch": "2.11.0+cpu",
+        "torchvision": "0.26.0+cpu",
+        "torchaudio": "2.11.0+cpu",
+        "tokenizers": "0.23.1",
+        "numpy": "1.26.4",
+        "pillow": "12.2.0",
+        "accelerate": "1.13.0",
+        "safetensors": "0.8.0",
+        "huggingface-hub": "1.32.0",
+        "sentencepiece": "0.2.1",
+        "protobuf": "6.33.6",
+        "librosa": "0.11.0",
+        "soundfile": "0.13.1",
+        "scipy": "1.15.3"
+      },
+      "seconds": 6.76,
+      "environment_differs": {
+        "python": "3.11.17 (pinned 3.10)"
+      },
+      "platform": "cpu-x86_64",
+      "baseline": "tests/contracts/expectations/mic-whisper/cpu-x86_64/mic-whisper-slim.json",
+      "status": "fail",
+      "failures": [
+        "label_logprobs: max delta 0.000112 over tolerance"
+      ]
+    },
+    {
+      "contract": "hf-internal-testing/mic-whisper-integration",
+      "contract_name": "mic-whisper",
+      "contract_revision": "0e9904dea2784797b5a8b998a32ad0384b5b375a",
+      "framework": "transformers",
+      "variant": "eager",
+      "target": "mic-whisper-slim",
+      "kind": "fixture",
+      "revision": "bb225853a3b2b2079639de9cdb5af3cbfa87fe48",
+      "environment": {
+        "python": "3.11.17",
+        "transformers": "5.19.0.dev0",
+        "torch": "2.11.0+cpu",
+        "torchvision": "0.26.0+cpu",
+        "torchaudio": "2.11.0+cpu",
+        "tokenizers": "0.23.1",
+        "numpy": "1.26.4",
+        "pillow": "12.2.0",
+        "accelerate": "1.13.0",
+        "safetensors": "0.8.0",
+        "huggingface-hub": "1.32.0",
+        "sentencepiece": "0.2.1",
+        "protobuf": "6.33.6",
+        "librosa": "0.11.0",
+        "soundfile": "0.13.1",
+        "scipy": "1.15.3"
+      },
+      "seconds": 8.25,
+      "environment_differs": {
+        "python": "3.11.17 (pinned 3.10)"
+      },
+      "platform": "cpu-x86_64",
+      "baseline": "tests/contracts/expectations/mic-whisper/cpu-x86_64/mic-whisper-slim.eager.json",
+      "status": "fail",
+      "failures": [
+        "label_logprobs: max delta 0.000112 over tolerance"
+      ]
+    },
+    {
+      "contract": "hf-internal-testing/mic-whisper-integration",
+      "contract_name": "mic-whisper",
+      "contract_revision": "0e9904dea2784797b5a8b998a32ad0384b5b375a",
+      "framework": "transformers",
+      "variant": "bfloat16",
+      "target": "mic-whisper-slim",
+      "kind": "fixture",
+      "revision": "bb225853a3b2b2079639de9cdb5af3cbfa87fe48",
+      "environment": {
+        "python": "3.11.17",
+        "transformers": "5.19.0.dev0",
+        "torch": "2.11.0+cpu",
+        "torchvision": "0.26.0+cpu",
+        "torchaudio": "2.11.0+cpu",
+        "tokenizers": "0.23.1",
+        "numpy": "1.26.4",
+        "pillow": "12.2.0",
+        "accelerate": "1.13.0",
+        "safetensors": "0.8.0",
+        "huggingface-hub": "1.32.0",
+        "sentencepiece": "0.2.1",
+        "protobuf": "6.33.6",
+        "librosa": "0.11.0",
+        "soundfile": "0.13.1",
+        "scipy": "1.15.3"
+      },
+      "seconds": 6.52,
+      "environment_differs": {
+        "python": "3.11.17 (pinned 3.10)"
+      },
+      "platform": "cpu-x86_64-bf16",
+      "baseline": "tests/contracts/expectations/mic-whisper/cpu-x86_64-bf16/mic-whisper-slim.bfloat16.json",
+      "status": "fail",
+      "failures": [
+        "no reviewed baseline at tests/contracts/expectations/mic-whisper/cpu-x86_64-bf16/mic-whisper-slim.bfloat16.json"
+      ]
+    }
+  ],
+  "note": "Whisper unexpectedly reached numeric checks despite recorder generation error. Source provenance and explicit checkout PYTHONPATH added for rerun; no tolerances changed."
+}

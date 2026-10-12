@@ -1,0 +1,186 @@
+{
+  "model": "HuggingFaceTB/SmolVLM2-2.2B-Instruct",
+  "contract": "smolvlm",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": {
+    "variant": "bfloat16",
+    "records": [
+      {
+        "contract": "hf-internal-testing/mic-smolvlm-integration",
+        "contract_name": "smolvlm",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "bfloat16",
+        "target": "mic-smolvlm-slim",
+        "kind": "fixture",
+        "revision": "unpublished",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3"
+        },
+        "seconds": 5.51,
+        "platform": "cuda",
+        "baseline": "transformers/tests/contracts/expectations/smolvlm/cuda/mic-smolvlm-slim.bfloat16.json",
+        "status": "pass",
+        "failures": []
+      }
+    ],
+    "lock_sha256": "c562e4476797f3cb641bf9b3132fc633ebd522363677585e8f505f601a34c947",
+    "manifest_sha256": "bc6f6726ac2e5ad0e9e13cae1fa0e28f97b08b86f86ecee273b90042db98501e",
+    "usage_sha256": "ae2b8d2e1e078d860f78f9624561a15359a460391643b62cd48a9814b706664d"
+  },
+  "validations": {
+    "default": {
+      "variant": "default",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-smolvlm-integration",
+          "contract_name": "smolvlm",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "default",
+          "target": "mic-smolvlm-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 5.46,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/smolvlm/cuda/mic-smolvlm-slim.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "c562e4476797f3cb641bf9b3132fc633ebd522363677585e8f505f601a34c947",
+      "manifest_sha256": "bc6f6726ac2e5ad0e9e13cae1fa0e28f97b08b86f86ecee273b90042db98501e",
+      "usage_sha256": "ae2b8d2e1e078d860f78f9624561a15359a460391643b62cd48a9814b706664d",
+      "fingerprint": "cb4499e134a86e419bda256da7016198bdfa639f53106096c397336201089d98"
+    },
+    "eager": {
+      "variant": "eager",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-smolvlm-integration",
+          "contract_name": "smolvlm",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "eager",
+          "target": "mic-smolvlm-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 5.43,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/smolvlm/cuda/mic-smolvlm-slim.eager.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "c562e4476797f3cb641bf9b3132fc633ebd522363677585e8f505f601a34c947",
+      "manifest_sha256": "bc6f6726ac2e5ad0e9e13cae1fa0e28f97b08b86f86ecee273b90042db98501e",
+      "usage_sha256": "ae2b8d2e1e078d860f78f9624561a15359a460391643b62cd48a9814b706664d",
+      "fingerprint": "cb4499e134a86e419bda256da7016198bdfa639f53106096c397336201089d98"
+    },
+    "bfloat16": {
+      "variant": "bfloat16",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-smolvlm-integration",
+          "contract_name": "smolvlm",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "bfloat16",
+          "target": "mic-smolvlm-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 5.51,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/smolvlm/cuda/mic-smolvlm-slim.bfloat16.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "c562e4476797f3cb641bf9b3132fc633ebd522363677585e8f505f601a34c947",
+      "manifest_sha256": "bc6f6726ac2e5ad0e9e13cae1fa0e28f97b08b86f86ecee273b90042db98501e",
+      "usage_sha256": "ae2b8d2e1e078d860f78f9624561a15359a460391643b62cd48a9814b706664d",
+      "fingerprint": "cb4499e134a86e419bda256da7016198bdfa639f53106096c397336201089d98"
+    }
+  },
+  "weight_decision": {
+    "requested": "auto",
+    "weights": "random",
+    "accepted": true,
+    "reused": false,
+    "reason": "Random weights pass the measured sensitivity and numeric-health gates; training is unnecessary.",
+    "readability_requested": false,
+    "historical_detection": "unverified until replayed; a gate pass is not a regression catch"
+  }
+}

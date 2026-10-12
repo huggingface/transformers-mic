@@ -1,0 +1,10 @@
+{
+  "model": "google/gemma-3n-E2B-it",
+  "contract": "gemma3n",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": null,
+  "validations": {}
+}

@@ -1,0 +1,90 @@
+{
+  "name": "internvl",
+  "manifest": {
+    "mic": "0.3",
+    "name": "InternVL3-1B",
+    "usage": "AutoProcessor + AutoModelForImageTextToText, multimodal image+text inference and training",
+    "architecture": "InternVLForConditionalGeneration",
+    "checkpoints": {
+      "OpenGVLab/InternVL3-1B-hf": {
+        "fixture": "hf-internal-testing/mic-internvl-slim"
+      }
+    },
+    "fixtures": {
+      "hf-internal-testing/mic-internvl-slim": {
+        "built_from": "OpenGVLab/InternVL3-1B-hf",
+        "covers": [
+          "OpenGVLab/InternVL3-1B-hf"
+        ],
+        "build": {
+          "seed": 17
+        }
+      }
+    },
+    "integrations": {
+      "transformers": {
+        "entry_point": "integrations/transformers/usage.md",
+        "format": "runnable-markdown",
+        "requires": [
+          "transformers>=4.52",
+          "torch",
+          "Pillow",
+          "numpy"
+        ],
+        "targets": [
+          "fixtures"
+        ],
+        "variants": {
+          "default": {},
+          "eager": {
+            "attn_implementation": "eager"
+          },
+          "bfloat16": {
+            "dtype": "bfloat16"
+          }
+        },
+        "training": true,
+        "resources": {
+          "fixture": {
+            "memory_gb": 4,
+            "download_mb": 200
+          },
+          "OpenGVLab/InternVL3-1B-hf": {
+            "memory_gb": 8,
+            "download_mb": 2100
+          }
+        }
+      }
+    },
+    "outputs": {
+      "runtime": {
+        "compare": "exact"
+      },
+      "logits_probe": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.loss": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.gradients": {
+        "compare": "all_true"
+      },
+      "training.updated": {
+        "compare": "true"
+      }
+    }
+  },
+  "usage": "# InternVL3-1B: multimodal image+text with Transformers\n\nThis page is the Transformers contract of the InternVL3-1B MIC and also a usage example. [doc-builder](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md) renders the `runnable` blocks below as documentation, and its pytest plugin runs them as written against `OpenGVLab/InternVL3-1B-hf`. The MIC runner runs the same blocks against each slim fixture and each checkpoint in [`integration.json`](../../integration.json). Lines marked `# doc-builder: hide` only matter there: they swap in the pinned checkpoint or variant and print the result record.\n\n## Image+text inference\n\n```py runnable:internvl\nimport torch\nfrom transformers import AutoProcessor, AutoModelForImageTextToText, set_seed\nfrom PIL import Image\nimport json  # doc-builder: hide\nimport os  # doc-builder: hide\nimport numpy as np  # doc-builder: hide\n\nmodel_id = \"OpenGVLab/InternVL3-1B-hf\"\nmodel_id = os.environ.get(\"MIC_MODEL\", model_id)  # doc-builder: hide\nvariant = json.loads(os.environ.get(\"MIC_MODEL_KWARGS\", \"{}\"))  # doc-builder: hide\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nset_seed(0)\n\nprocessor = AutoProcessor.from_pretrained(model_id)\nload_kwargs = dict(variant)  # doc-builder: hide\nif \"dtype\" in load_kwargs:  # doc-builder: hide\n    load_kwargs[\"torch_dtype\"] = getattr(torch, load_kwargs.pop(\"dtype\"))  # doc-builder: hide\nmodel = AutoModelForImageTextToText.from_pretrained(model_id, **load_kwargs).to(device)  # doc-builder: hide\n\n# Two distinct synthetic images matching the model's expected input size (448x448)\nimg1 = Image.fromarray(np.random.randint(0, 255, (448, 448, 3), dtype=np.uint8))\nimg2 = Image.fromarray(np.random.randint(0, 255, (448, 448, 3), dtype=np.uint8))\n\n# Prompt-only conversations for inference\nprompts = [\n    [{\"role\": \"user\", \"content\": [{\"type\": \"image\"}, {\"type\": \"text\", \"text\": \"Describe this image briefly.\"}]}],\n    [{\"role\": \"user\", \"content\": [{\"type\": \"image\"}, {\"type\": \"text\", \"text\": \"What do you see?\"}]}],\n]\nprompt_texts = [processor.apply_chat_template(p, tokenize=False, add_generation_prompt=True) for p in prompts]\n\ninputs = processor(images=[img1, img2], text=prompt_texts, return_tensors=\"pt\", padding=True).to(device)\n\nmodel.eval()\nwith torch.no_grad():\n    out = model(**inputs)\nlogits = out.logits\n\n# Compact probe: last 5 positions, first 5 vocab entries of sequence 0\nprobe = logits[0, -5:, :5].float().tolist()\nprint(f\"logits probe: {probe}\")\n```\n\n## One training step\n\n```py runnable:internvl:2\n# Full conversations (user + assistant) for supervised training\nfull_convs = [\n    [\n        {\"role\": \"user\", \"content\": [{\"type\": \"image\"}, {\"type\": \"text\", \"text\": \"Describe this image briefly.\"}]},\n        {\"role\": \"assistant\", \"content\": [{\"type\": \"text\", \"text\": \"A colorful abstract pattern.\"}]},\n    ],\n    [\n        {\"role\": \"user\", \"content\": [{\"type\": \"image\"}, {\"type\": \"text\", \"text\": \"What do you see?\"}]},\n        {\"role\": \"assistant\", \"content\": [{\"type\": \"text\", \"text\": \"A random noise image.\"}]},\n    ],\n]\nfull_texts = [processor.apply_chat_template(c, tokenize=False) for c in full_convs]\ntrain_inputs = processor(images=[img1, img2], text=full_texts, return_tensors=\"pt\", padding=True).to(device)\n\n# Labels: -100 for prompt positions, token ids for response positions\nprompt_enc = processor(images=[img1, img2], text=prompt_texts, return_tensors=\"pt\", padding=True)\nprompt_lens = prompt_enc[\"input_ids\"].ne(processor.tokenizer.pad_token_id).sum(dim=-1).to(device)\nlabels = train_inputs[\"input_ids\"].clone()\nfor i in range(labels.shape[0]):\n    labels[i, :prompt_lens[i]] = -100\n    if processor.tokenizer.pad_token_id is not None:\n        labels[i, train_inputs[\"input_ids\"][i] == processor.tokenizer.pad_token_id] = -100\n\nmodel.train()\noptimizer = torch.optim.SGD(model.parameters(), lr=0.01)\nloss = model(**train_inputs, labels=labels).loss\nloss.backward()\nbefore = {n: p.detach().clone() for n, p in model.named_parameters()}  # doc-builder: hide\noptimizer.step()\nprint(f\"loss: {loss.item():.4f}\")\n\nif os.environ.get(\"MIC_RUNNER\"):  # doc-builder: hide\n    named = dict(model.named_parameters())\n    all_names = list(named.keys())\n    vis_params = [n for n in all_names if \"vision\" in n and \"layers.0\" in n]\n    lang_params = [n for n in all_names if \"language\" in n and \"layers.0\" in n and \"q_proj\" in n]\n    checked = (vis_params[0] if vis_params else all_names[0], lang_params[0] if lang_params else all_names[-1])\n    result = {\n        \"runtime\": {\n            \"device\": device,\n            \"dtype\": str(next(model.parameters()).dtype).removeprefix(\"torch.\"),\n            \"attn_implementation\": model.config._attn_implementation,\n        },\n        \"logits_probe\": probe,\n        \"training\": {\n            \"loss\": loss.item(),\n            \"gradients\": {\n                n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all())\n                for n in checked\n            },\n            \"updated\": any(not torch.equal(p, before[n]) for n, p in named.items()),\n        },\n    }\n    print(json.dumps(result))\n```\n",
+  "rationale": "InternVL3-1B is a 1B-parameter multimodal model (InternVision encoder + Qwen2 decoder) that supports both image-conditioned text generation and supervised fine-tuning. The contract exercises the full AutoProcessor pipeline (image resize/normalize + chat-template tokenization), verifies deterministic inference via a compact logits probe, and confirms that a single SGD step produces finite nonzero gradients in both the vision and language sub-models while actually updating weights. Two distinct synthetic 448x448 images with different prompts ensure batch perturbation is meaningful. The bfloat16 variant exercises the model's native dtype path; the eager variant disables SDPA to isolate attention-implementation regressions.",
+  "historical_candidates": [],
+  "llm": {
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "auto",
+    "usage": "ChatCompletionOutputUsage(completion_tokens=9959, prompt_tokens=5093, total_tokens=15052, completion_tokens_details={'reasoning_tokens': 7941}, prompt_tokens_details={'cached_tokens': 4096, 'image_tokens': 0})",
+    "role": "proposal only"
+  }
+}

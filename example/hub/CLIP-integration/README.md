@@ -19,7 +19,7 @@ Usage path: CLIPProcessor + CLIPModel, image-caption matching, batched.
 
 | Checkpoint | Slim fixture (every framework PR) |
 | --- | --- |
-| [`openai/clip-vit-base-patch32`](https://huggingface.co/openai/clip-vit-base-patch32) | [`hf-internal-testing/proto-clip-vit-base-patch32-slim`](https://huggingface.co/hf-internal-testing/proto-clip-vit-base-patch32-slim) |
+| [`openai/clip-vit-base-patch32`](https://huggingface.co/openai/clip-vit-base-patch32) | [`hf-internal-testing/mic-clip-vit-base-patch32-slim`](https://huggingface.co/hf-internal-testing/mic-clip-vit-base-patch32-slim) |
 
 Checked outputs: `image_to_text`, `text_to_image`, `logits_per_image`, `text_kwargs_input_ids`, `image_processor_config_keys`, `training.loss`, `training.gradients`, `training.updated`.
 

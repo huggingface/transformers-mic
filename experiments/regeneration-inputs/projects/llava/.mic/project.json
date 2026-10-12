@@ -1,0 +1,10 @@
+{
+  "model": "llava-hf/llava-1.5-7b-hf",
+  "contract": "llava",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": null,
+  "validations": {}
+}

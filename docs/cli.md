@@ -4,8 +4,9 @@
 and reviewed catalog. The `tmic` command creates a working directory for a model,
 proposes additional usage paths when needed, and measures expectations there.
 It is an alpha implementation: generated plans still need code review and a
-working model-specific build recipe. Repository renaming does not change the
-published Hub artifact names or historical evidence links.
+working model-specific build recipe. New artifacts use `hf-internal-testing/mic-{name}-slim` and
+`mic-{name}-integration`. The nine legacy `proto-*-slim` repositories were moved
+to `mic-*-slim`, preserving suffixes and revisions; historical evidence stays as recorded.
 
 ## Install and start
 
@@ -121,6 +122,10 @@ Hub revisions. It invalidates local check receipts, so check again before export
 Upload requires write access to the integration/fixture namespaces; catalog
 artifacts remain under their existing owners.
 
+`export --contract-name mic-bert` gives the destination a distinct name when
+retaining a historical `BERT` contract. Export rejects names that differ only
+by case, avoiding baseline-folder collisions on macOS and Windows.
+
 `export` writes a reviewable `tests/contracts/fleet.lock` and expectations into the
 provided checkout, preserves other contracts, and removes workspace paths from
 pins. It does not commit, open a PR, or merge Transformers changes. CI can run:
@@ -145,9 +150,64 @@ fixture passed the build gates and recorded a candidate. Source distributions
 and wheels were checked for complete backend/catalog resources and exclusion of
 weights, pending candidates and installed JavaScript dependencies.
 
-A live default Qwen request produced a validated BERT draft; its random slim
-passed the sensitivity/numeric-health gates and recorded a repeatable CPU
-candidate. This verifies the workflow on one model, not generation quality or
-architecture support across the fleet. Unit tests cover policy failures, draft
-repair, update preservation, validation invalidation, and fleet export.
-[Validation report](../experiments/results/mic_cli_validation.json).
+A live default Qwen request produced a validated BERT draft. Fleet exercise now
+covers 26 concrete architectures; the repeated SpeechT5 request is deduplicated.
+`auto` uses BERT, T5 and ViT contracts with explicit Auto classes, rather than
+building a separate model. The [third GPU pass](https://github.com/huggingface/transformers-mic/actions/runs/38260897058)
+validated 17 architectures in default/eager/bfloat16, with fixture-only targets:
+BERT, GPT2, T5, ModernBERT, ViT, CLIP, Table Transformer, GOT-OCR2, Whisper,
+Wav2Vec2, Llama, Gemma3, Qwen2, Mistral3, LLaVA, SmolVLM and InternVL.
+[Per-model results](../experiments/results/prototype-regeneration.json).
+
+Subsequent GPU passes validated GPT-OSS, Qwen2-Audio, Qwen2.5-VL, DETR,
+SpeechT5 and Qwen2.5-Omni, bringing the published fleet to **23 architectures**.
+Each has immutable public `hf-internal-testing/mic-*-slim` and
+`mic-*-integration` pins. GPT-OSS uses a dense slim derived from the quantized
+checkpoint's paired MXFP4 blocks/scales; it does not test quantized kernels.
+
+Three architectures remain rejected: CSM's processor passes an unsupported
+argument to its audio feature extractor; Gemma3n has nonfinite gradients despite
+finite forward/loss; PI0's native action calls execute but its fixture fails the
+fixed state/image sensitivity gates. PI0 uses the documented `lerobot/pi0_base`
+checkpoint. Numeric tolerances and the sensitivity threshold remain unchanged.
+DETR and SpeechT5 explicitly exempt amplitude scaling that their input
+normalization cancels; other probes remain required. The original failed
+[normalization probes](../experiments/results/prototype-normalization-probes.json)
+are retained. Initial fleet creation
+skipped history collection; these checks establish fixture behavior, without
+historical-regression or full-checkpoint coverage. Some GPU runs used documented,
+model-scoped framework patches; the Transformers proof runs without them.
+
+Regenerate or resume the declared fleet using the CLI:
+
+```sh
+tmic batch --models-file experiments/proto-models.json --out work/fleet --phase prepare --no-history
+tmic batch --models-file experiments/proto-models.json --out work/fleet --phase run --resume
+tmic batch --models-file experiments/proto-models.json --out work/fleet --phase run --resume --select whisper
+```
+
+`batch` records a stage result for every model and continues after failures.
+Resume retains successful builds and repeats recording, review and checks;
+`--publish` explicitly adds upload and published-pin checks. CPU expectations
+must be recorded and checked before using GPU-generated contracts in CPU CI.
+The `mic-published` workflow checks immutable Hub pins on GPU, records/reviews
+fresh CPU expectations, checks both platforms and exports passing contracts.
+Native CPU recording now runs on Transformers' actual `aws-m8i-l-cache`
+runner, with torch 2.11, pinned scientific dependencies and four CPU threads.
+The proof explicitly selects checkout `src` and asserts its framework import
+path and thread count, because installed-package versions alone do not verify
+the source under test. The
+[native recording run](https://github.com/huggingface/transformers/actions/runs/38281747657)
+checked and exported 22 models in all three variants; Whisper's prototype remains
+blocked by the `suppress_tokens` generation error (#49456). New native BF16/FP16
+platform references were recorded; no changed candidates were approved.
+The 23-model proof fleet retains Whisper as a message-matched expected failure
+and skips only Wav2Vec2 loss/gradients for #49385. Its historical six-contract
+fleet stays separate. See [current proof scope](transformers-ci-proof.md).
+`published_gpu_only=true` focuses `mic-published` on immutable GPU pins when
+native CPU validation has already run separately.
+
+Unit tests cover policy failures, draft repair, checkpoint-name inspection,
+update preservation, validation invalidation and fleet export. The initial
+[package validation report](../experiments/results/mic_cli_validation.json)
+remains separate from the architecture fleet study.

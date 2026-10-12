@@ -1,0 +1,82 @@
+{
+  "mic": "0.3",
+  "name": "GOT-OCR2",
+  "usage": "AutoProcessor + AutoModelForImageTextToText, vision-language OCR with synthetic image inputs",
+  "architecture": "GotOcr2ForConditionalGeneration",
+  "checkpoints": {
+    "stepfun-ai/GOT-OCR-2.0-hf": {
+      "fixture": "hf-internal-testing/mic-got_ocr2-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/mic-got_ocr2-slim": {
+      "built_from": "stepfun-ai/GOT-OCR-2.0-hf",
+      "covers": [
+        "stepfun-ai/GOT-OCR-2.0-hf"
+      ],
+      "build": {
+        "seed": 17
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=4.49",
+        "torch",
+        "Pillow"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 2,
+          "download_mb": 100
+        },
+        "stepfun-ai/GOT-OCR-2.0-hf": {
+          "memory_gb": 4,
+          "download_mb": 2000,
+          "variants": {
+            "bfloat16": {
+              "memory_gb": 3
+            }
+          }
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "inference_logits": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

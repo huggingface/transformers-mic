@@ -1,0 +1,39 @@
+{
+  "framework": "transformers",
+  "environment": {
+    "python": "3.10",
+    "torch": "2.11.0",
+    "torchvision": "0.26.0",
+    "torchaudio": "2.11.0",
+    "tokenizers": "0.23.1",
+    "numpy": "1.26.4",
+    "pillow": "12.2.0",
+    "accelerate": "1.13.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.32.0",
+    "sentencepiece": "0.2.1",
+    "protobuf": "6.33.6",
+    "librosa": "0.11.0",
+    "soundfile": "0.13.1",
+    "scipy": "1.15.3"
+  },
+  "contracts": {
+    "gemma3": {
+      "integration": {
+        "repo": "hf-internal-testing/mic-gemma3-integration",
+        "revision": "f34a04b1578553d45003a3e23dc3a803d98390a4",
+        "path": "../../../hub/gemma3-integration",
+        "files_sha256": "88558f25aaac18f3e5c4beecaab2aa9655b1fa89447c88f17215dd87e8af2785"
+      },
+      "fixtures": {
+        "hf-internal-testing/mic-gemma3-slim": {
+          "revision": "69edff0fefb48c63648254cc9e80028a61b091b5",
+          "files_sha256": "a841e5e6ebfb391619b35159d6e11484fae13626909909743e861d192ace7372"
+        }
+      },
+      "checkpoints": {
+        "google/gemma-3-4b-it": "093f9f388b31de276ce2de164bdc2081324b9767"
+      }
+    }
+  }
+}

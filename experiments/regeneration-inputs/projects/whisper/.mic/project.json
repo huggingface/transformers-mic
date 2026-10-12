@@ -1,0 +1,10 @@
+{
+  "model": "openai/whisper-tiny",
+  "contract": "whisper",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "catalog-regenerated",
+  "validated": false,
+  "validation": null,
+  "validations": {}
+}

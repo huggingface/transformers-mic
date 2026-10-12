@@ -1,0 +1,186 @@
+{
+  "model": "google/gemma-3-4b-it",
+  "contract": "gemma3",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": {
+    "variant": "bfloat16",
+    "records": [
+      {
+        "contract": "hf-internal-testing/mic-gemma3-integration",
+        "contract_name": "gemma3",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "bfloat16",
+        "target": "mic-gemma3-slim",
+        "kind": "fixture",
+        "revision": "unpublished",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3"
+        },
+        "seconds": 6.36,
+        "platform": "cuda",
+        "baseline": "transformers/tests/contracts/expectations/gemma3/cuda/mic-gemma3-slim.bfloat16.json",
+        "status": "pass",
+        "failures": []
+      }
+    ],
+    "lock_sha256": "7383fabaa138f08643c154f90e1896d6720f6e933e3991606858b79fa8483c03",
+    "manifest_sha256": "42028f8104ce026abc7cdaeb5a1ce28046f17028344d7c1d109ff9deb2c6849f",
+    "usage_sha256": "9333edf1db31b96127fa90ab158ee4ce3c3433c47e34c6dc08169e2d69f2a53d"
+  },
+  "validations": {
+    "default": {
+      "variant": "default",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-gemma3-integration",
+          "contract_name": "gemma3",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "default",
+          "target": "mic-gemma3-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 6.33,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/gemma3/cuda/mic-gemma3-slim.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "7383fabaa138f08643c154f90e1896d6720f6e933e3991606858b79fa8483c03",
+      "manifest_sha256": "42028f8104ce026abc7cdaeb5a1ce28046f17028344d7c1d109ff9deb2c6849f",
+      "usage_sha256": "9333edf1db31b96127fa90ab158ee4ce3c3433c47e34c6dc08169e2d69f2a53d",
+      "fingerprint": "30fc3493351682296f306bb0818b40f5e7c174e94dc9b6726061a296d87c74bb"
+    },
+    "eager": {
+      "variant": "eager",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-gemma3-integration",
+          "contract_name": "gemma3",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "eager",
+          "target": "mic-gemma3-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 6.39,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/gemma3/cuda/mic-gemma3-slim.eager.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "7383fabaa138f08643c154f90e1896d6720f6e933e3991606858b79fa8483c03",
+      "manifest_sha256": "42028f8104ce026abc7cdaeb5a1ce28046f17028344d7c1d109ff9deb2c6849f",
+      "usage_sha256": "9333edf1db31b96127fa90ab158ee4ce3c3433c47e34c6dc08169e2d69f2a53d",
+      "fingerprint": "30fc3493351682296f306bb0818b40f5e7c174e94dc9b6726061a296d87c74bb"
+    },
+    "bfloat16": {
+      "variant": "bfloat16",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-gemma3-integration",
+          "contract_name": "gemma3",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "bfloat16",
+          "target": "mic-gemma3-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 6.36,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/gemma3/cuda/mic-gemma3-slim.bfloat16.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "7383fabaa138f08643c154f90e1896d6720f6e933e3991606858b79fa8483c03",
+      "manifest_sha256": "42028f8104ce026abc7cdaeb5a1ce28046f17028344d7c1d109ff9deb2c6849f",
+      "usage_sha256": "9333edf1db31b96127fa90ab158ee4ce3c3433c47e34c6dc08169e2d69f2a53d",
+      "fingerprint": "30fc3493351682296f306bb0818b40f5e7c174e94dc9b6726061a296d87c74bb"
+    }
+  },
+  "weight_decision": {
+    "requested": "auto",
+    "weights": "random",
+    "accepted": true,
+    "reused": false,
+    "reason": "Random weights pass the measured sensitivity and numeric-health gates; training is unnecessary.",
+    "readability_requested": false,
+    "historical_detection": "unverified until replayed; a gate pass is not a regression catch"
+  }
+}

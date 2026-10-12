@@ -1,0 +1,87 @@
+{
+  "origin": "catalog-regenerated",
+  "source_contract": "BERT",
+  "scope": "fixtures",
+  "manifest": {
+    "mic": "0.3",
+    "name": "BERT fill-mask",
+    "usage": "AutoTokenizer + AutoModelForMaskedLM, batched, right padding",
+    "architecture": "BertForMaskedLM",
+    "checkpoints": {
+      "google-bert/bert-base-uncased": {
+        "fixture": "hf-internal-testing/mic-bert-slim"
+      }
+    },
+    "fixtures": {
+      "hf-internal-testing/mic-bert-slim": {
+        "built_from": "google-bert/bert-base-uncased",
+        "covers": [
+          "google-bert/bert-base-uncased"
+        ],
+        "build": {
+          "seed": 17
+        }
+      }
+    },
+    "integrations": {
+      "transformers": {
+        "entry_point": "integrations/transformers/usage.md",
+        "format": "runnable-markdown",
+        "requires": [
+          "transformers>=5",
+          "torch"
+        ],
+        "targets": [
+          "fixtures"
+        ],
+        "variants": {
+          "default": {},
+          "eager": {
+            "attn_implementation": "eager"
+          },
+          "bfloat16": {
+            "dtype": "bfloat16"
+          }
+        },
+        "training": true,
+        "resources": {
+          "fixture": {
+            "memory_gb": 1,
+            "download_mb": 20
+          },
+          "google-bert/bert-base-uncased": {
+            "memory_gb": 2,
+            "download_mb": 440
+          }
+        }
+      }
+    },
+    "outputs": {
+      "runtime": {
+        "compare": "exact"
+      },
+      "predicted_tokens": {
+        "compare": "exact"
+      },
+      "predicted_text": {
+        "compare": "exact"
+      },
+      "answer_logits": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.loss": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.gradients": {
+        "compare": "all_true"
+      },
+      "training.updated": {
+        "compare": "true"
+      }
+    }
+  }
+}

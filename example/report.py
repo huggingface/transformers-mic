@@ -73,15 +73,16 @@ def main():
                 detail = f"not compared (known failure): {', '.join(r['skipped_outputs'])}"
             else:
                 detail = first_line(r.get("failures"))
-            out.append(f"| {ICON.get(r['status'], r['status'])} | {short(r['contract'])} | `{r['target']}` | {r.get('platform', '')} | {detail} |")
+            out.append(f"| {ICON.get(r['status'], r['status'])} | {r.get('contract_name', short(r['contract']))} | `{r['target']}` | {r.get('platform', '')} | {detail} |")
     bad = [r for r in records if r["status"] in ("fail", "error")]
     if bad:
         out += ["", "#### Failures", ""]
         for r in bad:
-            command = f"{args.runner} --framework transformers --fixtures-only{lock} --contract {short(r['contract'])} --target {r['target']}"
+            framework = "" if args.runner == "tmic check" else " --framework transformers"
+            command = f"{args.runner}{framework} --fixtures-only{lock} --contract {r.get('contract_name', short(r['contract']))} --target {r['target']}"
             if r.get("variant", "default") != "default":
                 command += f" --variant {r['variant']}"
-            out += [f"**{short(r['contract'])} / `{r['target']}`** ({r['status']}; baseline `{r.get('baseline', 'none')}`)", "",
+            out += [f"**{r.get('contract_name', short(r['contract']))} / `{r['target']}`** ({r['status']}; baseline `{r.get('baseline', 'none')}`)", "",
                     "```", *(f.rstrip() for f in r.get("failures", [])[:5]), "```", "",
                     f"Reproduce: `{command}`", ""]
         out += ["Is it a regression or an intended change? A regression: fix it in this PR (the fixture runs the contract's real usage code). "

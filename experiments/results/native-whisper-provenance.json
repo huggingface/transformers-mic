@@ -1,0 +1,124 @@
+{
+  "run": "https://github.com/huggingface/transformers/actions/runs/38293434434",
+  "source": "/__w/transformers/transformers/src/transformers",
+  "configuration_utils_sha256": "5d7bcd7432edb59b0206ddd05fe6976eca791bcba154ed3349e48b12b7e07827",
+  "working_directories_checked": [
+    "/__w/transformers/transformers",
+    "/tmp"
+  ],
+  "suppress_tokens_in_default_fields": false,
+  "stages": {
+    "record": 1
+  },
+  "results": [
+    {
+      "contract": "hf-internal-testing/mic-whisper-integration",
+      "contract_name": "whisper",
+      "contract_revision": "0e9904dea2784797b5a8b998a32ad0384b5b375a",
+      "framework": "transformers",
+      "variant": "default",
+      "target": "mic-whisper-slim",
+      "kind": "fixture",
+      "revision": "bb225853a3b2b2079639de9cdb5af3cbfa87fe48",
+      "environment": {
+        "python": "3.11.17",
+        "transformers": "5.19.0.dev0",
+        "torch": "2.11.0+cpu",
+        "torchvision": "0.26.0+cpu",
+        "torchaudio": "2.11.0+cpu",
+        "tokenizers": "0.23.1",
+        "numpy": "1.26.4",
+        "pillow": "12.2.0",
+        "accelerate": "1.13.0",
+        "safetensors": "0.8.0",
+        "huggingface-hub": "1.32.0",
+        "sentencepiece": "0.2.1",
+        "protobuf": "6.33.6",
+        "librosa": "0.11.0",
+        "soundfile": "0.13.1",
+        "scipy": "1.15.3"
+      },
+      "seconds": 6.07,
+      "environment_differs": {
+        "python": "3.11.17 (pinned 3.10)"
+      },
+      "status": "error",
+      "failures": [
+        "cpu/projects/whisper/example/hub/whisper-integration/integrations/transformers/usage.md\", line 25, in <module>\n    if variant:  # doc-builder: hide\n                ^^^^^^^^^^^^^^^^^^^^^\n  File \"/__w/transformers/transformers/src/transformers/models/whisper/generation_whisper.py\", line 650, in generate\n    generation_config, kwargs = self._prepare_generation_config(generation_config, **kwargs)\n                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/__w/transformers/transformers/src/transformers/generation/utils.py\", line 2067, in _prepare_generation_config\n    raise ValueError(\nValueError: You have modified the pretrained model configuration to control generation We detected the following values set - {'suppress_tokens': [1, 2, 7, 8, 9, 10, 14, 25, 26, 27, 28, 29, 31, 58, 59, 60, 61, 62, 63, 90, 91, 92, 93, 359, 503, 522, 542, 873, 893, 902, 918, 922, 931, 1350, 1853, 1982, 2460, 2627, 3246, 3253, 3268, 3536, 3846, 3961, 4183, 4667, 6585, 6647, 7273, 9061, 9383, 10428, 10929, 11938, 12033, 12331, 12562, 13793, 14157, 14635, 15265, 15618, 16553, 16604, 18362, 18956, 20075, 21675, 22520, 26130, 26161, 26435, 28279, 29464, 31650, 32302, 32470, 36865, 42863, 47425, 49870, 50254, 50258, 50358, 50359, 50360, 50361, 50362]}. This strategy to control generation is not supported anymore. Please use and modify `model.generation_config` (see https://huggingface.co/docs/transformers/generation_strategies#default-text-generation-configuration )"
+      ]
+    },
+    {
+      "contract": "hf-internal-testing/mic-whisper-integration",
+      "contract_name": "whisper",
+      "contract_revision": "0e9904dea2784797b5a8b998a32ad0384b5b375a",
+      "framework": "transformers",
+      "variant": "eager",
+      "target": "mic-whisper-slim",
+      "kind": "fixture",
+      "revision": "bb225853a3b2b2079639de9cdb5af3cbfa87fe48",
+      "environment": {
+        "python": "3.11.17",
+        "transformers": "5.19.0.dev0",
+        "torch": "2.11.0+cpu",
+        "torchvision": "0.26.0+cpu",
+        "torchaudio": "2.11.0+cpu",
+        "tokenizers": "0.23.1",
+        "numpy": "1.26.4",
+        "pillow": "12.2.0",
+        "accelerate": "1.13.0",
+        "safetensors": "0.8.0",
+        "huggingface-hub": "1.32.0",
+        "sentencepiece": "0.2.1",
+        "protobuf": "6.33.6",
+        "librosa": "0.11.0",
+        "soundfile": "0.13.1",
+        "scipy": "1.15.3"
+      },
+      "seconds": 5.75,
+      "environment_differs": {
+        "python": "3.11.17 (pinned 3.10)"
+      },
+      "status": "error",
+      "failures": [
+        "cpu/projects/whisper/example/hub/whisper-integration/integrations/transformers/usage.md\", line 25, in <module>\n    if variant:  # doc-builder: hide\n                ^^^^^^^^^^^^^^^^^^^^^\n  File \"/__w/transformers/transformers/src/transformers/models/whisper/generation_whisper.py\", line 650, in generate\n    generation_config, kwargs = self._prepare_generation_config(generation_config, **kwargs)\n                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/__w/transformers/transformers/src/transformers/generation/utils.py\", line 2067, in _prepare_generation_config\n    raise ValueError(\nValueError: You have modified the pretrained model configuration to control generation We detected the following values set - {'suppress_tokens': [1, 2, 7, 8, 9, 10, 14, 25, 26, 27, 28, 29, 31, 58, 59, 60, 61, 62, 63, 90, 91, 92, 93, 359, 503, 522, 542, 873, 893, 902, 918, 922, 931, 1350, 1853, 1982, 2460, 2627, 3246, 3253, 3268, 3536, 3846, 3961, 4183, 4667, 6585, 6647, 7273, 9061, 9383, 10428, 10929, 11938, 12033, 12331, 12562, 13793, 14157, 14635, 15265, 15618, 16553, 16604, 18362, 18956, 20075, 21675, 22520, 26130, 26161, 26435, 28279, 29464, 31650, 32302, 32470, 36865, 42863, 47425, 49870, 50254, 50258, 50358, 50359, 50360, 50361, 50362]}. This strategy to control generation is not supported anymore. Please use and modify `model.generation_config` (see https://huggingface.co/docs/transformers/generation_strategies#default-text-generation-configuration )"
+      ]
+    },
+    {
+      "contract": "hf-internal-testing/mic-whisper-integration",
+      "contract_name": "whisper",
+      "contract_revision": "0e9904dea2784797b5a8b998a32ad0384b5b375a",
+      "framework": "transformers",
+      "variant": "bfloat16",
+      "target": "mic-whisper-slim",
+      "kind": "fixture",
+      "revision": "bb225853a3b2b2079639de9cdb5af3cbfa87fe48",
+      "environment": {
+        "python": "3.11.17",
+        "transformers": "5.19.0.dev0",
+        "torch": "2.11.0+cpu",
+        "torchvision": "0.26.0+cpu",
+        "torchaudio": "2.11.0+cpu",
+        "tokenizers": "0.23.1",
+        "numpy": "1.26.4",
+        "pillow": "12.2.0",
+        "accelerate": "1.13.0",
+        "safetensors": "0.8.0",
+        "huggingface-hub": "1.32.0",
+        "sentencepiece": "0.2.1",
+        "protobuf": "6.33.6",
+        "librosa": "0.11.0",
+        "soundfile": "0.13.1",
+        "scipy": "1.15.3"
+      },
+      "seconds": 5.94,
+      "environment_differs": {
+        "python": "3.11.17 (pinned 3.10)"
+      },
+      "status": "error",
+      "failures": [
+        "cpu/projects/whisper/example/hub/whisper-integration/integrations/transformers/usage.md\", line 25, in <module>\n    if variant:  # doc-builder: hide\n                ^^^^^^^^^^^^^^^^^^^^^\n  File \"/__w/transformers/transformers/src/transformers/models/whisper/generation_whisper.py\", line 650, in generate\n    generation_config, kwargs = self._prepare_generation_config(generation_config, **kwargs)\n                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/__w/transformers/transformers/src/transformers/generation/utils.py\", line 2067, in _prepare_generation_config\n    raise ValueError(\nValueError: You have modified the pretrained model configuration to control generation We detected the following values set - {'suppress_tokens': [1, 2, 7, 8, 9, 10, 14, 25, 26, 27, 28, 29, 31, 58, 59, 60, 61, 62, 63, 90, 91, 92, 93, 359, 503, 522, 542, 873, 893, 902, 918, 922, 931, 1350, 1853, 1982, 2460, 2627, 3246, 3253, 3268, 3536, 3846, 3961, 4183, 4667, 6585, 6647, 7273, 9061, 9383, 10428, 10929, 11938, 12033, 12331, 12562, 13793, 14157, 14635, 15265, 15618, 16553, 16604, 18362, 18956, 20075, 21675, 22520, 26130, 26161, 26435, 28279, 29464, 31650, 32302, 32470, 36865, 42863, 47425, 49870, 50254, 50258, 50358, 50359, 50360, 50361, 50362]}. This strategy to control generation is not supported anymore. Please use and modify `model.generation_config` (see https://huggingface.co/docs/transformers/generation_strategies#default-text-generation-configuration )"
+      ]
+    }
+  ],
+  "interpretation": "Focused recording reproduces #49456 against the reviewed source; all three variants stop at generation. The first full run numeric failures are retained separately; no changed Whisper outputs were approved."
+}

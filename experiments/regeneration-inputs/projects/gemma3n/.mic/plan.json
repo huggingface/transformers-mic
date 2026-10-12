@@ -1,0 +1,99 @@
+{
+  "name": "gemma3n",
+  "manifest": {
+    "mic": "0.3",
+    "name": "Gemma3n",
+    "usage": "AutoModelForCausalLM + AutoTokenizer, batched, right padding, causal LM inference and one SGD step",
+    "architecture": "Gemma3nForConditionalGeneration",
+    "checkpoints": {
+      "google/gemma-3n-E2B-it": {
+        "fixture": "hf-internal-testing/mic-gemma3n-slim"
+      }
+    },
+    "fixtures": {
+      "hf-internal-testing/mic-gemma3n-slim": {
+        "built_from": "google/gemma-3n-E2B-it",
+        "covers": [
+          "google/gemma-3n-E2B-it"
+        ],
+        "build": {
+          "seed": 17
+        }
+      }
+    },
+    "integrations": {
+      "transformers": {
+        "entry_point": "integrations/transformers/usage.md",
+        "format": "runnable-markdown",
+        "requires": [
+          "transformers>=4.53",
+          "torch"
+        ],
+        "targets": [
+          "fixtures"
+        ],
+        "variants": {
+          "default": {},
+          "eager": {
+            "attn_implementation": "eager"
+          },
+          "bfloat16": {
+            "dtype": "bfloat16"
+          }
+        },
+        "training": true,
+        "resources": {
+          "fixture": {
+            "memory_gb": 4,
+            "download_mb": 50
+          },
+          "google/gemma-3n-E2B-it": {
+            "memory_gb": 8,
+            "download_mb": 5000,
+            "variants": {
+              "bfloat16": {
+                "memory_gb": 6
+              }
+            }
+          }
+        }
+      }
+    },
+    "outputs": {
+      "runtime": {
+        "compare": "exact"
+      },
+      "predicted_tokens": {
+        "compare": "exact"
+      },
+      "predicted_text": {
+        "compare": "exact"
+      },
+      "answer_logits": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.loss": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.gradients": {
+        "compare": "all_true"
+      },
+      "training.updated": {
+        "compare": "true"
+      }
+    }
+  },
+  "usage": "# Gemma3n: causal LM with Transformers\n\nThis page is the Transformers contract of the Gemma3n MIC and also a usage example. [doc-builder](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md) renders the `runnable` blocks below as documentation, and its pytest plugin runs them as written against `google/gemma-3n-E2B-it`. The MIC runner runs the same blocks against each slim fixture and each checkpoint in [`integration.json`](../../integration.json). Lines marked `# doc-builder: hide` only matter there: they swap in the pinned checkpoint or variant and print the result record.\n\n## Inference\n\n```py runnable:usage\nimport torch\nfrom transformers import AutoModelForCausalLM, AutoTokenizer, set_seed\nimport json  # doc-builder: hide\nimport os  # doc-builder: hide\n\nmodel_id = \"google/gemma-3n-E2B-it\"\nmodel_id = os.environ.get(\"MIC_MODEL\", model_id)  # doc-builder: hide\nvariant = json.loads(os.environ.get(\"MIC_MODEL_KWARGS\", \"{}\"))  # doc-builder: hide\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nset_seed(0)\n\ntokenizer = AutoTokenizer.from_pretrained(model_id)\nmodel = AutoModelForCausalLM.from_pretrained(model_id).to(device)\nif variant:  # doc-builder: hide\n    model = AutoModelForCausalLM.from_pretrained(model_id, **variant).to(device)\n\nprompts = [\"The capital of France is\", \"The sky is\"]\ninputs = tokenizer(prompts, return_tensors=\"pt\", padding=True).to(device)\n\nmodel.eval()\nwith torch.no_grad():\n    logits = model(**inputs).logits\n\nselected_token_ids = [tokenizer(\"Paris\").input_ids[0], tokenizer(\"blue\").input_ids[0]]\nlast_logits = logits[:, -1, :]\nanswer_logits = last_logits[:, selected_token_ids].float()\npredicted = last_logits.argmax(dim=-1)\npredicted_tokens = tokenizer.batch_decode(predicted, skip_special_tokens=True)\nprint(predicted_tokens)\n```\n\n## One training step\n\n```py runnable:usage:2\nlabels = inputs[\"input_ids\"].clone()\nlabels[:, 0] = -100\n\nmodel.train()\noptimizer = torch.optim.SGD(model.parameters(), lr=0.01)\nloss = model(**inputs, labels=labels).loss\nloss.backward()\nbefore = {name: p.detach().clone() for name, p in model.named_parameters()}  # doc-builder: hide\noptimizer.step()\nprint(f\"loss: {loss.item():.4f}\")\n\nif os.environ.get(\"MIC_RUNNER\"):  # doc-builder: hide\n    named = dict(model.named_parameters())\n    checked = (\"model.embed_tokens.weight\", \"lm_head.weight\")\n    param = next(model.parameters())\n    result = {\n        \"runtime\": {\n            \"device\": param.device.type,\n            \"dtype\": str(param.dtype).removeprefix(\"torch.\"),\n            \"attn_implementation\": model.config._attn_implementation,\n        },\n        \"predicted_tokens\": predicted.tolist(),\n        \"predicted_text\": predicted_tokens,\n        \"answer_logits\": answer_logits.tolist(),\n        \"training\": {\n            \"loss\": loss.item(),\n            \"gradients\": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all()) for n in checked},\n            \"updated\": any(not torch.equal(p, before[n]) for n, p in named.items()),\n        },\n    }\n    print(json.dumps(result))\n```\n",
+  "rationale": "Gemma3n is a new multimodal conditional-generation architecture (text + vision + audio) with a non-standard transformer stack (alternating up-projections, low-rank Laurel components, mixed sliding/full attention). The integration exercises the causal-LM path: batched inference with two distinct prompts (padding exercised), a compact logit probe at two semantically relevant token positions, and a single SGD training step with teacher-forced labels to verify gradient flow through the full stack including the altup and laurel sub-modules. The bfloat16 variant matches the model's native dtype and tests the mixed-precision path. The eager variant isolates the attention kernel from SDPA/FlashAttention differences.",
+  "historical_candidates": [],
+  "llm": {
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "auto",
+    "usage": "ChatCompletionOutputUsage(completion_tokens=5611, prompt_tokens=5146, total_tokens=10757, completion_tokens_details={'reasoning_tokens': 4243}, prompt_tokens_details={'cached_tokens': 0, 'image_tokens': 0})",
+    "role": "proposal only"
+  }
+}

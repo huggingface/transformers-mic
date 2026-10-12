@@ -1,0 +1,84 @@
+{
+  "mic": "0.3",
+  "name": "Qwen2.5-VL image+text",
+  "usage": "AutoProcessor + Qwen2_5_VLForConditionalGeneration, synthetic images, causal LM training step",
+  "architecture": "Qwen2_5_VLForConditionalGeneration",
+  "checkpoints": {
+    "Qwen/Qwen2.5-VL-3B-Instruct": {
+      "fixture": "hf-internal-testing/mic-qwen2_5_vl-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/mic-qwen2_5_vl-slim": {
+      "built_from": "Qwen/Qwen2.5-VL-3B-Instruct",
+      "covers": [
+        "Qwen/Qwen2.5-VL-3B-Instruct"
+      ],
+      "build": {
+        "seed": 17,
+        "model_class": "Qwen2_5_VLForConditionalGeneration"
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=4.46",
+        "torch",
+        "Pillow",
+        "numpy"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 4,
+          "download_mb": 50
+        },
+        "Qwen/Qwen2.5-VL-3B-Instruct": {
+          "memory_gb": 12,
+          "download_mb": 6500,
+          "variants": {
+            "bfloat16": {
+              "memory_gb": 8
+            }
+          }
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "inference.selected_logits": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

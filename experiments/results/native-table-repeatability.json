@@ -1,0 +1,137 @@
+{
+  "run": "https://github.com/huggingface/transformers/actions/runs/38298142514",
+  "cpu_threads": 4,
+  "stages": {
+    "table_transformer": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    }
+  },
+  "comparison_with_first_native_references": {
+    "cpu-x86_64/mic-table_transformer-slim.json": {
+      "exact_outputs_equal": true,
+      "failures": []
+    },
+    "cpu-x86_64/mic-table_transformer-slim.eager.json": {
+      "exact_outputs_equal": true,
+      "failures": []
+    },
+    "cpu-x86_64-bf16/mic-table_transformer-slim.bfloat16.json": {
+      "exact_outputs_equal": true,
+      "failures": []
+    }
+  },
+  "baseline_imported": false,
+  "checked_cases": [
+    {
+      "contract": "hf-internal-testing/mic-table_transformer-integration",
+      "contract_name": "table_transformer",
+      "contract_revision": "526a6608540f09cb9243420e83ac433d8b0a2ec3",
+      "framework": "transformers",
+      "variant": "default",
+      "target": "mic-table_transformer-slim",
+      "kind": "fixture",
+      "revision": "a0616d0368291a2730b5499af39909926ff9382e",
+      "environment": {
+        "python": "3.11.17",
+        "transformers": "5.19.0.dev0",
+        "torch": "2.11.0+cpu",
+        "torchvision": "0.26.0+cpu",
+        "torchaudio": "2.11.0+cpu",
+        "tokenizers": "0.23.1",
+        "numpy": "1.26.4",
+        "pillow": "12.2.0",
+        "accelerate": "1.13.0",
+        "safetensors": "0.8.0",
+        "huggingface-hub": "1.32.0",
+        "sentencepiece": "0.2.1",
+        "protobuf": "6.33.6",
+        "librosa": "0.11.0",
+        "soundfile": "0.13.1",
+        "scipy": "1.15.3"
+      },
+      "seconds": 7.05,
+      "environment_differs": {
+        "python": "3.11.17 (pinned 3.10)"
+      },
+      "platform": "cpu-x86_64",
+      "baseline": "transformers/tests/contracts/expectations/table_transformer/cpu-x86_64/mic-table_transformer-slim.json",
+      "status": "pass",
+      "failures": []
+    },
+    {
+      "contract": "hf-internal-testing/mic-table_transformer-integration",
+      "contract_name": "table_transformer",
+      "contract_revision": "526a6608540f09cb9243420e83ac433d8b0a2ec3",
+      "framework": "transformers",
+      "variant": "eager",
+      "target": "mic-table_transformer-slim",
+      "kind": "fixture",
+      "revision": "a0616d0368291a2730b5499af39909926ff9382e",
+      "environment": {
+        "python": "3.11.17",
+        "transformers": "5.19.0.dev0",
+        "torch": "2.11.0+cpu",
+        "torchvision": "0.26.0+cpu",
+        "torchaudio": "2.11.0+cpu",
+        "tokenizers": "0.23.1",
+        "numpy": "1.26.4",
+        "pillow": "12.2.0",
+        "accelerate": "1.13.0",
+        "safetensors": "0.8.0",
+        "huggingface-hub": "1.32.0",
+        "sentencepiece": "0.2.1",
+        "protobuf": "6.33.6",
+        "librosa": "0.11.0",
+        "soundfile": "0.13.1",
+        "scipy": "1.15.3"
+      },
+      "seconds": 7.11,
+      "environment_differs": {
+        "python": "3.11.17 (pinned 3.10)"
+      },
+      "platform": "cpu-x86_64",
+      "baseline": "transformers/tests/contracts/expectations/table_transformer/cpu-x86_64/mic-table_transformer-slim.eager.json",
+      "status": "pass",
+      "failures": []
+    },
+    {
+      "contract": "hf-internal-testing/mic-table_transformer-integration",
+      "contract_name": "table_transformer",
+      "contract_revision": "526a6608540f09cb9243420e83ac433d8b0a2ec3",
+      "framework": "transformers",
+      "variant": "bfloat16",
+      "target": "mic-table_transformer-slim",
+      "kind": "fixture",
+      "revision": "a0616d0368291a2730b5499af39909926ff9382e",
+      "environment": {
+        "python": "3.11.17",
+        "transformers": "5.19.0.dev0",
+        "torch": "2.11.0+cpu",
+        "torchvision": "0.26.0+cpu",
+        "torchaudio": "2.11.0+cpu",
+        "tokenizers": "0.23.1",
+        "numpy": "1.26.4",
+        "pillow": "12.2.0",
+        "accelerate": "1.13.0",
+        "safetensors": "0.8.0",
+        "huggingface-hub": "1.32.0",
+        "sentencepiece": "0.2.1",
+        "protobuf": "6.33.6",
+        "librosa": "0.11.0",
+        "soundfile": "0.13.1",
+        "scipy": "1.15.3"
+      },
+      "seconds": 6.86,
+      "environment_differs": {
+        "python": "3.11.17 (pinned 3.10)"
+      },
+      "platform": "cpu-x86_64-bf16",
+      "baseline": "transformers/tests/contracts/expectations/table_transformer/cpu-x86_64-bf16/mic-table_transformer-slim.bfloat16.json",
+      "status": "pass",
+      "failures": []
+    }
+  ]
+}

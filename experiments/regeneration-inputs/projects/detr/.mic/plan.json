@@ -1,0 +1,98 @@
+{
+  "name": "detr",
+  "manifest": {
+    "mic": "0.3",
+    "name": "DETR object detection",
+    "usage": "DetrImageProcessor + DetrForObjectDetection, batched synthetic images, training with target boxes and class ids",
+    "architecture": "DetrForObjectDetection",
+    "checkpoints": {
+      "facebook/detr-resnet-50": {
+        "fixture": "hf-internal-testing/mic-detr-slim"
+      }
+    },
+    "fixtures": {
+      "hf-internal-testing/mic-detr-slim": {
+        "built_from": "facebook/detr-resnet-50",
+        "covers": [
+          "facebook/detr-resnet-50"
+        ],
+        "build": {
+          "seed": 17
+        }
+      }
+    },
+    "integrations": {
+      "transformers": {
+        "entry_point": "integrations/transformers/usage.md",
+        "format": "runnable-markdown",
+        "requires": [
+          "transformers>=5",
+          "torch"
+        ],
+        "targets": [
+          "fixtures"
+        ],
+        "variants": {
+          "default": {},
+          "eager": {
+            "attn_implementation": "eager"
+          },
+          "bfloat16": {
+            "dtype": "bfloat16"
+          }
+        },
+        "training": true,
+        "resources": {
+          "fixture": {
+            "memory_gb": 2,
+            "download_mb": 100
+          },
+          "facebook/detr-resnet-50": {
+            "memory_gb": 5,
+            "download_mb": 1000,
+            "variants": {
+              "bfloat16": {
+                "memory_gb": 3
+              }
+            }
+          }
+        }
+      }
+    },
+    "outputs": {
+      "runtime": {
+        "compare": "exact"
+      },
+      "top_class_logits": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "pred_boxes": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.loss": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.gradients": {
+        "compare": "all_true"
+      },
+      "training.updated": {
+        "compare": "true"
+      }
+    }
+  },
+  "usage": "# DETR: object detection with Transformers\n\nThis page is the Transformers contract of the DETR MIC and also a usage example. [doc-builder](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md) renders the `runnable` blocks below as documentation, and its pytest plugin runs them as written against `facebook/detr-resnet-50`. The MIC runner runs the same blocks against each slim fixture and each checkpoint in [`integration.json`](../../integration.json). Lines marked `# doc-builder: hide` only matter there: they swap in the pinned checkpoint or variant and print the result record.\n\n## Inference on synthetic images\n\n```py runnable:detr_detect\nimport torch\nfrom transformers import DetrForObjectDetection, DetrImageProcessor, set_seed\nimport numpy as np\nimport json  # doc-builder: hide\nimport os  # doc-builder: hide\n\nmodel_id = \"facebook/detr-resnet-50\"\nmodel_id = os.environ.get(\"MIC_MODEL\", model_id)  # doc-builder: hide\nvariant = json.loads(os.environ.get(\"MIC_MODEL_KWARGS\", \"{}\"))  # doc-builder: hide\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nset_seed(0)  # seeds torch, NumPy, and Python: loading, dropout, and data augmentation draw random numbers\n\nprocessor = DetrImageProcessor.from_pretrained(model_id)\nmodel = DetrForObjectDetection.from_pretrained(model_id, **variant).to(device)\n\n# Two distinct synthetic images so batch perturbation is meaningful\nnp.random.seed(0)\nimages = [np.random.randint(0, 255, (64, 64, 3), dtype=np.uint8) for _ in range(2)]\n\ninputs = processor(images, return_tensors=\"pt\").to(device)\n\nmodel.eval()\nwith torch.no_grad():\n    outputs = model(**inputs)\n\n# Compact probes: first 3 queries, first 5 class logits for the first image\ntop_class_logits = outputs.logits[0, :3, :5].float().tolist()\n# First 3 predicted boxes for the first image\npred_boxes = outputs.pred_boxes[0, :3].float().tolist()\n\nprint(top_class_logits)\nprint(pred_boxes)\n```\n\n## One training step\n\n```py runnable:detr_detect:2\n# Target boxes in normalized (x_center, y_center, width, height) format\nlabels = [\n    {\"boxes\": torch.tensor([[0.5, 0.5, 0.3, 0.3]]), \"class_ids\": torch.tensor([1])},\n    {\"boxes\": torch.tensor([[0.4, 0.6, 0.2, 0.2]]), \"class_ids\": torch.tensor([3])},\n]\n\nmodel.train()\noptimizer = torch.optim.SGD(model.parameters(), lr=0.01)\nloss = model(**inputs, labels=labels).loss\nloss.backward()\nbefore = {name: p.detach().clone() for name, p in model.named_parameters()}  # doc-builder: hide\noptimizer.step()\nprint(f\"loss: {loss.item():.4f}\")\n\nif os.environ.get(\"MIC_RUNNER\"):  # doc-builder: hide\n    named = dict(model.named_parameters())\n    checked = (\"class_logits.weight\", \"bbox_pred.0.weight\")\n    result = {\n        \"runtime\": {\n            \"device\": model.device.type,\n            \"dtype\": str(next(model.parameters()).dtype).removeprefix(\"torch.\"),\n            \"attn_implementation\": model.config._attn_implementation,\n        },\n        \"top_class_logits\": top_class_logits,\n        \"pred_boxes\": pred_boxes,\n        \"training\": {\n            \"loss\": loss.item(),\n            \"gradients\": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all()) for n in checked},\n            \"updated\": any(not torch.equal(p, before[n]) for n, p in named.items()),\n        },\n    }\n    print(json.dumps(result))\n```\n",
+  "rationale": "DETR is a transformer-based object detection model with a ResNet-50 backbone, 6 encoder layers, and 6 decoder layers operating on 100 object queries. The integration exercises the full encoder-decoder pipeline: image preprocessing via DetrImageProcessor, inference producing class logits and predicted boxes, and a real training step with target boxes and class IDs. The training step uses SGD with a single step to verify that gradients flow through both the classification head (class_logits) and the bounding-box prediction head (bbox_pred). Two distinct synthetic images ensure batch perturbation is meaningful. The compact probes (3 queries × 5 classes for logits, 3 boxes) keep output size manageable while still capturing model behavior across the query dimension.",
+  "historical_candidates": [],
+  "llm": {
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "auto",
+    "usage": "ChatCompletionOutputUsage(completion_tokens=4021, prompt_tokens=5497, total_tokens=9518, completion_tokens_details={'reasoning_tokens': 2558}, prompt_tokens_details={'cached_tokens': 0, 'image_tokens': 0})",
+    "role": "proposal only"
+  }
+}

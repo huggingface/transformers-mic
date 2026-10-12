@@ -1,0 +1,78 @@
+{
+  "mic": "0.3",
+  "name": "InternVL3-1B",
+  "usage": "AutoProcessor + AutoModelForImageTextToText, multimodal image+text inference and training",
+  "architecture": "InternVLForConditionalGeneration",
+  "checkpoints": {
+    "OpenGVLab/InternVL3-1B-hf": {
+      "fixture": "hf-internal-testing/mic-internvl-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/mic-internvl-slim": {
+      "built_from": "OpenGVLab/InternVL3-1B-hf",
+      "covers": [
+        "OpenGVLab/InternVL3-1B-hf"
+      ],
+      "build": {
+        "seed": 17
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=4.52",
+        "torch",
+        "Pillow",
+        "numpy"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 4,
+          "download_mb": 200
+        },
+        "OpenGVLab/InternVL3-1B-hf": {
+          "memory_gb": 8,
+          "download_mb": 2100
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "logits_probe": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

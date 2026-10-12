@@ -1,0 +1,300 @@
+{
+  "run": "https://github.com/huggingface/transformers/actions/runs/38281747657",
+  "stages": {
+    "bert": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "gpt2": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "t5": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "modernbert": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "vit": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "clip": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "detr": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "table_transformer": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "got_ocr2": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "whisper": {
+      "record": 1
+    },
+    "wav2vec2": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "qwen2_audio": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "speech_t5": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "llama": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "gemma3": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "qwen2": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "mistral3": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "qwen2_5_vl": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "llava": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "smolvlm": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "internvl": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "gpt_oss": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    },
+    "qwen2_5_omni": {
+      "record": 0,
+      "review": 0,
+      "unpatched-check": 0,
+      "export": 0
+    }
+  },
+  "candidate_review": {
+    "bert": {
+      "summary": {
+        "unchanged": 2,
+        "new": 1
+      },
+      "approved": true
+    },
+    "clip": {
+      "summary": {
+        "unchanged": 2,
+        "new": 1
+      },
+      "approved": true
+    },
+    "detr": {
+      "summary": {
+        "new": 3
+      },
+      "approved": true
+    },
+    "gemma3": {
+      "summary": {
+        "new": 3
+      },
+      "approved": true
+    },
+    "got_ocr2": {
+      "summary": {
+        "new": 3
+      },
+      "approved": true
+    },
+    "gpt2": {
+      "summary": {
+        "unchanged": 2,
+        "new": 1
+      },
+      "approved": true
+    },
+    "gpt_oss": {
+      "summary": {
+        "new": 3
+      },
+      "approved": true
+    },
+    "internvl": {
+      "summary": {
+        "new": 3
+      },
+      "approved": true
+    },
+    "llama": {
+      "summary": {
+        "new": 3
+      },
+      "approved": true
+    },
+    "llava": {
+      "summary": {
+        "new": 3
+      },
+      "approved": true
+    },
+    "mistral3": {
+      "summary": {
+        "new": 3
+      },
+      "approved": true
+    },
+    "modernbert": {
+      "summary": {
+        "unchanged": 2,
+        "new": 1
+      },
+      "approved": true
+    },
+    "qwen2": {
+      "summary": {
+        "new": 3
+      },
+      "approved": true
+    },
+    "qwen2_5_omni": {
+      "summary": {
+        "new": 3
+      },
+      "approved": true
+    },
+    "qwen2_5_vl": {
+      "summary": {
+        "new": 3
+      },
+      "approved": true
+    },
+    "qwen2_audio": {
+      "summary": {
+        "new": 3
+      },
+      "approved": true
+    },
+    "smolvlm": {
+      "summary": {
+        "unchanged": 2,
+        "new": 1
+      },
+      "approved": true
+    },
+    "speech_t5": {
+      "summary": {
+        "new": 3
+      },
+      "approved": true
+    },
+    "t5": {
+      "summary": {
+        "unchanged": 2,
+        "new": 1
+      },
+      "approved": true
+    },
+    "table_transformer": {
+      "summary": {
+        "unchanged": 2,
+        "new": 1
+      },
+      "approved": true
+    },
+    "vit": {
+      "summary": {
+        "unchanged": 2,
+        "new": 1
+      },
+      "approved": true
+    },
+    "wav2vec2": {
+      "summary": {
+        "unchanged": 2,
+        "new": 1
+      },
+      "approved": true
+    }
+  },
+  "blocked": {
+    "whisper": "Generation config suppress_tokens error (#49456); no native CPU export"
+  },
+  "policy": "No changed candidates approved. Wav2Vec2 controlled initialization only for recording; unpatched checks skip training.loss and training.gradients.",
+  "checked_case_summary": {
+    "count": 66,
+    "statuses": {
+      "pass": 66
+    },
+    "platforms": {
+      "cpu-x86_64-bf16": 38,
+      "cpu-x86_64": 26,
+      "cpu-x86_64-fp16": 2
+    },
+    "summed_contract_seconds": 540.87,
+    "maximum_case_seconds": 14.22
+  }
+}

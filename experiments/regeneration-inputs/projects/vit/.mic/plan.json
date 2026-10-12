@@ -1,0 +1,91 @@
+{
+  "name": "vit",
+  "manifest": {
+    "mic": "0.3",
+    "name": "ViT image classification",
+    "usage": "AutoImageProcessor + AutoModelForImageClassification, batched synthetic images",
+    "architecture": "ViTForImageClassification",
+    "checkpoints": {
+      "google/vit-base-patch16-224": {
+        "fixture": "hf-internal-testing/mic-vit-slim"
+      }
+    },
+    "fixtures": {
+      "hf-internal-testing/mic-vit-slim": {
+        "built_from": "google/vit-base-patch16-224",
+        "covers": [
+          "google/vit-base-patch16-224"
+        ],
+        "build": {
+          "seed": 17
+        }
+      }
+    },
+    "integrations": {
+      "transformers": {
+        "entry_point": "integrations/transformers/usage.md",
+        "format": "runnable-markdown",
+        "requires": [
+          "transformers>=5",
+          "torch"
+        ],
+        "targets": [
+          "fixtures"
+        ],
+        "variants": {
+          "default": {},
+          "eager": {
+            "attn_implementation": "eager"
+          },
+          "bfloat16": {
+            "dtype": "bfloat16"
+          }
+        },
+        "training": true,
+        "resources": {
+          "fixture": {
+            "memory_gb": 2,
+            "download_mb": 50
+          },
+          "google/vit-base-patch16-224": {
+            "memory_gb": 4,
+            "download_mb": 340
+          }
+        }
+      }
+    },
+    "outputs": {
+      "runtime": {
+        "compare": "exact"
+      },
+      "top5_labels": {
+        "compare": "exact"
+      },
+      "top5_probs": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.loss": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.gradients": {
+        "compare": "all_true"
+      },
+      "training.updated": {
+        "compare": "true"
+      }
+    }
+  },
+  "usage": "# ViT: image classification with Transformers\n\nThis page is the Transformers contract of the ViT MIC and also a usage example. [doc-builder](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md) renders the `runnable` blocks below as documentation, and its pytest plugin runs them as written against `google/vit-base-patch16-224`. The MIC runner runs the same blocks against each slim fixture and each checkpoint in [`integration.json`](../../integration.json). Lines marked `# doc-builder: hide` only matter there: they swap in the pinned checkpoint or variant and print the result record.\n\n## Classify two synthetic images\n\n```py runnable:vit_classify\nimport torch\nfrom transformers import AutoModelForImageClassification, AutoImageProcessor, set_seed\nimport json  # doc-builder: hide\nimport os  # doc-builder: hide\nimport numpy as np\n\nmodel_id = \"google/vit-base-patch16-224\"\nmodel_id = os.environ.get(\"MIC_MODEL\", model_id)  # doc-builder: hide\nvariant = json.loads(os.environ.get(\"MIC_MODEL_KWARGS\", \"{}\"))  # doc-builder: hide\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nset_seed(0)  # seeds torch, NumPy, and Python: loading, dropout, and data augmentation draw random numbers\n\nprocessor = AutoImageProcessor.from_pretrained(model_id)\nmodel = AutoModelForImageClassification.from_pretrained(model_id).to(device)\nif variant:  # doc-builder: hide\n    model = AutoModelForImageClassification.from_pretrained(model_id, **variant).to(device)\n\n# Two distinct synthetic images (224x224x3, uint8)\nimg1 = np.zeros((224, 224, 3), dtype=np.uint8)\nimg1[:112, :112] = 255  # top-left white quadrant\nimg2 = np.zeros((224, 224, 3), dtype=np.uint8)\nimg2[112:, 112:] = 255  # bottom-right white quadrant\n\ninputs = processor(images=[img1, img2], return_tensors=\"pt\").to(device)\n\nmodel.eval()\nwith torch.no_grad():\n    logits = model(**inputs).logits\n\ntop5 = logits.topk(5, dim=-1)\ntop5_indices = top5.indices.tolist()\ntop5_probs = torch.softmax(logits, dim=-1).topk(5, dim=-1).values.float().tolist()\n\nprint(f\"Top-5 labels: {top5_indices}\")\nprint(f\"Top-5 probs: {[[f'{p:.4f}' for p in row] for row in top5_probs]}\")\n```\n\n## One training step\n\n```py runnable:vit_classify:2\nlabels = torch.tensor([0, 1], device=device)\n\nmodel.train()\noptimizer = torch.optim.SGD(model.parameters(), lr=0.01)\nloss = model(**inputs, labels=labels).loss\nloss.backward()\nbefore = {name: p.detach().clone() for name, p in model.named_parameters()}  # doc-builder: hide\noptimizer.step()\nprint(f\"loss: {loss.item():.4f}\")\n\nif os.environ.get(\"MIC_RUNNER\"):  # doc-builder: hide\n    named = dict(model.named_parameters())\n    checked = (\n        \"vit.encoder.layer.0.attention.attention.query.weight\",\n        \"vit.encoder.layer.0.intermediate.dense.weight\",\n        \"classifier.weight\",\n    )\n    result = {\n        \"runtime\": {\n            \"device\": model.device.type,\n            \"dtype\": str(next(model.parameters()).dtype).removeprefix(\"torch.\"),\n            \"attn_implementation\": model.config._attn_implementation,\n        },\n        \"top5_labels\": top5_indices,\n        \"top5_probs\": top5_probs,\n        \"training\": {\n            \"loss\": loss.item(),\n            \"gradients\": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all()) for n in checked},\n            \"updated\": any(not torch.equal(p, before[n]) for n, p in named.items()),\n        },\n    }\n    print(json.dumps(result))\n```\n",
+  "rationale": "ViT is a foundational vision transformer used for image classification. The contract exercises the full pipeline: image preprocessing via AutoImageProcessor, batched inference with eval mode, and a single SGD training step with integer class labels. Two distinct synthetic quadrant images ensure batch perturbation is meaningful. The top-5 logits/probes keep output compact while still capturing discriminative behavior across the 1000-class vocabulary. Gradient checks target the first encoder layer's query projection, the first feed-forward layer, and the classification head to confirm the full computation graph receives finite nonzero gradients.",
+  "historical_candidates": [],
+  "llm": {
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "auto",
+    "usage": "ChatCompletionOutputUsage(completion_tokens=3031, prompt_tokens=29377, total_tokens=32408, completion_tokens_details={'reasoning_tokens': 1568}, prompt_tokens_details={'cached_tokens': 0, 'image_tokens': 0})",
+    "role": "proposal only"
+  }
+}

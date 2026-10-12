@@ -1,0 +1,79 @@
+{
+  "mic": "0.3",
+  "name": "Qwen2.5-Omni text generation",
+  "usage": "Qwen2_5OmniForConditionalGeneration + Qwen2_5OmniProcessor, text-only chat, batched with padding",
+  "architecture": "Qwen2_5OmniForConditionalGeneration",
+  "checkpoints": {
+    "Qwen/Qwen2.5-Omni-7B": {
+      "fixture": "hf-internal-testing/mic-qwen2_5_omni-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/mic-qwen2_5_omni-slim": {
+      "built_from": "Qwen/Qwen2.5-Omni-7B",
+      "covers": [
+        "Qwen/Qwen2.5-Omni-7B"
+      ],
+      "build": {
+        "seed": 17
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=4.50",
+        "torch"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 2,
+          "download_mb": 50
+        },
+        "Qwen/Qwen2.5-Omni-7B": {
+          "memory_gb": 16,
+          "download_mb": 15000
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "selected_logits": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "generated_token_ids": {
+      "compare": "exact"
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

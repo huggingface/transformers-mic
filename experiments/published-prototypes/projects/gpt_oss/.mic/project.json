@@ -1,0 +1,186 @@
+{
+  "model": "openai/gpt-oss-20b",
+  "contract": "gpt_oss",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": {
+    "variant": "bfloat16",
+    "records": [
+      {
+        "contract": "hf-internal-testing/mic-gpt_oss-integration",
+        "contract_name": "gpt_oss",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "bfloat16",
+        "target": "mic-gpt_oss-slim",
+        "kind": "fixture",
+        "revision": "unpublished",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3"
+        },
+        "seconds": 5.98,
+        "platform": "cuda",
+        "baseline": "transformers/tests/contracts/expectations/gpt_oss/cuda/mic-gpt_oss-slim.bfloat16.json",
+        "status": "pass",
+        "failures": []
+      }
+    ],
+    "lock_sha256": "e6e7322fbe941264d6d4f80c5c08c030dd347390b816bb9524079b4a56b3be69",
+    "manifest_sha256": "7d3d3021d2456655c4bdac979895b0250cfdc18a57ba9cc8a295578fa0175894",
+    "usage_sha256": "4a4f1a1626a74066bf3d3bc98a4e1cb606a36188181d7db1eab8106d4bc97b70"
+  },
+  "validations": {
+    "default": {
+      "variant": "default",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-gpt_oss-integration",
+          "contract_name": "gpt_oss",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "default",
+          "target": "mic-gpt_oss-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 5.91,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/gpt_oss/cuda/mic-gpt_oss-slim.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "e6e7322fbe941264d6d4f80c5c08c030dd347390b816bb9524079b4a56b3be69",
+      "manifest_sha256": "7d3d3021d2456655c4bdac979895b0250cfdc18a57ba9cc8a295578fa0175894",
+      "usage_sha256": "4a4f1a1626a74066bf3d3bc98a4e1cb606a36188181d7db1eab8106d4bc97b70",
+      "fingerprint": "86beb997a03cbc4206acdbec1273337b4ead0fdbd37a4f33edcdc65637b7a735"
+    },
+    "eager": {
+      "variant": "eager",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-gpt_oss-integration",
+          "contract_name": "gpt_oss",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "eager",
+          "target": "mic-gpt_oss-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 5.97,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/gpt_oss/cuda/mic-gpt_oss-slim.eager.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "e6e7322fbe941264d6d4f80c5c08c030dd347390b816bb9524079b4a56b3be69",
+      "manifest_sha256": "7d3d3021d2456655c4bdac979895b0250cfdc18a57ba9cc8a295578fa0175894",
+      "usage_sha256": "4a4f1a1626a74066bf3d3bc98a4e1cb606a36188181d7db1eab8106d4bc97b70",
+      "fingerprint": "86beb997a03cbc4206acdbec1273337b4ead0fdbd37a4f33edcdc65637b7a735"
+    },
+    "bfloat16": {
+      "variant": "bfloat16",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-gpt_oss-integration",
+          "contract_name": "gpt_oss",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "bfloat16",
+          "target": "mic-gpt_oss-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 5.98,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/gpt_oss/cuda/mic-gpt_oss-slim.bfloat16.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "e6e7322fbe941264d6d4f80c5c08c030dd347390b816bb9524079b4a56b3be69",
+      "manifest_sha256": "7d3d3021d2456655c4bdac979895b0250cfdc18a57ba9cc8a295578fa0175894",
+      "usage_sha256": "4a4f1a1626a74066bf3d3bc98a4e1cb606a36188181d7db1eab8106d4bc97b70",
+      "fingerprint": "86beb997a03cbc4206acdbec1273337b4ead0fdbd37a4f33edcdc65637b7a735"
+    }
+  },
+  "weight_decision": {
+    "requested": "auto",
+    "weights": "random",
+    "accepted": true,
+    "reused": false,
+    "reason": "Random weights pass the measured sensitivity and numeric-health gates; training is unnecessary.",
+    "readability_requested": false,
+    "historical_detection": "unverified until replayed; a gate pass is not a regression catch"
+  }
+}

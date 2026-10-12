@@ -1,0 +1,186 @@
+{
+  "model": "llava-hf/llava-1.5-7b-hf",
+  "contract": "llava",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": {
+    "variant": "bfloat16",
+    "records": [
+      {
+        "contract": "hf-internal-testing/mic-llava-integration",
+        "contract_name": "llava",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "bfloat16",
+        "target": "mic-llava-slim",
+        "kind": "fixture",
+        "revision": "unpublished",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3"
+        },
+        "seconds": 4.73,
+        "platform": "cuda",
+        "baseline": "transformers/tests/contracts/expectations/llava/cuda/mic-llava-slim.bfloat16.json",
+        "status": "pass",
+        "failures": []
+      }
+    ],
+    "lock_sha256": "22a8cb53821fb7f98e1e98c8b0a53bd07c634caa7906b2e7fad5552dafce5ecf",
+    "manifest_sha256": "4b523cceb9f48932c8c5318ceb0c818004ee7dcdf91b5a41456a6670c3d5bedb",
+    "usage_sha256": "e516f000099f41a58ed37f7ccde0f73d2c0a16c90b03e476371d7adc4019c7a2"
+  },
+  "validations": {
+    "default": {
+      "variant": "default",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-llava-integration",
+          "contract_name": "llava",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "default",
+          "target": "mic-llava-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 4.77,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/llava/cuda/mic-llava-slim.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "22a8cb53821fb7f98e1e98c8b0a53bd07c634caa7906b2e7fad5552dafce5ecf",
+      "manifest_sha256": "4b523cceb9f48932c8c5318ceb0c818004ee7dcdf91b5a41456a6670c3d5bedb",
+      "usage_sha256": "e516f000099f41a58ed37f7ccde0f73d2c0a16c90b03e476371d7adc4019c7a2",
+      "fingerprint": "02b3325335e86312e751386ad75283827f56930e920fd633dac46b6f024d63b2"
+    },
+    "eager": {
+      "variant": "eager",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-llava-integration",
+          "contract_name": "llava",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "eager",
+          "target": "mic-llava-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 4.85,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/llava/cuda/mic-llava-slim.eager.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "22a8cb53821fb7f98e1e98c8b0a53bd07c634caa7906b2e7fad5552dafce5ecf",
+      "manifest_sha256": "4b523cceb9f48932c8c5318ceb0c818004ee7dcdf91b5a41456a6670c3d5bedb",
+      "usage_sha256": "e516f000099f41a58ed37f7ccde0f73d2c0a16c90b03e476371d7adc4019c7a2",
+      "fingerprint": "02b3325335e86312e751386ad75283827f56930e920fd633dac46b6f024d63b2"
+    },
+    "bfloat16": {
+      "variant": "bfloat16",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-llava-integration",
+          "contract_name": "llava",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "bfloat16",
+          "target": "mic-llava-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 4.73,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/llava/cuda/mic-llava-slim.bfloat16.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "22a8cb53821fb7f98e1e98c8b0a53bd07c634caa7906b2e7fad5552dafce5ecf",
+      "manifest_sha256": "4b523cceb9f48932c8c5318ceb0c818004ee7dcdf91b5a41456a6670c3d5bedb",
+      "usage_sha256": "e516f000099f41a58ed37f7ccde0f73d2c0a16c90b03e476371d7adc4019c7a2",
+      "fingerprint": "02b3325335e86312e751386ad75283827f56930e920fd633dac46b6f024d63b2"
+    }
+  },
+  "weight_decision": {
+    "requested": "auto",
+    "weights": "random",
+    "accepted": true,
+    "reused": false,
+    "reason": "Random weights pass the measured sensitivity and numeric-health gates; training is unnecessary.",
+    "readability_requested": false,
+    "historical_detection": "unverified until replayed; a gate pass is not a regression catch"
+  }
+}

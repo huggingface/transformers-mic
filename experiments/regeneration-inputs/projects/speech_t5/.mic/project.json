@@ -1,0 +1,10 @@
+{
+  "model": "microsoft/speecht5_asr",
+  "contract": "speech_t5",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": null,
+  "validations": {}
+}

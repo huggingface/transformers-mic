@@ -1,0 +1,182 @@
+{
+  "model": "openai-community/gpt2",
+  "contract": "gpt2",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": {
+    "variant": "bfloat16",
+    "records": [
+      {
+        "contract": "hf-internal-testing/mic-gpt2-integration",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "bfloat16",
+        "target": "mic-gpt2-slim",
+        "kind": "fixture",
+        "revision": "unpublished",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3"
+        },
+        "seconds": 4.4,
+        "platform": "cuda",
+        "baseline": "transformers/tests/contracts/expectations/gpt2/cuda/mic-gpt2-slim.bfloat16.json",
+        "status": "pass",
+        "failures": []
+      }
+    ],
+    "lock_sha256": "b1dae102bbcb444d4dd88f5b21c9893543501e7c837621bdaa3bdcc286d1ba89",
+    "manifest_sha256": "c71d88a7a309ef956a47566705988f92232129552a22f80d8a4fef6abeba1804",
+    "usage_sha256": "5ecdabcff9fcf938a8ac9e38eb59ef04996b2444154f611058f207567b015a46"
+  },
+  "validations": {
+    "default": {
+      "variant": "default",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-gpt2-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "default",
+          "target": "mic-gpt2-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 4.28,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/gpt2/cuda/mic-gpt2-slim.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "b1dae102bbcb444d4dd88f5b21c9893543501e7c837621bdaa3bdcc286d1ba89",
+      "manifest_sha256": "c71d88a7a309ef956a47566705988f92232129552a22f80d8a4fef6abeba1804",
+      "usage_sha256": "5ecdabcff9fcf938a8ac9e38eb59ef04996b2444154f611058f207567b015a46",
+      "fingerprint": "6d58581286bf57b54e942b61b7e6efa740459c910b8bd5932bd2bd3b37380157"
+    },
+    "eager": {
+      "variant": "eager",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-gpt2-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "eager",
+          "target": "mic-gpt2-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 4.29,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/gpt2/cuda/mic-gpt2-slim.eager.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "b1dae102bbcb444d4dd88f5b21c9893543501e7c837621bdaa3bdcc286d1ba89",
+      "manifest_sha256": "c71d88a7a309ef956a47566705988f92232129552a22f80d8a4fef6abeba1804",
+      "usage_sha256": "5ecdabcff9fcf938a8ac9e38eb59ef04996b2444154f611058f207567b015a46",
+      "fingerprint": "6d58581286bf57b54e942b61b7e6efa740459c910b8bd5932bd2bd3b37380157"
+    },
+    "bfloat16": {
+      "variant": "bfloat16",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-gpt2-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "bfloat16",
+          "target": "mic-gpt2-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 4.4,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/gpt2/cuda/mic-gpt2-slim.bfloat16.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "b1dae102bbcb444d4dd88f5b21c9893543501e7c837621bdaa3bdcc286d1ba89",
+      "manifest_sha256": "c71d88a7a309ef956a47566705988f92232129552a22f80d8a4fef6abeba1804",
+      "usage_sha256": "5ecdabcff9fcf938a8ac9e38eb59ef04996b2444154f611058f207567b015a46",
+      "fingerprint": "6d58581286bf57b54e942b61b7e6efa740459c910b8bd5932bd2bd3b37380157"
+    }
+  },
+  "weight_decision": {
+    "requested": "auto",
+    "weights": "random",
+    "accepted": true,
+    "reused": false,
+    "reason": "Random weights pass the measured sensitivity and numeric-health gates; training is unnecessary.",
+    "readability_requested": false,
+    "historical_detection": "unverified until replayed; a gate pass is not a regression catch"
+  }
+}

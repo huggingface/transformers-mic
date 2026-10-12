@@ -1,0 +1,39 @@
+{
+  "framework": "transformers",
+  "environment": {
+    "python": "3.10",
+    "torch": "2.11.0",
+    "torchvision": "0.26.0",
+    "torchaudio": "2.11.0",
+    "tokenizers": "0.23.1",
+    "numpy": "1.26.4",
+    "pillow": "12.2.0",
+    "accelerate": "1.13.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.32.0",
+    "sentencepiece": "0.2.1",
+    "protobuf": "6.33.6",
+    "librosa": "0.11.0",
+    "soundfile": "0.13.1",
+    "scipy": "1.15.3"
+  },
+  "contracts": {
+    "llama": {
+      "integration": {
+        "repo": "hf-internal-testing/mic-llama-integration",
+        "revision": "cbd35a6c9e9be70f57591a4aecad6cd3c9cb11e6",
+        "files_sha256": "3a71d13875c18b7c3cbc7957217f21642c8e25b370584923ef9257cad8aa8529",
+        "path": "../../../hub/llama-integration"
+      },
+      "fixtures": {
+        "hf-internal-testing/mic-llama-slim": {
+          "revision": "ec23804b44cda418c562a57ddef6dfc000169e66",
+          "files_sha256": "e2e2a64edcfe417d1350c83fe3c9be1c8184512a88b45b2339bbd41650a54ac3"
+        }
+      },
+      "checkpoints": {
+        "HuggingFaceTB/SmolLM2-135M": "93efa2f097d58c2a74874c7e644dbc9b0cee75a2"
+      }
+    }
+  }
+}

@@ -1,0 +1,202 @@
+{
+  "model": "openai/whisper-tiny",
+  "contract": "whisper",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "catalog-regenerated",
+  "validated": false,
+  "validation": {
+    "variant": "bfloat16",
+    "records": [
+      {
+        "contract": "hf-internal-testing/mic-whisper-integration",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "bfloat16",
+        "target": "mic-whisper-slim",
+        "kind": "fixture",
+        "revision": "unpublished",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3",
+          "local_patches": [
+            "config-field-generation-params",
+            "masked-spec-embed-init",
+            "whisper-decode-tensor-batch"
+          ]
+        },
+        "seconds": 2.39,
+        "platform": "cuda",
+        "baseline": "transformers/tests/contracts/expectations/whisper/cuda/mic-whisper-slim.bfloat16.json",
+        "status": "pass",
+        "failures": []
+      }
+    ],
+    "lock_sha256": "b68c4c6f14eccfc0317bd15dfb982b6eea03b3556883c4bf916c606f198796cb",
+    "manifest_sha256": "0f4a05ec4b33ba94dacc1b6a26080a683e2e1ea04fec1b0109936301c8d0a6a4",
+    "usage_sha256": "4de05477073bbf71039a0049c8b23a738c912e50b4ab516dcf32a77b841e6468"
+  },
+  "validations": {
+    "default": {
+      "variant": "default",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-whisper-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "default",
+          "target": "mic-whisper-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3",
+            "local_patches": [
+              "config-field-generation-params",
+              "masked-spec-embed-init",
+              "whisper-decode-tensor-batch"
+            ]
+          },
+          "seconds": 2.07,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/whisper/cuda/mic-whisper-slim.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "b68c4c6f14eccfc0317bd15dfb982b6eea03b3556883c4bf916c606f198796cb",
+      "manifest_sha256": "0f4a05ec4b33ba94dacc1b6a26080a683e2e1ea04fec1b0109936301c8d0a6a4",
+      "usage_sha256": "4de05477073bbf71039a0049c8b23a738c912e50b4ab516dcf32a77b841e6468",
+      "fingerprint": "4aba6ea1937de2fc8e164ca30b99a8a7303422af0b536ee08c40267625735e8d"
+    },
+    "eager": {
+      "variant": "eager",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-whisper-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "eager",
+          "target": "mic-whisper-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3",
+            "local_patches": [
+              "config-field-generation-params",
+              "masked-spec-embed-init",
+              "whisper-decode-tensor-batch"
+            ]
+          },
+          "seconds": 2.27,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/whisper/cuda/mic-whisper-slim.eager.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "b68c4c6f14eccfc0317bd15dfb982b6eea03b3556883c4bf916c606f198796cb",
+      "manifest_sha256": "0f4a05ec4b33ba94dacc1b6a26080a683e2e1ea04fec1b0109936301c8d0a6a4",
+      "usage_sha256": "4de05477073bbf71039a0049c8b23a738c912e50b4ab516dcf32a77b841e6468",
+      "fingerprint": "4aba6ea1937de2fc8e164ca30b99a8a7303422af0b536ee08c40267625735e8d"
+    },
+    "bfloat16": {
+      "variant": "bfloat16",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-whisper-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "bfloat16",
+          "target": "mic-whisper-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3",
+            "local_patches": [
+              "config-field-generation-params",
+              "masked-spec-embed-init",
+              "whisper-decode-tensor-batch"
+            ]
+          },
+          "seconds": 2.39,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/whisper/cuda/mic-whisper-slim.bfloat16.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "b68c4c6f14eccfc0317bd15dfb982b6eea03b3556883c4bf916c606f198796cb",
+      "manifest_sha256": "0f4a05ec4b33ba94dacc1b6a26080a683e2e1ea04fec1b0109936301c8d0a6a4",
+      "usage_sha256": "4de05477073bbf71039a0049c8b23a738c912e50b4ab516dcf32a77b841e6468",
+      "fingerprint": "4aba6ea1937de2fc8e164ca30b99a8a7303422af0b536ee08c40267625735e8d"
+    }
+  },
+  "weight_decision": {
+    "requested": "auto",
+    "weights": "overfit",
+    "accepted": true,
+    "reused": false,
+    "reason": "Random failed the sensitivity gate; overfit passed the gate after bounded training.",
+    "readability_requested": false,
+    "historical_detection": "unverified until replayed; a gate pass is not a regression catch"
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "runs": [
+    "https://github.com/huggingface/transformers-mic/actions/runs/38269732983",
+    "https://github.com/huggingface/transformers-mic/actions/runs/38270513115"
+  ],
+  "scope": "Published immutable pins; CPU fresh-process recording/review/check, GPU checks before and after CPU baseline changes; three variants. CPU executed on the GPU worker; dedicated CPU integration runner validation is separate.",
+  "models": {
+    "bert": {
+      "published-gpu": 0,
+      "cpu-record": 0,
+      "cpu-review": 0,
+      "cpu-approve": 0,
+      "cpu-check": 0,
+      "gpu-recheck": 0,
+      "export": 0
+    },
+    "gpt2": {
+      "published-gpu": 0,
+      "cpu-record": 0,
+      "cpu-review": 0,
+      "cpu-approve": 0,
+      "cpu-check": 0,
+      "gpu-recheck": 0,
+      "export": 0
+    },
+    "t5": {
+      "published-gpu": 0,
+      "cpu-record": 0,
+      "cpu-review": 0,
+      "cpu-approve": 0,
+      "cpu-check": 0,
+      "gpu-recheck": 0,
+      "export": 0
+    },
+    "modernbert": {
+      "published-gpu": 0,
+      "cpu-record": 0,
+      "cpu-review": 0,
+      "cpu-approve": 0,
+      "cpu-check": 0,
+      "gpu-recheck": 0,
+      "export": 0
+    },
+    "vit": {
+      "published-gpu": 0,
+      "cpu-record": 0,
+      "cpu-review": 0,
+      "cpu-approve": 0,
+      "cpu-check": 0,
+      "gpu-recheck": 0,
+      "export": 0
+    },
+    "clip": {
+      "published-gpu": 0,
+      "cpu-record": 0,
+      "cpu-review": 0,
+      "cpu-approve": 0,
+      "cpu-check": 0,
+      "gpu-recheck": 0,
+      "export": 0
+    },
+    "whisper": {
+      "published-gpu": 0,
+      "cpu-record": 0,
+      "cpu-review": 0,
+      "cpu-approve": 0,
+      "cpu-check": 0,
+      "gpu-recheck": 0,
+      "export": 0
+    },
+    "wav2vec2": {
+      "published-gpu": 0,
+      "cpu-record": 0,
+      "cpu-review": 0,
+      "cpu-approve": 0,
+      "cpu-check": 0,
+      "gpu-recheck": 0,
+      "export": 0
+    },
+    "llama": {
+      "published-gpu": 0,
+      "cpu-record": 0,
+      "cpu-review": 0,
+      "cpu-approve": 0,
+      "cpu-check": 0,
+      "gpu-recheck": 0,
+      "export": 0
+    },
+    "qwen2": {
+      "published-gpu": 0,
+      "cpu-record": 0,
+      "cpu-review": 0,
+      "cpu-approve": 0,
+      "cpu-check": 0,
+      "gpu-recheck": 0,
+      "export": 0
+    },
+    "mistral3": {
+      "published-gpu": 0,
+      "cpu-record": 0,
+      "cpu-review": 0,
+      "cpu-approve": 0,
+      "cpu-check": 0,
+      "gpu-recheck": 0,
+      "export": 0
+    },
+    "internvl": {
+      "published-gpu": 0,
+      "cpu-record": 0,
+      "cpu-review": 0,
+      "cpu-approve": 0,
+      "cpu-check": 0,
+      "gpu-recheck": 0,
+      "export": 0
+    },
+    "table_transformer": {
+      "published-gpu": 0,
+      "cpu-record": 0,
+      "cpu-review": 0,
+      "cpu-approve": 0,
+      "cpu-check": 0,
+      "gpu-recheck": 0,
+      "export": 0
+    },
+    "got_ocr2": {
+      "published-gpu": 0,
+      "cpu-record": 0,
+      "cpu-review": 0,
+      "cpu-approve": 0,
+      "cpu-check": 0,
+      "gpu-recheck": 0,
+      "export": 0
+    },
+    "gemma3": {
+      "published-gpu": 0,
+      "cpu-record": 0,
+      "cpu-review": 0,
+      "cpu-approve": 0,
+      "cpu-check": 0,
+      "gpu-recheck": 0,
+      "export": 0
+    },
+    "llava": {
+      "published-gpu": 0,
+      "cpu-record": 0,
+      "cpu-review": 0,
+      "cpu-approve": 0,
+      "cpu-check": 0,
+      "gpu-recheck": 0,
+      "export": 0
+    },
+    "smolvlm": {
+      "published-gpu": 0,
+      "cpu-record": 0,
+      "cpu-review": 0,
+      "cpu-approve": 0,
+      "cpu-check": 0,
+      "gpu-recheck": 0,
+      "export": 0
+    }
+  }
+}

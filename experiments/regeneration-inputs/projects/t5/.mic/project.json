@@ -1,0 +1,10 @@
+{
+  "model": "google-t5/t5-small",
+  "contract": "t5",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "catalog-regenerated",
+  "validated": false,
+  "validation": null,
+  "validations": {}
+}

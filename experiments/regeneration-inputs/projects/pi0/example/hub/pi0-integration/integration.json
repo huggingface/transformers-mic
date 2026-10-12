@@ -1,0 +1,79 @@
+{
+  "mic": "0.3",
+  "name": "PI0 policy",
+  "usage": "PI0ForConditionalGeneration: two camera observations and state, deterministic action sampling, and one flow-matching training step",
+  "architecture": "PI0ForConditionalGeneration",
+  "checkpoints": {
+    "lerobot/pi0_base": {
+      "fixture": "hf-internal-testing/mic-pi0-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/mic-pi0-slim": {
+      "built_from": "lerobot/pi0_base",
+      "covers": [
+        "lerobot/pi0_base"
+      ],
+      "build": {
+        "seed": 17,
+        "model_class": "PI0ForConditionalGeneration",
+        "config_overrides": {
+          "fields": {
+            "vlm_config.text_config.initializer_range": 0.06,
+            "dit_config.initializer_range": 0.06
+          },
+          "reason": "At width 64, standard 0.02 initialization makes several state/text probes smaller than the fixed 0.001 gate. Overfitting recovers state/text sensitivity but loses image sensitivity. Use one bounded increase of the random initialization scale and require the unchanged gate and finite-output checks to pass."
+        }
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=4.48",
+        "torch"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "action_first_step": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "action_last_step": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

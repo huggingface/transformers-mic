@@ -1,0 +1,82 @@
+{
+  "mic": "0.3",
+  "name": "SmolVLM2",
+  "usage": "AutoProcessor + AutoModelForVision2Seq, batched image+text inference with causal LM training step",
+  "architecture": "SmolVLMForConditionalGeneration",
+  "checkpoints": {
+    "HuggingFaceTB/SmolVLM2-2.2B-Instruct": {
+      "fixture": "hf-internal-testing/mic-smolvlm-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/mic-smolvlm-slim": {
+      "built_from": "HuggingFaceTB/SmolVLM2-2.2B-Instruct",
+      "covers": [
+        "HuggingFaceTB/SmolVLM2-2.2B-Instruct"
+      ],
+      "build": {
+        "seed": 17
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=4.47",
+        "torch",
+        "Pillow"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 4,
+          "download_mb": 200
+        },
+        "HuggingFaceTB/SmolVLM2-2.2B-Instruct": {
+          "memory_gb": 12,
+          "download_mb": 4500,
+          "variants": {
+            "bfloat16": {
+              "memory_gb": 8
+            }
+          }
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "selected_logits": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "framework": "transformers",
+  "environment": {
+    "python": "3.10",
+    "torch": "2.11.0",
+    "torchvision": "0.26.0",
+    "torchaudio": "2.11.0",
+    "tokenizers": "0.23.1",
+    "numpy": "1.26.4",
+    "pillow": "12.2.0",
+    "accelerate": "1.13.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.32.0",
+    "sentencepiece": "0.2.1",
+    "protobuf": "6.33.6",
+    "librosa": "0.11.0",
+    "soundfile": "0.13.1",
+    "scipy": "1.15.3"
+  },
+  "contracts": {
+    "vit": {
+      "integration": {
+        "repo": "hf-internal-testing/mic-vit-integration",
+        "revision": "499b613e58aa698e4a572f6c1265aa55eb60a38e",
+        "files_sha256": "0633949a8897be9da997ebd7dafba63c6747f8fa2b432679e11a7afe33ec0a72",
+        "path": "../../../hub/vit-integration"
+      },
+      "fixtures": {
+        "hf-internal-testing/mic-vit-slim": {
+          "revision": "2bf504ea8bd2e48d5e5870ea2880f8f79d52e11e",
+          "files_sha256": "3db848ce65d7db235433a2164505e9e9db5e82dbbbc705a175b5c392b69baa7a"
+        }
+      },
+      "checkpoints": {
+        "google/vit-base-patch16-224": "3f49326eb077187dfe1c2a2bb15fbd74e6ab91e3"
+      }
+    }
+  }
+}

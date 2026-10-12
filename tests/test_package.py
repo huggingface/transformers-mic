@@ -184,6 +184,98 @@ def test_export_keeps_other_contracts_and_removes_local_paths(workspace, tmp_pat
     assert all("path" not in p for p in lock["contracts"]["BERT"]["fixtures"].values())
 
 
+def test_export_rejects_case_collision_and_allows_explicit_name(workspace, tmp_path):
+    approve_receipts(workspace)
+    target = tmp_path / "transformers"
+    folder = target / "tests/contracts/expectations/bert"
+    folder.mkdir(parents=True)
+    args = SimpleNamespace(workspace=workspace.root, transformers_checkout=target)
+    with pytest.raises(ValueError, match="differs only by case"):
+        commands.export(args)
+    assert not (target / "tests/contracts/fleet.lock").exists()
+    args.contract_name = "mic-bert"
+    commands.export(args)
+    assert "mic-bert" in read(target / "tests/contracts/fleet.lock")["contracts"]
+    assert folder.exists()
+
+
+def test_external_check_defaults_to_full_fleet(monkeypatch, tmp_path):
+    from transformers_mic import backend
+
+    calls = []
+    monkeypatch.setattr(
+        backend,
+        "invoke",
+        lambda tool, root, options: (
+            calls.append(options) or SimpleNamespace(returncode=0)
+        ),
+    )
+    assert main(["check", "--lock", str(tmp_path / "fleet.lock")]) == 0
+    assert "--run-all" in calls[-1]
+    assert (
+        main(
+            [
+                "check",
+                "--lock",
+                str(tmp_path / "fleet.lock"),
+                "--changed-files",
+                str(tmp_path / "changes"),
+            ]
+        )
+        == 0
+    )
+    assert "--run-all" not in calls[-1]
+
+
+def test_contract_infrastructure_and_baseline_changes_select_cases():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "mic_selector_test", resources.backend() / "select_contracts.py"
+    )
+    selector = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(selector)
+    cases = {"BERT": ["bert"], "mic-vit": ["vit"]}
+    assert set(selector.select(["tests/contracts/prototype-fleet.lock"], cases)) == set(
+        cases
+    )
+    assert set(
+        selector.select(
+            ["tests/contracts/expectations/mic-vit/cpu-x86_64/a.json"], cases
+        )
+    ) == {"mic-vit"}
+
+
+def test_export_rejects_patched_validation(workspace, tmp_path):
+    lock = workspace.lock
+    lock["local_patches"] = {"masked-spec-embed-init": "reference control"}
+    write(workspace.lock_path, lock)
+    approve_receipts(workspace)
+    with pytest.raises(ValueError, match="without local patches"):
+        commands.export(
+            SimpleNamespace(
+                workspace=workspace.root, transformers_checkout=tmp_path / "tf"
+            )
+        )
+
+
+def test_cpu_precision_baselines_follow_hardware(monkeypatch):
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "mic_platform_test", resources.backend() / "run.py"
+    )
+    runner = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(runner)
+    monkeypatch.setattr(runner.os, "uname", lambda: SimpleNamespace(machine="x86_64"))
+    monkeypatch.setattr(runner, "native_bfloat16", lambda: True)
+    monkeypatch.setattr(runner, "native_float16", lambda: True)
+    assert runner.platform_class("cpu", "float32") == "cpu-x86_64"
+    assert runner.platform_class("cpu", "bfloat16") == "cpu-x86_64-bf16"
+    assert runner.platform_class("cpu", "float16") == "cpu-x86_64-fp16"
+    assert runner.platform_class("cuda", "float16") == "cuda"
+
+
 def test_create_offline_and_status(tmp_path, capsys):
     path = tmp_path / "new"
     assert (
@@ -328,3 +420,141 @@ def test_external_fleet_uses_each_contract_variants(tmp_path, monkeypatch):
         options[options.index("--contract") + 1] == "b" and options[-1] == "eager"
         for options in calls
     )
+
+
+def test_regeneration_creates_new_mic_artifacts_without_old_baselines(tmp_path):
+    path = tmp_path / "regenerated"
+    assert (
+        main(
+            [
+                "create",
+                "google-bert/bert-base-uncased",
+                "--regenerate",
+                "--fixtures-only",
+                "--namespace",
+                "hf-internal-testing",
+                "--name",
+                "bert",
+                "--out",
+                str(path),
+            ]
+        )
+        == 0
+    )
+    project = Workspace(path)
+    assert project.fixture == "hf-internal-testing/mic-bert-slim"
+    assert (
+        project.lock["contracts"]["bert"]["integration"]["repo"]
+        == "hf-internal-testing/mic-bert-integration"
+    )
+    assert project.manifest["integrations"]["transformers"]["targets"] == ["fixtures"]
+    assert not (project.lock_path.parent / "expectations").exists()
+
+
+def test_metadata_missing_keys_handles_ties_and_legacy_norm_names():
+    from transformers_mic.inspection import missing_from_keys
+
+    tied = object()
+
+    class Model:
+        base_model_prefix = "model"
+        all_tied_weights_keys = {}
+
+        def state_dict(self):
+            return {
+                "model.norm.weight": None,
+                "model.norm.bias": None,
+                "embedding.weight": None,
+                "lm_head.weight": None,
+                "masked_spec_embed": None,
+                "vision.layer_scale.gamma": None,
+            }
+
+        def named_parameters(self, **kwargs):
+            return [("embedding.weight", tied), ("lm_head.weight", tied)]
+
+    assert missing_from_keys(
+        Model(),
+        {"norm.gamma", "norm.beta", "embedding.weight", "vision.layer_scale.gamma"},
+    ) == ["masked_spec_embed"]
+
+
+def test_mxfp4_presence_requires_paired_blocks_and_scales():
+    from transformers_mic.inspection import logical_checkpoint_keys
+
+    config = SimpleNamespace(
+        model_type="gpt_oss", quantization_config={"quant_method": "mxfp4"}
+    )
+    keys = {
+        "model.layers.0.mlp.experts.gate_up_proj_blocks",
+        "model.layers.0.mlp.experts.gate_up_proj_scales",
+    }
+    assert "model.layers.0.mlp.experts.gate_up_proj" in logical_checkpoint_keys(
+        config, keys
+    )
+    with pytest.raises(ValueError, match="lacks scales"):
+        logical_checkpoint_keys(
+            config, {next(k for k in keys if k.endswith("_blocks"))}
+        )
+    config.quantization_config = {"quant_method": "other"}
+    with pytest.raises(ValueError, match="reviewed parameter-name adapter"):
+        logical_checkpoint_keys(config, keys)
+
+
+def test_fixtures_only_manifest_never_downloads_checkpoints(monkeypatch, tmp_path):
+    import importlib.util
+
+    source = resources.backend() / "run.py"
+    spec = importlib.util.spec_from_file_location("mic_test_runner", source)
+    runner = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(runner)
+    monkeypatch.setattr(
+        runner,
+        "checkpoint_path",
+        lambda *a: pytest.fail("Full checkpoint download requested"),
+    )
+    manifest = {
+        "fixtures": {},
+        "checkpoints": {"org/model": {}},
+        "integrations": {"transformers": {"targets": ["fixtures"]}},
+    }
+    contract = {"fixtures": {}, "checkpoints": {"org/model": "sha"}}
+    assert list(runner.targets(tmp_path, contract, manifest, "transformers")) == []
+
+
+def test_batch_keeps_running_after_a_model_failure(tmp_path, monkeypatch):
+    from transformers_mic import batch
+
+    root = tmp_path / "batch"
+    for name in ("bert", "other"):
+        Workspace(root / "projects" / name).from_catalog(
+            "google-bert/bert-base-uncased", "BERT", "auto", False
+        )
+    path = tmp_path / "models.json"
+    write(
+        path,
+        {
+            "models": [
+                {"name": "bert", "checkpoint": "org/bert"},
+                {"name": "other", "checkpoint": "org/other"},
+            ]
+        },
+    )
+
+    def invoke(out, name, command, timeout):
+        return {"exit_code": 1 if name == "bert" else 0}
+
+    monkeypatch.setattr(batch, "invoke", invoke)
+    args = SimpleNamespace(
+        models_file=path,
+        out=root,
+        phase="run",
+        select=None,
+        resume=False,
+        publish=False,
+        timeout=1,
+    )
+    assert batch.run(args) == 1
+    report = read(root / "report.json")
+    assert report["models"]["bert"]["status"] == "build-failed"
+    assert report["models"]["other"]["status"] == "validated"

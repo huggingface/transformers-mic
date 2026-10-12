@@ -25,10 +25,25 @@ on:
         type: string
         default: text clip bert t5 whisper wav2vec2
       matrix:
-        description: "mic-package: installed CLI on GPU · full: everything below · tf32: CPU baselines checked on GPU in float32, cuDNN TF32 on vs off · init: fixture_init.py (random/overfit/pruned/sliced) on GPU · contracts: the original contract fleet on GPU (record, stability, CPU golden, bfloat16) · dependency-stability: frozen current fleet, dependency upgrades and fresh-process repeats"
+        description: "mic-regeneration: declared prototype fleet · mic-package: installed CLI on GPU · full: everything below · tf32: CPU baselines checked on GPU in float32, cuDNN TF32 on vs off · init: fixture_init.py (random/overfit/pruned/sliced) on GPU · contracts: the original contract fleet on GPU (record, stability, CPU golden, bfloat16) · dependency-stability: frozen current fleet, dependency upgrades and fresh-process repeats"
         required: false
         type: string
         default: full
+      regeneration_previous_run:
+        description: "Resume from this run's mic-regeneration artifact (optional)"
+        required: false
+        type: string
+        default: ""
+      model_select:
+        description: "Space-separated model names for MIC regeneration or published validation (empty runs the whole fleet)"
+        required: false
+        type: string
+        default: ""
+      published_gpu_only:
+        description: "For mic-published: check immutable GPU pins only (native CPU recording is separate)"
+        required: false
+        type: boolean
+        default: false
       dependency_profiles:
         description: "Dependency study environments to run (empty runs all; use torch-cu130 for a focused retry)"
         required: false
@@ -45,10 +60,11 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   checks:
-    if: inputs.matrix != 'whisper-contract' && inputs.matrix != 'whisper-assist-large' && inputs.matrix != 'whisper-speech' && inputs.matrix != 'dependency-stability' && inputs.matrix != 'wav2vec2-normalization' && inputs.matrix != 'mic-package'
+    if: inputs.matrix != 'whisper-contract' && inputs.matrix != 'whisper-assist-large' && inputs.matrix != 'whisper-speech' && inputs.matrix != 'dependency-stability' && inputs.matrix != 'wav2vec2-normalization' && inputs.matrix != 'mic-package' && inputs.matrix != 'mic-regeneration' && inputs.matrix != 'mic-published' && inputs.matrix != 'mic-cpu-record'
     runs-on:
       group: '${{ inputs.machine_type }}'
     timeout-minutes: 240
@@ -302,7 +318,7 @@ jobs:
           done
       - name: Build a random twin for assisted decoding
         run: |
-          python3 example/build_fixtures.py --fixture proto-whisper-tiny-slim --keep-random --out "$GITHUB_WORKSPACE/out/random" > out/random-build.log 2>&1
+          python3 example/build_fixtures.py --fixture mic-whisper-tiny-slim --keep-random --out "$GITHUB_WORKSPACE/out/random" > out/random-build.log 2>&1
       - name: Archive the assisted-decoding fix and parent
         run: |
           git -C /tmp/transformers fetch --quiet --depth 2 https://github.com/huggingface/transformers b6688043ff8e1c972c7fcac92db7942e1e41f42e
@@ -321,7 +337,7 @@ jobs:
           for stage in fix bad; do
             for model in overfit random checkpoint; do
               PYTHONPATH="/tmp/assisted-builds/$stage/src" HF_HUB_OFFLINE=1 python3 experiments/whisper_assisted_suppression.py \
-                --model "$model" --random-fixture out/random/proto-whisper-tiny-slim --speech experiments/audio/1272-128104-0000.flac \
+                --model "$model" --random-fixture out/random/mic-whisper-tiny-slim --speech experiments/audio/1272-128104-0000.flac \
                 --device cuda --build "$(cat out/$stage.sha)" --output "out/assisted-$model-$stage.json" > "out/assisted-$model-$stage.log" 2>&1
             done
           done
@@ -540,10 +556,164 @@ jobs:
           tmic create google-bert/bert-base-uncased --offline --out /tmp/mic-package-fresh
           cd /tmp/mic-package-fresh
           tmic build --rebuild --weights random
-          tmic record --target proto-bert-base-uncased-slim
+          tmic record --target mic-bert-base-uncased-slim
           cp -R .mic "$GITHUB_WORKSPACE/out/fresh-project"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: mic-package
           path: out
+
+  mic-regeneration:
+    if: inputs.matrix == 'mic-regeneration'
+    runs-on:
+      group: '${{ inputs.machine_type }}'
+    timeout-minutes: 360
+    container:
+      image: ${{ inputs.docker }}
+      options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    env:
+      MIC_MODELS: ${{ inputs.model_select }}
+      HF_HOME: /mnt/cache
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      CUBLAS_WORKSPACE_CONFIG: ":4096:8"
+      CUDA_VISIBLE_DEVICES: "0"
+      PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "8"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install the pinned environment and standalone CLI
+        run: |
+          PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
+          python3 -m pip wheel . --no-deps --wheel-dir /tmp/tmic-wheels
+          python3 -m pip install --no-deps /tmp/tmic-wheels/transformers_mic-*.whl
+          python3 -m pip install timm pytest
+          mkdir -p out
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q tests > out/package-tests.txt
+      - name: Download the previous fleet artifacts
+        if: inputs.regeneration_previous_run != ''
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: mic-regeneration
+          run-id: ${{ inputs.regeneration_previous_run }}
+          github-token: ${{ github.token }}
+          path: /tmp/tmic-previous
+      - name: Regenerate the declared prototype fleet
+        run: |
+          if [ -d /tmp/tmic-previous/regeneration ]; then
+            cp -R /tmp/tmic-previous/regeneration /tmp/tmic-regeneration
+            python3 - <<'PY_INPUTS'
+          from pathlib import Path
+          import json
+          import shutil
+          source = Path('experiments/regeneration-inputs/projects')
+          target = Path('/tmp/tmic-regeneration/projects')
+          for project in source.iterdir():
+              dest = target / project.name
+              state = dest / '.mic/project.json'
+              changed_checkpoint = state.exists() and json.loads(state.read_text())['model'] != json.loads((project / '.mic/project.json').read_text())['model']
+              if not state.exists() or changed_checkpoint:
+                  shutil.copytree(project, dest, dirs_exist_ok=True)
+              else:
+                  # Preserve built pins, artifacts and approved baselines; replace
+                  # only the reviewed usage sources for this retry.
+                  shutil.copytree(project / 'example/hub', dest / 'example/hub', dirs_exist_ok=True)
+          PY_INPUTS
+          else
+            cp -R experiments/regeneration-inputs /tmp/tmic-regeneration
+          fi
+          cd /tmp
+          selected=()
+          for model in $MIC_MODELS; do selected+=(--select "$model"); done
+          tmic batch --models-file "$GITHUB_WORKSPACE/experiments/proto-models.json" \
+            --out /tmp/tmic-regeneration --phase run --resume --timeout 900 "${selected[@]}"
+      - name: Collect all successes and failures
+        if: always()
+        run: |
+          if [ -d /tmp/tmic-regeneration ]; then cp -R /tmp/tmic-regeneration out/regeneration; fi
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: mic-regeneration
+          path: out
+          include-hidden-files: true
+
+  mic-published:
+    if: inputs.matrix == 'mic-published'
+    runs-on:
+      group: '${{ inputs.machine_type }}'
+    timeout-minutes: 180
+    container:
+      image: ${{ inputs.docker }}
+      options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    env:
+      MIC_GPU_ONLY: ${{ inputs.published_gpu_only }}
+      MIC_MODELS: ${{ inputs.model_select }}
+      HF_HOME: /mnt/cache
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      CUBLAS_WORKSPACE_CONFIG: ":4096:8"
+      CUDA_VISIBLE_DEVICES: "0"
+      PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "8"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install the pinned runtime and packaged CLI
+        run: |
+          PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
+          python3 -m pip wheel . --no-deps --wheel-dir /tmp/tmic-wheels
+          python3 -m pip install --no-deps /tmp/tmic-wheels/transformers_mic-*.whl
+          python3 -m pip install timm
+      - name: Validate immutable Hub pins on CPU and GPU and export passing contracts
+        run: |
+          cp -R experiments/published-prototypes /tmp/tmic-published
+          cd /tmp
+          python3 "$GITHUB_WORKSPACE/.github/scripts/validate_published.py" /tmp/tmic-published $MIC_MODELS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: mic-published
+          path: /tmp/tmic-published
+          include-hidden-files: true
+
+  mic-cpu-record:
+    if: inputs.matrix == 'mic-cpu-record'
+    runs-on:
+      group: '${{ inputs.machine_type }}'
+    timeout-minutes: 120
+    container:
+      image: ${{ inputs.docker }}
+      options: --shm-size "16gb"
+    env:
+      MIC_MODELS: ${{ inputs.model_select }}
+      HF_HOME: /tmp/hf_home
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "4"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install pinned CPU dependencies and the Transformers proof revision
+        run: |
+          PY=python FETCH=${{ inputs.transformers_sha }} SHA=${{ inputs.transformers_sha }} TORCH_INDEX=cpu .github/scripts/install_pinned.sh
+          python -m pip wheel . --no-deps --wheel-dir /tmp/tmic-wheels
+          python -m pip install --no-deps /tmp/tmic-wheels/transformers_mic-*.whl
+          python -m pip install timm
+      - name: Record native CPU baselines and validate the unpatched calls
+        run: |
+          cp -R experiments/published-prototypes /tmp/tmic-cpu
+          cd /tmp
+          python "$GITHUB_WORKSPACE/.github/scripts/record_cpu_prototypes.py" /tmp/tmic-cpu $MIC_MODELS
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: mic-cpu-record
+          path: /tmp/tmic-cpu
+          include-hidden-files: true

@@ -1,0 +1,10 @@
+{
+  "model": "Qwen/Qwen2-0.5B",
+  "contract": "qwen2",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": null,
+  "validations": {}
+}

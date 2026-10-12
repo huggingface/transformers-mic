@@ -62,6 +62,17 @@ def parser():
     )
     create.add_argument("--revision")
     create.add_argument(
+        "--regenerate",
+        action="store_true",
+        help="Create new mic- artifacts using a catalog path where available",
+    )
+    create.add_argument("--name", help="Stable contract slug for generated artifacts")
+    create.add_argument(
+        "--fixtures-only",
+        action="store_true",
+        help="Declare this prototype as slim-only; full checkpoint validation remains separate",
+    )
+    create.add_argument(
         "--llm",
         action="store_true",
         help="Generate a new draft even if a catalog contract exists",
@@ -105,6 +116,10 @@ def parser():
                 type=Path,
                 help="Run an exported fleet lock without a MIC workspace",
             )
+            run.add_argument("--fixtures-only", action="store_true")
+            run.add_argument("--changed-files", type=Path)
+            run.add_argument("--output", type=Path)
+            run.add_argument("--run-all", action="store_true")
             run.add_argument(
                 "--contract",
                 action="append",
@@ -152,9 +167,42 @@ def parser():
         help="Write immutable pins and expectations into a Transformers checkout",
     )
     export.add_argument("--transformers-checkout", required=True)
+    export.add_argument(
+        "--contract-name", help="Destination name, e.g. mic-bert alongside BERT"
+    )
+    report = sub.add_parser(
+        "report", help="Render CI results and reproducible tmic commands"
+    )
+    report.add_argument("results", type=Path)
+    report.add_argument("--log", type=Path)
+    report.add_argument("--lock", type=Path)
+    sub.add_parser(
+        "auto",
+        help="Check AutoConfig and Auto-model factory mappings for the built slim",
+    )
     sub.add_parser(
         "status", help="Show project provenance, weight choice and check receipts"
     )
+    batch = sub.add_parser(
+        "batch", help="Regenerate a declared prototype fleet and report every stage"
+    )
+    batch.add_argument("--models-file", type=Path, required=True)
+    batch.add_argument("--out", required=True)
+    batch.add_argument("--namespace", default="hf-internal-testing")
+    batch.add_argument("--phase", choices=("prepare", "run", "all"), default="all")
+    batch.add_argument(
+        "--select", action="append", help="Model names to run (repeatable)"
+    )
+    batch.add_argument("--resume", action="store_true")
+    batch.add_argument(
+        "--publish",
+        action="store_true",
+        help="Upload only after all declared checks pass",
+    )
+    batch.add_argument("--timeout", type=int, default=1800, help="Seconds per stage")
+    batch.add_argument("--no-history", action="store_true")
+    batch.add_argument("--history-limit", type=int, default=10)
+    llm_options(batch)
     return root
 
 
@@ -170,6 +218,14 @@ def external_check(args):
         options += ["--target", target]
     if args.isolate:
         options.append("--isolate")
+    if args.fixtures_only:
+        options.append("--fixtures-only")
+    if args.changed_files:
+        options += ["--changed-files", str(args.changed_files.resolve())]
+    if args.output:
+        options += ["--output", str(args.output.resolve())]
+    if args.run_all or not args.changed_files:
+        options.append("--run-all")
     if not args.all_variants:
         for name in args.contract or []:
             options += ["--contract", name]
@@ -206,8 +262,22 @@ def external_check(args):
 def main(argv=None):
     args = parser().parse_args(argv)
     try:
+        if args.command == "batch":
+            from .batch import run
+
+            return run(args)
         if args.command == "check" and args.lock:
             return external_check(args)
+        if args.command == "report":
+            options = [str(args.results.resolve()), "--runner", "tmic check"]
+            if args.log:
+                options += ["--log", str(args.log.resolve())]
+            if args.lock:
+                options += ["--lock", str(args.lock)]
+            return backend.invoke("report", Path.cwd(), options).returncode
+        if args.command == "auto":
+            project = Workspace(args.workspace)
+            return backend.invoke("auto-stage", project.root).returncode
         if args.command == "status":
             print(json.dumps(Workspace(args.workspace).state, indent=2))
             return 0

@@ -1,0 +1,10 @@
+{
+  "model": "lerobot/pi0_base",
+  "contract": "pi0",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": null,
+  "validations": {}
+}

@@ -5,11 +5,11 @@
   "architecture": "Wav2Vec2ForCTC",
   "checkpoints": {
     "facebook/wav2vec2-base-960h": {
-      "fixture": "hf-internal-testing/proto-wav2vec2-base-960h-slim"
+      "fixture": "hf-internal-testing/mic-wav2vec2-base-960h-slim"
     }
   },
   "fixtures": {
-    "hf-internal-testing/proto-wav2vec2-base-960h-slim": {
+    "hf-internal-testing/mic-wav2vec2-base-960h-slim": {
       "built_from": "facebook/wav2vec2-base-960h",
       "covers": [
         "facebook/wav2vec2-base-960h"

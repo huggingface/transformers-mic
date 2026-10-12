@@ -1,0 +1,10 @@
+{
+  "model": "Qwen/Qwen2-Audio-7B",
+  "contract": "qwen2_audio",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": null,
+  "validations": {}
+}

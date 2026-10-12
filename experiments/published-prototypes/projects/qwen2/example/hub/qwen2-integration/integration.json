@@ -1,0 +1,85 @@
+{
+  "mic": "0.3",
+  "name": "Qwen2 causal-LM",
+  "usage": "AutoTokenizer + AutoModelForCausalLM, batched right-padding, causal-LM training step",
+  "architecture": "Qwen2ForCausalLM",
+  "checkpoints": {
+    "Qwen/Qwen2-0.5B": {
+      "fixture": "hf-internal-testing/mic-qwen2-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/mic-qwen2-slim": {
+      "built_from": "Qwen/Qwen2-0.5B",
+      "covers": [
+        "Qwen/Qwen2-0.5B"
+      ],
+      "build": {
+        "seed": 17,
+        "model_class": "Qwen2ForCausalLM"
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=5",
+        "torch"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 1,
+          "download_mb": 50
+        },
+        "Qwen/Qwen2-0.5B": {
+          "memory_gb": 5,
+          "download_mb": 1100,
+          "variants": {
+            "bfloat16": {
+              "memory_gb": 3
+            }
+          }
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "predicted_tokens": {
+      "compare": "exact"
+    },
+    "selected_logits": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

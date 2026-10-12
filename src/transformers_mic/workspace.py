@@ -24,6 +24,22 @@ def digest(files):
     return hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest()
 
 
+def catalog_patches(catalog, name):
+    needed = {
+        "Whisper": {"config-field-generation-params", "whisper-decode-tensor-batch"},
+        "WhisperSpeech": {
+            "config-field-generation-params",
+            "whisper-decode-tensor-batch",
+        },
+        "Wav2Vec2": {"masked-spec-embed-init"},
+    }.get(name, set())
+    return {
+        key: value
+        for key, value in catalog.get("local_patches", {}).items()
+        if key in needed
+    }
+
+
 class Workspace:
     def __init__(self, path):
         self.root = Path(path).resolve()
@@ -88,7 +104,7 @@ class Workspace:
                 "framework": "transformers",
                 "contracts": {name: entry},
                 "environment": catalog["environment"],
-                "local_patches": catalog.get("local_patches", {}),
+                "local_patches": catalog_patches(catalog, name),
             },
         )
         write(
@@ -131,7 +147,7 @@ class Workspace:
                 "contracts": {
                     name: {
                         "integration": {
-                            "repo": f"{namespace}/{name}-integration",
+                            "repo": f"{namespace}/mic-{name}-integration",
                             "revision": "unpublished",
                             "path": f"../../../hub/{name}-integration",
                         },

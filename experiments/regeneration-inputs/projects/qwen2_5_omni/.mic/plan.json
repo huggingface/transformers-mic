@@ -1,0 +1,91 @@
+{
+  "name": "qwen2_5_omni",
+  "manifest": {
+    "mic": "0.3",
+    "name": "Qwen2.5-Omni text generation",
+    "usage": "Qwen2_5OmniForConditionalGeneration + Qwen2_5OmniProcessor, text-only chat, batched with padding",
+    "architecture": "Qwen2_5OmniForConditionalGeneration",
+    "checkpoints": {
+      "Qwen/Qwen2.5-Omni-7B": {
+        "fixture": "hf-internal-testing/mic-qwen2_5_omni-slim"
+      }
+    },
+    "fixtures": {
+      "hf-internal-testing/mic-qwen2_5_omni-slim": {
+        "built_from": "Qwen/Qwen2.5-Omni-7B",
+        "covers": [
+          "Qwen/Qwen2.5-Omni-7B"
+        ],
+        "build": {
+          "seed": 17
+        }
+      }
+    },
+    "integrations": {
+      "transformers": {
+        "entry_point": "integrations/transformers/usage.md",
+        "format": "runnable-markdown",
+        "requires": [
+          "transformers>=4.50",
+          "torch"
+        ],
+        "targets": [
+          "fixtures"
+        ],
+        "variants": {
+          "default": {},
+          "eager": {
+            "attn_implementation": "eager"
+          },
+          "bfloat16": {
+            "dtype": "bfloat16"
+          }
+        },
+        "training": true,
+        "resources": {
+          "fixture": {
+            "memory_gb": 2,
+            "download_mb": 50
+          },
+          "Qwen/Qwen2.5-Omni-7B": {
+            "memory_gb": 16,
+            "download_mb": 15000
+          }
+        }
+      }
+    },
+    "outputs": {
+      "runtime": {
+        "compare": "exact"
+      },
+      "selected_logits": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "generated_token_ids": {
+        "compare": "exact"
+      },
+      "training.loss": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.gradients": {
+        "compare": "all_true"
+      },
+      "training.updated": {
+        "compare": "true"
+      }
+    }
+  },
+  "usage": "# Qwen2.5-Omni: text generation with Transformers\n\nThis page is the Transformers contract of the Qwen2.5-Omni MIC and also a usage example. The MIC runner runs the blocks below against each slim fixture and each checkpoint in [`integration.json`](../../integration.json).\n\n## Inference and one training step\n\n```py runnable:omni_text\nimport torch\nfrom transformers import Qwen2_5OmniForConditionalGeneration, Qwen2_5OmniProcessor, set_seed\nimport json  # doc-builder: hide\nimport os  # doc-builder: hide\n\nmodel_id = \"Qwen/Qwen2.5-Omni-7B\"\nmodel_id = os.environ.get(\"MIC_MODEL\", model_id)  # doc-builder: hide\nvariant = json.loads(os.environ.get(\"MIC_MODEL_KWARGS\", \"{}\"))  # doc-builder: hide\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nset_seed(0)\n\nprocessor = Qwen2_5OmniProcessor.from_pretrained(model_id)\n\nload_kwargs = {}  # doc-builder: hide\nif variant:  # doc-builder: hide\n    if \"dtype\" in variant:\n        load_kwargs[\"torch_dtype\"] = variant[\"dtype\"]\n    for k, v in variant.items():\n        if k != \"dtype\":\n            load_kwargs[k] = v\n\nmodel = Qwen2_5OmniForConditionalGeneration.from_pretrained(model_id, **load_kwargs).to(device)  # doc-builder: hide\n\nconversations = [\n    [\n        {\"role\": \"system\", \"content\": [{\"type\": \"text\", \"text\": \"You are a helpful assistant.\"}]},\n        {\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Who are you?\"}]},\n    ],\n    [\n        {\"role\": \"system\", \"content\": [{\"type\": \"text\", \"text\": \"You are a helpful assistant.\"}]},\n        {\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"What is the capital of France?\"}]},\n    ],\n]\n\ntexts = processor.apply_chat_template(conversations, add_generation_prompt=True, tokenize=False)\ninputs = processor(text=texts, return_tensors=\"pt\", padding=True).to(device)\nfor k, v in inputs.items():  # doc-builder: hide\n    if isinstance(v, torch.Tensor) and v.is_floating_point():\n        inputs[k] = v.to(model.dtype)\n\nmodel.eval()\nwith torch.no_grad():\n    outputs = model(**inputs)\n\nselected_logits = outputs.logits[0, :5, :5].float().tolist()\n\nwith torch.no_grad():\n    generated_ids = model.generate(**inputs, max_new_tokens=8, do_sample=False, return_audio=False)\ngenerated_tokens = generated_ids[0, inputs[\"input_ids\"].size(1):].tolist()\nprint(f\"generated: {generated_tokens}\")\n```\n\n```py runnable:omni_text:2\n# Training step on the thinker causal-LM head\nlabels = torch.full_like(inputs[\"input_ids\"], -100)\nseq_lens = inputs[\"attention_mask\"].sum(dim=1)\nfor i in range(inputs[\"input_ids\"].size(0)):\n    start = max(0, seq_lens[i].item() - 5)\n    labels[i, start:seq_lens[i]] = inputs[\"input_ids\"][i, start:seq_lens[i]]\n\nmodel.train()\noptimizer = torch.optim.SGD(model.parameters(), lr=0.01)\nloss = model(input_ids=inputs[\"input_ids\"], attention_mask=inputs[\"attention_mask\"], labels=labels).loss\nloss.backward()\nbefore = {name: p.detach().clone() for name, p in model.named_parameters()}  # doc-builder: hide\noptimizer.step()\nprint(f\"loss: {loss.item():.4f}\")\n\nif os.environ.get(\"MIC_RUNNER\"):  # doc-builder: hide\n    named = dict(model.named_parameters())\n    checked = (\"thinker.model.layers.0.self_attn.q_proj.weight\", \"thinker.model.layers.0.mlp.gate_proj.weight\")\n    result = {\n        \"runtime\": {\n            \"device\": model.device.type,\n            \"dtype\": str(model.dtype).removeprefix(\"torch.\"),\n            \"attn_implementation\": getattr(model.config, \"_attn_implementation\", \"unknown\"),\n        },\n        \"selected_logits\": selected_logits,\n        \"generated_token_ids\": generated_tokens,\n        \"training\": {\n            \"loss\": loss.item(),\n            \"gradients\": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all()) for n in checked},\n            \"updated\": any(not torch.equal(p, before[n]) for n, p in named.items()),\n        },\n    }\n    print(json.dumps(result))\n```\n",
+  "rationale": "Text-only chat path avoids external media dependencies while exercising the full processor pipeline (chat template, tokenization, padding). Two distinct conversations provide a meaningful batch for padding sensitivity. The thinker's causal-LM head supports standard next-token loss, enabling a real training step with SGD. Selected logits (5x5 slice) give a compact numeric probe without dumping the full vocabulary. Gradient checks target the first layer's attention query and MLP gate in the thinker, which are guaranteed to receive gradients from the causal-LM loss.",
+  "historical_candidates": [],
+  "llm": {
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "auto",
+    "usage": "ChatCompletionOutputUsage(completion_tokens=7899, prompt_tokens=9265, total_tokens=17164, completion_tokens_details={'reasoning_tokens': 6240}, prompt_tokens_details={'cached_tokens': 0, 'image_tokens': 0})",
+    "role": "proposal only"
+  }
+}

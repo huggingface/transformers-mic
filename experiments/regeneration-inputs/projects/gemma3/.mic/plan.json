@@ -1,0 +1,108 @@
+{
+  "name": "gemma3",
+  "manifest": {
+    "mic": "0.3",
+    "name": "Gemma3 causal LM",
+    "usage": "AutoProcessor + AutoModelForCausalLM, text-only batched with padding, one training step",
+    "architecture": "Gemma3ForConditionalGeneration",
+    "checkpoints": {
+      "google/gemma-3-4b-it": {
+        "fixture": "hf-internal-testing/mic-gemma3-slim"
+      }
+    },
+    "fixtures": {
+      "hf-internal-testing/mic-gemma3-slim": {
+        "built_from": "google/gemma-3-4b-it",
+        "covers": [
+          "google/gemma-3-4b-it"
+        ],
+        "build": {
+          "seed": 17
+        }
+      }
+    },
+    "integrations": {
+      "transformers": {
+        "entry_point": "integrations/transformers/usage.md",
+        "format": "runnable-markdown",
+        "requires": [
+          "transformers>=5",
+          "torch"
+        ],
+        "targets": [
+          "fixtures"
+        ],
+        "variants": {
+          "default": {},
+          "eager": {
+            "attn_implementation": "eager"
+          },
+          "bfloat16": {
+            "dtype": "bfloat16"
+          }
+        },
+        "training": true,
+        "resources": {
+          "fixture": {
+            "memory_gb": 1,
+            "download_mb": 50
+          },
+          "google/gemma-3-4b-it": {
+            "memory_gb": 16,
+            "download_mb": 8500,
+            "variants": {
+              "bfloat16": {
+                "memory_gb": 8
+              }
+            }
+          }
+        }
+      }
+    },
+    "outputs": {
+      "runtime": {
+        "compare": "exact"
+      },
+      "predicted_tokens": {
+        "compare": "exact"
+      },
+      "predicted_text": {
+        "compare": "exact"
+      },
+      "answer_logits": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.loss": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.gradients": {
+        "compare": "all_true"
+      },
+      "training.updated": {
+        "compare": "true"
+      }
+    }
+  },
+  "usage": "# Gemma3: causal LM with Transformers\n\nThis page is the Transformers contract of the Gemma3 MIC and also a usage example. [doc-builder](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md) renders the `runnable` blocks below as documentation, and its pytest plugin runs them as written against `google/gemma-3-4b-it`. The MIC runner runs the same blocks against each slim fixture and each checkpoint in [`integration.json`](../../integration.json). Lines marked `# doc-builder: hide` only matter there: they swap in the pinned checkpoint or variant and print the result record.\n\n## Next-token prediction\n\n```py runnable:gemma3\nimport torch\nfrom transformers import AutoProcessor, AutoModelForCausalLM, set_seed\nimport json  # doc-builder: hide\nimport os  # doc-builder: hide\n\nmodel_id = \"google/gemma-3-4b-it\"\nmodel_id = os.environ.get(\"MIC_MODEL\", model_id)  # doc-builder: hide\nvariant = json.loads(os.environ.get(\"MIC_MODEL_KWARGS\", \"{}\"))  # doc-builder: hide\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nset_seed(0)  # seeds torch, NumPy, and Python: loading, dropout, and data augmentation draw random numbers\n\nprocessor = AutoProcessor.from_pretrained(model_id)\nmodel = AutoModelForCausalLM.from_pretrained(model_id).to(device)\nif variant:  # doc-builder: hide\n    model = AutoModelForCausalLM.from_pretrained(model_id, **variant).to(device)\n\nprompts = [\"The sky is\", \"Water is\"]\ninputs = processor(text=prompts, return_tensors=\"pt\", padding=True).to(device)\n\nmodel.eval()\nwith torch.no_grad():\n    outputs = model(**inputs)\nlogits = outputs.logits\n\n# Last-token logits for next-token prediction\nseq_lens = inputs[\"input_ids\"].sum(dim=-1) - 1\nlast_logits = logits[torch.arange(inputs[\"input_ids\"].shape[0]), seq_lens]\npredicted_ids = last_logits.argmax(dim=-1)\npredicted_tokens = processor.tokenizer.convert_ids_to_tokens(predicted_ids)\npredicted_text = processor.tokenizer.decode(predicted_ids, skip_special_tokens=False)\nprint(predicted_tokens)\n```\n\n## One training step\n\n```py runnable:gemma3:2\n# Causal LM labels: shift input_ids left, mask padding\ninput_ids = inputs[\"input_ids\"]\nlabels = torch.roll(input_ids, shifts=-1, dims=-1)\nif processor.tokenizer.pad_token_id is not None:\n    labels[input_ids == processor.tokenizer.pad_token_id] = -100\n\nmodel.train()\noptimizer = torch.optim.SGD(model.parameters(), lr=0.01)\nloss = model(**inputs, labels=labels).loss\nloss.backward()\nbefore = {name: p.detach().clone() for name, p in model.named_parameters()}  # doc-builder: hide\noptimizer.step()\nprint(f\"loss: {loss.item():.4f}\")\n\nif os.environ.get(\"MIC_RUNNER\"):  # doc-builder: hide\n    named = dict(model.named_parameters())\n    checked = (\n        \"model.language_model.layers.0.self_attn.q_proj.weight\",\n        \"model.language_model.layers.0.mlp.up_proj.weight\",\n    )\n    top3 = last_logits.topk(3, dim=-1).values.float()\n    result = {\n        \"runtime\": {\n            \"device\": next(model.parameters()).device.type,\n            \"dtype\": str(next(model.parameters()).dtype).removeprefix(\"torch.\"),\n            \"attn_implementation\": model.config._attn_implementation,\n        },\n        \"predicted_tokens\": predicted_tokens,\n        \"predicted_text\": predicted_text,\n        \"answer_logits\": top3.tolist(),\n        \"training\": {\n            \"loss\": loss.item(),\n            \"gradients\": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all()) for n in checked},\n            \"updated\": any(not torch.equal(p, before[n]) for n, p in named.items()),\n        },\n    }\n    print(json.dumps(result))\n```\n",
+  "rationale": "Gemma3 is a multimodal (text+vision) causal LM. This contract exercises the text-only path through AutoProcessor and AutoModelForCausalLM with two padded prompts of different lengths, verifying next-token prediction stability and a real SGD training step with shifted labels. The top-3 logits at the final position provide a compact numeric probe without dumping the full vocabulary. Gradient checks target the first text layer's attention and MLP projections, which are guaranteed to receive gradients from text-only causal LM loss.",
+  "historical_candidates": [
+    {
+      "issue_url": "https://github.com/huggingface/transformers/issues/33500",
+      "reason": "Sliding-window attention (sliding_window=1024 in text_config) combined with eager attention implementation may produce different numerical results vs SDPA; investigate whether the eager variant diverges beyond tolerance on short sequences where the window is not actually truncated."
+    },
+    {
+      "issue_url": "https://github.com/huggingface/transformers/issues/32100",
+      "reason": "Gemma3ForConditionalGeneration with text-only inputs: verify that the vision tower parameters remain at zero gradient and do not affect the training.updated check (any() over all params). If vision params are initialized to zero and never updated, the check should still pass via text params, but confirm no NaN propagation from unused vision branches."
+    }
+  ],
+  "llm": {
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "auto",
+    "usage": "ChatCompletionOutputUsage(completion_tokens=5896, prompt_tokens=4067, total_tokens=9963, completion_tokens_details={'reasoning_tokens': 4297}, prompt_tokens_details={'cached_tokens': 0, 'image_tokens': 0})",
+    "role": "proposal only"
+  }
+}

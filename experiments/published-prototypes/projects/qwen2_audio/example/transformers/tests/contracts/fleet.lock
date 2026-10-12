@@ -1,0 +1,39 @@
+{
+  "framework": "transformers",
+  "environment": {
+    "python": "3.10",
+    "torch": "2.11.0",
+    "torchvision": "0.26.0",
+    "torchaudio": "2.11.0",
+    "tokenizers": "0.23.1",
+    "numpy": "1.26.4",
+    "pillow": "12.2.0",
+    "accelerate": "1.13.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.32.0",
+    "sentencepiece": "0.2.1",
+    "protobuf": "6.33.6",
+    "librosa": "0.11.0",
+    "soundfile": "0.13.1",
+    "scipy": "1.15.3"
+  },
+  "contracts": {
+    "qwen2_audio": {
+      "integration": {
+        "repo": "hf-internal-testing/mic-qwen2_audio-integration",
+        "revision": "0202e047354df58df00e0d1223105a3dfa0687f9",
+        "path": "../../../hub/qwen2_audio-integration",
+        "files_sha256": "553f4c308b565c18a6f59cda61dd75d2df65191b9ec5a41457df9dd94106d635"
+      },
+      "fixtures": {
+        "hf-internal-testing/mic-qwen2_audio-slim": {
+          "revision": "e9825cc2303d151dd4e093b7d4579052c361705d",
+          "files_sha256": "b436575e4e60ac7eaeaf2e81d841e141b70a674a89617cfc7c2dbe3e8eeda61c"
+        }
+      },
+      "checkpoints": {
+        "Qwen/Qwen2-Audio-7B": "dd84470756e6277a71d4d7188773a43cde92696e"
+      }
+    }
+  }
+}

@@ -1,0 +1,182 @@
+{
+  "model": "mistralai/Mistral-Small-3.1-24B-Instruct-2503",
+  "contract": "mistral3",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": {
+    "variant": "bfloat16",
+    "records": [
+      {
+        "contract": "hf-internal-testing/mic-mistral3-integration",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "bfloat16",
+        "target": "mic-mistral3-slim",
+        "kind": "fixture",
+        "revision": "unpublished",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3"
+        },
+        "seconds": 5.89,
+        "platform": "cuda",
+        "baseline": "transformers/tests/contracts/expectations/mistral3/cuda/mic-mistral3-slim.bfloat16.json",
+        "status": "pass",
+        "failures": []
+      }
+    ],
+    "lock_sha256": "de3d15851b704d3e2b75971087ff5b09c5b9633e8a5c7a4bf8a9ddb554a24cd4",
+    "manifest_sha256": "773684afb6cb6cd5706d0fceb6e3cc1b4020fdd35f0f5c555c1bcd8f28f162c2",
+    "usage_sha256": "ff2e41b51391c0c5051f39bb313928afd7877ec27157cb20673ab56e2b356931"
+  },
+  "validations": {
+    "default": {
+      "variant": "default",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-mistral3-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "default",
+          "target": "mic-mistral3-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 5.93,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/mistral3/cuda/mic-mistral3-slim.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "de3d15851b704d3e2b75971087ff5b09c5b9633e8a5c7a4bf8a9ddb554a24cd4",
+      "manifest_sha256": "773684afb6cb6cd5706d0fceb6e3cc1b4020fdd35f0f5c555c1bcd8f28f162c2",
+      "usage_sha256": "ff2e41b51391c0c5051f39bb313928afd7877ec27157cb20673ab56e2b356931",
+      "fingerprint": "b797f912634684acee4cccf53568b735b8ff1e57752dcc02d8b1b7e05b34340f"
+    },
+    "eager": {
+      "variant": "eager",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-mistral3-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "eager",
+          "target": "mic-mistral3-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 6.04,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/mistral3/cuda/mic-mistral3-slim.eager.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "de3d15851b704d3e2b75971087ff5b09c5b9633e8a5c7a4bf8a9ddb554a24cd4",
+      "manifest_sha256": "773684afb6cb6cd5706d0fceb6e3cc1b4020fdd35f0f5c555c1bcd8f28f162c2",
+      "usage_sha256": "ff2e41b51391c0c5051f39bb313928afd7877ec27157cb20673ab56e2b356931",
+      "fingerprint": "b797f912634684acee4cccf53568b735b8ff1e57752dcc02d8b1b7e05b34340f"
+    },
+    "bfloat16": {
+      "variant": "bfloat16",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-mistral3-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "bfloat16",
+          "target": "mic-mistral3-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 5.89,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/mistral3/cuda/mic-mistral3-slim.bfloat16.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "de3d15851b704d3e2b75971087ff5b09c5b9633e8a5c7a4bf8a9ddb554a24cd4",
+      "manifest_sha256": "773684afb6cb6cd5706d0fceb6e3cc1b4020fdd35f0f5c555c1bcd8f28f162c2",
+      "usage_sha256": "ff2e41b51391c0c5051f39bb313928afd7877ec27157cb20673ab56e2b356931",
+      "fingerprint": "b797f912634684acee4cccf53568b735b8ff1e57752dcc02d8b1b7e05b34340f"
+    }
+  },
+  "weight_decision": {
+    "requested": "auto",
+    "weights": "random",
+    "accepted": true,
+    "reused": false,
+    "reason": "Random weights pass the measured sensitivity and numeric-health gates; training is unnecessary.",
+    "readability_requested": false,
+    "historical_detection": "unverified until replayed; a gate pass is not a regression catch"
+  }
+}

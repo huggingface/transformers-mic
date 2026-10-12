@@ -1,0 +1,94 @@
+{
+  "name": "gpt2",
+  "manifest": {
+    "mic": "0.3",
+    "name": "GPT-2 next-token",
+    "usage": "AutoTokenizer + AutoModelForCausalLM, batched, right padding",
+    "architecture": "GPT2LMHeadModel",
+    "checkpoints": {
+      "openai-community/gpt2": {
+        "fixture": "hf-internal-testing/mic-gpt2-slim"
+      }
+    },
+    "fixtures": {
+      "hf-internal-testing/mic-gpt2-slim": {
+        "built_from": "openai-community/gpt2",
+        "covers": [
+          "openai-community/gpt2"
+        ],
+        "build": {
+          "seed": 17
+        }
+      }
+    },
+    "integrations": {
+      "transformers": {
+        "entry_point": "integrations/transformers/usage.md",
+        "format": "runnable-markdown",
+        "requires": [
+          "transformers>=5",
+          "torch"
+        ],
+        "targets": [
+          "fixtures"
+        ],
+        "variants": {
+          "default": {},
+          "eager": {
+            "attn_implementation": "eager"
+          },
+          "bfloat16": {
+            "dtype": "bfloat16"
+          }
+        },
+        "training": true,
+        "resources": {
+          "fixture": {
+            "memory_gb": 1,
+            "download_mb": 20
+          },
+          "openai-community/gpt2": {
+            "memory_gb": 5,
+            "download_mb": 548
+          }
+        }
+      }
+    },
+    "outputs": {
+      "runtime": {
+        "compare": "exact"
+      },
+      "predicted_tokens": {
+        "compare": "exact"
+      },
+      "predicted_text": {
+        "compare": "exact"
+      },
+      "next_token_logits": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.loss": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.gradients": {
+        "compare": "all_true"
+      },
+      "training.updated": {
+        "compare": "true"
+      }
+    }
+  },
+  "usage": "# GPT-2: next-token prediction with Transformers\n\nThis page is the Transformers contract of the GPT-2 MIC and also a usage example. [doc-builder](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md) renders the `runnable` blocks below as documentation, and its pytest plugin runs them as written against `openai-community/gpt2`. The MIC runner runs the same blocks against each slim fixture and each checkpoint in [`integration.json`](../../integration.json). Lines marked `# doc-builder: hide` only matter there: they swap in the pinned checkpoint or variant and print the result record.\n\n## Predict the next token\n\n```py runnable:next_token\nimport torch\nfrom transformers import AutoModelForCausalLM, AutoTokenizer, set_seed\nimport json  # doc-builder: hide\nimport os  # doc-builder: hide\n\nmodel_id = \"openai-community/gpt2\"\nmodel_id = os.environ.get(\"MIC_MODEL\", model_id)  # doc-builder: hide\nvariant = json.loads(os.environ.get(\"MIC_MODEL_KWARGS\", \"{}\"))  # doc-builder: hide\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nset_seed(0)\n\ntokenizer = AutoTokenizer.from_pretrained(model_id)\nmodel = AutoModelForCausalLM.from_pretrained(model_id).to(device)\nif variant:  # doc-builder: hide\n    model = AutoModelForCausalLM.from_pretrained(model_id, **variant).to(device)\n\nprompts = [\"The quick brown fox\", \"Once upon a time\"]\ninputs = tokenizer(prompts, return_tensors=\"pt\", padding=True).to(device)\n\nmodel.eval()\nwith torch.no_grad():\n    logits = model(input_ids=inputs[\"input_ids\"], attention_mask=inputs[\"attention_mask\"]).logits\n\nlast_positions = inputs[\"attention_mask\"].sum(dim=-1) - 1\nlast_logits = logits[torch.arange(logits.size(0)), last_positions]\npredicted = last_logits.argmax(dim=-1)\nprint(tokenizer.convert_ids_to_tokens(predicted))\n```\n\n## One training step\n\n```py runnable:next_token:2\nlabels = inputs[\"input_ids\"].clone()\nlabels[inputs[\"attention_mask\"] == 0] = -100\n\nmodel.train()\noptimizer = torch.optim.SGD(model.parameters(), lr=0.01)\nloss = model(input_ids=inputs[\"input_ids\"], attention_mask=inputs[\"attention_mask\"], labels=labels).loss\nloss.backward()\nbefore = {name: p.detach().clone() for name, p in model.named_parameters()}  # doc-builder: hide\noptimizer.step()\nprint(f\"loss: {loss.item():.4f}\")\n\nif os.environ.get(\"MIC_RUNNER\"):  # doc-builder: hide\n    named = dict(model.named_parameters())\n    checked = (\"transformer.h.0.attn.c_attn.weight\", \"transformer.h.0.mlp.c_fc.weight\")\n    top_k = 5\n    top_logits = last_logits.topk(top_k, dim=-1).values.float().tolist()\n    result = {\n        \"runtime\": {\n            \"device\": model.device.type,\n            \"dtype\": str(next(model.parameters()).dtype).removeprefix(\"torch.\"),\n            \"attn_implementation\": model.config._attn_implementation,\n        },\n        \"predicted_tokens\": predicted.tolist(),\n        \"predicted_text\": tokenizer.convert_ids_to_tokens(predicted),\n        \"next_token_logits\": top_logits,\n        \"training\": {\n            \"loss\": loss.item(),\n            \"gradients\": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all()) for n in checked},\n            \"updated\": any(not torch.equal(p, before[n]) for n, p in named.items()),\n        },\n    }\n    print(json.dumps(result))\n```\n",
+  "rationale": "GPT-2 is a causal language model; the natural integration path is next-token prediction on short prompts with a single SGD training step. Two prompts of different lengths exercise padding and batch perturbation. The top-5 logits at the last position provide a compact numeric probe without dumping the full vocabulary. Gradient checks target the first attention and MLP layers to verify backpropagation reaches the model core.",
+  "historical_candidates": [],
+  "llm": {
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "auto",
+    "usage": "ChatCompletionOutputUsage(completion_tokens=6907, prompt_tokens=4014, total_tokens=10921, completion_tokens_details={'reasoning_tokens': 5588}, prompt_tokens_details={'cached_tokens': 0, 'image_tokens': 0})",
+    "role": "proposal only"
+  }
+}

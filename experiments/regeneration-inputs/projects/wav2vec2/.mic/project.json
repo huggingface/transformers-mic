@@ -1,0 +1,10 @@
+{
+  "model": "facebook/wav2vec2-base-960h",
+  "contract": "wav2vec2",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "catalog-regenerated",
+  "validated": false,
+  "validation": null,
+  "validations": {}
+}

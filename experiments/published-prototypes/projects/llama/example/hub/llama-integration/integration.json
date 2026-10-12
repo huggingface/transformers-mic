@@ -1,0 +1,76 @@
+{
+  "mic": "0.3",
+  "name": "SmolLM2-135M causal LM",
+  "usage": "AutoTokenizer + AutoModelForCausalLM, batched, right padding",
+  "architecture": "LlamaForCausalLM",
+  "checkpoints": {
+    "HuggingFaceTB/SmolLM2-135M": {
+      "fixture": "hf-internal-testing/mic-llama-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/mic-llama-slim": {
+      "built_from": "HuggingFaceTB/SmolLM2-135M",
+      "covers": [
+        "HuggingFaceTB/SmolLM2-135M"
+      ],
+      "build": {
+        "seed": 17
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=5",
+        "torch"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 1,
+          "download_mb": 20
+        },
+        "HuggingFaceTB/SmolLM2-135M": {
+          "memory_gb": 2,
+          "download_mb": 270
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "logit_probes": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

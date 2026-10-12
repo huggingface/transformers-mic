@@ -1,0 +1,39 @@
+{
+  "framework": "transformers",
+  "environment": {
+    "python": "3.10",
+    "torch": "2.11.0",
+    "torchvision": "0.26.0",
+    "torchaudio": "2.11.0",
+    "tokenizers": "0.23.1",
+    "numpy": "1.26.4",
+    "pillow": "12.2.0",
+    "accelerate": "1.13.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.32.0",
+    "sentencepiece": "0.2.1",
+    "protobuf": "6.33.6",
+    "librosa": "0.11.0",
+    "soundfile": "0.13.1",
+    "scipy": "1.15.3"
+  },
+  "contracts": {
+    "qwen2_5_omni": {
+      "integration": {
+        "repo": "hf-internal-testing/mic-qwen2_5_omni-integration",
+        "revision": "7a33d69a41f3c7f87c2e572f806d2f7d6d58bfe6",
+        "path": "../../../hub/qwen2_5_omni-integration",
+        "files_sha256": "96f2d53ba3a571180763ec921643dbbfbf20b37b618c582887ff2d9e6328055e"
+      },
+      "fixtures": {
+        "hf-internal-testing/mic-qwen2_5_omni-slim": {
+          "revision": "31295f58a2767c43a12cf018d70f35ee6e363b46",
+          "files_sha256": "c61453e554e93cc0613e075efbe788171d9db089e7d3fe192b2af8da835edbea"
+        }
+      },
+      "checkpoints": {
+        "Qwen/Qwen2.5-Omni-7B": "ae9e1690543ffd5c0221dc27f79834d0294cba00"
+      }
+    }
+  }
+}

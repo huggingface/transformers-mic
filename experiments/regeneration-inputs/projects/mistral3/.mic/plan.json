@@ -1,0 +1,93 @@
+{
+  "name": "mistral3",
+  "manifest": {
+    "mic": "0.3",
+    "name": "Mistral3 image-text-to-text",
+    "usage": "AutoProcessor + AutoModelForImageTextToText, chat template, text-only batch with padding",
+    "architecture": "Mistral3ForConditionalGeneration",
+    "checkpoints": {
+      "mistralai/Mistral-Small-3.1-24B-Instruct-2503": {
+        "fixture": "hf-internal-testing/mic-mistral3-slim"
+      }
+    },
+    "fixtures": {
+      "hf-internal-testing/mic-mistral3-slim": {
+        "built_from": "mistralai/Mistral-Small-3.1-24B-Instruct-2503",
+        "covers": [
+          "mistralai/Mistral-Small-3.1-24B-Instruct-2503"
+        ],
+        "build": {
+          "seed": 17,
+          "model_class": "Mistral3ForConditionalGeneration"
+        }
+      }
+    },
+    "integrations": {
+      "transformers": {
+        "entry_point": "integrations/transformers/usage.md",
+        "format": "runnable-markdown",
+        "requires": [
+          "transformers>=5",
+          "torch"
+        ],
+        "targets": [
+          "fixtures"
+        ],
+        "variants": {
+          "default": {},
+          "eager": {
+            "attn_implementation": "eager"
+          },
+          "bfloat16": {
+            "dtype": "bfloat16"
+          }
+        },
+        "training": true,
+        "resources": {
+          "fixture": {
+            "memory_gb": 4,
+            "download_mb": 100
+          },
+          "mistralai/Mistral-Small-3.1-24B-Instruct-2503": {
+            "memory_gb": 60,
+            "gpu_memory_gb": 60,
+            "download_mb": 48000
+          }
+        }
+      }
+    },
+    "outputs": {
+      "runtime": {
+        "compare": "exact"
+      },
+      "predicted_tokens": {
+        "compare": "exact"
+      },
+      "answer_logits": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.loss": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.gradients": {
+        "compare": "all_true"
+      },
+      "training.updated": {
+        "compare": "true"
+      }
+    }
+  },
+  "usage": "# Mistral3: image-text-to-text with Transformers\n\nThis page is the Transformers contract of the Mistral3 MIC and also a usage example. [doc-builder](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md) renders the `runnable` blocks below as documentation, and its pytest plugin runs them as written against `mistralai/Mistral-Small-3.1-24B-Instruct-2503`. The MIC runner runs the same blocks against each slim fixture and each checkpoint in [`integration.json`](../../integration.json). Lines marked `# doc-builder: hide` only matter there: they swap in the pinned checkpoint or variant and print the result record.\n\n## Inference: chat completion\n\n```py runnable:mistral3_chat\nimport torch\nfrom transformers import AutoProcessor, AutoModelForImageTextToText, set_seed\nimport json  # doc-builder: hide\nimport os  # doc-builder: hide\n\nmodel_id = \"mistralai/Mistral-Small-3.1-24B-Instruct-2503\"\nmodel_id = os.environ.get(\"MIC_MODEL\", model_id)  # doc-builder: hide\nvariant = json.loads(os.environ.get(\"MIC_MODEL_KWARGS\", \"{}\"))  # doc-builder: hide\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nset_seed(0)  # seeds torch, NumPy, and Python: loading, dropout, and data augmentation draw random numbers\n\nprocessor = AutoProcessor.from_pretrained(model_id)\nmodel = AutoModelForImageTextToText.from_pretrained(model_id).to(device)\nif variant:  # doc-builder: hide\n    model = AutoModelForImageTextToText.from_pretrained(model_id, **variant).to(device)\n\nmessages = [\n    [{\"role\": \"user\", \"content\": \"What is the capital of France?\"}],\n    [{\"role\": \"user\", \"content\": \"What is the capital of Germany?\"}],\n]\ntexts = [processor.apply_chat_template(m, tokenize=False, add_generation_prompt=True) for m in messages]\ninputs = processor(text=texts, return_tensors=\"pt\", padding=True).to(device)\n\nmodel.eval()\nwith torch.no_grad():\n    outputs = model(**inputs)\nlogits = outputs.logits\n\nlast_positions = inputs[\"attention_mask\"].sum(dim=-1) - 1\nbatch_idx = torch.arange(len(texts), device=device)\nselected_logits = logits[batch_idx, last_positions, :10].float()\npredicted_ids = logits[batch_idx, last_positions].argmax(dim=-1)\npredicted_tokens = [processor.tokenizer.decode([pid], skip_special_tokens=True) for pid in predicted_ids.tolist()]\n\nprint(f\"predicted: {predicted_tokens}\")\nprint(f\"selected_logits: {selected_logits.tolist()}\")\n```\n\n## One training step\n\n```py runnable:mistral3_chat:2\nlabels = inputs[\"input_ids\"].clone()\nlabels[inputs[\"attention_mask\"] == 0] = -100\n\nmodel.train()\noptimizer = torch.optim.SGD(model.parameters(), lr=0.01)\nloss = model(**inputs, labels=labels).loss\nloss.backward()\nbefore = {name: p.detach().clone() for name, p in model.named_parameters()}  # doc-builder: hide\noptimizer.step()\nprint(f\"loss: {loss.item():.4f}\")\n\nif os.environ.get(\"MIC_RUNNER\"):  # doc-builder: hide\n    named = dict(model.named_parameters())\n    checked = (\n        \"model.language_model.layers.0.self_attn.q_proj.weight\",\n        \"model.language_model.layers.0.mlp.gate_proj.weight\",\n    )\n    result = {\n        \"runtime\": {\n            \"device\": model.device.type,\n            \"dtype\": str(next(model.parameters()).dtype).removeprefix(\"torch.\"),\n            \"attn_implementation\": model.config._attn_implementation,\n        },\n        \"predicted_tokens\": predicted_tokens,\n        \"answer_logits\": selected_logits.tolist(),\n        \"training\": {\n            \"loss\": loss.item(),\n            \"gradients\": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all()) for n in checked},\n            \"updated\": any(not torch.equal(p, before[n]) for n, p in named.items()),\n        },\n    }\n    print(json.dumps(result))\n```\n",
+  "rationale": "Mistral3 is a multimodal (text + Pixtral vision) instruct model. The integration exercises the text-only path through AutoProcessor's chat template and AutoModelForImageTextToText, which is the primary inference path for this architecture. Two distinct prompts with padding exercise batch handling and the attention mask. The training step uses causal-LM labels (input_ids with padding masked to -100) and a single SGD step to verify gradient flow through the language model. Gradient checks target the first layer's attention and MLP projections, which are guaranteed to receive gradients from any text input. The bfloat16 variant matches the model's native dtype; the eager variant tests the non-SDPA attention path.",
+  "historical_candidates": [],
+  "llm": {
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "auto",
+    "usage": "ChatCompletionOutputUsage(completion_tokens=7166, prompt_tokens=4187, total_tokens=11353, completion_tokens_details={'reasoning_tokens': 5577}, prompt_tokens_details={'cached_tokens': 0, 'image_tokens': 0})",
+    "role": "proposal only"
+  }
+}

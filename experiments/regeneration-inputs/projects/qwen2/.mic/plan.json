@@ -1,0 +1,97 @@
+{
+  "name": "qwen2",
+  "manifest": {
+    "mic": "0.3",
+    "name": "Qwen2 causal-LM",
+    "usage": "AutoTokenizer + AutoModelForCausalLM, batched right-padding, causal-LM training step",
+    "architecture": "Qwen2ForCausalLM",
+    "checkpoints": {
+      "Qwen/Qwen2-0.5B": {
+        "fixture": "hf-internal-testing/mic-qwen2-slim"
+      }
+    },
+    "fixtures": {
+      "hf-internal-testing/mic-qwen2-slim": {
+        "built_from": "Qwen/Qwen2-0.5B",
+        "covers": [
+          "Qwen/Qwen2-0.5B"
+        ],
+        "build": {
+          "seed": 17,
+          "model_class": "Qwen2ForCausalLM"
+        }
+      }
+    },
+    "integrations": {
+      "transformers": {
+        "entry_point": "integrations/transformers/usage.md",
+        "format": "runnable-markdown",
+        "requires": [
+          "transformers>=5",
+          "torch"
+        ],
+        "targets": [
+          "fixtures"
+        ],
+        "variants": {
+          "default": {},
+          "eager": {
+            "attn_implementation": "eager"
+          },
+          "bfloat16": {
+            "dtype": "bfloat16"
+          }
+        },
+        "training": true,
+        "resources": {
+          "fixture": {
+            "memory_gb": 1,
+            "download_mb": 50
+          },
+          "Qwen/Qwen2-0.5B": {
+            "memory_gb": 5,
+            "download_mb": 1100,
+            "variants": {
+              "bfloat16": {
+                "memory_gb": 3
+              }
+            }
+          }
+        }
+      }
+    },
+    "outputs": {
+      "runtime": {
+        "compare": "exact"
+      },
+      "predicted_tokens": {
+        "compare": "exact"
+      },
+      "selected_logits": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.loss": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.gradients": {
+        "compare": "all_true"
+      },
+      "training.updated": {
+        "compare": "true"
+      }
+    }
+  },
+  "usage": "# Qwen2: causal-LM with Transformers\n\nThis page is the Transformers contract of the Qwen2 MIC and also a usage example. [doc-builder](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md) renders the `runnable` blocks below as documentation, and its pytest plugin runs them as written against `Qwen/Qwen2-0.5B`. The MIC runner runs the same blocks against each slim fixture and each checkpoint in [`integration.json`](../../integration.json). Lines marked `# doc-builder: hide` only matter there: they swap in the pinned checkpoint or variant and print the result record.\n\n## Inference: next-token prediction\n\n```py runnable:usage\nimport torch\nfrom transformers import AutoModelForCausalLM, AutoTokenizer, set_seed\nimport json  # doc-builder: hide\nimport os  # doc-builder: hide\n\nmodel_id = \"Qwen/Qwen2-0.5B\"\nmodel_id = os.environ.get(\"MIC_MODEL\", model_id)  # doc-builder: hide\nvariant = json.loads(os.environ.get(\"MIC_MODEL_KWARGS\", \"{}\"))  # doc-builder: hide\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nset_seed(0)  # seeds torch, NumPy, and Python: loading, dropout, and data augmentation draw random numbers\n\ntokenizer = AutoTokenizer.from_pretrained(model_id)\nmodel = AutoModelForCausalLM.from_pretrained(model_id, **variant).to(device)  # doc-builder: hide\nmodel.eval()\n\nprompts = [\"The capital of France is\", \"The sky is\"]\ninputs = tokenizer(prompts, return_tensors=\"pt\", padding=True).to(device)\n\nwith torch.no_grad():\n    logits = model(**inputs).logits\n\n# compact probes: last-position logits for a small set of token ids\nprobe_ids = [tokenizer(\"Paris\").input_ids[0], tokenizer(\"blue\").input_ids[0], tokenizer(\"the\").input_ids[0]]\nlast_pos = inputs[\"attention_mask\"].sum(dim=-1) - 1\nselected = logits[torch.arange(logits.size(0)), last_pos, probe_ids].float()\npredicted = logits[torch.arange(logits.size(0)), last_pos].argmax(dim=-1)\nprint(tokenizer.convert_ids_to_tokens(predicted))\n```\n\n## One training step\n\n```py runnable:usage:2\n# build causal-LM labels: shift input_ids right, pad with -100\nlabels = torch.full_like(inputs[\"input_ids\"], -100)\nlabels[:, 1:] = inputs[\"input_ids\"][:, :-1]\n\nmodel.train()\noptimizer = torch.optim.SGD(model.parameters(), lr=0.01)\nloss = model(**inputs, labels=labels).loss\nloss.backward()\nbefore = {name: p.detach().clone() for name, p in model.named_parameters()}  # doc-builder: hide\noptimizer.step()\nprint(f\"loss: {loss.item():.4f}\")\n\nif os.environ.get(\"MIC_RUNNER\"):  # doc-builder: hide\n    named = dict(model.named_parameters())\n    checked = (\"model.layers.0.self_attn.q_proj.weight\", \"model.layers.0.mlp.gate_proj.weight\")\n    result = {\n        \"runtime\": {\n            \"device\": model.device.type,\n            \"dtype\": str(next(model.parameters()).dtype).removeprefix(\"torch.\"),\n            \"attn_implementation\": model.config._attn_implementation,\n        },\n        \"predicted_tokens\": predicted.tolist(),\n        \"selected_logits\": selected.tolist(),\n        \"training\": {\n            \"loss\": loss.item(),\n            \"gradients\": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all()) for n in checked},\n            \"updated\": any(not torch.equal(p, before[n]) for n, p in named.items()),\n        },\n    }\n    print(json.dumps(result))\n```\n",
+  "rationale": "Qwen2-0.5B is a small, widely-used causal-LM checkpoint. The contract exercises the full Qwen2ForCausalLM path (RMSNorm, GQA, RoPE, SwiGLU) through a standard Transformers inference + single SGD step. Two distinct prompts with padding ensure batch-level perturbation is meaningful. Compact probes (three token ids at the last valid position) keep the output record small while still covering the output projection. The bfloat16 variant uses the documented `dtype` kwarg so the builder can capture it without torch_dtype ambiguity.",
+  "historical_candidates": [],
+  "llm": {
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "auto",
+    "usage": "ChatCompletionOutputUsage(completion_tokens=2114, prompt_tokens=4738, total_tokens=6852, completion_tokens_details={'reasoning_tokens': 701}, prompt_tokens_details={'cached_tokens': 0, 'image_tokens': 0})",
+    "role": "proposal only"
+  }
+}

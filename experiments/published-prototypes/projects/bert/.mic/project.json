@@ -1,0 +1,202 @@
+{
+  "model": "google-bert/bert-base-uncased",
+  "contract": "bert",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "catalog-regenerated",
+  "validated": false,
+  "weight_decision": {
+    "requested": "auto",
+    "weights": "random",
+    "accepted": true,
+    "reused": false,
+    "reason": "Random weights pass the measured sensitivity and numeric-health gates; training is unnecessary.",
+    "readability_requested": false,
+    "historical_detection": "unverified until replayed; a gate pass is not a regression catch"
+  },
+  "validation": {
+    "variant": "bfloat16",
+    "records": [
+      {
+        "contract": "hf-internal-testing/mic-bert-integration",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "bfloat16",
+        "target": "mic-bert-slim",
+        "kind": "fixture",
+        "revision": "unpublished",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3",
+          "local_patches": [
+            "config-field-generation-params",
+            "masked-spec-embed-init",
+            "whisper-decode-tensor-batch"
+          ]
+        },
+        "seconds": 1.14,
+        "platform": "cuda",
+        "baseline": "transformers/tests/contracts/expectations/bert/cuda/mic-bert-slim.bfloat16.json",
+        "status": "pass",
+        "failures": []
+      }
+    ],
+    "lock_sha256": "8dd6995195235c6f19b31485b8487121838336dccbfbdf94d94b7f4ce3957d02",
+    "manifest_sha256": "2e956974bc9f569fb13010691a0cd35c101fc6cbe8dd4915edddac82e4feb595",
+    "usage_sha256": "56d19a502294d80eee583a3d9b30a995314ddab3767c5d4f88177ae6d041a42e"
+  },
+  "validations": {
+    "default": {
+      "variant": "default",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-bert-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "default",
+          "target": "mic-bert-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3",
+            "local_patches": [
+              "config-field-generation-params",
+              "masked-spec-embed-init",
+              "whisper-decode-tensor-batch"
+            ]
+          },
+          "seconds": 1.08,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/bert/cuda/mic-bert-slim.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "8dd6995195235c6f19b31485b8487121838336dccbfbdf94d94b7f4ce3957d02",
+      "manifest_sha256": "2e956974bc9f569fb13010691a0cd35c101fc6cbe8dd4915edddac82e4feb595",
+      "usage_sha256": "56d19a502294d80eee583a3d9b30a995314ddab3767c5d4f88177ae6d041a42e",
+      "fingerprint": "398ee81f6f203c547331129a3e71546034e0f2905d0391d1188f77c9e341efcd"
+    },
+    "eager": {
+      "variant": "eager",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-bert-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "eager",
+          "target": "mic-bert-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3",
+            "local_patches": [
+              "config-field-generation-params",
+              "masked-spec-embed-init",
+              "whisper-decode-tensor-batch"
+            ]
+          },
+          "seconds": 1.0,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/bert/cuda/mic-bert-slim.eager.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "8dd6995195235c6f19b31485b8487121838336dccbfbdf94d94b7f4ce3957d02",
+      "manifest_sha256": "2e956974bc9f569fb13010691a0cd35c101fc6cbe8dd4915edddac82e4feb595",
+      "usage_sha256": "56d19a502294d80eee583a3d9b30a995314ddab3767c5d4f88177ae6d041a42e",
+      "fingerprint": "398ee81f6f203c547331129a3e71546034e0f2905d0391d1188f77c9e341efcd"
+    },
+    "bfloat16": {
+      "variant": "bfloat16",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-bert-integration",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "bfloat16",
+          "target": "mic-bert-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3",
+            "local_patches": [
+              "config-field-generation-params",
+              "masked-spec-embed-init",
+              "whisper-decode-tensor-batch"
+            ]
+          },
+          "seconds": 1.14,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/bert/cuda/mic-bert-slim.bfloat16.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "8dd6995195235c6f19b31485b8487121838336dccbfbdf94d94b7f4ce3957d02",
+      "manifest_sha256": "2e956974bc9f569fb13010691a0cd35c101fc6cbe8dd4915edddac82e4feb595",
+      "usage_sha256": "56d19a502294d80eee583a3d9b30a995314ddab3767c5d4f88177ae6d041a42e",
+      "fingerprint": "398ee81f6f203c547331129a3e71546034e0f2905d0391d1188f77c9e341efcd"
+    }
+  }
+}

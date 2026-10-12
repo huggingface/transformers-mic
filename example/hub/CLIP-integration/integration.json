@@ -5,11 +5,11 @@
   "architecture": "CLIPModel",
   "checkpoints": {
     "openai/clip-vit-base-patch32": {
-      "fixture": "hf-internal-testing/proto-clip-vit-base-patch32-slim"
+      "fixture": "hf-internal-testing/mic-clip-vit-base-patch32-slim"
     }
   },
   "fixtures": {
-    "hf-internal-testing/proto-clip-vit-base-patch32-slim": {
+    "hf-internal-testing/mic-clip-vit-base-patch32-slim": {
       "built_from": "openai/clip-vit-base-patch32",
       "covers": [
         "openai/clip-vit-base-patch32"

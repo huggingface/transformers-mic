@@ -1,0 +1,186 @@
+{
+  "model": "Qwen/Qwen2.5-VL-3B-Instruct",
+  "contract": "qwen2_5_vl",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": {
+    "variant": "bfloat16",
+    "records": [
+      {
+        "contract": "hf-internal-testing/mic-qwen2_5_vl-integration",
+        "contract_name": "qwen2_5_vl",
+        "contract_revision": "unpublished",
+        "framework": "transformers",
+        "variant": "bfloat16",
+        "target": "mic-qwen2_5_vl-slim",
+        "kind": "fixture",
+        "revision": "unpublished",
+        "environment": {
+          "python": "3.10.12",
+          "transformers": "5.19.0.dev0",
+          "torch": "2.11.0+cu128",
+          "torchvision": "0.26.0+cu128",
+          "torchaudio": "2.11.0+cu128",
+          "tokenizers": "0.23.1",
+          "numpy": "1.26.4",
+          "pillow": "12.2.0",
+          "accelerate": "1.13.0",
+          "safetensors": "0.8.0",
+          "huggingface-hub": "1.32.0",
+          "sentencepiece": "0.2.1",
+          "protobuf": "6.33.6",
+          "librosa": "0.11.0",
+          "soundfile": "0.13.1",
+          "scipy": "1.15.3"
+        },
+        "seconds": 6.06,
+        "platform": "cuda",
+        "baseline": "transformers/tests/contracts/expectations/qwen2_5_vl/cuda/mic-qwen2_5_vl-slim.bfloat16.json",
+        "status": "pass",
+        "failures": []
+      }
+    ],
+    "lock_sha256": "3557bafd74cf41d4768c5e8a3a83075997eeff5bd27bd0c4dd023bb6f9fb2810",
+    "manifest_sha256": "ef8b31d9bd1a6ffefd96d1eb0ba225304d2897c73756fd0659bfa94dedb66293",
+    "usage_sha256": "1cc668035db476c585bcfe81e41c3594ee3fa559ad3fe020dce0856083302c88"
+  },
+  "validations": {
+    "default": {
+      "variant": "default",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-qwen2_5_vl-integration",
+          "contract_name": "qwen2_5_vl",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "default",
+          "target": "mic-qwen2_5_vl-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 5.85,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/qwen2_5_vl/cuda/mic-qwen2_5_vl-slim.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "3557bafd74cf41d4768c5e8a3a83075997eeff5bd27bd0c4dd023bb6f9fb2810",
+      "manifest_sha256": "ef8b31d9bd1a6ffefd96d1eb0ba225304d2897c73756fd0659bfa94dedb66293",
+      "usage_sha256": "1cc668035db476c585bcfe81e41c3594ee3fa559ad3fe020dce0856083302c88",
+      "fingerprint": "b3c90ff8918295f6dcbc809ee8129245401d79928ca96e4a2e9d6ea9b09c6ba4"
+    },
+    "eager": {
+      "variant": "eager",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-qwen2_5_vl-integration",
+          "contract_name": "qwen2_5_vl",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "eager",
+          "target": "mic-qwen2_5_vl-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 6.21,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/qwen2_5_vl/cuda/mic-qwen2_5_vl-slim.eager.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "3557bafd74cf41d4768c5e8a3a83075997eeff5bd27bd0c4dd023bb6f9fb2810",
+      "manifest_sha256": "ef8b31d9bd1a6ffefd96d1eb0ba225304d2897c73756fd0659bfa94dedb66293",
+      "usage_sha256": "1cc668035db476c585bcfe81e41c3594ee3fa559ad3fe020dce0856083302c88",
+      "fingerprint": "b3c90ff8918295f6dcbc809ee8129245401d79928ca96e4a2e9d6ea9b09c6ba4"
+    },
+    "bfloat16": {
+      "variant": "bfloat16",
+      "records": [
+        {
+          "contract": "hf-internal-testing/mic-qwen2_5_vl-integration",
+          "contract_name": "qwen2_5_vl",
+          "contract_revision": "unpublished",
+          "framework": "transformers",
+          "variant": "bfloat16",
+          "target": "mic-qwen2_5_vl-slim",
+          "kind": "fixture",
+          "revision": "unpublished",
+          "environment": {
+            "python": "3.10.12",
+            "transformers": "5.19.0.dev0",
+            "torch": "2.11.0+cu128",
+            "torchvision": "0.26.0+cu128",
+            "torchaudio": "2.11.0+cu128",
+            "tokenizers": "0.23.1",
+            "numpy": "1.26.4",
+            "pillow": "12.2.0",
+            "accelerate": "1.13.0",
+            "safetensors": "0.8.0",
+            "huggingface-hub": "1.32.0",
+            "sentencepiece": "0.2.1",
+            "protobuf": "6.33.6",
+            "librosa": "0.11.0",
+            "soundfile": "0.13.1",
+            "scipy": "1.15.3"
+          },
+          "seconds": 6.06,
+          "platform": "cuda",
+          "baseline": "transformers/tests/contracts/expectations/qwen2_5_vl/cuda/mic-qwen2_5_vl-slim.bfloat16.json",
+          "status": "pass",
+          "failures": []
+        }
+      ],
+      "lock_sha256": "3557bafd74cf41d4768c5e8a3a83075997eeff5bd27bd0c4dd023bb6f9fb2810",
+      "manifest_sha256": "ef8b31d9bd1a6ffefd96d1eb0ba225304d2897c73756fd0659bfa94dedb66293",
+      "usage_sha256": "1cc668035db476c585bcfe81e41c3594ee3fa559ad3fe020dce0856083302c88",
+      "fingerprint": "b3c90ff8918295f6dcbc809ee8129245401d79928ca96e4a2e9d6ea9b09c6ba4"
+    }
+  },
+  "weight_decision": {
+    "requested": "auto",
+    "weights": "random",
+    "accepted": true,
+    "reused": false,
+    "reason": "Random weights pass the measured sensitivity and numeric-health gates; training is unnecessary.",
+    "readability_requested": false,
+    "historical_detection": "unverified until replayed; a gate pass is not a regression catch"
+  }
+}

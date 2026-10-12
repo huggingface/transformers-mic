@@ -1,0 +1,89 @@
+{
+  "mic": "0.3",
+  "name": "CLIP zero-shot image classification",
+  "usage": "CLIPProcessor + CLIPModel, image-caption matching, batched",
+  "architecture": "CLIPModel",
+  "checkpoints": {
+    "openai/clip-vit-base-patch32": {
+      "fixture": "hf-internal-testing/mic-clip-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/mic-clip-slim": {
+      "built_from": "openai/clip-vit-base-patch32",
+      "covers": [
+        "openai/clip-vit-base-patch32"
+      ],
+      "build": {
+        "seed": 17
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=5",
+        "torch",
+        "Pillow"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 1,
+          "download_mb": 20
+        },
+        "openai/clip-vit-base-patch32": {
+          "memory_gb": 2,
+          "download_mb": 605
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "image_to_text": {
+      "compare": "exact"
+    },
+    "text_to_image": {
+      "compare": "exact"
+    },
+    "logits_per_image": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "text_kwargs_input_ids": {
+      "compare": "exact"
+    },
+    "image_processor_config_keys": {
+      "compare": "exact"
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

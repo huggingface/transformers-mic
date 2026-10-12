@@ -2,7 +2,7 @@
 
     python example/run.py --framework transformers                  # every contract, target, default variant
     python example/run.py --framework transformers --contract T5 --variant eager
-    python example/run.py --framework transformers --target proto-t5-small-slim
+    python example/run.py --framework transformers --target mic-t5-small-slim
     python example/run.py --framework transformers --fixtures-only  # what a framework PR runs
     python example/run.py --framework transformers --isolate        # one process per target
     python example/run.py --framework transformers.js
@@ -227,7 +227,7 @@ def targets(lock_dir, contract, manifest, framework, fixtures_only=False, local_
     elif "fixtures" in unsupported:
         for repo in manifest["fixtures"]:
             yield short(repo), "fixture", None, None, unsupported["fixtures"]
-    if fixtures_only:
+    if fixtures_only or "checkpoints" not in integration["targets"]:
         return
     for repo in manifest["checkpoints"]:
         if repo in unsupported:
@@ -536,15 +536,25 @@ def native_bfloat16():
     return bool(flags & {"avx512_bf16", "amx_bf16"})
 
 
+def native_float16():
+    """Whether this x86 CPU has native float16 vector instructions."""
+    try:
+        return "avx512_fp16" in Path("/proc/cpuinfo").read_text().split()
+    except OSError:
+        return False
+
+
 def platform_class(device, dtype=None):
     """The baseline platform: the device, with the architecture for CPUs, and
-    native bfloat16 support for bfloat16 runs on x86."""
+    native low-precision support for bfloat16/float16 runs on x86."""
     if device != "cpu":
         return device
     machine = os.uname().machine.lower()
     arch = {"aarch64": "arm64", "amd64": "x86_64"}.get(machine, machine)
     if arch == "x86_64" and dtype == "bfloat16" and native_bfloat16():
         return "cpu-x86_64-bf16"
+    if arch == "x86_64" and dtype == "float16" and native_float16():
+        return "cpu-x86_64-fp16"
     return f"cpu-{arch}"
 
 
@@ -649,6 +659,7 @@ def main():
                     raise SystemExit(f"{root}: differs from the pinned {contract['integration']['repo']}; publish it or pass --local-contracts")
             base = {
                 "contract": contract["integration"]["repo"],
+                "contract_name": name,
                 "contract_revision": contract_revision,
                 "framework": args.framework,
                 "variant": args.variant,

@@ -20,8 +20,8 @@ Usage path: AutoTokenizer + AutoModelForSeq2SeqLM.generate, batched.
 
 | Checkpoint | Slim fixture (every framework PR) |
 | --- | --- |
-| [`google-t5/t5-small`](https://huggingface.co/google-t5/t5-small) | [`hf-internal-testing/proto-t5-small-slim`](https://huggingface.co/hf-internal-testing/proto-t5-small-slim) |
-| [`google/umt5-small`](https://huggingface.co/google/umt5-small) | [`hf-internal-testing/proto-umt5-small-slim`](https://huggingface.co/hf-internal-testing/proto-umt5-small-slim) (real checkpoint unsupported: config.json has no model_type, so AutoModelForSeq2SeqLM cannot load it; the fixture (saved with model_type umt5) covers the UMT5 code path) |
+| [`google-t5/t5-small`](https://huggingface.co/google-t5/t5-small) | [`hf-internal-testing/mic-t5-small-slim`](https://huggingface.co/hf-internal-testing/mic-t5-small-slim) |
+| [`google/umt5-small`](https://huggingface.co/google/umt5-small) | [`hf-internal-testing/mic-umt5-small-slim`](https://huggingface.co/hf-internal-testing/mic-umt5-small-slim) (real checkpoint unsupported: config.json has no model_type, so AutoModelForSeq2SeqLM cannot load it; the fixture (saved with model_type umt5) covers the UMT5 code path) |
 
 Checked outputs: `generated_tokens`, `generated_text`, `label_logprobs`, `decoded_roundtrip`, `training.loss`, `training.gradients`, `training.updated`.
 

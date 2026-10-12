@@ -1,0 +1,52 @@
+{
+  "run": "https://github.com/huggingface/transformers/actions/runs/38296023340",
+  "summary": {
+    "pass": 72,
+    "xfail": 4,
+    "fail": 1
+  },
+  "executed": 77,
+  "reference_omp_threads": 4,
+  "proof_omp_threads": 8,
+  "failures": [
+    {
+      "contract": "hf-internal-testing/mic-table_transformer-integration",
+      "contract_name": "mic-table_transformer",
+      "contract_revision": "526a6608540f09cb9243420e83ac433d8b0a2ec3",
+      "framework": "transformers",
+      "variant": "bfloat16",
+      "target": "mic-table_transformer-slim",
+      "kind": "fixture",
+      "revision": "a0616d0368291a2730b5499af39909926ff9382e",
+      "environment": {
+        "python": "3.11.17",
+        "transformers": "5.19.0.dev0",
+        "torch": "2.11.0+cpu",
+        "torchvision": "0.26.0+cpu",
+        "torchaudio": "2.11.0+cpu",
+        "tokenizers": "0.23.1",
+        "numpy": "1.26.4",
+        "pillow": "12.2.0",
+        "accelerate": "1.13.0",
+        "safetensors": "0.8.0",
+        "huggingface-hub": "1.32.0",
+        "sentencepiece": "0.2.1",
+        "protobuf": "6.33.6",
+        "librosa": "0.11.0",
+        "soundfile": "0.13.1",
+        "scipy": "1.15.3"
+      },
+      "seconds": 7.57,
+      "environment_differs": {
+        "python": "3.11.17 (pinned 3.10)"
+      },
+      "platform": "cpu-x86_64-bf16",
+      "baseline": "tests/contracts/expectations/mic-table_transformer/cpu-x86_64-bf16/mic-table_transformer-slim.bfloat16.json",
+      "status": "fail",
+      "failures": [
+        "inference_scores: max delta 0.00195 over tolerance"
+      ]
+    }
+  ],
+  "interpretation": "A native BF16 score moved by 0.00195 after a previously passing run. Aligning thread profile with reference recording; no tolerance or numeric-reference changes."
+}

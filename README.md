@@ -32,7 +32,7 @@ The first goal is CI, not a Hub feature. The same contracts could later back com
 
 A MIC covers one usage path and every checkpoint on it. Each part links to the [full example](example/README.md).
 
-1. **Repositories by owner.** Creators' model repos are unchanged. Hugging Face owns an [integration repo](https://huggingface.co/hf-internal-testing/SmolLM-integration) (the contract; [source](example/hub/SmolLM-integration)) and [fixture repos](https://huggingface.co/hf-internal-testing/proto-SmolLM-slim) (slim models). Each [framework repo](example/transformers/tests/contracts) owns its fleet lock and expected results.
+1. **Repositories by owner.** Creators' model repos are unchanged. Hugging Face owns an [integration repo](https://huggingface.co/hf-internal-testing/SmolLM-integration) (the contract; [source](example/hub/SmolLM-integration)) and [fixture repos](https://huggingface.co/hf-internal-testing/mic-SmolLM-slim) (slim models). Each [framework repo](example/transformers/tests/contracts) owns its fleet lock and expected results.
 2. **Fixed layouts:**
 
    ```text
@@ -42,7 +42,7 @@ A MIC covers one usage path and every checkpoint on it. Each part links to the [
      integrations/transformers.js/integration.js
    transformers/tests/contracts/               # framework repo: what to expect
      fleet.lock
-     expectations/SmolLM/cpu-arm64/proto-SmolLM-slim.json  # one baseline per target, platform, and variant
+     expectations/SmolLM/cpu-arm64/mic-SmolLM-slim.json  # one baseline per target, platform, and variant
      expectations/SmolLM/cpu-arm64/SmolLM-135M.json
      expectations/SmolLM/cpu-arm64/SmolLM-135M.eager.json
    ```
@@ -51,7 +51,7 @@ A MIC covers one usage path and every checkpoint on it. Each part links to the [
 4. **User code as the contract**: the public API with default settings, printing one JSON line. As [doc-builder runnable markdown](example/hub/SmolLM-integration/integrations/transformers/usage.md), it is both documentation and test.
 5. **Checks beyond "it ran"**: generated outputs, logits within tolerance, and where training applies, finite loss and gradients and a parameter update.
 6. **Reviewed baselines** ([`expectations/`](example/transformers/tests/contracts/expectations/SmolLM/cpu-arm64)) per target, variant, and platform class. A behavior-changing PR updates them; nothing updates them automatically.
-7. **Shared [fixtures](example/hub/proto-SmolLM-slim).** Processor files copied byte for byte; weights and config shrink. Checkpoints share a fixture only with identical processors, retained config fields, and default dtype.
+7. **Shared [fixtures](example/hub/mic-SmolLM-slim).** Processor files copied byte for byte; weights and config shrink. Checkpoints share a fixture only with identical processors, retained config fields, and default dtype.
 8. **Everything pinned** in the framework's [fleet lock](example/transformers/tests/contracts/fleet.lock): contract, fixture, checkpoint, and dependency revisions.
 
 [`run.py`](example/run.py) implements the runner prototype and validates its schemas. Remaining pilot work: [technical design](docs/design.md#pilot).

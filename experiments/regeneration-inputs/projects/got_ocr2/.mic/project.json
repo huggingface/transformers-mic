@@ -1,0 +1,10 @@
+{
+  "model": "stepfun-ai/GOT-OCR-2.0-hf",
+  "contract": "got_ocr2",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": null,
+  "validations": {}
+}

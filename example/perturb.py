@@ -41,8 +41,9 @@ PERTURBATIONS = {
     "pixel_values": (roll_batch, swap_channels, reverse, halve),
     "input_features": (roll_batch, reverse, halve),
     "input_values": (roll_batch, reverse, halve),
+    "state": (roll_batch, reverse, halve),
 }
-NEVER = {"labels", "return_loss"}
+NEVER = {"labels", "actions", "return_loss"}
 
 
 def logits_of(output):
@@ -65,7 +66,8 @@ def sensitivity(model, batch, threshold, accepted=None):
     """
     accepted = accepted or {}
     model.eval()
-    with torch.no_grad():
+    parameter = next(model.parameters())
+    with torch.no_grad(), torch.autocast(parameter.device.type, dtype=parameter.dtype, enabled=parameter.dtype in (torch.float16, torch.bfloat16)):
         base = logits_of(model(**batch))
         rows, undefined = {}, []
         for name, value in batch.items():

@@ -5,11 +5,11 @@
   "architecture": "MusicgenMelodyForConditionalGeneration",
   "checkpoints": {
     "facebook/musicgen-melody": {
-      "fixture": "hf-internal-testing/proto-musicgen-melody-slim"
+      "fixture": "hf-internal-testing/mic-musicgen-melody-slim"
     }
   },
   "fixtures": {
-    "hf-internal-testing/proto-musicgen-melody-slim": {
+    "hf-internal-testing/mic-musicgen-melody-slim": {
       "built_from": "facebook/musicgen-melody",
       "covers": [
         "facebook/musicgen-melody"

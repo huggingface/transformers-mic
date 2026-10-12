@@ -1,0 +1,10 @@
+{
+  "model": "answerdotai/ModernBERT-base",
+  "contract": "modernbert",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": null,
+  "validations": {}
+}

@@ -1,0 +1,99 @@
+{
+  "name": "smolvlm",
+  "manifest": {
+    "mic": "0.3",
+    "name": "SmolVLM2",
+    "usage": "AutoProcessor + AutoModelForVision2Seq, batched image+text inference with causal LM training step",
+    "architecture": "SmolVLMForConditionalGeneration",
+    "checkpoints": {
+      "HuggingFaceTB/SmolVLM2-2.2B-Instruct": {
+        "fixture": "hf-internal-testing/mic-smolvlm-slim"
+      }
+    },
+    "fixtures": {
+      "hf-internal-testing/mic-smolvlm-slim": {
+        "built_from": "HuggingFaceTB/SmolVLM2-2.2B-Instruct",
+        "covers": [
+          "HuggingFaceTB/SmolVLM2-2.2B-Instruct"
+        ],
+        "build": {
+          "seed": 17
+        }
+      }
+    },
+    "integrations": {
+      "transformers": {
+        "entry_point": "integrations/transformers/usage.md",
+        "format": "runnable-markdown",
+        "requires": [
+          "transformers>=4.47",
+          "torch",
+          "Pillow"
+        ],
+        "targets": [
+          "fixtures"
+        ],
+        "variants": {
+          "default": {},
+          "eager": {
+            "attn_implementation": "eager"
+          },
+          "bfloat16": {
+            "dtype": "bfloat16"
+          }
+        },
+        "training": true,
+        "resources": {
+          "fixture": {
+            "memory_gb": 4,
+            "download_mb": 200
+          },
+          "HuggingFaceTB/SmolVLM2-2.2B-Instruct": {
+            "memory_gb": 12,
+            "download_mb": 4500,
+            "variants": {
+              "bfloat16": {
+                "memory_gb": 8
+              }
+            }
+          }
+        }
+      }
+    },
+    "outputs": {
+      "runtime": {
+        "compare": "exact"
+      },
+      "selected_logits": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.loss": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.gradients": {
+        "compare": "all_true"
+      },
+      "training.updated": {
+        "compare": "true"
+      }
+    }
+  },
+  "usage": "# SmolVLM2: Vision-Language with Transformers\n\nThis page is the Transformers contract of the SmolVLM2 MIC and also a usage example. The MIC runner runs the same blocks against each slim fixture and each checkpoint in [`integration.json`](../../integration.json). Lines marked `# doc-builder: hide` only matter there: they swap in the pinned checkpoint or variant and print the result record.\n\n## Image + text inference\n\n```py runnable:usage\nimport torch\nfrom transformers import AutoProcessor, AutoModelForVision2Seq, set_seed\nimport json\nimport os\nfrom PIL import Image\nimport numpy as np\n\nmodel_id = \"HuggingFaceTB/SmolVLM2-2.2B-Instruct\"\nmodel_id = os.environ.get(\"MIC_MODEL\", model_id)  # doc-builder: hide\nvariant = json.loads(os.environ.get(\"MIC_MODEL_KWARGS\", \"{}\"))  # doc-builder: hide\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nset_seed(0)\n\nload_kwargs = {}\nfor k, v in variant.items():\n    if k == \"dtype\":\n        load_kwargs[\"torch_dtype\"] = getattr(torch, v)\n    else:\n        load_kwargs[k] = v\n\nprocessor = AutoProcessor.from_pretrained(model_id)\nmodel = AutoModelForVision2Seq.from_pretrained(model_id, **load_kwargs).to(device)\nmodel.eval()\n\n# Two distinct synthetic images\nrng = np.random.default_rng(0)\nimg1 = Image.fromarray(rng.integers(0, 255, (224, 224, 3), dtype=np.uint8))\nimg2 = Image.fromarray(rng.integers(0, 255, (224, 224, 3), dtype=np.uint8))\n\nprompts = [\n    \"<image>\\nWhat is in this image?\",\n    \"<image>\\nDescribe the scene.\"\n]\n\ninputs = processor(images=[img1, img2], text=prompts, return_tensors=\"pt\", padding=True).to(device)\n\nwith torch.no_grad():\n    outputs = model(**inputs)\nlogits = outputs.logits\n\n# Compact numeric probe: first 5 positions, first 10 vocab entries of sample 0\nselected_logits = logits[0, :5, :10].float().tolist()\nprint(f\"selected_logits: {selected_logits}\")\n```\n\n## One training step\n\n```py runnable:usage:2\n# Preserve inference outputs before training\ninference_selected_logits = selected_logits  # doc-builder: hide\n\n# Build labels for causal LM training (mask padded positions)\nlabels = inputs[\"input_ids\"].clone()\nlabels[inputs[\"attention_mask\"] == 0] = -100\n\nmodel.train()\noptimizer = torch.optim.SGD(model.parameters(), lr=0.01)\nloss = model(\n    pixel_values=inputs[\"pixel_values\"],\n    input_ids=inputs[\"input_ids\"],\n    attention_mask=inputs[\"attention_mask\"],\n    labels=labels,\n).loss\nloss.backward()\nbefore = {name: p.detach().clone() for name, p in model.named_parameters()}  # doc-builder: hide\noptimizer.step()\nprint(f\"loss: {loss.item():.4f}\")\n\nif os.environ.get(\"MIC_RUNNER\"):  # doc-builder: hide\n    named = dict(model.named_parameters())\n    checked = (\n        \"language_model.model.layers.0.self_attn.q_proj.weight\",\n        \"language_model.model.layers.0.mlp.gate_proj.weight\",\n    )\n    result = {\n        \"runtime\": {\n            \"device\": model.device.type,\n            \"dtype\": str(next(model.parameters()).dtype).removeprefix(\"torch.\"),\n            \"attn_implementation\": model.config._attn_implementation,\n        },\n        \"selected_logits\": inference_selected_logits,\n        \"training\": {\n            \"loss\": loss.item(),\n            \"gradients\": {n: bool(named[n].grad is not None and torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all()) for n in checked},\n            \"updated\": any(not torch.equal(p, before[n]) for n, p in named.items()),\n        },\n    }\n    print(json.dumps(result))\n```\n",
+  "rationale": "SmolVLM2-2.2B-Instruct is a compact vision-language model (2.2B params) that supports both image+text inference and causal LM training. The integration exercises the full pipeline: AutoProcessor handles image preprocessing and tokenization with padding for batched inputs, AutoModelForVision2Seq loads the model with configurable dtype and attention implementation, and a real SGD training step verifies gradient flow through both the vision encoder and language model. Two distinct synthetic 224x224 images ensure batch perturbation is meaningful. Compact logit probes (5 positions x 10 vocab entries) keep output size manageable while still capturing numerical sensitivity. The bfloat16 variant halves memory requirements for the 2.2B model.",
+  "historical_candidates": [
+    {
+      "url": "https://github.com/huggingface/transformers/issues",
+      "reason": "SmolVLM is a relatively new architecture (model_type=smolvlm); potential issues with attention implementation switching (eager vs sdpa vs flash_attention_2) on the vision encoder side have not been fully characterized. The perceiver/resampler sub-config in text_config may interact unexpectedly with non-default attention backends."
+    }
+  ],
+  "llm": {
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "auto",
+    "usage": "ChatCompletionOutputUsage(completion_tokens=7661, prompt_tokens=5536, total_tokens=13197, completion_tokens_details={'reasoning_tokens': 6027}, prompt_tokens_details={'cached_tokens': 4096, 'image_tokens': 0})",
+    "role": "proposal only"
+  }
+}

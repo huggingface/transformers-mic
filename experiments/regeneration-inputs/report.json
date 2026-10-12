@@ -1,0 +1,318 @@
+{
+  "scope": "fixtures",
+  "auto": "Shared AutoConfig/AutoModel/AutoProcessor loading in the concrete usage paths; no separate architecture or checkpoint.",
+  "models": {
+    "bert": {
+      "name": "bert",
+      "model_type": "bert",
+      "checkpoint": "google-bert/bert-base-uncased",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/bert.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "gpt2": {
+      "name": "gpt2",
+      "model_type": "gpt2",
+      "checkpoint": "openai-community/gpt2",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/gpt2.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "t5": {
+      "name": "t5",
+      "model_type": "t5",
+      "checkpoint": "google-t5/t5-small",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/t5.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "modernbert": {
+      "name": "modernbert",
+      "model_type": "modernbert",
+      "checkpoint": "answerdotai/ModernBERT-base",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/modernbert.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "vit": {
+      "name": "vit",
+      "model_type": "vit",
+      "checkpoint": "google/vit-base-patch16-224",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/vit.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "clip": {
+      "name": "clip",
+      "model_type": "clip",
+      "checkpoint": "openai/clip-vit-base-patch32",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/clip.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "detr": {
+      "name": "detr",
+      "model_type": "detr",
+      "checkpoint": "facebook/detr-resnet-50",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/detr.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "table_transformer": {
+      "name": "table_transformer",
+      "model_type": "table-transformer",
+      "checkpoint": "microsoft/table-transformer-detection",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/table_transformer.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "got_ocr2": {
+      "name": "got_ocr2",
+      "model_type": "got_ocr2",
+      "checkpoint": "stepfun-ai/GOT-OCR-2.0-hf",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/got_ocr2.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "whisper": {
+      "name": "whisper",
+      "model_type": "whisper",
+      "checkpoint": "openai/whisper-tiny",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/whisper.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "wav2vec2": {
+      "name": "wav2vec2",
+      "model_type": "wav2vec2",
+      "checkpoint": "facebook/wav2vec2-base-960h",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/wav2vec2.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "qwen2_audio": {
+      "name": "qwen2_audio",
+      "model_type": "qwen2_audio",
+      "checkpoint": "Qwen/Qwen2-Audio-7B",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/qwen2_audio.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "speech_t5": {
+      "name": "speech_t5",
+      "model_type": "speecht5",
+      "checkpoint": "microsoft/speecht5_asr",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/speech_t5.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "csm": {
+      "name": "csm",
+      "model_type": "csm",
+      "checkpoint": "cartesia/azzurra-voice",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/csm.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "llama": {
+      "name": "llama",
+      "model_type": "llama",
+      "checkpoint": "HuggingFaceTB/SmolLM2-135M",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/llama.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "gemma3": {
+      "name": "gemma3",
+      "model_type": "gemma3",
+      "checkpoint": "google/gemma-3-4b-it",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/gemma3.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "qwen2": {
+      "name": "qwen2",
+      "model_type": "qwen2",
+      "checkpoint": "Qwen/Qwen2-0.5B",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/qwen2.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "mistral3": {
+      "name": "mistral3",
+      "model_type": "mistral3",
+      "checkpoint": "mistralai/Mistral-Small-3.1-24B-Instruct-2503",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/mistral3.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "qwen2_5_vl": {
+      "name": "qwen2_5_vl",
+      "model_type": "qwen2_5_vl",
+      "checkpoint": "Qwen/Qwen2.5-VL-3B-Instruct",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/qwen2_5_vl.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "llava": {
+      "name": "llava",
+      "model_type": "llava",
+      "checkpoint": "llava-hf/llava-1.5-7b-hf",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/llava.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "smolvlm": {
+      "name": "smolvlm",
+      "model_type": "smolvlm",
+      "checkpoint": "HuggingFaceTB/SmolVLM2-2.2B-Instruct",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/smolvlm.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "internvl": {
+      "name": "internvl",
+      "model_type": "internvl",
+      "checkpoint": "OpenGVLab/InternVL3-1B-hf",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/internvl.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "gemma3n": {
+      "name": "gemma3n",
+      "model_type": "gemma3n",
+      "checkpoint": "google/gemma-3n-E2B-it",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/gemma3n.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "gpt_oss": {
+      "name": "gpt_oss",
+      "model_type": "gpt_oss",
+      "checkpoint": "openai/gpt-oss-20b",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/gpt_oss.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "qwen2_5_omni": {
+      "name": "qwen2_5_omni",
+      "model_type": "qwen2_5_omni",
+      "checkpoint": "Qwen/Qwen2.5-Omni-7B",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/qwen2_5_omni.log"
+        }
+      },
+      "status": "prepared"
+    },
+    "pi0": {
+      "name": "pi0",
+      "model_type": "pi0",
+      "checkpoint": "yinchenghust/openpi_libero_all",
+      "stages": {
+        "prepare": {
+          "exit_code": 0,
+          "log": "logs/pi0.log"
+        }
+      },
+      "status": "prepared"
+    }
+  }
+}

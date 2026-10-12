@@ -1,0 +1,206 @@
+{
+  "tests/contracts/expectations/mic-modernbert/cpu-x86_64/mic-modernbert-slim.bfloat16.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-modernbert/cpu-x86_64/mic-modernbert-slim.eager.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-modernbert/cpu-x86_64/mic-modernbert-slim.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-t5/cpu-x86_64/mic-t5-slim.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-t5/cpu-x86_64/mic-t5-slim.bfloat16.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-t5/cpu-x86_64/mic-t5-slim.eager.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-got_ocr2/cpu-x86_64/mic-got_ocr2-slim.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-got_ocr2/cpu-x86_64/mic-got_ocr2-slim.eager.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-got_ocr2/cpu-x86_64/mic-got_ocr2-slim.bfloat16.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-gpt2/cpu-x86_64/mic-gpt2-slim.eager.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-gpt2/cpu-x86_64/mic-gpt2-slim.bfloat16.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-gpt2/cpu-x86_64/mic-gpt2-slim.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-smolvlm/cpu-x86_64/mic-smolvlm-slim.bfloat16.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-smolvlm/cpu-x86_64/mic-smolvlm-slim.eager.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-smolvlm/cpu-x86_64/mic-smolvlm-slim.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-wav2vec2/cpu-x86_64/mic-wav2vec2-slim.bfloat16.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-wav2vec2/cpu-x86_64/mic-wav2vec2-slim.eager.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-wav2vec2/cpu-x86_64/mic-wav2vec2-slim.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-bert/cpu-x86_64/mic-bert-slim.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-bert/cpu-x86_64/mic-bert-slim.bfloat16.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-bert/cpu-x86_64/mic-bert-slim.eager.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-qwen2/cpu-x86_64/mic-qwen2-slim.eager.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-qwen2/cpu-x86_64/mic-qwen2-slim.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-qwen2/cpu-x86_64/mic-qwen2-slim.bfloat16.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-whisper/cpu-x86_64/mic-whisper-slim.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-whisper/cpu-x86_64/mic-whisper-slim.bfloat16.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-whisper/cpu-x86_64/mic-whisper-slim.eager.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-gemma3/cpu-x86_64/mic-gemma3-slim.eager.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-gemma3/cpu-x86_64/mic-gemma3-slim.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-gemma3/cpu-x86_64/mic-gemma3-slim.bfloat16.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-mistral3/cpu-x86_64/mic-mistral3-slim.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-mistral3/cpu-x86_64/mic-mistral3-slim.bfloat16.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-mistral3/cpu-x86_64/mic-mistral3-slim.eager.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-clip/cpu-x86_64/mic-clip-slim.eager.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-clip/cpu-x86_64/mic-clip-slim.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-clip/cpu-x86_64/mic-clip-slim.bfloat16.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-llama/cpu-x86_64/mic-llama-slim.eager.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-llama/cpu-x86_64/mic-llama-slim.bfloat16.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-llama/cpu-x86_64/mic-llama-slim.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-internvl/cpu-x86_64/mic-internvl-slim.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-internvl/cpu-x86_64/mic-internvl-slim.eager.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-internvl/cpu-x86_64/mic-internvl-slim.bfloat16.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-table_transformer/cpu-x86_64/mic-table_transformer-slim.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-table_transformer/cpu-x86_64/mic-table_transformer-slim.eager.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-table_transformer/cpu-x86_64/mic-table_transformer-slim.bfloat16.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-llava/cpu-x86_64/mic-llava-slim.eager.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-llava/cpu-x86_64/mic-llava-slim.bfloat16.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-llava/cpu-x86_64/mic-llava-slim.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-vit/cpu-x86_64/mic-vit-slim.bfloat16.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-vit/cpu-x86_64/mic-vit-slim.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  },
+  "tests/contracts/expectations/mic-vit/cpu-x86_64/mic-vit-slim.eager.json": {
+    "failures": [],
+    "review": "Native CPU metadata and within-tolerance output changes; Wav2Vec2 loss/gradients excluded as documented."
+  }
+}

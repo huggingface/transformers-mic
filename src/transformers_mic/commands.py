@@ -12,8 +12,8 @@ import tempfile
 from huggingface_hub import HfApi, hf_hub_download
 import jsonschema
 
-from . import backend, history, planner, policy, resources
-from .workspace import Workspace, digest, read, write
+from . import backend, history, planner, policy, references, resources
+from .workspace import Workspace, catalog_patches, digest, read, write
 
 
 def manifest_schema():
@@ -98,7 +98,9 @@ def validate_plan(plan, model, fixture, old=None):
     if integration.get("variants", {}).get("bfloat16") != {"dtype": "bfloat16"}:
         raise ValueError("Use bfloat16 variant kwargs {dtype: bfloat16}")
     # Syntax is checked without importing or running generated code.
-    blocks = re.findall(r"```py runnable:[^\n]*\n(.*?)```", plan["usage"], re.S)
+    blocks = re.findall(
+        r"```(?:py|python) runnable:[^\n]*\n(.*?)```", plan["usage"], re.S
+    )
     if not blocks:
         raise ValueError("Generated usage contains no runnable Python blocks")
     ast.parse("\n".join(blocks))
@@ -143,7 +145,56 @@ def create(args):
     ]
     if args.contract:
         names = [n for n in names if n == args.contract]
-    if names and not args.llm:
+    if names and args.regenerate and not args.llm:
+        name = names[0]
+        original = read(
+            resources.catalog() / "hub" / f"{name}-integration/integration.json"
+        )
+        old_fixture = original["checkpoints"][args.model]["fixture"]
+        namespace = args.namespace or HfApi().whoami()["name"]
+        slug = args.name or re.sub(r"[^A-Za-z0-9_-]", "-", args.model.split("/")[-1])
+        fixture = f"{namespace}/mic-{slug}-slim"
+        manifest = json.loads(json.dumps(original).replace(old_fixture, fixture))
+        manifest["checkpoints"] = {args.model: {"fixture": fixture}}
+        manifest["fixtures"] = {fixture: manifest["fixtures"][fixture]}
+        manifest["fixtures"][fixture].update(built_from=args.model, covers=[args.model])
+        if args.fixtures_only:
+            manifest["integrations"]["transformers"]["targets"] = ["fixtures"]
+        pin = catalog["contracts"][name]["checkpoints"][args.model]
+        source = resources.catalog() / "hub" / f"{name}-integration"
+        usage = (
+            source / manifest["integrations"]["transformers"]["entry_point"]
+        ).read_text()
+        workspace.from_plan(
+            args.model,
+            pin,
+            namespace,
+            slug,
+            manifest,
+            usage,
+            args.weights,
+            args.readable_output,
+        )
+        # Preserve frozen assets used by the catalog usage (e.g. speech).
+        for item in source.iterdir():
+            if item.is_dir() and item.name != "integrations":
+                shutil.copytree(
+                    item, workspace.contract_root / item.name, dirs_exist_ok=True
+                )
+        workspace.save_state(origin="catalog-regenerated")
+        lock = workspace.lock
+        lock["local_patches"] = catalog_patches(catalog, name)
+        write(workspace.lock_path, lock)
+        write(
+            workspace.root / ".mic/plan.json",
+            {
+                "origin": "catalog-regenerated",
+                "source_contract": name,
+                "scope": "fixtures" if args.fixtures_only else "all",
+                "manifest": manifest,
+            },
+        )
+    elif names and not args.llm:
         name = names[0]
         workspace.from_catalog(args.model, name, args.weights, args.readable_output)
         write(
@@ -180,7 +231,7 @@ def create(args):
         revision, config = model_context(args.model, args.revision)
         namespace = args.namespace or HfApi().whoami()["name"]
         slug = re.sub(r"[^A-Za-z0-9_.-]", "-", args.model.split("/")[-1])
-        fixture = f"{namespace}/proto-{slug}-slim"
+        fixture = f"{namespace}/mic-{args.name or slug}-slim"
         evidence = (
             {"items": [], "complete": False, "source": "not requested"}
             if args.no_history
@@ -201,13 +252,23 @@ def create(args):
             "failure_candidates": evidence["items"][:30],
             "request": "Design a small useful integration path; include inference and a training step where supported.",
         }
+        context.update(references.collect(args.model, revision, config))
         sample = resources.catalog() / "hub/BERT-integration"
-        context["example_manifest"] = read(sample / "integration.json")
-        context["example_usage"] = (
-            sample / "integrations/transformers/usage.md"
-        ).read_text()
+        context["example_plan"] = {
+            "name": "BERT",
+            "manifest": read(sample / "integration.json"),
+            "usage": (sample / "integrations/transformers/usage.md").read_text(),
+            "rationale": "Use the model's public API and measure expectations by execution.",
+            "historical_candidates": [],
+        }
         plan, llm = propose_valid(context, args, args.model, fixture)
         manifest = plan["manifest"]
+        if args.name:
+            if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]*", args.name):
+                raise ValueError("Contract name must be a directory slug")
+            plan["name"] = args.name
+        if args.fixtures_only:
+            manifest["integrations"]["transformers"]["targets"] = ["fixtures"]
         workspace.from_plan(
             args.model,
             revision,
@@ -611,6 +672,10 @@ def export(args):
     publication_ready(workspace)
     state = workspace.state
     source = workspace.lock
+    if source.get("local_patches"):
+        raise ValueError(
+            "Validate without local patches before exporting to Transformers; use narrow known_failures for unresolved framework bugs"
+        )
     name = state["contract"]
     contract = source["contracts"][name]
     pins = [contract["integration"], *contract.get("fixtures", {}).values()]
@@ -633,6 +698,20 @@ def export(args):
             "contracts": {},
         }
     )
+    destination_name = getattr(args, "contract_name", None) or name
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", destination_name):
+        raise ValueError("Destination contract name must be a safe folder name")
+    existing_names = set(old["contracts"])
+    expectations = target / "expectations"
+    if expectations.exists():
+        existing_names.update(p.name for p in expectations.iterdir() if p.is_dir())
+    if any(
+        n != destination_name and n.casefold() == destination_name.casefold()
+        for n in existing_names
+    ):
+        raise ValueError(
+            "Destination name differs only by case from an existing contract; use --contract-name"
+        )
     if old["environment"] != source["environment"]:
         raise ValueError(
             "Destination environment differs; review the environment change separately"
@@ -641,12 +720,13 @@ def export(args):
     clean = json.loads(json.dumps(contract))
     for pin in [clean["integration"], *clean.get("fixtures", {}).values()]:
         pin.pop("path", None)
-    old["contracts"][name] = clean
-    old.setdefault("local_patches", {}).update(source.get("local_patches", {}))
+    old["contracts"][destination_name] = clean
+    if source.get("known_failures"):
+        old.setdefault("known_failures", {}).update(source["known_failures"])
     write(path, old)
     shutil.copytree(
         workspace.lock_path.parent / "expectations" / name,
-        target / "expectations" / name,
+        target / "expectations" / destination_name,
         dirs_exist_ok=True,
         ignore=shutil.ignore_patterns("*.candidate.json"),
     )
@@ -654,7 +734,7 @@ def export(args):
         json.dumps(
             {
                 "exported": str(target),
-                "contract": name,
+                "contract": destination_name,
                 "next": "Review git diff, install transformers-mic, and invoke tmic check --lock tests/contracts/fleet.lock in CI.",
             }
         )

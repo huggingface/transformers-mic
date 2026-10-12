@@ -1,0 +1,10 @@
+{
+  "model": "openai/gpt-oss-20b",
+  "contract": "gpt_oss",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false,
+  "validation": null,
+  "validations": {}
+}

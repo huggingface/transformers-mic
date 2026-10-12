@@ -6,7 +6,7 @@ docs/next-steps.md
 example/hub/*-slim/*
 !example/hub/*-slim/README.md
 !example/hub/*-slim/build.json
-!example/hub/proto-SmolLM-1.7B-slim/*
+!example/hub/mic-SmolLM-1.7B-slim/*
 
 # Python package build products and local MIC workspaces.
 build/
@@ -15,3 +15,8 @@ dist/
 .pytest_cache/
 .ruff_cache/
 work/
+
+experiments/regeneration-inputs/projects/*/.mic/artifacts/
+experiments/regeneration-inputs/projects/*/.mic/check*.jsonl
+experiments/regeneration-inputs/projects/*/.mic/record*.jsonl
+experiments/regeneration-inputs/projects/*/example/transformers/tests/contracts/expectations/

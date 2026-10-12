@@ -5,11 +5,11 @@
   "architecture": "BertForMaskedLM",
   "checkpoints": {
     "google-bert/bert-base-uncased": {
-      "fixture": "hf-internal-testing/proto-bert-base-uncased-slim"
+      "fixture": "hf-internal-testing/mic-bert-base-uncased-slim"
     }
   },
   "fixtures": {
-    "hf-internal-testing/proto-bert-base-uncased-slim": {
+    "hf-internal-testing/mic-bert-base-uncased-slim": {
       "built_from": "google-bert/bert-base-uncased",
       "covers": [
         "google-bert/bert-base-uncased"

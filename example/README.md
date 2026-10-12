@@ -11,7 +11,7 @@ A runnable MIC for batched greedy generation on three SmolLM checkpoints, in Tra
 | --- | --- |
 | `HuggingFaceTB/SmolLM-135M`, `-360M`, `-1.7B` (creator) | pinned in the fleet locks |
 | [`SmolLM-integration`](https://huggingface.co/hf-internal-testing/SmolLM-integration): contract and manifest | [`hub/SmolLM-integration/`](hub/SmolLM-integration) |
-| [`proto-SmolLM-slim`](https://huggingface.co/hf-internal-testing/proto-SmolLM-slim) (135M, 360M), [`proto-SmolLM-1.7B-slim`](https://huggingface.co/hf-internal-testing/proto-SmolLM-1.7B-slim) (1.7B) | [`hub/`](hub) |
+| [`mic-SmolLM-slim`](https://huggingface.co/hf-internal-testing/mic-SmolLM-slim) (135M, 360M), [`mic-SmolLM-1.7B-slim`](https://huggingface.co/hf-internal-testing/mic-SmolLM-1.7B-slim) (1.7B) | [`hub/`](hub) |
 | `onnx-community/SmolLM-135M-ONNX`, `-360M-ONNX`, loaded by Transformers.js | pinned in its lock |
 | Fleet lock and expected results per framework | [`transformers/`](transformers/tests/contracts), [`transformers.js/`](transformers.js/tests/contracts) |
 
@@ -34,8 +34,8 @@ A runnable MIC for batched greedy generation on three SmolLM checkpoints, in Tra
 
 **Shared fixtures, by [fixture key](../docs/design.md#grouping-checkpoints):**
 
-- SmolLM-135M, -360M: [`proto-SmolLM-slim`](hub/proto-SmolLM-slim), key `a186080c7a70`, 3.2M parameters, bfloat16 (6.1 MB), overfit by reviewed choice (80 steps, `target_loss` 0.3; [why](../docs/evidence.md#bfloat16-on-cpu)).
-- SmolLM-1.7B: different tokenizer files and full multi-head attention (32/32 heads vs 9/3, 15/5). [`proto-SmolLM-1.7B-slim`](hub/proto-SmolLM-1.7B-slim), key `8a9d62b3b3b2`, 4/4 heads, float32 (13 MB), overfit by an earlier build script.
+- SmolLM-135M, -360M: [`mic-SmolLM-slim`](hub/mic-SmolLM-slim), key `a186080c7a70`, 3.2M parameters, bfloat16 (6.1 MB), overfit by reviewed choice (80 steps, `target_loss` 0.3; [why](../docs/evidence.md#bfloat16-on-cpu)).
+- SmolLM-1.7B: different tokenizer files and full multi-head attention (32/32 heads vs 9/3, 15/5). [`mic-SmolLM-1.7B-slim`](hub/mic-SmolLM-1.7B-slim), key `8a9d62b3b3b2`, 4/4 heads, float32 (13 MB), overfit by an earlier build script.
 
 **Runnable markdown.** [`usage.md`](hub/SmolLM-integration/integrations/transformers/usage.md) ([doc-builder blocks](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md)) renders as a plain SmolLM-135M example (generate, one training step), passes `pytest -p doc_builder.pytest_plugin usage.md`, and is what `run.py` runs, with each pinned target passed as a local path. Transformers.js: [`integration.js`](hub/SmolLM-integration/integrations/transformers.js/integration.js), a plain script on the `onnx-community` conversions, no training probe.
 
@@ -54,10 +54,10 @@ $PY example/run.py --framework transformers --contract SmolLM --variant eager
 $PY example/run.py --framework transformers.js
 $PY example/run.py --framework transformers.js --variant webgpu                    # WebGPU baselines
 $PY example/run.py --framework transformers.js --variant webgpu-fp16 --golden cpu  # tokens vs CPU golden
-$PY example/run.py --framework transformers --target proto-SmolLM-slim --record
+$PY example/run.py --framework transformers --target mic-SmolLM-slim --record
 $PY example/run.py --framework transformers --fixtures-only      # what a framework PR runs
-$PY example/build_fixtures.py --fixture proto-whisper-tiny-slim        # rebuild one fixture
-$PY example/build_fixtures.py --fixture proto-whisper-tiny-slim --out /tmp/twin --keep-random  # random-weight twin
+$PY example/build_fixtures.py --fixture mic-whisper-tiny-slim        # rebuild one fixture
+$PY example/build_fixtures.py --fixture mic-whisper-tiny-slim --out /tmp/twin --keep-random  # random-weight twin
 $PY example/replay.py d7ba937671 --contract T5                    # UMT5 #49135, bad vs fixed build
 ```
 
@@ -67,8 +67,8 @@ Results on CPU (Apple M5, Transformers `5.19.0.dev0`, torch 2.11.0, `@huggingfac
 
 | Framework | Target | Runtime | Generated (default variant) | Default | Eager | Seconds |
 | --- | --- | --- | --- | --- | --- | ---: |
-| Transformers | proto-SmolLM-slim | bfloat16 | " Paris Paris Paris Paris", " Berlin Berlin Berlin of", " Rome Rome London London", " London London London London" | pass | pass | 2.8 |
-| Transformers | proto-SmolLM-1.7B-slim | float32 | " Paris", " Berlin", " Rome", " London" | pass | pass | 2.6 |
+| Transformers | mic-SmolLM-slim | bfloat16 | " Paris Paris Paris Paris", " Berlin Berlin Berlin of", " Rome Rome London London", " London London London London" | pass | pass | 2.8 |
+| Transformers | mic-SmolLM-1.7B-slim | float32 | " Paris", " Berlin", " Rome", " London" | pass | pass | 2.6 |
 | Transformers | SmolLM-135M | bfloat16 | " Paris, the capital", " Berlin.\nThe", " Rome. It is", " London.\nThe" | pass | pass | 5.8 |
 | Transformers | SmolLM-360M | bfloat16 | " Paris.\nThe", " Berlin.\nThe", " Rome.\nThe", " London.\nThe" | pass | pass | 11.0 |
 | Transformers | SmolLM-1.7B | float32 | " Paris.\nThe", " Berlin.\nGermany", " Rome.\nThe", " London.\nThe" | pass | pass | 33.4 |
@@ -88,7 +88,7 @@ Eight contracts through `run.py` on Apple M5, torch 2.11.0: the original six use
 
 | Contract | Usage path | Fixture (weights, why) | Checkpoints |
 | --- | --- | --- | --- |
-| SmolLM | batched greedy generation | 2 fixtures, overfit: proto-SmolLM-slim by reviewed choice (random weights repeat one answer), 1.7B by an earlier script | 135M, 360M, 1.7B |
+| SmolLM | batched greedy generation | 2 fixtures, overfit: mic-SmolLM-slim by reviewed choice (random weights repeat one answer), 1.7B by an earlier script | 135M, 360M, 1.7B |
 | CLIP | zero-shot image-caption matching | random: weakest input move 4.9e-3 | `openai/clip-vit-base-patch32` |
 | BERT | fill-mask | random: weakest 2.8e-3 (padding mask) | `google-bert/bert-base-uncased` |
 | T5 | text-to-text generation | T5 and UMT5 fixtures, random: weakest 1.3 and 3.1 | `google-t5/t5-small`; `google/umt5-small` unsupported (no `model_type`; Auto classes cannot load it) |

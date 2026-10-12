@@ -1,0 +1,53 @@
+{
+ "fixture": "hf-internal-testing/mic-SmolLM-1.7B-slim",
+ "key": "8a9d62b3b3b26034afde013adadd4330ea7ff4a157a12d29502c11c57020c856",
+ "key_fields": {
+  "model_type": "llama",
+  "architectures": [
+   "LlamaForCausalLM"
+  ],
+  "vocab_size": 49152,
+  "tie_word_embeddings": true,
+  "rope_theta": 10000.0,
+  "rope_scaling": null,
+  "max_position_embeddings": 2048,
+  "bos_token_id": 0,
+  "eos_token_id": 0,
+  "rms_norm_eps": 1e-05,
+  "hidden_act": "silu",
+  "attention_bias": false,
+  "mlp_bias": null,
+  "grouped_kv_heads": false
+ },
+ "covers": {
+  "HuggingFaceTB/SmolLM-1.7B": "d7449ff7241c863f3e8accc475155f0f97afa011"
+ },
+ "built_from": {
+  "repo": "HuggingFaceTB/SmolLM-1.7B",
+  "revision": "d7449ff7241c863f3e8accc475155f0f97afa011"
+ },
+ "seed": 17,
+ "training": {
+  "seconds": 0.3905240840977058,
+  "steps": 50,
+  "loss": 0.0034790136851370335,
+  "converged": true
+ },
+ "copied_unchanged": [
+  "tokenizer.json",
+  "tokenizer_config.json",
+  "special_tokens_map.json",
+  "vocab.json",
+  "merges.txt"
+ ],
+ "sha256": {
+  "config.json": "6ca9de9839a0be85a8aded3f5492d948bc19995b42052a76139d052549e723ca",
+  "generation_config.json": "793cfc022261e51f1a9f923d7c5d7c8bc6b1e0ed3dabda2f60f097d4ff693f2c",
+  "merges.txt": "0b54e8aa4e53d5383e2e4bc635a56b43f9647f7b13832d5d9ecd8f82dac4f510",
+  "model.safetensors": "cc679bb3550bcee49847398c05dab2187557350c3cb7a22ce649f69ee02d6fea",
+  "special_tokens_map.json": "e786b595b9a23148bf1630df78d9037a048ea671e48bfd3549a1e3c233742bb3",
+  "tokenizer.json": "6ae489e54654605c859dec0fe2ba636baf64399dffe01ec44b3311778b269857",
+  "tokenizer_config.json": "2d9292f87357fec4a28f4e170533dfc712bfd1d16870f3d3d9afe0419859842a",
+  "vocab.json": "82b84012e3add4d01d12ba14442026e49b8cbbaead1f79ecf3d919784f82dc79"
+ }
+}

@@ -1,0 +1,8 @@
+{
+  "model": "HuggingFaceTB/SmolLM2-135M",
+  "contract": "llama",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false
+}

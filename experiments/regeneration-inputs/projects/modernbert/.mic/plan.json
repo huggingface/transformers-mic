@@ -1,0 +1,99 @@
+{
+  "name": "modernbert",
+  "manifest": {
+    "mic": "0.3",
+    "name": "ModernBERT fill-mask",
+    "usage": "AutoTokenizer + AutoModelForMaskedLM, batched, right padding",
+    "architecture": "ModernBertForMaskedLM",
+    "checkpoints": {
+      "answerdotai/ModernBERT-base": {
+        "fixture": "hf-internal-testing/mic-modernbert-slim"
+      }
+    },
+    "fixtures": {
+      "hf-internal-testing/mic-modernbert-slim": {
+        "built_from": "answerdotai/ModernBERT-base",
+        "covers": [
+          "answerdotai/ModernBERT-base"
+        ],
+        "build": {
+          "seed": 17
+        }
+      }
+    },
+    "integrations": {
+      "transformers": {
+        "entry_point": "integrations/transformers/usage.md",
+        "format": "runnable-markdown",
+        "requires": [
+          "transformers>=5",
+          "torch"
+        ],
+        "targets": [
+          "fixtures"
+        ],
+        "variants": {
+          "default": {},
+          "eager": {
+            "attn_implementation": "eager"
+          },
+          "bfloat16": {
+            "dtype": "bfloat16"
+          }
+        },
+        "training": true,
+        "resources": {
+          "fixture": {
+            "memory_gb": 1,
+            "download_mb": 50
+          },
+          "answerdotai/ModernBERT-base": {
+            "memory_gb": 2,
+            "download_mb": 620,
+            "variants": {
+              "bfloat16": {
+                "memory_gb": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "outputs": {
+      "runtime": {
+        "compare": "exact"
+      },
+      "predicted_tokens": {
+        "compare": "exact"
+      },
+      "predicted_text": {
+        "compare": "exact"
+      },
+      "answer_logits": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.loss": {
+        "compare": "allclose",
+        "atol": 0.0001,
+        "rtol": 0.0001
+      },
+      "training.gradients": {
+        "compare": "all_true"
+      },
+      "training.updated": {
+        "compare": "true"
+      }
+    }
+  },
+  "usage": "# ModernBERT: fill-mask with Transformers\n\nThis page is the Transformers contract of the ModernBERT MIC and also a usage example. [doc-builder](https://github.com/huggingface/doc-builder/blob/main/docs/runnable-code-blocks.md) renders the `runnable` blocks below as documentation, and its pytest plugin runs them as written against `answerdotai/ModernBERT-base`. The MIC runner runs the same blocks against each slim fixture and each checkpoint in [`integration.json`](../../integration.json). Lines marked `# doc-builder: hide` only matter there: they swap in the pinned checkpoint or variant and print the result record.\n\n## Predict the masked word\n\n```py runnable:fill_mask\nimport torch\nfrom transformers import AutoModelForMaskedLM, AutoTokenizer, set_seed\nimport json  # doc-builder: hide\nimport os  # doc-builder: hide\n\nmodel_id = \"answerdotai/ModernBERT-base\"\nmodel_id = os.environ.get(\"MIC_MODEL\", model_id)  # doc-builder: hide\nvariant = json.loads(os.environ.get(\"MIC_MODEL_KWARGS\", \"{}\"))  # doc-builder: hide\ndevice = \"cuda\" if torch.cuda.is_available() else \"cpu\"\nset_seed(0)\n\ntokenizer = AutoTokenizer.from_pretrained(model_id)\nmodel = AutoModelForMaskedLM.from_pretrained(model_id).to(device)\nif variant:  # doc-builder: hide\n    model = AutoModelForMaskedLM.from_pretrained(model_id, **variant).to(device)\n\nprompts = [\n    \"The capital of France is [MASK].\",\n    \"Water is made of hydrogen and [MASK].\",\n]\ninputs = tokenizer(prompts, return_tensors=\"pt\", padding=True).to(device)\n\nmodel.eval()\nwith torch.no_grad():\n    logits = model(**inputs).logits\nmasked = inputs[\"input_ids\"] == tokenizer.mask_token_id\npredicted = logits[masked].argmax(dim=-1)\nprint(tokenizer.convert_ids_to_tokens(predicted))\n```\n\n## One training step\n\n```py runnable:fill_mask:2\nanswers = [\"paris\", \"oxygen\"]\nanswer_ids = tokenizer.convert_tokens_to_ids(answers)\nlabels = torch.full_like(inputs[\"input_ids\"], -100)\nlabels[masked] = torch.tensor(answer_ids, device=device)\n\nmodel.train()\noptimizer = torch.optim.SGD(model.parameters(), lr=0.01)\nloss = model(**inputs, labels=labels).loss\nloss.backward()\nbefore = {name: p.detach().clone() for name, p in model.named_parameters()}  # doc-builder: hide\noptimizer.step()\nprint(f\"loss: {loss.item():.4f}\")\n\nif os.environ.get(\"MIC_RUNNER\"):  # doc-builder: hide\n    named = dict(model.named_parameters())\n    grad_params = [n for n, p in named.items() if p.grad is not None]\n    checked = grad_params[:2]\n    result = {\n        \"runtime\": {\n            \"device\": model.device.type,\n            \"dtype\": str(model.dtype).removeprefix(\"torch.\"),\n            \"attn_implementation\": model.config._attn_implementation,\n        },\n        \"predicted_tokens\": predicted.tolist(),\n        \"predicted_text\": tokenizer.convert_ids_to_tokens(predicted),\n        \"answer_logits\": logits[masked][:, answer_ids].float().tolist(),\n        \"training\": {\n            \"loss\": loss.item(),\n            \"gradients\": {n: bool(torch.count_nonzero(named[n].grad) > 0 and torch.isfinite(named[n].grad).all()) for n in checked},\n            \"updated\": any(not torch.equal(p, before[n]) for n, p in named.items()),\n        },\n    }\n    print(json.dumps(result))\n```\n",
+  "rationale": "ModernBERT-base is a 155M-parameter masked-language-model with a hybrid local/global attention pattern (RoPE with local window 128, global every 3rd layer). The contract exercises the standard AutoModelForMaskedLM path with two distinct fill-mask sentences to make batch perturbation meaningful. A single SGD step on the same batch verifies gradient flow through the hybrid attention and the tied embedding/classifier. The bfloat16 variant uses the dtype kwarg to exercise the half-precision path without changing the architecture.",
+  "historical_candidates": [],
+  "llm": {
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "auto",
+    "usage": "ChatCompletionOutputUsage(completion_tokens=3687, prompt_tokens=4184, total_tokens=7871, completion_tokens_details={'reasoning_tokens': 2372}, prompt_tokens_details={'cached_tokens': 0, 'image_tokens': 0})",
+    "role": "proposal only"
+  }
+}

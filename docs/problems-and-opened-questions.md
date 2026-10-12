@@ -37,7 +37,7 @@ The experiments support a CI pilot; removing tests or requiring contracts needs 
 - The fixture key guarantees identical processor files, retained config, and dtype, not behavior that depends on shrunk dimensions.
 - CPU excludes GPU paths; short inputs leave long context untested.
 - Whisper #48108 changes real-checkpoint assisted speech outputs but neither slim weight kind. The checkpoint-only WhisperSpeech contract covers frozen speech with an encoder-decoder assistant in nightly; fast fixture checks still miss this bug ([replay](evidence.md#whisper-assisted-decoding-suppression)).
-- Fixtures load in their source's dtype, but at hidden size 64 bfloat16 may not reach the native CPU kernels the real checkpoint hits: proto-SmolLM-slim agrees across native and emulated bfloat16 while SmolLM-135M does not ([evidence](evidence.md#bfloat16-on-cpu)).
+- Fixtures load in their source's dtype, but at hidden size 64 bfloat16 may not reach the native CPU kernels the real checkpoint hits: mic-SmolLM-slim agrees across native and emulated bfloat16 while SmolLM-135M does not ([evidence](evidence.md#bfloat16-on-cpu)).
 
 **Next.** Per contract, record what the fixture covers and which full-model or hardware job covers the rest. Choose PR variants explicitly, for cost versus signal.
 

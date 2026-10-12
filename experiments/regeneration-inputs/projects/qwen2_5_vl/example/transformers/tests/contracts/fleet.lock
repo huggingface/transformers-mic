@@ -1,0 +1,38 @@
+{
+  "framework": "transformers",
+  "environment": {
+    "python": "3.10",
+    "torch": "2.11.0",
+    "torchvision": "0.26.0",
+    "torchaudio": "2.11.0",
+    "tokenizers": "0.23.1",
+    "numpy": "1.26.4",
+    "pillow": "12.2.0",
+    "accelerate": "1.13.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.32.0",
+    "sentencepiece": "0.2.1",
+    "protobuf": "6.33.6",
+    "librosa": "0.11.0",
+    "soundfile": "0.13.1",
+    "scipy": "1.15.3"
+  },
+  "contracts": {
+    "qwen2_5_vl": {
+      "integration": {
+        "repo": "hf-internal-testing/mic-qwen2_5_vl-integration",
+        "revision": "unpublished",
+        "path": "../../../hub/qwen2_5_vl-integration"
+      },
+      "fixtures": {
+        "hf-internal-testing/mic-qwen2_5_vl-slim": {
+          "revision": "unpublished",
+          "path": "../../../hub/mic-qwen2_5_vl-slim"
+        }
+      },
+      "checkpoints": {
+        "Qwen/Qwen2.5-VL-3B-Instruct": "66285546d2b821cf421d4f5eb2576359d3770cd3"
+      }
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "mic": "0.3",
+  "name": "Mistral3 image-text-to-text",
+  "usage": "AutoProcessor + AutoModelForImageTextToText, chat template, text-only batch with padding",
+  "architecture": "Mistral3ForConditionalGeneration",
+  "checkpoints": {
+    "mistralai/Mistral-Small-3.1-24B-Instruct-2503": {
+      "fixture": "hf-internal-testing/mic-mistral3-slim"
+    }
+  },
+  "fixtures": {
+    "hf-internal-testing/mic-mistral3-slim": {
+      "built_from": "mistralai/Mistral-Small-3.1-24B-Instruct-2503",
+      "covers": [
+        "mistralai/Mistral-Small-3.1-24B-Instruct-2503"
+      ],
+      "build": {
+        "seed": 17,
+        "model_class": "Mistral3ForConditionalGeneration"
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=5",
+        "torch"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {},
+        "eager": {
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "memory_gb": 4,
+          "download_mb": 100
+        },
+        "mistralai/Mistral-Small-3.1-24B-Instruct-2503": {
+          "memory_gb": 60,
+          "gpu_memory_gb": 60,
+          "download_mb": 48000
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "predicted_tokens": {
+      "compare": "exact"
+    },
+    "answer_logits": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

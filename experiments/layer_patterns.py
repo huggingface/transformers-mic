@@ -63,7 +63,9 @@ def is_sparse(config, i):
 
 def layer_kind(config, i):
     types = getattr(config, "layer_types", None)
-    return (types[i] if types else None, is_sparse(config, i))
+    shared = getattr(config, "num_kv_shared_layers", 0)
+    kv_shared = i >= config.num_hidden_layers - shared if shared else False
+    return (types[i] if types else None, is_sparse(config, i), kv_shared)
 
 
 def pattern_indices(config):
