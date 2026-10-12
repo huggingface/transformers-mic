@@ -123,5 +123,9 @@
       ]
     }
   ],
-  "note": "Whisper unexpectedly reached numeric checks despite recorder generation error. Source provenance and explicit checkout PYTHONPATH added for rerun; no tolerances changed."
+  "note": "This run checked a synthetic PR merge containing newer upstream code. Its Whisper generation succeeds, unlike branch-head recording. Source import checks remain useful, but PR-versus-head source scope explains the differing generation behavior. No tolerance changes or changed reference approvals.",
+  "event": "pull_request",
+  "framework_commit": "836dca49878398ea96b4e20adf5c848ec0591a10",
+  "head_commit": "3b3cf34427671bbc843966d76269e937601ddbff",
+  "base_commit": "2fa1fdd5b27ae54bdcee0516848c7963393a5f5c"
 }

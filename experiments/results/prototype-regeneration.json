@@ -913,6 +913,17 @@
       "xfail": 4
     },
     "whisper": "Both historical and prototype default generation calls match #49456; downstream Whisper checks remain blocked.",
-    "wav2vec2": "Only training.loss and training.gradients skipped for #49385; no runtime patches."
+    "wav2vec2": "Only training.loss and training.gradients skipped for #49385; no runtime patches.",
+    "pr_merge": {
+      "run": 38298093605,
+      "framework_commit": "1111c102092739070a59f8eb41f8008fc9709213",
+      "base_commit": "78633ef9ff2338284e0c9da2218381b7ed755bc4",
+      "executed": 77,
+      "summary": {
+        "pass": 73,
+        "fail": 4
+      },
+      "status": "Whisper fix in newer upstream source exposes obsolete historical error match and missing/changed prototype CPU references; not a green PR proof."
+    }
   }
 }
