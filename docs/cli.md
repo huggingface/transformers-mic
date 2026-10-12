@@ -54,7 +54,9 @@ credits. Provider inference may be billed to that account.
 
 The planner receives checkpoint config, the manifest schema, and failure
 candidates. It proposes a manifest and runnable usage, stored in `.mic/plan.json`.
-It cannot generate expected numeric values, loosen tolerances, or choose overfit
+Invalid drafts receive validation feedback for one repair attempt; persistent
+errors stop creation without executing the draft. It cannot generate expected
+numeric values, loosen tolerances, or choose overfit
 weights. Review generated `integration.json` and `usage.md` before running them:
 syntax/schema checks do not sandbox Python. `create` alone does not execute the
 proposed model code; `--build` and `--record` are explicit execution shortcuts.
@@ -132,3 +134,20 @@ expectations, checks and artifacts; keep them outside versioned source or ignore
 `work/`. The current release implements Transformers orchestration; the bundled
 prototype still includes Transformers.js contracts, but the CLI does not publish
 or export a JavaScript fleet.
+
+## Validation of this alpha
+
+The [GPU package workflow](https://github.com/huggingface/transformers-mic/actions/runs/38227068563)
+installed the wheel outside the checkout on an A10G, checked BERT's fixture and
+checkpoint in default/eager/bfloat16, recorded fresh-process candidates, reviewed
+them, exported the fleet and checked the exported pins. A separate fresh random
+fixture passed the build gates and recorded a candidate. Source distributions
+and wheels were checked for complete backend/catalog resources and exclusion of
+weights, pending candidates and installed JavaScript dependencies.
+
+A live default Qwen request produced a validated BERT draft; its random slim
+passed the sensitivity/numeric-health gates and recorded a repeatable CPU
+candidate. This verifies the workflow on one model, not generation quality or
+architecture support across the fleet. Unit tests cover policy failures, draft
+repair, update preservation, validation invalidation, and fleet export.
+[Validation report](../experiments/results/mic_cli_validation.json).

@@ -13,6 +13,8 @@ class BuildPy(build_py):
         super().run()
         package = Path(self.build_lib) / "transformers_mic"
         backend = package / "_backend"
+        if backend.exists():
+            shutil.rmtree(backend)
         backend.mkdir(parents=True, exist_ok=True)
         for source in (ROOT / "example").glob("*.py"):
             shutil.copy2(source, backend / source.name)
@@ -22,6 +24,8 @@ class BuildPy(build_py):
             ROOT / "example/schemas", backend / "schemas", dirs_exist_ok=True
         )
         catalog = package / "_catalog"
+        if catalog.exists():
+            shutil.rmtree(catalog)
         for source in (ROOT / "example/hub").glob("*-integration"):
             shutil.copytree(
                 source,
@@ -39,6 +43,7 @@ class BuildPy(build_py):
             ROOT / "example/transformers/tests/contracts",
             catalog / "contracts",
             dirs_exist_ok=True,
+            ignore=shutil.ignore_patterns("*.candidate.json", "__pycache__"),
         )
 
 

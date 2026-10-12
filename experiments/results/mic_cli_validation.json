@@ -1,0 +1,99 @@
+{
+  "package": "transformers-mic",
+  "version": "0.1.0",
+  "gpu": {
+    "run": "https://github.com/huggingface/transformers-mic/actions/runs/38227068563",
+    "conclusion": "success",
+    "installed_wheel_outside_checkout": true,
+    "contract": "BERT",
+    "checks": {
+      "default": {
+        "targets": 2,
+        "statuses": [
+          "pass",
+          "pass"
+        ],
+        "platforms": [
+          "cuda"
+        ]
+      },
+      "eager": {
+        "targets": 2,
+        "statuses": [
+          "pass",
+          "pass"
+        ],
+        "platforms": [
+          "cuda"
+        ]
+      },
+      "bfloat16": {
+        "targets": 2,
+        "statuses": [
+          "pass",
+          "pass"
+        ],
+        "platforms": [
+          "cuda"
+        ]
+      }
+    },
+    "workflow_exercises": [
+      "catalog reuse",
+      "record/review/check all variants",
+      "publication preview",
+      "exported fleet check",
+      "fresh random build and candidate recording"
+    ]
+  },
+  "live_planner": {
+    "model": "Qwen/Qwen3.8-27B",
+    "provider": "auto",
+    "checkpoint": "google-bert/bert-base-uncased",
+    "contract": "BERT",
+    "build_decision": {
+      "requested": "random",
+      "weights": "random",
+      "accepted": true,
+      "reused": false,
+      "reason": "Random weights pass the measured sensitivity and numeric-health gates; training is unnecessary.",
+      "readability_requested": false,
+      "historical_detection": "unverified until replayed; a gate pass is not a regression catch"
+    },
+    "record": {
+      "contract": "hf-internal-testing/BERT-integration",
+      "contract_revision": "unpublished",
+      "framework": "transformers",
+      "variant": "default",
+      "target": "proto-bert-base-uncased-slim",
+      "kind": "fixture",
+      "revision": "unpublished",
+      "environment": {
+        "python": "3.10.19",
+        "transformers": "5.16.0.dev0",
+        "torch": "2.11.0",
+        "torchvision": "0.26.0",
+        "torchaudio": "2.11.0",
+        "tokenizers": "0.23.1",
+        "numpy": "1.26.4",
+        "pillow": "12.2.0",
+        "accelerate": "1.13.0",
+        "safetensors": "0.8.0",
+        "huggingface-hub": "1.32.0",
+        "sentencepiece": "0.2.1",
+        "protobuf": "6.33.6",
+        "librosa": "0.11.0",
+        "soundfile": "0.13.1",
+        "scipy": "1.15.3"
+      },
+      "seconds": 2.54,
+      "platform": "cpu-arm64",
+      "status": "recorded"
+    }
+  },
+  "limitations": [
+    "One model validates the workflow; architecture-wide generation quality is unmeasured.",
+    "No test artifacts were uploaded to the Hub and no upstream Transformers PR was opened.",
+    "Historical failure candidates do not establish detection without replay."
+  ]
+}

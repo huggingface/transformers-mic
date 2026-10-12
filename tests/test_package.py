@@ -202,3 +202,129 @@ def test_backend_schemas_and_catalog_present():
     assert (resources.backend() / "schemas/integration.schema.json").is_file()
     assert (resources.backend() / "run.py").is_file()
     assert resources.catalog_lock().is_file()
+
+
+def test_planner_repairs_invalid_draft(workspace, monkeypatch):
+    plan = {
+        "name": "BERT",
+        "manifest": workspace.manifest,
+        "usage": (
+            workspace.contract_root / "integrations/transformers/usage.md"
+        ).read_text(),
+        "rationale": "",
+        "historical_candidates": [],
+    }
+    invalid = copy.deepcopy(plan)
+    del invalid["manifest"]["outputs"]["training.updated"]
+    calls = []
+
+    def propose(context, **kwargs):
+        calls.append(context)
+        return (invalid if len(calls) == 1 else plan), {"model": planner.DEFAULT_MODEL}
+
+    monkeypatch.setattr(planner, "propose", propose)
+    result, _ = commands.propose_valid(
+        {},
+        SimpleNamespace(llm_model=planner.DEFAULT_MODEL, provider="auto"),
+        workspace.state["model"],
+        workspace.fixture,
+    )
+    assert result == plan
+    assert "Training contracts require" in calls[1]["validation_error"]
+
+
+def test_update_keeps_fixture_pin_and_old_source(workspace, monkeypatch):
+    plan = {
+        "name": "BERT",
+        "manifest": workspace.manifest,
+        "usage": (
+            workspace.contract_root / "integrations/transformers/usage.md"
+        ).read_text()
+        + "\nAdditional path documentation.\n",
+        "rationale": "",
+        "historical_candidates": [],
+    }
+    old_lock = workspace.lock_path.read_bytes()
+    monkeypatch.setattr(planner, "propose", lambda *a, **k: (plan, {}))
+    commands.update(
+        SimpleNamespace(
+            workspace=workspace.root,
+            request="Add a path",
+            llm_model=planner.DEFAULT_MODEL,
+            provider="auto",
+            retrain=False,
+        )
+    )
+    assert workspace.lock_path.read_bytes() == old_lock
+    assert list((workspace.root / ".mic/history").glob("*/integration.json"))
+    assert not workspace.state["validated"]
+
+
+def test_export_refuses_unpublished_local_source(workspace, tmp_path):
+    path = workspace.contract_root / "integrations/transformers/usage.md"
+    path.write_text(path.read_text() + "\nNew source.\n")
+    approve_receipts(workspace)
+    with pytest.raises(ValueError, match="differs from its published pin"):
+        commands.export(
+            SimpleNamespace(
+                workspace=workspace.root,
+                transformers_checkout=tmp_path / "transformers",
+            )
+        )
+
+
+def test_publication_rejects_pending_candidates_and_missing_variant(workspace):
+    approve_receipts(workspace)
+    validations = workspace.state["validations"]
+    del validations["eager"]
+    workspace.save_state(validations=validations)
+    with pytest.raises(ValueError, match="Every declared variant"):
+        commands.publication_ready(workspace)
+    path = (
+        workspace.lock_path.parent
+        / "expectations/BERT/cpu-arm64/example.candidate.json"
+    )
+    write(path, {})
+    approve_receipts(workspace)
+    with pytest.raises(ValueError, match="Unreviewed"):
+        commands.publication_ready(workspace)
+
+
+def test_external_fleet_uses_each_contract_variants(tmp_path, monkeypatch):
+    from transformers_mic import cli
+
+    manifests = {
+        "a": {
+            "integrations": {"transformers": {"variants": {"default": {}, "eager": {}}}}
+        },
+        "b": {"integrations": {"transformers": {"variants": {"default": {}}}}},
+    }
+    for key, manifest in manifests.items():
+        write(tmp_path / f"{key}.json", manifest)
+    lock = tmp_path / "fleet.lock"
+    write(
+        lock,
+        {
+            "contracts": {
+                key: {"integration": {"repo": key, "revision": "pinned"}}
+                for key in manifests
+            }
+        },
+    )
+    monkeypatch.setattr(
+        "huggingface_hub.hf_hub_download",
+        lambda repo, *a, **k: tmp_path / f"{repo}.json",
+    )
+    calls = []
+    monkeypatch.setattr(
+        cli.backend,
+        "invoke",
+        lambda tool, workspace, options: calls.append(options)
+        or SimpleNamespace(returncode=0),
+    )
+    assert cli.main(["check", "--lock", str(lock), "--all-variants"]) == 0
+    assert len(calls) == 3
+    assert not any(
+        options[options.index("--contract") + 1] == "b" and options[-1] == "eager"
+        for options in calls
+    )

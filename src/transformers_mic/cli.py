@@ -6,7 +6,7 @@ from pathlib import Path
 import sys
 
 import jsonschema
-import httpx
+from huggingface_hub.errors import HfHubHTTPError
 
 from . import __version__, backend, commands, planner
 from .workspace import Workspace
@@ -213,7 +213,7 @@ def main(argv=None):
         if args.command in ("record", "check"):
             return commands.execute(args, record=args.command == "record")
         return getattr(commands, args.command)(args)
-    except (ValueError, OSError, jsonschema.ValidationError, httpx.HTTPError) as exc:
+    except (ValueError, OSError, jsonschema.ValidationError, HfHubHTTPError) as exc:
         print(f"mic: {exc}", file=sys.stderr)
         return 2
 

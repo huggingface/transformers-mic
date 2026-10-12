@@ -38,7 +38,9 @@ def validate_plan(plan, model, fixture, old=None):
         raise ValueError(
             "Generated entry point must be integrations/transformers/usage.md, runnable-markdown"
         )
-    recipe = manifest["fixtures"][fixture]["build"]
+    recipe = manifest["fixtures"][fixture].get("build")
+    if not isinstance(recipe, dict):
+        raise ValueError("Generated fixture needs a build recipe")
     previous_recipe = old["fixtures"][fixture].get("build", {}) if old else {}
     for key in ("overfit", "accept_insensitive"):
         if recipe.get(key) != previous_recipe.get(key):
@@ -65,6 +67,21 @@ def validate_plan(plan, model, fixture, old=None):
         raise ValueError(
             "Update changes existing comparison rules; review those changes manually"
         )
+    if not {"default", "eager", "bfloat16"}.issubset(integration.get("variants", {})):
+        raise ValueError(
+            "Generated contract must declare default, eager and bfloat16 variants"
+        )
+    if old:
+        previous = old["integrations"]["transformers"]
+        if previous.get("training") and not integration.get("training"):
+            raise ValueError("Update disables existing training assertions")
+        if not set(previous["targets"]).issubset(integration["targets"]):
+            raise ValueError("Update removes existing target types")
+        if any(
+            integration["variants"].get(key) != value
+            for key, value in previous["variants"].items()
+        ):
+            raise ValueError("Update changes existing variants")
     if integration.get("training"):
         required = {
             "training.loss": "allclose",
@@ -219,7 +236,7 @@ def create(args):
             }
         )
     )
-    if args.build:
+    if args.build or args.record:
         args.workspace = str(workspace.root)
         args.rebuild = False
         status = build(args)
@@ -270,10 +287,12 @@ def build(args):
         workspace.save_state(weight_decision=choice)
         print(json.dumps(choice))
         return 0
-    if pin["revision"] != "unpublished" and not args.rebuild:
-        metadata = read(
-            workspace.root / "example/hub" / fixture.split("/")[-1] / "build.json"
-        )
+    local_metadata = (workspace.lock_path.parent / pin["path"]).resolve() / "build.json"
+    if not args.rebuild and (
+        pin["revision"] != "unpublished"
+        or (pin.get("files_sha256") and local_metadata.exists())
+    ):
+        metadata = read(local_metadata)
         choice = policy.decision(metadata, requested, readable, reused=True)
         if choice["accepted"]:
             workspace.save_state(weight_decision=choice)

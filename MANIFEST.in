@@ -6,3 +6,6 @@ include example/hub/WhisperSpeech-integration/audio/*.json
 include example/transformers/tests/contracts/fleet.lock
 recursive-include example/transformers/tests/contracts/expectations *.json
 include experiments/sweep.py experiments/layer_patterns.py
+include docs/cli.md
+prune example/hub/SmolLM-integration/integrations/transformers.js/node_modules
+global-exclude *.candidate.json *.pyc

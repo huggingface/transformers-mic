@@ -1,5 +1,8 @@
 # Full example: MICs and the runner prototype
 
+The [transformers-mic CLI](../docs/cli.md) packages this backend and catalog for
+model workspaces, HF-assisted drafts, fixture builds and reviewed expectations.
+
 A runnable MIC for batched greedy generation on three SmolLM checkpoints, in Transformers and Transformers.js, covering every part of the [proposed standard](../README.md#the-proposed-standard). Published [fixtures](https://huggingface.co/hf-internal-testing?search_models=proto-) and [contracts](https://huggingface.co/hf-internal-testing?search_models=-integration) have their sources in [`hub/`](hub). Six more contracts (CLIP, BERT, T5/UMT5, Whisper, Wav2Vec2, MusicGen Melody) use the same [runner](#runner-prototype).
 
 ## Where each piece lives
