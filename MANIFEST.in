@@ -1,0 +1,8 @@
+include setup.py
+include example/*.py
+recursive-include example/schemas *.json
+recursive-include example/hub integration.json usage.md README.md build.json *.flac *.js package.json package-lock.json
+include example/hub/WhisperSpeech-integration/audio/*.json
+include example/transformers/tests/contracts/fleet.lock
+recursive-include example/transformers/tests/contracts/expectations *.json
+include experiments/sweep.py experiments/layer_patterns.py

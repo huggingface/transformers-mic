@@ -7,3 +7,11 @@ example/hub/*-slim/*
 !example/hub/*-slim/README.md
 !example/hub/*-slim/build.json
 !example/hub/proto-SmolLM-1.7B-slim/*
+
+# Python package build products and local MIC workspaces.
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+work/
