@@ -125,6 +125,11 @@ def parser():
                 action="append",
                 help="Select contracts in an exported fleet",
             )
+            run.add_argument(
+                "--no-baseline",
+                action="store_true",
+                help="Run contracts without comparing against reviewed baselines",
+            )
     review = sub.add_parser(
         "review", help="Compare measured candidates with approved expectations"
     )
@@ -226,6 +231,8 @@ def external_check(args):
         options += ["--output", str(args.output.resolve())]
     if args.run_all or not args.changed_files:
         options.append("--run-all")
+    if args.no_baseline:
+        options.append("--no-baseline")
     if not args.all_variants:
         for name in args.contract or []:
             options += ["--contract", name]
