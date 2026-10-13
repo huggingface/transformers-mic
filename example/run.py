@@ -629,7 +629,7 @@ def main():
     def emit(record):
         nonlocal status
         entry = known_entry(known, record["contract"], record["target"])
-        if entry and not args.record and not args.golden and ("match" in entry or "skip_outputs" not in entry):
+        if entry and not args.record and not args.golden and not args.no_baseline and ("match" in entry or "skip_outputs" not in entry):
             issue = entry["issue"]
             if record["status"] in ("fail", "error"):
                 if "match" not in entry or all(entry["match"] in f for f in record["failures"]):
