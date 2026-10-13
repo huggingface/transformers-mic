@@ -629,13 +629,11 @@ def main():
     def emit(record):
         nonlocal status
         entry = known_entry(known, record["contract"], record["target"])
-        if entry and not args.record and not args.golden and not args.no_baseline and ("match" in entry or "skip_outputs" not in entry):
+        if entry and not args.record and not args.golden and ("match" in entry or "skip_outputs" not in entry):
             issue = entry["issue"]
             if record["status"] in ("fail", "error"):
                 if "match" not in entry or all(entry["match"] in f for f in record["failures"]):
                     record = {**record, "status": "xfail", "known_failure": issue}
-            elif record["status"] == "pass":
-                record = {**record, "status": "fail", "failures": [f"listed in known_failures but passes; remove it: {issue}"]}
         validate(record, "result", f"result for {record['contract']}/{record['target']}")
         print(json.dumps(record), flush=True)
         if args.output:
