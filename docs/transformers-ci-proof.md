@@ -21,6 +21,7 @@ include F32 runs and remain historical evidence.
 | [Whisper candidates on fixed PR source](https://github.com/huggingface/transformers/actions/runs/38302181914), source `1111c102` | 3 variants, each repeated in a fresh process | **3 recorded, unpatched**; this recording preceded the focused BF16 review |
 | Published GPU pins | 23 architectures, three variants each | Checked after publication; some model-scoped patches, as recorded per model |
 | [Last three GPU models](https://github.com/huggingface/transformers-mic/actions/runs/38286933326) | 9 | **9 pass, unpatched**: DETR, SpeechT5, Qwen2.5-Omni |
+| [Current-image observational PR merge](https://github.com/huggingface/transformers/actions/runs/38368933981), proof head `aec34847` | 24 | **22 pass, two numeric failures**, non-blocking: Wav2Vec2 logits 0.000977 and SmolVLM selected logits 0.00195 beyond tolerance |
 
 The PR job checks GitHub's synthetic merge of the proof head into upstream;
 the push job checks the proof branch itself. Both explicitly select checkout
@@ -98,6 +99,14 @@ contract step took about two minutes on the proof runners. Prototype cases
 currently start a backend process per case; repeated timing is still needed
 before proposing wider PR adoption.
 
+The observational PR run uses the current torch-light CI image: PyTorch
+2.14.0+cpu and NumPy 2.3.5 in the first run. Its reviewed references were
+recorded with PyTorch 2.11.0 and NumPy 1.26.4. Removing the 2.11 wheel
+replacement reduced the PR install step from 5 minutes 32 seconds to 8
+seconds. The two numeric differences above remain unreviewed; no tolerance or
+baseline changed. The workflow completed successfully despite the contract
+step's failure and uploaded its per-case results and version record.
+
 ## Exceptions and noise
 
 No runtime framework patches enter the Transformers proof.
@@ -121,12 +130,21 @@ the other probes remain required. [Original rejected probes](../experiments/resu
 
 ## Remaining work
 
-1. Diagnose the three rejected architectures: CSM's real audio processor path,
-   Gemma3n's nonfinite gradients, and PI0's weak state/image sensitivity. Keep
-   gates fixed; finite forward calls alone do not qualify a fixture.
-2. Measure repeated native CPU noise and reduce subprocess overhead before
-   proposing broader PR adoption. Full checkpoints and historical replay of
-   the new prototypes remain separate work.
+1. Land the 24-case BF16 fleet as an observational PR check. The workflow
+   selects contracts affected by changed files, writes per-case results and
+   selection data to an artifact, and warns on failures without blocking a PR.
+   The current self-hosted runner limits this wave to members and
+   collaborators; external fork PRs need an isolated runner path. Verify the
+   non-blocking behavior with a deliberately failing proof PR before merge.
+2. Observe selected cases, passes, known failures, new failures, empty
+   selections, setup errors and runtime across PRs. The observational job uses
+   current torch-light CI image versions rather than reinstalling the historic
+   recording pins. Review version-linked failures before changing baselines.
+   Repeat native CPU runs on the fixed four-thread profile to identify noise
+   before expanding coverage.
+3. Add historical replay and full-checkpoint checks with owners for baseline
+   changes. Diagnose CSM's audio path, Gemma3n's nonfinite gradients and PI0's
+   weak sensitivity separately, with their validation gates unchanged.
 
 The [2026-10-09 pilot](transformers-ci-proof-pilot-2026-10-09.md) preserves the
 original six-contract results, UMT5 regression demonstration, timings and
