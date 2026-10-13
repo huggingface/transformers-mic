@@ -4,6 +4,12 @@ Status: 2026-10-12. The expanded proof runs on `contracts-proof`; it is not
 adopted for unrelated Transformers PRs. The package work was squashed and pushed
 to transformers-mic `main` as `03500b0`.
 
+**BF16 is the default precision for the current proof.** It checks the BF16
+variant of each of the 23 prototypes and one historical SmolLM control with a
+reviewed BF16 default: 24 cases in total. The earlier 77-case results below
+include F32 runs and remain historical evidence. The new 24-case proof is
+awaiting CI validation.
+
 ## Results and tested source
 
 | Check | Executed | Result |
@@ -46,13 +52,26 @@ exported, and no error matches were removed. This is successful candidate
 recording, not a green PR proof.
 [Candidates and numeric review](../experiments/results/native-whisper-fixed-source.json).
 
+The native Whisper BF16 candidate is now reviewed and included in the published
+prototype workspace and proof branch. Its finite training checks and outputs reproduced in
+fresh processes and in an independent m8i repeat. The source, PyTorch wheel,
+and four/eight-thread controls produced identical outputs. The two changed F32
+candidates remain unapproved. BF16 is the selected proof precision; the old F32
+reference movement does not set the BF16 proof baseline.
+
 ## Scope and runtime
 
-The installed `transformers-mic` package runs two locks: the six-contract,
+The earlier full proof ran two locks: the six-contract,
 eight-fixture historical control in its default variant, plus 23 prototype
 architectures in default/eager/bfloat16 (**69 cases**). Full proofs use `--run-all`
 and fail if any prototype case is missing. Zero-selection greens are not model
 validation. [Final records](../experiments/results/native-cpu-final.json).
+
+The current default selects only the prototype `bfloat16` variant and the
+historical SmolLM BF16 control. Its coverage guard requires all 23 prototype
+cases and the control, and verifies reviewed BF16 runtime expectations. The
+other five historical contracts are outside this default proof while their
+BF16 coverage is developed.
 
 The expanded fleet is fixture-only, with immutable public Hub pins and no
 historical replay. Auto uses explicit Auto classes for BERT/T5/ViT. GPT-OSS's
@@ -96,11 +115,9 @@ the other probes remain required. [Original rejected probes](../experiments/resu
 
 ## Remaining work
 
-1. Whisper candidates are now recorded on the exact fixed PR merge source
-   `1111c102`. Explain the reproducible F32 drift before approving changed
-   references; review the new native BF16 candidate, then check and export on
-   that same source. Remove obsolete error matches only for a fixed build;
-   the branch-head generation bug remains present.
+1. Validate the new BF16 default proof on both the branch head and PR merge.
+   The source-aware error match keeps the older branch's precise Whisper
+   failure and drops the obsolete match only where generation is fixed.
 2. Diagnose the three rejected architectures: CSM's real audio processor path,
    Gemma3n's nonfinite gradients, and PI0's weak state/image sensitivity. Keep
    gates fixed; finite forward calls alone do not qualify a fixture.
