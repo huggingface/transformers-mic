@@ -808,5 +808,37 @@
   ],
   "approved": false,
   "exported": false,
-  "interpretation": "All three variants recorded unpatched and reproduced in fresh processes on the exact fixed PR merge source. Default and eager differ from old CPU-executed F32 references by 0.00011213589459657669 in label_logprobs; training loss moves by 0.0000028223730623722076 within tolerance. All generated token and text outputs match exactly. Native BF16 is new. Old references report Python 3.10.12 / torch 2.11.0+cu128 and controlled patches; new candidates report Python 3.11.17 / torch 2.11.0+cpu and no patches. Source/build/runtime contributions to F32 drift are not isolated. No numeric references approved, no export and no obsolete error matches removed. A green recording workflow is not a green PR contract proof."
+  "interpretation": "The original F32 reference was recorded on a different CPU host/Python profile. Controlled m8i reruns show exact equality across repeated runs, CPU and CUDA PyTorch wheels, four and eight threads, and older versus newer framework source when the generation fix is held constant. The remaining old-to-native F32 difference is associated with the original host/Python profile; no new F32 reference is approved. BF16 is the selected proof precision.",
+  "controls": {
+    "cpu_repeat": {
+      "run": 38359636094,
+      "wheel": "cpu",
+      "threads": 4,
+      "all_three_outputs_byte_equal": true
+    },
+    "cuda_wheel_on_cpu": {
+      "run": 38359637104,
+      "wheel": "cu128",
+      "threads": 4,
+      "all_three_outputs_equal_to_cpu_wheel": true
+    },
+    "older_source_with_generation_fix": {
+      "run": 38360564564,
+      "source": "11c4611c0f9826e452d5cdaae9afdd22cc5d5fe5",
+      "overlay": "configuration_utils.py from 1111c102092739070a59f8eb41f8008fc9709213",
+      "threads": 4,
+      "all_three_outputs_equal_to_fixed_merge": true
+    },
+    "eight_threads": {
+      "run": 38361205308,
+      "wheel": "cu128",
+      "threads": 8,
+      "all_three_outputs_equal_to_four_threads": true
+    }
+  },
+  "decision": {
+    "bf16_candidate": "approved as the native m8i reference after fresh-process recording, exact CPU repeat, wheel/source/thread controls, finite training checks, and inspection against GPU BF16 outputs",
+    "bf16_only_proof_default": true,
+    "f32_candidates": "left unapproved; not selected by the BF16 proof"
+  }
 }
