@@ -529,7 +529,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
       - name: Install the pinned environment and standalone wheel
         run: |
           PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
@@ -558,7 +558,7 @@ jobs:
           tmic build --rebuild --weights random
           tmic record --target mic-bert-base-uncased-slim
           cp -R .mic "$GITHUB_WORKSPACE/out/fresh-project"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         if: always()
         with:
           name: mic-package
