@@ -30,9 +30,16 @@ the contract's inputs move the outputs (the sensitivity gate).
 1. **Create the workspace from the real checkpoint.**
 
    ```sh
-   tmic create google-bert/bert-base-uncased --out work/bert
+   tmic create google-bert/bert-base-uncased --out work/bert --namespace hf-internal-testing
    cd work/bert
    ```
+
+   `--namespace` sets the Hub owner of the new `mic-*-slim` and
+   `mic-*-integration` repos. Without it, they belong to whoever is logged in
+   (for example `you/mic-bert-base-uncased-integration`). It has no effect on
+   which token pays for the LLM call. Set it here, because `create` writes the
+   name into the manifest and the lock, and changing it later means creating
+   the workspace again. Nothing is uploaded until step 7.
 
    If the checkpoint is in the bundled catalog, this reuses the published
    contract and needs no LLM call. Add `--regenerate` to build a new
