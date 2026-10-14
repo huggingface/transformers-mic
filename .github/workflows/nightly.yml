@@ -32,11 +32,12 @@ on:
         type: string
         default: check
 
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
   nightly:
+    permissions:
+      contents: write
     runs-on:
       group: aws-g5-4xlarge-cache
     timeout-minutes: 180
