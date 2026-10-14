@@ -20,8 +20,7 @@ on:
         required: true
         type: string
 
-permissions:
-  contents: write
+permissions: {}
 
 env:
   SINCE: ${{ inputs.since }}
@@ -32,6 +31,8 @@ env:
 
 jobs:
   chunk:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
@@ -66,6 +67,8 @@ jobs:
           path: out/
 
   publish:
+    permissions:
+      contents: write
     needs: chunk
     if: always()
     runs-on: ubuntu-latest

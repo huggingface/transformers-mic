@@ -29,14 +29,15 @@ on:
         type: string
         default: ""
 
-permissions:
-  contents: write
+permissions: {}
 
 # No concurrency group: GitHub keeps one pending run per group and cancels the
 # rest. Each run writes its own file, and the push retries on a rebase.
 
 jobs:
   shadow:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
