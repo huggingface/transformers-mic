@@ -8,26 +8,115 @@ working model-specific build recipe. New artifacts use `hf-internal-testing/mic-
 `mic-{name}-integration`. The nine legacy `proto-*-slim` repositories were moved
 to `mic-*-slim`, preserving suffixes and revisions; historical evidence stays as recorded.
 
-## Install and start
+## Install
 
 From this repository (Python 3.10+):
 
 ```sh
 python -m pip install -e '.[runtime,dev]'
 python -m pip install 'hf-doc-builder @ git+https://github.com/huggingface/doc-builder.git'
-hf auth login
-tmic create google-bert/bert-base-uncased --out work/bert
-cd work/bert
-tmic build
-tmic record --all-variants
-tmic review
-tmic review --approve
-tmic check --all-variants
-tmic publish                         # preview
-tmic publish --execute               # upload to the logged-in Hub account
-tmic check --all-variants             # check the published pins
-tmic export --transformers-checkout /path/to/transformers
+hf auth login        # publishing needs write access to the target namespace
+gh auth login        # history search; or pass --no-history to create
 ```
+
+## Step by step: one model
+
+**The order is: real checkpoint → contract → fixture.** You never write a fixture
+first. You start from a real checkpoint id. `create` writes the contract (the
+usage code and manifest), and `build` then derives the slim fixture from that
+checkpoint. `build` needs the contract because it accepts weights only after
+the contract's inputs move the outputs (the sensitivity gate).
+
+1. **Create the workspace from the real checkpoint.**
+
+   ```sh
+   tmic create google-bert/bert-base-uncased --out work/bert
+   cd work/bert
+   ```
+
+   If the checkpoint is in the bundled catalog, this reuses the published
+   contract and needs no LLM call. Add `--regenerate` to build a new
+   `mic-*-slim` fixture instead of reusing the published one. If the checkpoint
+   is new, the planner drafts the contract on your HF token (see
+   [When the LLM is used](#when-the-llm-is-used)). By default the contract
+   covers both the real checkpoint and the fixture. Use `--fixtures-only` to
+   declare a slim-only contract.
+
+2. **Read the draft.** Open `integration.json` and `usage.md` before running
+   anything. They are executable Python, and nothing sandboxes them.
+
+3. **Build the fixture.**
+
+   ```sh
+   tmic build
+   ```
+
+   This shrinks the real config, copies the processors byte for byte and tries
+   random weights first. If the gates fail, it tries a bounded overfit. If both
+   fail, the build is rejected. `.mic/project.json` records which weights won
+   and why ([Random or overfit?](#random-or-overfit)).
+
+4. **Record the candidate expectations.**
+
+   ```sh
+   tmic record --all-variants
+   ```
+
+   Every case runs twice, each time in a fresh process, and the results are
+   written to `*.candidate.json`.
+
+5. **Review and approve them.**
+
+   ```sh
+   tmic review
+   tmic review --approve
+   ```
+
+   `--approve` accepts only new and unchanged values. Changed values stay
+   pending until someone approves them by hand.
+
+6. **Check the approved expectations.**
+
+   ```sh
+   tmic check --all-variants
+   tmic status
+   ```
+
+7. **Publish to the Hub.**
+
+   ```sh
+   tmic publish                 # preview the destinations
+   tmic publish --execute       # upload; the lock is rewritten to immutable revisions
+   tmic check --all-variants    # publishing invalidates receipts: check the published pins
+   ```
+
+   Uploads are public and pinned, so this step is outward-facing.
+
+8. **Export into Transformers.**
+
+   ```sh
+   tmic export --transformers-checkout /path/to/transformers
+   ```
+
+   This writes `tests/contracts/fleet.lock` and the expectations. It does not
+   commit or open a PR.
+
+## Several models at once
+
+List the models in a JSON file shaped like `experiments/proto-models.json`, with
+`name`, `model_type` and `checkpoint` for each entry. Then:
+
+```sh
+tmic batch --models-file my-models.json --out work/fleet --phase prepare --no-history
+tmic batch --models-file my-models.json --out work/fleet --phase run --resume
+```
+
+`prepare` runs step 1 for every model, always with `--regenerate`. Read the
+drafts in `work/fleet/projects/*/` before you start `run`, which does steps 3–6. `run`
+calls `review --approve` itself, so you do not get a manual review there:
+inspect the approved expectations before you publish. `batch` keeps going past
+failures and records every stage. `--select NAME` reruns one model. `--publish`
+adds step 7, and it uploads only after all declared checks pass.
 
 Use a checkout pinned to the workspace's `fleet.lock` dependency environment for
 baseline reproduction. Installing the runtime extra alone does not freeze that
