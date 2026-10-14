@@ -702,10 +702,12 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install pinned CPU dependencies and the Transformers proof revision
         run: |
-          PY=python FETCH=${{ inputs.transformers_sha }} SHA=${{ inputs.transformers_sha }} TORCH_INDEX=cpu .github/scripts/install_pinned.sh
+          PY=python FETCH=${INPUTS_TRANSFORMERS_SHA} SHA=${INPUTS_TRANSFORMERS_SHA} TORCH_INDEX=cpu .github/scripts/install_pinned.sh
           python -m pip wheel . --no-deps --wheel-dir /tmp/tmic-wheels
           python -m pip install --no-deps /tmp/tmic-wheels/transformers_mic-*.whl
           python -m pip install timm
+        env:
+          INPUTS_TRANSFORMERS_SHA: ${{ inputs.transformers_sha }}
       - name: Record native CPU baselines and validate the unpatched calls
         run: |
           cp -R experiments/published-prototypes /tmp/tmic-cpu
