@@ -774,8 +774,13 @@ def main():
                 emit({**record, "status": "fail" if failures else "pass", "failures": failures})
     if not set(counts) - {"unsupported"} and (counts or args.contract or args.target):
         # Every requested target was skipped, or none matched: nothing was checked, which is not a pass.
-        print(f"no target ran: {counts['unsupported']} unsupported" if counts else "no target matched", file=sys.stderr)
-        status = 1
+        # Exception: --changed-files with an empty selection means no contracts touch the changed paths —
+        # that is a valid "nothing to do" outcome, not a failure.
+        if selected_by is not None and not selected_by and not args.run_all:
+            print("no contract matched the changed files — nothing to run", file=sys.stderr)
+        else:
+            print(f"no target ran: {counts['unsupported']} unsupported" if counts else "no target matched", file=sys.stderr)
+            status = 1
     summary = {"summary": counts, "seconds": round(time.perf_counter() - started, 1), "isolate": args.isolate}
     print(json.dumps(summary), file=sys.stderr)
     return status
