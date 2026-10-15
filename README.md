@@ -79,6 +79,7 @@ Agent reuse is measured separately ([recipe](docs/agent-walkthrough/README.md#co
 
 - [Full example](example/README.md): runnable SmolLM MIC, every part of the standard; the runner on eight contracts.
 - [Evidence](docs/evidence.md): experiments, regression replay, shadow backfill, overfit vs random.
+- [Smoke vs assertions](docs/smoke-vs-assertions.md): which caught regressions raised, and which only a value check sees.
 - [Problems and opened questions](docs/problems-and-opened-questions.md): what the pilot must settle.
 - [Slim models in Transformers CI](docs/slim-models-in-transformers-ci.md): PR and `run-slow` flows.
 - [Transformers CI proof](docs/transformers-ci-proof.md): the fleet in Transformers PR CI, with a one-page write-up for maintainers.

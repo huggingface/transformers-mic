@@ -13,6 +13,7 @@ Results from local experiments, the regression replay, the shadow backfill over 
 - **In Transformers' PR CI, a reverted fix fails as in the backfill:** reverting #49135 turns the job red with the same UMT5 deltas, on Intel with the CI image's packages, and the summary's repro command gives the same failure on a Mac ([proof](#transformers-ci-proof)).
 - **The runner found a real bug:** seven audio models leave `masked_spec_embed` uninitialized ([#49385](https://github.com/huggingface/transformers/issues/49385), fix [#49386](https://github.com/huggingface/transformers/pull/49386)); the slim Wav2Vec2 fixture catches it every run ([runner](../example/README.md#runner-prototype)).
 - **No real regression has needed an overfit fixture yet:** random twins caught the MusicGen Melody conditioning drop ([#48679](https://github.com/huggingface/transformers/pull/48679)) and Whisper's left-padded long-form bug ([#48028](https://github.com/huggingface/transformers/pull/48028)) as well as the overfit fixtures. Whisper needed controlled unequal first-segment lengths to reach the trigger ([follow-up](#whisper-left-padded-previous-segment-prompts)); assisted decoding #48108 remains missed.
+- **Most catches needed an assertion:** of 18 regressions caught, 6–7 raised and 11 returned a wrong value with no error ([smoke vs assertions](smoke-vs-assertions.md)).
 - **Golden outputs catch silent backend bugs:** Transformers.js on WebGPU returned all-zero fp16/q4f16 logits with no error ([repro](../experiments/webgpu_browser/README.md)).
 
 **Fixtures, baselines, cost**
