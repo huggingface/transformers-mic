@@ -591,6 +591,8 @@ def main():
                         help="with --changed-files: run every contract anyway, recording selected_by (null if not selected)")
     parser.add_argument("--require-all", action="store_true",
                         help="fail on targets skipped for this host's hardware or an undefined variant; only skips the manifest declares are allowed")
+    parser.add_argument("--no-baseline", action="store_true",
+                        help="run contracts without comparing against reviewed baselines; pass when outputs are valid, skip the baseline check entirely")
     args = parser.parse_args()
     if args.golden:
         args.golden = platform_class(args.golden)
@@ -754,6 +756,9 @@ def main():
                     recorded = {k: v for k, v in record.items() if k != "baseline"}
                     candidate.write_text(json.dumps(validate({"recorded_with": recorded, "outputs": actual}, "baseline", candidate), indent=1) + "\n")
                     emit({**record, "status": "recorded", "baseline": shown(candidate)})
+                    continue
+                if args.no_baseline:
+                    emit({**record, "status": "pass", "failures": []})
                     continue
                 if not baseline.exists():
                     failures = [f"no reviewed baseline at {record['baseline']}"]

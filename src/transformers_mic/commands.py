@@ -445,6 +445,8 @@ def execute_one(args, record=False):
             options += ["--target", target]
     if record:
         options.append("--record")
+    if getattr(args, "no_baseline", False):
+        options.append("--no-baseline")
     output = (
         workspace.root
         / ".mic"
