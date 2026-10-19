@@ -1,14 +1,15 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/T5-integration",
-  "contract_revision": "f3f9d6fc9c219baae452736af8a928c091095c02",
+  "contract_name": "T5",
+  "contract_revision": "2fe60bcd6fbdf615d93cd1599a5776459e7646bf",
   "framework": "transformers",
   "variant": "default",
   "target": "t5-small",
   "kind": "checkpoint",
   "revision": "df1b051c49625cf57a3d0d8d3863ed4d13564fe4",
   "environment": {
-   "python": "3.10.12",
+   "python": "3.11.17",
    "transformers": "5.19.0.dev0",
    "torch": "2.11.0+cu128",
    "torchvision": "0.26.0+cu128",
@@ -30,7 +31,10 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 9.14,
+  "seconds": 9.69,
+  "environment_differs": {
+   "python": "3.11.17 (pinned 3.10)"
+  },
   "platform": "cuda"
  },
  "outputs": {
@@ -105,34 +109,34 @@
   ],
   "label_logprobs": [
    [
-    -0.6655855178833008,
+    -0.6655857563018799,
     -0.1508723646402359,
     -0.05508923903107643,
-    -0.5601855516433716,
-    -0.07581447064876556,
+    -0.5601853132247925,
+    -0.07581435889005661,
     -0.01798067055642605,
     0.0
    ],
    [
-    -0.2801833748817444,
-    -2.106472969055176,
+    -0.28018349409103394,
+    -2.106473207473755,
     -0.005225215572863817,
-    -0.7215188145637512,
+    -0.7215180397033691,
     -0.03396051004528999,
     -0.027789555490016937,
     -0.0026595955714583397
    ],
    [
-    -0.1583338975906372,
-    -0.651359498500824,
-    -0.052614975720644,
+    -0.15833419561386108,
+    -0.651360273361206,
+    -0.05261486396193504,
     -0.07451473921537399,
     -0.02021624892950058,
     -0.0027169003151357174,
     0.0
    ],
    [
-    -1.939071536064148,
+    -1.9390714168548584,
     -0.05353472754359245,
     -0.0027341386303305626,
     0.0,
@@ -146,7 +150,7 @@
    "Hello, world! How are you?"
   ],
   "training": {
-   "loss": 0.49811726808547974,
+   "loss": 0.5836107730865479,
    "gradients": {
     "encoder.block.0.layer.0.SelfAttention.q.weight": true,
     "decoder.block.0.layer.1.EncDecAttention.q.weight": true

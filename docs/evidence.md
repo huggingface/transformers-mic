@@ -262,7 +262,7 @@ The [selective math control](../experiments/sdpa_kernel_control.py) keeps the ne
 contiguous masks and asserts that their values match the parent's construction.
 It forces MATH only for attention calls whose old mask stride blocked fused
 kernels, leaving other attention calls on their normal dispatch. All **10 old
-references pass under the control**, while native dispatch reproduces all 10
+references match exactly under the control**, while native dispatch reproduces all 10
 nightly failures. Both modes run twice in fresh processes: **20 repeat pairs are
 exact**. [GPU run](https://github.com/huggingface/transformers-mic/actions/runs/39221846237),
 [validation](../experiments/results/sdpa_kernel_control.json).
@@ -272,6 +272,15 @@ failures are training losses; bfloat16 also changes T5 label log-probabilities a
 the real MusicGen Melody checkpoint's audio codes and waveform probe. The control
 does not establish unchanged task quality. Changed references still require review;
 tolerances and contract assertions remain fixed.
+
+The [candidate recording](https://github.com/huggingface/transformers-mic/actions/runs/39221242324)
+produced 57 CUDA candidates, each reproduced in a fresh process, plus six declared
+unsupported cases. Exactly 10 candidates differ from their old references; the
+other 47 output records are identical. All 10 changed candidates exactly match
+the native control's outputs. The proposed reference refresh changes those 10
+files only; its [review record](../experiments/results/sdpa_baseline_review.json)
+lists the changed fields. The control workflow pins the old references at
+`fa886c490e` so it can still reproduce the transition after a refresh.
 
 ## Historical regression replay
 

@@ -100,6 +100,7 @@ def study(out):
     provenance = {
         "run_id": os.environ.get("GITHUB_RUN_ID"),
         "harness_sha": os.environ.get("GITHUB_SHA"),
+        "reference_sha": os.environ.get("MIC_REFERENCE_SHA"),
         "transformers_sha": subprocess.check_output(
             ["git", "-C", "/tmp/transformers", "rev-parse", "HEAD"], text=True
         ).strip(),

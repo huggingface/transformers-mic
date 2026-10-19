@@ -375,5 +375,7 @@
     }
   },
   "scope": "Pinned A10G, torch 2.11.0+cu128. Contiguous masks retained; MATH forced only where the previous mask stride blocked fused attention. Other attention calls use native dispatch.",
-  "interpretation": "The 10 reference mismatches are caused by the intended SDPA kernel transition in #49517. This does not establish unchanged task quality; BF16 MusicGen Melody greedy codes differ."
+  "interpretation": "The 10 reference mismatches are caused by the intended SDPA kernel transition in #49517. This does not establish unchanged task quality; BF16 MusicGen Melody greedy codes differ.",
+  "math_outputs_exactly_match_old_references": 10,
+  "reference_sha": "fa886c490e5871de36831057815643844173048d"
 }

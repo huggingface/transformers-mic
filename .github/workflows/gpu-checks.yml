@@ -488,6 +488,7 @@ jobs:
       image: ${{ inputs.docker }}
       options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
     env:
+      MIC_REFERENCE_SHA: fa886c490e5871de36831057815643844173048d
       HF_HOME: /mnt/cache
       HF_HUB_DISABLE_PROGRESS_BARS: "1"
       CUBLAS_WORKSPACE_CONFIG: ":4096:8"
@@ -500,6 +501,8 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - name: Install the pinned GPU environment at the introducing commit
         run: |
+          git fetch --quiet --depth 1 origin "$MIC_REFERENCE_SHA"
+          git restore --source="$MIC_REFERENCE_SHA" -- example/transformers/tests/contracts
           PY=python3 TORCH_INDEX=cu128 FETCH=457293986e12f5b5eede9570c5d2e026ea371a04 .github/scripts/install_pinned.sh
           mkdir -p out
           nvidia-smi > out/nvidia-smi.txt
