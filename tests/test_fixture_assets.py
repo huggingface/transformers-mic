@@ -23,7 +23,7 @@ def test_weight_named_processor_asset_is_copied(tmp_path):
     assert "model.safetensors" not in build_fixtures.copied_files(tmp_path, recipe)
 
 
-def test_selected_frozen_parameters_survive_random_initialization(
+def test_selected_fixed_tensors_survive_random_initialization(
     tmp_path, monkeypatch
 ):
     class Model(torch.nn.Module):
@@ -31,11 +31,17 @@ def test_selected_frozen_parameters_survive_random_initialization(
             super().__init__()
             self.geometry = torch.nn.Parameter(torch.zeros(2), requires_grad=False)
             self.weights = torch.nn.Parameter(torch.zeros(2))
+            self.register_buffer("mesh_index", torch.tensor(0))
+            self.register_buffer("scratch", torch.tensor(0), persistent=False)
 
     source = tmp_path / "source"
     source.mkdir()
     safetensors.save_file(
-        {"geometry": torch.tensor([2.0, 3.0]), "weights": torch.tensor([8.0, 9.0])},
+        {
+            "geometry": torch.tensor([2.0, 3.0]),
+            "weights": torch.tensor([8.0, 9.0]),
+            "mesh_index": torch.tensor(7),
+        },
         source / "model.safetensors",
     )
     monkeypatch.setattr(
@@ -48,10 +54,17 @@ def test_selected_frozen_parameters_survive_random_initialization(
         source,
         "org/checkpoint",
         "pinned-sha",
-        {"preserve_frozen_prefixes": ["geometry"]},
+        {"preserve_frozen_prefixes": ["geometry", "mesh_"]},
     )
     assert model.geometry.tolist() == [2.0, 3.0]
     assert model.weights.tolist() == [0.0, 0.0]
+    assert model.mesh_index.item() == 7
+    assert (
+        hashes["mesh_index"]
+        == hashlib.sha256(
+            torch.tensor([7]).view(torch.uint8).numpy().tobytes()
+        ).hexdigest()
+    )
     assert (
         hashes["geometry"]
         == hashlib.sha256(
@@ -65,4 +78,12 @@ def test_selected_frozen_parameters_survive_random_initialization(
             "org/checkpoint",
             "pinned-sha",
             {"preserve_frozen_prefixes": ["weights"]},
+        )
+    with pytest.raises(ValueError, match="No frozen parameters or persistent buffers"):
+        build_fixtures.restore_frozen(
+            model,
+            source,
+            "org/checkpoint",
+            "pinned-sha",
+            {"preserve_frozen_prefixes": ["scratch"]},
         )
