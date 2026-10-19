@@ -63,6 +63,22 @@ the contract's inputs move the outputs (the sensitivity gate).
    fail, the build is rejected. `.mic/project.json` records which weights won
    and why ([Random or overfit?](#random-or-overfit)).
 
+   For models with fixed geometry or processor tensors, add reviewed entries to
+   the fixture's `build` recipe before this step. For example:
+
+   ```json
+   {
+     "copy_assets": ["attention_mask.safetensors"],
+     "preserve_frozen_prefixes": ["model.geometry."]
+   }
+   ```
+
+   `copy_assets` names extra files copied byte for byte from the pinned source.
+   `preserve_frozen_prefixes` copies matching parameters only when they have
+   `requires_grad=False`; missing names and shape changes fail the build. Their
+   source hashes are included in the fixture key and build record. The planner
+   cannot add these options; review and edit the recipe yourself.
+
 4. **Record the candidate expectations.**
 
    ```sh

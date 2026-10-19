@@ -17,8 +17,10 @@ For each fixture in a contract's manifest that has a `build` recipe:
    saved in the source checkpoint's dtype (float32 when its config names none),
    so the fixture loads in the dtype users of the checkpoint get by default.
 3. Copy. Every non-weight file of the source checkpoint (tokenizer,
-   processor, generation config) is copied unchanged; only config.json and the
-   weights are new. The weights mirror the real checkpoint's tensor names:
+   processor, generation config) is copied unchanged. A recipe can explicitly
+   include a processor asset with a weight-like extension and preserve selected
+   frozen parameters from the pinned checkpoint. Other weights are new. The
+   weights mirror the real checkpoint's tensor names:
    parameters the real checkpoint lacks are dropped from the fixture too, so
    loading initializes them as it does for users, and the build checks that
    the fixture reports the same missing parameters.
@@ -84,7 +86,7 @@ GATE_FACTOR = 10
 DTYPES = ("float32", "bfloat16", "float16")
 
 
-def source_snapshot(repo, revision):
+def source_snapshot(repo, revision, recipe=None):
     """Config and processor files of a pinned checkpoint, without its weights."""
     try:
         ignore = [f"*{suffix}" for suffix in WEIGHTS] + run.WEIGHT_PATTERNS
@@ -97,21 +99,31 @@ def source_snapshot(repo, revision):
             if asset.size is None or asset.size > 1024**2:
                 raise ValueError("Omni speaker asset exceeds the 1 MiB copy limit")
             hf_hub_download(repo, "spk_dict.pt", revision=revision)
-        return source
     except Exception:
         cached = Path(HF_HUB_CACHE) / f"models--{repo.replace('/', '--')}" / "snapshots" / revision
         if (cached / "config.json").exists():
-            return cached
-        raise
+            source = cached
+        else:
+            raise
+    for name in (recipe or {}).get("copy_assets", []):
+        if Path(name).name != name or name in {".", "..", *NOT_COPIED} or name.startswith(("model.", "pytorch_model")):
+            raise ValueError(f"Invalid processor asset name: {name}")
+        if not (source / name).exists():
+            from huggingface_hub import hf_hub_download
+            hf_hub_download(repo, name, revision=revision)
+        if not (source / name).is_file():
+            raise ValueError(f"Pinned processor asset is unavailable: {name}")
+    return source
 
 
-def copied_files(source):
+def copied_files(source, recipe=None):
+    assets = set((recipe or {}).get("copy_assets", []))
     return sorted(
         f.name
         for f in source.iterdir()
         if f.is_file()
         and f.name not in NOT_COPIED
-        and (not f.name.endswith(WEIGHTS) or f.name == "spk_dict.pt")
+        and (not f.name.endswith(WEIGHTS) or f.name == "spk_dict.pt" or f.name in assets)
         and not f.name.endswith(".index.json")
     )
 
@@ -170,10 +182,12 @@ def source_dtype(source):
     return config.get("dtype") or config.get("torch_dtype") or "float32"
 
 
-def fixture_key(source, cls, missing, recipe=None):
+def fixture_key(source, cls, missing, recipe=None, frozen_hashes=None):
     config = {k: v for k, v in shrunk_config(source, cls, recipe).to_dict().items() if k not in VOLATILE}
-    processor = {name: hashlib.sha256((source / name).read_bytes()).hexdigest() for name in copied_files(source)}
+    processor = {name: hashlib.sha256((source / name).read_bytes()).hexdigest() for name in copied_files(source, recipe)}
     fields = {"config": config, "processor": processor, "missing": missing}
+    if frozen_hashes is not None:
+        fields["frozen_parameters"] = frozen_hashes
     dtype = source_dtype(source)
     if dtype != "float32":  # float32 is implied, so the keys of float32 fixtures stay as built
         fields["dtype"] = config["dtype"] = dtype
@@ -195,7 +209,44 @@ def as_dtype(batch, dtype):
     return tensor_tree(batch, lambda value: value.to(dtype) if value.is_floating_point() else value)
 
 
-def save(model, out, source, missing):
+def restore_frozen(model, source, repo, revision, recipe):
+    """Copy explicitly selected frozen parameters from the pinned checkpoint."""
+    prefixes = recipe.get("preserve_frozen_prefixes", [])
+    if not prefixes:
+        return None
+    from huggingface_hub import hf_hub_download
+    from safetensors import safe_open
+
+    selected = {}
+    for name, parameter in model.named_parameters():
+        if any(name.startswith(prefix) for prefix in prefixes):
+            if parameter.requires_grad:
+                raise ValueError(f"Requested fixed tensor is trainable: {name}")
+            selected[name] = parameter
+    for prefix in prefixes:
+        if not any(name.startswith(prefix) for name in selected):
+            raise ValueError(f"No frozen parameters match {prefix!r}")
+    index = source / "model.safetensors.index.json"
+    weight_map = json.loads(index.read_text())["weight_map"] if index.exists() else {}
+    files = {weight_map.get(name, "model.safetensors") for name in selected}
+    hashes = {}
+    for filename in sorted(files):
+        path = hf_hub_download(repo, filename, revision=revision)
+        with safe_open(path, framework="pt", device="cpu") as checkpoint, torch.no_grad():
+            for name, parameter in selected.items():
+                if weight_map.get(name, "model.safetensors") != filename:
+                    continue
+                if name not in checkpoint.keys():
+                    raise ValueError(f"Pinned checkpoint lacks frozen parameter {name}")
+                tensor = checkpoint.get_tensor(name)
+                if tensor.shape != parameter.shape:
+                    raise ValueError(f"Frozen parameter {name} has shape {tuple(tensor.shape)}, expected {tuple(parameter.shape)}")
+                parameter.copy_(tensor)
+                hashes[name] = hashlib.sha256(tensor.contiguous().view(torch.uint8).numpy().tobytes()).hexdigest()
+    return hashes
+
+
+def save(model, out, source, missing, recipe=None):
     """Write the fixture: new config and weights without the parameters the real
     checkpoint lacks, every processor file copied unchanged."""
     from safetensors.torch import load_file, save_file
@@ -211,7 +262,7 @@ def save(model, out, source, missing):
     if absent:
         raise SystemExit(f"cannot mirror the real checkpoint: the fixture has no tensor named {absent}")
     save_file({k: v for k, v in tensors.items() if k not in missing}, weights, metadata={"format": "pt"})
-    copied = copied_files(source)
+    copied = copied_files(source, recipe)
     for name in copied:
         shutil.copyfile(source / name, out / name)  # overwrites the generation config save_pretrained wrote
     return copied
@@ -351,6 +402,11 @@ def readme(name, contract, build, cls, config):
             f"the input-sensitivity gate: `{gate['weakest']}` moved the logits by only {gate['deltas'][gate['weakest']]:.2g} "
             f"(threshold {gate['threshold']:g})."
         )
+    preserved = build.get("preserved_frozen_sha256", {})
+    fixed = (
+        f"- **Fixed tensors preserved** from the pinned checkpoint: {', '.join(f'`{n}`' for n in preserved)}.\n"
+        if preserved else ""
+    )
     return f"""---
 tags:
   - mic
@@ -367,7 +423,7 @@ A {build['parameters'] / 1e6:.1f}M-parameter fixture for the [{contract} MIC](ht
 - **Processor files copied byte for byte** from `{build['built_from']['repo']}`: {', '.join(f'`{f}`' for f in build['copied_unchanged'])}.
 - {weights}
 - **Same tensor names as the real checkpoint.** {mirror}
-- **Saved in {build['dtype']}**, the dtype `{build['built_from']['repo']}` loads in by default.
+{fixed}- **Saved in {build['dtype']}**, the dtype `{build['built_from']['repo']}` loads in by default.
 - **Finite in float32, bfloat16, and float16** (forward, loss, gradients).
 
 Built by [`build_fixtures.py`](https://github.com/huggingface/transformers-mic/blob/main/example/build_fixtures.py); [`build.json`](build.json) records the pinned sources, gate results, and file hashes. The source repository commits only `README.md` and `build.json`; rebuild the other files with `python example/build_fixtures.py --fixture {short(name)}`.
@@ -397,17 +453,22 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
     recipe = fixture["build"]
     keys, missing = {}, {}
     for repo in fixture["covers"]:
-        source = source_snapshot(repo, revisions[repo])
+        source = source_snapshot(repo, revisions[repo], recipe)
         cls = model_class(source, recipe)
         missing[repo] = (inspect_checkpoint(cls, source, repo, revisions[repo]) if inspect_checkpoint
                          else missing_parameters(cls, run.checkpoint_path(repo, revisions[repo])))
-        keys[repo] = fixture_key(source, cls, missing[repo], recipe)
+        frozen_hashes = None
+        if recipe.get("preserve_frozen_prefixes"):
+            frozen_model = cls._from_config(shrunk_config(source, cls, recipe))
+            frozen_hashes = restore_frozen(frozen_model, source, repo, revisions[repo], recipe)
+            del frozen_model
+        keys[repo] = fixture_key(source, cls, missing[repo], recipe, frozen_hashes)
     if len({key for key, _ in keys.values()}) != 1:
         raise SystemExit(f"{name}: covered checkpoints have different fixture keys: { {r: k[:12] for r, (k, _) in keys.items()} }")
     key, config = next(iter(keys.values()))
     source_repo = fixture["built_from"]
     lacks = missing[source_repo]
-    source = source_snapshot(source_repo, revisions[source_repo])
+    source = source_snapshot(source_repo, revisions[source_repo], recipe)
     cls = model_class(source, recipe)
     tolerance = recipe.get("gate_tolerance") or max(
         r["atol"] for r in manifest["outputs"].values() if r["compare"] == "allclose"
@@ -418,7 +479,8 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
     torch.manual_seed(recipe["seed"])
     # Initialized in float32 like every other fixture, then cast: the seed gives the same weights in any dtype.
     model = cls._from_config(shrunk_config(source, cls, recipe), dtype=torch.float32).eval().to(dtype)
-    copied = save(model, out, source, lacks)
+    frozen_hashes = restore_frozen(model, source, source_repo, revisions[source_repo], recipe)
+    copied = save(model, out, source, lacks, recipe)
     entry = root / manifest["integrations"]["transformers"]["entry_point"]
     batch, captured = contract_batch(entry, out)
     accepted = recipe.get("accept_insensitive", {})
@@ -433,7 +495,7 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
         if not training["converged"] or not gate["overfit"]["pass"]:
             raise SystemExit(f"{name}: random weights fail the gate and overfitting did not fix it: {training}, {gate}")
         weights = "overfit"
-        save(model, out, source, lacks)
+        save(model, out, source, lacks, recipe)
     mirrored = missing_parameters(cls, out)
     if mirrored != lacks:
         raise SystemExit(f"{name}: fixture lacks {mirrored}, the real checkpoint lacks {lacks}")
@@ -452,6 +514,7 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
         "model_class": cls.__name__,
         "parameters": sum(p.numel() for p in model.parameters()),
         "missing_parameters": lacks,
+        **({"preserved_frozen_sha256": frozen_hashes} if frozen_hashes is not None else {}),
         "checkpoint_inspection": "parameter headers/indexes; bounded binary fallback" if inspect_checkpoint else "full checkpoint load",
         "numeric_health_scope": "CPU float32/bfloat16/float16; autocast for low-precision losses",
         "captured": captured,
@@ -502,10 +565,15 @@ def main():
             if args.keys_only:
                 keys = {}
                 for repo in fixture["covers"]:
-                    source = source_snapshot(repo, contract["checkpoints"][repo])
+                    source = source_snapshot(repo, contract["checkpoints"][repo], fixture["build"])
                     cls = model_class(source, fixture["build"])
                     lacks = missing_parameters(cls, run.checkpoint_path(repo, contract["checkpoints"][repo]))
-                    keys[repo] = fixture_key(source, cls, lacks, fixture["build"])[0][:12]
+                    frozen_hashes = None
+                    if fixture["build"].get("preserve_frozen_prefixes"):
+                        model = cls._from_config(shrunk_config(source, cls, fixture["build"]))
+                        frozen_hashes = restore_frozen(model, source, repo, contract["checkpoints"][repo], fixture["build"])
+                        del model
+                    keys[repo] = fixture_key(source, cls, lacks, fixture["build"], frozen_hashes)[0][:12]
                 print(json.dumps({"fixture": name, "keys": keys, "shared": len(set(keys.values())) == 1}))
                 continue
             start = time.perf_counter()
