@@ -279,3 +279,212 @@ def test_different_model_never_overwrites_workspace(workflow, monkeypatch):
     changed[1] = "another/model"
     assert main(changed) == 2
     assert workflow.calls == before
+
+
+def agent_call(workflow, capsys, *, answer=None, extra=()):
+    args = [*workflow.argv, "--mode", "agent", *extra]
+    if answer is not None:
+        path = workflow.root.parent / "answer.json"
+        path.write_text(json.dumps(answer))
+        args += ["--answer", str(path)]
+    code = main(args)
+    captured = capsys.readouterr()
+    # Agent stdout must be exactly one JSON value, with no prose or progress lines.
+    return code, json.loads(captured.out), captured.err
+
+
+def approval(payload, answer="approve", **fields):
+    return {
+        "question_id": payload["pending_question"]["question_id"],
+        "answer": answer,
+        **fields,
+    }
+
+
+def test_agent_drives_full_workflow_without_a_terminal(workflow, monkeypatch, capsys):
+    monkeypatch.setattr(
+        "builtins.input", lambda _: pytest.fail("agent must never read stdin")
+    )
+    code, source, logs = agent_call(workflow, capsys)
+    assert code == 3 and source["protocol_version"] == 1
+    assert source["pending_question"]["kind"] == "source-review"
+    assert source["pending_question"]["context"]["files"][0]["sha256"]
+    assert "tmic: create" in logs
+    assert "--mode agent" in source["resume"] and "--answer" not in source["resume"]
+    code, publish, _ = agent_call(workflow, capsys, answer=approval(source))
+    assert code == 3 and publish["pending_question"]["kind"] == "model-publication"
+    code, fleet, _ = agent_call(workflow, capsys, answer=approval(publish))
+    assert code == 3 and fleet["pending_question"]["kind"] == "fleet-update"
+    assert fleet["pending_question"]["context"]["base_revision"] == "a" * 40
+    code, result, _ = agent_call(workflow, capsys, answer=approval(fleet))
+    assert code == 0 and result["status"] == "complete"
+    assert result["dataset_revision"] == SHA
+    decisions = read(workflow.root / ".mic/automation.json")["decisions"]
+    assert [d["kind"] for d in decisions] == [
+        "source-review",
+        "model-publication",
+        "fleet-update",
+    ]
+    assert all(d["mode"] == "agent" for d in decisions)
+
+
+def test_agent_polling_keeps_question_id_and_does_no_work(workflow, capsys):
+    _, first, _ = agent_call(workflow, capsys)
+    before = list(workflow.calls)
+    _, second, _ = agent_call(workflow, capsys)
+    assert first["pending_question"] == second["pending_question"]
+    assert workflow.calls == before
+
+
+def test_stale_answer_cannot_approve_edited_source(workflow, capsys):
+    _, old, _ = agent_call(workflow, capsys)
+    usage = (
+        Workspace(workflow.root).contract_root / "integrations/transformers/usage.md"
+    )
+    usage.write_text(usage.read_text() + "\n# changed after review\n")
+    code, current, _ = agent_call(workflow, capsys, answer=approval(old))
+    assert code == 3 and "does not match" in current["answer_error"]
+    assert (
+        current["pending_question"]["question_id"]
+        != old["pending_question"]["question_id"]
+    )
+    assert not any(n == "build" for n, _ in workflow.calls)
+
+
+def test_agent_replay_never_reuses_source_approval_for_publication(workflow, capsys):
+    _, source, _ = agent_call(workflow, capsys)
+    _, publish, _ = agent_call(workflow, capsys, answer=approval(source))
+    before = list(workflow.calls)
+    code, current, _ = agent_call(workflow, capsys, answer=approval(source))
+    assert code == 3 and "already been used" in current["answer_error"]
+    assert current["pending_question"] == publish["pending_question"]
+    assert workflow.calls == before
+
+
+def test_agent_retry_waits_for_answer_before_reexecuting_failure(workflow, capsys):
+    workflow.failures["check"] = [1]
+    _, source, _ = agent_call(workflow, capsys)
+    code, failed, _ = agent_call(workflow, capsys, answer=approval(source))
+    assert code == 3 and failed["pending_question"]["kind"] == "retry"
+    assert failed["pending_question"]["choices"] == ["retry", "defer"]
+    code, same, _ = agent_call(workflow, capsys)
+    assert code == 3 and same["pending_question"] == failed["pending_question"]
+    assert [n for n, _ in workflow.calls].count("check") == 1
+    code, ready, _ = agent_call(workflow, capsys, answer=approval(failed, "retry"))
+    assert code == 3 and ready["pending_question"]["kind"] == "model-publication"
+    assert [n for n, _ in workflow.calls].count("check") == 2
+
+
+def test_agent_can_retry_failed_creation(workflow, capsys):
+    workflow.failures["create"] = [1]
+    code, failed, _ = agent_call(workflow, capsys)
+    assert code == 3 and failed["pending_question"]["kind"] == "retry"
+    agent_call(workflow, capsys)
+    assert [n for n, _ in workflow.calls].count("create") == 1
+    code, source, _ = agent_call(workflow, capsys, answer=approval(failed, "retry"))
+    assert code == 3 and source["pending_question"]["kind"] == "source-review"
+    assert [n for n, _ in workflow.calls].count("create") == 2
+
+
+def test_agent_local_only_remains_local_when_resuming(workflow, capsys):
+    _, source, _ = agent_call(workflow, capsys, extra=["--local-only"])
+    assert "--local-only" in source["resume"]
+    code, result, _ = agent_call(
+        workflow, capsys, answer=approval(source), extra=["--local-only"]
+    )
+    assert code == 0 and result["status"] == "validated"
+    assert not any(n == "publish" for n, _ in workflow.calls)
+
+
+def test_agent_can_take_over_a_human_question(workflow, monkeypatch, capsys):
+    monkeypatch.setattr(automation.sys.stdin, "isatty", lambda: False)
+    assert main(workflow.argv) == 3
+    human = json.loads(capsys.readouterr().out.splitlines()[-1])
+    code, agent, _ = agent_call(workflow, capsys)
+    assert code == 3 and agent["pending_question"] == human["pending_question"]
+
+
+def test_agent_rejects_malformed_answer_and_reports_json(workflow, capsys):
+    code, result, _ = agent_call(workflow, capsys, answer={"answer": True})
+    assert code == 2 and result["status"] == "error"
+    assert not workflow.calls
+
+
+def test_workspace_lock_prevents_concurrent_consumption(workflow, capsys):
+    from filelock import FileLock
+
+    with FileLock(workflow.root / ".mic/automation.lock"):
+        code, result, _ = agent_call(workflow, capsys)
+    assert code == 2 and "Another tmic run" in result["error"]
+    assert not workflow.calls
+
+
+def test_agent_protocol_is_discoverable_in_help(capsys):
+    with pytest.raises(SystemExit) as root:
+        main(["--help"])
+    assert root.value.code == 0
+    help = capsys.readouterr().out
+    assert "--mode human" in help and "--mode agent" in help
+    assert "--answer answer.json" in help and "pending_question" in help
+    with pytest.raises(SystemExit):
+        main(["run", "--help"])
+    help = capsys.readouterr().out
+    for word in (
+        "question_id",
+        "context_sha256",
+        "requires_reason",
+        "retry",
+        "defer",
+        "Exit codes",
+        "130",
+    ):
+        assert word in help
+
+
+def test_agent_changed_baseline_poll_and_reason_do_not_repeat_work(workflow, capsys):
+    Workspace(workflow.root).from_catalog(MODEL, "BERT", "auto", False)
+    workspace = Workspace(workflow.root)
+    baseline = next(workspace.expectations.rglob("*.json"))
+    candidate = baseline.with_name(baseline.stem + ".candidate.json")
+    candidate.write_text(baseline.read_text() + "\n")
+    workflow.failures["review"] = [1]
+    _, source, _ = agent_call(workflow, capsys)
+    code, changed, _ = agent_call(workflow, capsys, answer=approval(source))
+    assert code == 3 and changed["pending_question"]["kind"] == "baseline-change"
+    before = list(workflow.calls)
+    _, same, _ = agent_call(workflow, capsys)
+    assert same["pending_question"] == changed["pending_question"]
+    code, missing, _ = agent_call(workflow, capsys, answer=approval(changed))
+    assert code == 3 and "reason" in missing["answer_error"]
+    assert workflow.calls == before and candidate.exists()
+    code, ready, _ = agent_call(
+        workflow,
+        capsys,
+        answer=approval(changed, reason="Measured reference correction"),
+    )
+    assert code == 3 and ready["pending_question"]["kind"] == "model-publication"
+    assert not candidate.exists()
+    assert (
+        read(workflow.root / ".mic/automation-reviews.json")[-1]["reason"]
+        == "Measured reference correction"
+    )
+
+
+def test_source_edit_during_baseline_review_is_not_approved(workflow, monkeypatch):
+    Workspace(workflow.root).from_catalog(MODEL, "BERT", "auto", False)
+    workspace = Workspace(workflow.root)
+    baseline = next(workspace.expectations.rglob("*.json"))
+    candidate = baseline.with_name(baseline.stem + ".candidate.json")
+    candidate.write_text(baseline.read_text() + "\n")
+    usage = workspace.contract_root / "integrations/transformers/usage.md"
+
+    def reply(prompt):
+        if "Reason" in prompt:
+            usage.write_text(usage.read_text() + "\n# altered executable\n")
+            return "Reviewed baseline correction"
+        return "yes"
+
+    monkeypatch.setattr("builtins.input", reply)
+    with pytest.raises(ValueError, match="changed during review"):
+        automation.review_changed(SimpleNamespace(non_interactive=False), workspace)
+    assert candidate.exists()

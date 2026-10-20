@@ -10,12 +10,15 @@ expectations. See the [CLI guide](docs/cli.md) for installation, HF Inference
 Providers (default `Qwen/Qwen3.8-27B`), and the create/update/publish workflow.
 
 ```sh
-tmic run org/model
+tmic run org/model --mode human
+tmic run org/model --mode agent
 ```
 
 Runs the measured workflow through publication and the shared fleet update,
 asking for source review, changed baseline decisions, and upload confirmation.
-Repeat the command to resume; use `--local-only` to stop after validation.
+Repeat the command to resume; use `--local-only` to stop after validation. Agent
+mode emits JSON questions and accepts one-use `--answer` files. Run `tmic --help`
+or `tmic run --help` to discover both modes and the answer protocol.
 See [automated mode](docs/cli.md#automated-mode).
 
 ## Model Integration Contract
