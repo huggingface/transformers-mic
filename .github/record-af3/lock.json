@@ -1,0 +1,38 @@
+{
+  "framework": "transformers",
+  "environment": {
+    "python": "3.10",
+    "torch": "2.11.0",
+    "torchvision": "0.26.0",
+    "torchaudio": "2.11.0",
+    "tokenizers": "0.23.1",
+    "numpy": "1.26.4",
+    "pillow": "12.2.0",
+    "accelerate": "1.13.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "1.32.0",
+    "sentencepiece": "0.2.1",
+    "protobuf": "6.33.6",
+    "librosa": "0.11.0",
+    "soundfile": "0.13.1",
+    "scipy": "1.15.3"
+  },
+  "contracts": {
+    "mic-audioflamingo3": {
+      "integration": {
+        "repo": "huggingface-mic/audio-flamingo-3-hf-mic",
+        "revision": "276182b20c675e3d1ab367edb9e0cd722d1e9f0b",
+        "files_sha256": "989a835564c0ea410f117b7a4ce1f0fcc32d5caf6004e2b3ad2c2217197ad15c"
+      },
+      "fixtures": {
+        "huggingface-mic/audio-flamingo-3-hf-mic": {
+          "revision": "276182b20c675e3d1ab367edb9e0cd722d1e9f0b",
+          "files_sha256": "fbc4b3cf0ac78667f13d2d19f2209128af9b462e6e20264fe6be579286d89e34"
+        }
+      },
+      "checkpoints": {
+        "nvidia/audio-flamingo-3-hf": "7d4bae64ee29878af6504ae6f6bb3e40492838ad"
+      }
+    }
+  }
+}

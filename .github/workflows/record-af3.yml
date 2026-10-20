@@ -1,0 +1,50 @@
+name: Record AudioFlamingo3 CPU baselines
+
+# Throwaway: records cpu-x86_64 / cpu-x86_64-bf16 baselines for
+# huggingface-mic/audio-flamingo-3-hf-mic with the same runner, image, install
+# and thread count as transformers-ci's pr-ci_contracts.yml.
+
+on:
+  push:
+    branches: [record/audioflamingo3-cpu]
+
+permissions:
+  contents: read
+
+env:
+  TRANSFORMERS_SHA: 1e4edd3c57b9542ea497d1aeec0fa9615580a745
+  CI_SHA: 7f4960bccf51a4daa2e16a2633abaf50c2207d87
+  DOC_BUILDER_SHA: c69e96c087165ba49b1788e0c3464654dd60253c
+  HF_HUB_DISABLE_PROGRESS_BARS: "1"
+  PYTHONUNBUFFERED: "1"
+  OMP_NUM_THREADS: "4"
+
+jobs:
+  m8i:
+    runs-on:
+      group: aws-m8i-l-cache
+    timeout-minutes: 30
+    container:
+      image: huggingface/transformers-torch-light
+      options: "--shm-size=16gb"
+    env:
+      HF_HOME: /tmp/hf_home
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Install
+        run: |
+          git clone --quiet --filter=blob:none https://github.com/huggingface/transformers /tmp/transformers
+          git -C /tmp/transformers checkout --quiet "$TRANSFORMERS_SHA"
+          cd /tmp/transformers && uv pip install -e .
+          uv pip install "transformers-ci[contracts] @ git+https://github.com/huggingface/transformers-ci@${CI_SHA}"
+          uv pip install timm jsonschema "git+https://github.com/huggingface/doc-builder@$DOC_BUILDER_SHA"
+      - name: Record and check
+        run: OUT="$GITHUB_WORKSPACE/out" .github/record-af3/record.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: af3-m8i
+          path: out/
