@@ -21,6 +21,7 @@ env:
 
 jobs:
   gpu-host:
+    if: false  # recorded in run 39447623594
     runs-on:
       group: aws-g5-4xlarge-cache
     timeout-minutes: 30
@@ -57,11 +58,15 @@ jobs:
       options: "--shm-size=4gb"
     env:
       HF_HOME: /tmp/hf_home
+      REQUIRE_BF16: "1"
+      VARIANTS: bfloat16
     defaults:
       run:
         shell: bash
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Native bfloat16?
+        run: grep -q -w -E 'avx512_bf16|amx_bf16' /proc/cpuinfo || { lscpu | sed -n 's/^Model name: *//p'; exit 1; }
       - name: Install
         run: |
           git clone --quiet --filter=blob:none https://github.com/huggingface/transformers /tmp/transformers
