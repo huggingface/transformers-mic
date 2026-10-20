@@ -117,15 +117,18 @@ the contract's inputs move the outputs (the sensitivity gate).
 
    Uploads are public and pinned, so this step is outward-facing.
 
-8. **Export into Transformers.**
+8. **Update the shared fleet and pin Transformers.**
 
    ```sh
-   tmic export --transformers-checkout /path/to/transformers
+   tmic export --fleet prototypes
+   tmic export --fleet prototypes --execute --transformers-checkout /path/to/transformers
    ```
 
-   This writes only `tests/contracts/fleet.lock` in the Transformers checkout.
-   Expectations stay beside usage in the pinned Hub model; export does not copy
-   them into Transformers. It does not commit or open a PR.
+   The first command previews the update; `--execute` uploads it to the
+   [`huggingface-mic/transformers-fleet`](https://huggingface.co/datasets/huggingface-mic/transformers-fleet)
+   dataset. Only `tests/contracts.lock`, containing the dataset commit SHA, is
+   written into Transformers. Expectations stay beside usage in the pinned model.
+   Review and commit the pin change in your framework PR.
 
 ## Several models at once
 
@@ -241,13 +244,35 @@ Upload requires write access to the MIC model namespace, which defaults to
 retaining an existing `BERT` contract. Export rejects names that differ only
 by case.
 
-`export` writes a reviewable `tests/contracts/fleet.lock` into the
-provided checkout, preserves other contracts, and removes workspace paths from
-pins. It does not commit, open a PR, or merge Transformers changes. CI can run:
+`export --fleet control` updates `fleet-lock.json` in the shared dataset;
+`--fleet prototypes` updates `prototype-fleet.lock`. The default is `control`.
+Exports preserve other entries and strip local paths. Environment changes must
+be reviewed separately. Preview first, then use `--execute` to upload. A concurrent
+Hub update rejects the commit; rerun to review the new state.
+`--transformers-checkout PATH` writes only `tests/contracts.lock` after upload.
+Neither command commits or opens a framework PR.
+
+To adopt an existing dataset revision without exporting a workspace:
 
 ```sh
-tmic check --lock tests/contracts/fleet.lock --contract BERT --all-variants
+tmic pin --transformers-checkout /path/to/transformers --revision <dataset-commit>
+# Resolve the latest dataset main to a SHA:
+tmic pin --transformers-checkout /path/to/transformers
 ```
+
+Run the pinned fleet from the Transformers checkout:
+
+```sh
+tmic check --fleet control --fixtures-only
+tmic check --fleet prototypes --variant bfloat16 --fixtures-only
+# Reproduce a previous dataset snapshot:
+tmic check --fleet prototypes --fleet-revision <dataset-commit> --variant bfloat16 --fixtures-only
+```
+
+`tmic check` outside a MIC workspace uses `tests/contracts.lock` when present.
+An explicit `--fleet-revision` overrides that pin; without a local pin the dataset
+ref defaults to `main` and is resolved once. `--lock PATH` also accepts a custom
+JSON fleet, or `tests/contracts.lock` for the pinned control fleet.
 
 `tmic status` shows project state. Workspaces contain source, history, candidate
 expectations, checks and artifacts; keep them outside versioned source or ignore
@@ -281,6 +306,7 @@ expectations directory in the Transformers checkout.
 
 `tmic publish --execute` combines the built weights, usage and reviewed expectations
 in `huggingface-mic/<name>-mic` and pins the Hub commit. Local build artifacts are
-staged under `.mic/artifacts/` until publication. `tmic export` writes the fleet
-lock into Transformers; the lock references the Hub snapshot containing the
-expectations. CI loads them from that immutable snapshot.
+staged under `.mic/artifacts/` until publication. `tmic export --execute` updates
+the shared fleet dataset. Transformers keeps only the dataset SHA in
+`tests/contracts.lock`; CI loads the fleet and model expectations from immutable
+Hub snapshots.

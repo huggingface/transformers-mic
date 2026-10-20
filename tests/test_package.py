@@ -163,10 +163,11 @@ def test_snapshot_keeps_previous_usage(workspace):
     assert (backup / "integrations/transformers/usage.md").read_text() == original
 
 
-def test_export_keeps_other_contracts_and_removes_local_paths(workspace, tmp_path):
-    approve_receipts(workspace)
-    target = tmp_path / "transformers"
-    path = target / "tests/contracts/fleet.lock"
+@pytest.fixture
+def dataset(workspace, monkeypatch, tmp_path):
+    from transformers_mic import fleet
+
+    path = tmp_path / "remote-fleet.json"
     write(
         path,
         {
@@ -175,28 +176,110 @@ def test_export_keeps_other_contracts_and_removes_local_paths(workspace, tmp_pat
             "contracts": {"Other": {"keep": True}},
         },
     )
-    commands.export(
-        SimpleNamespace(workspace=workspace.root, transformers_checkout=target)
+    monkeypatch.setattr(fleet, "download", lambda *args: (path, "a" * 40))
+    calls = []
+
+    class API:
+        def create_commit(self, **kwargs):
+            calls.append(kwargs)
+            return SimpleNamespace(oid="b" * 40)
+
+    monkeypatch.setattr(commands, "HfApi", API)
+    return path, calls
+
+
+def test_export_publishes_dataset_and_writes_only_sha(workspace, dataset, tmp_path):
+    approve_receipts(workspace)
+    target = tmp_path / "transformers"
+    args = SimpleNamespace(
+        workspace=workspace.root, transformers_checkout=target, execute=False
     )
-    lock = read(path)
+    commands.export(args)
+    assert dataset[1] == []
+    assert not target.exists()
+    args.execute = True
+    commands.export(args)
+    call = dataset[1][0]
+    assert call["repo_id"] == "huggingface-mic/transformers-fleet"
+    assert call["repo_type"] == "dataset"
+    assert call["parent_commit"] == "a" * 40
+    operation = call["operations"][0]
+    assert operation.path_in_repo == "fleet-lock.json"
+    lock = json.loads(operation.path_or_fileobj)
     assert lock["contracts"]["Other"] == {"keep": True}
     assert "path" not in lock["contracts"]["BERT"]["integration"]
     assert all("path" not in p for p in lock["contracts"]["BERT"]["fixtures"].values())
+    assert list(target.rglob("*")) == [
+        target / "tests",
+        target / "tests/contracts.lock",
+    ]
+    assert (target / "tests/contracts.lock").read_text() == "b" * 40 + "\n"
+    assert (
+        "BERT" not in read(dataset[0])["contracts"]
+    )  # cached download is never edited
 
 
-def test_export_rejects_case_collision_and_allows_explicit_name(workspace, tmp_path):
+def test_export_rejects_case_collision_and_allows_explicit_name(workspace, dataset):
     approve_receipts(workspace)
-    target = tmp_path / "transformers"
-    folder = target / "tests/contracts/expectations/bert"
-    folder.mkdir(parents=True)
-    args = SimpleNamespace(workspace=workspace.root, transformers_checkout=target)
+    old = read(dataset[0])
+    old["contracts"]["bert"] = {}
+    write(dataset[0], old)
+    args = SimpleNamespace(workspace=workspace.root, execute=True)
     with pytest.raises(ValueError, match="differs only by case"):
         commands.export(args)
-    assert not (target / "tests/contracts/fleet.lock").exists()
     args.contract_name = "mic-bert"
     commands.export(args)
-    assert "mic-bert" in read(target / "tests/contracts/fleet.lock")["contracts"]
-    assert folder.exists()
+    lock = json.loads(dataset[1][0]["operations"][0].path_or_fileobj)
+    assert "mic-bert" in lock["contracts"]
+    assert "bert" in lock["contracts"]
+
+
+def test_dataset_export_conflict_does_not_update_framework_pin(
+    workspace, dataset, tmp_path, monkeypatch
+):
+    approve_receipts(workspace)
+    target = tmp_path / "transformers"
+    pin = target / "tests/contracts.lock"
+    pin.parent.mkdir(parents=True)
+    pin.write_text("a" * 40 + "\n")
+
+    class API:
+        def create_commit(self, **kwargs):
+            raise ValueError("remote changed since preview")
+
+    monkeypatch.setattr(commands, "HfApi", API)
+    with pytest.raises(ValueError, match="remote changed"):
+        commands.export(
+            SimpleNamespace(
+                workspace=workspace.root, execute=True, transformers_checkout=target
+            )
+        )
+    assert pin.read_text() == "a" * 40 + "\n"
+
+
+def test_dataset_check_uses_framework_pin(dataset, tmp_path, monkeypatch):
+    from transformers_mic import cli, fleet
+
+    monkeypatch.chdir(tmp_path)
+    pin = tmp_path / "tests/contracts.lock"
+    pin.parent.mkdir()
+    pin.write_text("c" * 40 + "\n")
+    calls = []
+
+    def download(name, revision):
+        calls.append((name, revision))
+        return dataset[0], revision
+
+    monkeypatch.setattr(fleet, "download", download)
+    monkeypatch.setattr(cli, "external_check", lambda args: 0)
+    assert main(["check", "--fleet", "prototypes"]) == 0
+    assert calls == [("prototypes", "c" * 40)]
+    assert main(["check"]) == 0
+    assert calls[-1] == ("control", "c" * 40)
+    assert main(["check", "--lock", str(pin)]) == 0
+    assert calls[-1] == ("control", "c" * 40)
+    pin.write_text("main\n")
+    assert main(["check", "--fleet", "control"]) == 2
 
 
 def test_external_check_defaults_to_full_fleet(monkeypatch, tmp_path):
@@ -236,6 +319,7 @@ def test_contract_infrastructure_and_baseline_changes_select_cases():
     selector = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(selector)
     cases = {"BERT": ["bert"], "mic-vit": ["vit"]}
+    assert set(selector.select(["tests/contracts.lock"], cases)) == set(cases)
     assert set(selector.select(["tests/contracts/prototype-fleet.lock"], cases)) == set(
         cases
     )
@@ -408,8 +492,9 @@ def test_external_fleet_uses_each_contract_variants(tmp_path, monkeypatch):
     monkeypatch.setattr(
         cli.backend,
         "invoke",
-        lambda tool, workspace, options: calls.append(options)
-        or SimpleNamespace(returncode=0),
+        lambda tool, workspace, options: (
+            calls.append(options) or SimpleNamespace(returncode=0)
+        ),
     )
     assert cli.main(["check", "--lock", str(lock), "--all-variants"]) == 0
     assert len(calls) == 3
@@ -733,3 +818,53 @@ def test_merged_hub_card_keeps_both_descriptions(monkeypatch):
     assert "Original parameter count and build details." in card
     assert "integrations/transformers/expectations" in card
     assert card.startswith("---\n")
+
+
+def test_dataset_pin_resolves_main_once_and_checks_both_fleets(monkeypatch, tmp_path):
+    from transformers_mic import fleet
+
+    calls = []
+
+    class API:
+        def dataset_info(self, repo, revision):
+            calls.append((repo, revision))
+            return SimpleNamespace(sha="d" * 40)
+
+    def download(repo, filename, **kwargs):
+        assert repo == fleet.REPOSITORY
+        assert kwargs == {"repo_type": "dataset", "revision": "d" * 40}
+        return str(tmp_path / filename)
+
+    monkeypatch.setattr(fleet, "HfApi", API)
+    monkeypatch.setattr(fleet, "hf_hub_download", download)
+    checkout = tmp_path / "transformers"
+    assert main(["pin", "--transformers-checkout", str(checkout)]) == 0
+    assert calls == [(fleet.REPOSITORY, "main")]
+    assert (checkout / "tests/contracts.lock").read_text() == "d" * 40 + "\n"
+
+
+def test_dataset_export_scopes_known_failures_and_uses_prototype_file(
+    workspace, dataset
+):
+    approve_receipts(workspace)
+    original = read(dataset[0])
+    original["known_failures"] = {"Other/target": {"issue": "keep"}}
+    write(dataset[0], original)
+    commands.export(
+        SimpleNamespace(workspace=workspace.root, fleet="prototypes", execute=True)
+    )
+    op = dataset[1][0]["operations"][0]
+    assert op.path_in_repo == "prototype-fleet.lock"
+    lock = json.loads(op.path_or_fileobj)
+    assert lock["known_failures"]["Other/target"] == {"issue": "keep"}
+    assert all(k.startswith(("Other/", "BERT/")) for k in lock["known_failures"])
+
+
+def test_dataset_export_rejects_environment_change(workspace, dataset):
+    approve_receipts(workspace)
+    lock = read(dataset[0])
+    lock["environment"] = {"torch": "changed"}
+    write(dataset[0], lock)
+    with pytest.raises(ValueError, match="environment differs"):
+        commands.export(SimpleNamespace(workspace=workspace.root, execute=True))
+    assert not dataset[1]

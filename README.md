@@ -37,7 +37,7 @@ The first goal is CI, not a Hub feature. The same contracts could later back com
 
 A MIC covers one usage path and every checkpoint on it. Each part links to the [full example](example/README.md).
 
-1. **One MIC repository per slim model.** Creators' checkpoint repos stay unchanged. Hugging Face owns a model repo such as [`huggingface-mic/qwen2_5_omni-mic`](https://huggingface.co/huggingface-mic/qwen2_5_omni-mic), containing its slim weights, contract, usage and reviewed expectations. Frameworks own the review of their expectations; their fleet locks select immutable Hub snapshots.
+1. **One MIC repository per slim model.** Creators' checkpoint repos stay unchanged. Hugging Face owns a model repo such as [`huggingface-mic/qwen2_5_omni-mic`](https://huggingface.co/huggingface-mic/qwen2_5_omni-mic), containing its slim weights, contract, usage and reviewed expectations. Frameworks own the review of their expectations; `tests/contracts.lock` pins a snapshot of the shared [fleet dataset](https://huggingface.co/datasets/huggingface-mic/transformers-fleet).
 2. **Fixed layout:**
 
    ```text
@@ -54,7 +54,7 @@ A MIC covers one usage path and every checkpoint on it. Each part links to the [
      integrations/transformers.js/             # when this framework is supported
        integration.js
        expectations/<platform>/<target>.<variant>.json
-   transformers/tests/contracts/fleet.lock     # immutable pins; no duplicated baselines
+   transformers/tests/contracts.lock           # shared fleet dataset commit SHA
    ```
 
    The fixture pin's `target` identifies its expectation file. See [Hub layout](docs/hub-organization.md).
@@ -64,7 +64,7 @@ A MIC covers one usage path and every checkpoint on it. Each part links to the [
 5. **Checks beyond "it ran"**: generated outputs, logits within tolerance, and where training applies, finite loss and gradients and a parameter update.
 6. **Reviewed baselines** under `integrations/<framework>/expectations/<platform>/`, per target and variant. A behavior-changing PR measures candidates, has them reviewed, then publishes a new snapshot and updates its lock. Nothing updates approved values automatically.
 7. **Shared [fixtures](example/hub/mic-SmolLM-slim).** Processor files copied byte for byte; weights and config shrink. Checkpoints share a fixture only with identical processors, retained config fields, and default dtype.
-8. **Everything pinned** in the framework's [fleet lock](example/transformers/tests/contracts/fleet.lock): contract, fixture, checkpoint, and dependency revisions.
+8. **Everything pinned** in the shared [fleet dataset](https://huggingface.co/datasets/huggingface-mic/transformers-fleet): contract, fixture, checkpoint, and dependency revisions. Transformers keeps only the dataset commit SHA in `tests/contracts.lock`.
 
 [`run.py`](example/run.py) implements the runner prototype and validates its schemas. Remaining pilot work: [technical design](docs/design.md#pilot).
 
