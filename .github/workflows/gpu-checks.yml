@@ -64,7 +64,7 @@ permissions:
 
 jobs:
   checks:
-    if: inputs.matrix != 'whisper-contract' && inputs.matrix != 'whisper-assist-large' && inputs.matrix != 'whisper-speech' && inputs.matrix != 'dependency-stability' && inputs.matrix != 'wav2vec2-normalization' && inputs.matrix != 'mic-package' && inputs.matrix != 'mic-regeneration' && inputs.matrix != 'mic-published' && inputs.matrix != 'mic-cpu-record'
+    if: inputs.matrix != 'whisper-contract' && inputs.matrix != 'whisper-assist-large' && inputs.matrix != 'whisper-speech' && inputs.matrix != 'dependency-stability' && inputs.matrix != 'wav2vec2-normalization' && inputs.matrix != 'mic-package' && inputs.matrix != 'mic-regeneration' && inputs.matrix != 'mic-published' && inputs.matrix != 'mic-cpu-record' && inputs.matrix != 'mic-baseline-repair'
     runs-on:
       group: '${{ inputs.machine_type }}'
     timeout-minutes: 240
@@ -717,3 +717,51 @@ jobs:
           name: mic-cpu-record
           path: /tmp/tmic-cpu
           include-hidden-files: true
+
+  mic-baseline-repair:
+    if: inputs.matrix == 'mic-baseline-repair'
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [current, reference]
+    runs-on:
+      group: ${{ inputs.machine_type }}
+    timeout-minutes: 40
+    container:
+      image: ${{ inputs.docker }}
+      options: --shm-size=16gb
+    env:
+      HF_HOME: /tmp/hf_home
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      PYTHONUNBUFFERED: "1"
+      OMP_NUM_THREADS: "4"
+      OUT: /tmp/mic-baseline-evidence
+      TF_SHA: ${{ inputs.transformers_sha }}
+      PROFILE: ${{ matrix.profile }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Install current Transformers and MIC runner
+        run: |
+          git clone --filter=blob:none https://github.com/huggingface/transformers /tmp/framework
+          git -C /tmp/framework checkout "$TF_SHA"
+          cd /tmp/framework
+          uv pip install -e .
+          uv pip install "transformers-ci[contracts] @ git+https://github.com/huggingface/transformers-ci@7880a8bf11135f966105d81cc5475c05521ef319" timm jsonschema "git+https://github.com/huggingface/doc-builder@c69e96c087165ba49b1788e0c3464654dd60253c"
+          if [[ "$PROFILE" == reference ]]; then
+            uv pip install torch==2.11.0 torchvision==0.26.0 torchaudio==2.11.0 --index-url https://download.pytorch.org/whl/cpu
+            uv pip install numpy==1.26.4
+          fi
+          mkdir -p "$OUT"
+          uv pip freeze > "$OUT/pip-freeze.txt"
+          lscpu > "$OUT/cpu.txt"
+          git rev-parse HEAD > "$OUT/framework-sha.txt"
+      - name: Check frozen references and record twice
+        run: python .github/scripts/probe_baselines.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: mic-baseline-${{ matrix.profile }}
+          path: /tmp/mic-baseline-evidence
