@@ -7,9 +7,11 @@ from pathlib import Path
 import shlex
 import sys
 
+from filelock import FileLock, Timeout
 from huggingface_hub.utils import validate_repo_id
 
 from . import batch, fleet
+from .interaction import Interaction, Pending, PROTOCOL_VERSION, load_answer
 from .workspace import Workspace, read, write
 
 NEEDS_INPUT = 3
@@ -29,25 +31,16 @@ STAGES = (
 )
 
 
-class Pending(Exception):
-    def __init__(self, question, details):
-        self.question, self.details = question, details
+def ask(args, question, details, **kwargs):
+    interaction = getattr(args, "_interaction", None)
+    if interaction is None:
+        mode = "agent" if args.non_interactive else "human"
+        interaction = Interaction(mode, {}, lambda: None, lambda: {})
+    return interaction.ask(question, details, **kwargs)
 
 
-def ask(args, question, details, *, reason=False):
-    print(question, flush=True)
-    print(details, flush=True)
-    if args.non_interactive or not sys.stdin.isatty():
-        raise Pending(question, details)
-    try:
-        reply = input(
-            "Reason for approving this change: " if reason else "Continue? [y/N] "
-        ).strip()
-    except EOFError:
-        reply = ""
-    if (reason and not reply) or (not reason and reply.lower() not in ("y", "yes")):
-        raise Pending(question, details)
-    return reply
+def file_snapshot(path):
+    return {"path": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
 
 
 def last_json(path):
@@ -58,7 +51,8 @@ def last_json(path):
 
 
 def review_changed(args, workspace):
-    """Only a human can approve changed or removed baseline outputs."""
+    """Changed baselines need an explicit decision and a recorded reason."""
+    reviewed_source = workspace.contract_digest()
     for candidate in sorted(workspace.expectations.rglob("*.candidate.json")):
         approved = candidate.with_name(
             candidate.name.replace(".candidate.json", ".json")
@@ -74,12 +68,21 @@ def review_changed(args, workspace):
                 lineterm="",
             )
         )
-        ask(args, f"Approve changed baseline {candidate.name}?", detail)
         reason = ask(
-            args, "Why is this baseline change expected?", str(candidate), reason=True
+            args,
+            f"Approve changed baseline {candidate.name}?",
+            detail,
+            reason=True,
+            kind="baseline-change",
+            context={
+                "candidate": file_snapshot(candidate),
+                "approved": file_snapshot(approved) if approved.exists() else None,
+                "source_sha256": workspace.contract_digest(),
+            },
         )
         if (
-            candidate.read_text() != after
+            workspace.contract_digest() != reviewed_source
+            or candidate.read_text() != after
             or (approved.read_text() if approved.exists() else "") != before
         ):
             raise ValueError(
@@ -102,6 +105,25 @@ def review_changed(args, workspace):
 
 
 def run(args):
+    args.mode = "agent" if args.non_interactive else args.mode
+    try:
+        return locked_run(args)
+    except (ValueError, OSError) as error:
+        if args.mode != "agent":
+            raise
+        print(
+            json.dumps(
+                {
+                    "protocol_version": PROTOCOL_VERSION,
+                    "status": "error",
+                    "error": str(error),
+                }
+            )
+        )
+        return 2
+
+
+def locked_run(args):
     validate_repo_id(args.model)
     if args.timeout <= 0:
         raise ValueError("Stage timeout must be positive")
@@ -116,6 +138,20 @@ def run(args):
             else Path("work/mic") / model_slug
         )
     ).resolve()
+    if args.answer and args.mode != "agent":
+        raise ValueError("--answer requires --mode agent")
+    answer = load_answer(args.answer)
+    lock = FileLock(root / ".mic/automation.lock")
+    try:
+        with lock.acquire(timeout=0):
+            return run_locked(args, root, answer)
+    except Timeout:
+        raise ValueError(
+            f"Another tmic run is using {root}; wait for it to finish"
+        ) from None
+
+
+def run_locked(args, root, answer):
     workspace = Workspace(root)
     folder = root / ".mic/automation"
     state_path = root / ".mic/automation.json"
@@ -147,6 +183,10 @@ def run(args):
             "stages": {},
         }
     )
+    if answer is not None and not state.get("pending_question"):
+        raise ValueError(
+            "There is no pending question; resume without --answer to obtain one"
+        )
     if state["config"] != config:
         raise ValueError(
             "Automation options differ from this workspace; reuse the original options or choose another --out"
@@ -169,8 +209,29 @@ def run(args):
         state["fingerprint"] = fingerprint()
         write(state_path, state)
 
+    args._interaction = Interaction(
+        args.mode,
+        state,
+        lambda: write(state_path, state),
+        lambda: {
+            "workspace": str(root),
+            "model": args.model,
+            "stage": state["next_stage"],
+            "workspace_sha256": fingerprint(),
+            "fleet": args.fleet,
+            "contract_name": args.contract_name,
+            "transformers_checkout": args.transformers_checkout,
+        },
+        answer,
+    )
+    output = sys.stderr if args.mode == "agent" else sys.stdout
+
     def stage(name, options, *, create=False):
-        print(f"tmic: {name} (log: {folder / 'logs' / (name + '.log')})", flush=True)
+        print(
+            f"tmic: {name} (log: {folder / 'logs' / (name + '.log')})",
+            file=output,
+            flush=True,
+        )
         command = options if create else ["--workspace", str(root), *options]
         result = batch.invoke(folder, name, command, args.timeout)
         state["stages"][name] = result
@@ -179,11 +240,38 @@ def run(args):
         log = folder / result["log"]
         text = log.read_text()
         if result["exit_code"]:
-            print("\n".join(text.splitlines()[-60:]), flush=True)
+            print("\n".join(text.splitlines()[-60:]), file=output, flush=True)
         return result["exit_code"], log
 
     try:
-        if not workspace.state_path.exists():
+        pending = state.get("pending_question")
+        if (
+            args.mode == "agent"
+            and pending
+            and pending["kind"] == "retry"
+            and pending["context"].get("workspace_sha256") == fingerprint()
+        ):
+            context = {
+                key: pending["context"][key]
+                for key in ("failed_stage", "exit_code", "log")
+            }
+            context["log"] = file_snapshot(Path(context["log"]["path"]))
+            ask(
+                args,
+                pending["question"],
+                pending["details"],
+                kind="retry",
+                context=context,
+            )
+        if (
+            args.mode == "agent"
+            and pending
+            and pending["kind"] == "baseline-change"
+            and pending["context"].get("workspace_sha256") == fingerprint()
+        ):
+            review_changed(args, workspace)
+            save()
+        while not workspace.state_path.exists():
             options = [
                 "create",
                 args.model,
@@ -212,13 +300,21 @@ def run(args):
                     options.append("--" + name.replace("_", "-"))
             code, log = stage("create", options, create=True)
             if code:
-                raise Pending(
-                    "Workspace creation needs attention; fix the reported problem and rerun.",
+                ask(
+                    args,
+                    "Workspace creation needs attention; fix the reported problem and retry?",
                     str(log),
+                    kind="retry",
+                    context={
+                        "failed_stage": "create",
+                        "exit_code": code,
+                        "log": file_snapshot(log),
+                    },
                 )
+                continue
             if workspace.state["model"] != args.model:
                 raise ValueError("Created workspace does not match the requested model")
-        elif state.get("fingerprint") != fingerprint():
+        if state.get("fingerprint") != fingerprint():
             # Manual source/reference/lock edits invalidate previous checks and decisions.
             state["next_stage"] = "source"
             state.pop("dataset_revision", None)
@@ -239,6 +335,12 @@ def run(args):
             state["next_stage"] = "pin"
         save()
         while state["next_stage"] != "done":
+            if (
+                state["next_stage"] != "source"
+                and state.get("reviewed_source_sha256") != workspace.contract_digest()
+            ):
+                state["next_stage"] = "source"
+                save()
             name = state["next_stage"]
             if args.local_only and STAGES.index(name) >= STAGES.index(
                 "publish-preview"
@@ -248,6 +350,7 @@ def run(args):
                 print(
                     json.dumps(
                         {
+                            "protocol_version": PROTOCOL_VERSION,
                             "status": "validated",
                             "workspace": str(root),
                             "resume": resume,
@@ -270,9 +373,21 @@ def run(args):
                     f"Targets: {manifest['integrations']['transformers']['targets']}\n"
                     f"Variants: {list(manifest['integrations']['transformers']['variants'])}\n"
                     "All declared targets and variants will be checked.",
+                    kind="source-review",
+                    context={
+                        "files": [
+                            file_snapshot(workspace.contract_root / "integration.json"),
+                            file_snapshot(usage),
+                        ],
+                        "targets": manifest["integrations"]["transformers"]["targets"],
+                        "variants": list(
+                            manifest["integrations"]["transformers"]["variants"]
+                        ),
+                    },
                 )
                 if before != fingerprint():
                     continue
+                state["reviewed_source_sha256"] = workspace.contract_digest()
             elif name == "build":
                 code, log = stage(name, ["build"])
             elif name == "auto":
@@ -298,6 +413,11 @@ def run(args):
                     "Publish the checked MIC model and expectations publicly to the Hub?",
                     f"Model: {workspace.fixture}\nWorkspace: {root}\n"
                     f"Preview: {folder / 'logs/publish-preview.log'}",
+                    kind="model-publication",
+                    context={
+                        "repository": workspace.fixture,
+                        "preview": file_snapshot(folder / "logs/publish-preview.log"),
+                    },
                 )
                 if before != fingerprint():
                     state["next_stage"] = "source"
@@ -324,6 +444,13 @@ def run(args):
                         },
                         indent=2,
                     ),
+                    kind="fleet-update",
+                    context={
+                        "repository": fleet.REPOSITORY,
+                        "base_revision": preview["revision"],
+                        "contract": preview["contract"],
+                        "pins": preview["contracts"][preview["contract"]],
+                    },
                 )
                 if before != fingerprint():
                     state["next_stage"] = "source"
@@ -368,6 +495,12 @@ def run(args):
                     args,
                     f"{name} failed (exit {code}). Fix the problem and retry?",
                     str(log),
+                    kind="retry",
+                    context={
+                        "failed_stage": name,
+                        "exit_code": code,
+                        "log": file_snapshot(log),
+                    },
                 )
                 if failed_fingerprint != fingerprint():
                     state["next_stage"] = "source"
@@ -384,6 +517,7 @@ def run(args):
         print(
             json.dumps(
                 {
+                    "protocol_version": PROTOCOL_VERSION,
                     "status": "complete",
                     "workspace": str(root),
                     "fleet_repository": fleet.REPOSITORY,
@@ -401,7 +535,10 @@ def run(args):
         print(
             json.dumps(
                 {
+                    "protocol_version": PROTOCOL_VERSION,
                     "status": "needs-input",
+                    "pending_question": pending.record,
+                    **({"answer_error": pending.error} if pending.error else {}),
                     "question": pending.question,
                     "details": pending.details,
                     "workspace": str(root),
@@ -414,11 +551,25 @@ def run(args):
         state["status"] = "interrupted"
         save()
         print(f"\ntmic: interrupted; resume with {resume}", file=sys.stderr)
+        if args.mode == "agent":
+            print(
+                json.dumps(
+                    {
+                        "protocol_version": PROTOCOL_VERSION,
+                        "status": "interrupted",
+                        "resume": resume,
+                    }
+                )
+            )
         return 130
 
 
 def resume_options(args):
     options = [
+        "--mode",
+        args.mode,
+        "--timeout",
+        str(args.timeout),
         "--fleet",
         args.fleet,
         "--namespace",
@@ -442,4 +593,6 @@ def resume_options(args):
     for name in ("regenerate", "llm", "fixtures_only", "readable_output", "no_history"):
         if getattr(args, name):
             options.append("--" + name.replace("_", "-"))
+    if args.local_only:
+        options.append("--local-only")
     return options

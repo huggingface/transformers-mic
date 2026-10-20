@@ -62,12 +62,69 @@ an unchanged workspace. Source, lock, or baseline edits invalidate earlier check
 and restart validation. After `--local-only`, rerun without it to continue through
 publication. No Git commit or framework PR is created automatically.
 
-Without a terminal, or with `--non-interactive`, the command saves a pending
-question, prints JSON containing the question and resume command, and exits **3**.
-Run the resume command in a terminal to answer it. A successful local-only run or
-completed publication exits **0**; Ctrl-C saves progress, stops running stage
-processes, and exits **130**. Existing individual commands remain available;
-`tmic auto` still checks factory mappings for a built fixture.
+### Human and agent modes
+
+```sh
+tmic run org/model --mode human   # default: interactive terminal
+tmic run org/model --mode agent   # JSON protocol, no stdin reads
+```
+
+Both modes use the same workspace and decisions. You can switch modes when
+resuming. `tmic --help` introduces both modes; `tmic run --help` contains the
+answer format and exit codes, so an agent can discover the interface directly.
+`--non-interactive` is an alias for agent mode.
+
+In agent mode, stdout contains one JSON result and progress/log output goes to
+stderr. A pending question exits **3** and includes `protocol_version: 1`,
+`status: "needs-input"`, a `resume` command, and `pending_question`:
+
+```json
+{
+  "question_id": "<opaque ID>",
+  "kind": "source-review",
+  "question": "Review the executable contract before running it.",
+  "details": "Paths and review details...",
+  "choices": ["approve", "defer"],
+  "requires_reason": false,
+  "context": {"workspace_sha256": "<hash>", "files": []},
+  "context_sha256": "<hash>"
+}
+```
+
+Inspect the context and referenced files or diffs. Obtain the operator's decision
+when needed, then write a JSON answer file:
+
+```json
+{"question_id": "<ID from pending_question>", "answer": "approve", "reason": "Reviewed the displayed snapshot"}
+```
+
+Run the emitted resume command with `--answer answer.json`. For example:
+
+```sh
+tmic run org/model --mode agent --out work/mic/org--model --answer answer.json
+```
+
+Use the **emitted command** to preserve options such as `--local-only`, fleet,
+namespace and timeout. The answer file is deliberately absent from that command:
+each accepted answer is consumed once, and the next question needs another
+answer. Retry questions offer `retry` or `defer`; other questions offer `approve`
+or `defer`. Changed-baseline approvals require a nonempty `reason`. `defer`
+leaves the question pending and performs no approved action.
+
+Questions bind the workspace snapshot, stage, selected destination, relevant
+file hashes and, for fleet updates, the exact dataset base revision and pins.
+Polling an unchanged question preserves its ID. Stale or reused approvals exit
+**3** with `answer_error` and the current question; approval is never transferred
+to another snapshot. Malformed answer files or answers without a pending
+question exit **2**. Decisions and their contexts are recorded in
+`.mic/automation.json`; changed-baseline explanations also retain their file-hash
+receipts. A workspace lock prevents simultaneous runs consuming the same answer.
+
+A successful local-only run (`status: "validated"`) or publication
+(`status: "complete"`) exits **0**. Ctrl-C stops stage processes, saves progress
+and exits **130**. Invalid invocations/state exit **2**; command-line syntax
+errors use the normal argparse error output. Existing individual commands remain
+available; `tmic auto` still checks factory mappings for a built fixture.
 
 ## Step by step: one model
 

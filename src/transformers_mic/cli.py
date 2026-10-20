@@ -43,6 +43,17 @@ def parser():
     root = argparse.ArgumentParser(
         prog="tmic",
         description="Build, measure and review Transformers model integration contracts.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""Automated modes:
+  Human: tmic run org/model --mode human
+  Agent: tmic run org/model --mode agent
+
+Agent mode writes one JSON result to stdout; logs go to stderr.
+Exit 3 means a pending_question needs an answer. Review its snapshot, write
+{"question_id": "<pending ID>", "answer": "approve", "reason": "<explanation>"}
+to answer.json, then use the emitted resume command with --answer answer.json.
+Approvals are single-use and bound to the reviewed snapshot.
+See 'tmic run --help' for the protocol and exit codes.""",
     )
     root.add_argument("--version", action="version", version=__version__)
     root.add_argument(
@@ -52,9 +63,47 @@ def parser():
     )
     sub = root.add_subparsers(dest="command", required=True)
     run = sub.add_parser(
-        "run", help="Automate one model from creation through the shared fleet update"
+        "run",
+        help="Automate one model in human or agent mode",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""Modes:
+  --mode human (default): interactive questions in a terminal.
+  --mode agent: no stdin reads; stdout is one JSON object (protocol_version 1).
+                Stage logs go to stderr. --non-interactive is an alias.
+
+Agent protocol:
+  1. tmic run org/model --mode agent --out work/model
+  2. Exit 3 returns pending_question with question_id, kind, choices,
+     requires_reason, context, and context_sha256. Inspect the referenced
+     files/diffs, and ask the operator when their decision is needed.
+  3. Write an answer file:
+     {"question_id": "<ID>", "answer": "approve", "reason": "Reviewed change"}
+     Use 'retry' for retry questions or 'defer' to leave the question pending.
+     Baseline changes require a nonempty reason.
+  4. Run the emitted resume command with --answer answer.json.
+     The answer is consumed once; the next question needs a separate answer.
+
+Workspace changes invalidate approvals. Stale or reused answers return exit 3
+with answer_error and the current pending_question. Malformed answer files exit 2. No approval
+is transferred to a new snapshot. Human and agent modes share resumable state.
+--local-only stops after validation; it is preserved in resume commands.
+
+Exit codes: 0 validated/complete; 2 invalid invocation or state; 3 needs input;
+            130 interrupted. Read status in the JSON object, not only the code.
+No Git commit or framework PR is created automatically.""",
     )
     run.add_argument("model")
+    run.add_argument(
+        "--mode",
+        choices=("human", "agent"),
+        default="human",
+        help="Interaction mode (default: human)",
+    )
+    run.add_argument(
+        "--answer",
+        type=Path,
+        help="One-use JSON answer to a pending question; requires --mode agent",
+    )
     run.add_argument("--out", help="Resumable workspace (default: work/mic/ORG--MODEL)")
     run.add_argument("--namespace", default="huggingface-mic")
     run.add_argument("--fleet", choices=tuple(fleet.FILES), default="prototypes")
@@ -75,7 +124,7 @@ def parser():
     run.add_argument(
         "--non-interactive",
         action="store_true",
-        help="Save questions and exit 3 when human input is needed",
+        help="Alias for --mode agent",
     )
     run.add_argument(
         "--timeout", type=int, default=1800, help="Timeout in seconds per stage"
