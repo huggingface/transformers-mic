@@ -72,6 +72,8 @@ def select(changed_files, contract_dirs):
     """{contract: reason} for the contracts the changed files can affect."""
     selected = {}
     for path in changed_files:
+        if path == "tests/contracts.lock":
+            return {name: f"fleet revision ({path})" for name in contract_dirs}
         if path.startswith(("utils/contracts/", ".github/workflows/contracts", "tests/contracts/fleet", "tests/contracts/prototype-fleet")):
             return {name: f"contract infrastructure ({path})" for name in contract_dirs}
         if path.startswith("tests/contracts/expectations/"):

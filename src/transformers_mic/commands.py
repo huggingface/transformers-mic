@@ -9,10 +9,10 @@ import re
 import shutil
 import tempfile
 
-from huggingface_hub import HfApi, hf_hub_download
+from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download
 import jsonschema
 
-from . import backend, history, planner, policy, references, resources
+from . import backend, fleet, history, planner, policy, references, resources
 from .hub import DEFAULT_NAMESPACE, canonical_references, upgrade_contract
 from .workspace import Workspace, catalog_patches, digest, read, write
 
@@ -692,24 +692,13 @@ def export(args):
         raise ValueError(
             "Local contract differs from its published pin; publish the reviewed source before export"
         )
-    target = Path(args.transformers_checkout).resolve() / "tests/contracts"
-    path = target / "fleet.lock"
-    old = (
-        read(path)
-        if path.exists()
-        else {
-            "framework": "transformers",
-            "environment": source["environment"],
-            "contracts": {},
-        }
-    )
+    fleet_name = getattr(args, "fleet", "control")
+    path, revision = fleet.download(fleet_name)
+    old = read(path)
     destination_name = getattr(args, "contract_name", None) or name
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", destination_name):
         raise ValueError("Destination contract name must be a safe folder name")
     existing_names = set(old["contracts"])
-    expectations = target / "expectations"
-    if expectations.exists():
-        existing_names.update(p.name for p in expectations.iterdir() if p.is_dir())
     if any(
         n != destination_name and n.casefold() == destination_name.casefold()
         for n in existing_names
@@ -726,23 +715,56 @@ def export(args):
     for pin in [clean["integration"], *clean.get("fixtures", {}).values()]:
         pin.pop("path", None)
     old["contracts"][destination_name] = clean
-    if source.get("known_failures"):
-        old.setdefault("known_failures", {}).update(source["known_failures"])
-    write(path, old)
-    if not clean["integration"]["repo"].endswith("-mic"):
-        shutil.copytree(
-            workspace.expectations,
-            target / "expectations" / destination_name,
-            dirs_exist_ok=True,
-            ignore=shutil.ignore_patterns("*.candidate.json"),
+    # Only this workspace's contract belongs to the update; keep other cases intact.
+    known = old.setdefault("known_failures", {})
+    for key in list(known):
+        if key.startswith(destination_name + "/"):
+            del known[key]
+    for key, value in source.get("known_failures", {}).items():
+        if key.startswith(name + "/"):
+            known[destination_name + key[len(name) :]] = value
+    payload = (json.dumps(old, indent=2, allow_nan=False) + "\n").encode()
+    executed = getattr(args, "execute", False)
+    checkout = getattr(args, "transformers_checkout", None)
+    if executed:
+        commit = HfApi().create_commit(
+            repo_id=fleet.REPOSITORY,
+            repo_type="dataset",
+            parent_commit=revision,
+            operations=[
+                CommitOperationAdd(
+                    path_in_repo=fleet.FILES[fleet_name], path_or_fileobj=payload
+                )
+            ],
+            commit_message=f"Update {destination_name} in the {fleet_name} fleet",
         )
+        revision = commit.oid
+        if checkout:
+            fleet.pin(checkout, revision)
     print(
         json.dumps(
             {
-                "exported": str(target),
+                "repository": fleet.REPOSITORY,
+                "fleet": fleet_name,
                 "contract": destination_name,
-                "next": "Review git diff, install transformers-mic, and invoke tmic check --lock tests/contracts/fleet.lock in CI.",
+                "revision": revision,
+                "execute": executed,
+                "contracts": old["contracts"],
+                "next": "Review the dataset update and the tests/contracts.lock diff."
+                if executed
+                else "Review this preview, then repeat with --execute to upload.",
             }
+        )
+    )
+    return 0
+
+
+def pin(args):
+    revision = fleet.resolve(args.revision)
+    path = fleet.pin(args.transformers_checkout, revision)
+    print(
+        json.dumps(
+            {"repository": fleet.REPOSITORY, "revision": revision, "pin": str(path)}
         )
     )
     return 0

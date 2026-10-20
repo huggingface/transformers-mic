@@ -8,7 +8,7 @@ import sys
 import jsonschema
 from huggingface_hub.errors import HfHubHTTPError
 
-from . import __version__, backend, commands, planner
+from . import __version__, backend, commands, fleet, planner
 from .workspace import Workspace
 
 
@@ -58,7 +58,9 @@ def parser():
     create.add_argument("--out", required=True)
     create.add_argument("--contract", help="Choose a catalog usage path")
     create.add_argument(
-        "--namespace", default="huggingface-mic", help="Hub owner for new artifacts (default: huggingface-mic)"
+        "--namespace",
+        default="huggingface-mic",
+        help="Hub owner for new artifacts (default: huggingface-mic)",
     )
     create.add_argument("--revision")
     create.add_argument(
@@ -116,6 +118,15 @@ def parser():
                 type=Path,
                 help="Run an exported fleet lock without a MIC workspace",
             )
+            run.add_argument(
+                "--fleet",
+                choices=tuple(fleet.FILES),
+                help="Check a fleet from the shared Hub dataset",
+            )
+            run.add_argument(
+                "--fleet-revision",
+                help="Dataset revision (defaults to tests/contracts.lock, then main)",
+            )
             run.add_argument("--fixtures-only", action="store_true")
             run.add_argument("--changed-files", type=Path)
             run.add_argument("--output", type=Path)
@@ -169,9 +180,21 @@ def parser():
     publish.add_argument("--private", action="store_true")
     export = sub.add_parser(
         "export",
-        help="Write immutable pins and expectations into a Transformers checkout",
+        help="Preview or publish immutable pins to the shared fleet dataset",
     )
-    export.add_argument("--transformers-checkout", required=True)
+    export.add_argument(
+        "--transformers-checkout",
+        help="Write tests/contracts.lock after a successful upload",
+    )
+    export.add_argument("--fleet", choices=tuple(fleet.FILES), default="control")
+    export.add_argument(
+        "--execute", action="store_true", help="Upload the previewed fleet update"
+    )
+    pin = sub.add_parser(
+        "pin", help="Pin a dataset revision in a Transformers checkout"
+    )
+    pin.add_argument("--transformers-checkout", required=True)
+    pin.add_argument("--revision", default="main")
     export.add_argument(
         "--contract-name", help="Destination name, e.g. mic-bert alongside BERT"
     )
@@ -251,7 +274,11 @@ def external_check(args):
     for name in selected:
         pin = lock["contracts"][name]["integration"]
         manifest = read(
-            hf_hub_download(canonical_repo(pin["repo"]), "integration.json", revision=pin["revision"])
+            hf_hub_download(
+                canonical_repo(pin["repo"]),
+                "integration.json",
+                revision=pin["revision"],
+            )
         )
         for variant in manifest["integrations"]["transformers"].get(
             "variants", {"default": {}}
@@ -274,8 +301,41 @@ def main(argv=None):
             from .batch import run
 
             return run(args)
-        if args.command == "check" and args.lock:
-            return external_check(args)
+        if args.command == "check":
+            if args.lock and (args.fleet or args.fleet_revision):
+                raise ValueError(
+                    "--lock cannot be combined with --fleet or --fleet-revision"
+                )
+            if args.lock and args.lock.name == "contracts.lock":
+                args.fleet_revision = fleet.read_pin(args.lock)
+                args.lock = None
+                args.fleet = "control"
+            if (
+                not args.lock
+                and not args.fleet
+                and not args.fleet_revision
+                and Path("tests/contracts.lock").exists()
+                and not (Path(args.workspace) / ".mic/project.json").exists()
+            ):
+                args.fleet = "control"
+            if args.fleet or args.fleet_revision:
+                revision = args.fleet_revision
+                if not revision and Path("tests/contracts.lock").exists():
+                    revision = fleet.read_pin("tests/contracts.lock")
+                args.lock, revision = fleet.download(
+                    args.fleet or "control", revision or "main"
+                )
+                print(
+                    json.dumps(
+                        {
+                            "fleet_repository": fleet.REPOSITORY,
+                            "fleet_revision": revision,
+                        }
+                    ),
+                    file=sys.stderr,
+                )
+            if args.lock:
+                return external_check(args)
         if args.command == "report":
             options = [str(args.results.resolve()), "--runner", "tmic check"]
             if args.log:
