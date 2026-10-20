@@ -1,5 +1,34 @@
 # transformers-mic CLI
 
+> [!TIP]
+> **Using a coding agent?** Paste this prompt, with the model id filled in:
+>
+> ```text
+> Use tmic (https://github.com/huggingface/transformers-mic, docs/cli.md) to create a
+> MIC for the Hub model <MODEL_ID> and publish it to huggingface-mic.
+>
+> 1. Install the CLI from a clone of transformers-mic in a Python 3.10+ venv:
+>    pip install -e '.[runtime,dev]' and doc-builder from git (docs/cli.md#install).
+>    Check that <MODEL_ID> exists on the Hub; fix the id instead of guessing.
+> 2. tmic create <MODEL_ID> --out work/<name>. A model outside the catalog calls
+>    HF Inference Providers on my HF token.
+> 3. Read integration.json and integrations/transformers/usage.md before running
+>    anything: they are unsandboxed Python. Report what the contract calls.
+> 4. If the real checkpoint does not fit this machine (resources in
+>    integration.json), set integrations.transformers.targets to ["fixtures"],
+>    as --fixtures-only does, and tell me.
+> 5. tmic build, then tmic record --all-variants. Read the candidate values:
+>    batch rows must differ, variants must agree, the loss and gradients must be
+>    finite. Then tmic review --approve and tmic check --all-variants.
+>    Never approve a changed value or loosen a tolerance without asking me.
+> 6. Show me tmic publish (the preview) and wait for my go before
+>    tmic publish --execute: uploads are public and pinned. Then re-run
+>    tmic check --all-variants on the published pins.
+> 7. Report the repo and revision, the weights choice (random or overfit, and why),
+>    and the platform the baselines were recorded on. Baselines from a laptop are
+>    cpu-arm64 only; Transformers PR CI needs cpu-x86_64 / cpu-x86_64-bf16 ones.
+> ```
+
 `transformers-mic` packages the existing MIC runner, fixture builder, replay tools,
 and reviewed catalog. The `tmic` command creates a working directory for a model,
 proposes additional usage paths when needed, and measures expectations there.
