@@ -83,7 +83,7 @@ jobs:
         shell: bash
         working-directory: experiments
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # github.workspace is the host path; steps run in the container (/__w/...).
       - name: Output directory
@@ -254,7 +254,7 @@ jobs:
                   print(f"    {r['family']:9} {r['weights']:8} seed={r['seed']} {hits} delta={r.get('max_absolute_delta')} {r.get('error', '')[:120]}")
           EOF
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: gpu-checks
@@ -279,7 +279,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install the pinned environment
         run: |
           PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
@@ -341,7 +341,7 @@ jobs:
                 --device cuda --build "$(cat out/$stage.sha)" --output "out/assisted-$model-$stage.json" > "out/assisted-$model-$stage.log" 2>&1
             done
           done
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: whisper-contract
@@ -364,7 +364,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install the pinned environment
         run: |
           PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
@@ -401,7 +401,7 @@ jobs:
               --speech experiments/audio/1272-128104-0000.flac --device cuda \
               --build "$(cat out/$stage.sha)" --output "out/large-$stage.json" > "out/large-$stage.log" 2>&1
           done
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: whisper-assist-large
@@ -424,7 +424,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install the pinned environment
         run: |
           PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
@@ -433,7 +433,7 @@ jobs:
           python3 -m pip freeze > out/pip-freeze.txt
       - name: Record, check and replay Whisper speech
         run: bash .github/scripts/whisper_speech.sh
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: whisper-speech
@@ -457,7 +457,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install the pinned control
         run: |
           PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
@@ -473,7 +473,7 @@ jobs:
             args=(--profiles "${profiles[@]}")
           fi
           python3 experiments/dependency_study.py --out out/dependency-stability "${args[@]}"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: dependency-stability
@@ -497,7 +497,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install the pinned GPU environment
         run: |
           PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
@@ -505,7 +505,7 @@ jobs:
           nvidia-smi > out/nvidia-smi.txt
       - name: Validate explicit normalization through full model calls
         run: python3 experiments/wav2vec2_normalization_control.py --out out/normalization
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: wav2vec2-normalization
@@ -529,7 +529,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - name: Install the pinned environment and standalone wheel
         run: |
           PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
@@ -558,7 +558,7 @@ jobs:
           tmic build --rebuild --weights random
           tmic record --target mic-bert-base-uncased-slim
           cp -R .mic "$GITHUB_WORKSPACE/out/fresh-project"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         if: always()
         with:
           name: mic-package
@@ -584,7 +584,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install the pinned environment and standalone CLI
         run: |
           PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
@@ -595,7 +595,7 @@ jobs:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -q tests > out/package-tests.txt
       - name: Download the previous fleet artifacts
         if: inputs.regeneration_previous_run != ''
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: mic-regeneration
           run-id: ${{ inputs.regeneration_previous_run }}
@@ -634,7 +634,7 @@ jobs:
         if: always()
         run: |
           if [ -d /tmp/tmic-regeneration ]; then cp -R /tmp/tmic-regeneration out/regeneration; fi
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: mic-regeneration
@@ -662,7 +662,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install the pinned runtime and packaged CLI
         run: |
           PY=python3 TORCH_INDEX=cu128 FETCH=8625785e7e3e138a328ec2e678dc198e356e7c6c .github/scripts/install_pinned.sh
@@ -674,7 +674,7 @@ jobs:
           cp -R experiments/published-prototypes /tmp/tmic-published
           cd /tmp
           python3 "$GITHUB_WORKSPACE/.github/scripts/validate_published.py" /tmp/tmic-published $MIC_MODELS
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: mic-published
@@ -699,7 +699,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Install pinned CPU dependencies and the Transformers proof revision
         run: |
           PY=python FETCH=${{ inputs.transformers_sha }} SHA=${{ inputs.transformers_sha }} TORCH_INDEX=cpu .github/scripts/install_pinned.sh
@@ -711,7 +711,7 @@ jobs:
           cp -R experiments/published-prototypes /tmp/tmic-cpu
           cd /tmp
           python "$GITHUB_WORKSPACE/.github/scripts/record_cpu_prototypes.py" /tmp/tmic-cpu $MIC_MODELS
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: mic-cpu-record
