@@ -4,9 +4,9 @@
 and reviewed catalog. The `tmic` command creates a working directory for a model,
 proposes additional usage paths when needed, and measures expectations there.
 It is an alpha implementation: generated plans still need code review and a
-working model-specific build recipe. New artifacts use `hf-internal-testing/mic-{name}-slim` and
-`mic-{name}-integration`. The nine legacy `proto-*-slim` repositories were moved
-to `mic-*-slim`, preserving suffixes and revisions; historical evidence stays as recorded.
+working model-specific build recipe. New projects use one repository,
+`huggingface-mic/<name>-mic`, for slim weights, the contract, usage and reviewed
+framework expectations. See [the Hub layout](hub-organization.md).
 
 ## Install
 
@@ -30,27 +30,28 @@ the contract's inputs move the outputs (the sensitivity gate).
 1. **Create the workspace from the real checkpoint.**
 
    ```sh
-   tmic create google-bert/bert-base-uncased --out work/bert --namespace hf-internal-testing
+   tmic create google-bert/bert-base-uncased --out work/bert --namespace huggingface-mic
    cd work/bert
    ```
 
-   `--namespace` sets the Hub owner of the new `mic-*-slim` and
-   `mic-*-integration` repos. Without it, they belong to whoever is logged in
-   (for example `you/mic-bert-base-uncased-integration`). It has no effect on
-   which token pays for the LLM call. Set it here, because `create` writes the
-   name into the manifest and the lock, and changing it later means creating
-   the workspace again. Nothing is uploaded until step 7.
+   `--namespace` sets the owner of the single `<name>-mic` repository.
+   It defaults to `huggingface-mic`; an explicit owner overrides that default.
+   Nothing is uploaded until publication. The workspace holds usage and candidate
+   references locally; reviewed expectations belong under
+   `integrations/transformers/expectations/<platform>/`, alongside `usage.md`.
 
    If the checkpoint is in the bundled catalog, this reuses the published
    contract and needs no LLM call. Add `--regenerate` to build a new
-   `mic-*-slim` fixture instead of reusing the published one. If the checkpoint
+   `<name>-mic` fixture instead of reusing the published one. If the checkpoint
    is new, the planner drafts the contract on your HF token (see
    [When the LLM is used](#when-the-llm-is-used)). By default the contract
    covers both the real checkpoint and the fixture. Use `--fixtures-only` to
    declare a slim-only contract.
 
-2. **Read the draft.** Open `integration.json` and `usage.md` before running
-   anything. They are executable Python, and nothing sandboxes them.
+2. **Read the draft.** Open `integration.json` and
+   `integrations/transformers/usage.md` in the workspace's MIC model directory
+   (`example/hub/<name>-mic/`) before running anything. The usage is executable
+   Python, and nothing sandboxes it.
 
 3. **Build the fixture.**
 
@@ -86,7 +87,8 @@ the contract's inputs move the outputs (the sensitivity gate).
    ```
 
    Every case runs twice, each time in a fresh process, and the results are
-   written to `*.candidate.json`.
+   written to `integrations/transformers/expectations/<platform>/*.candidate.json`
+   in the same MIC model directory as the usage.
 
 5. **Review and approve them.**
 
@@ -121,8 +123,9 @@ the contract's inputs move the outputs (the sensitivity gate).
    tmic export --transformers-checkout /path/to/transformers
    ```
 
-   This writes `tests/contracts/fleet.lock` and the expectations. It does not
-   commit or open a PR.
+   This writes only `tests/contracts/fleet.lock` in the Transformers checkout.
+   Expectations stay beside usage in the pinned Hub model; export does not copy
+   them into Transformers. It does not commit or open a PR.
 
 ## Several models at once
 
@@ -229,16 +232,16 @@ platforms actually run, not an untested CPU/GPU or dependency matrix.
 ## Hub and Transformers updates
 
 `publish` previews the destination after validation. `publish --execute` delegates
-to the existing checksum-checked Hub publishers and updates the lock to immutable
-Hub revisions. It invalidates local check receipts, so check again before export.
-Upload requires write access to the integration/fixture namespaces; catalog
-artifacts remain under their existing owners.
+to the checksum-checked MIC publisher and updates the lock to an immutable
+Hub revision. It invalidates local check receipts, so check again before export.
+Upload requires write access to the MIC model namespace, which defaults to
+`huggingface-mic`.
 
 `export --contract-name mic-bert` gives the destination a distinct name when
-retaining a historical `BERT` contract. Export rejects names that differ only
-by case, avoiding baseline-folder collisions on macOS and Windows.
+retaining an existing `BERT` contract. Export rejects names that differ only
+by case.
 
-`export` writes a reviewable `tests/contracts/fleet.lock` and expectations into the
+`export` writes a reviewable `tests/contracts/fleet.lock` into the
 provided checkout, preserves other contracts, and removes workspace paths from
 pins. It does not commit, open a PR, or merge Transformers changes. CI can run:
 
@@ -252,48 +255,32 @@ expectations, checks and artifacts; keep them outside versioned source or ignore
 prototype still includes Transformers.js contracts, but the CLI does not publish
 or export a JavaScript fleet.
 
-## Validation of this alpha
+## Files and publication
 
-The current fleet has **23 published architectures**, each checked on GPU in
-three variants. `auto` uses explicit Auto classes for BERT/T5/ViT, without a
-separate fixture. All Hub fixtures and contracts use immutable pins.
-[Per-model results and scope](../experiments/results/prototype-regeneration.json).
-Some GPU checks use documented model-scoped patches; GPT-OSS's slim is dense,
-so these results do not establish unpatched or quantized-kernel coverage.
+A MIC model has one location for usage and expectations, both in the workspace
+and on the Hub:
 
-Native m8i CPU recording checked/exported **22 models / 66 variants**. The
-four-thread proof-branch push executed **77 cases: 73 pass, four exact Whisper
-xfails**. Wav2Vec2 skips only loss/gradients. The PR synthetic merge uses newer
-source: Whisper generation succeeds, exposing an obsolete error match and
-prototype numeric/missing-BF16-reference failures. It remains red.
-[Current proof and remaining work](transformers-ci-proof.md).
-
-Use the recorded runtime and four-thread profile for CPU reproduction. The proof
-asserts the checkout import path and thread count. New/unchanged candidates were
-approved; numeric tolerances were not loosened. Table Transformer's focused
-four-thread repeat exactly matched its original references.
-
-**CSM, Gemma3n and PI0 remain rejected**: real audio processor incompatibility,
-nonfinite gradients, and weak state/image sensitivity, respectively. DETR and
-SpeechT5 exempt only amplitude scaling canceled by input normalization; their
-remaining probes and the .001 threshold stay fixed. The new fleet has no
-historical-replay or full-checkpoint claim.
-
-Regenerate or resume the declared fleet:
-
-```sh
-tmic batch --models-file experiments/proto-models.json --out work/fleet --phase prepare --no-history
-tmic batch --models-file experiments/proto-models.json --out work/fleet --phase run --resume
-tmic batch --models-file experiments/proto-models.json --out work/fleet --phase run --resume --select whisper
+```text
+<name>-mic/
+  config.json
+  model.safetensors
+  build.json
+  integration.json
+  integrations/
+    transformers/
+      usage.md
+      expectations/
+        <platform>/
+          <target>.<variant>.json
+          <target>.<variant>.candidate.json   # local candidates; never uploaded
 ```
 
-`batch` continues after failures and records each stage. `--publish` explicitly
-adds upload and published-pin checks. `mic-published` can check GPU pins only
-with `published_gpu_only=true`; native CPU recording/checks remain separate.
+`tmic record` writes candidates in this expectations directory. `tmic review`
+approves files there, and `tmic check` reads them there. There is no second
+expectations directory in the Transformers checkout.
 
-31 package tests and ruff pass. Wheel/sdist checks verify bundled resources and
-exclude weights, candidate baselines and installed JavaScript dependencies.
-The installed CLI creates an offline BERT workspace outside the checkout.
-Transformers `make style` passes in the proof worktree. The
-[initial package validation](../experiments/results/mic_cli_validation.json)
-is separate from the architecture fleet study.
+`tmic publish --execute` combines the built weights, usage and reviewed expectations
+in `huggingface-mic/<name>-mic` and pins the Hub commit. Local build artifacts are
+staged under `.mic/artifacts/` until publication. `tmic export` writes the fleet
+lock into Transformers; the lock references the Hub snapshot containing the
+expectations. CI loads them from that immutable snapshot.

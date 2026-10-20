@@ -27,6 +27,8 @@ def dispatch(tool, workspace, args):
     if source.name == "example":
         sys.path.insert(1, str(source.parent / "experiments"))
     runner = importlib.import_module("run")
+    from .hub import canonical_repo
+    runner.canonical_repo = canonical_repo
     runner.HERE = workspace / "example"
     runner.SCHEMAS = source / "schemas"
     runner.schema.cache_clear()
@@ -106,6 +108,7 @@ def dispatch(tool, workspace, args):
             entry["checkpoints"],
             Path(out),
             keep_random=bool(selection),
+            contract_repo=entry["integration"]["repo"],
             inspect_checkpoint=importlib.import_module(
                 "transformers_mic.inspection"
             ).inspect_checkpoint,

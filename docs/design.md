@@ -1,5 +1,7 @@
 # MICs: technical design
 
+Current storage layout: one `huggingface-mic/<name>-mic` model repo contains weights, contract and `integrations/<framework>/expectations/` beside usage. Framework locks pin the snapshot. See [Hub layout](hub-organization.md); split-repo paths below describe the historical prototype.
+
 Mechanics behind the [proposed standard](../README.md#the-proposed-standard). Results: [evidence](evidence.md); fixtures: [small fixtures](fixtures.md); limits: [open problems](problems-and-opened-questions.md).
 
 ## The standard: contract layout

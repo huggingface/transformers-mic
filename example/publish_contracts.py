@@ -39,7 +39,7 @@ def main():
                 continue
             pin = contract["integration"]
             folder = (locks[fw].parent / pin["path"]).resolve()
-            source, users = repos.setdefault(pin["repo"], (folder, []))
+            source, users = repos.setdefault(run.canonical_repo(pin["repo"]), (folder, []))
             if source != folder:
                 raise SystemExit(f"{pin['repo']}: fleet locks point at different folders ({source}, {folder})")
             users.append((fw, name))
@@ -50,9 +50,9 @@ def main():
         if all(p["revision"] != "unpublished" and p.get("files_sha256") == files_sha256 for p in pins):
             print(json.dumps({"unchanged": repo, "revision": pins[0]["revision"]}), flush=True)
             continue
-        api.create_repo(repo, private=args.private, exist_ok=True)
+        api.create_repo(run.canonical_repo(repo), private=args.private, exist_ok=True)
         commit = api.upload_folder(
-            repo_id=repo,
+            repo_id=run.canonical_repo(repo),
             folder_path=folder,
             ignore_patterns=["node_modules/*", "**/node_modules/*", ".cache/*"],
             commit_message=f"MIC {run.short(repo)} (files_sha256 {files_sha256[:12]})",

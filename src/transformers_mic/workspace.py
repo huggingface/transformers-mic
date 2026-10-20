@@ -71,6 +71,27 @@ class Workspace:
     def fixture(self):
         return self.manifest["checkpoints"][self.state["model"]]["fixture"]
 
+    @property
+    def expectations(self):
+        if (self.contract_root / ".mic-repo.json").exists():
+            return self.contract_root / "integrations/transformers/expectations"
+        return self.lock_path.parent / "expectations" / self.state["contract"]
+
+    def update_layout(self):
+        if not (self.contract_root / ".mic-repo.json").exists():
+            return
+        files = [
+            p.relative_to(self.contract_root).as_posix()
+            for p in self.contract_root.rglob("*")
+            if p.is_file()
+            and p.name not in ("README.md", ".gitattributes", ".mic-repo.json")
+            and "expectations" not in p.relative_to(self.contract_root).parts
+        ]
+        write(
+            self.contract_root / ".mic-repo.json",
+            {"format": "mic-umbrella-v1", "contract_files": sorted(files)},
+        )
+
     def save_state(self, **updates):
         state = self.state
         state.update(updates)
@@ -83,19 +104,47 @@ class Workspace:
     def from_catalog(self, model, name, weights, readable):
         self.ensure_new()
         catalog = read(resources.catalog_lock())
-        entry = catalog["contracts"][name]
+        from .hub import upgrade_contract, umbrella_references
+
+        original = catalog["contracts"][name]
+        entry = upgrade_contract(original)
         source = resources.catalog() / "hub" / f"{name}-integration"
-        shutil.copytree(
-            source, self.root / "example/hub" / source.name, dirs_exist_ok=True
+        upgraded = entry["integration"]["repo"] != original["integration"]["repo"]
+        root = (
+            self.root
+            / "example/hub"
+            / (entry["integration"]["repo"].split("/")[-1] if upgraded else source.name)
         )
-        for repo in entry.get("fixtures", {}):
-            source = resources.catalog() / "hub" / repo.split("/")[-1]
+        shutil.copytree(source, root, dirs_exist_ok=True)
+        entry["integration"]["path"] = str(Path("../../../hub") / root.name)
+        if upgraded:
+            write(
+                root / "integration.json",
+                umbrella_references(read(root / "integration.json")),
+            )
+            files = [
+                p.relative_to(root).as_posix()
+                for p in root.rglob("*")
+                if p.is_file()
+                and p.name not in ("README.md", ".gitattributes")
+                and "expectations" not in p.relative_to(root).parts
+            ]
+            write(
+                root / ".mic-repo.json",
+                {"format": "mic-umbrella-v1", "contract_files": sorted(files)},
+            )
+        for repo in original.get("fixtures", {}):
+            fixture_source = resources.catalog() / "hub" / repo.split("/")[-1]
             shutil.copytree(
-                source, self.root / "example/hub" / source.name, dirs_exist_ok=True
+                fixture_source,
+                self.root / "example/hub" / fixture_source.name,
+                dirs_exist_ok=True,
             )
         shutil.copytree(
             resources.catalog_expectations() / name,
-            self.lock_path.parent / "expectations" / name,
+            root / "integrations/transformers/expectations"
+            if upgraded
+            else self.lock_path.parent / "expectations" / name,
             dirs_exist_ok=True,
         )
         write(
@@ -123,11 +172,19 @@ class Workspace:
         self, model, revision, namespace, name, manifest, usage, weights, readable
     ):
         self.ensure_new()
-        root = self.root / "example/hub" / f"{name}-integration"
+        repo = next(iter(manifest["fixtures"]))
+        root = self.root / "example/hub" / repo.split("/")[-1]
         entry = manifest["integrations"]["transformers"]["entry_point"]
         (root / entry).parent.mkdir(parents=True, exist_ok=True)
         (root / entry).write_text(usage)
         write(root / "integration.json", manifest)
+        write(
+            root / ".mic-repo.json",
+            {
+                "format": "mic-umbrella-v1",
+                "contract_files": ["integration.json", entry],
+            },
+        )
         (root / "README.md").write_text(
             f"---\ntags: [mic, test-artifact]\nbase_model: {model}\n---\n\n# {manifest['name']}\n\nGenerated usage draft; expected outputs must be measured and reviewed.\n"
         )
@@ -147,9 +204,9 @@ class Workspace:
                 "contracts": {
                     name: {
                         "integration": {
-                            "repo": f"{namespace}/mic-{name}-integration",
+                            "repo": repo,
                             "revision": "unpublished",
-                            "path": f"../../../hub/{name}-integration",
+                            "path": f"../../../hub/{repo.split('/')[-1]}",
                         },
                         "fixtures": fixtures,
                         "checkpoints": {model: revision},
@@ -189,7 +246,7 @@ class Workspace:
             for p in self.contract_root.rglob("*")
             if p.is_file() and p.name not in ("README.md", ".gitattributes")
         ]
-        paths += list((self.lock_path.parent / "expectations").rglob("*.json"))
+        paths += list(self.expectations.rglob("*.json"))
         return digest(
             {
                 str(p.relative_to(self.root)): hashlib.sha256(
@@ -206,7 +263,8 @@ class Workspace:
             ).hexdigest()
             for p in self.contract_root.rglob("*")
             if p.is_file()
-            and p.name not in ("README.md", ".gitattributes")
+            and p.name not in ("README.md", ".gitattributes", ".mic-repo.json")
+            and "expectations" not in p.relative_to(self.contract_root).parts
             and not {"node_modules", ".cache", ".git"}.intersection(
                 p.relative_to(self.contract_root).parts
             )

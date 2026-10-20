@@ -107,6 +107,12 @@ _DECORATOR = re.compile(r"^\s*#\s*pytest-decorator:.*$", re.MULTILINE)
 WEIGHT_PATTERNS = ["*.msgpack", "*.h5", "*.ot", "*.onnx", "onnx/*", "*.tflite", "flax_model*", "tf_model*", "rust_model*"]
 
 
+def canonical_repo(repo):
+    """Resolve pre-migration MIC ids without modifying immutable manifests."""
+    prefix = "hf-internal-testing/mic-"
+    return "huggingface-mic/mic-" + repo[len(prefix):] if repo.startswith(prefix) else repo
+
+
 @cache
 def schema(name):
     return json.loads((SCHEMAS / f"{name}.schema.json").read_text())
@@ -137,7 +143,10 @@ def digest(files):
 
 
 def file_hashes(folder):
-    skip = ("README.md", "build.json", ".gitattributes")
+    skip = {"README.md", "build.json", ".gitattributes", ".mic-repo.json"}
+    layout = folder / ".mic-repo.json"
+    if layout.exists():
+        skip.update(json.loads(layout.read_text())["contract_files"])
     return {
         f.name: hashlib.sha256(f.read_bytes()).hexdigest()
         for f in sorted(folder.iterdir())
@@ -163,6 +172,12 @@ def fixture_problem(folder, pin):
 
 def contract_files(folder):
     """{relative path: sha256} of a contract's files, as the fleet lock pins them (README and installed packages excluded)."""
+    layout = folder / ".mic-repo.json"
+    if layout.exists():
+        names = json.loads(layout.read_text())["contract_files"]
+        if any(Path(n).is_absolute() or ".." in Path(n).parts for n in names):
+            raise ValueError("invalid contract file path in .mic-repo.json")
+        return {name: hashlib.sha256((folder / name).read_bytes()).hexdigest() for name in sorted(names)}
     return {
         f.relative_to(folder).as_posix(): hashlib.sha256(f.read_bytes()).hexdigest()
         for f in sorted(folder.rglob("*"))
@@ -181,7 +196,7 @@ def contract_folder(lock_dir, pin, local):
         return path, pin["revision"] if same or pin["revision"] == "unpublished" else "local"
     from huggingface_hub import snapshot_download
 
-    folder = Path(snapshot_download(pin["repo"], revision=pin["revision"]))
+    folder = Path(snapshot_download(canonical_repo(pin["repo"]), revision=pin["revision"]))
     if digest(contract_files(folder)) != pin.get("files_sha256"):
         raise SystemExit(f"{pin['repo']}@{pin['revision'][:10]}: files differ from the fleet lock's files_sha256")
     return folder, pin["revision"]
@@ -195,9 +210,9 @@ def checkpoint_path(repo, revision):
     cached = Path(HF_HUB_CACHE) / f"models--{repo.replace('/', '--')}" / "snapshots" / revision
     if cached.is_dir() and any(f.suffix in (".safetensors", ".bin") for f in cached.iterdir()):
         return str(cached)
-    files = HfApi().list_repo_files(repo, revision=revision)
+    files = HfApi().list_repo_files(canonical_repo(repo), revision=revision)
     ignore = WEIGHT_PATTERNS + (["*.bin", "*.pt"] if any(f.endswith(".safetensors") for f in files) else [])
-    return snapshot_download(repo, revision=revision, ignore_patterns=ignore)
+    return snapshot_download(canonical_repo(repo), revision=revision, ignore_patterns=ignore)
 
 
 def source_folder(lock_dir, repo, pin):
@@ -213,7 +228,7 @@ def fixture_folder(lock_dir, repo, pin, local):
         return source_folder(lock_dir, repo, pin)
     from huggingface_hub import snapshot_download
 
-    return Path(snapshot_download(repo, revision=pin["revision"]))
+    return Path(snapshot_download(canonical_repo(repo), revision=pin["revision"]))
 
 
 def targets(lock_dir, contract, manifest, framework, fixtures_only=False, local_fixtures=False):
@@ -223,10 +238,10 @@ def targets(lock_dir, contract, manifest, framework, fixtures_only=False, local_
     if "fixtures" in integration["targets"]:
         for repo, pin in contract.get("fixtures", {}).items():
             folder = fixture_folder(lock_dir, repo, pin, local_fixtures)
-            yield short(repo), "fixture", str(folder), pin["revision"], fixture_problem(folder, pin)
+            yield pin.get("target", short(repo)), "fixture", str(folder), pin["revision"], fixture_problem(folder, pin)
     elif "fixtures" in unsupported:
         for repo in manifest["fixtures"]:
-            yield short(repo), "fixture", None, None, unsupported["fixtures"]
+            yield contract.get("fixtures", {}).get(repo, {}).get("target", short(repo)), "fixture", None, None, unsupported["fixtures"]
     if fixtures_only or "checkpoints" not in integration["targets"]:
         return
     for repo in manifest["checkpoints"]:
@@ -580,6 +595,7 @@ def main():
     parser.add_argument("--local-contracts", action="store_true",
                         help="run the contracts in example/hub instead of their pinned Hub revisions (records contract_revision 'local' if they differ)")
     parser.add_argument("--lock", type=Path, help="fleet lock to run (default <framework>/tests/contracts/fleet.lock next to this script); expectations/ sits next to it")
+    parser.add_argument("--expectations", type=Path, help="override baseline directory")
     parser.add_argument("--variant", default="default")
     parser.add_argument("--isolate", action="store_true", help="run each target in its own process")
     parser.add_argument("--record", action="store_true", help="write candidate baselines for review")
@@ -628,7 +644,7 @@ def main():
 
     def emit(record):
         nonlocal status
-        entry = known_entry(known, record["contract"], record["target"])
+        entry = known_entry(known, record.get("contract_name", record["contract"]), record["target"])
         if entry and not args.record and not args.golden and ("match" in entry or "skip_outputs" not in entry):
             issue = entry["issue"]
             if record["status"] in ("fail", "error"):
@@ -661,6 +677,7 @@ def main():
                     raise SystemExit(f"{root}: differs from the pinned {contract['integration']['repo']}; publish it or pass --local-contracts")
             base = {
                 "contract": contract["integration"]["repo"],
+                "contract_name": name,
                 "contract_name": name,
                 "contract_revision": contract_revision,
                 "framework": args.framework,
@@ -714,14 +731,14 @@ def main():
                 actual = json.loads(lines[-1])
                 platform = platform_class(actual["runtime"]["device"], actual["runtime"].get("dtype"))
                 record["platform"] = platform
-                entry = known_entry(known, record["contract"], target)
+                entry = known_entry(known, record.get("contract_name", record["contract"]), target)
                 skipped = sorted(entry.get("skip_outputs", [])) if entry and not args.record else []
                 outputs = {k: r for k, r in manifest["outputs"].items() if k not in skipped}
                 checked = required - set(skipped)
                 if skipped:
                     record["skipped_outputs"] = skipped
                 suffix = "" if args.variant == "default" or args.golden else f".{args.variant}"
-                platform_dir = lock_dir / "expectations" / name / (args.golden or platform)
+                platform_dir = (args.expectations or (root / "integrations" / args.framework / "expectations" if (root / ".mic-repo.json").exists() else lock_dir / "expectations" / name)) / (args.golden or platform)
                 baseline = platform_dir / f"{target}{suffix}.json"
                 record["baseline"] = shown(baseline)
                 if args.golden:

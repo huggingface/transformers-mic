@@ -1,5 +1,7 @@
 # Full example: MICs and the runner prototype
 
+These source fixtures preserve the original split-repo evidence. New workspaces and published models use [one umbrella repository](../docs/hub-organization.md), with framework expectations beside usage. `publish_mic.py` publishes that layout atomically; the old publishers remain for historical workspaces.
+
 The [transformers-mic CLI](../docs/cli.md) packages this backend and catalog for
 model workspaces, HF-assisted drafts, fixture builds and reviewed expectations.
 
