@@ -1,0 +1,855 @@
+{
+  "aliases": {
+    "huggingface-mic/mic-bert-slim": "huggingface-mic/bert-mic",
+    "hf-internal-testing/mic-bert-slim": "huggingface-mic/bert-mic",
+    "huggingface-mic/mic-bert-integration": "huggingface-mic/bert-mic",
+    "hf-internal-testing/mic-bert-integration": "huggingface-mic/bert-mic",
+    "huggingface-mic/mic-clip-slim": "huggingface-mic/clip-mic",
+    "hf-internal-testing/mic-clip-slim": "huggingface-mic/clip-mic",
+    "huggingface-mic/mic-clip-integration": "huggingface-mic/clip-mic",
+    "hf-internal-testing/mic-clip-integration": "huggingface-mic/clip-mic",
+    "huggingface-mic/mic-detr-slim": "huggingface-mic/detr-mic",
+    "hf-internal-testing/mic-detr-slim": "huggingface-mic/detr-mic",
+    "huggingface-mic/mic-detr-integration": "huggingface-mic/detr-mic",
+    "hf-internal-testing/mic-detr-integration": "huggingface-mic/detr-mic",
+    "huggingface-mic/mic-gemma3-slim": "huggingface-mic/gemma3-mic",
+    "hf-internal-testing/mic-gemma3-slim": "huggingface-mic/gemma3-mic",
+    "huggingface-mic/mic-gemma3-integration": "huggingface-mic/gemma3-mic",
+    "hf-internal-testing/mic-gemma3-integration": "huggingface-mic/gemma3-mic",
+    "huggingface-mic/mic-got_ocr2-slim": "huggingface-mic/got_ocr2-mic",
+    "hf-internal-testing/mic-got_ocr2-slim": "huggingface-mic/got_ocr2-mic",
+    "huggingface-mic/mic-got_ocr2-integration": "huggingface-mic/got_ocr2-mic",
+    "hf-internal-testing/mic-got_ocr2-integration": "huggingface-mic/got_ocr2-mic",
+    "huggingface-mic/mic-gpt2-slim": "huggingface-mic/gpt2-mic",
+    "hf-internal-testing/mic-gpt2-slim": "huggingface-mic/gpt2-mic",
+    "huggingface-mic/mic-gpt2-integration": "huggingface-mic/gpt2-mic",
+    "hf-internal-testing/mic-gpt2-integration": "huggingface-mic/gpt2-mic",
+    "huggingface-mic/mic-gpt_oss-slim": "huggingface-mic/gpt_oss-mic",
+    "hf-internal-testing/mic-gpt_oss-slim": "huggingface-mic/gpt_oss-mic",
+    "huggingface-mic/mic-gpt_oss-integration": "huggingface-mic/gpt_oss-mic",
+    "hf-internal-testing/mic-gpt_oss-integration": "huggingface-mic/gpt_oss-mic",
+    "huggingface-mic/mic-internvl-slim": "huggingface-mic/internvl-mic",
+    "hf-internal-testing/mic-internvl-slim": "huggingface-mic/internvl-mic",
+    "huggingface-mic/mic-internvl-integration": "huggingface-mic/internvl-mic",
+    "hf-internal-testing/mic-internvl-integration": "huggingface-mic/internvl-mic",
+    "huggingface-mic/mic-llama-slim": "huggingface-mic/llama-mic",
+    "hf-internal-testing/mic-llama-slim": "huggingface-mic/llama-mic",
+    "huggingface-mic/mic-llama-integration": "huggingface-mic/llama-mic",
+    "hf-internal-testing/mic-llama-integration": "huggingface-mic/llama-mic",
+    "huggingface-mic/mic-llava-slim": "huggingface-mic/llava-mic",
+    "hf-internal-testing/mic-llava-slim": "huggingface-mic/llava-mic",
+    "huggingface-mic/mic-llava-integration": "huggingface-mic/llava-mic",
+    "hf-internal-testing/mic-llava-integration": "huggingface-mic/llava-mic",
+    "huggingface-mic/mic-mistral3-slim": "huggingface-mic/mistral3-mic",
+    "hf-internal-testing/mic-mistral3-slim": "huggingface-mic/mistral3-mic",
+    "huggingface-mic/mic-mistral3-integration": "huggingface-mic/mistral3-mic",
+    "hf-internal-testing/mic-mistral3-integration": "huggingface-mic/mistral3-mic",
+    "huggingface-mic/mic-modernbert-slim": "huggingface-mic/modernbert-mic",
+    "hf-internal-testing/mic-modernbert-slim": "huggingface-mic/modernbert-mic",
+    "huggingface-mic/mic-modernbert-integration": "huggingface-mic/modernbert-mic",
+    "hf-internal-testing/mic-modernbert-integration": "huggingface-mic/modernbert-mic",
+    "huggingface-mic/mic-qwen2-slim": "huggingface-mic/qwen2-mic",
+    "hf-internal-testing/mic-qwen2-slim": "huggingface-mic/qwen2-mic",
+    "huggingface-mic/mic-qwen2-integration": "huggingface-mic/qwen2-mic",
+    "hf-internal-testing/mic-qwen2-integration": "huggingface-mic/qwen2-mic",
+    "huggingface-mic/mic-qwen2_5_omni-slim": "huggingface-mic/qwen2_5_omni-mic",
+    "hf-internal-testing/mic-qwen2_5_omni-slim": "huggingface-mic/qwen2_5_omni-mic",
+    "huggingface-mic/mic-qwen2_5_omni-integration": "huggingface-mic/qwen2_5_omni-mic",
+    "hf-internal-testing/mic-qwen2_5_omni-integration": "huggingface-mic/qwen2_5_omni-mic",
+    "huggingface-mic/mic-qwen2_5_vl-slim": "huggingface-mic/qwen2_5_vl-mic",
+    "hf-internal-testing/mic-qwen2_5_vl-slim": "huggingface-mic/qwen2_5_vl-mic",
+    "huggingface-mic/mic-qwen2_5_vl-integration": "huggingface-mic/qwen2_5_vl-mic",
+    "hf-internal-testing/mic-qwen2_5_vl-integration": "huggingface-mic/qwen2_5_vl-mic",
+    "huggingface-mic/mic-qwen2_audio-slim": "huggingface-mic/qwen2_audio-mic",
+    "hf-internal-testing/mic-qwen2_audio-slim": "huggingface-mic/qwen2_audio-mic",
+    "huggingface-mic/mic-qwen2_audio-integration": "huggingface-mic/qwen2_audio-mic",
+    "hf-internal-testing/mic-qwen2_audio-integration": "huggingface-mic/qwen2_audio-mic",
+    "huggingface-mic/mic-smolvlm-slim": "huggingface-mic/smolvlm-mic",
+    "hf-internal-testing/mic-smolvlm-slim": "huggingface-mic/smolvlm-mic",
+    "huggingface-mic/mic-smolvlm-integration": "huggingface-mic/smolvlm-mic",
+    "hf-internal-testing/mic-smolvlm-integration": "huggingface-mic/smolvlm-mic",
+    "huggingface-mic/mic-speech_t5-slim": "huggingface-mic/speech_t5-mic",
+    "hf-internal-testing/mic-speech_t5-slim": "huggingface-mic/speech_t5-mic",
+    "huggingface-mic/mic-speech_t5-integration": "huggingface-mic/speech_t5-mic",
+    "hf-internal-testing/mic-speech_t5-integration": "huggingface-mic/speech_t5-mic",
+    "huggingface-mic/mic-t5-slim": "huggingface-mic/t5-mic",
+    "hf-internal-testing/mic-t5-slim": "huggingface-mic/t5-mic",
+    "huggingface-mic/mic-t5-integration": "huggingface-mic/t5-mic",
+    "hf-internal-testing/mic-t5-integration": "huggingface-mic/t5-mic",
+    "huggingface-mic/mic-table_transformer-slim": "huggingface-mic/table_transformer-mic",
+    "hf-internal-testing/mic-table_transformer-slim": "huggingface-mic/table_transformer-mic",
+    "huggingface-mic/mic-table_transformer-integration": "huggingface-mic/table_transformer-mic",
+    "hf-internal-testing/mic-table_transformer-integration": "huggingface-mic/table_transformer-mic",
+    "huggingface-mic/mic-vit-slim": "huggingface-mic/vit-mic",
+    "hf-internal-testing/mic-vit-slim": "huggingface-mic/vit-mic",
+    "huggingface-mic/mic-vit-integration": "huggingface-mic/vit-mic",
+    "hf-internal-testing/mic-vit-integration": "huggingface-mic/vit-mic",
+    "huggingface-mic/mic-wav2vec2-slim": "huggingface-mic/wav2vec2-mic",
+    "hf-internal-testing/mic-wav2vec2-slim": "huggingface-mic/wav2vec2-mic",
+    "huggingface-mic/mic-wav2vec2-integration": "huggingface-mic/wav2vec2-mic",
+    "hf-internal-testing/mic-wav2vec2-integration": "huggingface-mic/wav2vec2-mic",
+    "huggingface-mic/mic-weathernext2-mini-slim": "huggingface-mic/weathernext2-mic",
+    "hf-internal-testing/mic-weathernext2-mini-slim": "huggingface-mic/weathernext2-mic",
+    "huggingface-mic/mic-weathernext2-integration": "huggingface-mic/weathernext2-mic",
+    "hf-internal-testing/mic-weathernext2-integration": "huggingface-mic/weathernext2-mic",
+    "huggingface-mic/mic-whisper-slim": "huggingface-mic/whisper-mic",
+    "hf-internal-testing/mic-whisper-slim": "huggingface-mic/whisper-mic",
+    "huggingface-mic/mic-whisper-integration": "huggingface-mic/whisper-mic",
+    "hf-internal-testing/mic-whisper-integration": "huggingface-mic/whisper-mic",
+    "huggingface-mic/mic-SmolLM-1.7B-slim": "huggingface-mic/smollm-1.7b-mic",
+    "hf-internal-testing/mic-SmolLM-1.7B-slim": "huggingface-mic/smollm-1.7b-mic",
+    "huggingface-mic/mic-SmolLM-slim": "huggingface-mic/smollm-mic",
+    "hf-internal-testing/mic-SmolLM-slim": "huggingface-mic/smollm-mic",
+    "huggingface-mic/mic-bert-base-uncased-slim": "huggingface-mic/bert-base-uncased-mic",
+    "hf-internal-testing/mic-bert-base-uncased-slim": "huggingface-mic/bert-base-uncased-mic",
+    "huggingface-mic/mic-clip-vit-base-patch32-slim": "huggingface-mic/clip-vit-base-patch32-mic",
+    "hf-internal-testing/mic-clip-vit-base-patch32-slim": "huggingface-mic/clip-vit-base-patch32-mic",
+    "huggingface-mic/mic-musicgen-melody-slim": "huggingface-mic/musicgen-melody-mic",
+    "hf-internal-testing/mic-musicgen-melody-slim": "huggingface-mic/musicgen-melody-mic",
+    "huggingface-mic/mic-t5-small-slim": "huggingface-mic/t5-small-mic",
+    "hf-internal-testing/mic-t5-small-slim": "huggingface-mic/t5-small-mic",
+    "huggingface-mic/mic-umt5-small-slim": "huggingface-mic/umt5-small-mic",
+    "hf-internal-testing/mic-umt5-small-slim": "huggingface-mic/umt5-small-mic",
+    "huggingface-mic/mic-wav2vec2-base-960h-slim": "huggingface-mic/wav2vec2-base-960h-mic",
+    "hf-internal-testing/mic-wav2vec2-base-960h-slim": "huggingface-mic/wav2vec2-base-960h-mic",
+    "huggingface-mic/mic-whisper-tiny-slim": "huggingface-mic/whisper-tiny-mic",
+    "hf-internal-testing/mic-whisper-tiny-slim": "huggingface-mic/whisper-tiny-mic",
+    "hf-internal-testing/CLIP-integration": "huggingface-mic/clip-vit-base-patch32-mic",
+    "hf-internal-testing/Wav2Vec2-integration": "huggingface-mic/wav2vec2-base-960h-mic",
+    "hf-internal-testing/BERT-integration": "huggingface-mic/bert-base-uncased-mic",
+    "hf-internal-testing/MusicgenMelody-integration": "huggingface-mic/musicgen-melody-mic",
+    "hf-internal-testing/Whisper-integration": "huggingface-mic/whisper-tiny-mic",
+    "hf-internal-testing/SmolLM-integration": "huggingface-mic/smollm-mic",
+    "hf-internal-testing/T5-integration": "huggingface-mic/t5-small-mic"
+  },
+  "fixtures": {
+    "huggingface-mic/mic-bert-slim": {
+      "repo": "huggingface-mic/bert-mic",
+      "revision": "565fb1745a10faab255312b06a69c6a7d9a698ee",
+      "contract_files_sha256": "dcfd3773a561e9ba7dd3aea0bc24d38ad28a4df85782d3650bbf809dce958f73",
+      "fixture_files_sha256": "0628d40ee37032b80d518cb06f1dca6f8fd27625c76e46199e49685e6c60fb13"
+    },
+    "hf-internal-testing/mic-bert-slim": {
+      "repo": "huggingface-mic/bert-mic",
+      "revision": "565fb1745a10faab255312b06a69c6a7d9a698ee",
+      "contract_files_sha256": "dcfd3773a561e9ba7dd3aea0bc24d38ad28a4df85782d3650bbf809dce958f73",
+      "fixture_files_sha256": "0628d40ee37032b80d518cb06f1dca6f8fd27625c76e46199e49685e6c60fb13"
+    },
+    "huggingface-mic/mic-clip-slim": {
+      "repo": "huggingface-mic/clip-mic",
+      "revision": "945db810ef3b08579db2fe2dd57e4b37ed8e462b",
+      "contract_files_sha256": "c0aef55b4359943629d31f5ffa8271e5e79a980831cf02c499ecebcfe6b39130",
+      "fixture_files_sha256": "eb25463febbbc22df2a054f240a6791ce35a2f5302e4ffc4bc3d8beef144b024"
+    },
+    "hf-internal-testing/mic-clip-slim": {
+      "repo": "huggingface-mic/clip-mic",
+      "revision": "945db810ef3b08579db2fe2dd57e4b37ed8e462b",
+      "contract_files_sha256": "c0aef55b4359943629d31f5ffa8271e5e79a980831cf02c499ecebcfe6b39130",
+      "fixture_files_sha256": "eb25463febbbc22df2a054f240a6791ce35a2f5302e4ffc4bc3d8beef144b024"
+    },
+    "huggingface-mic/mic-detr-slim": {
+      "repo": "huggingface-mic/detr-mic",
+      "revision": "85e28d302059d0540aaf2ed34dfba458a8040882",
+      "contract_files_sha256": "dbdfb7ceee936cdab10be11f23d326bf8bf8c616fa6c7d26bb631de092f36d16",
+      "fixture_files_sha256": "5ea58813db1f02c506fea5e4e774af5b1de8a329b85be95d6dcd54d17f50b8ed"
+    },
+    "hf-internal-testing/mic-detr-slim": {
+      "repo": "huggingface-mic/detr-mic",
+      "revision": "85e28d302059d0540aaf2ed34dfba458a8040882",
+      "contract_files_sha256": "dbdfb7ceee936cdab10be11f23d326bf8bf8c616fa6c7d26bb631de092f36d16",
+      "fixture_files_sha256": "5ea58813db1f02c506fea5e4e774af5b1de8a329b85be95d6dcd54d17f50b8ed"
+    },
+    "huggingface-mic/mic-gemma3-slim": {
+      "repo": "huggingface-mic/gemma3-mic",
+      "revision": "5f50fc50fea580b11176a7063ba6569281555903",
+      "contract_files_sha256": "896e24a8526d57458c74eb01df8d685b5dc7777f476d067aca1590abaeb23ae2",
+      "fixture_files_sha256": "a841e5e6ebfb391619b35159d6e11484fae13626909909743e861d192ace7372"
+    },
+    "hf-internal-testing/mic-gemma3-slim": {
+      "repo": "huggingface-mic/gemma3-mic",
+      "revision": "5f50fc50fea580b11176a7063ba6569281555903",
+      "contract_files_sha256": "896e24a8526d57458c74eb01df8d685b5dc7777f476d067aca1590abaeb23ae2",
+      "fixture_files_sha256": "a841e5e6ebfb391619b35159d6e11484fae13626909909743e861d192ace7372"
+    },
+    "huggingface-mic/mic-got_ocr2-slim": {
+      "repo": "huggingface-mic/got_ocr2-mic",
+      "revision": "c35a1e642aa983aca9eb77e151db3e406b4eb63f",
+      "contract_files_sha256": "238b4d6ac3a1d8f854bd2d1b11a7b4774ce9cdc2d86887faa33216e4505ae4b6",
+      "fixture_files_sha256": "a53662ce54e807e7fb3305e64397b58f1000eb2ad04c0846c36207ea90d4c44d"
+    },
+    "hf-internal-testing/mic-got_ocr2-slim": {
+      "repo": "huggingface-mic/got_ocr2-mic",
+      "revision": "c35a1e642aa983aca9eb77e151db3e406b4eb63f",
+      "contract_files_sha256": "238b4d6ac3a1d8f854bd2d1b11a7b4774ce9cdc2d86887faa33216e4505ae4b6",
+      "fixture_files_sha256": "a53662ce54e807e7fb3305e64397b58f1000eb2ad04c0846c36207ea90d4c44d"
+    },
+    "huggingface-mic/mic-gpt2-slim": {
+      "repo": "huggingface-mic/gpt2-mic",
+      "revision": "fd0b7d99b893833541cecafbc953d8a85aa4d438",
+      "contract_files_sha256": "b7da3c249c668bf8487bc8c660212cb7e4a9f61fae67e42f944722bcb76852e0",
+      "fixture_files_sha256": "e56fc4f7878a200291c4e817c51f40c9987d0b5f70fef553033e2f0c795b3de8"
+    },
+    "hf-internal-testing/mic-gpt2-slim": {
+      "repo": "huggingface-mic/gpt2-mic",
+      "revision": "fd0b7d99b893833541cecafbc953d8a85aa4d438",
+      "contract_files_sha256": "b7da3c249c668bf8487bc8c660212cb7e4a9f61fae67e42f944722bcb76852e0",
+      "fixture_files_sha256": "e56fc4f7878a200291c4e817c51f40c9987d0b5f70fef553033e2f0c795b3de8"
+    },
+    "huggingface-mic/mic-gpt_oss-slim": {
+      "repo": "huggingface-mic/gpt_oss-mic",
+      "revision": "adb29e36a5bb98d7bc0729ddf90698c6e61efa67",
+      "contract_files_sha256": "4de89652049f883621a041aacb524a35c6bab7990d2b4cbaa6f13c8bebec2086",
+      "fixture_files_sha256": "2a9272b5d5a27a2cc84ec6510697fa037bf79d36330fca7bfab3855a36de08c4"
+    },
+    "hf-internal-testing/mic-gpt_oss-slim": {
+      "repo": "huggingface-mic/gpt_oss-mic",
+      "revision": "adb29e36a5bb98d7bc0729ddf90698c6e61efa67",
+      "contract_files_sha256": "4de89652049f883621a041aacb524a35c6bab7990d2b4cbaa6f13c8bebec2086",
+      "fixture_files_sha256": "2a9272b5d5a27a2cc84ec6510697fa037bf79d36330fca7bfab3855a36de08c4"
+    },
+    "huggingface-mic/mic-internvl-slim": {
+      "repo": "huggingface-mic/internvl-mic",
+      "revision": "f01c184e89421347e12f440365cce1b3cc9e3bf1",
+      "contract_files_sha256": "79fbe5e92fc1a9777eb9ea9c9072efe280feea6a8bab8b86cb50015cc421a7c5",
+      "fixture_files_sha256": "7a08fc521ac8d91ff25828e55a3241ae8c62dc8657fcbbbdb9f1616e8d371528"
+    },
+    "hf-internal-testing/mic-internvl-slim": {
+      "repo": "huggingface-mic/internvl-mic",
+      "revision": "f01c184e89421347e12f440365cce1b3cc9e3bf1",
+      "contract_files_sha256": "79fbe5e92fc1a9777eb9ea9c9072efe280feea6a8bab8b86cb50015cc421a7c5",
+      "fixture_files_sha256": "7a08fc521ac8d91ff25828e55a3241ae8c62dc8657fcbbbdb9f1616e8d371528"
+    },
+    "huggingface-mic/mic-llama-slim": {
+      "repo": "huggingface-mic/llama-mic",
+      "revision": "8d226a7446d25c950cc09a3f7101ab553f01699a",
+      "contract_files_sha256": "10acdb69188e12fa97329a658289fdaf5bfe3a7b8580f0e8a892a3c1e36a236e",
+      "fixture_files_sha256": "e2e2a64edcfe417d1350c83fe3c9be1c8184512a88b45b2339bbd41650a54ac3"
+    },
+    "hf-internal-testing/mic-llama-slim": {
+      "repo": "huggingface-mic/llama-mic",
+      "revision": "8d226a7446d25c950cc09a3f7101ab553f01699a",
+      "contract_files_sha256": "10acdb69188e12fa97329a658289fdaf5bfe3a7b8580f0e8a892a3c1e36a236e",
+      "fixture_files_sha256": "e2e2a64edcfe417d1350c83fe3c9be1c8184512a88b45b2339bbd41650a54ac3"
+    },
+    "huggingface-mic/mic-llava-slim": {
+      "repo": "huggingface-mic/llava-mic",
+      "revision": "4b1f1435225c55dfa06c35e63319c36a0f5a9ce2",
+      "contract_files_sha256": "92c3376a2cd7d4fb9e94425e7532d1f443abbb0d8104e593e5fb4d1fd2b30ecf",
+      "fixture_files_sha256": "eebcc2537637f5dc942131626562ff0b6d995329b8a03af39dc2bdf2d6db9660"
+    },
+    "hf-internal-testing/mic-llava-slim": {
+      "repo": "huggingface-mic/llava-mic",
+      "revision": "4b1f1435225c55dfa06c35e63319c36a0f5a9ce2",
+      "contract_files_sha256": "92c3376a2cd7d4fb9e94425e7532d1f443abbb0d8104e593e5fb4d1fd2b30ecf",
+      "fixture_files_sha256": "eebcc2537637f5dc942131626562ff0b6d995329b8a03af39dc2bdf2d6db9660"
+    },
+    "huggingface-mic/mic-mistral3-slim": {
+      "repo": "huggingface-mic/mistral3-mic",
+      "revision": "4e05ef6b5d73ea89e0f35563c284162b1eb8a10f",
+      "contract_files_sha256": "2923ae62a9857e187b4417d046b88acc02a9027f0a892427f8375eaff93efe41",
+      "fixture_files_sha256": "e1ff61844c87c8150ada71205f60c96b9aaf1782f951ea8377a0555446e6d41a"
+    },
+    "hf-internal-testing/mic-mistral3-slim": {
+      "repo": "huggingface-mic/mistral3-mic",
+      "revision": "4e05ef6b5d73ea89e0f35563c284162b1eb8a10f",
+      "contract_files_sha256": "2923ae62a9857e187b4417d046b88acc02a9027f0a892427f8375eaff93efe41",
+      "fixture_files_sha256": "e1ff61844c87c8150ada71205f60c96b9aaf1782f951ea8377a0555446e6d41a"
+    },
+    "huggingface-mic/mic-modernbert-slim": {
+      "repo": "huggingface-mic/modernbert-mic",
+      "revision": "82c6dab7d0832dad0556878a513392a6af7b9b36",
+      "contract_files_sha256": "fc5772805458fa2e9ae1d6ec5b368de7d71b526afc80d99f0153440093ddc558",
+      "fixture_files_sha256": "cd9316607f78870f9f6ec027cd6b848c1d4b87e852aafe80a719e68fa7e53d7b"
+    },
+    "hf-internal-testing/mic-modernbert-slim": {
+      "repo": "huggingface-mic/modernbert-mic",
+      "revision": "82c6dab7d0832dad0556878a513392a6af7b9b36",
+      "contract_files_sha256": "fc5772805458fa2e9ae1d6ec5b368de7d71b526afc80d99f0153440093ddc558",
+      "fixture_files_sha256": "cd9316607f78870f9f6ec027cd6b848c1d4b87e852aafe80a719e68fa7e53d7b"
+    },
+    "huggingface-mic/mic-qwen2-slim": {
+      "repo": "huggingface-mic/qwen2-mic",
+      "revision": "b0dda0caafedc49a98a2165724569ee3d736aa01",
+      "contract_files_sha256": "946c35d1250cc96ee814bfceb3d6ed7fb90a1bce91c52c8bf08fc7fb2d1e23c3",
+      "fixture_files_sha256": "bbd363376581a00e427b3cd90c3fa5697b72c8e2b398b6d04ec74a6aa328090c"
+    },
+    "hf-internal-testing/mic-qwen2-slim": {
+      "repo": "huggingface-mic/qwen2-mic",
+      "revision": "b0dda0caafedc49a98a2165724569ee3d736aa01",
+      "contract_files_sha256": "946c35d1250cc96ee814bfceb3d6ed7fb90a1bce91c52c8bf08fc7fb2d1e23c3",
+      "fixture_files_sha256": "bbd363376581a00e427b3cd90c3fa5697b72c8e2b398b6d04ec74a6aa328090c"
+    },
+    "huggingface-mic/mic-qwen2_5_omni-slim": {
+      "repo": "huggingface-mic/qwen2_5_omni-mic",
+      "revision": "0eb041a27dc034095a74991d04f8ed03ad2e39d6",
+      "contract_files_sha256": "d62075fb5cc643e21fba61b293a2678478698ea21e62a7711bdbf4fe3166eb07",
+      "fixture_files_sha256": "c61453e554e93cc0613e075efbe788171d9db089e7d3fe192b2af8da835edbea"
+    },
+    "hf-internal-testing/mic-qwen2_5_omni-slim": {
+      "repo": "huggingface-mic/qwen2_5_omni-mic",
+      "revision": "0eb041a27dc034095a74991d04f8ed03ad2e39d6",
+      "contract_files_sha256": "d62075fb5cc643e21fba61b293a2678478698ea21e62a7711bdbf4fe3166eb07",
+      "fixture_files_sha256": "c61453e554e93cc0613e075efbe788171d9db089e7d3fe192b2af8da835edbea"
+    },
+    "huggingface-mic/mic-qwen2_5_vl-slim": {
+      "repo": "huggingface-mic/qwen2_5_vl-mic",
+      "revision": "d8ccc6eaf1889a4baa829d9b2826b6fe26b82976",
+      "contract_files_sha256": "1f7871fd03a43e401cc34dd1e1687a77e88a62971e6d46ad18fed07ad30c3fa0",
+      "fixture_files_sha256": "192aae6e9dd2627f91ea5a21b0de9a11f9b0d8cc593aaa094843504201d6acce"
+    },
+    "hf-internal-testing/mic-qwen2_5_vl-slim": {
+      "repo": "huggingface-mic/qwen2_5_vl-mic",
+      "revision": "d8ccc6eaf1889a4baa829d9b2826b6fe26b82976",
+      "contract_files_sha256": "1f7871fd03a43e401cc34dd1e1687a77e88a62971e6d46ad18fed07ad30c3fa0",
+      "fixture_files_sha256": "192aae6e9dd2627f91ea5a21b0de9a11f9b0d8cc593aaa094843504201d6acce"
+    },
+    "huggingface-mic/mic-qwen2_audio-slim": {
+      "repo": "huggingface-mic/qwen2_audio-mic",
+      "revision": "9248df5113350c17a4bf458e0fff1ccc78d6269e",
+      "contract_files_sha256": "6f65a7616c57d110b102264265df6d0ac3eb5a50714f53b3088fb010db2cb0d4",
+      "fixture_files_sha256": "b436575e4e60ac7eaeaf2e81d841e141b70a674a89617cfc7c2dbe3e8eeda61c"
+    },
+    "hf-internal-testing/mic-qwen2_audio-slim": {
+      "repo": "huggingface-mic/qwen2_audio-mic",
+      "revision": "9248df5113350c17a4bf458e0fff1ccc78d6269e",
+      "contract_files_sha256": "6f65a7616c57d110b102264265df6d0ac3eb5a50714f53b3088fb010db2cb0d4",
+      "fixture_files_sha256": "b436575e4e60ac7eaeaf2e81d841e141b70a674a89617cfc7c2dbe3e8eeda61c"
+    },
+    "huggingface-mic/mic-smolvlm-slim": {
+      "repo": "huggingface-mic/smolvlm-mic",
+      "revision": "01b7aa3d3bf28b227747925bfbf04c31bcdc885b",
+      "contract_files_sha256": "f6af21d765bfcf66bd372cdad395f9126f375a38be881496331ef271a0867844",
+      "fixture_files_sha256": "4f6a96aaee4c39ee21fa062e1a6d1790b0a5d15e11123afc90fad407c15e00a1"
+    },
+    "hf-internal-testing/mic-smolvlm-slim": {
+      "repo": "huggingface-mic/smolvlm-mic",
+      "revision": "01b7aa3d3bf28b227747925bfbf04c31bcdc885b",
+      "contract_files_sha256": "f6af21d765bfcf66bd372cdad395f9126f375a38be881496331ef271a0867844",
+      "fixture_files_sha256": "4f6a96aaee4c39ee21fa062e1a6d1790b0a5d15e11123afc90fad407c15e00a1"
+    },
+    "huggingface-mic/mic-speech_t5-slim": {
+      "repo": "huggingface-mic/speech_t5-mic",
+      "revision": "2c169d91b2d9f6bee299541a0ab2346caa41f6fe",
+      "contract_files_sha256": "1f97a3ebaa663ee88c7e55b0769907301011c9a2f2942c3b133cb360e44f2e32",
+      "fixture_files_sha256": "75759c7279cdbc38b318ffd59fe3c957651ee989e2a8338244c6f4b9c013865d"
+    },
+    "hf-internal-testing/mic-speech_t5-slim": {
+      "repo": "huggingface-mic/speech_t5-mic",
+      "revision": "2c169d91b2d9f6bee299541a0ab2346caa41f6fe",
+      "contract_files_sha256": "1f97a3ebaa663ee88c7e55b0769907301011c9a2f2942c3b133cb360e44f2e32",
+      "fixture_files_sha256": "75759c7279cdbc38b318ffd59fe3c957651ee989e2a8338244c6f4b9c013865d"
+    },
+    "huggingface-mic/mic-t5-slim": {
+      "repo": "huggingface-mic/t5-mic",
+      "revision": "f392307cb22152bf136c04182f65b4f281b3fc0a",
+      "contract_files_sha256": "25278f33463543b967faff212d11f8077ba85c6fffd37a92d1609dcf0b5e8a7a",
+      "fixture_files_sha256": "d3ade13909f6d1a9ed4ca18f700e37a2a80e842670418bc50ebe202e27860160"
+    },
+    "hf-internal-testing/mic-t5-slim": {
+      "repo": "huggingface-mic/t5-mic",
+      "revision": "f392307cb22152bf136c04182f65b4f281b3fc0a",
+      "contract_files_sha256": "25278f33463543b967faff212d11f8077ba85c6fffd37a92d1609dcf0b5e8a7a",
+      "fixture_files_sha256": "d3ade13909f6d1a9ed4ca18f700e37a2a80e842670418bc50ebe202e27860160"
+    },
+    "huggingface-mic/mic-table_transformer-slim": {
+      "repo": "huggingface-mic/table_transformer-mic",
+      "revision": "44b77c46b6d691e21d75a1c927b31cf9fddaec12",
+      "contract_files_sha256": "779ff44e6eacbed5f6717e8fb46b32b2d52f580475e11e8a84fe3c4a6718aa05",
+      "fixture_files_sha256": "6972d9c59e49604df44b6cab597309f48390bfc4797419beecfb5709a5d24413"
+    },
+    "hf-internal-testing/mic-table_transformer-slim": {
+      "repo": "huggingface-mic/table_transformer-mic",
+      "revision": "44b77c46b6d691e21d75a1c927b31cf9fddaec12",
+      "contract_files_sha256": "779ff44e6eacbed5f6717e8fb46b32b2d52f580475e11e8a84fe3c4a6718aa05",
+      "fixture_files_sha256": "6972d9c59e49604df44b6cab597309f48390bfc4797419beecfb5709a5d24413"
+    },
+    "huggingface-mic/mic-vit-slim": {
+      "repo": "huggingface-mic/vit-mic",
+      "revision": "80336735d19e2c2cf43cd3b3509d4b9156d9c8a2",
+      "contract_files_sha256": "2b4725173d3d7ffabba8600584cca030fae1c1152ce038ba9f6d46e7bc059578",
+      "fixture_files_sha256": "3db848ce65d7db235433a2164505e9e9db5e82dbbbc705a175b5c392b69baa7a"
+    },
+    "hf-internal-testing/mic-vit-slim": {
+      "repo": "huggingface-mic/vit-mic",
+      "revision": "80336735d19e2c2cf43cd3b3509d4b9156d9c8a2",
+      "contract_files_sha256": "2b4725173d3d7ffabba8600584cca030fae1c1152ce038ba9f6d46e7bc059578",
+      "fixture_files_sha256": "3db848ce65d7db235433a2164505e9e9db5e82dbbbc705a175b5c392b69baa7a"
+    },
+    "huggingface-mic/mic-wav2vec2-slim": {
+      "repo": "huggingface-mic/wav2vec2-mic",
+      "revision": "d327f2aa18acd6562683ed02ed9c3ae45fa57848",
+      "contract_files_sha256": "2131bf9293886e1691f6a41cf59ad9f99e98a6b587eaa24c963a83af91e79845",
+      "fixture_files_sha256": "ba3b9b605fadac9525a13eec4c000fda49cc3338ba726fc5fba475fae96a116b"
+    },
+    "hf-internal-testing/mic-wav2vec2-slim": {
+      "repo": "huggingface-mic/wav2vec2-mic",
+      "revision": "d327f2aa18acd6562683ed02ed9c3ae45fa57848",
+      "contract_files_sha256": "2131bf9293886e1691f6a41cf59ad9f99e98a6b587eaa24c963a83af91e79845",
+      "fixture_files_sha256": "ba3b9b605fadac9525a13eec4c000fda49cc3338ba726fc5fba475fae96a116b"
+    },
+    "huggingface-mic/mic-weathernext2-mini-slim": {
+      "repo": "huggingface-mic/weathernext2-mic",
+      "revision": "3ce5455e880cc19bd24c11b5ade32b98e1922ec1",
+      "contract_files_sha256": "e161f57d6c5c854bf5177331783819b439a58ba0e10af598dbb223ef99a07a17",
+      "fixture_files_sha256": "473694ef5670bbf3bd5df56b9daca99030040622cabcc4f4f6479bf54a27538f"
+    },
+    "hf-internal-testing/mic-weathernext2-mini-slim": {
+      "repo": "huggingface-mic/weathernext2-mic",
+      "revision": "3ce5455e880cc19bd24c11b5ade32b98e1922ec1",
+      "contract_files_sha256": "e161f57d6c5c854bf5177331783819b439a58ba0e10af598dbb223ef99a07a17",
+      "fixture_files_sha256": "473694ef5670bbf3bd5df56b9daca99030040622cabcc4f4f6479bf54a27538f"
+    },
+    "huggingface-mic/mic-whisper-slim": {
+      "repo": "huggingface-mic/whisper-mic",
+      "revision": "ef0ed28d53f0eb9dbbe039957aced1877cca45cb",
+      "contract_files_sha256": "a101440bc634baf3a2dbd63d0c5b229c7cbc50387276dc44ef431fe06a64b51e",
+      "fixture_files_sha256": "e8e61605360733db094072f3c94462c215b3fa6a002abfea98fe9d8023a73203"
+    },
+    "hf-internal-testing/mic-whisper-slim": {
+      "repo": "huggingface-mic/whisper-mic",
+      "revision": "ef0ed28d53f0eb9dbbe039957aced1877cca45cb",
+      "contract_files_sha256": "a101440bc634baf3a2dbd63d0c5b229c7cbc50387276dc44ef431fe06a64b51e",
+      "fixture_files_sha256": "e8e61605360733db094072f3c94462c215b3fa6a002abfea98fe9d8023a73203"
+    },
+    "huggingface-mic/mic-SmolLM-1.7B-slim": {
+      "repo": "huggingface-mic/smollm-1.7b-mic",
+      "revision": "fc0e707f0977de7e4095792e1b56203e3af7b5c6",
+      "contract_files_sha256": "fe4674584d161b963cc40d293e9086851f1e33ced8ef1de5d37005d57b5a402a",
+      "fixture_files_sha256": "d6cb7aae64669f6d15ed9cbc6004396e3c12e1a9c7b2d6b41b5e1c70ca61c48b"
+    },
+    "hf-internal-testing/mic-SmolLM-1.7B-slim": {
+      "repo": "huggingface-mic/smollm-1.7b-mic",
+      "revision": "fc0e707f0977de7e4095792e1b56203e3af7b5c6",
+      "contract_files_sha256": "fe4674584d161b963cc40d293e9086851f1e33ced8ef1de5d37005d57b5a402a",
+      "fixture_files_sha256": "d6cb7aae64669f6d15ed9cbc6004396e3c12e1a9c7b2d6b41b5e1c70ca61c48b"
+    },
+    "huggingface-mic/mic-SmolLM-slim": {
+      "repo": "huggingface-mic/smollm-mic",
+      "revision": "39a8a2e580277c904e7d9737302b408d168e8efb",
+      "contract_files_sha256": "fe4674584d161b963cc40d293e9086851f1e33ced8ef1de5d37005d57b5a402a",
+      "fixture_files_sha256": "8562493b1bb64ef7fd81ceb10b47e69aa135afe9ea31385d2b3dfaaf92ba330d"
+    },
+    "hf-internal-testing/mic-SmolLM-slim": {
+      "repo": "huggingface-mic/smollm-mic",
+      "revision": "39a8a2e580277c904e7d9737302b408d168e8efb",
+      "contract_files_sha256": "fe4674584d161b963cc40d293e9086851f1e33ced8ef1de5d37005d57b5a402a",
+      "fixture_files_sha256": "8562493b1bb64ef7fd81ceb10b47e69aa135afe9ea31385d2b3dfaaf92ba330d"
+    },
+    "huggingface-mic/mic-bert-base-uncased-slim": {
+      "repo": "huggingface-mic/bert-base-uncased-mic",
+      "revision": "faa5f7a24350db87b0b9992eab1e07ad01032c70",
+      "contract_files_sha256": "8f62027b0db7f38c367d906cc2cc599308ca7e3e7a47ef8dbce79033a0a978b6",
+      "fixture_files_sha256": "10e7f1627bf4615e202df67f40abbeb5070a88fd9741a257fbf71dee21daf16f"
+    },
+    "hf-internal-testing/mic-bert-base-uncased-slim": {
+      "repo": "huggingface-mic/bert-base-uncased-mic",
+      "revision": "faa5f7a24350db87b0b9992eab1e07ad01032c70",
+      "contract_files_sha256": "8f62027b0db7f38c367d906cc2cc599308ca7e3e7a47ef8dbce79033a0a978b6",
+      "fixture_files_sha256": "10e7f1627bf4615e202df67f40abbeb5070a88fd9741a257fbf71dee21daf16f"
+    },
+    "huggingface-mic/mic-clip-vit-base-patch32-slim": {
+      "repo": "huggingface-mic/clip-vit-base-patch32-mic",
+      "revision": "5eb92c4457ab608437d2a495fbed71df19740da8",
+      "contract_files_sha256": "068ddc0b5c80c8779e81e570107adb30a63828f69541afe0932d0df737b99fe5",
+      "fixture_files_sha256": "e72402276836e7b27c96687600cde8e3612a82e7b6e9d69a0523626816f99e1d"
+    },
+    "hf-internal-testing/mic-clip-vit-base-patch32-slim": {
+      "repo": "huggingface-mic/clip-vit-base-patch32-mic",
+      "revision": "5eb92c4457ab608437d2a495fbed71df19740da8",
+      "contract_files_sha256": "068ddc0b5c80c8779e81e570107adb30a63828f69541afe0932d0df737b99fe5",
+      "fixture_files_sha256": "e72402276836e7b27c96687600cde8e3612a82e7b6e9d69a0523626816f99e1d"
+    },
+    "huggingface-mic/mic-musicgen-melody-slim": {
+      "repo": "huggingface-mic/musicgen-melody-mic",
+      "revision": "c81d5a554014860f347652b1fa414e3b86bb583f",
+      "contract_files_sha256": "a6d4a5c409e6c3e35b9ac85244d54a1585d9a89e8e47de7efb6833eb196cb3a2",
+      "fixture_files_sha256": "fea13f71f63edb80ab197589fefb65949b4dd74ea8d81f243cc56b9f41e5de37"
+    },
+    "hf-internal-testing/mic-musicgen-melody-slim": {
+      "repo": "huggingface-mic/musicgen-melody-mic",
+      "revision": "c81d5a554014860f347652b1fa414e3b86bb583f",
+      "contract_files_sha256": "a6d4a5c409e6c3e35b9ac85244d54a1585d9a89e8e47de7efb6833eb196cb3a2",
+      "fixture_files_sha256": "fea13f71f63edb80ab197589fefb65949b4dd74ea8d81f243cc56b9f41e5de37"
+    },
+    "huggingface-mic/mic-t5-small-slim": {
+      "repo": "huggingface-mic/t5-small-mic",
+      "revision": "4a35f4f7e20ff5839f0de0050b928cb8f8e360c1",
+      "contract_files_sha256": "2db49b1a3dd135901892fda6f18585d00bc9160f8d953a803de0de83bcece2e9",
+      "fixture_files_sha256": "530a553b936f1a6c0a68b8e394e30319fd0ae38dc76718fe55c47212d053f8a6"
+    },
+    "hf-internal-testing/mic-t5-small-slim": {
+      "repo": "huggingface-mic/t5-small-mic",
+      "revision": "4a35f4f7e20ff5839f0de0050b928cb8f8e360c1",
+      "contract_files_sha256": "2db49b1a3dd135901892fda6f18585d00bc9160f8d953a803de0de83bcece2e9",
+      "fixture_files_sha256": "530a553b936f1a6c0a68b8e394e30319fd0ae38dc76718fe55c47212d053f8a6"
+    },
+    "huggingface-mic/mic-umt5-small-slim": {
+      "repo": "huggingface-mic/umt5-small-mic",
+      "revision": "d19f49ff5f24f97a285fe1a11ef9ffbd67097f67",
+      "contract_files_sha256": "2db49b1a3dd135901892fda6f18585d00bc9160f8d953a803de0de83bcece2e9",
+      "fixture_files_sha256": "91a8c18974956cfd1e6e08cb6ec8f056b10d12ada1a3e8d35acee48a995634ac"
+    },
+    "hf-internal-testing/mic-umt5-small-slim": {
+      "repo": "huggingface-mic/umt5-small-mic",
+      "revision": "d19f49ff5f24f97a285fe1a11ef9ffbd67097f67",
+      "contract_files_sha256": "2db49b1a3dd135901892fda6f18585d00bc9160f8d953a803de0de83bcece2e9",
+      "fixture_files_sha256": "91a8c18974956cfd1e6e08cb6ec8f056b10d12ada1a3e8d35acee48a995634ac"
+    },
+    "huggingface-mic/mic-wav2vec2-base-960h-slim": {
+      "repo": "huggingface-mic/wav2vec2-base-960h-mic",
+      "revision": "d77fbf722169d5fbf4c740afc55cef80600e031f",
+      "contract_files_sha256": "600d344a61da970d76c09012059203e5ca6dc2de4b8814613f119b956ada256d",
+      "fixture_files_sha256": "5522f324c0e8bd3e70aa54a57318e4d5016c46df7709120dfb632423f4221c2f"
+    },
+    "hf-internal-testing/mic-wav2vec2-base-960h-slim": {
+      "repo": "huggingface-mic/wav2vec2-base-960h-mic",
+      "revision": "d77fbf722169d5fbf4c740afc55cef80600e031f",
+      "contract_files_sha256": "600d344a61da970d76c09012059203e5ca6dc2de4b8814613f119b956ada256d",
+      "fixture_files_sha256": "5522f324c0e8bd3e70aa54a57318e4d5016c46df7709120dfb632423f4221c2f"
+    },
+    "huggingface-mic/mic-whisper-tiny-slim": {
+      "repo": "huggingface-mic/whisper-tiny-mic",
+      "revision": "974f2748e2a6dc5744e89efbcfa96b9a1b1eceda",
+      "contract_files_sha256": "8e5fcc36121354232238e0f8df35db9751ff6d58eb5784d549960cb5f78ea564",
+      "fixture_files_sha256": "71e6e2a43065192dd2d535faaf16d2ed5bd2a6d6d7b8e66ef8388a159511ec9f"
+    },
+    "hf-internal-testing/mic-whisper-tiny-slim": {
+      "repo": "huggingface-mic/whisper-tiny-mic",
+      "revision": "974f2748e2a6dc5744e89efbcfa96b9a1b1eceda",
+      "contract_files_sha256": "8e5fcc36121354232238e0f8df35db9751ff6d58eb5784d549960cb5f78ea564",
+      "fixture_files_sha256": "71e6e2a43065192dd2d535faaf16d2ed5bd2a6d6d7b8e66ef8388a159511ec9f"
+    }
+  },
+  "integrations": {
+    "huggingface-mic/mic-bert-integration": {
+      "repo": "huggingface-mic/bert-mic",
+      "revision": "565fb1745a10faab255312b06a69c6a7d9a698ee",
+      "contract_files_sha256": "dcfd3773a561e9ba7dd3aea0bc24d38ad28a4df85782d3650bbf809dce958f73",
+      "fixture_files_sha256": "0628d40ee37032b80d518cb06f1dca6f8fd27625c76e46199e49685e6c60fb13"
+    },
+    "hf-internal-testing/mic-bert-integration": {
+      "repo": "huggingface-mic/bert-mic",
+      "revision": "565fb1745a10faab255312b06a69c6a7d9a698ee",
+      "contract_files_sha256": "dcfd3773a561e9ba7dd3aea0bc24d38ad28a4df85782d3650bbf809dce958f73",
+      "fixture_files_sha256": "0628d40ee37032b80d518cb06f1dca6f8fd27625c76e46199e49685e6c60fb13"
+    },
+    "huggingface-mic/mic-clip-integration": {
+      "repo": "huggingface-mic/clip-mic",
+      "revision": "945db810ef3b08579db2fe2dd57e4b37ed8e462b",
+      "contract_files_sha256": "c0aef55b4359943629d31f5ffa8271e5e79a980831cf02c499ecebcfe6b39130",
+      "fixture_files_sha256": "eb25463febbbc22df2a054f240a6791ce35a2f5302e4ffc4bc3d8beef144b024"
+    },
+    "hf-internal-testing/mic-clip-integration": {
+      "repo": "huggingface-mic/clip-mic",
+      "revision": "945db810ef3b08579db2fe2dd57e4b37ed8e462b",
+      "contract_files_sha256": "c0aef55b4359943629d31f5ffa8271e5e79a980831cf02c499ecebcfe6b39130",
+      "fixture_files_sha256": "eb25463febbbc22df2a054f240a6791ce35a2f5302e4ffc4bc3d8beef144b024"
+    },
+    "huggingface-mic/mic-detr-integration": {
+      "repo": "huggingface-mic/detr-mic",
+      "revision": "85e28d302059d0540aaf2ed34dfba458a8040882",
+      "contract_files_sha256": "dbdfb7ceee936cdab10be11f23d326bf8bf8c616fa6c7d26bb631de092f36d16",
+      "fixture_files_sha256": "5ea58813db1f02c506fea5e4e774af5b1de8a329b85be95d6dcd54d17f50b8ed"
+    },
+    "hf-internal-testing/mic-detr-integration": {
+      "repo": "huggingface-mic/detr-mic",
+      "revision": "85e28d302059d0540aaf2ed34dfba458a8040882",
+      "contract_files_sha256": "dbdfb7ceee936cdab10be11f23d326bf8bf8c616fa6c7d26bb631de092f36d16",
+      "fixture_files_sha256": "5ea58813db1f02c506fea5e4e774af5b1de8a329b85be95d6dcd54d17f50b8ed"
+    },
+    "huggingface-mic/mic-gemma3-integration": {
+      "repo": "huggingface-mic/gemma3-mic",
+      "revision": "5f50fc50fea580b11176a7063ba6569281555903",
+      "contract_files_sha256": "896e24a8526d57458c74eb01df8d685b5dc7777f476d067aca1590abaeb23ae2",
+      "fixture_files_sha256": "a841e5e6ebfb391619b35159d6e11484fae13626909909743e861d192ace7372"
+    },
+    "hf-internal-testing/mic-gemma3-integration": {
+      "repo": "huggingface-mic/gemma3-mic",
+      "revision": "5f50fc50fea580b11176a7063ba6569281555903",
+      "contract_files_sha256": "896e24a8526d57458c74eb01df8d685b5dc7777f476d067aca1590abaeb23ae2",
+      "fixture_files_sha256": "a841e5e6ebfb391619b35159d6e11484fae13626909909743e861d192ace7372"
+    },
+    "huggingface-mic/mic-got_ocr2-integration": {
+      "repo": "huggingface-mic/got_ocr2-mic",
+      "revision": "c35a1e642aa983aca9eb77e151db3e406b4eb63f",
+      "contract_files_sha256": "238b4d6ac3a1d8f854bd2d1b11a7b4774ce9cdc2d86887faa33216e4505ae4b6",
+      "fixture_files_sha256": "a53662ce54e807e7fb3305e64397b58f1000eb2ad04c0846c36207ea90d4c44d"
+    },
+    "hf-internal-testing/mic-got_ocr2-integration": {
+      "repo": "huggingface-mic/got_ocr2-mic",
+      "revision": "c35a1e642aa983aca9eb77e151db3e406b4eb63f",
+      "contract_files_sha256": "238b4d6ac3a1d8f854bd2d1b11a7b4774ce9cdc2d86887faa33216e4505ae4b6",
+      "fixture_files_sha256": "a53662ce54e807e7fb3305e64397b58f1000eb2ad04c0846c36207ea90d4c44d"
+    },
+    "huggingface-mic/mic-gpt2-integration": {
+      "repo": "huggingface-mic/gpt2-mic",
+      "revision": "fd0b7d99b893833541cecafbc953d8a85aa4d438",
+      "contract_files_sha256": "b7da3c249c668bf8487bc8c660212cb7e4a9f61fae67e42f944722bcb76852e0",
+      "fixture_files_sha256": "e56fc4f7878a200291c4e817c51f40c9987d0b5f70fef553033e2f0c795b3de8"
+    },
+    "hf-internal-testing/mic-gpt2-integration": {
+      "repo": "huggingface-mic/gpt2-mic",
+      "revision": "fd0b7d99b893833541cecafbc953d8a85aa4d438",
+      "contract_files_sha256": "b7da3c249c668bf8487bc8c660212cb7e4a9f61fae67e42f944722bcb76852e0",
+      "fixture_files_sha256": "e56fc4f7878a200291c4e817c51f40c9987d0b5f70fef553033e2f0c795b3de8"
+    },
+    "huggingface-mic/mic-gpt_oss-integration": {
+      "repo": "huggingface-mic/gpt_oss-mic",
+      "revision": "adb29e36a5bb98d7bc0729ddf90698c6e61efa67",
+      "contract_files_sha256": "4de89652049f883621a041aacb524a35c6bab7990d2b4cbaa6f13c8bebec2086",
+      "fixture_files_sha256": "2a9272b5d5a27a2cc84ec6510697fa037bf79d36330fca7bfab3855a36de08c4"
+    },
+    "hf-internal-testing/mic-gpt_oss-integration": {
+      "repo": "huggingface-mic/gpt_oss-mic",
+      "revision": "adb29e36a5bb98d7bc0729ddf90698c6e61efa67",
+      "contract_files_sha256": "4de89652049f883621a041aacb524a35c6bab7990d2b4cbaa6f13c8bebec2086",
+      "fixture_files_sha256": "2a9272b5d5a27a2cc84ec6510697fa037bf79d36330fca7bfab3855a36de08c4"
+    },
+    "huggingface-mic/mic-internvl-integration": {
+      "repo": "huggingface-mic/internvl-mic",
+      "revision": "f01c184e89421347e12f440365cce1b3cc9e3bf1",
+      "contract_files_sha256": "79fbe5e92fc1a9777eb9ea9c9072efe280feea6a8bab8b86cb50015cc421a7c5",
+      "fixture_files_sha256": "7a08fc521ac8d91ff25828e55a3241ae8c62dc8657fcbbbdb9f1616e8d371528"
+    },
+    "hf-internal-testing/mic-internvl-integration": {
+      "repo": "huggingface-mic/internvl-mic",
+      "revision": "f01c184e89421347e12f440365cce1b3cc9e3bf1",
+      "contract_files_sha256": "79fbe5e92fc1a9777eb9ea9c9072efe280feea6a8bab8b86cb50015cc421a7c5",
+      "fixture_files_sha256": "7a08fc521ac8d91ff25828e55a3241ae8c62dc8657fcbbbdb9f1616e8d371528"
+    },
+    "huggingface-mic/mic-llama-integration": {
+      "repo": "huggingface-mic/llama-mic",
+      "revision": "8d226a7446d25c950cc09a3f7101ab553f01699a",
+      "contract_files_sha256": "10acdb69188e12fa97329a658289fdaf5bfe3a7b8580f0e8a892a3c1e36a236e",
+      "fixture_files_sha256": "e2e2a64edcfe417d1350c83fe3c9be1c8184512a88b45b2339bbd41650a54ac3"
+    },
+    "hf-internal-testing/mic-llama-integration": {
+      "repo": "huggingface-mic/llama-mic",
+      "revision": "8d226a7446d25c950cc09a3f7101ab553f01699a",
+      "contract_files_sha256": "10acdb69188e12fa97329a658289fdaf5bfe3a7b8580f0e8a892a3c1e36a236e",
+      "fixture_files_sha256": "e2e2a64edcfe417d1350c83fe3c9be1c8184512a88b45b2339bbd41650a54ac3"
+    },
+    "huggingface-mic/mic-llava-integration": {
+      "repo": "huggingface-mic/llava-mic",
+      "revision": "4b1f1435225c55dfa06c35e63319c36a0f5a9ce2",
+      "contract_files_sha256": "92c3376a2cd7d4fb9e94425e7532d1f443abbb0d8104e593e5fb4d1fd2b30ecf",
+      "fixture_files_sha256": "eebcc2537637f5dc942131626562ff0b6d995329b8a03af39dc2bdf2d6db9660"
+    },
+    "hf-internal-testing/mic-llava-integration": {
+      "repo": "huggingface-mic/llava-mic",
+      "revision": "4b1f1435225c55dfa06c35e63319c36a0f5a9ce2",
+      "contract_files_sha256": "92c3376a2cd7d4fb9e94425e7532d1f443abbb0d8104e593e5fb4d1fd2b30ecf",
+      "fixture_files_sha256": "eebcc2537637f5dc942131626562ff0b6d995329b8a03af39dc2bdf2d6db9660"
+    },
+    "huggingface-mic/mic-mistral3-integration": {
+      "repo": "huggingface-mic/mistral3-mic",
+      "revision": "4e05ef6b5d73ea89e0f35563c284162b1eb8a10f",
+      "contract_files_sha256": "2923ae62a9857e187b4417d046b88acc02a9027f0a892427f8375eaff93efe41",
+      "fixture_files_sha256": "e1ff61844c87c8150ada71205f60c96b9aaf1782f951ea8377a0555446e6d41a"
+    },
+    "hf-internal-testing/mic-mistral3-integration": {
+      "repo": "huggingface-mic/mistral3-mic",
+      "revision": "4e05ef6b5d73ea89e0f35563c284162b1eb8a10f",
+      "contract_files_sha256": "2923ae62a9857e187b4417d046b88acc02a9027f0a892427f8375eaff93efe41",
+      "fixture_files_sha256": "e1ff61844c87c8150ada71205f60c96b9aaf1782f951ea8377a0555446e6d41a"
+    },
+    "huggingface-mic/mic-modernbert-integration": {
+      "repo": "huggingface-mic/modernbert-mic",
+      "revision": "82c6dab7d0832dad0556878a513392a6af7b9b36",
+      "contract_files_sha256": "fc5772805458fa2e9ae1d6ec5b368de7d71b526afc80d99f0153440093ddc558",
+      "fixture_files_sha256": "cd9316607f78870f9f6ec027cd6b848c1d4b87e852aafe80a719e68fa7e53d7b"
+    },
+    "hf-internal-testing/mic-modernbert-integration": {
+      "repo": "huggingface-mic/modernbert-mic",
+      "revision": "82c6dab7d0832dad0556878a513392a6af7b9b36",
+      "contract_files_sha256": "fc5772805458fa2e9ae1d6ec5b368de7d71b526afc80d99f0153440093ddc558",
+      "fixture_files_sha256": "cd9316607f78870f9f6ec027cd6b848c1d4b87e852aafe80a719e68fa7e53d7b"
+    },
+    "huggingface-mic/mic-qwen2-integration": {
+      "repo": "huggingface-mic/qwen2-mic",
+      "revision": "b0dda0caafedc49a98a2165724569ee3d736aa01",
+      "contract_files_sha256": "946c35d1250cc96ee814bfceb3d6ed7fb90a1bce91c52c8bf08fc7fb2d1e23c3",
+      "fixture_files_sha256": "bbd363376581a00e427b3cd90c3fa5697b72c8e2b398b6d04ec74a6aa328090c"
+    },
+    "hf-internal-testing/mic-qwen2-integration": {
+      "repo": "huggingface-mic/qwen2-mic",
+      "revision": "b0dda0caafedc49a98a2165724569ee3d736aa01",
+      "contract_files_sha256": "946c35d1250cc96ee814bfceb3d6ed7fb90a1bce91c52c8bf08fc7fb2d1e23c3",
+      "fixture_files_sha256": "bbd363376581a00e427b3cd90c3fa5697b72c8e2b398b6d04ec74a6aa328090c"
+    },
+    "huggingface-mic/mic-qwen2_5_omni-integration": {
+      "repo": "huggingface-mic/qwen2_5_omni-mic",
+      "revision": "0eb041a27dc034095a74991d04f8ed03ad2e39d6",
+      "contract_files_sha256": "d62075fb5cc643e21fba61b293a2678478698ea21e62a7711bdbf4fe3166eb07",
+      "fixture_files_sha256": "c61453e554e93cc0613e075efbe788171d9db089e7d3fe192b2af8da835edbea"
+    },
+    "hf-internal-testing/mic-qwen2_5_omni-integration": {
+      "repo": "huggingface-mic/qwen2_5_omni-mic",
+      "revision": "0eb041a27dc034095a74991d04f8ed03ad2e39d6",
+      "contract_files_sha256": "d62075fb5cc643e21fba61b293a2678478698ea21e62a7711bdbf4fe3166eb07",
+      "fixture_files_sha256": "c61453e554e93cc0613e075efbe788171d9db089e7d3fe192b2af8da835edbea"
+    },
+    "huggingface-mic/mic-qwen2_5_vl-integration": {
+      "repo": "huggingface-mic/qwen2_5_vl-mic",
+      "revision": "d8ccc6eaf1889a4baa829d9b2826b6fe26b82976",
+      "contract_files_sha256": "1f7871fd03a43e401cc34dd1e1687a77e88a62971e6d46ad18fed07ad30c3fa0",
+      "fixture_files_sha256": "192aae6e9dd2627f91ea5a21b0de9a11f9b0d8cc593aaa094843504201d6acce"
+    },
+    "hf-internal-testing/mic-qwen2_5_vl-integration": {
+      "repo": "huggingface-mic/qwen2_5_vl-mic",
+      "revision": "d8ccc6eaf1889a4baa829d9b2826b6fe26b82976",
+      "contract_files_sha256": "1f7871fd03a43e401cc34dd1e1687a77e88a62971e6d46ad18fed07ad30c3fa0",
+      "fixture_files_sha256": "192aae6e9dd2627f91ea5a21b0de9a11f9b0d8cc593aaa094843504201d6acce"
+    },
+    "huggingface-mic/mic-qwen2_audio-integration": {
+      "repo": "huggingface-mic/qwen2_audio-mic",
+      "revision": "9248df5113350c17a4bf458e0fff1ccc78d6269e",
+      "contract_files_sha256": "6f65a7616c57d110b102264265df6d0ac3eb5a50714f53b3088fb010db2cb0d4",
+      "fixture_files_sha256": "b436575e4e60ac7eaeaf2e81d841e141b70a674a89617cfc7c2dbe3e8eeda61c"
+    },
+    "hf-internal-testing/mic-qwen2_audio-integration": {
+      "repo": "huggingface-mic/qwen2_audio-mic",
+      "revision": "9248df5113350c17a4bf458e0fff1ccc78d6269e",
+      "contract_files_sha256": "6f65a7616c57d110b102264265df6d0ac3eb5a50714f53b3088fb010db2cb0d4",
+      "fixture_files_sha256": "b436575e4e60ac7eaeaf2e81d841e141b70a674a89617cfc7c2dbe3e8eeda61c"
+    },
+    "huggingface-mic/mic-smolvlm-integration": {
+      "repo": "huggingface-mic/smolvlm-mic",
+      "revision": "01b7aa3d3bf28b227747925bfbf04c31bcdc885b",
+      "contract_files_sha256": "f6af21d765bfcf66bd372cdad395f9126f375a38be881496331ef271a0867844",
+      "fixture_files_sha256": "4f6a96aaee4c39ee21fa062e1a6d1790b0a5d15e11123afc90fad407c15e00a1"
+    },
+    "hf-internal-testing/mic-smolvlm-integration": {
+      "repo": "huggingface-mic/smolvlm-mic",
+      "revision": "01b7aa3d3bf28b227747925bfbf04c31bcdc885b",
+      "contract_files_sha256": "f6af21d765bfcf66bd372cdad395f9126f375a38be881496331ef271a0867844",
+      "fixture_files_sha256": "4f6a96aaee4c39ee21fa062e1a6d1790b0a5d15e11123afc90fad407c15e00a1"
+    },
+    "huggingface-mic/mic-speech_t5-integration": {
+      "repo": "huggingface-mic/speech_t5-mic",
+      "revision": "2c169d91b2d9f6bee299541a0ab2346caa41f6fe",
+      "contract_files_sha256": "1f97a3ebaa663ee88c7e55b0769907301011c9a2f2942c3b133cb360e44f2e32",
+      "fixture_files_sha256": "75759c7279cdbc38b318ffd59fe3c957651ee989e2a8338244c6f4b9c013865d"
+    },
+    "hf-internal-testing/mic-speech_t5-integration": {
+      "repo": "huggingface-mic/speech_t5-mic",
+      "revision": "2c169d91b2d9f6bee299541a0ab2346caa41f6fe",
+      "contract_files_sha256": "1f97a3ebaa663ee88c7e55b0769907301011c9a2f2942c3b133cb360e44f2e32",
+      "fixture_files_sha256": "75759c7279cdbc38b318ffd59fe3c957651ee989e2a8338244c6f4b9c013865d"
+    },
+    "huggingface-mic/mic-t5-integration": {
+      "repo": "huggingface-mic/t5-mic",
+      "revision": "f392307cb22152bf136c04182f65b4f281b3fc0a",
+      "contract_files_sha256": "25278f33463543b967faff212d11f8077ba85c6fffd37a92d1609dcf0b5e8a7a",
+      "fixture_files_sha256": "d3ade13909f6d1a9ed4ca18f700e37a2a80e842670418bc50ebe202e27860160"
+    },
+    "hf-internal-testing/mic-t5-integration": {
+      "repo": "huggingface-mic/t5-mic",
+      "revision": "f392307cb22152bf136c04182f65b4f281b3fc0a",
+      "contract_files_sha256": "25278f33463543b967faff212d11f8077ba85c6fffd37a92d1609dcf0b5e8a7a",
+      "fixture_files_sha256": "d3ade13909f6d1a9ed4ca18f700e37a2a80e842670418bc50ebe202e27860160"
+    },
+    "huggingface-mic/mic-table_transformer-integration": {
+      "repo": "huggingface-mic/table_transformer-mic",
+      "revision": "44b77c46b6d691e21d75a1c927b31cf9fddaec12",
+      "contract_files_sha256": "779ff44e6eacbed5f6717e8fb46b32b2d52f580475e11e8a84fe3c4a6718aa05",
+      "fixture_files_sha256": "6972d9c59e49604df44b6cab597309f48390bfc4797419beecfb5709a5d24413"
+    },
+    "hf-internal-testing/mic-table_transformer-integration": {
+      "repo": "huggingface-mic/table_transformer-mic",
+      "revision": "44b77c46b6d691e21d75a1c927b31cf9fddaec12",
+      "contract_files_sha256": "779ff44e6eacbed5f6717e8fb46b32b2d52f580475e11e8a84fe3c4a6718aa05",
+      "fixture_files_sha256": "6972d9c59e49604df44b6cab597309f48390bfc4797419beecfb5709a5d24413"
+    },
+    "huggingface-mic/mic-vit-integration": {
+      "repo": "huggingface-mic/vit-mic",
+      "revision": "80336735d19e2c2cf43cd3b3509d4b9156d9c8a2",
+      "contract_files_sha256": "2b4725173d3d7ffabba8600584cca030fae1c1152ce038ba9f6d46e7bc059578",
+      "fixture_files_sha256": "3db848ce65d7db235433a2164505e9e9db5e82dbbbc705a175b5c392b69baa7a"
+    },
+    "hf-internal-testing/mic-vit-integration": {
+      "repo": "huggingface-mic/vit-mic",
+      "revision": "80336735d19e2c2cf43cd3b3509d4b9156d9c8a2",
+      "contract_files_sha256": "2b4725173d3d7ffabba8600584cca030fae1c1152ce038ba9f6d46e7bc059578",
+      "fixture_files_sha256": "3db848ce65d7db235433a2164505e9e9db5e82dbbbc705a175b5c392b69baa7a"
+    },
+    "huggingface-mic/mic-wav2vec2-integration": {
+      "repo": "huggingface-mic/wav2vec2-mic",
+      "revision": "d327f2aa18acd6562683ed02ed9c3ae45fa57848",
+      "contract_files_sha256": "2131bf9293886e1691f6a41cf59ad9f99e98a6b587eaa24c963a83af91e79845",
+      "fixture_files_sha256": "ba3b9b605fadac9525a13eec4c000fda49cc3338ba726fc5fba475fae96a116b"
+    },
+    "hf-internal-testing/mic-wav2vec2-integration": {
+      "repo": "huggingface-mic/wav2vec2-mic",
+      "revision": "d327f2aa18acd6562683ed02ed9c3ae45fa57848",
+      "contract_files_sha256": "2131bf9293886e1691f6a41cf59ad9f99e98a6b587eaa24c963a83af91e79845",
+      "fixture_files_sha256": "ba3b9b605fadac9525a13eec4c000fda49cc3338ba726fc5fba475fae96a116b"
+    },
+    "huggingface-mic/mic-weathernext2-integration": {
+      "repo": "huggingface-mic/weathernext2-mic",
+      "revision": "3ce5455e880cc19bd24c11b5ade32b98e1922ec1",
+      "contract_files_sha256": "e161f57d6c5c854bf5177331783819b439a58ba0e10af598dbb223ef99a07a17",
+      "fixture_files_sha256": "473694ef5670bbf3bd5df56b9daca99030040622cabcc4f4f6479bf54a27538f"
+    },
+    "hf-internal-testing/mic-weathernext2-integration": {
+      "repo": "huggingface-mic/weathernext2-mic",
+      "revision": "3ce5455e880cc19bd24c11b5ade32b98e1922ec1",
+      "contract_files_sha256": "e161f57d6c5c854bf5177331783819b439a58ba0e10af598dbb223ef99a07a17",
+      "fixture_files_sha256": "473694ef5670bbf3bd5df56b9daca99030040622cabcc4f4f6479bf54a27538f"
+    },
+    "huggingface-mic/mic-whisper-integration": {
+      "repo": "huggingface-mic/whisper-mic",
+      "revision": "ef0ed28d53f0eb9dbbe039957aced1877cca45cb",
+      "contract_files_sha256": "a101440bc634baf3a2dbd63d0c5b229c7cbc50387276dc44ef431fe06a64b51e",
+      "fixture_files_sha256": "e8e61605360733db094072f3c94462c215b3fa6a002abfea98fe9d8023a73203"
+    },
+    "hf-internal-testing/mic-whisper-integration": {
+      "repo": "huggingface-mic/whisper-mic",
+      "revision": "ef0ed28d53f0eb9dbbe039957aced1877cca45cb",
+      "contract_files_sha256": "a101440bc634baf3a2dbd63d0c5b229c7cbc50387276dc44ef431fe06a64b51e",
+      "fixture_files_sha256": "e8e61605360733db094072f3c94462c215b3fa6a002abfea98fe9d8023a73203"
+    },
+    "hf-internal-testing/SmolLM-integration": {
+      "repo": "huggingface-mic/smollm-mic",
+      "revision": "39a8a2e580277c904e7d9737302b408d168e8efb",
+      "contract_files_sha256": "fe4674584d161b963cc40d293e9086851f1e33ced8ef1de5d37005d57b5a402a",
+      "fixture_files_sha256": "8562493b1bb64ef7fd81ceb10b47e69aa135afe9ea31385d2b3dfaaf92ba330d"
+    },
+    "hf-internal-testing/BERT-integration": {
+      "repo": "huggingface-mic/bert-base-uncased-mic",
+      "revision": "faa5f7a24350db87b0b9992eab1e07ad01032c70",
+      "contract_files_sha256": "8f62027b0db7f38c367d906cc2cc599308ca7e3e7a47ef8dbce79033a0a978b6",
+      "fixture_files_sha256": "10e7f1627bf4615e202df67f40abbeb5070a88fd9741a257fbf71dee21daf16f"
+    },
+    "hf-internal-testing/CLIP-integration": {
+      "repo": "huggingface-mic/clip-vit-base-patch32-mic",
+      "revision": "5eb92c4457ab608437d2a495fbed71df19740da8",
+      "contract_files_sha256": "068ddc0b5c80c8779e81e570107adb30a63828f69541afe0932d0df737b99fe5",
+      "fixture_files_sha256": "e72402276836e7b27c96687600cde8e3612a82e7b6e9d69a0523626816f99e1d"
+    },
+    "hf-internal-testing/MusicgenMelody-integration": {
+      "repo": "huggingface-mic/musicgen-melody-mic",
+      "revision": "c81d5a554014860f347652b1fa414e3b86bb583f",
+      "contract_files_sha256": "a6d4a5c409e6c3e35b9ac85244d54a1585d9a89e8e47de7efb6833eb196cb3a2",
+      "fixture_files_sha256": "fea13f71f63edb80ab197589fefb65949b4dd74ea8d81f243cc56b9f41e5de37"
+    },
+    "hf-internal-testing/T5-integration": {
+      "repo": "huggingface-mic/t5-small-mic",
+      "revision": "4a35f4f7e20ff5839f0de0050b928cb8f8e360c1",
+      "contract_files_sha256": "2db49b1a3dd135901892fda6f18585d00bc9160f8d953a803de0de83bcece2e9",
+      "fixture_files_sha256": "530a553b936f1a6c0a68b8e394e30319fd0ae38dc76718fe55c47212d053f8a6"
+    },
+    "hf-internal-testing/Wav2Vec2-integration": {
+      "repo": "huggingface-mic/wav2vec2-base-960h-mic",
+      "revision": "d77fbf722169d5fbf4c740afc55cef80600e031f",
+      "contract_files_sha256": "600d344a61da970d76c09012059203e5ca6dc2de4b8814613f119b956ada256d",
+      "fixture_files_sha256": "5522f324c0e8bd3e70aa54a57318e4d5016c46df7709120dfb632423f4221c2f"
+    },
+    "hf-internal-testing/Whisper-integration": {
+      "repo": "huggingface-mic/whisper-tiny-mic",
+      "revision": "974f2748e2a6dc5744e89efbcfa96b9a1b1eceda",
+      "contract_files_sha256": "8e5fcc36121354232238e0f8df35db9751ff6d58eb5784d549960cb5f78ea564",
+      "fixture_files_sha256": "71e6e2a43065192dd2d535faaf16d2ed5bd2a6d6d7b8e66ef8388a159511ec9f"
+    }
+  }
+}

@@ -148,7 +148,7 @@ def test_publish_requires_all_variants_and_invalidates_baseline_edits(workspace)
         commands.publication_ready(workspace)
     approve_receipts(workspace)
     commands.publication_ready(workspace)
-    path = next((workspace.lock_path.parent / "expectations").rglob("*.json"))
+    path = next(workspace.expectations.rglob("*.json"))
     path.write_text(path.read_text() + "\n")
     with pytest.raises(ValueError, match="Every declared variant"):
         commands.publication_ready(workspace)
@@ -372,10 +372,7 @@ def test_publication_rejects_pending_candidates_and_missing_variant(workspace):
     workspace.save_state(validations=validations)
     with pytest.raises(ValueError, match="Every declared variant"):
         commands.publication_ready(workspace)
-    path = (
-        workspace.lock_path.parent
-        / "expectations/BERT/cpu-arm64/example.candidate.json"
-    )
+    path = workspace.expectations / "cpu-arm64/example.candidate.json"
     write(path, {})
     approve_receipts(workspace)
     with pytest.raises(ValueError, match="Unreviewed"):
@@ -442,10 +439,10 @@ def test_regeneration_creates_new_mic_artifacts_without_old_baselines(tmp_path):
         == 0
     )
     project = Workspace(path)
-    assert project.fixture == "hf-internal-testing/mic-bert-slim"
+    assert project.fixture == "hf-internal-testing/bert-mic"
     assert (
         project.lock["contracts"]["bert"]["integration"]["repo"]
-        == "hf-internal-testing/mic-bert-integration"
+        == "hf-internal-testing/bert-mic"
     )
     assert project.manifest["integrations"]["transformers"]["targets"] == ["fixtures"]
     assert not (project.lock_path.parent / "expectations").exists()
@@ -558,3 +555,181 @@ def test_batch_keeps_running_after_a_model_failure(tmp_path, monkeypatch):
     report = read(root / "report.json")
     assert report["models"]["bert"]["status"] == "build-failed"
     assert report["models"]["other"]["status"] == "validated"
+
+
+def test_new_artifacts_default_to_mic_organization(tmp_path):
+    args = parser().parse_args(["create", "org/model", "--out", "project"])
+    assert args.namespace == "huggingface-mic"
+    args = parser().parse_args(
+        ["batch", "--models-file", "models.json", "--out", "project"]
+    )
+    assert args.namespace == "huggingface-mic"
+    path = tmp_path / "mic-org"
+    assert (
+        main(
+            [
+                "create",
+                "google-bert/bert-base-uncased",
+                "--regenerate",
+                "--name",
+                "bert",
+                "--out",
+                str(path),
+            ]
+        )
+        == 0
+    )
+    project = Workspace(path)
+    assert project.fixture == "huggingface-mic/bert-mic"
+    assert (
+        project.lock["contracts"]["bert"]["integration"]["repo"]
+        == "huggingface-mic/bert-mic"
+    )
+
+
+def test_hub_aliases_preserve_pins_and_unrelated_owners():
+    from transformers_mic.hub import canonical_references
+
+    original = {
+        "integration": {
+            "repo": "hf-internal-testing/mic-bert-integration",
+            "revision": "same",
+            "files_sha256": "hash",
+        },
+        "fixtures": {"hf-internal-testing/mic-bert-slim": {"revision": "same"}},
+        "checkpoints": {"hf-internal-testing/tiny-random-bert": "same"},
+    }
+    moved = canonical_references(original)
+    assert moved["integration"] == {
+        **original["integration"],
+        "repo": "huggingface-mic/mic-bert-integration",
+    }
+    assert "huggingface-mic/mic-bert-slim" in moved["fixtures"]
+    assert moved["checkpoints"] == original["checkpoints"]
+    assert original["integration"]["repo"].startswith("hf-internal-testing/")
+
+
+def test_umbrella_baselines_live_next_to_usage_and_invalidate_validation(tmp_path):
+    path = tmp_path / "umbrella"
+    assert (
+        main(
+            [
+                "create",
+                "google-bert/bert-base-uncased",
+                "--regenerate",
+                "--name",
+                "bert",
+                "--out",
+                str(path),
+            ]
+        )
+        == 0
+    )
+    project = Workspace(path)
+    assert project.contract_root.name == "bert-mic"
+    assert (
+        project.expectations
+        == project.contract_root / "integrations/transformers/expectations"
+    )
+    digest_before = project.contract_digest()
+    fingerprint_before = project.validation_fingerprint()
+    write(project.expectations / "cpu-test/bert-mic.json", {"outputs": {"value": 1}})
+    assert project.contract_digest() == digest_before
+    assert project.validation_fingerprint() != fingerprint_before
+
+
+def test_umbrella_publish_uploads_one_snapshot_and_pins_both_roles(
+    tmp_path, monkeypatch
+):
+    import importlib.util
+    import sys
+    from pathlib import Path
+
+    example = Path(__file__).resolve().parents[1] / "example"
+    monkeypatch.syspath_prepend(str(example))
+    spec = importlib.util.spec_from_file_location(
+        "publish_mic_test", example / "publish_mic.py"
+    )
+    publisher = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(publisher)
+    path = tmp_path / "umbrella"
+    assert (
+        main(
+            [
+                "create",
+                "google-bert/bert-base-uncased",
+                "--regenerate",
+                "--name",
+                "bert",
+                "--out",
+                str(path),
+            ]
+        )
+        == 0
+    )
+    project = Workspace(path)
+    fixture = tmp_path / "fixture"
+    fixture.mkdir()
+    (fixture / "config.json").write_text("{}")
+    (fixture / "model.safetensors").write_bytes(b"weights")
+    write(
+        fixture / "build.json",
+        {"sha256": {"config.json": "hash", "model.safetensors": "hash"}},
+    )
+    write(project.expectations / "cpu-test/bert-mic.json", {"reviewed": True})
+    lock = project.lock
+    pin = lock["contracts"]["bert"]["fixtures"][project.fixture]
+    pin.update(path=str(fixture), files_sha256="hash")
+    write(project.lock_path, lock)
+    monkeypatch.setattr(publisher, "HERE", project.root / "example")
+    monkeypatch.setattr(publisher.run, "load", lambda path, schema: read(path))
+    monkeypatch.setattr(publisher.run, "fixture_problem", lambda *a: None)
+    calls = []
+
+    class API:
+        def repo_exists(self, repo):
+            return False
+
+        def create_repo(self, repo, **kwargs):
+            assert repo == "huggingface-mic/bert-mic"
+
+        def upload_folder(self, repo_id, folder_path, **kwargs):
+            assert repo_id == "huggingface-mic/bert-mic"
+            assert (folder_path / "model.safetensors").read_bytes() == b"weights"
+            assert (folder_path / "integrations/transformers/usage.md").exists()
+            assert read(
+                folder_path
+                / "integrations/transformers/expectations/cpu-test/bert-mic.json"
+            ) == {"reviewed": True}
+            assert (folder_path / ".mic-repo.json").exists()
+            calls.append(repo_id)
+            return SimpleNamespace(oid="c" * 40)
+
+    monkeypatch.setattr(publisher, "HfApi", API)
+    monkeypatch.setattr(sys, "argv", ["publish_mic"])
+    assert publisher.main() == 0
+    contract = project.lock["contracts"]["bert"]
+    assert (
+        contract["integration"]["revision"]
+        == contract["fixtures"][project.fixture]["revision"]
+        == "c" * 40
+    )
+    assert calls == ["huggingface-mic/bert-mic"]
+
+
+def test_merged_hub_card_keeps_both_descriptions(monkeypatch):
+    from pathlib import Path
+
+    monkeypatch.syspath_prepend(str(Path(__file__).resolve().parents[1] / "example"))
+    from mic_card import merged_card
+
+    card = merged_card(
+        "huggingface-mic/example-mic",
+        "# Usage\n\nOriginal usage explanation.",
+        "---\ntags: [mic]\n---\n# Weights\n\nOriginal parameter count and build details.",
+        "owner/model",
+    )
+    assert "Original usage explanation." in card
+    assert "Original parameter count and build details." in card
+    assert "integrations/transformers/expectations" in card
+    assert card.startswith("---\n")

@@ -376,7 +376,8 @@ def depth(config, prefix=""):
     return ", ".join(p for p in parts if p)
 
 
-def readme(name, contract, build, cls, config):
+def readme(name, contract, build, cls, config, contract_repo=None):
+    contract_repo = run.canonical_repo(contract_repo or f"hf-internal-testing/{contract}-integration")
     lacks = build.get("missing_parameters", [])
     mirror = (
         f"The real checkpoint lacks {', '.join(f'`{n}`' for n in lacks)}, so the fixture omits it too, and loading initializes it as it does for users."
@@ -416,7 +417,7 @@ base_model: {build['built_from']['repo']}
 
 # Slim fixture: {short(name)}
 
-A {build['parameters'] / 1e6:.1f}M-parameter fixture for the [{contract} MIC](https://huggingface.co/hf-internal-testing/{contract}-integration), covering {covers}. It is a test artifact, not a usable model, tagged `test-artifact` to keep it out of candidate-model search.
+A {build['parameters'] / 1e6:.1f}M-parameter fixture for the [{contract} MIC](https://huggingface.co/{contract_repo}), covering {covers}. It is a test artifact, not a usable model, tagged `test-artifact` to keep it out of candidate-model search.
 
 - **Fixture key `{build['key'][:12]}`.** It covers every checkpoint whose processor files are byte-identical and whose config matches after shrinking.
 - **Same architecture, smaller config:** `{cls.__name__}`, shrunk by the generic rule in [`sweep.py`](https://github.com/huggingface/model-integration-contracts/blob/main/experiments/sweep.py) ({depth(config)}).
@@ -449,7 +450,7 @@ def environment():
     }
 
 
-def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, keep_random=False, inspect_checkpoint=None):
+def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, keep_random=False, inspect_checkpoint=None, contract_repo=None):
     recipe = fixture["build"]
     keys, missing = {}, {}
     for repo in fixture["covers"]:
@@ -529,7 +530,7 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
     }
     run.validate(build, "fixture-build", f"{name} build.json")
     (out / "build.json").write_text(json.dumps(build, indent=1, default=str) + "\n")
-    (out / "README.md").write_text(readme(name, contract_name, build, cls, config))
+    (out / "README.md").write_text(readme(name, contract_name, build, cls, config, contract_repo))
     return build
 
 
@@ -578,7 +579,7 @@ def main():
                 continue
             start = time.perf_counter()
             out = args.out / short(name) if args.out else (lock_dir / pin["path"]).resolve()
-            build = build_fixture(name, fixture, contract_name, manifest, root, contract["checkpoints"], out, args.keep_random)
+            build = build_fixture(name, fixture, contract_name, manifest, root, contract["checkpoints"], out, args.keep_random, contract_repo=contract["integration"]["repo"])
             if args.out:
                 same = run.digest(build["sha256"]) == pin.get("files_sha256")
                 print(json.dumps({"fixture": name, "matches_pin": same, "differs": [] if same else sorted(

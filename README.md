@@ -1,5 +1,8 @@
 # transformers-mic
 
+New MIC artifacts use the [`huggingface-mic`](https://huggingface.co/huggingface-mic) Hub organization.
+See [Hub layout](docs/hub-organization.md).
+
 Python package and CLI for model integration contracts, slim fixtures, and measured
 expectations. See the [CLI guide](docs/cli.md) for installation, HF Inference
 Providers (default `Qwen/Qwen3.8-27B`), and the create/update/publish workflow.
@@ -32,25 +35,32 @@ The first goal is CI, not a Hub feature. The same contracts could later back com
 
 A MIC covers one usage path and every checkpoint on it. Each part links to the [full example](example/README.md).
 
-1. **Repositories by owner.** Creators' model repos are unchanged. Hugging Face owns an [integration repo](https://huggingface.co/hf-internal-testing/SmolLM-integration) (the contract; [source](example/hub/SmolLM-integration)) and [fixture repos](https://huggingface.co/hf-internal-testing/mic-SmolLM-slim) (slim models). Each [framework repo](example/transformers/tests/contracts) owns its fleet lock and expected results.
-2. **Fixed layouts:**
+1. **One MIC repository per slim model.** Creators' checkpoint repos stay unchanged. Hugging Face owns a model repo such as [`huggingface-mic/qwen2_5_omni-mic`](https://huggingface.co/huggingface-mic/qwen2_5_omni-mic), containing its slim weights, contract, usage and reviewed expectations. Frameworks own the review of their expectations; their fleet locks select immutable Hub snapshots.
+2. **Fixed layout:**
 
    ```text
-   hf-internal-testing/SmolLM-integration      # Hub: what to run
-     integration.json                          # manifest
-     integrations/transformers/usage.md        # runnable markdown: documentation and test
-     integrations/transformers.js/integration.js
-   transformers/tests/contracts/               # framework repo: what to expect
-     fleet.lock
-     expectations/SmolLM/cpu-arm64/mic-SmolLM-slim.json  # one baseline per target, platform, and variant
-     expectations/SmolLM/cpu-arm64/SmolLM-135M.json
-     expectations/SmolLM/cpu-arm64/SmolLM-135M.eager.json
+   huggingface-mic/qwen2_5_omni-mic/
+     config.json
+     model.safetensors
+     build.json
+     integration.json
+     .mic-repo.json                            # separates contract files from weights
+     integrations/transformers/
+       usage.md
+       expectations/cpu-x86_64-bf16/
+         mic-qwen2_5_omni-slim.bfloat16.json
+     integrations/transformers.js/             # when this framework is supported
+       integration.js
+       expectations/<platform>/<target>.<variant>.json
+   transformers/tests/contracts/fleet.lock     # immutable pins; no duplicated baselines
    ```
+
+   The fixture pin's `target` identifies its expectation file. See [Hub layout](docs/hub-organization.md).
 
 3. **A static manifest.** [`integration.json`](example/hub/SmolLM-integration/integration.json) declares checkpoints, each one's fixture, and per framework: entry point, variants, unsupported targets, resources, and a comparison rule per output.
 4. **User code as the contract**: the public API with default settings, printing one JSON line. As [doc-builder runnable markdown](example/hub/SmolLM-integration/integrations/transformers/usage.md), it is both documentation and test.
 5. **Checks beyond "it ran"**: generated outputs, logits within tolerance, and where training applies, finite loss and gradients and a parameter update.
-6. **Reviewed baselines** ([`expectations/`](example/transformers/tests/contracts/expectations/SmolLM/cpu-arm64)) per target, variant, and platform class. A behavior-changing PR updates them; nothing updates them automatically.
+6. **Reviewed baselines** under `integrations/<framework>/expectations/<platform>/`, per target and variant. A behavior-changing PR measures candidates, has them reviewed, then publishes a new snapshot and updates its lock. Nothing updates approved values automatically.
 7. **Shared [fixtures](example/hub/mic-SmolLM-slim).** Processor files copied byte for byte; weights and config shrink. Checkpoints share a fixture only with identical processors, retained config fields, and default dtype.
 8. **Everything pinned** in the framework's [fleet lock](example/transformers/tests/contracts/fleet.lock): contract, fixture, checkpoint, and dependency revisions.
 
@@ -58,7 +68,7 @@ A MIC covers one usage path and every checkpoint on it. Each part links to the [
 
 ## Why on the Hub, owned by Hugging Face
 
-Hugging Face maintains contracts and fixtures without requiring creator changes. Frameworks own expected results, reviewed in behavior-changing PRs. One versioned Hub contract per usage path serves multiple frameworks and can later expose checkpoint results.
+Hugging Face maintains contracts and fixtures without requiring creator changes. Framework maintainers review expected results in behavior-changing PRs. They live with their framework usage in the same versioned Hub model repository, and each framework pins the reviewed snapshot.
 
 ## Pilot run
 

@@ -34,13 +34,14 @@ def main():
         for repo, pin in contract.get("fixtures", {}).items():
             if args.fixture and run.short(repo) not in args.fixture:
                 continue
+            repo = run.canonical_repo(repo)
             folder = (lock_path.parent / pin["path"]).resolve()
             problem = run.fixture_problem(folder, {**pin, "revision": "unpublished"})
             if problem:
                 raise SystemExit(f"{repo}: not published: {problem}")
-            api.create_repo(repo, private=args.private, exist_ok=True)
+            api.create_repo(run.canonical_repo(repo), private=args.private, exist_ok=True)
             commit = api.upload_folder(
-                repo_id=repo,
+                repo_id=run.canonical_repo(repo),
                 folder_path=folder,
                 commit_message=f"Slim fixture {run.short(repo)} (files_sha256 {pin['files_sha256'][:12]})",
             )

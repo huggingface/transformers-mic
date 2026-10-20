@@ -58,7 +58,7 @@ def parser():
     create.add_argument("--out", required=True)
     create.add_argument("--contract", help="Choose a catalog usage path")
     create.add_argument(
-        "--namespace", help="Hub owner for new artifacts; defaults to logged-in account"
+        "--namespace", default="huggingface-mic", help="Hub owner for new artifacts (default: huggingface-mic)"
     )
     create.add_argument("--revision")
     create.add_argument(
@@ -193,7 +193,7 @@ def parser():
     )
     batch.add_argument("--models-file", type=Path, required=True)
     batch.add_argument("--out", required=True)
-    batch.add_argument("--namespace", default="hf-internal-testing")
+    batch.add_argument("--namespace", default="huggingface-mic")
     batch.add_argument("--phase", choices=("prepare", "run", "all"), default="all")
     batch.add_argument(
         "--select", action="append", help="Model names to run (repeatable)"
@@ -240,6 +240,7 @@ def external_check(args):
             "run", Path.cwd(), [*options, "--variant", args.variant]
         ).returncode
     from .workspace import read
+    from .hub import canonical_repo
     from huggingface_hub import hf_hub_download
 
     lock = read(args.lock)
@@ -250,7 +251,7 @@ def external_check(args):
     for name in selected:
         pin = lock["contracts"][name]["integration"]
         manifest = read(
-            hf_hub_download(pin["repo"], "integration.json", revision=pin["revision"])
+            hf_hub_download(canonical_repo(pin["repo"]), "integration.json", revision=pin["revision"])
         )
         for variant in manifest["integrations"]["transformers"].get(
             "variants", {"default": {}}

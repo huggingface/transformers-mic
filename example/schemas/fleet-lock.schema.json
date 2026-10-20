@@ -78,6 +78,9 @@
          "type": "string",
          "pattern": "^[0-9a-f]{64}$",
          "description": "sha256 of the fixture's build.json sha256 map, sorted JSON"
+        },
+        "target": {
+         "type": "string"
         }
        }
       }

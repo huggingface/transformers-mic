@@ -33,15 +33,19 @@ def main():
     parser.add_argument("--framework", default="transformers")
     parser.add_argument("--platform", help="only this platform's candidates")
     parser.add_argument("--approve", action="store_true", help="approve unchanged and new candidates")
+    parser.add_argument("--expectations", type=Path)
+    parser.add_argument("--manifest", type=Path)
     args = parser.parse_args()
-    root = HERE / args.framework / "tests/contracts/expectations"
+    if bool(args.expectations) != bool(args.manifest):
+        parser.error("--expectations and --manifest must be supplied together")
+    root = args.expectations or HERE / args.framework / "tests/contracts/expectations"
     counts = {}
-    for candidate in sorted(root.glob("*/*/*.candidate.json")):
+    for candidate in sorted(root.glob("*/*.candidate.json" if args.expectations else "*/*/*.candidate.json")):
         contract, platform = candidate.parent.parent.name, candidate.parent.name
         if args.platform and platform != args.platform:
             continue
         approved = candidate.with_name(candidate.name.replace(".candidate.json", ".json"))
-        manifest = run.load(HERE / "hub" / f"{contract}-integration/integration.json", "integration")
+        manifest = run.load(args.manifest or HERE / "hub" / f"{contract}-integration/integration.json", "integration")
         new = run.load(candidate, "baseline")["outputs"]
         if not approved.exists():
             verdict, detail = "new", sorted(k for k in manifest["outputs"] if run.lookup(new, k) is not None)

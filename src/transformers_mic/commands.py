@@ -13,6 +13,7 @@ from huggingface_hub import HfApi, hf_hub_download
 import jsonschema
 
 from . import backend, history, planner, policy, references, resources
+from .hub import DEFAULT_NAMESPACE, canonical_references, upgrade_contract
 from .workspace import Workspace, catalog_patches, digest, read, write
 
 
@@ -42,7 +43,12 @@ def validate_plan(plan, model, fixture, old=None):
     if not isinstance(recipe, dict):
         raise ValueError("Generated fixture needs a build recipe")
     previous_recipe = old["fixtures"][fixture].get("build", {}) if old else {}
-    for key in ("overfit", "accept_insensitive", "copy_assets", "preserve_frozen_prefixes"):
+    for key in (
+        "overfit",
+        "accept_insensitive",
+        "copy_assets",
+        "preserve_frozen_prefixes",
+    ):
         if recipe.get(key) != previous_recipe.get(key):
             raise ValueError(
                 "The LLM cannot select overfit, exempt insensitive inputs, or preserve source tensors/assets"
@@ -151,9 +157,9 @@ def create(args):
             resources.catalog() / "hub" / f"{name}-integration/integration.json"
         )
         old_fixture = original["checkpoints"][args.model]["fixture"]
-        namespace = args.namespace or HfApi().whoami()["name"]
+        namespace = args.namespace or DEFAULT_NAMESPACE
         slug = args.name or re.sub(r"[^A-Za-z0-9_-]", "-", args.model.split("/")[-1])
-        fixture = f"{namespace}/mic-{slug}-slim"
+        fixture = f"{namespace}/{slug}-mic"
         manifest = json.loads(json.dumps(original).replace(old_fixture, fixture))
         manifest["checkpoints"] = {args.model: {"fixture": fixture}}
         manifest["fixtures"] = {fixture: manifest["fixtures"][fixture]}
@@ -229,9 +235,9 @@ def create(args):
                 "No catalog contract matches this model; new models need Hub metadata and an LLM usage plan"
             )
         revision, config = model_context(args.model, args.revision)
-        namespace = args.namespace or HfApi().whoami()["name"]
+        namespace = args.namespace or DEFAULT_NAMESPACE
         slug = re.sub(r"[^A-Za-z0-9_.-]", "-", args.model.split("/")[-1])
-        fixture = f"{namespace}/mic-{args.name or slug}-slim"
+        fixture = f"{namespace}/{args.name or slug}-mic"
         evidence = (
             {"items": [], "complete": False, "source": "not requested"}
             if args.no_history
@@ -281,6 +287,7 @@ def create(args):
         )
         write(workspace.root / ".mic/plan.json", {**plan, "llm": llm})
         write(workspace.root / ".mic/history.json", evidence)
+    workspace.update_layout()
     print(
         json.dumps(
             {
@@ -513,7 +520,14 @@ def execute(args, record=False):
 
 def review(args):
     workspace = Workspace(args.workspace)
-    options = ["--framework", "transformers"]
+    options = [
+        "--framework",
+        "transformers",
+        "--expectations",
+        str(workspace.expectations),
+        "--manifest",
+        str(workspace.contract_root / "integration.json"),
+    ]
     if args.platform:
         options += ["--platform", args.platform]
     if args.approve:
@@ -618,7 +632,7 @@ def publication_ready(workspace):
         raise ValueError(
             "Run tmic check on all declared targets after reviewing candidates; source or lock changes invalidate validation"
         )
-    if list(workspace.lock_path.parent.glob("expectations/**/*.candidate.json")):
+    if list(workspace.expectations.rglob("*.candidate.json")):
         raise ValueError(
             "Unreviewed candidate baselines remain; run tmic review before publishing"
         )
@@ -650,19 +664,8 @@ def publish(args):
     )
     if not args.execute:
         return 0
-    name = workspace.state["contract"]
-    pin = workspace.lock["contracts"][name]["fixtures"][workspace.fixture]
-    if pin["revision"] == "unpublished":
-        options = ["--fixture", workspace.fixture.split("/")[-1]] + (
-            ["--private"] if args.private else []
-        )
-        result = backend.invoke("publish_fixtures", workspace.root, options)
-        if result.returncode:
-            return result.returncode
     result = backend.invoke(
-        "publish_contracts",
-        workspace.root,
-        ["--contract", name] + (["--private"] if args.private else []),
+        "publish_mic", workspace.root, ["--private"] if args.private else []
     )
     workspace.save_state(validated=False)
     print("Run tmic check --all-variants on the published pins before export.")
@@ -719,19 +722,20 @@ def export(args):
             "Destination environment differs; review the environment change separately"
         )
     # Hub-only paths keep the exported lock independent of this workspace.
-    clean = json.loads(json.dumps(contract))
+    clean = upgrade_contract(canonical_references(contract))
     for pin in [clean["integration"], *clean.get("fixtures", {}).values()]:
         pin.pop("path", None)
     old["contracts"][destination_name] = clean
     if source.get("known_failures"):
         old.setdefault("known_failures", {}).update(source["known_failures"])
     write(path, old)
-    shutil.copytree(
-        workspace.lock_path.parent / "expectations" / name,
-        target / "expectations" / destination_name,
-        dirs_exist_ok=True,
-        ignore=shutil.ignore_patterns("*.candidate.json"),
-    )
+    if not clean["integration"]["repo"].endswith("-mic"):
+        shutil.copytree(
+            workspace.expectations,
+            target / "expectations" / destination_name,
+            dirs_exist_ok=True,
+            ignore=shutil.ignore_patterns("*.candidate.json"),
+        )
     print(
         json.dumps(
             {
