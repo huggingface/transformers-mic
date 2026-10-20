@@ -1,5 +1,7 @@
 # transformers-mic
 
+![logo](/docs/mic-logo.png)
+
 New MIC artifacts use the [`huggingface-mic`](https://huggingface.co/huggingface-mic) Hub organization.
 See [Hub layout](docs/hub-organization.md).
 
