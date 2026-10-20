@@ -694,6 +694,11 @@ def export(args):
         )
     fleet_name = getattr(args, "fleet", "control")
     path, revision = fleet.download(fleet_name)
+    if expected := getattr(args, "expected_revision", None):
+        if revision != expected:
+            raise ValueError(
+                "Dataset changed since preview; review the current fleet before exporting"
+            )
     old = read(path)
     destination_name = getattr(args, "contract_name", None) or name
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", destination_name):

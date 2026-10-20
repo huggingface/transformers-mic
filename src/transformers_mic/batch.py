@@ -26,13 +26,21 @@ def invoke(out, name, arguments, timeout):
             )
             process.wait(timeout=timeout)
             return {"exit_code": process.returncode, "log": str(log.relative_to(out))}
-        except subprocess.TimeoutExpired:
-            os.killpg(process.pid, signal.SIGTERM)
+        except (subprocess.TimeoutExpired, KeyboardInterrupt) as error:
+            try:
+                os.killpg(process.pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
             try:
                 process.wait(timeout=5)
             except subprocess.TimeoutExpired:
-                os.killpg(process.pid, signal.SIGKILL)
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
                 process.wait()
+            if isinstance(error, KeyboardInterrupt):
+                raise
             return {
                 "exit_code": 124,
                 "error": "stage timeout",

@@ -51,6 +51,37 @@ def parser():
         help="Project directory (default: current directory)",
     )
     sub = root.add_subparsers(dest="command", required=True)
+    run = sub.add_parser(
+        "run", help="Automate one model from creation through the shared fleet update"
+    )
+    run.add_argument("model")
+    run.add_argument("--out", help="Resumable workspace (default: work/mic/ORG--MODEL)")
+    run.add_argument("--namespace", default="huggingface-mic")
+    run.add_argument("--fleet", choices=tuple(fleet.FILES), default="prototypes")
+    run.add_argument("--contract-name")
+    run.add_argument("--transformers-checkout")
+    run.add_argument("--revision")
+    run.add_argument("--name")
+    run.add_argument("--contract")
+    run.add_argument("--regenerate", action="store_true")
+    run.add_argument("--llm", action="store_true")
+    run.add_argument("--fixtures-only", action="store_true")
+    run.add_argument("--no-history", action="store_true")
+    run.add_argument(
+        "--local-only",
+        action="store_true",
+        help="Stop after local validation without uploading",
+    )
+    run.add_argument(
+        "--non-interactive",
+        action="store_true",
+        help="Save questions and exit 3 when human input is needed",
+    )
+    run.add_argument(
+        "--timeout", type=int, default=1800, help="Timeout in seconds per stage"
+    )
+    weights_options(run, "auto")
+    llm_options(run)
     create = sub.add_parser(
         "create", help="Reuse a catalog contract or ask the HF planner for a draft"
     )
@@ -188,6 +219,9 @@ def parser():
     )
     export.add_argument("--fleet", choices=tuple(fleet.FILES), default="control")
     export.add_argument(
+        "--expected-revision", help="Reject upload if the dataset changed since preview"
+    )
+    export.add_argument(
         "--execute", action="store_true", help="Upload the previewed fleet update"
     )
     pin = sub.add_parser(
@@ -297,6 +331,10 @@ def external_check(args):
 def main(argv=None):
     args = parser().parse_args(argv)
     try:
+        if args.command == "run":
+            from .automation import run
+
+            return run(args)
         if args.command == "batch":
             from .batch import run
 

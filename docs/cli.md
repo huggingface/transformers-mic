@@ -19,6 +19,56 @@ hf auth login        # publishing needs write access to the target namespace
 gh auth login        # history search; or pass --no-history to create
 ```
 
+## Automated mode
+
+```sh
+tmic run org/model
+```
+
+This creates a workspace at `work/mic/org--model` and runs the same measured
+workflow as the individual commands: reuse or draft the contract, select/build
+weights, check Auto-model registrations, record reproducible candidates for every
+declared variant, review them, validate all targets, publish the model snapshot,
+validate its published pins, and update the shared fleet dataset. The default fleet
+is `prototypes`; use `--fleet control` for the control fleet.
+
+The command asks you to review the executable contract before building it. It
+automatically approves only new or unchanged candidate baselines, using the
+existing review rules. Changed baselines show a diff and need your confirmation
+and an explanation, saved with file hashes in `.mic/automation-reviews.json`.
+It previews each upload and asks before publishing the model or updating the fleet.
+An intervening dataset update requires a fresh preview and decision.
+
+```sh
+# Validate locally, without uploading:
+tmic run org/model --local-only
+# Choose a workspace and write the final dataset SHA into a framework checkout:
+tmic run org/model --out work/my-model --transformers-checkout /path/to/transformers
+# For a new model, declare only fixture targets:
+tmic run org/model --fixtures-only
+```
+
+Declared variants and targets are not silently dropped. Catalog contracts keep
+their existing target scope, which can include real checkpoints. Use a runtime
+that supports those variants. Model-specific build errors, missing dependencies,
+and unsupported hardware stop progression and show the stage log; fix the problem
+and retry. `--timeout SECONDS` bounds each stage (default 1800). New models use the
+HF planner just as `create` does; `--no-history`, `--provider`, `--llm-model`,
+`--weights`, `--namespace`, `--contract`, `--name`, and `--regenerate` are available.
+
+Repeat the same command to resume. State lives in `.mic/automation.json`; logs
+live in `.mic/automation/logs/`. Completed uploads are not repeated when resuming
+an unchanged workspace. Source, lock, or baseline edits invalidate earlier checks
+and restart validation. After `--local-only`, rerun without it to continue through
+publication. No Git commit or framework PR is created automatically.
+
+Without a terminal, or with `--non-interactive`, the command saves a pending
+question, prints JSON containing the question and resume command, and exits **3**.
+Run the resume command in a terminal to answer it. A successful local-only run or
+completed publication exits **0**; Ctrl-C saves progress, stops running stage
+processes, and exits **130**. Existing individual commands remain available;
+`tmic auto` still checks factory mappings for a built fixture.
+
 ## Step by step: one model
 
 **The order is: real checkpoint → contract → fixture.** You never write a fixture

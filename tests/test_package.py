@@ -868,3 +868,14 @@ def test_dataset_export_rejects_environment_change(workspace, dataset):
     with pytest.raises(ValueError, match="environment differs"):
         commands.export(SimpleNamespace(workspace=workspace.root, execute=True))
     assert not dataset[1]
+
+
+def test_export_rejects_a_dataset_changed_since_human_preview(workspace, dataset):
+    approve_receipts(workspace)
+    with pytest.raises(ValueError, match="changed since preview"):
+        commands.export(
+            SimpleNamespace(
+                workspace=workspace.root, execute=True, expected_revision="f" * 40
+            )
+        )
+    assert not dataset[1]
