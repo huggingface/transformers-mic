@@ -53,7 +53,7 @@ def upgrade_contract(contract):
     original = result["integration"]["repo"]
     primary = migration["integrations"].get(original)
     if primary is None:
-        return result
+        return rename_known_targets(result, migration)
     result["integration"].update(
         repo=primary["repo"],
         revision=primary["revision"],
@@ -66,10 +66,29 @@ def upgrade_contract(contract):
             pin.update(
                 revision=row["revision"],
                 files_sha256=row["fixture_files_sha256"],
-                target=pin.get("target", repo.split("/")[-1]),
+                target=row.get("target", pin.get("target", repo.split("/")[-1])),
             )
             fixtures[row["repo"]] = pin
         else:
             fixtures[repo] = pin
     result["fixtures"] = fixtures
-    return result
+    return rename_known_targets(result, migration)
+
+
+def rename_known_targets(contract, migration):
+    """Advance only snapshots whose baselines were renamed without value changes."""
+    targets = migration.get("targets", {})
+    integration = contract["integration"]
+    pins = [(integration["repo"], integration), *contract.get("fixtures", {}).items()]
+    for repo, pin in pins:
+        row = targets.get(repo)
+        if row and pin["revision"] not in [row["revision"], *row["previous_revisions"]]:
+            return contract
+    row = targets.get(integration["repo"])
+    if row and integration["revision"] in row["previous_revisions"]:
+        integration["revision"] = row["revision"]
+    for repo, pin in contract.get("fixtures", {}).items():
+        row = targets.get(repo)
+        if row and pin["revision"] in [row["revision"], *row["previous_revisions"]]:
+            pin.update(revision=row["revision"], target=row["target"])
+    return contract

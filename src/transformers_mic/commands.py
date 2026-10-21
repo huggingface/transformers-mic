@@ -13,7 +13,12 @@ from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download
 import jsonschema
 
 from . import backend, fleet, history, planner, policy, references, resources
-from .hub import DEFAULT_NAMESPACE, canonical_references, upgrade_contract
+from .hub import (
+    DEFAULT_NAMESPACE,
+    canonical_references,
+    umbrella_references,
+    upgrade_contract,
+)
 from .workspace import Workspace, catalog_patches, digest, read, write
 
 
@@ -720,6 +725,14 @@ def export(args):
     for pin in [clean["integration"], *clean.get("fixtures", {}).values()]:
         pin.pop("path", None)
     old["contracts"][destination_name] = clean
+    renamed_targets = {}
+    for repo, pin in contract.get("fixtures", {}).items():
+        canonical = umbrella_references(canonical_references(repo))
+        if current := clean.get("fixtures", {}).get(canonical):
+            renamed_targets[pin.get("target", repo.split("/")[-1])] = current.get(
+                "target", canonical.split("/")[-1]
+            )
+
     # Only this workspace's contract belongs to the update; keep other cases intact.
     known = old.setdefault("known_failures", {})
     for key in list(known):
@@ -727,7 +740,8 @@ def export(args):
             del known[key]
     for key, value in source.get("known_failures", {}).items():
         if key.startswith(name + "/"):
-            known[destination_name + key[len(name) :]] = value
+            target = key[len(name) + 1 :]
+            known[destination_name + "/" + renamed_targets.get(target, target)] = value
     payload = (json.dumps(old, indent=2, allow_nan=False) + "\n").encode()
     executed = getattr(args, "execute", False)
     checkout = getattr(args, "transformers_checkout", None)

@@ -879,3 +879,32 @@ def test_export_rejects_a_dataset_changed_since_human_preview(workspace, dataset
             )
         )
     assert not dataset[1]
+
+
+def test_export_moves_known_failure_to_the_renamed_target(
+    workspace, dataset, monkeypatch
+):
+    source = workspace.lock
+    fixture, pin = next(iter(source["contracts"]["BERT"]["fixtures"].items()))
+    old_target = pin.get("target", fixture.split("/")[-1])
+    source["known_failures"] = {
+        f"BERT/{old_target}": {"issue": "tracked", "skip_outputs": ["training.loss"]}
+    }
+    write(workspace.lock_path, source)
+    approve_receipts(workspace)
+    original = commands.upgrade_contract
+
+    def canonical(contract):
+        result = original(contract)
+        for repo, pin in result["fixtures"].items():
+            pin["target"] = repo.split("/")[-1]
+        return result
+
+    monkeypatch.setattr(commands, "upgrade_contract", canonical)
+    commands.export(SimpleNamespace(workspace=workspace.root, execute=True))
+    exported = json.loads(dataset[1][0]["operations"][0].path_or_fileobj)
+    target = fixture.split("/")[-1]
+    assert exported["known_failures"][f"BERT/{target}"]["skip_outputs"] == [
+        "training.loss"
+    ]
+    assert f"BERT/{old_target}" not in exported["known_failures"]
