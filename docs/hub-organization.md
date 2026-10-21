@@ -39,3 +39,11 @@ inventory against the contract hash, and verifies weights and processors separat
 against `build.json`. Expectations are outside both content inventories. They remain
 covered by the immutable Hub commit pin and workspace validation fingerprint.
 The fixture pin's `target` field identifies the matching expectation file.
+
+The fixture pin's `target` also appears in `recorded_with.target` inside every
+baseline. For `huggingface-mic/bert-mic`, the canonical target is `bert-mic`,
+with references such as `bert-mic.bfloat16.json`. Rename the files and their
+recorded identities together, then update the fleet's target and immutable model
+revision. Numeric expectations, executable contract hashes and fixture hashes
+stay unchanged for a target rename. Exports carry scoped known-failure entries
+to the matching renamed target.
