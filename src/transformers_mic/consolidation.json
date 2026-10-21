@@ -263,15 +263,15 @@
     },
     "huggingface-mic/mic-mistral3-slim": {
       "repo": "huggingface-mic/mistral3-mic",
-      "revision": "6320652c65d41c49903fe19d7cc2e5c0ab2842ad",
-      "contract_files_sha256": "2923ae62a9857e187b4417d046b88acc02a9027f0a892427f8375eaff93efe41",
+      "revision": "5d6b31a7548b1dc4c1255f42cbe8d1d44ead6261",
+      "contract_files_sha256": "52558c71b08b729cc8b943a0f1515ab7d162415117ba29f361a4d7c985c3d5fc",
       "fixture_files_sha256": "e1ff61844c87c8150ada71205f60c96b9aaf1782f951ea8377a0555446e6d41a",
       "target": "mistral3-mic"
     },
     "hf-internal-testing/mic-mistral3-slim": {
       "repo": "huggingface-mic/mistral3-mic",
-      "revision": "6320652c65d41c49903fe19d7cc2e5c0ab2842ad",
-      "contract_files_sha256": "2923ae62a9857e187b4417d046b88acc02a9027f0a892427f8375eaff93efe41",
+      "revision": "5d6b31a7548b1dc4c1255f42cbe8d1d44ead6261",
+      "contract_files_sha256": "52558c71b08b729cc8b943a0f1515ab7d162415117ba29f361a4d7c985c3d5fc",
       "fixture_files_sha256": "e1ff61844c87c8150ada71205f60c96b9aaf1782f951ea8377a0555446e6d41a",
       "target": "mistral3-mic"
     },
@@ -683,14 +683,14 @@
     },
     "huggingface-mic/mic-mistral3-integration": {
       "repo": "huggingface-mic/mistral3-mic",
-      "revision": "6320652c65d41c49903fe19d7cc2e5c0ab2842ad",
-      "contract_files_sha256": "2923ae62a9857e187b4417d046b88acc02a9027f0a892427f8375eaff93efe41",
+      "revision": "5d6b31a7548b1dc4c1255f42cbe8d1d44ead6261",
+      "contract_files_sha256": "52558c71b08b729cc8b943a0f1515ab7d162415117ba29f361a4d7c985c3d5fc",
       "fixture_files_sha256": "e1ff61844c87c8150ada71205f60c96b9aaf1782f951ea8377a0555446e6d41a"
     },
     "hf-internal-testing/mic-mistral3-integration": {
       "repo": "huggingface-mic/mistral3-mic",
-      "revision": "6320652c65d41c49903fe19d7cc2e5c0ab2842ad",
-      "contract_files_sha256": "2923ae62a9857e187b4417d046b88acc02a9027f0a892427f8375eaff93efe41",
+      "revision": "5d6b31a7548b1dc4c1255f42cbe8d1d44ead6261",
+      "contract_files_sha256": "52558c71b08b729cc8b943a0f1515ab7d162415117ba29f361a4d7c985c3d5fc",
       "fixture_files_sha256": "e1ff61844c87c8150ada71205f60c96b9aaf1782f951ea8377a0555446e6d41a"
     },
     "huggingface-mic/mic-modernbert-integration": {
@@ -966,11 +966,14 @@
       ]
     },
     "huggingface-mic/mistral3-mic": {
-      "revision": "6320652c65d41c49903fe19d7cc2e5c0ab2842ad",
+      "revision": "5d6b31a7548b1dc4c1255f42cbe8d1d44ead6261",
       "target": "mistral3-mic",
       "previous_revisions": [
-        "958fe85acde48676cffc8c8b13ba1ff905922c8e"
-      ]
+        "958fe85acde48676cffc8c8b13ba1ff905922c8e",
+        "6320652c65d41c49903fe19d7cc2e5c0ab2842ad"
+      ],
+      "previous_contract_files_sha256": "2923ae62a9857e187b4417d046b88acc02a9027f0a892427f8375eaff93efe41",
+      "contract_files_sha256": "52558c71b08b729cc8b943a0f1515ab7d162415117ba29f361a4d7c985c3d5fc"
     },
     "huggingface-mic/modernbert-mic": {
       "revision": "52ba11fb809465524dae87fb4121e8deb71d0d9c",

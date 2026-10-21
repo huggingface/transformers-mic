@@ -66,6 +66,15 @@ on both framework sources reproduced its output exactly. Predicted tokens,
 finite gradients and the training update remained stable; existing tolerances
 were retained. [Review evidence](../experiments/results/native-mistral3-bf16-review.json).
 
+A subsequent daily failure exposed a changing input: Mistral3's default chat
+template inserts the current date. The same source, fixture and runtime reproduce
+the reviewed reference on October 20 and the reported assertion failures on
+October 21. The usage now fixes the template date to October 20, following the
+approach in Transformers' own Mistral3 integration tests. Native fresh-process
+checks under three simulated dates produce identical tokenized inputs and match
+all existing baseline outputs exactly; no expected values or tolerances change.
+[Date-only reproduction](../experiments/results/mistral3-calendar-date.json).
+
 ## Scope and runtime
 
 The earlier full proof ran two locks: the six-contract,

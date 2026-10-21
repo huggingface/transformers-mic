@@ -24,7 +24,7 @@ A candidate is a question, not a verdict.
 ## Adding a check
 
 1. **Reproduce on the real checkpoint first**, through the public call, on bad and fixed builds ([replay](evidence.md#historical-regression-replay)). No checkpoint failure → stop.
-2. **Write it as user code:** documented API, default settings, short, deterministic, in its own `usage.md` section.
+2. **Write it as user code:** documented API, default settings, short, deterministic, in its own `usage.md` section. Check rendered chat prompts too: templates may insert the current date through `strftime_now`. Pin the template's reference date, as Transformers' Mistral3 generation tests do, or provide a fixed system message. A random seed does not freeze the clock. Verify that inputs and checked outputs stay identical on different simulated dates before approving a baseline.
 3. **Don't move existing outputs.** Place it before training if it draws no random numbers (tokenization, decoding, config reads, greedy generation); otherwise after the outputs it could affect, and re-review them.
 4. **Declare its output** in the manifest: `exact` for tokens, text, labels, keys; `allclose` only for floats.
 5. **Prove it on the bug** with [`replay.py`](../example/replay.py): fixture fails on bad, passes on fixed. If only the checkpoint differs, keep it as full-model coverage (nightly, `run-slow`), not PR coverage.

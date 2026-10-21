@@ -17,6 +17,8 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 set_seed(0)  # seeds torch, NumPy, and Python: loading, dropout, and data augmentation draw random numbers
 
 processor = AutoProcessor.from_pretrained(model_id)
+# Keep the prompt identical across daily runs; the default template inserts today's date.
+processor.chat_template = processor.chat_template.replace('strftime_now("%Y-%m-%d")', '"2026-10-20"')
 model = AutoModelForImageTextToText.from_pretrained(model_id).to(device)
 if variant:  # doc-builder: hide
     model = AutoModelForImageTextToText.from_pretrained(model_id, **variant).to(device)

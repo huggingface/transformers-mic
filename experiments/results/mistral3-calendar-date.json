@@ -1,0 +1,322 @@
+{
+  "workflow_run": "https://github.com/huggingface/transformers/actions/runs/39595367797",
+  "framework_revision": "6b75aeeab91d98bd3872b3f2382cfb4a8ce810d4",
+  "baseline_revision": "6320652c65d41c49903fe19d7cc2e5c0ab2842ad",
+  "fixed_revision": "5d6b31a7548b1dc4c1255f42cbe8d1d44ead6261",
+  "expected_outputs_changed": false,
+  "tolerances_changed": false,
+  "records": [
+    {
+      "prompt": "explicit",
+      "date": "2026-10-20",
+      "outputs": {
+        "runtime": {
+          "device": "cpu",
+          "dtype": "bfloat16",
+          "attn_implementation": "sdpa"
+        },
+        "predicted_tokens": [
+          "",
+          ""
+        ],
+        "answer_logits": [
+          [
+            -0.04833984375,
+            0.07763671875,
+            0.1611328125,
+            -0.224609375,
+            1.109375,
+            0.19921875,
+            0.2099609375,
+            -0.048828125,
+            0.095703125,
+            0.1728515625
+          ],
+          [
+            -0.05126953125,
+            0.07373046875,
+            0.1591796875,
+            -0.2314453125,
+            1.109375,
+            0.203125,
+            0.2041015625,
+            -0.044921875,
+            0.09619140625,
+            0.1748046875
+          ]
+        ],
+        "training": {
+          "loss": 11.765435218811035,
+          "gradients": {
+            "model.language_model.embed_tokens.weight": true,
+            "model.language_model.layers.0.self_attn.q_proj.weight": true
+          },
+          "updated": true
+        }
+      },
+      "matches_reviewed_baseline_exactly": true,
+      "texts_sha256": "cfd7e2ad75e83e9bd7ad23e0954460f5aa160473dbe3464f88e79098bf8720f4",
+      "inputs_sha256": "36aff5bbe919be30c94743d47a0ff214a907ff9582e6b9236802beb6e65dbdbd"
+    },
+    {
+      "prompt": "explicit",
+      "date": "2026-10-21",
+      "outputs": {
+        "runtime": {
+          "device": "cpu",
+          "dtype": "bfloat16",
+          "attn_implementation": "sdpa"
+        },
+        "predicted_tokens": [
+          "",
+          ""
+        ],
+        "answer_logits": [
+          [
+            -0.04833984375,
+            0.07763671875,
+            0.1611328125,
+            -0.224609375,
+            1.109375,
+            0.19921875,
+            0.2099609375,
+            -0.048828125,
+            0.095703125,
+            0.1728515625
+          ],
+          [
+            -0.05126953125,
+            0.07373046875,
+            0.1591796875,
+            -0.2314453125,
+            1.109375,
+            0.203125,
+            0.2041015625,
+            -0.044921875,
+            0.09619140625,
+            0.1748046875
+          ]
+        ],
+        "training": {
+          "loss": 11.765435218811035,
+          "gradients": {
+            "model.language_model.embed_tokens.weight": true,
+            "model.language_model.layers.0.self_attn.q_proj.weight": true
+          },
+          "updated": true
+        }
+      },
+      "matches_reviewed_baseline_exactly": true,
+      "texts_sha256": "cfd7e2ad75e83e9bd7ad23e0954460f5aa160473dbe3464f88e79098bf8720f4",
+      "inputs_sha256": "36aff5bbe919be30c94743d47a0ff214a907ff9582e6b9236802beb6e65dbdbd"
+    },
+    {
+      "prompt": "explicit",
+      "date": "2026-10-22",
+      "outputs": {
+        "runtime": {
+          "device": "cpu",
+          "dtype": "bfloat16",
+          "attn_implementation": "sdpa"
+        },
+        "predicted_tokens": [
+          "",
+          ""
+        ],
+        "answer_logits": [
+          [
+            -0.04833984375,
+            0.07763671875,
+            0.1611328125,
+            -0.224609375,
+            1.109375,
+            0.19921875,
+            0.2099609375,
+            -0.048828125,
+            0.095703125,
+            0.1728515625
+          ],
+          [
+            -0.05126953125,
+            0.07373046875,
+            0.1591796875,
+            -0.2314453125,
+            1.109375,
+            0.203125,
+            0.2041015625,
+            -0.044921875,
+            0.09619140625,
+            0.1748046875
+          ]
+        ],
+        "training": {
+          "loss": 11.765435218811035,
+          "gradients": {
+            "model.language_model.embed_tokens.weight": true,
+            "model.language_model.layers.0.self_attn.q_proj.weight": true
+          },
+          "updated": true
+        }
+      },
+      "matches_reviewed_baseline_exactly": true,
+      "texts_sha256": "cfd7e2ad75e83e9bd7ad23e0954460f5aa160473dbe3464f88e79098bf8720f4",
+      "inputs_sha256": "36aff5bbe919be30c94743d47a0ff214a907ff9582e6b9236802beb6e65dbdbd"
+    },
+    {
+      "prompt": "original",
+      "date": "2026-10-20",
+      "outputs": {
+        "runtime": {
+          "device": "cpu",
+          "dtype": "bfloat16",
+          "attn_implementation": "sdpa"
+        },
+        "predicted_tokens": [
+          "",
+          ""
+        ],
+        "answer_logits": [
+          [
+            -0.04833984375,
+            0.07763671875,
+            0.1611328125,
+            -0.224609375,
+            1.109375,
+            0.19921875,
+            0.2099609375,
+            -0.048828125,
+            0.095703125,
+            0.1728515625
+          ],
+          [
+            -0.05126953125,
+            0.07373046875,
+            0.1591796875,
+            -0.2314453125,
+            1.109375,
+            0.203125,
+            0.2041015625,
+            -0.044921875,
+            0.09619140625,
+            0.1748046875
+          ]
+        ],
+        "training": {
+          "loss": 11.765435218811035,
+          "gradients": {
+            "model.language_model.embed_tokens.weight": true,
+            "model.language_model.layers.0.self_attn.q_proj.weight": true
+          },
+          "updated": true
+        }
+      },
+      "matches_reviewed_baseline_exactly": true,
+      "texts_sha256": "cfd7e2ad75e83e9bd7ad23e0954460f5aa160473dbe3464f88e79098bf8720f4",
+      "inputs_sha256": "36aff5bbe919be30c94743d47a0ff214a907ff9582e6b9236802beb6e65dbdbd"
+    },
+    {
+      "prompt": "original",
+      "date": "2026-10-21",
+      "outputs": {
+        "runtime": {
+          "device": "cpu",
+          "dtype": "bfloat16",
+          "attn_implementation": "sdpa"
+        },
+        "predicted_tokens": [
+          "",
+          ""
+        ],
+        "answer_logits": [
+          [
+            -0.049560546875,
+            0.08056640625,
+            0.1630859375,
+            -0.2255859375,
+            1.109375,
+            0.1982421875,
+            0.212890625,
+            -0.051513671875,
+            0.10009765625,
+            0.17578125
+          ],
+          [
+            -0.05126953125,
+            0.0771484375,
+            0.16015625,
+            -0.2333984375,
+            1.109375,
+            0.2021484375,
+            0.20703125,
+            -0.04833984375,
+            0.10009765625,
+            0.1748046875
+          ]
+        ],
+        "training": {
+          "loss": 11.766748428344727,
+          "gradients": {
+            "model.language_model.embed_tokens.weight": true,
+            "model.language_model.layers.0.self_attn.q_proj.weight": true
+          },
+          "updated": true
+        }
+      },
+      "matches_reviewed_baseline_exactly": false,
+      "texts_sha256": "1e578bbc4edc880f984ca55a38b7ba640fc466df533dd9b3a6cfc29887813e83",
+      "inputs_sha256": "6533e8571d6042a32c331ac63a01e5526b39dca5ba90c2e4d4c466fa3011877f"
+    },
+    {
+      "prompt": "original",
+      "date": "2026-10-22",
+      "outputs": {
+        "runtime": {
+          "device": "cpu",
+          "dtype": "bfloat16",
+          "attn_implementation": "sdpa"
+        },
+        "predicted_tokens": [
+          "",
+          ""
+        ],
+        "answer_logits": [
+          [
+            -0.048095703125,
+            0.08056640625,
+            0.162109375,
+            -0.2197265625,
+            1.1015625,
+            0.197265625,
+            0.2080078125,
+            -0.0537109375,
+            0.09619140625,
+            0.1728515625
+          ],
+          [
+            -0.04931640625,
+            0.0771484375,
+            0.16015625,
+            -0.2265625,
+            1.1015625,
+            0.1982421875,
+            0.203125,
+            -0.052001953125,
+            0.09619140625,
+            0.173828125
+          ]
+        ],
+        "training": {
+          "loss": 11.760100364685059,
+          "gradients": {
+            "model.language_model.embed_tokens.weight": true,
+            "model.language_model.layers.0.self_attn.q_proj.weight": true
+          },
+          "updated": true
+        }
+      },
+      "matches_reviewed_baseline_exactly": false,
+      "texts_sha256": "394bbdce4444d071ad1725da5002132739cca6ac8c298b41c7e1c99ffc08fdd9",
+      "inputs_sha256": "233778718648f78b917dbefa72a8d187906f8139103d0abd73c3bfb364c1a26d"
+    }
+  ]
+}

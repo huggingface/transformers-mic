@@ -12,7 +12,7 @@ def test_known_canonical_snapshot_advances_without_changing_hashes(repo):
         "integration": {
             "repo": repo,
             "revision": row["previous_revisions"][0],
-            "files_sha256": "a" * 64,
+            "files_sha256": row.get("previous_contract_files_sha256", "a" * 64),
         },
         "fixtures": {
             repo: {
@@ -26,7 +26,9 @@ def test_known_canonical_snapshot_advances_without_changing_hashes(repo):
     updated = upgrade_contract(original)
     assert original == source
     assert updated["integration"]["revision"] == row["revision"]
-    assert updated["integration"]["files_sha256"] == "a" * 64
+    assert updated["integration"]["files_sha256"] == row.get(
+        "contract_files_sha256", "a" * 64
+    )
     assert updated["fixtures"][repo]["revision"] == row["revision"]
     assert updated["fixtures"][repo]["files_sha256"] == "b" * 64
     assert updated["fixtures"][repo]["target"] == repo.split("/")[-1]
@@ -37,6 +39,22 @@ def test_unrecognized_custom_snapshot_is_preserved():
     source = {
         "integration": {"repo": repo, "revision": "f" * 40},
         "fixtures": {repo: {"revision": "f" * 40, "target": "custom-target"}},
+    }
+    assert upgrade_contract(source) == source
+
+
+def test_date_fix_preserves_custom_contract_content():
+    repo = "huggingface-mic/mistral3-mic"
+    row = consolidation()["targets"][repo]
+    source = {
+        "integration": {
+            "repo": repo,
+            "revision": row["previous_revisions"][0],
+            "files_sha256": "f" * 64,
+        },
+        "fixtures": {
+            repo: {"revision": row["previous_revisions"][0], "target": "mistral3-mic"}
+        },
     }
     assert upgrade_contract(source) == source
 

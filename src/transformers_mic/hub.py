@@ -76,7 +76,7 @@ def upgrade_contract(contract):
 
 
 def rename_known_targets(contract, migration):
-    """Advance only snapshots whose baselines were renamed without value changes."""
+    """Advance known snapshots, preserving custom revisions and contract content."""
     targets = migration.get("targets", {})
     integration = contract["integration"]
     pins = [(integration["repo"], integration), *contract.get("fixtures", {}).items()]
@@ -85,8 +85,17 @@ def rename_known_targets(contract, migration):
         if row and pin["revision"] not in [row["revision"], *row["previous_revisions"]]:
             return contract
     row = targets.get(integration["repo"])
+    if (
+        row
+        and row.get("previous_contract_files_sha256")
+        and integration.get("files_sha256")
+        not in [row["previous_contract_files_sha256"], row["contract_files_sha256"]]
+    ):
+        return contract
     if row and integration["revision"] in row["previous_revisions"]:
         integration["revision"] = row["revision"]
+        if row.get("contract_files_sha256"):
+            integration["files_sha256"] = row["contract_files_sha256"]
     for repo, pin in contract.get("fixtures", {}).items():
         row = targets.get(repo)
         if row and pin["revision"] in [row["revision"], *row["previous_revisions"]]:
