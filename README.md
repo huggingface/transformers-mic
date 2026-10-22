@@ -101,6 +101,7 @@ Agent reuse is measured separately ([recipe](docs/agent-walkthrough/README.md#co
 
 ## Documents
 
+- [MIC for Transformers maintainers](docs/slides/index.html): async HTML slides on creating small models, CI usage, and investigating dashboard failures.
 - [Full example](example/README.md): runnable SmolLM MIC, every part of the standard; the runner on eight contracts.
 - [Evidence](docs/evidence.md): experiments, regression replay, shadow backfill, overfit vs random.
 - [Smoke vs assertions](docs/smoke-vs-assertions.md): which caught regressions raised, and which only a value check sees.
