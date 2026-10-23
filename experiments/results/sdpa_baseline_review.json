@@ -1,0 +1,187 @@
+{
+  "recording_run": "39221242324",
+  "transformers_sha": "457293986e12f5b5eede9570c5d2e026ea371a04",
+  "counts": {
+    "recorded": 57,
+    "unsupported": 6
+  },
+  "changed_references": 10,
+  "unchanged_references": 47,
+  "unchanged_outputs_exact": 47,
+  "new_references_exactly_match_native_control": 10,
+  "candidate_checks_against_proposed_references": 57,
+  "approval": "proposed; pending human review",
+  "changed": [
+    {
+      "baseline": "example/transformers/tests/contracts/expectations/MusicgenMelody/cuda/mic-musicgen-melody-slim.bfloat16.json",
+      "contract": "MusicgenMelody",
+      "target": "mic-musicgen-melody-slim",
+      "variant": "bfloat16",
+      "changed_outputs": [
+        "training.loss"
+      ],
+      "loss": {
+        "before": 0.015869140625,
+        "after": 0.0169677734375
+      },
+      "discrete_changes": {
+        "codes": 0,
+        "text_only_codes": 0
+      }
+    },
+    {
+      "baseline": "example/transformers/tests/contracts/expectations/MusicgenMelody/cuda/mic-musicgen-melody-slim.json",
+      "contract": "MusicgenMelody",
+      "target": "mic-musicgen-melody-slim",
+      "variant": "default",
+      "changed_outputs": [
+        "training.loss"
+      ],
+      "loss": {
+        "before": 0.014785105362534523,
+        "after": 0.017514856532216072
+      },
+      "discrete_changes": {
+        "codes": 0,
+        "text_only_codes": 0
+      }
+    },
+    {
+      "baseline": "example/transformers/tests/contracts/expectations/MusicgenMelody/cuda/musicgen-melody.bfloat16.json",
+      "contract": "MusicgenMelody",
+      "target": "musicgen-melody",
+      "variant": "bfloat16",
+      "changed_outputs": [
+        "codes",
+        "audio_head",
+        "text_only_codes",
+        "training.loss"
+      ],
+      "loss": {
+        "before": 10.09375,
+        "after": 9.953125
+      },
+      "discrete_changes": {
+        "codes": 41,
+        "text_only_codes": 24
+      }
+    },
+    {
+      "baseline": "example/transformers/tests/contracts/expectations/MusicgenMelody/cuda/musicgen-melody.json",
+      "contract": "MusicgenMelody",
+      "target": "musicgen-melody",
+      "variant": "default",
+      "changed_outputs": [
+        "training.loss"
+      ],
+      "loss": {
+        "before": 10.085145950317383,
+        "after": 9.860235214233398
+      },
+      "discrete_changes": {
+        "codes": 0,
+        "text_only_codes": 0
+      }
+    },
+    {
+      "baseline": "example/transformers/tests/contracts/expectations/T5/cuda/mic-t5-small-slim.bfloat16.json",
+      "contract": "T5",
+      "target": "mic-t5-small-slim",
+      "variant": "bfloat16",
+      "changed_outputs": [
+        "label_logprobs",
+        "training.loss"
+      ],
+      "loss": {
+        "before": 10.9375,
+        "after": 11.0625
+      },
+      "discrete_changes": {
+        "generated_tokens": 0
+      }
+    },
+    {
+      "baseline": "example/transformers/tests/contracts/expectations/T5/cuda/mic-t5-small-slim.json",
+      "contract": "T5",
+      "target": "mic-t5-small-slim",
+      "variant": "default",
+      "changed_outputs": [
+        "training.loss"
+      ],
+      "loss": {
+        "before": 10.801079750061035,
+        "after": 10.870068550109863
+      },
+      "discrete_changes": {
+        "generated_tokens": 0
+      }
+    },
+    {
+      "baseline": "example/transformers/tests/contracts/expectations/T5/cuda/mic-umt5-small-slim.bfloat16.json",
+      "contract": "T5",
+      "target": "mic-umt5-small-slim",
+      "variant": "bfloat16",
+      "changed_outputs": [
+        "label_logprobs",
+        "training.loss"
+      ],
+      "loss": {
+        "before": 12.8125,
+        "after": 12.6875
+      },
+      "discrete_changes": {
+        "generated_tokens": 0
+      }
+    },
+    {
+      "baseline": "example/transformers/tests/contracts/expectations/T5/cuda/mic-umt5-small-slim.json",
+      "contract": "T5",
+      "target": "mic-umt5-small-slim",
+      "variant": "default",
+      "changed_outputs": [
+        "training.loss"
+      ],
+      "loss": {
+        "before": 12.877460479736328,
+        "after": 12.49087905883789
+      },
+      "discrete_changes": {
+        "generated_tokens": 0
+      }
+    },
+    {
+      "baseline": "example/transformers/tests/contracts/expectations/T5/cuda/t5-small.bfloat16.json",
+      "contract": "T5",
+      "target": "t5-small",
+      "variant": "bfloat16",
+      "changed_outputs": [
+        "label_logprobs",
+        "training.loss"
+      ],
+      "loss": {
+        "before": 0.5859375,
+        "after": 0.5234375
+      },
+      "discrete_changes": {
+        "generated_tokens": 0
+      }
+    },
+    {
+      "baseline": "example/transformers/tests/contracts/expectations/T5/cuda/t5-small.json",
+      "contract": "T5",
+      "target": "t5-small",
+      "variant": "default",
+      "changed_outputs": [
+        "training.loss"
+      ],
+      "loss": {
+        "before": 0.49811726808547974,
+        "after": 0.5836107730865479
+      },
+      "discrete_changes": {
+        "generated_tokens": 0
+      }
+    }
+  ],
+  "unrelated_metadata": "Three unchanged SmolLM CUDA baselines retain their older recorded fixture revision; their output values match exactly and those files are unchanged."
+}

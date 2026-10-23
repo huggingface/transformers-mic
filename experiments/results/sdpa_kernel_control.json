@@ -1,0 +1,381 @@
+{
+  "run_id": "39221846237",
+  "harness_sha": "1bfa1ab090a33d49dce481eec70f93111e770527",
+  "transformers_sha": "457293986e12f5b5eede9570c5d2e026ea371a04",
+  "parent_sha": "ca35879024a8622a30baea1f420ca34186c7ce55",
+  "parent_run": "39216898928",
+  "introducing_commit_run": "39216908189",
+  "frozen_files_sha256": "3906fa1f6351f7c5e520385ac4550026d6388b9edfbdea19fec62f448856d4a9",
+  "comparisons": [
+    {
+      "contract": "T5",
+      "target": "mic-t5-small-slim",
+      "variant": "default",
+      "mode": "native",
+      "status": "fail",
+      "changed_outputs": [
+        "training.loss"
+      ]
+    },
+    {
+      "contract": "T5",
+      "target": "mic-umt5-small-slim",
+      "variant": "default",
+      "mode": "native",
+      "status": "fail",
+      "changed_outputs": [
+        "training.loss"
+      ]
+    },
+    {
+      "contract": "T5",
+      "target": "t5-small",
+      "variant": "default",
+      "mode": "native",
+      "status": "fail",
+      "changed_outputs": [
+        "training.loss"
+      ]
+    },
+    {
+      "contract": "T5",
+      "target": "mic-t5-small-slim",
+      "variant": "default",
+      "mode": "math",
+      "status": "pass",
+      "changed_outputs": []
+    },
+    {
+      "contract": "T5",
+      "target": "mic-umt5-small-slim",
+      "variant": "default",
+      "mode": "math",
+      "status": "pass",
+      "changed_outputs": []
+    },
+    {
+      "contract": "T5",
+      "target": "t5-small",
+      "variant": "default",
+      "mode": "math",
+      "status": "pass",
+      "changed_outputs": []
+    },
+    {
+      "contract": "T5",
+      "target": "mic-t5-small-slim",
+      "variant": "bfloat16",
+      "mode": "native",
+      "status": "fail",
+      "changed_outputs": [
+        "label_logprobs",
+        "training.loss"
+      ]
+    },
+    {
+      "contract": "T5",
+      "target": "mic-umt5-small-slim",
+      "variant": "bfloat16",
+      "mode": "native",
+      "status": "fail",
+      "changed_outputs": [
+        "label_logprobs",
+        "training.loss"
+      ]
+    },
+    {
+      "contract": "T5",
+      "target": "t5-small",
+      "variant": "bfloat16",
+      "mode": "native",
+      "status": "fail",
+      "changed_outputs": [
+        "label_logprobs",
+        "training.loss"
+      ]
+    },
+    {
+      "contract": "T5",
+      "target": "mic-t5-small-slim",
+      "variant": "bfloat16",
+      "mode": "math",
+      "status": "pass",
+      "changed_outputs": []
+    },
+    {
+      "contract": "T5",
+      "target": "mic-umt5-small-slim",
+      "variant": "bfloat16",
+      "mode": "math",
+      "status": "pass",
+      "changed_outputs": []
+    },
+    {
+      "contract": "T5",
+      "target": "t5-small",
+      "variant": "bfloat16",
+      "mode": "math",
+      "status": "pass",
+      "changed_outputs": []
+    },
+    {
+      "contract": "MusicgenMelody",
+      "target": "mic-musicgen-melody-slim",
+      "variant": "default",
+      "mode": "native",
+      "status": "fail",
+      "changed_outputs": [
+        "training.loss"
+      ]
+    },
+    {
+      "contract": "MusicgenMelody",
+      "target": "musicgen-melody",
+      "variant": "default",
+      "mode": "native",
+      "status": "fail",
+      "changed_outputs": [
+        "training.loss"
+      ]
+    },
+    {
+      "contract": "MusicgenMelody",
+      "target": "mic-musicgen-melody-slim",
+      "variant": "default",
+      "mode": "math",
+      "status": "pass",
+      "changed_outputs": []
+    },
+    {
+      "contract": "MusicgenMelody",
+      "target": "musicgen-melody",
+      "variant": "default",
+      "mode": "math",
+      "status": "pass",
+      "changed_outputs": []
+    },
+    {
+      "contract": "MusicgenMelody",
+      "target": "mic-musicgen-melody-slim",
+      "variant": "bfloat16",
+      "mode": "native",
+      "status": "fail",
+      "changed_outputs": [
+        "training.loss"
+      ]
+    },
+    {
+      "contract": "MusicgenMelody",
+      "target": "musicgen-melody",
+      "variant": "bfloat16",
+      "mode": "native",
+      "status": "fail",
+      "changed_outputs": [
+        "codes",
+        "audio_head",
+        "text_only_codes",
+        "training.loss"
+      ]
+    },
+    {
+      "contract": "MusicgenMelody",
+      "target": "mic-musicgen-melody-slim",
+      "variant": "bfloat16",
+      "mode": "math",
+      "status": "pass",
+      "changed_outputs": []
+    },
+    {
+      "contract": "MusicgenMelody",
+      "target": "musicgen-melody",
+      "variant": "bfloat16",
+      "mode": "math",
+      "status": "pass",
+      "changed_outputs": []
+    }
+  ],
+  "repeats": [
+    {
+      "contract": "T5",
+      "target": "mic-t5-small-slim",
+      "variant": "default",
+      "mode": "native",
+      "exact": true,
+      "failures": []
+    },
+    {
+      "contract": "T5",
+      "target": "mic-umt5-small-slim",
+      "variant": "default",
+      "mode": "native",
+      "exact": true,
+      "failures": []
+    },
+    {
+      "contract": "T5",
+      "target": "t5-small",
+      "variant": "default",
+      "mode": "native",
+      "exact": true,
+      "failures": []
+    },
+    {
+      "contract": "T5",
+      "target": "mic-t5-small-slim",
+      "variant": "default",
+      "mode": "math",
+      "exact": true,
+      "failures": []
+    },
+    {
+      "contract": "T5",
+      "target": "mic-umt5-small-slim",
+      "variant": "default",
+      "mode": "math",
+      "exact": true,
+      "failures": []
+    },
+    {
+      "contract": "T5",
+      "target": "t5-small",
+      "variant": "default",
+      "mode": "math",
+      "exact": true,
+      "failures": []
+    },
+    {
+      "contract": "T5",
+      "target": "mic-t5-small-slim",
+      "variant": "bfloat16",
+      "mode": "native",
+      "exact": true,
+      "failures": []
+    },
+    {
+      "contract": "T5",
+      "target": "mic-umt5-small-slim",
+      "variant": "bfloat16",
+      "mode": "native",
+      "exact": true,
+      "failures": []
+    },
+    {
+      "contract": "T5",
+      "target": "t5-small",
+      "variant": "bfloat16",
+      "mode": "native",
+      "exact": true,
+      "failures": []
+    },
+    {
+      "contract": "T5",
+      "target": "mic-t5-small-slim",
+      "variant": "bfloat16",
+      "mode": "math",
+      "exact": true,
+      "failures": []
+    },
+    {
+      "contract": "T5",
+      "target": "mic-umt5-small-slim",
+      "variant": "bfloat16",
+      "mode": "math",
+      "exact": true,
+      "failures": []
+    },
+    {
+      "contract": "T5",
+      "target": "t5-small",
+      "variant": "bfloat16",
+      "mode": "math",
+      "exact": true,
+      "failures": []
+    },
+    {
+      "contract": "MusicgenMelody",
+      "target": "mic-musicgen-melody-slim",
+      "variant": "default",
+      "mode": "native",
+      "exact": true,
+      "failures": []
+    },
+    {
+      "contract": "MusicgenMelody",
+      "target": "musicgen-melody",
+      "variant": "default",
+      "mode": "native",
+      "exact": true,
+      "failures": []
+    },
+    {
+      "contract": "MusicgenMelody",
+      "target": "mic-musicgen-melody-slim",
+      "variant": "default",
+      "mode": "math",
+      "exact": true,
+      "failures": []
+    },
+    {
+      "contract": "MusicgenMelody",
+      "target": "musicgen-melody",
+      "variant": "default",
+      "mode": "math",
+      "exact": true,
+      "failures": []
+    },
+    {
+      "contract": "MusicgenMelody",
+      "target": "mic-musicgen-melody-slim",
+      "variant": "bfloat16",
+      "mode": "native",
+      "exact": true,
+      "failures": []
+    },
+    {
+      "contract": "MusicgenMelody",
+      "target": "musicgen-melody",
+      "variant": "bfloat16",
+      "mode": "native",
+      "exact": true,
+      "failures": []
+    },
+    {
+      "contract": "MusicgenMelody",
+      "target": "mic-musicgen-melody-slim",
+      "variant": "bfloat16",
+      "mode": "math",
+      "exact": true,
+      "failures": []
+    },
+    {
+      "contract": "MusicgenMelody",
+      "target": "musicgen-melody",
+      "variant": "bfloat16",
+      "mode": "math",
+      "exact": true,
+      "failures": []
+    }
+  ],
+  "instrumentation": {
+    "MusicgenMelody-bfloat16-math-1": {
+      "masks_checked": 42,
+      "math_calls": 42
+    },
+    "MusicgenMelody-default-math-1": {
+      "masks_checked": 42,
+      "math_calls": 42
+    },
+    "T5-bfloat16-math-1": {
+      "masks_checked": 298,
+      "math_calls": 164
+    },
+    "T5-default-math-1": {
+      "masks_checked": 298,
+      "math_calls": 164
+    }
+  },
+  "scope": "Pinned A10G, torch 2.11.0+cu128. Contiguous masks retained; MATH forced only where the previous mask stride blocked fused attention. Other attention calls use native dispatch.",
+  "interpretation": "The 10 reference mismatches are caused by the intended SDPA kernel transition in #49517. This does not establish unchanged task quality; BF16 MusicGen Melody greedy codes differ.",
+  "math_outputs_exactly_match_old_references": 10,
+  "reference_sha": "fa886c490e5871de36831057815643844173048d"
+}

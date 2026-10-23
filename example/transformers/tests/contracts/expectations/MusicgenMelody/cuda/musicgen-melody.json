@@ -1,14 +1,15 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/MusicgenMelody-integration",
-  "contract_revision": "108d4db1209ec36717128fecd72d67f1b4c2b338",
+  "contract_name": "MusicgenMelody",
+  "contract_revision": "464ee6197b072a8525754caca250d9e0ba2c75e8",
   "framework": "transformers",
   "variant": "default",
   "target": "musicgen-melody",
   "kind": "checkpoint",
   "revision": "68d653a95788ec0d2b0abccab22c0b3a200c2d90",
   "environment": {
-   "python": "3.10.12",
+   "python": "3.11.17",
    "transformers": "5.19.0.dev0",
    "torch": "2.11.0+cu128",
    "torchvision": "0.26.0+cu128",
@@ -30,7 +31,10 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 23.42,
+  "seconds": 36.73,
+  "environment_differs": {
+   "python": "3.11.17 (pinned 3.10)"
+  },
   "platform": "cuda"
  },
  "outputs": {
@@ -292,7 +296,7 @@
    ]
   ],
   "training": {
-   "loss": 10.085145950317383,
+   "loss": 9.860235214233398,
    "gradients": {
     "text_encoder.encoder.block.0.layer.0.SelfAttention.q.weight": true,
     "audio_enc_to_dec_proj.weight": true,

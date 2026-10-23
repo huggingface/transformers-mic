@@ -242,6 +242,46 @@ Miss triage: one model-tier candidate and 35 shared-tier rows (five fixes matche
 
 **Limits:** all backfill records declare the three current `local_patches`, including the workarounds for #49403 and #49456. Green patched history does not establish that the unpatched bugs were absent; their original scheduled failures remain the detection evidence. No new regression or baseline update from this weekly check. The five shared fixes identify paths outside current coverage, not bugs caught by this fleet.
 
+### SDPA kernel transition: 2026-10-15
+
+The nightlies of October 15–19 report the same 10 CUDA failures: T5's three
+supported targets and MusicGen Melody's two targets, each in default and bfloat16.
+CPU and CUDA eager checks pass. Replays in the same current environment isolate
+the change to [#49517](https://github.com/huggingface/transformers/pull/49517),
+which makes position-bias masks contiguous so fused SDPA kernels can run:
+
+| Transformers build | Result | Run |
+| --- | --- | --- |
+| Parent `ca35879024` | 95 pass, 10 declared unsupported | [parent replay](https://github.com/huggingface/transformers-mic/actions/runs/39216898928) |
+| Merge `457293986e` | 85 pass, 10 fail, 10 declared unsupported | [commit replay](https://github.com/huggingface/transformers-mic/actions/runs/39216908189) |
+
+The image also moved from Python 3.10 to 3.11 on October 15. Both replays use
+Python 3.11.17, torch 2.11.0+cu128, and the same A10G/driver; the parent still passes.
+
+The [selective math control](../experiments/sdpa_kernel_control.py) keeps the new
+contiguous masks and asserts that their values match the parent's construction.
+It forces MATH only for attention calls whose old mask stride blocked fused
+kernels, leaving other attention calls on their normal dispatch. All **10 old
+references match exactly under the control**, while native dispatch reproduces all 10
+nightly failures. Both modes run twice in fresh processes: **20 repeat pairs are
+exact**. [GPU run](https://github.com/huggingface/transformers-mic/actions/runs/39221846237),
+[validation](../experiments/results/sdpa_kernel_control.json).
+
+This establishes the kernel transition as the cause of the alerts. Default
+failures are training losses; bfloat16 also changes T5 label log-probabilities and
+the real MusicGen Melody checkpoint's audio codes and waveform probe. The control
+does not establish unchanged task quality. Changed references still require review;
+tolerances and contract assertions remain fixed.
+
+The [candidate recording](https://github.com/huggingface/transformers-mic/actions/runs/39221242324)
+produced 57 CUDA candidates, each reproduced in a fresh process, plus six declared
+unsupported cases. Exactly 10 candidates differ from their old references; the
+other 47 output records are identical. All 10 changed candidates exactly match
+the native control's outputs. The proposed reference refresh changes those 10
+files only; its [review record](../experiments/results/sdpa_baseline_review.json)
+lists the changed fields. The control workflow pins the old references at
+`fa886c490e` so it can still reproduce the transition after a refresh.
+
 ## Historical regression replay
 
 Regressions fixed since May 2026 ([freeze/check](../experiments/replay.py), [per-case driver](../experiments/replay_case.py), [usage repros](../experiments/usage_repros.py)): fixtures and real-checkpoint baselines frozen on a good build (`4d536e1f`), run unchanged on the bad build (the fix's parent) and the fixed one (caught = bad flagged, fixed clean); separately, the affected public call on both. Builds before 2026-08-17 need older `tokenizers` (before mid-June, also `kernels`): the fleet lock must pin dependencies, not just models.

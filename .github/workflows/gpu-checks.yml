@@ -64,7 +64,7 @@ permissions:
 
 jobs:
   checks:
-    if: inputs.matrix != 'whisper-contract' && inputs.matrix != 'whisper-assist-large' && inputs.matrix != 'whisper-speech' && inputs.matrix != 'dependency-stability' && inputs.matrix != 'wav2vec2-normalization' && inputs.matrix != 'mic-package' && inputs.matrix != 'mic-regeneration' && inputs.matrix != 'mic-published' && inputs.matrix != 'mic-cpu-record'
+    if: inputs.matrix != 'whisper-contract' && inputs.matrix != 'whisper-assist-large' && inputs.matrix != 'whisper-speech' && inputs.matrix != 'dependency-stability' && inputs.matrix != 'wav2vec2-normalization' && inputs.matrix != 'mic-package' && inputs.matrix != 'mic-regeneration' && inputs.matrix != 'mic-published' && inputs.matrix != 'mic-cpu-record' && inputs.matrix != 'sdpa-kernel-control'
     runs-on:
       group: '${{ inputs.machine_type }}'
     timeout-minutes: 240
@@ -477,6 +477,42 @@ jobs:
         if: always()
         with:
           name: dependency-stability
+          path: out
+
+  sdpa-kernel-control:
+    if: inputs.matrix == 'sdpa-kernel-control'
+    runs-on:
+      group: '${{ inputs.machine_type }}'
+    timeout-minutes: 60
+    container:
+      image: ${{ inputs.docker }}
+      options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    env:
+      MIC_REFERENCE_SHA: fa886c490e5871de36831057815643844173048d
+      HF_HOME: /mnt/cache
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      CUBLAS_WORKSPACE_CONFIG: ":4096:8"
+      CUDA_VISIBLE_DEVICES: "0"
+      PYTHONUNBUFFERED: "1"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Install the pinned GPU environment at the introducing commit
+        run: |
+          git fetch --quiet --depth 1 origin "$MIC_REFERENCE_SHA"
+          git restore --source="$MIC_REFERENCE_SHA" -- example/transformers/tests/contracts
+          PY=python3 TORCH_INDEX=cu128 FETCH=457293986e12f5b5eede9570c5d2e026ea371a04 .github/scripts/install_pinned.sh
+          mkdir -p out
+          nvidia-smi > out/nvidia-smi.txt
+          python3 -m pip freeze > out/pip-freeze.txt
+      - name: Compare native kernels with selective MATH dispatch
+        run: python3 experiments/sdpa_kernel_control.py --out out/control
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: sdpa-kernel-control
           path: out
 
   wav2vec2-normalization:
