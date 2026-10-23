@@ -364,7 +364,7 @@ class Executor:
 def environment_differs(pinned, actual):
     """{package: "installed (pinned)"} for every package not at the fleet lock's version."""
     def same(want, have):
-        # "2.11.0" pins 2.11.0+cpu too; "3.10" pins any 3.10.x.
+        # "2.11.0" pins 2.11.0+cpu too; "3.11" pins any 3.11.x.
         return have is not None and (have == want or have.split("+")[0] == want or have.startswith(want + "."))
     return {name: f"{actual.get(name)} (pinned {want})" for name, want in pinned.items() if not same(want, actual.get(name))}
 
