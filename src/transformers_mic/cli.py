@@ -62,6 +62,23 @@ See 'tmic run --help' for the protocol and exit codes.""",
         help="Project directory (default: current directory)",
     )
     sub = root.add_subparsers(dest="command", required=True)
+    auth = sub.add_parser(
+        "auth", help="Sign in to the dashboard with your GitHub account"
+    )
+    auth_sub = auth.add_subparsers(dest="auth_command", required=True)
+    for action in ("login", "status", "logout"):
+        command = auth_sub.add_parser(action)
+        command.add_argument(
+            "--dashboard",
+            default="https://transformers-ci.huggingface.cool",
+            help="Dashboard HTTPS origin",
+        )
+        if action == "login":
+            command.add_argument(
+                "--no-browser",
+                action="store_true",
+                help="Print the authorization link without opening a browser",
+            )
     run = sub.add_parser(
         "run",
         help="Automate one model in human or agent mode",
@@ -380,6 +397,10 @@ def external_check(args):
 def main(argv=None):
     args = parser().parse_args(argv)
     try:
+        if args.command == "auth":
+            from .dashboard_auth import run
+
+            return run(args)
         if args.command == "run":
             from .automation import run
 

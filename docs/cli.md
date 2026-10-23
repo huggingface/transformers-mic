@@ -19,6 +19,31 @@ hf auth login        # publishing needs write access to the target namespace
 gh auth login        # history search; or pass --no-history to create
 ```
 
+## Dashboard authentication
+
+```sh
+tmic auth login
+tmic auth status
+tmic auth logout
+```
+
+Login opens the Transformers CI dashboard. Sign in with GitHub, compare the code
+with the one printed in your terminal, and explicitly authorize tmic. On SSH,
+use `tmic auth login --no-browser` and open the printed URL elsewhere. Use
+`--dashboard https://dashboard.example.com` on each auth command for another
+deployment.
+
+Dashboard access lasts eight hours and can be revoked from your profile. The
+CLI stores its dashboard credential in
+`~/.config/transformers-mic/dashboard-auth.json` (or under `$XDG_CONFIG_HOME`),
+with file permissions `0600`. It stores no GitHub token and uses neither
+Grafana nor your local `gh` login. Logout revokes the server session before
+removing the local credential; connection failures leave it available to retry.
+
+This authenticates the CLI for the future remote MIC service. GPU submission,
+baseline approval and publication remain separate capabilities; these auth
+commands do not execute a remote job. Hub publishing still uses `hf auth login`.
+
 ## Automated mode
 
 ```sh
