@@ -88,7 +88,7 @@ model-scoped patches; they do not establish unpatched upstream behavior.
 
 CPU uses Intel m8i, four threads, torch/torchvision/torchaudio 2.11/0.26/2.11,
 NumPy 1.26.4 and pinned scientific dependencies. Python 3.11.17 comes from the
-image and is reported against the catalog's 3.10 pin. Native BF16/FP16 references
+image, matching the catalog's 3.11 pin. Native BF16/FP16 references
 have separate platform files. Candidate review approved only new or unchanged
 files; imported outputs also compare within existing tolerances.
 [Recording review](../experiments/results/native-cpu-review.json),

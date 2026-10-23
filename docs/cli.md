@@ -10,7 +10,7 @@ framework expectations. See [the Hub layout](hub-organization.md).
 
 ## Install
 
-From this repository (Python 3.10+):
+From this repository (Python 3.11+):
 
 ```sh
 python -m pip install -e '.[runtime,dev]'

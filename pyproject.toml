@@ -7,7 +7,7 @@ name = "transformers-mic"
 version = "0.1.0"
 description = "Build and validate model integration contracts and slim fixtures for Transformers"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = ["huggingface-hub>=1.32", "jsonschema>=4.23", "filelock>=3"]
 
 [project.optional-dependencies]

@@ -166,7 +166,7 @@
     "config-field-generation-params": "https://github.com/huggingface/transformers/issues/49456: since #48282 (d4f69a869d), PreTrainedConfig._get_generation_parameters counts config fields whose default is None as user-set generation parameters, so generate() raises on every Whisper checkpoint whose config.json sets suppress_tokens (all OpenAI ones). Skip the config class's declared fields, as before. Remove once fixed upstream."
   },
   "environment": {
-    "python": "3.10",
+    "python": "3.11",
     "torch": "2.11.0",
     "torchvision": "0.26.0",
     "torchaudio": "2.11.0",

@@ -45,7 +45,7 @@ A runnable MIC for batched greedy generation on three SmolLM checkpoints, in Tra
 
 ## Run it
 
-Use an isolated Python 3.10 environment with the [lock's dependencies](transformers/tests/contracts/fleet.lock) and pinned Transformers build `8625785e`. Linux CI uses [`install_pinned.sh`](../.github/scripts/install_pinned.sh); it assumes Linux/Bash and is not a Mac setup script. A different installed build may change outputs and will be reported in `environment_differs`.
+Use an isolated Python 3.11 environment with the [lock's dependencies](transformers/tests/contracts/fleet.lock) and pinned Transformers build `8625785e`. Linux CI uses [`install_pinned.sh`](../.github/scripts/install_pinned.sh); it assumes Linux/Bash and is not a Mac setup script. A different installed build may change outputs and will be reported in `environment_differs`.
 
 ```sh
 PY=.venv/bin/python                            # prepared environment described above
