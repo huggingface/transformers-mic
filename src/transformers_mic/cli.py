@@ -62,6 +62,78 @@ See 'tmic run --help' for the protocol and exit codes.""",
         help="Project directory (default: current directory)",
     )
     sub = root.add_subparsers(dest="command", required=True)
+    baselines = sub.add_parser(
+        "baselines",
+        help="Generate a complete baseline collection on the dashboard's ARC runners",
+    )
+    baseline_sub = baselines.add_subparsers(dest="baselines_command", required=True)
+    for action in ("run", "status", "upload", "review", "publish"):
+        command = baseline_sub.add_parser(action)
+        command.add_argument(
+            "--out", required=True, help="Resumable local collection directory"
+        )
+        if action in ("upload", "publish"):
+            command.add_argument(
+                "--execute",
+                action="store_true",
+                help="Upload/open the previewed Hub changes",
+            )
+        if action == "upload":
+            command.add_argument(
+                "--repo",
+                required=True,
+                help="Hub dataset for the measured candidate collection",
+            )
+        if action == "review":
+            command.add_argument(
+                "--approve",
+                action="store_true",
+                help="Approve new and unchanged measurements",
+            )
+            command.add_argument(
+                "--approve-changed",
+                action="store_true",
+                help="Explicitly approve displayed changed values",
+            )
+            command.add_argument(
+                "--reason", help="Explanation required for changed values"
+            )
+        if action in ("run", "status"):
+            command.add_argument(
+                "--dashboard", default="https://transformers-ci.huggingface.cool"
+            )
+        if action == "run":
+            command.add_argument(
+                "--fleet", choices=("all", "control", "prototypes"), default="all"
+            )
+            command.add_argument(
+                "--fleet-revision",
+                help="Immutable fleet dataset SHA (default: resolve main once)",
+            )
+            command.add_argument(
+                "--transformers-ref",
+                default="main",
+                help="Framework main or immutable commit SHA",
+            )
+            command.add_argument(
+                "--fixtures-only",
+                action="store_true",
+                help="Explicitly exclude real checkpoints",
+            )
+            command.add_argument(
+                "--no-wait",
+                action="store_true",
+                help="Submit without waiting; repeat to resume",
+            )
+            command.add_argument(
+                "--upload-repo",
+                help="Have the workflow upload models and candidate baselines directly to this Hub dataset",
+            )
+            command.add_argument(
+                "--no-download",
+                action="store_true",
+                help="Return the Hub revision without downloading artifacts (requires --upload-repo)",
+            )
     auth = sub.add_parser(
         "auth", help="Sign in to the dashboard with your GitHub account"
     )
@@ -397,6 +469,10 @@ def external_check(args):
 def main(argv=None):
     args = parser().parse_args(argv)
     try:
+        if args.command == "baselines":
+            from .baselines import run
+
+            return run(args)
         if args.command == "auth":
             from .dashboard_auth import run
 

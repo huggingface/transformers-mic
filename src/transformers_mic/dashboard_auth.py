@@ -43,7 +43,7 @@ def dashboard_url(value):
     return value.rstrip("/")
 
 
-def request(dashboard, path, *, body=None, token=None):
+def request(dashboard, path, *, body=None, token=None, binary=False):
     headers = {"Accept": "application/json"}
     if body is not None:
         headers["Content-Type"] = "application/json"
@@ -56,7 +56,11 @@ def request(dashboard, path, *, body=None, token=None):
     )
     try:
         with build_opener(NoRedirect()).open(req, timeout=20) as response:
-            return json.loads(response.read(65536))
+            limit = 256_000_000 if binary else 65536
+            payload = response.read(limit + 1)
+            if len(payload) > limit:
+                raise DashboardError("response_too_large")
+            return payload if binary else json.loads(payload)
     except HTTPError as error:
         try:
             reason = json.loads(error.read(4096)).get("error", "request_failed")
@@ -70,6 +74,10 @@ def request(dashboard, path, *, body=None, token=None):
         raise DashboardError(
             "Could not reach the dashboard; check the URL and connection"
         ) from None
+
+
+def request_bytes(dashboard, path, *, token):
+    return request(dashboard, path, token=token, binary=True)
 
 
 def credential_path():
