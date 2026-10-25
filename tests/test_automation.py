@@ -333,6 +333,87 @@ def approval(payload, answer="approve", **fields):
     }
 
 
+@pytest.fixture
+def repair_workflow(workflow, monkeypatch):
+    from transformers_mic import contract_repair
+
+    original = batch.invoke
+
+    def invoke(out, name, arguments, timeout):
+        result = original(out, name, arguments, timeout)
+        if name == "create":
+            Workspace(workflow.root).save_state(origin="llm")
+        if result["exit_code"]:
+            log = out / result["log"]
+            log.write_text(
+                log.read_text()
+                + "\nthe contract fails on the random fixture: KeyError: invented.parameter\n"
+            )
+        return result
+
+    def propose(context, **kw):
+        return {
+            "name": "BERT",
+            "manifest": context["existing_manifest"],
+            "usage": context["existing_usage"] + "\n<!-- repaired input -->\n",
+            "rationale": "Repair the input using inspected names.",
+            "historical_candidates": [],
+        }, {"model": "test"}
+
+    monkeypatch.setattr(batch, "invoke", invoke)
+    monkeypatch.setattr(contract_repair, "inspect_model", lambda _: {"parameters": []})
+    monkeypatch.setattr(contract_repair.planner, "propose", propose)
+    workflow.failures["build"] = [1]
+    return workflow
+
+
+def test_reviewed_repair_rebuilds_fixture_before_measurements(
+    repair_workflow, monkeypatch
+):
+    workflow = repair_workflow
+    confirm(monkeypatch, ["yes", "yes"])
+    assert main([*workflow.argv, "--local-only"]) == 0
+    state = read(workflow.root / ".mic/automation.json")
+    assert state["repairs"][0]["status"] == "applied"
+    builds = [args for name, args in workflow.calls if name == "build"]
+    assert len(builds) == 2 and "--rebuild" in builds[-1]
+    assert "--max-contract-repairs 2" in state["resume"]
+
+
+def test_agent_repair_waits_for_exact_approval_and_reuses_saved_proposal(
+    repair_workflow, capsys
+):
+    workflow = repair_workflow
+    _, source, _ = agent_call(workflow, capsys, extra=["--local-only"])
+    code, proposed, _ = agent_call(
+        workflow, capsys, answer=approval(source), extra=["--local-only"]
+    )
+    assert code == 3 and proposed["pending_question"]["kind"] == "contract-repair"
+    calls = list(workflow.calls)
+    code, same, _ = agent_call(workflow, capsys, extra=["--local-only"])
+    assert (
+        code == 3
+        and same["pending_question"]["question_id"]
+        == proposed["pending_question"]["question_id"]
+    )
+    assert workflow.calls == calls
+    code, done, _ = agent_call(
+        workflow, capsys, answer=approval(proposed), extra=["--local-only"]
+    )
+    assert code == 0 and done["status"] == "validated"
+    assert len(read(workflow.root / ".mic/automation.json")["repairs"]) == 1
+
+
+def test_repair_budget_exhaustion_returns_to_retry(repair_workflow, monkeypatch):
+    workflow = repair_workflow
+    workflow.failures["build"] = [1, 1, 1]
+    confirm(monkeypatch, ["yes", "yes", "no"])
+    assert main([*workflow.argv, "--local-only", "--max-contract-repairs", "1"]) == 3
+    state = read(workflow.root / ".mic/automation.json")
+    assert len(state["repairs"]) == 1
+    assert state["pending_question"]["kind"] == "retry"
+
+
 def test_agent_drives_full_workflow_without_a_terminal(workflow, monkeypatch, capsys):
     monkeypatch.setattr(
         "builtins.input", lambda _: pytest.fail("agent must never read stdin")

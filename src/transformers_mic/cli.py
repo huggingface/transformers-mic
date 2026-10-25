@@ -195,6 +195,13 @@ No Git commit or framework PR is created automatically.""",
     )
     run.add_argument("model")
     run.add_argument(
+        "--max-contract-repairs",
+        type=int,
+        choices=range(6),
+        default=2,
+        help="Maximum reviewed LLM repair proposals per workspace (default 2; 0 disables)",
+    )
+    run.add_argument(
         "--mode",
         choices=("human", "agent"),
         default="human",

@@ -185,6 +185,36 @@ an unchanged workspace. Source, lock, or baseline edits invalidate earlier check
 and restart validation. After `--local-only`, rerun without it to continue through
 publication. No Git commit or framework PR is created automatically.
 
+### Bounded contract repair
+
+When a generated contract fails during build, factory checks or measurement,
+`tmic run` can inspect the failure and draft a repair. It reads the pinned
+architecture's parameter names/shapes on the meta device (without loading its
+weights), plus the bounded failure log, current usage and manifest. The configured
+HF planner proposes a change; the CLI displays its rationale and usage diff and
+asks for approval **before** applying it. An approved repair backs up the old
+source, forces a fixture rebuild, and reruns gates and measurements.
+
+The manifest must remain byte-equivalent as JSON: output rules/tolerances, targets,
+variants, resources and build recipes cannot change. Explicit assertions and
+training gradient/update checks are preserved structurally. Review the code diff
+for semantic changes; automated checks cannot prove arbitrary Python equivalent.
+No failed measurement is converted to a pass, and no gate is bypassed.
+
+The default limit is two proposals per workspace, including rejected or interrupted
+attempts. `--max-contract-repairs 0` disables this; the accepted range is 0–5.
+When the budget is exhausted or a proposal fails validation, the ordinary manual
+retry prompt remains. Network/access errors retain the normal retry path.
+Proposal JSON, diffs, log/source hashes, backups and decisions are retained under
+`.mic/automation/repairs/` and `.mic/automation.json`. Resuming a pending repair
+reuses the saved proposal rather than making another provider call. Editing the
+source, log or proposal invalidates approval.
+
+Agent mode emits a `contract-repair` question using the same one-use answer
+protocol as other decisions. Answer `approve` to apply the displayed diff or
+`defer` to leave source unchanged. As with other questions, obtain the operator's
+decision before approving.
+
 ### Human and agent modes
 
 ```sh

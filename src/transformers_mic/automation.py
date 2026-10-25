@@ -10,7 +10,7 @@ import sys
 from filelock import FileLock, Timeout
 from huggingface_hub.utils import validate_repo_id
 
-from . import batch, fleet, model_baselines
+from . import batch, fleet, model_baselines, contract_repair
 from .interaction import Interaction, Pending, PROTOCOL_VERSION, load_answer
 from .workspace import Workspace, read, write
 
@@ -265,7 +265,54 @@ def run_locked(args, root, answer):
             print("\n".join(text.splitlines()[-60:]), file=output, flush=True)
         return result["exit_code"], log
 
+    def review_repair(attempt):
+        if not contract_repair.current(workspace, attempt):
+            attempt["status"] = "stale"
+            state["next_stage"] = "source"
+            save()
+            return False
+        proposal = read(attempt["proposal"]["path"])
+        ask(
+            args,
+            "Apply this proposed contract repair and retry validation?",
+            proposal["plan"]["rationale"]
+            + "\n\n"
+            + Path(attempt["diff"]["path"]).read_text(),
+            kind="contract-repair",
+            context={
+                key: attempt[key]
+                for key in (
+                    "stage",
+                    "source",
+                    "usage",
+                    "manifest",
+                    "log",
+                    "proposal",
+                    "diff",
+                    "evidence",
+                )
+            },
+        )
+        if not contract_repair.current(workspace, attempt):
+            attempt["status"] = "stale"
+            state["next_stage"] = "source"
+            save()
+            return False
+        contract_repair.apply(workspace, attempt)
+        # Approval covers the exact diff against the already reviewed source.
+        # Rerun the fixture gates as well as measurements for changed inputs.
+        state["reviewed_source_sha256"] = workspace.contract_digest()
+        state["rebuild_after_repair"] = True
+        state["next_stage"] = "build"
+        save()
+        return True
+
     try:
+        for attempt in state.get("repairs", []):
+            if attempt["status"] == "generating":
+                attempt["status"] = "interrupted"
+            if attempt["status"] == "proposed":
+                review_repair(attempt)
         pending = state.get("pending_question")
         if (
             args.mode == "agent"
@@ -411,7 +458,14 @@ def run_locked(args, root, answer):
                     continue
                 state["reviewed_source_sha256"] = workspace.contract_digest()
             elif name == "build":
-                code, log = stage(name, ["build"])
+                code, log = stage(
+                    name,
+                    ["build", "--rebuild"]
+                    if state.get("rebuild_after_repair")
+                    else ["build"],
+                )
+                if not code:
+                    state.pop("rebuild_after_repair", None)
             elif name == "auto":
                 if (
                     "fixtures"
@@ -545,6 +599,38 @@ def run_locked(args, root, answer):
                             Path(args.transformers_checkout).resolve()
                         )
             if code:
+                if (
+                    contract_repair.eligible(
+                        workspace, name, log, state["stages"][name]["command"]
+                    )
+                    and len(state.get("repairs", [])) < args.max_contract_repairs
+                ):
+                    print(
+                        "tmic: inspecting failure and proposing a bounded contract repair…",
+                        file=output,
+                        flush=True,
+                    )
+                    proposal = contract_repair.propose(
+                        args,
+                        workspace,
+                        name,
+                        log,
+                        folder,
+                        state,
+                        save,
+                        state["stages"][name]["command"],
+                    )
+                    if proposal is not None and review_repair(proposal):
+                        continue
+                    if state.get("repairs"):
+                        print(
+                            "tmic: repair was not applied: "
+                            + state["repairs"][-1].get(
+                                "error", "proposal became stale"
+                            ),
+                            file=output,
+                            flush=True,
+                        )
                 if name == "export":
                     # Refresh and review the exact dataset base after a conflict or rejection.
                     state["next_stage"] = "export-preview"
@@ -625,6 +711,8 @@ def run_locked(args, root, answer):
 
 def resume_options(args):
     options = [
+        "--max-contract-repairs",
+        str(args.max_contract_repairs),
         "--baseline-transport",
         args.baseline_transport,
         "--baseline-execution",
