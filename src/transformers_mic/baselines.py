@@ -81,16 +81,14 @@ def collection(root):
             or report["profile"] != profile
         ):
             raise ValueError("Artifact provenance does not match the requested job")
+        if request.get("workspace") != state["job"].get("workspace"):
+            raise ValueError("Artifact model input does not match the requested job")
         if not report.get("complete") or not report.get("cases"):
             raise ValueError(
                 f"{profile}: baseline collection is incomplete; inspect collection.json"
             )
         keys = [case["key"] for case in report["cases"]]
-        if (
-            len(keys) != len(set(keys))
-            or set(keys) != set(report["expected_cases"])
-            or not any(case["status"] == "validated" for case in report["cases"])
-        ):
+        if len(keys) != len(set(keys)) or set(keys) != set(report["expected_cases"]):
             raise ValueError("Collection does not cover its declared case matrix")
         for model in report.get("models", []) + report.get("contracts", []):
             for relative, expected in model["files"].items():
@@ -118,6 +116,12 @@ def collection(root):
                         f"Measured baseline changed after execution: {relative}"
                     )
         reports.append((folder, report))
+    if not any(
+        case["status"] == "validated"
+        for _, report in reports
+        for case in report["cases"]
+    ):
+        raise ValueError("Collection contains no validated measurements")
     return state, reports
 
 
@@ -344,6 +348,27 @@ def upload(root, repository, execute):
 
 
 def run(args):
+    if (
+        args.baselines_command == "run"
+        and getattr(args, "transport", "dashboard") == "github"
+    ):
+        from . import github_baselines
+        from types import SimpleNamespace
+
+        if args.no_wait or args.no_download or args.fleet_revision:
+            raise ValueError(
+                "GitHub test transport watches and downloads a collection resolved from fleet main"
+            )
+        return github_baselines.run(
+            SimpleNamespace(
+                out=args.out,
+                fleet=args.fleet,
+                include_checkpoints=not args.fixtures_only,
+                upload_repo=args.upload_repo or "",
+                transformers_ref=args.transformers_ref,
+                model_workspace=args.model_workspace,
+            )
+        )
     root = Path(args.out).resolve()
     root.mkdir(parents=True, exist_ok=True)
     try:
@@ -360,6 +385,11 @@ def run(args):
 
 
 def run_locked(args, root):
+    if args.baselines_command == "verify-model":
+        from .model_baselines import verify
+        from .workspace import Workspace
+
+        return verify(Workspace(args.model_workspace), root)
     if args.baselines_command == "upload":
         return upload(root, args.repo, args.execute)
     if args.baselines_command == "review":
@@ -378,6 +408,18 @@ def run_locked(args, root):
     if args.baselines_command == "run" and args.no_download and not args.upload_repo:
         raise ValueError("--no-download requires --upload-repo")
     token = dashboard_auth.access_token(dashboard)
+    model = None
+    model_input = None
+    if args.baselines_command == "run" and getattr(args, "model_workspace", None):
+        from . import model_baselines
+        from .workspace import Workspace
+
+        model = Workspace(args.model_workspace)
+        if args.fleet == "all" or args.fixtures_only or args.no_download:
+            raise ValueError(
+                "Model measurement requires one --fleet and all declared targets, with artifact download"
+            )
+        model_input = model_baselines.stage(model, root)
     path = root / "cloud.json"
     if path.exists():
         state = read(path)
@@ -398,6 +440,8 @@ def run_locked(args, root):
             "fixtures_only": args.fixtures_only,
             "upload_repo": args.upload_repo,
         }
+        if model_input:
+            request["workspace"] = model_input
         state = {"dashboard": dashboard, "request": request}
         write(path, state)  # persist the idempotency key before the network call
     if args.baselines_command == "run":
@@ -405,7 +449,8 @@ def run_locked(args, root):
             ["control", "prototypes"] if args.fleet == "all" else [args.fleet]
         )
         if (
-            state["request"]["fleets"] != expected_fleets
+            state["request"].get("workspace") != model_input
+            or state["request"]["fleets"] != expected_fleets
             or state["request"]["fixtures_only"] != args.fixtures_only
             or state["request"]["transformers_ref"] != args.transformers_ref
             or state["request"]["upload_repo"] != args.upload_repo
@@ -510,6 +555,8 @@ def run_locked(args, root):
     collection(
         root
     )  # partial/failed runs stay downloadable but cannot be uploaded as complete
+    if model:
+        model_baselines.import_candidates(model, root)
     print(
         json.dumps(
             {

@@ -95,7 +95,10 @@ def main():
         )
         api = HfApi()
         stale = []
-        if api.repo_exists(repo):
+        existing_files = set(api.list_repo_files(repo)) if api.repo_exists(repo) else set()
+        if existing_files - {".gitattributes", "README.md"} and not {".mic-repo.json", "build.json"} <= existing_files:
+            raise ValueError("Existing model main is not a complete MIC snapshot")
+        if {".mic-repo.json", "build.json"} <= existing_files:
             previous_layout = json.loads(
                 Path(hf_hub_download(repo, ".mic-repo.json")).read_text()
             )

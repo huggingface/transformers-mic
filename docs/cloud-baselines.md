@@ -9,18 +9,21 @@ The live Serge App also needs installation on `huggingface/transformers-mic`.
 While App setup is deferred, the [temporary CLI test](cli.md#temporary-test-without-dashboard-oauth)
 uses the caller's existing GitHub CLI identity to exercise ARC directly.
 
-The local CLI remains usable as before. Cloud execution uses the dashboard's
+The CLI can also measure a single newly created or updated model through `tmic run`; see below. Cloud execution uses the dashboard's
 GitHub identity, Serge's authorized workflow dispatcher, and the ARC runner
 groups already used by `huggingface/transformers-mic`. It does not require a
 separate cloud account or a GPU on the caller's machine.
 
 ## Choose where execution and upload happen
 
-Local creation/build/measurement/publication remains:
+Create or update one model, with local creation/build and cloud CPU/CUDA baseline measurement:
 
 ```sh
 tmic run org/model
-# For multiple reviewed workspaces, use tmic batch as documented in cli.md.
+# Temporary direct Actions path while dashboard App setup is deferred:
+tmic run org/model --baseline-transport github
+# Explicitly keep measurement local:
+tmic run org/model --baseline-execution local
 ```
 
 Generate the complete collection remotely and retrieve the models and baselines:
@@ -58,7 +61,21 @@ This refreshes baselines for the fleet's **existing immutable MIC fixtures**.
 The returned model files are those pinned slim snapshots, not newly generated
 weights. New contracts and rebuilt fixtures still follow the existing
 `tmic create/build/run` source-review flow before entering the shared fleet.
-Cloud workers do not execute unreviewed local source uploads or LLM drafts.
+For model-scoped runs, the user reviews the executable contract first, then
+approves uploading its built input to a separate `tmic-baselines/<source-hash>`
+branch in the model's Hub repository. The service accepts only an immutable
+revision in an operator-approved namespace. It checks the snapshot's single-model
+lock, source/build hashes and complete case matrix. The workflow reads that
+snapshot; it never receives local paths, arbitrary shell commands or the caller's
+Hub write token. Source execution still requires MIC repository write access.
+
+`tmic baselines run --model-workspace work/my-model --fleet prototypes --out work/model-baselines`
+is the underlying model command. Add `--transport github` to dispatch with the
+caller's existing `gh` identity during testing. `tmic run` imports its candidates,
+requests review for changed outputs, and binds publication to both hardware
+profiles and the unchanged model input. The `check` stages validate this returned
+cloud evidence rather than requiring a GPU on the caller's machine. `--local-only`
+and `--baseline-execution local` retain the local workflow.
 
 ## Progress and resuming
 
@@ -181,7 +198,7 @@ migrated to the single `<name>-mic` layout before this publication path.
 
 The job API accepts only fixed fleets, immutable revisions, the fixed CPU/CUDA
 profiles and approved upload namespaces. It accepts no user command, image,
-arbitrary source repository or caller-supplied identity. The initial limits are
+arbitrary source repository or caller-supplied identity. Model inputs are separately restricted by `TCI_MIC_INPUT_NAMESPACES` on the dashboard and `MIC_BASELINE_INPUT_NAMESPACES` in the workflow (both default to `huggingface-mic`). The initial limits are
 three submissions per user per hour and two active collection jobs globally.
 Abandoned jobs age out of capacity accounting after eight hours.
 

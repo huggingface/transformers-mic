@@ -1,19 +1,12 @@
 """Check test-helper retry behavior without submitting real GPU work."""
 
-import importlib.util
-from pathlib import Path
 from types import SimpleNamespace
 import subprocess
 
 import pytest
 
+from transformers_mic import github_baselines as helper
 from transformers_mic.workspace import read, write
-
-spec = importlib.util.spec_from_file_location(
-    "cloud_test_helper", Path(__file__).parents[1] / "tools/try_cloud_baselines.py"
-)
-helper = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(helper)
 
 
 def args():

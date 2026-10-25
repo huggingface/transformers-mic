@@ -67,11 +67,13 @@ See 'tmic run --help' for the protocol and exit codes.""",
         help="Generate a complete baseline collection on the dashboard's ARC runners",
     )
     baseline_sub = baselines.add_subparsers(dest="baselines_command", required=True)
-    for action in ("run", "status", "upload", "review", "publish"):
+    for action in ("run", "status", "upload", "review", "publish", "verify-model"):
         command = baseline_sub.add_parser(action)
         command.add_argument(
             "--out", required=True, help="Resumable local collection directory"
         )
+        if action == "verify-model":
+            command.add_argument("--model-workspace", required=True)
         if action in ("upload", "publish"):
             command.add_argument(
                 "--execute",
@@ -103,6 +105,16 @@ See 'tmic run --help' for the protocol and exit codes.""",
                 "--dashboard", default="https://transformers-ci.huggingface.cool"
             )
         if action == "run":
+            command.add_argument(
+                "--transport",
+                choices=("dashboard", "github"),
+                default="dashboard",
+                help="Use dashboard auth, or existing gh credentials for a direct Actions test",
+            )
+            command.add_argument(
+                "--model-workspace",
+                help="Built single-model workspace to stage and measure on CPU/CUDA",
+            )
             command.add_argument(
                 "--fleet", choices=("all", "control", "prototypes"), default="all"
             )
@@ -153,7 +165,7 @@ See 'tmic run --help' for the protocol and exit codes.""",
             )
     run = sub.add_parser(
         "run",
-        help="Automate one model in human or agent mode",
+        help="Create/update one model with cloud CPU/CUDA baselines in human or agent mode",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""Modes:
   --mode human (default): interactive questions in a terminal.
@@ -198,6 +210,22 @@ No Git commit or framework PR is created automatically.""",
     run.add_argument("--fleet", choices=tuple(fleet.FILES), default="prototypes")
     run.add_argument("--contract-name")
     run.add_argument("--transformers-checkout")
+    run.add_argument(
+        "--baseline-execution",
+        choices=("cloud", "local"),
+        default="cloud",
+        help="Measure this model on cloud CPU/CUDA by default; local uses this machine",
+    )
+    run.add_argument("--dashboard", default="https://transformers-ci.huggingface.cool")
+    run.add_argument(
+        "--baseline-transport", choices=("dashboard", "github"), default="dashboard"
+    )
+    run.add_argument(
+        "--baseline-timeout",
+        type=int,
+        default=21600,
+        help="Cloud measurement timeout in seconds",
+    )
     run.add_argument("--revision")
     run.add_argument("--name")
     run.add_argument("--contract")

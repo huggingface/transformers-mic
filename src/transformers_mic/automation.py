@@ -10,7 +10,7 @@ import sys
 from filelock import FileLock, Timeout
 from huggingface_hub.utils import validate_repo_id
 
-from . import batch, fleet
+from . import batch, fleet, model_baselines
 from .interaction import Interaction, Pending, PROTOCOL_VERSION, load_answer
 from .workspace import Workspace, read, write
 
@@ -106,6 +106,8 @@ def review_changed(args, workspace):
 
 def run(args):
     args.mode = "agent" if args.non_interactive else args.mode
+    if args.local_only:
+        args.baseline_execution = "local"
     try:
         return locked_run(args)
     except (ValueError, OSError) as error:
@@ -125,7 +127,7 @@ def run(args):
 
 def locked_run(args):
     validate_repo_id(args.model)
-    if args.timeout <= 0:
+    if args.timeout <= 0 or args.baseline_timeout <= 0:
         raise ValueError("Stage timeout must be positive")
     if args.transformers_checkout:
         args.transformers_checkout = str(Path(args.transformers_checkout).resolve())
@@ -193,6 +195,25 @@ def run_locked(args, root, answer):
         )
     if workspace.state_path.exists() and workspace.state["model"] != args.model:
         raise ValueError("Workspace belongs to a different model; choose another --out")
+    execution = {
+        "mode": args.baseline_execution,
+        "dashboard": args.dashboard,
+        "transport": args.baseline_transport,
+    }
+    if (
+        state.get(
+            "execution",
+            {
+                "mode": "local",
+                "dashboard": args.dashboard,
+                "transport": args.baseline_transport,
+            },
+        )
+        != execution
+    ):
+        state["next_stage"] = "source"
+        state.pop("dataset_revision", None)
+    state["execution"] = execution
     resume = shlex.join(
         ["tmic", "run", args.model, "--out", str(root), *resume_options(args)]
     )
@@ -233,7 +254,8 @@ def run_locked(args, root, answer):
             flush=True,
         )
         command = options if create else ["--workspace", str(root), *options]
-        result = batch.invoke(folder, name, command, args.timeout)
+        timeout = args.baseline_timeout if options[0] == "baselines" else args.timeout
+        result = batch.invoke(folder, name, command, timeout)
         state["stages"][name] = result
         state["stages"][name]["command"] = command
         save()
@@ -397,9 +419,46 @@ def run_locked(args, root, answer):
                 ):
                     code, log = stage(name, ["auto"])
             elif name in ("record", "check", "published-check"):
-                code, log = stage(
-                    name, ["record" if name == "record" else "check", "--all-variants"]
-                )
+                if args.baseline_execution == "cloud":
+                    cloud_root = folder / "cloud" / model_baselines.inputs(workspace)[0]
+                    options = [
+                        "baselines",
+                        "run" if name == "record" else "verify-model",
+                        "--out",
+                        str(cloud_root),
+                        "--model-workspace",
+                        str(root),
+                    ]
+                    if name == "record":
+                        ask(
+                            args,
+                            "Upload the reviewed model input to a Hub staging branch and measure CPU/GPU baselines?",
+                            f"Repository: {workspace.fixture}\nOnly the staging branch changes; model main and fleet pins are published after review.",
+                            kind="cloud-baselines",
+                            context={
+                                "repository": workspace.fixture,
+                                "source_sha256": model_baselines.inputs(workspace)[0],
+                                "profiles": ["cpu", "cuda"],
+                            },
+                        )
+                        if before != fingerprint():
+                            state["next_stage"] = "source"
+                            save()
+                            continue
+                        options += [
+                            "--transport",
+                            args.baseline_transport,
+                            "--fleet",
+                            args.fleet,
+                            "--dashboard",
+                            args.dashboard,
+                        ]
+                    code, log = stage(name, options)
+                else:
+                    code, log = stage(
+                        name,
+                        ["record" if name == "record" else "check", "--all-variants"],
+                    )
             elif name == "review":
                 code, log = stage(name, ["review", "--approve"])
                 if code == 1 and list(workspace.expectations.rglob("*.candidate.json")):
@@ -566,6 +625,14 @@ def run_locked(args, root, answer):
 
 def resume_options(args):
     options = [
+        "--baseline-transport",
+        args.baseline_transport,
+        "--baseline-execution",
+        args.baseline_execution,
+        "--dashboard",
+        args.dashboard,
+        "--baseline-timeout",
+        str(args.baseline_timeout),
         "--mode",
         args.mode,
         "--timeout",

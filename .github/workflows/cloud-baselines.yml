@@ -29,6 +29,15 @@ on:
         type: string
         default: ""
 
+      workspace_repo:
+        required: false
+        type: string
+        default: ""
+      workspace_revision:
+        required: false
+        type: string
+        default: ""
+
 permissions:
   contents: read
 
@@ -42,6 +51,9 @@ jobs:
     steps:
       - name: Validate immutable inputs and approved images before allocating ARC runners
         env:
+          MIC_WORKSPACE_REPO: ${{ inputs.workspace_repo }}
+          MIC_WORKSPACE_REVISION: ${{ inputs.workspace_revision }}
+          MIC_BASELINE_INPUT_NAMESPACES: ${{ vars.MIC_BASELINE_INPUT_NAMESPACES || 'huggingface-mic' }}
           JOB_ID: ${{ inputs.job_id }}
           FLEET_REVISION: ${{ inputs.fleet_revision }}
           TRANSFORMERS_SHA: ${{ inputs.transformers_sha }}
@@ -61,6 +73,14 @@ jobs:
               assert re.fullmatch(r"[a-f0-9]{40}", os.environ[key]), key
           assert os.environ["FLEETS"] in ("control", "prototypes", "control,prototypes")
           assert os.environ["FIXTURES_ONLY"] in ("true", "false")
+          workspace_repo = os.environ["MIC_WORKSPACE_REPO"]
+          workspace_revision = os.environ["MIC_WORKSPACE_REVISION"]
+          if workspace_repo or workspace_revision:
+              assert re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*-mic", workspace_repo)
+              assert workspace_repo.split('/')[0] in os.environ["MIC_BASELINE_INPUT_NAMESPACES"].split(',')
+              assert re.fullmatch(r"[a-f0-9]{40}", workspace_revision)
+              assert os.environ["FLEETS"] in ("control", "prototypes")
+              assert os.environ["FIXTURES_ONLY"] == 'false'
           destination = os.environ["UPLOAD_REPO"]
           if destination:
               assert re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*", destination)
@@ -90,6 +110,9 @@ jobs:
       image: ${{ matrix.profile == 'cpu' && vars.MIC_CPU_BASELINE_IMAGE || vars.MIC_GPU_BASELINE_IMAGE }}
       options: ${{ matrix.profile == 'cuda' && '--gpus all --shm-size=16gb' || '--shm-size=16gb' }}
     env:
+      MIC_WORKSPACE_REPO: ${{ inputs.workspace_repo }}
+      MIC_WORKSPACE_REVISION: ${{ inputs.workspace_revision }}
+      MIC_BASELINE_INPUT_NAMESPACES: ${{ vars.MIC_BASELINE_INPUT_NAMESPACES || 'huggingface-mic' }}
       HF_TOKEN: ${{ secrets.HF_HUB_READ_TOKEN }}
       HF_HOME: /tmp/mic-hf
       HF_HUB_DISABLE_PROGRESS_BARS: "1"
@@ -169,6 +192,9 @@ jobs:
       - name: Upload complete model and candidate-baseline collection
         env:
           # Write credentials exist only in this trusted publisher step.
+          MIC_WORKSPACE_REPO: ${{ inputs.workspace_repo }}
+          MIC_WORKSPACE_REVISION: ${{ inputs.workspace_revision }}
+          MIC_BASELINE_INPUT_NAMESPACES: ${{ vars.MIC_BASELINE_INPUT_NAMESPACES || 'huggingface-mic' }}
           HF_TOKEN: ${{ secrets.MIC_BASELINE_WRITE_TOKEN }}
           JOB_ID: ${{ inputs.job_id }}
           FLEET_REVISION: ${{ inputs.fleet_revision }}

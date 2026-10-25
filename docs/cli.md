@@ -118,10 +118,35 @@ There is no anonymous endpoint or production auth bypass. See
 tmic run org/model
 ```
 
-**This command runs locally.** CPU/GPU measurement uses the caller's machine;
-it does not submit work to the dashboard or ARC. `tmic baselines run` performs
-cloud CPU/GPU measurement of the existing pinned fleet. Creating a new model's
-contract and fixture remotely is not yet supported by `tmic run`.
+**Baseline measurement runs in the cloud by default.** Contract creation and
+fixture building happen locally. Then `tmic run` uses `tmic baselines run` for
+this model on cloud CPU and CUDA runners, covering every declared target and
+variant. It stages an immutable input on a `tmic-baselines/<source-hash>` Hub
+branch, retrieves and independently verifies the measured candidates, and uses
+the existing review/publication flow. The model's main branch and fleet pins
+change only after review. Cloud input requires the single `<name>-mic` layout
+and an operator-approved Hub namespace (default `huggingface-mic`).
+
+Until dashboard activation, use your GitHub CLI identity for the same model flow:
+
+```sh
+tmic run apple/mobilevit-xx-small --baseline-transport github
+```
+
+This directly dispatches Actions/ARC using `gh auth login`, without using the
+dashboard/Serge path. Your HF login needs permission to stage the model snapshot
+and, when approved, publish to the selected namespace. New model drafting also
+uses your configured HF inference provider. To measure locally instead:
+
+```sh
+tmic run org/model --baseline-execution local
+```
+
+`--local-only` also selects local execution and stops before any Hub upload.
+Cloud progress appears on stderr; `--baseline-timeout` defaults to six hours.
+Repeat the same command to resume the persisted cloud job. Missing CPU/CUDA cases,
+changed source/weights, or unreviewed/edited candidates block publication.
+Hardware exclusions explicitly declared in the manifest remain visible.
 
 This creates a workspace at `work/mic/org--model` and runs the same measured
 workflow as the individual commands: reuse or draft the contract, select/build

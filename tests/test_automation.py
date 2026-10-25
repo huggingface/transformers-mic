@@ -53,7 +53,15 @@ def workflow(tmp_path, monkeypatch):
         calls=calls,
         failures=failures,
         exports=exports,
-        argv=["run", MODEL, "--out", str(root), "--no-history"],
+        argv=[
+            "run",
+            MODEL,
+            "--out",
+            str(root),
+            "--no-history",
+            "--baseline-execution",
+            "local",
+        ],
     )
 
 
@@ -106,6 +114,30 @@ def test_noninteractive_stops_at_source_and_records_resumable_question(
     assert [name for name, _ in workflow.calls] == ["create"]
     assert (
         json.loads(capsys.readouterr().out.splitlines()[-1])["status"] == "needs-input"
+    )
+
+
+def test_default_run_measures_its_model_in_cloud_before_publication(
+    workflow, monkeypatch
+):
+    monkeypatch.setattr(
+        automation.model_baselines, "inputs", lambda _: ("f" * 64, None, {})
+    )
+    confirm(monkeypatch, ["yes", "yes", "yes", "yes"])
+    argv = list(workflow.argv)
+    argv.remove("--baseline-execution")
+    argv.remove("local")
+    assert main([*argv, "--baseline-transport", "github"]) == 0
+    commands = dict(workflow.calls)
+    for name in ("record", "check", "published-check"):
+        command = commands[name]
+        assert "baselines" in command and "--model-workspace" in command
+        assert command[command.index("--model-workspace") + 1] == str(workflow.root)
+    assert "--transport" in commands["record"] and "github" in commands["record"]
+    assert "--fixtures-only" not in commands["record"]
+    assert (
+        "--baseline-transport github"
+        in read(workflow.root / ".mic/automation.json")["resume"]
     )
 
 

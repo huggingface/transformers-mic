@@ -6,6 +6,7 @@ import signal
 from pathlib import Path
 import subprocess
 import sys
+import threading
 
 from .workspace import Workspace, read, write
 
@@ -16,15 +17,31 @@ def invoke(out, name, arguments, timeout):
     with log.open("a") as handle:
         handle.write("\nCOMMAND " + json.dumps(arguments) + "\n")
         handle.flush()
+        stream_progress = "baselines" in arguments
+        progress_thread = None
         try:
             process = subprocess.Popen(
                 [sys.executable, "-m", "transformers_mic", *arguments],
                 stdout=handle,
-                stderr=subprocess.STDOUT,
+                stderr=subprocess.PIPE if stream_progress else subprocess.STDOUT,
+                text=True,
                 start_new_session=True,
                 env={**os.environ, "PYTHONUNBUFFERED": "1"},
             )
+
+            if stream_progress:
+
+                def relay():
+                    for line in process.stderr:
+                        handle.write(line)
+                        handle.flush()
+                        print(line, end="", file=sys.stderr, flush=True)
+
+                progress_thread = threading.Thread(target=relay, daemon=True)
+                progress_thread.start()
             process.wait(timeout=timeout)
+            if progress_thread:
+                progress_thread.join()
             return {"exit_code": process.returncode, "log": str(log.relative_to(out))}
         except (subprocess.TimeoutExpired, KeyboardInterrupt) as error:
             try:
@@ -39,6 +56,8 @@ def invoke(out, name, arguments, timeout):
                 except ProcessLookupError:
                     pass
                 process.wait()
+            if progress_thread:
+                progress_thread.join()
             if isinstance(error, KeyboardInterrupt):
                 raise
             return {
