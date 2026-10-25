@@ -1,0 +1,187 @@
+# Baseline collections through the dashboard and ARC
+
+**Status:** implemented on the cloud-baselines branches; not deployed or proven
+on the live fleet yet. Dashboard GitHub App activation is separately deferred
+until the operator can access the App settings. This guide describes the new
+interface and the configuration needed to activate it.
+
+The local CLI remains usable as before. Cloud execution uses the dashboard's
+GitHub identity, Serge's authorized workflow dispatcher, and the ARC runner
+groups already used by `huggingface/transformers-mic`. It does not require a
+separate cloud account or a GPU on the caller's machine.
+
+## Choose where execution and upload happen
+
+Local creation/build/measurement/publication remains:
+
+```sh
+tmic run org/model
+# For multiple reviewed workspaces, use tmic batch as documented in cli.md.
+```
+
+Generate the complete collection remotely and retrieve the models and baselines:
+
+```sh
+tmic auth login
+tmic baselines run --out work/baselines
+```
+
+Have the workflow upload directly to a Hub dataset as well:
+
+```sh
+tmic baselines run --out work/baselines-hub \
+  --upload-repo huggingface-mic/baseline-candidates
+```
+
+Leave the results in the cloud and return only the immutable Hub revision:
+
+```sh
+tmic baselines run --out work/baselines-cloud \
+  --upload-repo huggingface-mic/baseline-candidates --no-download
+```
+
+The full collection means **both control and prototype fleets, CPU and CUDA,
+every declared variant, and real checkpoints as well as fixtures**. Use
+`--fleet control`, `--fleet prototypes`, or `--fixtures-only` to explicitly narrow
+the requested scope. An omitted case, unstable measurement, unexpected hardware
+skip or failed assertion makes the collection incomplete. Manifest-declared
+unsupported targets remain visible with their reasons.
+Device exclusions explicitly declared in manifest resources are accounted for
+as unsupported on that profile; insufficient memory on an otherwise supported
+profile remains a failure.
+
+This refreshes baselines for the fleet's **existing immutable MIC fixtures**.
+The returned model files are those pinned slim snapshots, not newly generated
+weights. New contracts and rebuilt fixtures still follow the existing
+`tmic create/build/run` source-review flow before entering the shared fleet.
+Cloud workers do not execute unreviewed local source uploads or LLM drafts.
+
+## Progress and resuming
+
+The CLI prints progress to stderr as work happens remotely: queueing, environment
+setup, model download, recording, validation, and publication. CPU and CUDA each
+report processed-case counts and the current contract/variant. JSON results go
+to stdout. Progress is updated approximately every ten seconds; it is not a
+byte-for-byte stream of GitHub logs. The job record includes the Actions run URL.
+
+Repeat the same command and `--out` to resume watching or retrieve results.
+The request ID is persisted before submission, so a timeout or retry cannot
+silently submit the same GPU job again. `main` is resolved only at initial
+submission; resuming does not adopt a newer framework or fleet snapshot.
+
+```sh
+tmic baselines run --out work/baselines --no-wait
+tmic baselines status --out work/baselines
+tmic baselines run --out work/baselines
+# A deliberate historical measurement:
+tmic baselines run --out work/historical \
+  --fleet-revision <dataset-commit-sha> --transformers-ref <framework-commit-sha>
+```
+
+Changing fleet selection, target scope, framework ref, upload destination or
+dashboard origin requires another `--out`. The local `cloud.json` records the
+job and immutable MIC, Transformers and fleet revisions. If dispatch was
+ambiguous, the dashboard searches for the exact workflow correlation ID rather
+than blindly dispatching again. An unresolved dispatch is reported as unknown.
+
+Model files are under `artifacts/cuda/models/`; candidate expectations and reports
+are under `artifacts/<profile>/<fleet>/<contract>/`. The CUDA artifact carries
+the pinned slim snapshots once, avoiding duplicate CPU copies. Each profile has
+`collection.json` with the complete expected matrix, execution evidence,
+runtime/package information and file hashes. Failed runs retain available
+artifacts for investigation and cannot masquerade as complete collections.
+
+## Hub uploads and reviewed baselines
+
+Remote upload uses a dedicated trusted publisher job after **both** measurement
+jobs succeed. Measurement jobs receive only `HF_HUB_READ_TOKEN`. The publisher's
+write token is scoped to its upload step, which never executes downloaded model
+code. Upload destinations must be in operator-approved namespaces.
+
+The dataset contains `collections/<job-id>/cpu/` and `cuda/`, including measured
+candidates, reference values, manifests, pinned models and validation evidence.
+Only checksum-covered files and the collection manifests are uploaded; runtime
+logs are not part of the public Hub collection. It is a measured artifact, not
+automatic acceptance of changed framework expectations.
+
+Alternatively, download first and upload using the caller's own `hf auth login`:
+
+```sh
+tmic baselines upload --out work/baselines --repo my-org/baseline-results
+tmic baselines upload --out work/baselines --repo my-org/baseline-results --execute
+```
+
+Review candidates and open Hub model PRs for canonical expectations:
+
+```sh
+tmic baselines review --out work/baselines
+tmic baselines review --out work/baselines --approve
+# Changed values need an explicit decision and explanation:
+tmic baselines review --out work/baselines --approve --approve-changed \
+  --reason 'Reviewed the intended framework behavior change'
+tmic baselines publish --out work/baselines
+tmic baselines publish --out work/baselines --execute
+```
+
+`--approve` accepts only new/unchanged measurements. Changed values are displayed
+as diffs; `--approve-changed` records their hashes and the supplied reason.
+Exit 3 means decisions remain pending. Publishing previews all affected files,
+then opens Hub PRs against the pinned parent revisions. It does not silently
+merge them, alter tolerances, update fleet dataset `main`, or change the
+framework's fleet pin. After review and Hub PR merge, adopt the new snapshots
+through the normal fleet export/pin process. Split legacy repositories must be
+migrated to the single `<name>-mic` layout before this publication path.
+
+## Operator setup
+
+1. Activate the dashboard-owned GitHub auth described in the dashboard's
+   `docs/dashboard-auth.md`. Enable `traceExporter.micJobs.enabled`, retaining
+   the persistent run store and Serge service-token connection.
+2. Install the dashboard read App and Serge's write App on
+   `huggingface/transformers-mic`. GitHub reads need Actions/Contents read;
+   dispatch needs Actions write. The authenticated actor also needs repository
+   write access. A login or CLI token alone does not grant GPU spending rights.
+3. Ship Serge's updated repository/workflow allowlist. If environment overrides
+   are used, include `huggingface/transformers-mic` in `DASHBOARD_REPOSITORIES`
+   and `cloud-baselines.yml` in `DASHBOARD_DISPATCH_WORKFLOWS`, preserving existing
+   entries. It dispatches the workflow on the default branch only.
+4. Merge `cloud-baselines.yml` and its worker code into MIC `main`. Confirm that
+   MIC can use `aws-m8i-l-cache` and `aws-g5-4xlarge-cache`.
+   Operator variables `MIC_CPU_BASELINE_RUNNER` and `MIC_GPU_BASELINE_RUNNER`
+   can select other approved ARC groups when full checkpoints need more memory
+   or GPUs. Callers cannot supply arbitrary runner groups.
+5. Set repository variables `MIC_CPU_BASELINE_IMAGE` and `MIC_GPU_BASELINE_IMAGE`
+   to approved **image digests** (`image@sha256:…`) containing Python matching
+   the fleet environment (currently 3.11). The workflow refuses mutable tags
+   before allocating ARC runners. CPU and CUDA dependencies come from the same
+   pinned fleet environment; doc-builder has an explicit commit pin. Runtime
+   details and the full package list are recorded in the collection.
+6. Configure `HF_HUB_READ_TOKEN` for required gated/private snapshots. For direct
+   upload, configure `MIC_BASELINE_WRITE_TOKEN`, restricted to the intended Hub
+   namespace. Set `MIC_BASELINE_UPLOAD_NAMESPACES` (CSV; default `huggingface-mic`)
+   and matching dashboard `traceExporter.micJobs.uploadNamespaces` if needed.
+   No upload is attempted when `--upload-repo` is absent.
+7. For live case progress set Serge's `DASHBOARD_MIC_PROGRESS_URL` to
+   `http://trace-exporter.transformers-ci.svc.cluster.local:8000/mic-jobs/progress`.
+   The workflow calls `MIC_PROGRESS_URL`, default
+   `https://serge.huggingface.tech/dashboard/mic-progress`. Serge verifies GitHub
+   OIDC signature, issuer, audience, repository, workflow, branch and event;
+   the dashboard binds progress to the actual Actions run and rejects stale
+   sequence numbers. Allow the internal Serge-to-exporter network path. Native
+   Actions job/step progress remains available if the callback relay is down.
+8. Allow exporter egress to the GitHub API and signed Actions artifact storage
+   (`*.blob.core.windows.net`, `*.actions.githubusercontent.com`,
+   `*.githubusercontent.com`). The App token is stripped before following a
+   signed storage redirect. The CLI downloads only through the authenticated
+   dashboard and needs no GitHub token.
+
+The job API accepts only fixed fleets, immutable revisions, the fixed CPU/CUDA
+profiles and approved upload namespaces. It accepts no user command, image,
+arbitrary source repository or caller-supplied identity. The initial limits are
+three submissions per user per hour and two active collection jobs globally.
+Abandoned jobs age out of capacity accounting after eight hours.
+
+Validation covers request authorization, retries, ownership, artifact traversal,
+matrix accounting, independent checks, review hashes, Hub upload/PR previews,
+direct cloud publication, and progress authentication. A live proof still needs
+the deferred App setup, deployment, configured images and a bounded ARC run.

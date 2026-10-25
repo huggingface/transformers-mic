@@ -44,6 +44,24 @@ This authenticates the CLI for the future remote MIC service. GPU submission,
 baseline approval and publication remain separate capabilities; these auth
 commands do not execute a remote job. Hub publishing still uses `hf auth login`.
 
+## Cloud baseline collections
+
+After dashboard activation, one command can measure the entire pinned collection
+on the dashboard/Serge ARC runners and retrieve models and candidate baselines:
+
+```sh
+tmic baselines run --out work/baselines
+# Or have the workflow upload directly, returning only the Hub revision:
+tmic baselines run --out work/baselines-hub \
+  --upload-repo huggingface-mic/baseline-candidates --no-download
+```
+
+The CLI shows remote stages and per-profile case counts. Repeat the same command
+to resume the same job. See [cloud baselines](cloud-baselines.md) for local versus
+cloud execution, artifact retrieval, direct or local Hub upload, baseline review,
+Hub model PRs, and operator setup. These commands refresh the shared fleet's
+existing immutable fixtures; new model creation still uses the workflow below.
+
 ## Automated mode
 
 ```sh

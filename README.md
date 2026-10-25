@@ -21,6 +21,11 @@ mode emits JSON questions and accepts one-use `--answer` files. Run `tmic --help
 or `tmic run --help` to discover both modes and the answer protocol.
 See [automated mode](docs/cli.md#automated-mode).
 
+Cloud baseline collections through the dashboard/Serge ARC runners are described
+in [cloud baselines](docs/cloud-baselines.md), including remote progress, model
+artifact retrieval, direct workflow-to-Hub upload and review before promotion.
+Activation is still pending; the guide records the operator prerequisites.
+
 ## Model Integration Contract
 
 **A proposed standard**: next to any Hub model, an executable check that it works in a given framework, run by that framework's CI.

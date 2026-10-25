@@ -1,0 +1,187 @@
+name: MIC baseline collection
+run-name: "MIC baselines · ${{ inputs.job_id }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_id:
+        required: true
+        type: string
+      fleet_revision:
+        required: true
+        type: string
+      transformers_sha:
+        required: true
+        type: string
+      mic_sha:
+        required: true
+        type: string
+      fleets:
+        required: true
+        type: string
+        default: control,prototypes
+      fixtures_only:
+        required: true
+        type: string
+        default: "false"
+      upload_repo:
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mic-baselines-${{ inputs.job_id }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate immutable inputs and approved images before allocating ARC runners
+        env:
+          JOB_ID: ${{ inputs.job_id }}
+          FLEET_REVISION: ${{ inputs.fleet_revision }}
+          TRANSFORMERS_SHA: ${{ inputs.transformers_sha }}
+          MIC_SHA: ${{ inputs.mic_sha }}
+          FLEETS: ${{ inputs.fleets }}
+          FIXTURES_ONLY: ${{ inputs.fixtures_only }}
+          CPU_IMAGE: ${{ vars.MIC_CPU_BASELINE_IMAGE }}
+          GPU_IMAGE: ${{ vars.MIC_GPU_BASELINE_IMAGE }}
+          UPLOAD_REPO: ${{ inputs.upload_repo }}
+          UPLOAD_NAMESPACES: ${{ vars.MIC_BASELINE_UPLOAD_NAMESPACES || 'huggingface-mic' }}
+          HAS_WRITE_TOKEN: ${{ secrets.MIC_BASELINE_WRITE_TOKEN != '' }}
+        run: |
+          python - <<'PY'
+          import os, re
+          assert re.fullmatch(r"[a-f0-9]{32}", os.environ["JOB_ID"])
+          for key in ("FLEET_REVISION", "TRANSFORMERS_SHA", "MIC_SHA"):
+              assert re.fullmatch(r"[a-f0-9]{40}", os.environ[key]), key
+          assert os.environ["FLEETS"] in ("control", "prototypes", "control,prototypes")
+          assert os.environ["FIXTURES_ONLY"] in ("true", "false")
+          destination = os.environ["UPLOAD_REPO"]
+          if destination:
+              assert re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*", destination)
+              assert destination.split('/')[0] in os.environ["UPLOAD_NAMESPACES"].split(',')
+              assert os.environ["HAS_WRITE_TOKEN"] == 'true', 'Configure MIC_BASELINE_WRITE_TOKEN before remote publication'
+          for key in ("CPU_IMAGE", "GPU_IMAGE"):
+              assert re.fullmatch(r"[a-zA-Z0-9./:_-]+@sha256:[a-f0-9]{64}", os.environ[key]), f"Set {key} to an approved image digest"
+          PY
+
+  measure:
+    needs: validate
+    permissions:
+      contents: read
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - profile: cpu
+            runner: ${{ vars.MIC_CPU_BASELINE_RUNNER || 'aws-m8i-l-cache' }}
+          - profile: cuda
+            runner: ${{ vars.MIC_GPU_BASELINE_RUNNER || 'aws-g5-4xlarge-cache' }}
+    runs-on:
+      group: ${{ matrix.runner }}
+    timeout-minutes: 360
+    container:
+      image: ${{ matrix.profile == 'cpu' && vars.MIC_CPU_BASELINE_IMAGE || vars.MIC_GPU_BASELINE_IMAGE }}
+      options: ${{ matrix.profile == 'cuda' && '--gpus all --shm-size=16gb' || '--shm-size=16gb' }}
+    env:
+      HF_TOKEN: ${{ secrets.HF_HUB_READ_TOKEN }}
+      HF_HOME: /tmp/mic-hf
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      OMP_NUM_THREADS: "4"
+      MKL_NUM_THREADS: "4"
+      OPENBLAS_NUM_THREADS: "4"
+      CUBLAS_WORKSPACE_CONFIG: ":4096:8"
+      CUDA_VISIBLE_DEVICES: ${{ matrix.profile == 'cuda' && '0' || '' }}
+      PYTHONUNBUFFERED: "1"
+      JOB_ID: ${{ inputs.job_id }}
+      FLEET_REVISION: ${{ inputs.fleet_revision }}
+      TRANSFORMERS_SHA: ${{ inputs.transformers_sha }}
+      MIC_SHA: ${{ inputs.mic_sha }}
+      FLEETS: ${{ inputs.fleets }}
+      FIXTURES_ONLY: ${{ inputs.fixtures_only }}
+      MIC_TRANSFORMERS_CHECKOUT: /tmp/mic-transformers
+      MIC_BASELINE_IMAGE: ${{ matrix.profile == 'cpu' && vars.MIC_CPU_BASELINE_IMAGE || vars.MIC_GPU_BASELINE_IMAGE }}
+      MIC_PROGRESS_URL: ${{ vars.MIC_PROGRESS_URL || 'https://serge.huggingface.tech/dashboard/mic-progress' }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          ref: ${{ inputs.mic_sha }}
+          persist-credentials: false
+      - name: Install MIC and the requested fleet environment
+        run: |
+          python3 -m venv /tmp/mic-runtime
+          echo "/tmp/mic-runtime/bin" >> "$GITHUB_PATH"
+          /tmp/mic-runtime/bin/python -m pip install .
+          /tmp/mic-runtime/bin/python .github/scripts/install_baseline_environment.py
+      - name: Measure and independently verify every declared case
+        env:
+          PROFILE: ${{ matrix.profile }}
+        run: |
+          options=()
+          if [ "$FIXTURES_ONLY" = true ]; then options+=(--fixtures-only); fi
+          python -m transformers_mic.baseline_worker \
+            --job-id "$JOB_ID" --fleet-revision "$FLEET_REVISION" \
+            --transformers-sha "$TRANSFORMERS_SHA" --mic-sha "$MIC_SHA" \
+            --fleets "$FLEETS" --profile "$PROFILE" --out "$GITHUB_WORKSPACE/out" "${options[@]}"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: mic-baselines-${{ matrix.profile }}
+          path: out
+          retention-days: 30
+          if-no-files-found: warn
+
+  publish:
+    needs: measure
+    if: ${{ inputs.upload_repo != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          ref: ${{ inputs.mic_sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: mic-baselines-cpu
+          path: publication/artifacts/cpu
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: mic-baselines-cuda
+          path: publication/artifacts/cuda
+      - name: Install trusted publication code
+        run: python -m pip install .
+      - name: Upload complete model and candidate-baseline collection
+        env:
+          # Write credentials exist only in this trusted publisher step.
+          HF_TOKEN: ${{ secrets.MIC_BASELINE_WRITE_TOKEN }}
+          JOB_ID: ${{ inputs.job_id }}
+          FLEET_REVISION: ${{ inputs.fleet_revision }}
+          TRANSFORMERS_SHA: ${{ inputs.transformers_sha }}
+          MIC_SHA: ${{ inputs.mic_sha }}
+          FLEETS: ${{ inputs.fleets }}
+          FIXTURES_ONLY: ${{ inputs.fixtures_only }}
+          UPLOAD_REPO: ${{ inputs.upload_repo }}
+          UPLOAD_NAMESPACES: ${{ vars.MIC_BASELINE_UPLOAD_NAMESPACES || 'huggingface-mic' }}
+          MIC_PROGRESS_URL: ${{ vars.MIC_PROGRESS_URL || 'https://serge.huggingface.tech/dashboard/mic-progress' }}
+        run: python .github/scripts/publish_baseline_collection.py publication
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: mic-baselines-publication
+          path: publication/publication.json
+          if-no-files-found: error
