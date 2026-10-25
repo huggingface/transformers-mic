@@ -1,9 +1,13 @@
 # Baseline collections through the dashboard and ARC
 
-**Status:** implemented on the cloud-baselines branches; not deployed or proven
+**Status:** merged into the MIC, dashboard and Serge main branches; not deployed or proven
 on the live fleet yet. Dashboard GitHub App activation is separately deferred
 until the operator can access the App settings. This guide describes the new
 interface and the configuration needed to activate it.
+
+The live Serge App also needs installation on `huggingface/transformers-mic`.
+While App setup is deferred, the [temporary CLI test](cli.md#temporary-test-without-dashboard-oauth)
+uses the caller's existing GitHub CLI identity to exercise ARC directly.
 
 The local CLI remains usable as before. Cloud execution uses the dashboard's
 GitHub identity, Serge's authorized workflow dispatcher, and the ARC runner

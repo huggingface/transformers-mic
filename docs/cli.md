@@ -40,9 +40,15 @@ with file permissions `0600`. It stores no GitHub token and uses neither
 Grafana nor your local `gh` login. Logout revokes the server session before
 removing the local credential; connection failures leave it available to retry.
 
-This authenticates the CLI for the future remote MIC service. GPU submission,
-baseline approval and publication remain separate capabilities; these auth
-commands do not execute a remote job. Hub publishing still uses `hf auth login`.
+This authenticates the CLI for the remote baseline service below. Workflow
+dispatch also requires repository write access. Baseline approval and publication
+remain explicit operations; the auth commands themselves do not execute a job.
+Local Hub publishing uses `hf auth login`; direct workflow publication uses the
+operator's dedicated Hub write secret.
+
+**Activation is pending:** browser OAuth needs the existing GitHub App's callback
+URL/client secret, and Serge's App must be installed on `transformers-mic`.
+Until then, use the GitHub-authenticated workflow test below.
 
 ## Cloud baseline collections
 
@@ -62,11 +68,60 @@ cloud execution, artifact retrieval, direct or local Hub upload, baseline review
 Hub model PRs, and operator setup. These commands refresh the shared fleet's
 existing immutable fixtures; new model creation still uses the workflow below.
 
+```sh
+# Explicitly narrow the scope for a first dashboard test:
+tmic baselines run --out work/smoke --fleet control --fixtures-only
+tmic baselines status --out work/smoke
+# Inspect downloaded measurements, then preview a dataset upload:
+tmic baselines review --out work/smoke
+tmic baselines upload --out work/smoke --repo my-org/baseline-results
+# Add --execute to upload. Canonical model changes use reviewed Hub PRs:
+tmic baselines publish --out work/smoke
+```
+
+### Temporary test without dashboard OAuth
+
+From the repository root, with MIC installed in the active Python environment:
+
+```sh
+gh auth login
+python tools/try_cloud_baselines.py --out work/arc-smoke
+```
+
+This uses your `gh` identity and repository permissions to dispatch the real ARC
+workflow directly, watches Actions job/step progress, downloads CPU/CUDA artifacts,
+and validates their provenance and checksums. It defaults to the control fleet's
+fixtures. Repeat the same command to resume; it never automatically repeats an
+ambiguous dispatch. Use a separate `--out` for another collection. Resume these
+test collections with the helper, rather than `tmic baselines run/status`.
+
+To request both fleets and real checkpoints:
+
+```sh
+python tools/try_cloud_baselines.py --out work/arc-all \
+  --fleet all --include-checkpoints
+# Optional direct Hub upload (requires the workflow's scoped write secret):
+python tools/try_cloud_baselines.py --out work/arc-hub \
+  --upload-repo huggingface-mic/baseline-candidates
+```
+
+The downloaded collection works with `tmic baselines review/upload/publish`.
+Repository image variables must be configured first; direct upload also needs
+`MIC_BASELINE_WRITE_TOKEN`. This tests GitHub Actions/ARC and artifact retrieval;
+it does not test dashboard/Serge authorization or the live case-progress relay.
+There is no anonymous endpoint or production auth bypass. See
+[operator setup](cloud-baselines.md#operator-setup) for the full service path.
+
 ## Automated mode
 
 ```sh
 tmic run org/model
 ```
+
+**This command runs locally.** CPU/GPU measurement uses the caller's machine;
+it does not submit work to the dashboard or ARC. `tmic baselines run` performs
+cloud CPU/GPU measurement of the existing pinned fleet. Creating a new model's
+contract and fixture remotely is not yet supported by `tmic run`.
 
 This creates a workspace at `work/mic/org--model` and runs the same measured
 workflow as the individual commands: reuse or draft the contract, select/build
