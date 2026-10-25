@@ -624,6 +624,10 @@ def replay(args):
 def publication_ready(workspace):
     state = workspace.state
     proof = state.get("validation") or {}
+    if proof.get("cloud_collection"):
+        from .model_baselines import verify
+
+        verify(workspace, Path(proof["cloud_collection"]), save=False)
     paths = {
         "lock_sha256": workspace.lock_path,
         "manifest_sha256": workspace.contract_root / "integration.json",

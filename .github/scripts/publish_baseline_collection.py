@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 import sys
 
+from transformers_mic import cloud_inputs
 from transformers_mic.baselines import upload
 from transformers_mic.cloud_progress import Progress
 from transformers_mic.workspace import read, write
@@ -26,6 +27,8 @@ def main(root):
         "fleets": os.environ["FLEETS"].split(","),
         "fixtures_only": os.environ["FIXTURES_ONLY"] == "true",
     }
+    if workspace := cloud_inputs.from_env():
+        request["workspace"] = workspace
     write(
         root / "cloud.json", {"job": request, "request": {"profiles": ["cpu", "cuda"]}}
     )

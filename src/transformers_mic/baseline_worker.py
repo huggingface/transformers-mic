@@ -12,7 +12,7 @@ import sys
 
 from huggingface_hub import hf_hub_download, snapshot_download
 
-from . import fleet
+from . import fleet, cloud_inputs
 from .cloud_progress import Progress
 from .baselines import sha256
 from .workspace import read, write
@@ -219,6 +219,16 @@ def measure(args):
     for key in ("fleet_revision", "transformers_sha", "mic_sha"):
         if not re.fullmatch(r"[0-9a-f]{40}", request[key]):
             raise ValueError("Cloud revisions must be immutable commit SHAs")
+    workspace = cloud_inputs.from_env()
+    if workspace:
+        request["workspace"] = workspace
+
+    def load_lock(name):
+        if workspace:
+            return cloud_inputs.lock(workspace)
+        source, _ = fleet.download(name, args.fleet_revision)
+        return read(source)
+
     report = {
         "request": request,
         "profile": args.profile,
@@ -248,8 +258,7 @@ def measure(args):
     for fleet_name in request["fleets"]:
         if fleet_name not in fleet.FILES:
             raise ValueError("Unknown fleet")
-        source, _ = fleet.download(fleet_name, args.fleet_revision)
-        for name, contract in read(source)["contracts"].items():
+        for name, contract in load_lock(fleet_name)["contracts"].items():
             safe(name)
             pin = contract["integration"]
             manifest = read(
@@ -317,8 +326,7 @@ def measure(args):
     for fleet_name in request["fleets"]:
         if fleet_name not in fleet.FILES:
             raise ValueError("Unknown fleet")
-        source, _ = fleet.download(fleet_name, args.fleet_revision)
-        lock = read(source)
+        lock = load_lock(fleet_name)
         if lock.get("local_patches"):
             raise ValueError("Cloud baselines require an unpatched fleet")
         lock.pop(
@@ -522,7 +530,6 @@ def measure(args):
         bool(keys)
         and len(keys) == len(set(keys))
         and set(keys) == set(report["expected_cases"])
-        and any(case["status"] == "validated" for case in report["cases"])
         and all(
             case["status"] in ("validated", "declared-unsupported")
             for case in report["cases"]

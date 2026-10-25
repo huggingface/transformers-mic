@@ -8,7 +8,7 @@ import re
 import subprocess
 import sys
 
-from transformers_mic import fleet
+from transformers_mic import fleet, cloud_inputs
 from transformers_mic.workspace import read
 
 
@@ -18,9 +18,13 @@ def main():
     if not all(re.fullmatch(r"[a-f0-9]{40}", value) for value in (revision, sha)):
         raise ValueError("Immutable revisions required")
     environments = []
-    for name in os.environ["FLEETS"].split(","):
-        path, _ = fleet.download(name, revision)
-        environments.append(read(path)["environment"])
+    workspace = cloud_inputs.from_env()
+    if workspace:
+        environments.append(cloud_inputs.lock(workspace)["environment"])
+    else:
+        for name in os.environ["FLEETS"].split(","):
+            path, _ = fleet.download(name, revision)
+            environments.append(read(path)["environment"])
     if not environments or any(
         environment != environments[0] for environment in environments
     ):
