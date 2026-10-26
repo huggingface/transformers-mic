@@ -206,3 +206,11 @@ Validation covers request authorization, retries, ownership, artifact traversal,
 matrix accounting, independent checks, review hashes, Hub upload/PR previews,
 direct cloud publication, and progress authentication. A live proof still needs
 the deferred App setup, deployment, configured images and a bounded ARC run.
+
+## BatchNorm fixtures
+
+After overfitting a slim fixture with BatchNorm, the builder recalibrates running
+statistics on the captured training batch with dropout disabled. This changes
+BatchNorm buffers only and records the layer/batch count in `build.json` training
+evidence. The same input-sensitivity thresholds and dtype health checks must
+then pass before the fixture can be used for cloud measurements.

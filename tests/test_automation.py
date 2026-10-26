@@ -414,6 +414,37 @@ def test_repair_budget_exhaustion_returns_to_retry(repair_workflow, monkeypatch)
     assert state["pending_question"]["kind"] == "retry"
 
 
+def test_human_always_completes_workflow_with_readable_summary(
+    workflow, monkeypatch, capsys
+):
+    prompts = []
+
+    def always(prompt):
+        prompts.append(prompt)
+        return "A"
+
+    monkeypatch.setattr("builtins.input", always)
+    assert main(workflow.argv) == 0
+    output = capsys.readouterr().out
+    assert len(prompts) == 1
+    assert "[2/12] Build fixture" in output
+    assert "Complete. Model:" in output
+    assert '"protocol_version"' not in output
+    state = read(workflow.root / ".mic/automation.json")
+    assert all(d["always_yes"] for d in state["decisions"])
+
+
+def test_human_always_stops_repeated_failed_builds(workflow, monkeypatch, capsys):
+    workflow.failures["build"] = [1] * 10
+    monkeypatch.setattr("builtins.input", lambda _: "A")
+    assert main(workflow.argv) == 3
+    assert sum(name == "build" for name, _ in workflow.calls) == 3
+    assert not workflow.exports
+    output = capsys.readouterr().out
+    assert "Stopped: this stage keeps failing" in output
+    assert "Resume:" in output
+
+
 def test_agent_drives_full_workflow_without_a_terminal(workflow, monkeypatch, capsys):
     monkeypatch.setattr(
         "builtins.input", lambda _: pytest.fail("agent must never read stdin")
@@ -512,7 +543,8 @@ def test_agent_local_only_remains_local_when_resuming(workflow, capsys):
 def test_agent_can_take_over_a_human_question(workflow, monkeypatch, capsys):
     monkeypatch.setattr(automation.sys.stdin, "isatty", lambda: False)
     assert main(workflow.argv) == 3
-    human = json.loads(capsys.readouterr().out.splitlines()[-1])
+    capsys.readouterr()
+    human = read(workflow.root / ".mic/automation.json")
     code, agent, _ = agent_call(workflow, capsys)
     assert code == 3 and agent["pending_question"] == human["pending_question"]
 

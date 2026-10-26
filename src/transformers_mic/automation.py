@@ -6,11 +6,12 @@ import json
 from pathlib import Path
 import shlex
 import sys
+import time
 
 from filelock import FileLock, Timeout
 from huggingface_hub.utils import validate_repo_id
 
-from . import batch, fleet, model_baselines, contract_repair
+from . import batch, fleet, model_baselines, contract_repair, terminal
 from .interaction import Interaction, Pending, PROTOCOL_VERSION, load_answer
 from .workspace import Workspace, read, write
 
@@ -247,12 +248,51 @@ def run_locked(args, root, answer):
     )
     output = sys.stderr if args.mode == "agent" else sys.stdout
 
-    def stage(name, options, *, create=False):
+    if args.mode == "human":
+        location = (
+            "local hardware"
+            if args.baseline_execution == "local"
+            else "cloud CPU + CUDA"
+        )
         print(
-            f"tmic: {name} (log: {folder / 'logs' / (name + '.log')})",
-            file=output,
+            f"\nMIC · {args.model}\n  Workspace: {root}\n  Baselines: {location}\n",
             flush=True,
         )
+
+    def emit_result(result):
+        if args.mode == "agent":
+            print(json.dumps(result))
+        elif result["status"] == "needs-input":
+            print(f"\nPaused. Your progress is saved.\nResume: {resume}", flush=True)
+        elif result["status"] == "validated":
+            print(
+                f"\nValidation complete. Results: {root}\nPublication was not requested.",
+                flush=True,
+            )
+        else:
+            print(
+                f"\nComplete. Model: {workspace.fixture}\nFleet revision: {state['dataset_revision']}\nResults: {root}",
+                flush=True,
+            )
+
+    def stage(name, options, *, create=False):
+        if args.mode == "agent":
+            print(
+                f"tmic: {name} (log: {folder / 'logs' / (name + '.log')})",
+                file=output,
+                flush=True,
+            )
+        else:
+            number = (
+                str(STAGES.index(name) + 1) + "/" + str(len(STAGES))
+                if name in STAGES
+                else "setup"
+            )
+            label = terminal.STAGE_NAMES.get(name, name)
+            if name == "record" and args.baseline_execution == "cloud":
+                label = "Measure CPU + CUDA baselines"
+            print(f"\n[{number}] {label}…", flush=True)
+        started = time.monotonic()
         command = options if create else ["--workspace", str(root), *options]
         timeout = args.baseline_timeout if options[0] == "baselines" else args.timeout
         result = batch.invoke(folder, name, command, timeout)
@@ -262,7 +302,15 @@ def run_locked(args, root, answer):
         log = folder / result["log"]
         text = log.read_text()
         if result["exit_code"]:
-            print("\n".join(text.splitlines()[-60:]), file=output, flush=True)
+            if args.mode == "agent":
+                print("\n".join(text.splitlines()[-60:]), file=output, flush=True)
+            else:
+                print(
+                    "  Failed: " + terminal.failure(text) + f"\n  Full log: {log}",
+                    flush=True,
+                )
+        elif args.mode == "human":
+            print(f"  Done ({time.monotonic() - started:.1f}s)", flush=True)
         return result["exit_code"], log
 
     def review_repair(attempt):
@@ -275,7 +323,8 @@ def run_locked(args, root, answer):
         ask(
             args,
             "Apply this proposed contract repair and retry validation?",
-            proposal["plan"]["rationale"]
+            f"Repair {state['repairs'].index(attempt) + 1}/{args.max_contract_repairs} · assertions and gates unchanged\n"
+            + proposal["plan"]["rationale"]
             + "\n\n"
             + Path(attempt["diff"]["path"]).read_text(),
             kind="contract-repair",
@@ -416,20 +465,20 @@ def run_locked(args, root, answer):
             ):
                 state["status"] = "validated"
                 save()
-                print(
-                    json.dumps(
-                        {
-                            "protocol_version": PROTOCOL_VERSION,
-                            "status": "validated",
-                            "workspace": str(root),
-                            "resume": resume,
-                        }
-                    )
+                emit_result(
+                    {
+                        "protocol_version": PROTOCOL_VERSION,
+                        "status": "validated",
+                        "workspace": str(root),
+                        "resume": resume,
+                    }
                 )
                 return 0
             before = fingerprint()
             code, log = 0, None
             if name == "source":
+                if args.mode == "human":
+                    print(f"\n[1/{len(STAGES)}] Review contract", flush=True)
                 manifest = workspace.manifest
                 usage = (
                     workspace.contract_root
@@ -606,7 +655,7 @@ def run_locked(args, root, answer):
                     and len(state.get("repairs", [])) < args.max_contract_repairs
                 ):
                     print(
-                        "tmic: inspecting failure and proposing a bounded contract repair…",
+                        f"Repair {len(state.get('repairs', [])) + 1}/{args.max_contract_repairs}: inspecting the failure and drafting a proposal…",
                         file=output,
                         flush=True,
                     )
@@ -638,8 +687,15 @@ def run_locked(args, root, answer):
                 failed_fingerprint = fingerprint()
                 ask(
                     args,
-                    f"{name} failed (exit {code}). Fix the problem and retry?",
-                    str(log),
+                    "Retry " + terminal.STAGE_NAMES.get(name, name).lower() + "?",
+                    (
+                        "Repair limit reached. "
+                        if len(state.get("repairs", [])) >= args.max_contract_repairs
+                        and args.max_contract_repairs
+                        else ""
+                    )
+                    + "Fix the cause before retrying; unchanged inputs will reproduce the failure.\nFull log: "
+                    + str(log),
                     kind="retry",
                     context={
                         "failed_stage": name,
@@ -659,17 +715,15 @@ def run_locked(args, root, answer):
             save()
         state["status"] = "complete"
         save()
-        print(
-            json.dumps(
-                {
-                    "protocol_version": PROTOCOL_VERSION,
-                    "status": "complete",
-                    "workspace": str(root),
-                    "fleet_repository": fleet.REPOSITORY,
-                    "fleet": args.fleet,
-                    "dataset_revision": state["dataset_revision"],
-                }
-            )
+        emit_result(
+            {
+                "protocol_version": PROTOCOL_VERSION,
+                "status": "complete",
+                "workspace": str(root),
+                "fleet_repository": fleet.REPOSITORY,
+                "fleet": args.fleet,
+                "dataset_revision": state["dataset_revision"],
+            }
         )
         return 0
     except Pending as pending:
@@ -677,19 +731,17 @@ def run_locked(args, root, answer):
             status="needs-input", question=pending.question, details=pending.details
         )
         save()
-        print(
-            json.dumps(
-                {
-                    "protocol_version": PROTOCOL_VERSION,
-                    "status": "needs-input",
-                    "pending_question": pending.record,
-                    **({"answer_error": pending.error} if pending.error else {}),
-                    "question": pending.question,
-                    "details": pending.details,
-                    "workspace": str(root),
-                    "resume": resume,
-                }
-            )
+        emit_result(
+            {
+                "protocol_version": PROTOCOL_VERSION,
+                "status": "needs-input",
+                "pending_question": pending.record,
+                **({"answer_error": pending.error} if pending.error else {}),
+                "question": pending.question,
+                "details": pending.details,
+                "workspace": str(root),
+                "resume": resume,
+            }
         )
         return NEEDS_INPUT
     except KeyboardInterrupt:

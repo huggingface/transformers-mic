@@ -185,6 +185,23 @@ an unchanged workspace. Source, lock, or baseline edits invalidate earlier check
 and restart validation. After `--local-only`, rerun without it to continue through
 publication. No Git commit or framework PR is created automatically.
 
+### Reading progress and answering prompts
+
+Human mode shows the model/workspace, numbered stages, elapsed times and short
+failure explanations. Complete tracebacks and worker output remain in the shown
+log files. Pausing prints a resume command; agent mode keeps its JSON protocol.
+
+At `Continue? [y/N/A=always]`, choose `A` (or `a`/`always`) to approve this and
+later questions in the current process. This includes source/repair reviews,
+baseline decisions, model publication and fleet updates. Every decision remains
+in the audit log and links to your original Always authorization. Changed
+baselines receive an explicit audit note that you chose Always for this invocation.
+A new CLI process asks again; this preference is not persisted across restarts.
+
+Always does not change validation rules or repair limits. After two automatic
+retries of the same failing stage with unchanged workspace inputs, the run pauses
+instead of looping. Fix the cause, then resume the printed command.
+
 ### Bounded contract repair
 
 When a generated contract fails during build, factory checks or measurement,
