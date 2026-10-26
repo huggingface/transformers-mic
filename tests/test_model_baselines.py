@@ -187,6 +187,27 @@ def test_cpu_coverage_rejects_different_hardware_class(dtype, actual, required):
     model_baselines.require_cpu_coverage(manifest, reports)
 
 
+def test_cpu_coverage_follows_the_dtype_the_case_ran_in(tmp_path):
+    # A default variant declares no dtype; a bfloat16 checkpoint runs in bfloat16.
+    manifest = {"integrations": {"transformers": {"variants": {"default": {}}}}}
+    write(
+        tmp_path / "candidates/model.candidate.json",
+        {"outputs": {"runtime": {"device": "cpu", "dtype": "bfloat16"}}},
+    )
+    case = {
+        "status": "validated",
+        "variant": "default",
+        "target": "fixture",
+        "candidate": "candidates/model.candidate.json",
+        "platform": "cpu-x86_64-bf16",
+    }
+    reports = [(tmp_path, {"profile": "cpu", "cases": [case]})]
+    model_baselines.require_cpu_coverage(manifest, reports)
+    case["platform"] = "cpu-x86_64"
+    with pytest.raises(ValueError, match="cpu-x86_64-bf16"):
+        model_baselines.require_cpu_coverage(manifest, reports)
+
+
 def test_verification_rechecks_native_cpu_coverage(measured):
     workspace, root = measured
     approve(workspace)

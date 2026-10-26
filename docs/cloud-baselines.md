@@ -3,10 +3,11 @@
 **Status (2026-10-26):** dashboard authentication and the MIC job API are deployed.
 Both Apps are installed on `huggingface/transformers-mic`; workflow reads,
 Serge's actor-permission check and authenticated progress callbacks are verified.
-A complete dashboard CPU/CUDA execution remains unproven: the native-bfloat16
-CPU probe on `aws-m8i-l-cache` stayed unassigned and was cancelled.
-`MIC_CPU_BASELINE_RUNNER` now selects that group; an org runner administrator
-must confirm repository access and capacity before submitting full collections.
+MIC can use `aws-m8i-l-cache`: the [CPU runner probe](https://github.com/huggingface/transformers-mic/actions/runs/40333451730)
+ran in the approved CPU image on a Xeon 6975P-C reporting `amx_bf16` and
+`avx512_bf16`, and `MIC_CPU_BASELINE_RUNNER` selects that group. A complete
+dashboard CPU/CUDA collection on this runner remains unproven; earlier cloud runs
+measured CPU on G5, which does not supply the native bfloat16 class.
 
 The [direct GitHub transport](cli.md#temporary-test-without-dashboard-oauth)
 uses the caller's existing GitHub CLI identity instead of dashboard authentication;
@@ -176,8 +177,8 @@ migrated to the single `<name>-mic` layout before this publication path.
    declaring bfloat16 need `cpu-x86_64-bf16`; float16 needs `cpu-x86_64-fp16`.
    Grant MIC access to an x86 runner with the matching instructions (such as
    Transformers' `aws-m8i-l-cache` for native bfloat16), then set
-   `MIC_CPU_BASELINE_RUNNER` to that group. MIC does not yet have verified access
-   to `aws-m8i-l-cache`. Model import/validation rejects mismatched CPU coverage;
+   `MIC_CPU_BASELINE_RUNNER` to that group. MIC's access to `aws-m8i-l-cache` is
+   verified by the CPU runner probe. Model import/validation rejects mismatched CPU coverage;
    never rename a baseline from another hardware class to fill the gap.
    Operator variables `MIC_CPU_BASELINE_RUNNER` and `MIC_GPU_BASELINE_RUNNER`
    can select other approved ARC groups when full checkpoints need more memory
@@ -203,8 +204,11 @@ migrated to the single `<name>-mic` layout before this publication path.
    Actions job/step progress remains available if the callback relay is down.
 8. Allow exporter egress to the GitHub API and signed Actions artifact storage
    (`*.blob.core.windows.net`, `*.actions.githubusercontent.com`,
-   `*.githubusercontent.com`). The App token is stripped before following a
-   signed storage redirect. The CLI downloads only through the authenticated
+   `*.githubusercontent.com`). In production the cluster boundary admits only
+   GitHub's API ranges, so the exporter sends both artifact hops through its
+   GitHub egress proxy (`traceExporter.auth.githubProxy`, transformers-ci #359);
+   without it artifact downloads hang until the ingress returns 504. The App
+   token is stripped before following a signed storage redirect. The CLI downloads only through the authenticated
    dashboard and needs no GitHub token.
 
 The job API accepts only fixed fleets, immutable revisions, the fixed CPU/CUDA
@@ -216,7 +220,7 @@ Abandoned jobs age out of capacity accounting after eight hours.
 Validation covers request authorization, retries, ownership, artifact traversal,
 matrix accounting, independent checks, review hashes, Hub upload/PR previews,
 direct cloud publication, and progress authentication. A live proof still needs
-the deferred App setup, deployment, configured images and a bounded ARC run.
+a bounded collection run with CPU measured on `aws-m8i-l-cache`.
 
 ## BatchNorm fixtures
 
