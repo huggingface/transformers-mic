@@ -148,7 +148,11 @@ Repeat the same command to resume the persisted cloud job. Missing CPU/CUDA case
 changed source/weights, or unreviewed/edited candidates block publication.
 Hardware exclusions explicitly declared in the manifest remain visible.
 
-This creates a workspace at `work/mic/org--model` and runs the same measured
+Without `--out`, MIC resumes the matching model workspace in `work/*` or
+`work/mic/*`, including custom names such as `work/mobilevit-e2e`. If more than
+one matches, it lists them and requires `--out`. An explicit `--out` or
+`--workspace` takes precedence, as does running inside a MIC workspace.
+With no existing match, it creates `work/mic/org--model` and runs the same measured
 workflow as the individual commands: reuse or draft the contract, select/build
 weights, check Auto-model registrations, record reproducible candidates for every
 declared variant, review them, validate all targets, publish the model snapshot,

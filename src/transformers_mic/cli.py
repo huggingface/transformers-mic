@@ -212,7 +212,10 @@ No Git commit or framework PR is created automatically.""",
         type=Path,
         help="One-use JSON answer to a pending question; requires --mode agent",
     )
-    run.add_argument("--out", help="Resumable workspace (default: work/mic/ORG--MODEL)")
+    run.add_argument(
+        "--out",
+        help="Workspace override (otherwise resume a matching workspace under work/ or create work/mic/ORG--MODEL)",
+    )
     run.add_argument("--namespace", default="huggingface-mic")
     run.add_argument("--fleet", choices=tuple(fleet.FILES), default="prototypes")
     run.add_argument("--contract-name")

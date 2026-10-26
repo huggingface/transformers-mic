@@ -126,21 +126,41 @@ def run(args):
         return 2
 
 
+def resolve_workspace(args):
+    if args.out:
+        return Path(args.out).resolve()
+    if args.workspace != "." or Path(".mic/project.json").exists():
+        return Path(args.workspace).resolve()
+    matches = set()
+    for pattern in (
+        "*/.mic/project.json",
+        "*/.mic/automation.json",
+        "mic/*/.mic/project.json",
+        "mic/*/.mic/automation.json",
+    ):
+        for path in Path("work").glob(pattern):
+            try:
+                if read(path).get("model") == args.model:
+                    matches.add(path.parent.parent.resolve())
+            except (OSError, ValueError):
+                continue
+    if len(matches) > 1:
+        raise ValueError(
+            "Multiple workspaces match this model; choose one with --out: "
+            + ", ".join(str(path) for path in sorted(matches))
+        )
+    if matches:
+        return matches.pop()
+    return (Path("work/mic") / args.model.replace("/", "--")).resolve()
+
+
 def locked_run(args):
     validate_repo_id(args.model)
     if args.timeout <= 0 or args.baseline_timeout <= 0:
         raise ValueError("Stage timeout must be positive")
     if args.transformers_checkout:
         args.transformers_checkout = str(Path(args.transformers_checkout).resolve())
-    model_slug = args.model.replace("/", "--")
-    root = Path(
-        args.out
-        or (
-            args.workspace
-            if args.workspace != "." or Path(".mic/project.json").exists()
-            else Path("work/mic") / model_slug
-        )
-    ).resolve()
+    root = resolve_workspace(args)
     if args.answer and args.mode != "agent":
         raise ValueError("--answer requires --mode agent")
     answer = load_answer(args.answer)
