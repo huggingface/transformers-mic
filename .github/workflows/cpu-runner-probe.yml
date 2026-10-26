@@ -11,6 +11,11 @@ jobs:
     runs-on:
       group: aws-m8i-l-cache
     timeout-minutes: 5
+    container:
+      image: ${{ vars.MIC_CPU_BASELINE_IMAGE }}
+      options: --shm-size=1gb
+    env:
+      CUDA_VISIBLE_DEVICES: ""
     steps:
       - name: Verify native bfloat16 CPU
         shell: bash
