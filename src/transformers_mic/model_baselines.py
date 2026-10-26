@@ -129,16 +129,33 @@ def stage(workspace, root):
     return result
 
 
+def measured_dtype(folder, case):
+    """The dtype the case actually ran in, as the runner's platform class uses it.
+
+    A variant without a declared dtype loads the checkpoint's own dtype, so a
+    bfloat16 checkpoint's default variant is a bfloat16 measurement.
+    """
+    if folder is None or not case.get("candidate"):
+        return None
+    path = Path(folder) / case["candidate"]
+    if not path.is_file():
+        return None
+    runtime = read(path).get("outputs", {}).get("runtime", {})
+    return runtime.get("dtype") if isinstance(runtime, dict) else None
+
+
 def require_cpu_coverage(manifest, reports):
     """Transformers CI uses native low-precision x86 CPU baselines."""
     variants = manifest["integrations"]["transformers"]["variants"]
-    for _, report in reports:
+    for folder, report in reports:
         if report["profile"] != "cpu":
             continue
         for case in report["cases"]:
             if case["status"] != "validated":
                 continue
-            dtype = variants[case["variant"]].get("dtype", "float32")
+            dtype = measured_dtype(folder, case) or variants[case["variant"]].get(
+                "dtype", "float32"
+            )
             required = {
                 "bfloat16": "cpu-x86_64-bf16",
                 "float16": "cpu-x86_64-fp16",

@@ -160,6 +160,11 @@ def locked_run(args):
         raise ValueError("Stage timeout must be positive")
     if args.transformers_checkout:
         args.transformers_checkout = str(Path(args.transformers_checkout).resolve())
+    if args.baseline_execution == "cloud" and args.baseline_transport == "dashboard":
+        from . import dashboard_auth
+
+        # Fail before creation/build rather than after them at the record stage.
+        dashboard_auth.access_token(dashboard_auth.dashboard_url(args.dashboard))
     root = resolve_workspace(args)
     if args.answer and args.mode != "agent":
         raise ValueError("--answer requires --mode agent")

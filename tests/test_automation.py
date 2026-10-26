@@ -141,6 +141,19 @@ def test_default_run_measures_its_model_in_cloud_before_publication(
     )
 
 
+def test_dashboard_cloud_run_requires_login_before_any_stage(
+    workflow, monkeypatch, tmp_path, capsys
+):
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+    argv = list(workflow.argv)
+    argv.remove("--baseline-execution")
+    argv.remove("local")
+    assert main(argv) != 0
+    assert "tmic auth login" in capsys.readouterr().err
+    assert workflow.calls == []
+    assert not (workflow.root / ".mic").exists()
+
+
 def test_local_only_checks_without_publication_and_can_resume_to_publish(
     workflow, monkeypatch
 ):
