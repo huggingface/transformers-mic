@@ -495,6 +495,8 @@ def run_locked(args, root, answer):
                 args.provider,
                 "--llm-model",
                 args.llm_model,
+                "--bill-to",
+                args.bill_to,
             ]
             for name in ("revision", "name", "contract"):
                 if value := getattr(args, name):
@@ -919,6 +921,8 @@ def resume_options(args):
         args.provider,
         "--llm-model",
         args.llm_model,
+        "--bill-to",
+        args.bill_to,
     ]
     for name in (
         "revision",

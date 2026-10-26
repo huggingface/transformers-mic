@@ -54,6 +54,41 @@ def test_default_provider_and_model():
     args = parser().parse_args(["create", "model/name", "--out", "project"])
     assert args.provider == "auto"
     assert args.llm_model == "Qwen/Qwen3.8-27B"
+    assert args.bill_to == "huggingface"
+
+
+def test_bill_to_follows_environment_and_can_be_personal(monkeypatch):
+    monkeypatch.setenv("TMIC_BILL_TO", "my-org")
+    args = parser().parse_args(["create", "model/name", "--out", "project"])
+    assert args.bill_to == "my-org"
+    args = parser().parse_args(
+        ["create", "model/name", "--out", "project", "--bill-to", ""]
+    )
+    assert args.bill_to == ""
+
+
+def test_planner_bills_the_organization_and_never_falls_back(monkeypatch):
+    from huggingface_hub.errors import HfHubHTTPError
+
+    created = []
+
+    class Client:
+        def __init__(self, **kwargs):
+            created.append(kwargs)
+
+        def chat_completion(self, **kwargs):
+            raise HfHubHTTPError(
+                "forbidden",
+                response=SimpleNamespace(status_code=403, headers={}, request=None),
+            )
+
+    monkeypatch.setattr(planner, "InferenceClient", Client)
+    with pytest.raises(ValueError, match="--bill-to ''"):
+        planner.propose({}, bill_to="huggingface")
+    assert len(created) == 1 and created[0]["bill_to"] == "huggingface"
+    with pytest.raises(HfHubHTTPError):
+        planner.propose({}, bill_to="")
+    assert created[1]["bill_to"] is None
 
 
 def test_planner_requests_json_and_never_generates_values():
@@ -401,7 +436,7 @@ def test_planner_repairs_invalid_draft(workspace, monkeypatch):
     monkeypatch.setattr(planner, "propose", propose)
     result, _ = commands.propose_valid(
         {},
-        SimpleNamespace(llm_model=planner.DEFAULT_MODEL, provider="auto"),
+        SimpleNamespace(llm_model=planner.DEFAULT_MODEL, provider="auto", bill_to=""),
         workspace.state["model"],
         workspace.fixture,
     )
@@ -428,6 +463,7 @@ def test_update_keeps_fixture_pin_and_old_source(workspace, monkeypatch):
             request="Add a path",
             llm_model=planner.DEFAULT_MODEL,
             provider="auto",
+            bill_to="",
             retrain=False,
         )
     )

@@ -142,6 +142,8 @@ def run(args):
                 args.provider,
                 "--llm-model",
                 args.llm_model,
+                "--bill-to",
+                args.bill_to,
             ]
             if spec.get("scope") == "fixtures":
                 command.append("--fixtures-only")

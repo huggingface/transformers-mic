@@ -125,7 +125,10 @@ def propose_valid(context, args, model, fixture, old=None):
         plan = None
         try:
             plan, llm = planner.propose(
-                context, model=args.llm_model, provider=args.provider
+                context,
+                model=args.llm_model,
+                provider=args.provider,
+                bill_to=args.bill_to,
             )
             validate_plan(plan, model, fixture, old)
             return plan, llm

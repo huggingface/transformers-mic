@@ -1,6 +1,7 @@
 """Command line interface for measured model integration contracts."""
 
 import argparse
+import os
 import json
 from pathlib import Path
 import sys
@@ -16,6 +17,12 @@ def llm_options(parser):
     parser.add_argument("--llm-model", default=planner.DEFAULT_MODEL)
     parser.add_argument(
         "--provider", default="auto", help="Hugging Face Inference Provider"
+    )
+    parser.add_argument(
+        "--bill-to",
+        default=os.getenv("TMIC_BILL_TO", planner.DEFAULT_BILL_TO),
+        help="Organization billed for planner inference; '' bills your own account "
+        "(default: $TMIC_BILL_TO or %(default)s)",
     )
 
 
