@@ -47,7 +47,7 @@ def setup(tmp_path, monkeypatch):
         contexts=contexts,
         folder=tmp_path / "automation",
         state={},
-        args=SimpleNamespace(max_contract_repairs=2, llm_model="test", provider="auto"),
+        args=SimpleNamespace(max_contract_repairs=2, llm_model="test", provider="auto", bill_to=""),
     )
 
 

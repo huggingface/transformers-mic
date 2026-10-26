@@ -4,9 +4,12 @@ import json
 import re
 
 from huggingface_hub import InferenceClient
+from huggingface_hub.errors import HfHubHTTPError
 import jsonschema
 
 DEFAULT_MODEL = "Qwen/Qwen3.8-27B"
+# Requests name the paying organization explicitly; the Hub has no org default.
+DEFAULT_BILL_TO = "huggingface"
 PLAN_SCHEMA = {
     "type": "object",
     "required": ["name", "manifest", "usage", "rationale", "historical_candidates"],
@@ -22,10 +25,34 @@ PLAN_SCHEMA = {
 
 
 def propose(
-    context, *, model=DEFAULT_MODEL, provider="auto", max_tokens=16384, client=None
+    context,
+    *,
+    model=DEFAULT_MODEL,
+    provider="auto",
+    bill_to=DEFAULT_BILL_TO,
+    max_tokens=16384,
+    client=None,
 ):
-    client = client or InferenceClient(model=model, provider=provider, timeout=120)
-    response = client.chat_completion(
+    client = client or InferenceClient(
+        model=model, provider=provider, timeout=120, bill_to=bill_to or None
+    )
+    try:
+        response = complete(client, context, model, max_tokens)
+    except HfHubHTTPError as error:
+        status = getattr(error.response, "status_code", None)
+        if bill_to and status in (401, 402, 403):
+            # Never fall back to personal billing without the user asking for it.
+            raise ValueError(
+                f"Inference Providers refused to bill {bill_to!r} (HTTP {status}); "
+                "check that your token can bill this organization, or pass "
+                "--bill-to '' to use your own account's credits"
+            ) from None
+        raise
+    return parse(response, model, provider, bill_to)
+
+
+def complete(client, context, model, max_tokens):
+    return client.chat_completion(
         messages=[
             {"role": "system", "content": SYSTEM},
             {
@@ -40,6 +67,9 @@ def propose(
         max_tokens=max_tokens,
         response_format={"type": "json_object"},
     )
+
+
+def parse(response, model, provider, bill_to):
     content = response.choices[0].message.content
     if not content:
         raise ValueError(
@@ -51,6 +81,7 @@ def propose(
     return plan, {
         "model": model,
         "provider": provider,
+        "bill_to": bill_to or None,
         "usage": str(response.usage),
         "role": "proposal only",
     }

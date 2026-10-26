@@ -478,8 +478,13 @@ Catalog reuse requires no inference call. For a new model, or with `create --llm
 the planner uses **Hugging Face Inference Providers**, default model
 **`Qwen/Qwen3.8-27B`**, with `provider="auto"`. Set `--provider` or `--llm-model`
 on `create` and `update` to override them. Authentication uses the normal HF token
-(`HF_TOKEN` or `hf auth login`) with Inference Providers permission and available
-credits. Provider inference may be billed to that account.
+(`HF_TOKEN` or `hf auth login`) with Inference Providers permission.
+
+Planner calls are billed to the **`huggingface` organization** by default: each
+request names it (`bill_to`), since the Hub has no organization-wide default. Set
+`--bill-to <org>` or `TMIC_BILL_TO` to bill another organization you belong to, or
+`--bill-to ''` to use your own account's credits. If the organization refuses the
+charge, tmic stops and says so; it never falls back to personal billing.
 
 The planner receives checkpoint config, the manifest schema, and failure
 candidates. It proposes a manifest and runnable usage, stored in `.mic/plan.json`.
