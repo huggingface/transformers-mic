@@ -683,3 +683,37 @@ def test_workspace_discovery_preserves_explicit_workspace_and_ignores_other_mode
     )
     args.workspace = "custom"
     assert automation.resolve_workspace(args) == tmp_path / "custom"
+
+
+def test_cloud_run_checks_all_fixture_variants_before_dispatch(workflow, monkeypatch):
+    monkeypatch.setattr(
+        automation.model_baselines, "inputs", lambda _: ("f" * 64, None, {})
+    )
+    confirm(monkeypatch, ["yes", "yes", "yes", "yes"])
+    argv = list(workflow.argv)
+    argv.remove("--baseline-execution")
+    argv.remove("local")
+    assert main([*argv, "--baseline-transport", "github"]) == 0
+    smoke = [
+        (i, command)
+        for i, (_, command) in enumerate(workflow.calls)
+        if "--no-baseline" in command
+    ]
+    assert len(smoke) == 1
+    index, command = smoke[0]
+    assert (
+        "--all-variants" in command and "--target" in command and "--isolate" in command
+    )
+    assert index < next(
+        i for i, (_, cmd) in enumerate(workflow.calls) if "baselines" in cmd
+    )
+
+
+def test_cloud_fixture_preflight_failure_prevents_dispatch(workflow, monkeypatch):
+    workflow.failures["auto"] = [0, 1]
+    confirm(monkeypatch, ["yes", "no"])
+    argv = list(workflow.argv)
+    argv.remove("--baseline-execution")
+    argv.remove("local")
+    assert main([*argv, "--baseline-transport", "github"]) != 0
+    assert not any("baselines" in cmd for _, cmd in workflow.calls)

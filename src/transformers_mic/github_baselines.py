@@ -25,6 +25,29 @@ REPO = "huggingface/transformers-mic"
 WORKFLOW = "cloud-baselines.yml"
 
 
+def failure_summary(root):
+    details = []
+    for profile in ("cpu", "cuda"):
+        path = root / "artifacts" / profile / "collection.json"
+        if not path.is_file():
+            continue
+        for case in read(path).get("cases", []):
+            if case.get("status") != "failed":
+                continue
+            failures = case.get("record", {}).get("failures", []) or case.get(
+                "check", {}
+            ).get("failures", [])
+            reason = (
+                str(failures[0]).strip().splitlines()[-1]
+                if failures
+                else "case failed; see worker logs"
+            )
+            details.append(
+                f"{profile}/{case.get('variant')}/{case.get('target')}: {reason}"
+            )
+    return "; ".join(details[:4]) or "inspect the Actions URL and partial artifacts"
+
+
 def restore_hidden_sources(root):
     """Recover source dotfiles omitted by older GitHub artifact uploads.
 
@@ -360,9 +383,8 @@ def run_locked(args, root):
         if publication.exists():
             shutil.copy2(publication, root / "publication.json")
     if job["status"] != "completed":
-        raise ValueError(
-            "Workflow failed; inspect the Actions URL and partial artifacts"
-        )
+        cloud_progress.display({"status": "failed", "run_url": job["run_url"]})
+        raise ValueError("Workflow failed: " + failure_summary(root))
     restore_hidden_sources(root)
     baselines.collection(root)
     if model:

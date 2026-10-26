@@ -136,6 +136,7 @@ def eligible(workspace, stage, log, command=()):
         for marker in (
             "the contract fails",
             "Traceback",
+            "RuntimeError:",
             "fail the gate",
             "sensitivity",
         )

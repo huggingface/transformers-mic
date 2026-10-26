@@ -341,6 +341,8 @@ def run_locked(args, root, answer):
             label = terminal.STAGE_NAMES.get(name, name)
             if name == "record" and args.baseline_execution == "cloud":
                 label = "Measure CPU + CUDA baselines"
+            if name == "auto" and args.baseline_execution == "cloud":
+                label = "Check model factories and fixture variants"
             if not (terminal.interactive() and options[0] != "baselines"):
                 print(
                     "\n" + terminal.color(prefix, "title") + " " + label + "…",
@@ -612,6 +614,22 @@ def run_locked(args, root, answer):
                     in workspace.manifest["integrations"]["transformers"]["targets"]
                 ):
                     code, log = stage(name, ["auto"])
+                    if not code and args.baseline_execution == "cloud":
+                        contract = workspace.lock["contracts"][
+                            workspace.state["contract"]
+                        ]
+                        smoke = [
+                            "check",
+                            "--all-variants",
+                            "--no-baseline",
+                            "--isolate",
+                        ]
+                        for repo, pin in contract["fixtures"].items():
+                            smoke += [
+                                "--target",
+                                pin.get("target", repo.split("/")[-1]),
+                            ]
+                        code, log = stage(name, smoke)
             elif name in ("record", "check", "published-check"):
                 if args.baseline_execution == "cloud":
                     cloud_root = folder / "cloud" / model_baselines.inputs(workspace)[0]
