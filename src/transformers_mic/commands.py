@@ -721,8 +721,15 @@ def export(args):
             "Destination name differs only by case from an existing contract; use --contract-name"
         )
     if old["environment"] != source["environment"]:
+        differences = "; ".join(
+            f"{key}: fleet={old['environment'].get(key, '<unset>')}, model={source['environment'].get(key, '<unset>')}"
+            for key in sorted(set(old["environment"]) | set(source["environment"]))
+            if old["environment"].get(key) != source["environment"].get(key)
+        )
         raise ValueError(
-            "Destination environment differs; review the environment change separately"
+            f"Destination environment differs ({fleet_name} at {revision}): {differences}. "
+            "Validate a separate fleet environment migration, or measure the model "
+            "with the destination environment before exporting. Retrying unchanged will not fix this."
         )
     # Hub-only paths keep the exported lock independent of this workspace.
     clean = upgrade_contract(canonical_references(contract))

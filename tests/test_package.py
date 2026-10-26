@@ -865,8 +865,10 @@ def test_dataset_export_rejects_environment_change(workspace, dataset):
     lock = read(dataset[0])
     lock["environment"] = {"torch": "changed"}
     write(dataset[0], lock)
-    with pytest.raises(ValueError, match="environment differs"):
+    with pytest.raises(ValueError, match="environment differs") as error:
         commands.export(SimpleNamespace(workspace=workspace.root, execute=True))
+    assert "torch: fleet=changed, model=" in str(error.value)
+    assert "measure the model" in str(error.value)
     assert not dataset[1]
 
 
