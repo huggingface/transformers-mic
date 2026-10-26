@@ -132,3 +132,20 @@ def test_always_stops_unchanged_retry_loop_even_if_log_changes(monkeypatch):
             context={"failed_stage": "build", "exit_code": 1},
         )
     assert len(state["decisions"]) == 3
+
+
+def test_details_can_be_opened_without_approving_or_changing_question(monkeypatch):
+    from transformers_mic import terminal
+
+    monkeypatch.setattr("sys.stdin.isatty", lambda: True)
+    answers = iter(["d", "N"])
+    monkeypatch.setattr("builtins.input", lambda _: next(answers))
+    opened = []
+    monkeypatch.setattr(terminal, "details", opened.append)
+    state = {}
+    interaction = Interaction("human", state, lambda: None, lambda: {})
+    with pytest.raises(Pending) as pending:
+        interaction.ask("Review?", "full diff\nline 2\nline 3\nline 4")
+    assert opened == ["full diff\nline 2\nline 3\nline 4"]
+    assert not state.get("decisions") and not interaction.always_yes
+    assert pending.value.record == state["pending_question"]

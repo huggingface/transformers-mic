@@ -427,7 +427,7 @@ def test_human_always_completes_workflow_with_readable_summary(
     assert main(workflow.argv) == 0
     output = capsys.readouterr().out
     assert len(prompts) == 1
-    assert "[2/12] Build fixture" in output
+    assert "[2/11] Build fixture" in output
     assert "Complete. Model:" in output
     assert '"protocol_version"' not in output
     state = read(workflow.root / ".mic/automation.json")
@@ -443,6 +443,21 @@ def test_human_always_stops_repeated_failed_builds(workflow, monkeypatch, capsys
     output = capsys.readouterr().out
     assert "Stopped: this stage keeps failing" in output
     assert "Resume:" in output
+
+
+def test_resumed_build_starts_at_one_and_omits_unrequested_pin(
+    workflow, monkeypatch, capsys
+):
+    workflow.failures["build"] = [1]
+    confirm(monkeypatch, ["yes", "N"])
+    assert main(workflow.argv) == 3
+    capsys.readouterr()
+    confirm(monkeypatch, ["yes", "yes"])
+    assert main(workflow.argv) == 0
+    output = capsys.readouterr().out
+    assert "[1/10] Build fixture" in output
+    assert "[10/10] Update fleet" in output
+    assert "[11/" not in output
 
 
 def test_agent_drives_full_workflow_without_a_terminal(workflow, monkeypatch, capsys):

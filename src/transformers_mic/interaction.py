@@ -5,6 +5,8 @@ import json
 import sys
 import uuid
 
+from . import terminal
+
 PROTOCOL_VERSION = 1
 
 
@@ -109,17 +111,28 @@ class Interaction:
                 )
         else:
             if not self.always_yes:
-                print("\n" + question, flush=True)
-                print(details, flush=True)
+                terminal.prompt(question, details, kind, record["context"])
             if not self.always_yes and not sys.stdin.isatty():
                 raise Pending(question, details, record=record)
             try:
                 automatic = self.always_yes
-                choice = (
-                    "yes"
-                    if automatic
-                    else input("Continue? [y/N/A=always] ").strip().lower()
-                )
+                choice = "yes"
+                if not automatic:
+                    while True:
+                        choice = (
+                            input(
+                                terminal.color(
+                                    "    Continue? [y/N/A=always/D=details] ",
+                                    "question",
+                                )
+                            )
+                            .strip()
+                            .lower()
+                        )
+                        if choice not in ("d", "details"):
+                            break
+                        terminal.details(details)
+                        terminal.prompt(question, details, kind, record["context"])
                 if choice not in ("y", "yes", "a", "always"):
                     raise Pending(question, details, record=record)
                 if choice in ("a", "always"):
@@ -145,7 +158,10 @@ class Interaction:
                         raise Pending(question, details, record=record)
                     self.automatic_retries[retry_key] = count + 1
                 if automatic:
-                    print("  Auto-approved: " + question, flush=True)
+                    print(
+                        "  Auto-approved: " + terminal.question_text(question, kind),
+                        flush=True,
+                    )
                 explanation = (
                     "Operator selected always yes for this CLI invocation."
                     if reason and self.always_yes

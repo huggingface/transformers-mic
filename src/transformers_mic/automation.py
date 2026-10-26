@@ -255,7 +255,10 @@ def run_locked(args, root, answer):
             else "cloud CPU + CUDA"
         )
         print(
-            f"\nMIC · {args.model}\n  Workspace: {root}\n  Baselines: {location}\n",
+            "\n"
+            + terminal.color(f"MIC · {args.model}", "title")
+            + "\n  "
+            + terminal.color(f"{terminal.short_path(root)} · {location}"),
             flush=True,
         )
 
@@ -275,6 +278,37 @@ def run_locked(args, root, answer):
                 flush=True,
             )
 
+    display_plan = None
+
+    def visible_steps(start):
+        if start not in STAGES:
+            return []
+        steps = list(STAGES[STAGES.index(start) :])
+        if args.local_only:
+            steps = [
+                step
+                for step in steps
+                if STAGES.index(step) < STAGES.index("publish-preview")
+            ]
+        if not args.transformers_checkout:
+            steps = [step for step in steps if step != "pin"]
+        if (
+            workspace.state_path.exists()
+            and "fixtures"
+            not in workspace.manifest["integrations"]["transformers"]["targets"]
+        ):
+            steps = [step for step in steps if step != "auto"]
+        return steps
+
+    def step_prefix(name):
+        nonlocal display_plan
+        if name == "create":
+            return "[setup]"
+        if display_plan is None or name not in display_plan:
+            display_plan = visible_steps(name)
+        position = display_plan.index(name) + 1
+        return f"[{position}/{len(display_plan)}]"
+
     def stage(name, options, *, create=False):
         if args.mode == "agent":
             print(
@@ -283,19 +317,31 @@ def run_locked(args, root, answer):
                 flush=True,
             )
         else:
-            number = (
-                str(STAGES.index(name) + 1) + "/" + str(len(STAGES))
-                if name in STAGES
-                else "setup"
-            )
+            prefix = step_prefix(name)
             label = terminal.STAGE_NAMES.get(name, name)
             if name == "record" and args.baseline_execution == "cloud":
                 label = "Measure CPU + CUDA baselines"
-            print(f"\n[{number}] {label}…", flush=True)
+            if not (terminal.interactive() and options[0] != "baselines"):
+                print(
+                    "\n" + terminal.color(prefix, "title") + " " + label + "…",
+                    flush=True,
+                )
+        log_path = folder / "logs" / (name + ".log")
+        log_offset = log_path.stat().st_size if log_path.exists() else 0
+        activity = terminal.Activity(
+            prefix if args.mode == "human" else "",
+            label if args.mode == "human" else "",
+            enabled=args.mode == "human" and options[0] != "baselines",
+            status=lambda: terminal.phase(log_path, log_offset),
+        )
         started = time.monotonic()
         command = options if create else ["--workspace", str(root), *options]
         timeout = args.baseline_timeout if options[0] == "baselines" else args.timeout
-        result = batch.invoke(folder, name, command, timeout)
+        activity.start()
+        try:
+            result = batch.invoke(folder, name, command, timeout)
+        finally:
+            activity.stop()
         state["stages"][name] = result
         state["stages"][name]["command"] = command
         save()
@@ -306,11 +352,30 @@ def run_locked(args, root, answer):
                 print("\n".join(text.splitlines()[-60:]), file=output, flush=True)
             else:
                 print(
-                    "  Failed: " + terminal.failure(text) + f"\n  Full log: {log}",
+                    (
+                        terminal.color(prefix + " " + label + " · failed", "error")
+                        + "\n"
+                        if activity.enabled
+                        else ""
+                    )
+                    + "  Failed: "
+                    + terminal.failure(text)
+                    + f"\n  Full log: {terminal.short_path(log)}",
                     flush=True,
                 )
         elif args.mode == "human":
-            print(f"  Done ({time.monotonic() - started:.1f}s)", flush=True)
+            progress = ""
+            if display_plan and name in display_plan:
+                progress = (
+                    terminal.bar(display_plan.index(name) + 1, len(display_plan)) + " "
+                )
+            print(
+                (prefix + " " + label + " · " if activity.enabled else "  ")
+                + terminal.color(
+                    progress + f"Done ({time.monotonic() - started:.1f}s)", "ok"
+                ),
+                flush=True,
+            )
         return result["exit_code"], log
 
     def review_repair(attempt):
@@ -452,6 +517,7 @@ def run_locked(args, root, answer):
         ):
             state["next_stage"] = "pin"
         save()
+        display_plan = visible_steps(state["next_stage"])
         while state["next_stage"] != "done":
             if (
                 state["next_stage"] != "source"
@@ -478,7 +544,12 @@ def run_locked(args, root, answer):
             code, log = 0, None
             if name == "source":
                 if args.mode == "human":
-                    print(f"\n[1/{len(STAGES)}] Review contract", flush=True)
+                    print(
+                        "\n"
+                        + terminal.color(step_prefix(name), "title")
+                        + " Review contract",
+                        flush=True,
+                    )
                 manifest = workspace.manifest
                 usage = (
                     workspace.contract_root
@@ -659,16 +730,25 @@ def run_locked(args, root, answer):
                         file=output,
                         flush=True,
                     )
-                    proposal = contract_repair.propose(
-                        args,
-                        workspace,
-                        name,
-                        log,
-                        folder,
-                        state,
-                        save,
-                        state["stages"][name]["command"],
+                    repair_activity = terminal.Activity(
+                        "  Repair",
+                        "Inspect model and draft a contract fix",
+                        enabled=args.mode == "human",
                     )
+                    repair_activity.start()
+                    try:
+                        proposal = contract_repair.propose(
+                            args,
+                            workspace,
+                            name,
+                            log,
+                            folder,
+                            state,
+                            save,
+                            state["stages"][name]["command"],
+                        )
+                    finally:
+                        repair_activity.stop()
                     if proposal is not None and review_repair(proposal):
                         continue
                     if state.get("repairs"):
