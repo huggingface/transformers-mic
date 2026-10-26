@@ -31,7 +31,9 @@ For each fixture in a contract's manifest that has a `build` recipe:
    name, not per model. Random weights are kept if every perturbation moves
    the logits by at least 10x the strictest tolerance the fixture must hold.
    Otherwise the fixture is overfit on the contract's training batch and must
-   then pass the gate; a fixture that does neither is a build failure. A
+   then pass the gate; BatchNorm running statistics are recalibrated on the captured
+   batch before evaluation, with dropout disabled. A fixture that does neither
+   is a build failure. A
    recipe can ask for overfitting anyway (`overfit`, with the reason), e.g.
    when random weights generate the same text for every prompt.
 6. Numeric health. The saved fixture is reloaded in float32, bfloat16, and
@@ -331,6 +333,35 @@ def overfit(model, batch, max_steps, target_loss=0.05):
     return {"seconds": round(time.perf_counter() - start, 2), "steps": step, "loss": loss.item(), "converged": stable == 2}
 
 
+def calibrate_batch_norm(model, batch):
+    """Set inference statistics from the captured batch after fixture overfitting.
+
+    Training loss can converge before the default exponential moving averages
+    approach the tiny activations of a slim randomly initialized CNN. Use the
+    batch's measured statistics, with dropout disabled, before evaluating gates.
+    This updates buffers only; all sensitivity thresholds remain unchanged.
+    """
+    norms = [module for module in model.modules()
+             if isinstance(module, torch.nn.modules.batchnorm._BatchNorm)
+             and module.track_running_stats]
+    if not norms:
+        return 0
+    model.eval()
+    momenta = [module.momentum for module in norms]
+    try:
+        for module in norms:
+            module.reset_running_stats()
+            module.momentum = None
+            module.train()
+        with torch.no_grad():
+            model(**batch)
+    finally:
+        for module, momentum in zip(norms, momenta):
+            module.momentum = momentum
+            module.eval()
+    return len(norms)
+
+
 def called_module(model, captured):
     """Probe the module called by the contract, including composite heads."""
     name = captured.get("class", type(model).__name__)
@@ -491,6 +522,9 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
         torch.manual_seed(recipe["seed"])  # dropout and SpecAugment stay on while training
         model = model.float()  # trained in float32, saved in the source dtype
         training = overfit(called_module(model, captured), as_dtype(batch, torch.float32), recipe.get("max_steps", 500), recipe.get("target_loss", 0.05))
+        calibrated = calibrate_batch_norm(called_module(model, captured), as_dtype(batch, torch.float32))
+        if calibrated:
+            training["batch_norm_calibration"] = {"layers": calibrated, "batches": 1}
         model = model.to(dtype)
         gate["overfit"] = sensitivity(called_module(model, captured), as_dtype(batch, dtype), threshold, accepted)
         if not training["converged"] or not gate["overfit"]["pass"]:

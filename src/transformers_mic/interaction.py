@@ -44,6 +44,9 @@ class Interaction:
     def __init__(self, mode, state, save, context, answer=None):
         self.mode, self.state, self.save, self.context = mode, state, save, context
         self.answer = answer
+        self.always_yes = False
+        self.always_authorization = None
+        self.automatic_retries = {}
 
     def ask(
         self, question, details, *, reason=False, kind="confirmation", context=None
@@ -105,16 +108,48 @@ class Interaction:
                     error="This approval requires a nonempty reason",
                 )
         else:
-            print(question, flush=True)
-            print(details, flush=True)
-            if not sys.stdin.isatty():
+            if not self.always_yes:
+                print("\n" + question, flush=True)
+                print(details, flush=True)
+            if not self.always_yes and not sys.stdin.isatty():
                 raise Pending(question, details, record=record)
             try:
-                choice = input("Continue? [y/N] ").strip().lower()
-                if choice not in ("y", "yes"):
+                automatic = self.always_yes
+                choice = (
+                    "yes"
+                    if automatic
+                    else input("Continue? [y/N/A=always] ").strip().lower()
+                )
+                if choice not in ("y", "yes", "a", "always"):
                     raise Pending(question, details, record=record)
+                if choice in ("a", "always"):
+                    self.always_yes = True
+                    self.always_authorization = record["question_id"]
+                    print(
+                        "Always yes enabled for this run. Unchanged failures stop after two automatic retries.",
+                        flush=True,
+                    )
+                if self.always_yes and kind == "retry":
+                    retry_key = (
+                        record["context"].get("failed_stage", question),
+                        record["context"].get("workspace_sha256"),
+                        record["context"].get("exit_code"),
+                    )
+                    count = self.automatic_retries.get(retry_key, 0)
+                    if count >= 2:
+                        print(
+                            "\nStopped: this stage keeps failing with unchanged inputs. Fix the cause before retrying.\n"
+                            + details,
+                            flush=True,
+                        )
+                        raise Pending(question, details, record=record)
+                    self.automatic_retries[retry_key] = count + 1
+                if automatic:
+                    print("  Auto-approved: " + question, flush=True)
                 explanation = (
-                    input("Reason for approving this change: ").strip()
+                    "Operator selected always yes for this CLI invocation."
+                    if reason and self.always_yes
+                    else input("Reason for approving this change: ").strip()
                     if reason
                     else ""
                 )
@@ -135,6 +170,14 @@ class Interaction:
                 "answer": answer["answer"],
                 "reason": explanation,
                 "mode": self.mode,
+                **(
+                    {
+                        "always_yes": True,
+                        "authorization_question_id": self.always_authorization,
+                    }
+                    if self.mode == "human" and self.always_yes
+                    else {}
+                ),
             }
         )
         self.state.pop("pending_question", None)
