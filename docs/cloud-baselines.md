@@ -1,13 +1,16 @@
 # Baseline collections through the dashboard and ARC
 
-**Status:** merged into the MIC, dashboard and Serge main branches; not deployed or proven
-on the live fleet yet. Dashboard GitHub App activation is separately deferred
-until the operator can access the App settings. This guide describes the new
-interface and the configuration needed to activate it.
+**Status (2026-10-26):** dashboard authentication and the MIC job API are deployed.
+Both Apps are installed on `huggingface/transformers-mic`; workflow reads,
+Serge's actor-permission check and authenticated progress callbacks are verified.
+A complete dashboard CPU/CUDA execution remains unproven: the native-bfloat16
+CPU probe on `aws-m8i-l-cache` stayed unassigned and was cancelled.
+`MIC_CPU_BASELINE_RUNNER` now selects that group; an org runner administrator
+must confirm repository access and capacity before submitting full collections.
 
-The live Serge App also needs installation on `huggingface/transformers-mic`.
-While App setup is deferred, the [temporary CLI test](cli.md#temporary-test-without-dashboard-oauth)
-uses the caller's existing GitHub CLI identity to exercise ARC directly.
+The [direct GitHub transport](cli.md#temporary-test-without-dashboard-oauth)
+uses the caller's existing GitHub CLI identity instead of dashboard authentication;
+it does not bypass runner-group access requirements.
 
 The CLI can also measure a single newly created or updated model through `tmic run`; see below. Cloud execution uses the dashboard's
 GitHub identity, Serge's authorized workflow dispatcher, and the ARC runner
