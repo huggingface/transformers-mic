@@ -129,6 +129,29 @@ def stage(workspace, root):
     return result
 
 
+def require_cpu_coverage(manifest, reports):
+    """Transformers CI uses native low-precision x86 CPU baselines."""
+    variants = manifest["integrations"]["transformers"]["variants"]
+    for _, report in reports:
+        if report["profile"] != "cpu":
+            continue
+        for case in report["cases"]:
+            if case["status"] != "validated":
+                continue
+            dtype = variants[case["variant"]].get("dtype", "float32")
+            required = {
+                "bfloat16": "cpu-x86_64-bf16",
+                "float16": "cpu-x86_64-fp16",
+            }.get(dtype, "cpu-x86_64")
+            if case["platform"] != required:
+                raise ValueError(
+                    f"Missing Transformers CI hardware coverage for {case['target']}/{case['variant']}: "
+                    f"measured {case['platform']}, requires {required}. "
+                    "Measure on a CPU runner with the required native instructions; "
+                    "do not copy or rename baselines from another hardware class."
+                )
+
+
 def import_candidates(workspace, root):
     from .baselines import collection
 
@@ -136,6 +159,7 @@ def import_candidates(workspace, root):
     if read(root / "model-input.json")["source"] != source:
         raise ValueError("Model changed while measuring cloud baselines")
     state, reports = collection(root)
+    require_cpu_coverage(workspace.manifest, reports)
     if state["job"].get("workspace") != read(root / "model-input.json")["workspace"]:
         raise ValueError("Cloud job measured a different model snapshot")
     candidates = {}
@@ -164,6 +188,7 @@ def verify(workspace, root, *, save=True):
     from .baselines import collection
 
     state, reports = collection(root)
+    require_cpu_coverage(workspace.manifest, reports)
     metadata = read(root / "model-input.json")
     if (
         state["request"]["profiles"] != ["cpu", "cuda"]

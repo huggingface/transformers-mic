@@ -168,8 +168,14 @@ migrated to the single `<name>-mic` layout before this publication path.
    entries. It dispatches the workflow on the default branch only.
 4. Merge `cloud-baselines.yml` and its worker code into MIC `main`. Confirm that
    MIC can use `aws-g5-4xlarge-cache`. Both profiles default to this verified
-   host group; the CPU profile uses CPU-only Torch and hides CUDA. MIC does not
-   have verified access to Transformers' `aws-m8i-l-cache` group.
+   host group; the CPU profile uses CPU-only Torch and hides CUDA. **G5's CPU
+   does not supply Transformers CI's native bfloat16 baseline class.** Models
+   declaring bfloat16 need `cpu-x86_64-bf16`; float16 needs `cpu-x86_64-fp16`.
+   Grant MIC access to an x86 runner with the matching instructions (such as
+   Transformers' `aws-m8i-l-cache` for native bfloat16), then set
+   `MIC_CPU_BASELINE_RUNNER` to that group. MIC does not yet have verified access
+   to `aws-m8i-l-cache`. Model import/validation rejects mismatched CPU coverage;
+   never rename a baseline from another hardware class to fill the gap.
    Operator variables `MIC_CPU_BASELINE_RUNNER` and `MIC_GPU_BASELINE_RUNNER`
    can select other approved ARC groups when full checkpoints need more memory
    or GPUs. Callers cannot supply arbitrary runner groups.

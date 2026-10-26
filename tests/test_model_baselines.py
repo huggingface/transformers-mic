@@ -160,3 +160,38 @@ def test_mutable_or_unapproved_inputs_never_reach_workers(monkeypatch):
     monkeypatch.setenv("MIC_WORKSPACE_REVISION", "main")
     with pytest.raises(ValueError, match="immutable"):
         cloud_inputs.from_env()
+
+
+@pytest.mark.parametrize(
+    "dtype,actual,required",
+    [
+        ("bfloat16", "cpu-x86_64", "cpu-x86_64-bf16"),
+        ("float16", "cpu-x86_64", "cpu-x86_64-fp16"),
+        ("float32", "cpu-arm64", "cpu-x86_64"),
+    ],
+)
+def test_cpu_coverage_rejects_different_hardware_class(dtype, actual, required):
+    manifest = {
+        "integrations": {"transformers": {"variants": {"variant": {"dtype": dtype}}}}
+    }
+    case = {
+        "status": "validated",
+        "variant": "variant",
+        "target": "fixture",
+        "platform": actual,
+    }
+    reports = [(None, {"profile": "cpu", "cases": [case]})]
+    with pytest.raises(ValueError, match=required):
+        model_baselines.require_cpu_coverage(manifest, reports)
+    case["platform"] = required
+    model_baselines.require_cpu_coverage(manifest, reports)
+
+
+def test_verification_rechecks_native_cpu_coverage(measured):
+    workspace, root = measured
+    approve(workspace)
+    workspace.manifest["integrations"]["transformers"]["variants"]["default"][
+        "dtype"
+    ] = "bfloat16"
+    with pytest.raises(ValueError, match="cpu-x86_64-bf16"):
+        model_baselines.verify(workspace, root)
