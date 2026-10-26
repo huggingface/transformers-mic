@@ -145,7 +145,7 @@ def require_cpu_coverage(manifest, reports):
             }.get(dtype, "cpu-x86_64")
             if case["platform"] != required:
                 raise ValueError(
-                    f"Missing Transformers CI hardware coverage for {case['target']}/{case['variant']}: "
+                    f"Missing Transformers CI hardware coverage for {case.get('target', case.get('key', 'case'))}/{case['variant']}: "
                     f"measured {case['platform']}, requires {required}. "
                     "Measure on a CPU runner with the required native instructions; "
                     "do not copy or rename baselines from another hardware class."
