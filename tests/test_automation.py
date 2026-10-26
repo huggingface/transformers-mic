@@ -648,3 +648,38 @@ def test_source_edit_during_baseline_review_is_not_approved(workflow, monkeypatc
     with pytest.raises(ValueError, match="changed during review"):
         automation.review_changed(SimpleNamespace(non_interactive=False), workspace)
     assert candidate.exists()
+
+
+def test_automatic_workspace_discovery(tmp_path, monkeypatch):
+    from transformers_mic.workspace import write
+
+    monkeypatch.chdir(tmp_path)
+    args = SimpleNamespace(model="apple/mobilevit-xx-small", out=None, workspace=".")
+    default = tmp_path / "work/mic/apple--mobilevit-xx-small"
+    assert automation.resolve_workspace(args) == default
+    existing = tmp_path / "work/mobilevit-e2e"
+    write(existing / ".mic/automation.json", {"model": args.model})
+    assert automation.resolve_workspace(args) == existing
+    write(existing / ".mic/project.json", {"model": args.model})
+    assert automation.resolve_workspace(args) == existing
+    write(default / ".mic/project.json", {"model": args.model})
+    with pytest.raises(ValueError, match="Multiple workspaces"):
+        automation.resolve_workspace(args)
+    args.out = str(existing)
+    assert automation.resolve_workspace(args) == existing
+
+
+def test_workspace_discovery_preserves_explicit_workspace_and_ignores_other_models(
+    tmp_path, monkeypatch
+):
+    from transformers_mic.workspace import write
+
+    monkeypatch.chdir(tmp_path)
+    args = SimpleNamespace(model=MODEL, out=None, workspace=".")
+    write(tmp_path / "work/other/.mic/project.json", {"model": "other/model"})
+    assert (
+        automation.resolve_workspace(args)
+        == tmp_path / "work/mic/google-bert--bert-base-uncased"
+    )
+    args.workspace = "custom"
+    assert automation.resolve_workspace(args) == tmp_path / "custom"
