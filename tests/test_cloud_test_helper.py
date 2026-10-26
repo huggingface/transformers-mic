@@ -74,3 +74,43 @@ def test_changed_options_cannot_resume_existing_run(tmp_path):
     changed.include_checkpoints = True
     with pytest.raises(ValueError, match="Different collection/options"):
         helper.run_locked(changed, tmp_path)
+
+
+def test_watcher_reports_actual_step_and_queue_without_native_watch(monkeypatch):
+    calls, views = [], []
+    states = iter(
+        [
+            {
+                "status": "in_progress",
+                "conclusion": None,
+                "html_url": "https://github.com/run",
+            },
+            {
+                "status": "completed",
+                "conclusion": "success",
+                "html_url": "https://github.com/run",
+            },
+        ]
+    )
+
+    def api(path):
+        calls.append(path)
+        if "/jobs?" in path:
+            return {
+                "jobs": [{"name": "measure (cpu)", "status": "queued", "steps": []}]
+            }
+        return next(states)
+
+    monkeypatch.setattr(helper, "api", api)
+    monkeypatch.setattr(helper.time, "sleep", lambda _: None)
+    monkeypatch.setattr(
+        helper.cloud_progress, "display", lambda view, previous: views.append(view)
+    )
+    monkeypatch.setattr(
+        helper.subprocess,
+        "run",
+        lambda *a, **k: pytest.fail("native watch repeats job sections"),
+    )
+    assert helper.watch(123)["conclusion"] == "success"
+    assert len(views) == 2 and views[0]["workflow_jobs"][0]["total_steps"] == 0
+    assert all("123" in call for call in calls)

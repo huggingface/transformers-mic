@@ -10,14 +10,13 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
-import sys
 import tempfile
 import time
 import uuid
 
 from filelock import FileLock
 
-from transformers_mic import baselines, fleet, model_baselines
+from transformers_mic import baselines, fleet, model_baselines, cloud_progress
 from transformers_mic.workspace import Workspace, read, write
 
 REPO = "huggingface/transformers-mic"
@@ -48,6 +47,49 @@ def find_run(job_id):
     if len(matches) > 1:
         raise ValueError("Multiple matching runs; inspect Actions before continuing")
     return matches[0] if matches else None
+
+
+def watch(run_id):
+    previous = None
+    while True:
+        remote = api(f"repos/{REPO}/actions/runs/{run_id}")
+        jobs = api(f"repos/{REPO}/actions/runs/{run_id}/jobs?per_page=100").get(
+            "jobs", []
+        )
+        view = {
+            "run_url": remote.get("html_url"),
+            "status": remote["conclusion"]
+            if remote["status"] == "completed"
+            else remote["status"],
+            "workflow_jobs": [
+                {
+                    "name": job["name"],
+                    "status": "failed"
+                    if job.get("conclusion") == "failure"
+                    else job["status"],
+                    "queued_at": (job.get("created_at") or job.get("started_at"))
+                    if job["status"] == "queued"
+                    else None,
+                    "step": next(
+                        (
+                            step["name"]
+                            for step in job.get("steps", [])
+                            if step["status"] == "in_progress"
+                        ),
+                        "",
+                    ),
+                    "completed_steps": sum(
+                        step["status"] == "completed" for step in job.get("steps", [])
+                    ),
+                    "total_steps": len(job.get("steps", [])),
+                }
+                for job in jobs
+            ],
+        }
+        previous = cloud_progress.display(view, previous)
+        if remote["status"] == "completed":
+            return remote
+        time.sleep(10)
 
 
 def run(args):
@@ -158,22 +200,7 @@ def run_locked(args, root):
     job.update(run_id=remote["id"], run_url=remote["html_url"])
     write(state_path, state)
     print(job["run_url"], flush=True)
-    subprocess.run(
-        [
-            "gh",
-            "run",
-            "watch",
-            str(remote["id"]),
-            "--repo",
-            REPO,
-            "--exit-status",
-            "--interval",
-            "10",
-        ],
-        check=False,
-        stdout=sys.stderr,
-    )
-    remote = api(f"repos/{REPO}/actions/runs/{remote['id']}")
+    remote = watch(remote["id"])
     if remote["status"] != "completed":
         raise ValueError("Run is still active; repeat this command to resume")
     job["status"] = "completed" if remote["conclusion"] == "success" else "failed"

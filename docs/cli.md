@@ -187,11 +187,27 @@ publication. No Git commit or framework PR is created automatically.
 
 ### Reading progress and answering prompts
 
-Human mode shows the model/workspace, numbered stages, elapsed times and short
-failure explanations. Complete tracebacks and worker output remain in the shown
+Human mode numbers only the work remaining in this invocation. A resumed build
+starts at step 1; completed review and an unrequested fleet-pin step are excluded.
+Completed local stages collapse to one line in a terminal, with an activity
+indicator and the actual build phase while running. Overall bars count stages,
+cloud bars count completed workflow steps or measured cases; they do not estimate
+elapsed-time completion.
+
+Questions use indentation and color, with long details folded by default. Press
+`D` to open the complete details or diff (quit the pager to return to the same
+question). This does not approve the question. Color is disabled for redirected
+output, `TERM=dumb`, or `NO_COLOR`.
+
+Cloud jobs refresh a single block instead of repeating GitHub's JOBS section.
+The display distinguishes waiting for a runner, dependency installation,
+measurement and completion, with a run link and last-check time. Redirected logs
+contain plain text only when status changes.
+
+Human mode shows short failure explanations. Complete tracebacks and worker output remain in the shown
 log files. Pausing prints a resume command; agent mode keeps its JSON protocol.
 
-At `Continue? [y/N/A=always]`, choose `A` (or `a`/`always`) to approve this and
+At `Continue? [y/N/A=always/D=details]`, choose `A` (or `a`/`always`) to approve this and
 later questions in the current process. This includes source/repair reviews,
 baseline decisions, model publication and fleet updates. Every decision remains
 in the audit log and links to your original Always authorization. Changed

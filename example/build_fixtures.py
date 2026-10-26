@@ -88,6 +88,10 @@ GATE_FACTOR = 10
 DTYPES = ("float32", "bfloat16", "float16")
 
 
+def report_phase(phase, detail=""):
+    print("MIC_PROGRESS " + json.dumps({"phase": phase, "detail": detail}), flush=True)
+
+
 def source_snapshot(repo, revision, recipe=None):
     """Config and processor files of a pinned checkpoint, without its weights."""
     try:
@@ -325,6 +329,7 @@ def overfit(model, batch, max_steps, target_loss=0.05):
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         optimizer.step()
         if step % 10 == 0:
+            report_phase("Fit fixture weights", f"step {step}/{max_steps} max · loss {loss.item():.4f}")
             stable = stable + 1 if loss.item() < target_loss else 0
             if stable == 2:
                 break
@@ -485,6 +490,7 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
     recipe = fixture["build"]
     keys, missing = {}, {}
     for repo in fixture["covers"]:
+        report_phase("Inspect checkpoint", repo)
         source = source_snapshot(repo, revisions[repo], recipe)
         cls = model_class(source, recipe)
         missing[repo] = (inspect_checkpoint(cls, source, repo, revisions[repo]) if inspect_checkpoint
@@ -508,24 +514,29 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
     threshold = GATE_FACTOR * tolerance
     dtype = getattr(torch, source_dtype(source))
 
+    report_phase("Initialize slim fixture")
     torch.manual_seed(recipe["seed"])
     # Initialized in float32 like every other fixture, then cast: the seed gives the same weights in any dtype.
     model = cls._from_config(shrunk_config(source, cls, recipe), dtype=torch.float32).eval().to(dtype)
     frozen_hashes = restore_frozen(model, source, source_repo, revisions[source_repo], recipe)
     copied = save(model, out, source, lacks, recipe)
     entry = root / manifest["integrations"]["transformers"]["entry_point"]
+    report_phase("Run contract and capture training inputs")
     batch, captured = contract_batch(entry, out)
     accepted = recipe.get("accept_insensitive", {})
+    report_phase("Check random-weight input sensitivity")
     gate = {"random": sensitivity(called_module(model, captured), as_dtype(batch, dtype), threshold, accepted)}
     weights, training = "random", None
     if not keep_random and (not gate["random"]["pass"] or recipe.get("overfit")):
         torch.manual_seed(recipe["seed"])  # dropout and SpecAugment stay on while training
         model = model.float()  # trained in float32, saved in the source dtype
         training = overfit(called_module(model, captured), as_dtype(batch, torch.float32), recipe.get("max_steps", 500), recipe.get("target_loss", 0.05))
+        report_phase("Calibrate BatchNorm statistics")
         calibrated = calibrate_batch_norm(called_module(model, captured), as_dtype(batch, torch.float32))
         if calibrated:
             training["batch_norm_calibration"] = {"layers": calibrated, "batches": 1}
         model = model.to(dtype)
+        report_phase("Verify trained fixture sensitivity")
         gate["overfit"] = sensitivity(called_module(model, captured), as_dtype(batch, dtype), threshold, accepted)
         if not training["converged"] or not gate["overfit"]["pass"]:
             raise SystemExit(f"{name}: random weights fail the gate and overfitting did not fix it: {training}, {gate}")
@@ -534,6 +545,7 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
     mirrored = missing_parameters(cls, out)
     if mirrored != lacks:
         raise SystemExit(f"{name}: fixture lacks {mirrored}, the real checkpoint lacks {lacks}")
+    report_phase("Check float32, bfloat16 and float16 numeric health")
     health = numeric_health(cls, out, batch, captured)
     if not all(row["finite"] for row in health.values()):
         raise SystemExit(f"{name}: numeric health check failed: {health}")

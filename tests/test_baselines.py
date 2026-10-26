@@ -530,6 +530,64 @@ def test_cli_progress_shows_stages_counts_and_suppresses_duplicate_updates(capsy
     assert capsys.readouterr().err == ""
 
 
+def test_terminal_progress_refreshes_same_block_and_explains_runner_queue(monkeypatch):
+    import io
+
+    class TTY(io.StringIO):
+        def isatty(self):
+            return True
+
+    output = TTY()
+    monkeypatch.setattr(cloud_progress.sys, "stderr", output)
+    monkeypatch.setenv("TERM", "xterm")
+    job = {
+        "status": "running",
+        "workflow_jobs": [{"name": "measure (cpu)", "status": "queued", "step": ""}],
+    }
+    first = cloud_progress.display(job)
+    assert "CPU: Waiting for a runner" in output.getvalue()
+    offset = output.tell()
+    job["workflow_jobs"][0].update(
+        status="in_progress",
+        step="Install fleet environment",
+        completed_steps=2,
+        total_steps=7,
+    )
+    second = cloud_progress.display(job, first)
+    assert "\x1b[2A\r\x1b[J" in output.getvalue()[offset:]
+    assert (
+        "2/7" in output.getvalue()[offset:]
+        and "Install fleet environment" in output.getvalue()[offset:]
+    )
+    offset = output.tell()
+    assert cloud_progress.display(job, second) == second
+    assert output.tell() == offset
+
+
+def test_redirected_progress_is_plain_and_only_changed_rows_are_printed(
+    monkeypatch, capsys
+):
+    monkeypatch.delenv("TMIC_LIVE_PROGRESS", raising=False)
+    job = {
+        "status": "running",
+        "workflow_jobs": [
+            {"name": "measure (cpu)", "status": "queued", "step": ""},
+            {
+                "name": "measure (cuda)",
+                "status": "in_progress",
+                "step": "Measure baselines",
+            },
+        ],
+    }
+    first = cloud_progress.display(job)
+    capsys.readouterr()
+    job["workflow_jobs"][0].update(status="in_progress", step="Install environment")
+    cloud_progress.display(job, first)
+    text = capsys.readouterr().err
+    assert "Install environment" in text
+    assert "CUDA" not in text and "[cloud]" not in text and "\x1b" not in text
+
+
 def test_progress_uses_cached_short_lived_oidc_and_never_forwards_hub_credentials(
     monkeypatch, capsys
 ):

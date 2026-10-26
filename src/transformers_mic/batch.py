@@ -3,6 +3,7 @@
 import json
 import os
 import signal
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -20,20 +21,23 @@ def invoke(out, name, arguments, timeout):
         stream_progress = "baselines" in arguments
         progress_thread = None
         try:
+            child_env = {**os.environ, "PYTHONUNBUFFERED": "1"}
+            if stream_progress and sys.stderr.isatty() and os.getenv("TERM") != "dumb":
+                child_env["TMIC_LIVE_PROGRESS"] = "1"
             process = subprocess.Popen(
                 [sys.executable, "-m", "transformers_mic", *arguments],
                 stdout=handle,
                 stderr=subprocess.PIPE if stream_progress else subprocess.STDOUT,
                 text=True,
                 start_new_session=True,
-                env={**os.environ, "PYTHONUNBUFFERED": "1"},
+                env=child_env,
             )
 
             if stream_progress:
 
                 def relay():
                     for line in process.stderr:
-                        handle.write(line)
+                        handle.write(re.sub(r"\x1b\[[0-9;?]*[A-Za-z]", "", line))
                         handle.flush()
                         print(line, end="", file=sys.stderr, flush=True)
 
