@@ -1,0 +1,26 @@
+name: CPU runner probe
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on:
+      group: aws-m8i-l-cache
+    timeout-minutes: 5
+    steps:
+      - name: Verify native bfloat16 CPU
+        shell: bash
+        run: |
+          set -euo pipefail
+          lscpu
+          python3 - <<'PY'
+          from pathlib import Path
+          flags = set(Path('/proc/cpuinfo').read_text().split())
+          supported = sorted(flags & {'avx512_bf16', 'amx_bf16'})
+          print('Native bfloat16 flags:', supported)
+          assert supported, 'CPU runner must expose native bfloat16'
+          PY
