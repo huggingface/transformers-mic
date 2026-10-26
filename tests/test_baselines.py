@@ -540,6 +540,7 @@ def test_terminal_progress_refreshes_same_block_and_explains_runner_queue(monkey
     output = TTY()
     monkeypatch.setattr(cloud_progress.sys, "stderr", output)
     monkeypatch.setenv("TERM", "xterm")
+    monkeypatch.setattr(cloud_progress.time, "monotonic", lambda: 100.0)
     job = {
         "status": "running",
         "workflow_jobs": [{"name": "measure (cpu)", "status": "queued", "step": ""}],

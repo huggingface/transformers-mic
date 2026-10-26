@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 import os
 import sys
 import time
+import threading
 import shutil
 import re
 import textwrap
@@ -96,10 +97,15 @@ def display(job, previous=None):
     old = json.loads(previous) if previous else {}
     old_rows = old.pop("_rows", 0)
     old_tick = old.pop("_tick", None)
+    started = old.pop("_started", time.monotonic())
+    if os.getenv("TMIC_PROGRESS_EVENTS") == "1":
+        if view != old:
+            print("MIC_CLOUD_VIEW " + json.dumps(view), file=sys.stderr, flush=True)
+        return json.dumps(view, sort_keys=True)
     live = (
         terminal.interactive(sys.stderr) or os.getenv("TMIC_LIVE_PROGRESS") == "1"
     ) and os.getenv("TERM") != "dumb"
-    tick = int(time.monotonic() / 10) if live else None
+    tick = int(time.monotonic() * 4) if live else None
     if view == old and (not live or tick == old_tick):
         return previous
     width = max(40, shutil.get_terminal_size().columns - 1)
@@ -141,8 +147,19 @@ def display(job, previous=None):
         return f"    [{event['profile']}] {event['stage']} {event['completed']}/{event['total']} {terminal.bar(event['completed'], event['total'], 10)} {event['detail']}"
 
     if live:
+        elapsed = max(0, int(time.monotonic() - started))
+        frame = "|/-\\"[tick % 4]
+        if view["status"] in (
+            "completed",
+            "success",
+            "failed",
+            "failure",
+            "cancelled",
+            "unknown",
+        ):
+            frame = ""
         lines = [
-            "  Cloud · " + view["status"] + " · checked " + time.strftime("%H:%M:%S")
+            f"  Cloud · {view['status']} {frame} {elapsed // 60:02d}:{elapsed % 60:02d}"
         ]
         if view.get("run_url"):
             lines.append("    Run: " + view["run_url"])
@@ -166,6 +183,7 @@ def display(job, previous=None):
         sys.stderr.flush()
         view["_rows"] = len(rendered)
         view["_tick"] = tick
+        view["_started"] = started
     else:
         if view.get("run_url") and old.get("run_url") != view["run_url"]:
             print("  Run: " + view["run_url"], file=sys.stderr, flush=True)
@@ -180,3 +198,61 @@ def display(job, previous=None):
             if old_events.get(event["profile"]) != event:
                 print(event_line(event), file=sys.stderr, flush=True)
     return json.dumps(view, sort_keys=True)
+
+
+class LiveProgress:
+    """Animate on the parent terminal; child processes send only state changes."""
+
+    def __init__(self):
+        self.job = None
+        self.previous = None
+        self.lock = threading.Lock()
+        self.stopped = threading.Event()
+        self.thread = None
+        self.enabled = terminal.interactive(sys.stderr)
+
+    def __enter__(self):
+        if self.enabled:
+
+            def animate():
+                while not self.stopped.is_set():
+                    with self.lock:
+                        self.render()
+                    self.stopped.wait(0.25)
+
+            self.thread = threading.Thread(target=animate, daemon=True)
+            self.thread.start()
+        return self
+
+    def render(self):
+        if self.job is not None:
+            self.previous = display(self.job, self.previous)
+
+    def update(self, view):
+        with self.lock:
+            self.job = {
+                "status": view["status"],
+                "run_url": view.get("run_url"),
+                "workflow_jobs": view.get("jobs", []),
+                "progress": {
+                    event["profile"]: event for event in view.get("progress", [])
+                },
+            }
+            self.render()
+
+    def message(self, text):
+        with self.lock:
+            if self.previous:
+                state = json.loads(self.previous)
+                rows = state.get("_rows", 0)
+                if rows:
+                    sys.stderr.write(f"\033[{rows}A\r\033[J")
+                    state.update(_rows=0, _tick=-1)
+                    self.previous = json.dumps(state)
+            sys.stderr.write(text)
+            sys.stderr.flush()
+
+    def __exit__(self, *args):
+        self.stopped.set()
+        if self.thread:
+            self.thread.join()

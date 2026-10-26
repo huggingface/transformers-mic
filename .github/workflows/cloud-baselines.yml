@@ -100,7 +100,7 @@ jobs:
       matrix:
         include:
           - profile: cpu
-            runner: ${{ vars.MIC_CPU_BASELINE_RUNNER || 'aws-m8i-l-cache' }}
+            runner: ${{ vars.MIC_CPU_BASELINE_RUNNER || 'aws-g5-4xlarge-cache' }}
           - profile: cuda
             runner: ${{ vars.MIC_GPU_BASELINE_RUNNER || 'aws-g5-4xlarge-cache' }}
     runs-on:

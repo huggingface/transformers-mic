@@ -201,8 +201,16 @@ output, `TERM=dumb`, or `NO_COLOR`.
 
 Cloud jobs refresh a single block instead of repeating GitHub's JOBS section.
 The display distinguishes waiting for a runner, dependency installation,
-measurement and completion, with a run link and last-check time. Redirected logs
-contain plain text only when status changes.
+measurement and completion, with a run link, a small animation and elapsed timer.
+Animation is rendered in the parent CLI so carriage returns survive the child
+process relay. Redirected logs contain plain text only when status changes.
+
+With the GitHub baseline transport, Ctrl+C stops the local watcher and asks
+whether to cancel the remote CPU/CUDA workflow. Answer `y` to request cancellation,
+or `n` (the default) to leave it running and reconnect with the same command.
+This question requires its own answer even after choosing `A=always` earlier.
+Agent mode and noninteractive input leave the remote run running. After GitHub
+confirms cancellation, the next run archives the old collection and starts fresh.
 
 Human mode shows short failure explanations. Complete tracebacks and worker output remain in the shown
 log files. Pausing prints a resume command; agent mode keeps its JSON protocol.

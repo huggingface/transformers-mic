@@ -825,6 +825,14 @@ def run_locked(args, root, answer):
         )
         return NEEDS_INPUT
     except KeyboardInterrupt:
+        if args.baseline_execution == "cloud" and args.baseline_transport == "github":
+            from . import github_baselines
+
+            if state.get("next_stage") == "record":
+                github_baselines.interrupt(
+                    folder / "cloud" / model_baselines.inputs(workspace)[0],
+                    interactive=args.mode == "human",
+                )
         state["status"] = "interrupted"
         save()
         print(f"\ntmic: interrupted; resume with {resume}", file=sys.stderr)
