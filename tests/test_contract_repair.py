@@ -161,3 +161,10 @@ def test_cloud_failure_uses_downloaded_worker_traceback_and_binds_it_to_review(s
     assert repair.current(s.workspace, attempt)
     worker_log.write_text("different failure")
     assert not repair.current(s.workspace, attempt)
+
+
+def test_truncated_runtime_error_is_eligible_for_repair(setup):
+    setup.log.write_text(
+        "RuntimeError: Input type FloatTensor and weight type BFloat16Type should be the same"
+    )
+    assert repair.eligible(setup.workspace, "auto", setup.log)

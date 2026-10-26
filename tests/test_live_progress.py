@@ -211,3 +211,28 @@ def test_cancelled_collection_is_archived_before_fresh_submission(
         transformers_ref="main",
     )
     assert run_locked(args, tmp_path) == 42
+
+
+def test_cloud_failure_reports_worker_cause(tmp_path):
+    from transformers_mic.github_baselines import failure_summary
+    from transformers_mic.workspace import write
+
+    write(
+        tmp_path / "artifacts/cpu/collection.json",
+        {
+            "cases": [
+                {
+                    "status": "failed",
+                    "variant": "bfloat16",
+                    "target": "fixture",
+                    "record": {
+                        "failures": ["traceback tail\nRuntimeError: dtype mismatch"]
+                    },
+                }
+            ]
+        },
+    )
+    assert (
+        failure_summary(tmp_path)
+        == "cpu/bfloat16/fixture: RuntimeError: dtype mismatch"
+    )

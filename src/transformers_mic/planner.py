@@ -89,7 +89,11 @@ under a training object. Declare those exact dotted keys in outputs, using
 allclose, all_true, and true respectively. training.gradients must be a nonempty
 dict of named BOOLEAN checks for finite, nonzero gradients, never raw norms.
 training.updated checks whether SGD actually changes weights. The bfloat16
-variant must use {"dtype": "bfloat16"}, not torch_dtype. Preserve inference
+variant must use {"dtype": "bfloat16"}, not torch_dtype. Cast floating-point
+processor inputs (such as pixel_values or input_features) to model.dtype and
+model.device before every forward; keep integer token IDs, masks and labels
+in their original dtype. Moving inputs to the device alone does not match dtype.
+Preserve inference
 outputs before the training step and report them along with training outputs. Use runnable
 fences ```py runnable:usage```. Multiple blocks sharing state use the same
 runnable identifier, with :2 etc. In an update, retain every existing call and

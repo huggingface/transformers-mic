@@ -204,6 +204,11 @@ question). This does not approve the question. Color is disabled for redirected
 output, `TERM=dumb`, or `NO_COLOR`.
 
 Cloud jobs refresh a single block instead of repeating GitHub's JOBS section.
+Before staging cloud inputs, the factory-check step executes every declared
+variant against the built fixture locally, without comparing numeric baselines.
+Failures enter the bounded, reviewed contract-repair flow before GPU dispatch.
+This catches errors such as floating inputs left in float32 for bfloat16 weights;
+it does not replace measurement and validation on the cloud CPU/CUDA environments.
 The display distinguishes waiting for a runner, dependency installation,
 measurement and completion, with a run link, a small animation and elapsed timer.
 Animation is rendered in the parent CLI so carriage returns survive the child
