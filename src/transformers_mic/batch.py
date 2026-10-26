@@ -4,6 +4,7 @@ import json
 import os
 import signal
 import re
+import shutil
 from pathlib import Path
 import subprocess
 import sys
@@ -24,6 +25,8 @@ def invoke(out, name, arguments, timeout):
             child_env = {**os.environ, "PYTHONUNBUFFERED": "1"}
             if stream_progress and sys.stderr.isatty() and os.getenv("TERM") != "dumb":
                 child_env["TMIC_LIVE_PROGRESS"] = "1"
+                size = shutil.get_terminal_size()
+                child_env.update(COLUMNS=str(size.columns), LINES=str(size.lines))
             process = subprocess.Popen(
                 [sys.executable, "-m", "transformers_mic", *arguments],
                 stdout=handle,
