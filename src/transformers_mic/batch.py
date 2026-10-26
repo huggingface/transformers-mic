@@ -1,6 +1,7 @@
 """Resumable prototype regeneration; every model gets an explicit stage result."""
 
 import json
+import codecs
 import os
 import signal
 import re
@@ -11,6 +12,7 @@ import sys
 import threading
 
 from .workspace import Workspace, read, write
+from .cloud_progress import LiveProgress
 
 
 def invoke(out, name, arguments, timeout):
@@ -24,7 +26,8 @@ def invoke(out, name, arguments, timeout):
         try:
             child_env = {**os.environ, "PYTHONUNBUFFERED": "1"}
             if stream_progress and sys.stderr.isatty() and os.getenv("TERM") != "dumb":
-                child_env["TMIC_LIVE_PROGRESS"] = "1"
+                child_env["TMIC_PROGRESS_EVENTS"] = "1"
+                child_env.pop("TMIC_LIVE_PROGRESS", None)
                 size = shutil.get_terminal_size()
                 child_env.update(COLUMNS=str(size.columns), LINES=str(size.lines))
             process = subprocess.Popen(
@@ -39,10 +42,33 @@ def invoke(out, name, arguments, timeout):
             if stream_progress:
 
                 def relay():
-                    for line in process.stderr:
-                        handle.write(re.sub(r"\x1b\[[0-9;?]*[A-Za-z]", "", line))
-                        handle.flush()
-                        print(line, end="", file=sys.stderr, flush=True)
+                    # TextIOWrapper universal-newline decoding turns carriage
+                    # returns into newlines. Decode the binary pipe ourselves.
+                    decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
+                    pending = ""
+                    with LiveProgress() as live:
+
+                        def forward(line):
+                            handle.write(re.sub(r"\x1b\[[0-9;?]*[A-Za-z]", "", line))
+                            handle.flush()
+                            if line.startswith("MIC_CLOUD_VIEW "):
+                                try:
+                                    live.update(
+                                        json.loads(line.removeprefix("MIC_CLOUD_VIEW "))
+                                    )
+                                    return
+                                except (ValueError, KeyError, TypeError):
+                                    pass
+                            live.message(line)
+
+                        while chunk := process.stderr.buffer.read1(4096):
+                            pending += decoder.decode(chunk)
+                            while "\n" in pending:
+                                line, pending = pending.split("\n", 1)
+                                forward(line + "\n")
+                        pending += decoder.decode(b"", final=True)
+                        if pending:
+                            forward(pending)
 
                 progress_thread = threading.Thread(target=relay, daemon=True)
                 progress_thread.start()

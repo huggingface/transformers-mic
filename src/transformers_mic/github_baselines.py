@@ -10,6 +10,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import time
 import uuid
@@ -95,8 +96,81 @@ def watch(run_id):
 def run(args):
     root = Path(args.out).resolve()
     root.mkdir(parents=True, exist_ok=True)
-    with FileLock(root / ".cloud.lock", timeout=0):
-        return run_locked(args, root)
+    try:
+        with FileLock(root / ".cloud.lock", timeout=0):
+            return run_locked(args, root)
+    except KeyboardInterrupt:
+        interrupt(root)
+        return 130
+
+
+def interrupt(root, *, interactive=True):
+    """Offer remote cancellation after the local watcher has stopped."""
+    from . import terminal
+
+    path = Path(root) / "cloud.json"
+    if not path.exists():
+        return
+    try:
+        state = read(path)
+        if state.get("transport") != "github-test":
+            return
+        job = state["job"]
+        remote = (
+            api(f"repos/{REPO}/actions/runs/{job['run_id']}")
+            if job.get("run_id")
+            else find_run(job["id"])
+        )
+        if not remote:
+            print(
+                "\nRemote dispatch unresolved; resume to locate the same run.",
+                file=sys.stderr,
+            )
+            return
+        if remote["status"] == "completed":
+            print("\nRemote workflow has already finished.", file=sys.stderr)
+            return
+        url = remote["html_url"]
+        print(f"\n  Remote workflow: {url}", file=sys.stderr)
+        answer = ""
+        if interactive and sys.stdin.isatty():
+            print(
+                terminal.color(
+                    "  Cancel the remote CPU/CUDA workflow? [y/N] ",
+                    "question",
+                    sys.stderr,
+                ),
+                end="",
+                file=sys.stderr,
+                flush=True,
+            )
+            try:
+                answer = input().strip().lower()
+            except (EOFError, KeyboardInterrupt):
+                pass
+        if answer not in {"y", "yes"}:
+            print(
+                "  Remote run continues. Repeat the command to reconnect.",
+                file=sys.stderr,
+            )
+            return
+        gh(
+            "api",
+            "--method",
+            "POST",
+            f"repos/{REPO}/actions/runs/{remote['id']}/cancel",
+        )
+        state["cancel_requested"] = True
+        write(path, state)
+        print(
+            "  Cancellation requested. GitHub may take a moment to stop the jobs.",
+            file=sys.stderr,
+        )
+    except (OSError, ValueError, KeyError, subprocess.CalledProcessError) as error:
+        print(
+            f"\n  Could not confirm remote cancellation: {error}. Check GitHub Actions.",
+            file=sys.stderr,
+        )
 
 
 def run_locked(args, root):
@@ -152,6 +226,18 @@ def run_locked(args, root):
         if job.get("run_id")
         else find_run(job["id"])
     )
+    if (
+        remote
+        and remote.get("conclusion") == "cancelled"
+        and remote["status"] == "completed"
+    ):
+        archive = root / "cancelled" / job["id"]
+        archive.mkdir(parents=True, exist_ok=True)
+        for item in root.iterdir():
+            if item.name not in {".cloud.lock", "cancelled"}:
+                shutil.move(str(item), archive / item.name)
+        print("Previous run was cancelled; starting a fresh collection.", flush=True)
+        return run_locked(args, root)
     if not remote and not state.get("dispatch_attempted"):
         # Persist before submission. An ambiguous timeout must never allocate
         # another GPU runner automatically on the next invocation.
@@ -207,6 +293,7 @@ def run_locked(args, root):
     write(state_path, state)
     # gh downloads only this run's artifacts; MIC then verifies the recorded
     # provenance, complete case matrix and content hashes before review/upload.
+    cloud_progress.display({"status": "downloading results", "run_url": job["run_url"]})
     with tempfile.TemporaryDirectory(dir=root) as directory:
         subprocess.run(
             [
@@ -239,6 +326,7 @@ def run_locked(args, root):
     baselines.collection(root)
     if model:
         model_baselines.import_candidates(model, root)
+    cloud_progress.display({"status": "completed", "run_url": job["run_url"]})
     print(f"Validated collection: {root}")
     return 0
 

@@ -167,7 +167,9 @@ migrated to the single `<name>-mic` layout before this publication path.
    and `cloud-baselines.yml` in `DASHBOARD_DISPATCH_WORKFLOWS`, preserving existing
    entries. It dispatches the workflow on the default branch only.
 4. Merge `cloud-baselines.yml` and its worker code into MIC `main`. Confirm that
-   MIC can use `aws-m8i-l-cache` and `aws-g5-4xlarge-cache`.
+   MIC can use `aws-g5-4xlarge-cache`. Both profiles default to this verified
+   host group; the CPU profile uses CPU-only Torch and hides CUDA. MIC does not
+   have verified access to Transformers' `aws-m8i-l-cache` group.
    Operator variables `MIC_CPU_BASELINE_RUNNER` and `MIC_GPU_BASELINE_RUNNER`
    can select other approved ARC groups when full checkpoints need more memory
    or GPUs. Callers cannot supply arbitrary runner groups.
