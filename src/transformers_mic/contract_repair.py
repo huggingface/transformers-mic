@@ -192,6 +192,9 @@ def propose(args, workspace, stage, log, folder, state, save, command=()):
         plan, llm = planner.propose(
             context, model=args.llm_model, provider=args.provider
         )
+        # A repair cannot rename the contract; the model often re-derives the
+        # name from the checkpoint id (Qwen3-0.6B), which the plan schema rejects.
+        plan["name"] = workspace.state["contract"]
         write(directory / "proposal.json", {"plan": plan, "llm": llm})
         commands.validate_plan(
             plan, workspace.state["model"], workspace.fixture, workspace.manifest

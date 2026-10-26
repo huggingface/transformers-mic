@@ -91,6 +91,15 @@ def test_repairs_cannot_weaken_manifest(setup, change):
     assert s.workspace.contract_digest() == before
 
 
+def test_repair_keeps_the_contract_name(setup):
+    s = setup
+    s.plan["name"] = "bert-base-uncased.v2"  # invalid slug, and a rename
+    attempt = propose(s)
+    assert attempt["status"] == "proposed"
+    repair.apply(s.workspace, attempt)
+    assert s.workspace.state["contract"] == "BERT"
+
+
 def test_changed_source_or_proposal_invalidates_approval(setup):
     s = setup
     attempt = propose(s)
