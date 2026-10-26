@@ -216,3 +216,10 @@ statistics on the captured training batch with dropout disabled. This changes
 BatchNorm buffers only and records the layer/batch count in `build.json` training
 evidence. The same input-sensitivity thresholds and dtype health checks must
 then pass before the fixture can be used for cloud measurements.
+
+GitHub baseline artifacts include hidden source files such as `.mic-repo.json`
+and `.mic/baseline-lock.json`. For older uploads that omitted these files, the
+GitHub client restores missing source dotfiles from the recorded immutable Hub
+revision and checks their worker-recorded SHA-256 before validating the collection.
+Measured candidates are never reconstructed this way. A successful remote run
+can therefore be resumed after an artifact-download failure without new GPU work.

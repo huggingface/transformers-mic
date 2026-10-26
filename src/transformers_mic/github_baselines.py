@@ -6,7 +6,7 @@ tests the workflow directly; it does not exercise dashboard/Serge authorization.
 
 import argparse
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import re
 import shutil
 import subprocess
@@ -16,12 +16,52 @@ import time
 import uuid
 
 from filelock import FileLock
+from huggingface_hub import hf_hub_download
 
 from transformers_mic import baselines, fleet, model_baselines, cloud_progress
 from transformers_mic.workspace import Workspace, read, write
 
 REPO = "huggingface/transformers-mic"
 WORKFLOW = "cloud-baselines.yml"
+
+
+def restore_hidden_sources(root):
+    """Recover source dotfiles omitted by older GitHub artifact uploads.
+
+    Only immutable Hub source files are eligible, never measured candidates.
+    The worker's recorded checksum must match before installing any file.
+    """
+    state = read(root / "cloud.json")
+    for profile in state["request"]["profiles"]:
+        folder = root / "artifacts" / profile
+        report = read(folder / "collection.json")
+        for kind in ("models", "contracts"):
+            for source in report.get(kind, []):
+                repo, revision = source["repo"], source["revision"]
+                if not re.fullmatch(r"[a-f0-9]{40}", revision):
+                    raise ValueError(
+                        "Source recovery requires an immutable Hub revision"
+                    )
+                prefix = PurePosixPath(kind, repo.replace("/", "--"), revision)
+                for name, expected in source["files"].items():
+                    path = PurePosixPath(name)
+                    if path.is_absolute() or ".." in path.parts or "\\" in name:
+                        raise ValueError("Unsafe source artifact path")
+                    relative = path.relative_to(prefix)
+                    target = folder / path
+                    if target.exists() or not any(
+                        part.startswith(".") for part in relative.parts
+                    ):
+                        continue
+                    recovered = Path(
+                        hf_hub_download(repo, relative.as_posix(), revision=revision)
+                    )
+                    if baselines.sha256(recovered) != expected:
+                        raise ValueError(
+                            "Recovered source differs from the measured artifact"
+                        )
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(recovered, target)
 
 
 def gh(*args):
@@ -323,6 +363,7 @@ def run_locked(args, root):
         raise ValueError(
             "Workflow failed; inspect the Actions URL and partial artifacts"
         )
+    restore_hidden_sources(root)
     baselines.collection(root)
     if model:
         model_baselines.import_candidates(model, root)

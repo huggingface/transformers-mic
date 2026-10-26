@@ -770,7 +770,8 @@ def run_locked(args, root, answer):
                     "Retry " + terminal.STAGE_NAMES.get(name, name).lower() + "?",
                     (
                         "Repair limit reached. "
-                        if len(state.get("repairs", [])) >= args.max_contract_repairs
+                        if name == "build"
+                        and len(state.get("repairs", [])) >= args.max_contract_repairs
                         and args.max_contract_repairs
                         else ""
                     )
