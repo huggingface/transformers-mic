@@ -33,7 +33,7 @@ def interactive(stream=None):
 
 
 def color(text, style="dim", stream=None):
-    codes = {"dim": "2", "title": "1;36", "question": "1;33", "ok": "32", "error": "31"}
+    codes = {"dim": "2", "title": "1", "question": "1", "ok": "32", "error": "31"}
     if not interactive(stream) or "NO_COLOR" in os.environ:
         return text
     return f"\033[{codes[style]}m{text}\033[0m"
