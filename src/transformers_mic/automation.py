@@ -424,7 +424,7 @@ def run_locked(args, root, answer):
             save()
             return False
         proposal = read(attempt["proposal"]["path"])
-        ask(
+        decision = ask(
             args,
             "Apply this proposed contract repair and retry validation?",
             f"Repair {state['repairs'].index(attempt) + 1}/{args.max_contract_repairs} · assertions and gates unchanged\n"
@@ -446,6 +446,10 @@ def run_locked(args, root, answer):
                 )
             },
         )
+        if decision == "reject":
+            attempt.update(status="rejected", error="rejected by the reviewer")
+            save()
+            return False
         if not contract_repair.current(workspace, attempt):
             attempt["status"] = "stale"
             state["next_stage"] = "source"

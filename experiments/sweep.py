@@ -197,10 +197,21 @@ def shrink(config):
             values["hidden_sizes"] = [16 * 2**i for i in range(len(values["hidden_sizes"]))]
         if isinstance(values.get("depths"), list):
             values["depths"] = [1] * len(values["depths"])
-        # Backbones: output stages are named after the real depth; let them default.
-        for key in ("out_features", "out_indices"):
-            if values.get(key) is not None:
-                values[key] = None
+        # Layer-indexed backbones name outputs after the real depth; let them default.
+        # Stage-based ones (depths per stage) keep their stage count, so keep them.
+        if not isinstance(values.get("depths"), list):
+            for key in ("out_features", "out_indices"):
+                if values.get(key) is not None:
+                    values[key] = None
+        # A detection encoder reads the backbone stages it was built for.
+        backbone = values.get("backbone_config")
+        if (
+            isinstance(values.get("encoder_in_channels"), list)
+            and isinstance(backbone, dict)
+            and isinstance(backbone.get("hidden_sizes"), list)
+            and backbone.get("out_indices")
+        ):
+            values["encoder_in_channels"] = [backbone["hidden_sizes"][i - 1] for i in backbone["out_indices"]]
         if isinstance(values.get("num_hidden_layers"), int):
             kept = layer_pattern(cfg) if hasattr(cfg, "num_hidden_layers") else [0, 1]
             kept = kept if len(kept) > 1 else list(range(min(2, values["num_hidden_layers"])))

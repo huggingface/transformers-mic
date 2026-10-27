@@ -417,6 +417,25 @@ def test_agent_repair_waits_for_exact_approval_and_reuses_saved_proposal(
     assert len(read(workflow.root / ".mic/automation.json")["repairs"]) == 1
 
 
+def test_agent_can_reject_a_repair_without_changing_source(repair_workflow, capsys):
+    workflow = repair_workflow
+    _, source, _ = agent_call(workflow, capsys, extra=["--local-only"])
+    code, proposed, _ = agent_call(
+        workflow, capsys, answer=approval(source), extra=["--local-only"]
+    )
+    assert proposed["pending_question"]["choices"] == ["approve", "reject", "defer"]
+    usage = (
+        Workspace(workflow.root).contract_root / "integrations/transformers/usage.md"
+    )
+    before = usage.read_text()
+    agent_call(
+        workflow, capsys, answer=approval(proposed, "reject"), extra=["--local-only"]
+    )
+    state = read(workflow.root / ".mic/automation.json")
+    assert state["repairs"][0]["status"] == "rejected"
+    assert usage.read_text() == before
+
+
 def test_repair_budget_exhaustion_returns_to_retry(repair_workflow, monkeypatch):
     workflow = repair_workflow
     workflow.failures["build"] = [1, 1, 1]

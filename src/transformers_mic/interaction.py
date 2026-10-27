@@ -35,11 +35,18 @@ def load_answer(path):
         )
     if not isinstance(answer.get("question_id"), str) or not answer["question_id"]:
         raise ValueError("Answer requires a nonempty question_id")
-    if answer.get("answer") not in ("approve", "retry", "defer"):
-        raise ValueError("Answer must be approve, retry, or defer")
+    if answer.get("answer") not in ("approve", "reject", "retry", "defer"):
+        raise ValueError("Answer must be approve, reject, retry, or defer")
     if "reason" in answer and not isinstance(answer["reason"], str):
         raise ValueError("Answer reason must be a string")
     return answer
+
+
+# A repair proposal can be declined outright; defer only postpones a question.
+CHOICES = {
+    "retry": ["retry", "defer"],
+    "contract-repair": ["approve", "reject", "defer"],
+}
 
 
 class Interaction:
@@ -57,7 +64,7 @@ class Interaction:
             "kind": kind,
             "question": question,
             "details": details,
-            "choices": ["retry" if kind == "retry" else "approve", "defer"],
+            "choices": CHOICES.get(kind, ["approve", "defer"]),
             "requires_reason": reason,
             "context": {**self.context(), **(context or {})},
         }
@@ -122,7 +129,9 @@ class Interaction:
                         choice = (
                             input(
                                 terminal.color(
-                                    "    Continue? [y/N/A=always/D=details] ",
+                                    "    Continue? [y/N/A=always/D=details"
+                                    + ("/R=reject" if kind == "contract-repair" else "")
+                                    + "] ",
                                     "question",
                                 )
                             )
@@ -133,7 +142,8 @@ class Interaction:
                             break
                         terminal.details(details)
                         terminal.prompt(question, details, kind, record["context"])
-                if choice not in ("y", "yes", "a", "always"):
+                rejected = kind == "contract-repair" and choice in ("r", "reject")
+                if choice not in ("y", "yes", "a", "always") and not rejected:
                     raise Pending(question, details, record=record)
                 if choice in ("a", "always"):
                     self.always_yes = True
@@ -175,7 +185,7 @@ class Interaction:
                 raise Pending(question, details, record=record)
             answer = {
                 "question_id": record["question_id"],
-                "answer": record["choices"][0],
+                "answer": "reject" if rejected else record["choices"][0],
                 "reason": explanation,
             }
 

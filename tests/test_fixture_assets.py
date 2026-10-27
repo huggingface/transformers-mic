@@ -144,3 +144,16 @@ def test_shrink_resamples_longrope_factors_to_the_resized_head():
     rope = shrink(config).rope_parameters
     assert len(rope["short_factor"]) == len(rope["long_factor"]) < half
     assert rope["short_factor"][0] == 1.0 and rope["long_factor"][0] == 2.0
+
+
+def test_shrink_keeps_stage_backbone_outputs_and_matches_encoder_channels():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import RTDetrConfig
+
+    config = shrink(RTDetrConfig())
+    backbone = config.backbone_config
+    assert backbone.out_indices == [2, 3, 4]
+    assert config.encoder_in_channels == [
+        backbone.hidden_sizes[i - 1] for i in backbone.out_indices
+    ]

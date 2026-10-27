@@ -261,8 +261,10 @@ reuses the saved proposal rather than making another provider call. Editing the
 source, log or proposal invalidates approval.
 
 Agent mode emits a `contract-repair` question using the same one-use answer
-protocol as other decisions. Answer `approve` to apply the displayed diff or
-`defer` to leave source unchanged. As with other questions, obtain the operator's
+protocol as other decisions. Answer `approve` to apply the displayed diff,
+`reject` to decline it (it still counts toward the repair limit; the failed
+stage then offers the ordinary retry), or `defer` to leave the question pending.
+In human mode, `R` rejects. As with other questions, obtain the operator's
 decision before approving.
 
 ### Human and agent modes
@@ -310,8 +312,8 @@ tmic run org/model --mode agent --out work/mic/org--model --answer answer.json
 Use the **emitted command** to preserve options such as `--local-only`, fleet,
 namespace and timeout. The answer file is deliberately absent from that command:
 each accepted answer is consumed once, and the next question needs another
-answer. Retry questions offer `retry` or `defer`; other questions offer `approve`
-or `defer`. Changed-baseline approvals require a nonempty `reason`. `defer`
+answer. Retry questions offer `retry` or `defer`; contract repairs offer
+`approve`, `reject` or `defer`; other questions offer `approve` or `defer`. Changed-baseline approvals require a nonempty `reason`. `defer`
 leaves the question pending and performs no approved action.
 
 Questions bind the workspace snapshot, stage, selected destination, relevant
