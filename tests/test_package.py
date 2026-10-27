@@ -1023,3 +1023,46 @@ def test_export_moves_known_failure_to_the_renamed_target(
         "training.loss"
     ]
     assert f"BERT/{old_target}" not in exported["known_failures"]
+
+
+def test_binary_only_checkpoint_reads_names_from_conversion_pr(tmp_path, monkeypatch):
+    from transformers_mic import inspection
+
+    class Api:
+        def file_exists(self, repo, filename, revision=None):
+            return False
+
+        def get_repo_discussions(self, repo, **filters):
+            assert filters["author"] == "SFconvertbot"
+            return [
+                SimpleNamespace(num=1, title="Something else"),
+                SimpleNamespace(
+                    num=4, title="Adding `safetensors` variant of this model"
+                ),
+            ]
+
+        def get_safetensors_metadata(self, repo, revision=None):
+            assert revision == "refs/pr/4"
+            return SimpleNamespace(weight_map={"encoder.weight": "model.safetensors"})
+
+        def model_info(self, *args, **kwargs):
+            raise AssertionError("must not fall back to the binary checkpoint")
+
+    monkeypatch.setattr(inspection, "HfApi", Api)
+    assert inspection.checkpoint_keys("org/model", "a" * 40, tmp_path) == {
+        "encoder.weight"
+    }
+
+
+def test_visible_usage_never_shows_runner_plumbing():
+    blocks = [
+        "model = AutoModel.from_pretrained(model_id).to(device)\n"
+        "if variant:  # doc-builder: hide\n"
+        "    model = AutoModel.from_pretrained(model_id, **variant)\n"
+        "print(model)\n"
+    ]
+    assert commands.visible_plumbing(blocks) == []
+    blocks = ["model = AutoModel.from_pretrained(model_id, **variant).to(device)\n"]
+    assert commands.visible_plumbing(blocks) == [
+        "model = AutoModel.from_pretrained(model_id, **variant).to(device)"
+    ]

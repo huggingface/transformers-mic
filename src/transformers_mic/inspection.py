@@ -17,6 +17,11 @@ def checkpoint_keys(repo, revision, source):
         return set(json.loads(binary_index.read_text())["weight_map"])
     api = HfApi()
     if not api.file_exists(repo, "model.safetensors", revision=revision):
+        # Transformers loads a binary-only repo from the bot's open safetensors
+        # conversion PR; its header names the same tensors without a download.
+        converted = conversion_pr_keys(api, repo)
+        if converted:
+            return converted
         import torch
         from huggingface_hub import hf_hub_download
 
@@ -35,6 +40,22 @@ def checkpoint_keys(repo, revision, source):
             repo, "model.safetensors", revision=revision, timeout=60
         ).tensors
     )
+
+
+def conversion_pr_keys(api, repo):
+    for discussion in api.get_repo_discussions(
+        repo,
+        author="SFconvertbot",
+        discussion_type="pull_request",
+        discussion_status="open",
+    ):
+        if discussion.title == "Adding `safetensors` variant of this model":
+            return set(
+                api.get_safetensors_metadata(
+                    repo, revision=f"refs/pr/{discussion.num}"
+                ).weight_map
+            )
+    return None
 
 
 def missing_from_keys(model, keys):

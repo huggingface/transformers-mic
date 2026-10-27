@@ -115,7 +115,35 @@ def validate_plan(plan, model, fixture, old=None):
     if not blocks:
         raise ValueError("Generated usage contains no runnable Python blocks")
     ast.parse("\n".join(blocks))
+    leaked = visible_plumbing(blocks)
+    if leaked:
+        raise ValueError(
+            "usage.md is published documentation: runner plumbing (variant, MIC_*, "
+            "os.environ) must stay on '# doc-builder: hide' lines or inside a hidden "
+            f"block, but these lines are visible: {leaked[:5]}"
+        )
     return manifest
+
+
+def visible_plumbing(blocks):
+    """Lines a reader would see that depend on the MIC runner."""
+    leaked = []
+    for block in blocks:
+        hidden_indent = None
+        for line in block.splitlines():
+            indent = len(line) - len(line.lstrip())
+            if hidden_indent is not None and (
+                not line.strip() or indent > hidden_indent
+            ):
+                continue
+            hidden_indent = None
+            if "# doc-builder: hide" in line:
+                if line.split("#", 1)[0].rstrip().endswith(":"):
+                    hidden_indent = indent
+                continue
+            if re.search(r"\bvariant\b|MIC_|os\.environ", line):
+                leaked.append(line.strip())
+    return leaked
 
 
 def check_parameter_names(plan, config):
