@@ -1095,6 +1095,9 @@ def test_create_rejects_unknown_override_fields_and_missing_requires():
         "torchvision",
     ]
     commands.check_config_facts(plan, config)
+    plan["usage"] = 'model = AutoModel.from_pretrained(model_id, device_map="auto")'
+    with pytest.raises(ValueError, match="accelerate"):
+        commands.check_config_facts(plan, config)
 
 
 def test_fp8_checkpoint_names_drop_their_scales():
