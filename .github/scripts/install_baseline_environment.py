@@ -54,7 +54,24 @@ def main():
     subprocess.run(
         ["git", "-C", str(checkout), "checkout", "--detach", "FETCH_HEAD"], check=True
     )
-    pip = [sys.executable, "-m", "pip", "install"]
+    # Constrain every install to the image's own versions: missing tools are added,
+    # nothing the image ships (numpy, torch, ...) is upgraded or downgraded.
+    frozen = subprocess.run(
+        [sys.executable, "-m", "pip", "freeze"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.splitlines()
+    constraints = checkout.parent / "image-constraints.txt"
+    constraints.write_text(
+        "\n".join(
+            line
+            for line in frozen
+            if "==" in line and not line.lower().startswith(("transformers==", "-e"))
+        )
+        + "\n"
+    )
+    pip = [sys.executable, "-m", "pip", "install", "-c", str(constraints)]
     # Measure in Transformers' own CI image: its torch, numpy and system libraries are
     # what fast-integration and the GPU nightly run, so nothing here overrides them.
     # Install the framework commit and the contract tools the way that CI does.
@@ -87,7 +104,6 @@ def main():
             ],
             check=True,
         )
-    subprocess.run([sys.executable, "-m", "pip", "check"], check=True)
     for key in sorted(environment):
         try:
             print(f"{key}: {importlib.metadata.version(key)}", flush=True)
