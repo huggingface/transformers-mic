@@ -330,10 +330,23 @@ def overfit(model, batch, max_steps, target_loss=0.05):
     start = time.perf_counter()
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.005, weight_decay=0.0)
     stable = 0
+    targets = None
     for step in range(1, max_steps + 1):
         model.train()
         optimizer.zero_grad(set_to_none=True)
-        loss = model(**batch).loss
+        output = model(**batch)
+        loss = getattr(output, "loss", None)
+        if loss is None:
+            # Models without a built-in loss (SAM2): fit the predictions the gate
+            # measures to fixed, distinct targets per example, as labels would.
+            predictions = logits_of(output)
+            if targets is None:
+                generator = torch.Generator().manual_seed(17)
+                targets = {
+                    k: torch.randn(v.shape, generator=generator).to(v.device, v.dtype)
+                    for k, v in predictions.items()
+                }
+            loss = sum(torch.nn.functional.mse_loss(v, targets[k]) for k, v in predictions.items())
         if not torch.isfinite(loss):
             raise SystemExit(f"non-finite training loss at step {step}")
         loss.backward()

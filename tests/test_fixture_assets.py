@@ -170,3 +170,21 @@ def test_capture_names_positional_model_inputs():
         model(ids, attention_mask=torch.ones_like(ids))
     assert set(calls[0]["kwargs"]) == {"input_ids", "attention_mask"}
     assert torch.equal(calls[0]["kwargs"]["input_ids"], ids)
+
+
+def test_overfit_fits_distinct_targets_when_the_model_has_no_loss():
+    class Head(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.proj = torch.nn.Linear(4, 3)
+
+        def forward(self, pixel_values):
+            return {"pred_logits": self.proj(pixel_values)}
+
+    torch.manual_seed(0)
+    model = Head()
+    batch = {"pixel_values": torch.randn(2, 4)}
+    result = build_fixtures.overfit(model, batch, max_steps=400)
+    assert result["converged"]
+    first, second = model(**batch)["pred_logits"].detach()
+    assert not torch.allclose(first, second, atol=0.1)
