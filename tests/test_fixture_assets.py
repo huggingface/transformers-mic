@@ -188,3 +188,12 @@ def test_overfit_fits_distinct_targets_when_the_model_has_no_loss():
     assert result["converged"]
     first, second = model(**batch)["pred_logits"].detach()
     assert not torch.allclose(first, second, atol=0.1)
+
+
+def test_shrink_drops_the_checkpoint_quantization_config():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import LlamaConfig
+
+    config = LlamaConfig(quantization_config={"quant_method": "fp8", "weight_block_size": [128, 128]})
+    assert getattr(shrink(config), "quantization_config", None) is None

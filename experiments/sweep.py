@@ -170,6 +170,8 @@ def shrink(config):
 
     def rebuilt(cfg):
         values = cfg.to_dict()
+        # A slim fixture holds dense random weights, whatever the checkpoint's format.
+        values.pop("quantization_config", None)
         for key in getattr(cfg, "sub_configs", {}) or {}:
             sub = getattr(cfg, key, None)
             if isinstance(sub, PretrainedConfig):
