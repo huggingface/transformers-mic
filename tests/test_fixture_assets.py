@@ -290,3 +290,29 @@ def test_max_delta_ignores_matching_infinities_but_keeps_nan():
     assert perturb.max_delta(unmasked, base) == inf
     broken = {"logits": torch.tensor([[float("nan"), -inf], [2.0, -inf]])}
     assert perturb.max_delta(broken, base) != perturb.max_delta(broken, base)
+
+
+@pytest.mark.parametrize("fill,healthy", [(float("-inf"), True), (float("nan"), False)])
+def test_numeric_health_accepts_masked_logits_but_not_nan(tmp_path, fill, healthy):
+    class Output(dict):
+        __getattr__ = dict.__getitem__
+
+    class Masked(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.proj = torch.nn.Linear(2, 3)
+
+        @classmethod
+        def from_pretrained(cls, folder, dtype):
+            return cls().to(dtype)
+
+        def forward(self, x):
+            logits = self.proj(x)
+            loss = logits[:, :2].float().pow(2).mean()
+            logits = torch.cat(
+                [logits[:, :2], torch.full_like(logits[:, 2:], fill)], -1
+            )
+            return Output(logits=logits, loss=loss)
+
+    rows = build_fixtures.numeric_health(Masked, tmp_path, {"x": torch.ones(2, 2)})
+    assert all(row["finite"] is healthy for row in rows.values()), rows

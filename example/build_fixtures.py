@@ -413,7 +413,11 @@ def numeric_health(cls, folder, batch, captured=None):
             with torch.autocast("cpu", dtype=dtype, enabled=dtype != torch.float32):
                 output = model(**as_dtype(batch, dtype))
             logits = logits_of(output)
-            row["outputs_finite"] = all(bool(torch.isfinite(t).all()) for t in logits.values())
+            # -inf is a masked logit (e.g. padded text positions), not an overflow.
+            row["outputs_finite"] = all(
+                bool((torch.isfinite(t) | (t == float("-inf"))).all() and torch.isfinite(t).any())
+                for t in logits.values()
+            )
             if output.get("loss") is not None:
                 output.loss.backward()
                 grads = [p.grad for p in model.parameters() if p.grad is not None]
