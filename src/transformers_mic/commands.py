@@ -169,13 +169,24 @@ def check_parameter_names(plan, config):
         return
     missing = sorted(names - real)
     if missing:
+        import difflib
+
+        # Checkpoint keys (language_model.model.layers...) are remapped on load;
+        # name the closest loaded parameter for each miss.
+        def nearest(name):
+            suffix = "." + ".".join(name.split(".")[-2:])
+            same = [r for r in real if ("." + r).endswith(suffix)] or real
+            return (difflib.get_close_matches(name, same, n=1, cutoff=0.0) or ["?"])[0]
+
+        closest = {name: nearest(name) for name in missing}
         # The first block and the non-repeated modules show the real naming scheme.
         hints = sorted(n for n in real if ".0." in n or not re.search(r"\.\d+\.", n))[
             :60
         ]
         raise ValueError(
-            f"Usage names parameters {cls.__name__} does not have: {missing}. "
-            f"Real parameter names include: {hints}"
+            f"Usage names parameters {cls.__name__} does not have after loading "
+            f"(checkpoint keys are remapped on load). Closest loaded names: {closest}; "
+            f"pick the right module from the real names: {hints}"
         )
 
 
@@ -221,7 +232,7 @@ def check_config_facts(plan, config):
 def propose_valid(context, args, model, fixture, old=None):
     # A provider can emit schema-valid JSON that violates runner conventions.
     # Return validation feedback for one repair; never execute an invalid draft.
-    for attempt in range(2):
+    for attempt in range(3):
         plan = None
         try:
             plan, llm = planner.propose(
@@ -236,7 +247,7 @@ def propose_valid(context, args, model, fixture, old=None):
                 check_parameter_names(plan, context["config"])
             return plan, llm
         except (ValueError, jsonschema.ValidationError) as exc:
-            if attempt:
+            if attempt == 2:
                 raise
             context = {
                 **context,
