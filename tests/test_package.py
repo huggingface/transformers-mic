@@ -1110,3 +1110,24 @@ def test_fp8_checkpoint_names_drop_their_scales():
     assert logical_checkpoint_keys(config, keys) == {"layer.w1.weight", "norm.weight"}
     with pytest.raises(ValueError, match="scale without its weight"):
         logical_checkpoint_keys(config, {"layer.w2.weight_scale_inv"})
+
+
+def test_planner_backs_off_on_rate_limits_then_gives_up(monkeypatch):
+    from huggingface_hub.errors import HfHubHTTPError
+
+    calls, waits = [], []
+
+    class Client:
+        def chat_completion(self, **kwargs):
+            calls.append(kwargs)
+            raise HfHubHTTPError(
+                "busy",
+                response=SimpleNamespace(
+                    status_code=429, headers={"retry-after": "7"}, request=None
+                ),
+            )
+
+    monkeypatch.setattr(planner.time, "sleep", waits.append)
+    with pytest.raises(HfHubHTTPError):
+        planner.complete_with_backoff(Client(), {}, "m", 10)
+    assert len(calls) == 4 and waits == [7, 7, 7]

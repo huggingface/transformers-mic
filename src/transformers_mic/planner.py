@@ -2,6 +2,8 @@
 
 import json
 import re
+import sys
+import time
 
 import httpx2
 from huggingface_hub import InferenceClient
@@ -38,7 +40,7 @@ def propose(
         model=model, provider=provider, timeout=120, bill_to=bill_to or None
     )
     try:
-        response = complete(client, context, model, max_tokens)
+        response = complete_with_backoff(client, context, model, max_tokens)
     except HfHubHTTPError as error:
         status = getattr(error.response, "status_code", None)
         if bill_to and status in (401, 402, 403):
@@ -57,6 +59,24 @@ def propose(
             "retry, or try another --provider or --llm-model"
         ) from None
     return parse(response, model, provider, bill_to)
+
+
+def complete_with_backoff(client, context, model, max_tokens, waits=(30, 90, 240)):
+    """Retry rate limits (429) and brief unavailability (503), honoring Retry-After."""
+    for wait in (*waits, None):
+        try:
+            return complete(client, context, model, max_tokens)
+        except HfHubHTTPError as error:
+            response = getattr(error, "response", None)
+            if wait is None or getattr(response, "status_code", None) not in (429, 503):
+                raise
+            after = (getattr(response, "headers", None) or {}).get("retry-after", "")
+            delay = min(int(after), 600) if str(after).isdigit() else wait
+            print(
+                f"Inference Providers busy (HTTP {response.status_code}); retrying in {delay}s",
+                file=sys.stderr,
+            )
+            time.sleep(delay)
 
 
 def complete(client, context, model, max_tokens):
