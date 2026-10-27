@@ -1,4 +1,4 @@
-"""Install the pinned fleet dependencies and exact framework commit in a job venv."""
+"""Install the exact framework commit into Transformers' CI image for baseline measurement."""
 
 import importlib.metadata
 import os
@@ -55,7 +55,9 @@ def main():
         ["git", "-C", str(checkout), "checkout", "--detach", "FETCH_HEAD"], check=True
     )
     pip = [sys.executable, "-m", "pip", "install"]
-    # Install framework dependencies first, then enforce the recorded versions.
+    # Measure in Transformers' own CI image: its torch, numpy and system libraries are
+    # what fast-integration and the GPU nightly run, so nothing here overrides them.
+    # Install the framework commit and the contract tools the way that CI does.
     subprocess.run(
         [
             *pip,
@@ -66,20 +68,16 @@ def main():
             "librosa",
             "scipy",
             "pillow",
+            "jsonschema",
             "hf-doc-builder @ git+https://github.com/huggingface/doc-builder@c69e96c087165ba49b1788e0c3464654dd60253c",
         ],
         check=True,
     )
-    torch = {"torch", "torchvision", "torchaudio", "torchcodec"}
-    # The torch stack comes from the Transformers source being measured, exactly as
-    # its own CI images install it, so baselines and CI run the same kernels.
-    torch_pins, index = transformers_torch_stack(checkout)
-    other_pins = [
-        f"{key}=={value}"
-        for key, value in environment.items()
-        if key not in torch | {"python", "transformers"}
-    ]
-    if torch_pins:
+    try:
+        importlib.metadata.version("torch")
+    except importlib.metadata.PackageNotFoundError:
+        # An image without torch (an operator override): follow the Dockerfiles.
+        torch_pins, index = transformers_torch_stack(checkout)
         subprocess.run(
             [
                 *pip,
@@ -89,17 +87,12 @@ def main():
             ],
             check=True,
         )
-    if other_pins:
-        subprocess.run([*pip, *other_pins], check=True)
     subprocess.run([sys.executable, "-m", "pip", "check"], check=True)
-    for key, expected in environment.items():
-        if key in {"python", "transformers"} | torch:
-            continue  # Python belongs to the image; framework and torch to the requested SHA.
-        if (
-            importlib.metadata.version(key).split("+", 1)[0]
-            != expected.split("+", 1)[0]
-        ):
-            raise ValueError(f"Dependency drift: {key}")
+    for key in sorted(environment):
+        try:
+            print(f"{key}: {importlib.metadata.version(key)}", flush=True)
+        except importlib.metadata.PackageNotFoundError:
+            print(f"{key}: not installed", flush=True)
 
 
 def transformers_torch_stack(checkout):
@@ -108,7 +101,8 @@ def transformers_torch_stack(checkout):
         # docker/torch-light.dockerfile: uv pip install 'torch<=X' 'torchaudio' ... --index-url .../cpu
         text = (checkout / "docker/torch-light.dockerfile").read_text()
         line = next(
-            line for line in text.splitlines()
+            line
+            for line in text.splitlines()
             if "pip install" in line and re.search(r"[\s']torch[<=>' ]", line)
         )
         specs = re.findall(r"'(torch[a-z]*[^']*)'", line)
@@ -119,7 +113,9 @@ def transformers_torch_stack(checkout):
     text = (checkout / "docker/transformers-all-latest-gpu/Dockerfile").read_text()
     args = dict(re.findall(r"^ARG (PYTORCH|CUDA)='([^']+)'", text, re.M))
     if set(args) != {"PYTORCH", "CUDA"}:
-        raise ValueError("No PYTORCH/CUDA args in transformers-all-latest-gpu/Dockerfile")
+        raise ValueError(
+            "No PYTORCH/CUDA args in transformers-all-latest-gpu/Dockerfile"
+        )
     return [f"torch=={args['PYTORCH']}", "torchvision", "torchaudio"], args["CUDA"]
 
 

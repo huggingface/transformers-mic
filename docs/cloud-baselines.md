@@ -183,12 +183,18 @@ migrated to the single `<name>-mic` layout before this publication path.
    Operator variables `MIC_CPU_BASELINE_RUNNER` and `MIC_GPU_BASELINE_RUNNER`
    can select other approved ARC groups when full checkpoints need more memory
    or GPUs. Callers cannot supply arbitrary runner groups.
-5. Set repository variables `MIC_CPU_BASELINE_IMAGE` and `MIC_GPU_BASELINE_IMAGE`
-   to approved **image digests** (`image@sha256:…`) containing Python matching
-   the fleet environment (currently 3.11). The workflow refuses mutable tags
-   before allocating ARC runners. CPU and CUDA dependencies come from the same
-   pinned fleet environment; doc-builder has an explicit commit pin. Runtime
-   details and the full package list are recorded in the collection.
+5. Baselines are measured in **Transformers' own CI images**: CPU in
+   `huggingface/transformers-torch-light` (what `fast-integration` runs) and CUDA in
+   `huggingface/transformers-all-latest-gpu` (the GPU nightly's image). The workflow
+   resolves each image's current digest at dispatch and runs by digest, so every
+   collection names the exact image it was measured in. The image's torch, numpy and
+   system libraries are used as is; the framework commit and contract tools are
+   installed into it the way Transformers CI does. A separate MIC image once pinned
+   torch 2.11 while Transformers CI ran 2.14, and sensitive fixtures failed in CI
+   against baselines from the other torch. Optional variables
+   `MIC_CPU_BASELINE_IMAGE_REPO` / `MIC_GPU_BASELINE_IMAGE_REPO` select another
+   repository. When Transformers rebuilds its image, re-record: changed values
+   then surface in review instead of as CI failures.
 6. Grant `HF_HUB_READ_TOKEN` to `huggingface/transformers-mic`. It is the
    `huggingface` **organization** secret Transformers' own CI uses for gated test
    checkpoints (exposed there as `HF_TOKEN`); an org admin adds this repository to

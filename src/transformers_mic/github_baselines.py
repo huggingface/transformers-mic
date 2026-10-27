@@ -262,13 +262,6 @@ def run_locked(args, root):
         ):
             raise ValueError("Different collection/options; use another --out")
     else:
-        variables = api(f"repos/{REPO}/actions/variables")["variables"]
-        configured = {v["name"]: v["value"] for v in variables}
-        for name in ("MIC_CPU_BASELINE_IMAGE", "MIC_GPU_BASELINE_IMAGE"):
-            if not re.fullmatch(
-                r"[a-zA-Z0-9./:_-]+@sha256:[a-f0-9]{64}", configured.get(name, "")
-            ):
-                raise ValueError(f"Configure repository variable {name} first")
         job_id = uuid.uuid4().hex
         request = {**options, "fleet_revision": fleet.resolve()}
         job = {

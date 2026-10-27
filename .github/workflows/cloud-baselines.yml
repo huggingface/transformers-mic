@@ -48,7 +48,26 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    outputs:
+      cpu_image: ${{ steps.images.outputs.cpu_image }}
+      gpu_image: ${{ steps.images.outputs.gpu_image }}
     steps:
+      - name: Pin Transformers' own CI images by digest
+        id: images
+        env:
+          CPU_REPO: ${{ vars.MIC_CPU_BASELINE_IMAGE_REPO || 'huggingface/transformers-torch-light' }}
+          GPU_REPO: ${{ vars.MIC_GPU_BASELINE_IMAGE_REPO || 'huggingface/transformers-all-latest-gpu' }}
+        run: |
+          # Baselines are measured in the images fast-integration and the GPU nightly use,
+          # pinned to the digest current at dispatch so each collection names its image.
+          digest() {
+            token=$(curl -fsS "https://auth.docker.io/token?service=registry.docker.io&scope=repository:$1:pull" | jq -r .token)
+            curl -fsSI -H "Authorization: Bearer $token" \
+              -H "Accept: application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json" \
+              "https://registry-1.docker.io/v2/$1/manifests/latest" | tr -d '\r' | sed -n 's/^docker-content-digest: //Ip'
+          }
+          echo "cpu_image=$CPU_REPO@$(digest "$CPU_REPO")" >> "$GITHUB_OUTPUT"
+          echo "gpu_image=$GPU_REPO@$(digest "$GPU_REPO")" >> "$GITHUB_OUTPUT"
       - name: Validate immutable inputs and approved images before allocating ARC runners
         env:
           MIC_WORKSPACE_REPO: ${{ inputs.workspace_repo }}
@@ -60,8 +79,8 @@ jobs:
           MIC_SHA: ${{ inputs.mic_sha }}
           FLEETS: ${{ inputs.fleets }}
           FIXTURES_ONLY: ${{ inputs.fixtures_only }}
-          CPU_IMAGE: ${{ vars.MIC_CPU_BASELINE_IMAGE }}
-          GPU_IMAGE: ${{ vars.MIC_GPU_BASELINE_IMAGE }}
+          CPU_IMAGE: ${{ steps.images.outputs.cpu_image }}
+          GPU_IMAGE: ${{ steps.images.outputs.gpu_image }}
           UPLOAD_REPO: ${{ inputs.upload_repo }}
           UPLOAD_NAMESPACES: ${{ vars.MIC_BASELINE_UPLOAD_NAMESPACES || 'huggingface-mic' }}
           HAS_WRITE_TOKEN: ${{ secrets.MIC_BASELINE_WRITE_TOKEN != '' }}
@@ -87,7 +106,7 @@ jobs:
               assert destination.split('/')[0] in os.environ["UPLOAD_NAMESPACES"].split(',')
               assert os.environ["HAS_WRITE_TOKEN"] == 'true', 'Configure MIC_BASELINE_WRITE_TOKEN before remote publication'
           for key in ("CPU_IMAGE", "GPU_IMAGE"):
-              assert re.fullmatch(r"[a-zA-Z0-9./:_-]+@sha256:[a-f0-9]{64}", os.environ[key]), f"Set {key} to an approved image digest"
+              assert re.fullmatch(r"[a-zA-Z0-9./:_-]+@sha256:[a-f0-9]{64}", os.environ[key]), f"{key} did not resolve to an image digest"
           PY
 
   measure:
@@ -107,7 +126,7 @@ jobs:
       group: ${{ matrix.runner }}
     timeout-minutes: 360
     container:
-      image: ${{ matrix.profile == 'cpu' && vars.MIC_CPU_BASELINE_IMAGE || vars.MIC_GPU_BASELINE_IMAGE }}
+      image: ${{ matrix.profile == 'cpu' && needs.validate.outputs.cpu_image || needs.validate.outputs.gpu_image }}
       options: ${{ matrix.profile == 'cuda' && '--gpus all --shm-size=16gb' || '--shm-size=16gb' }}
     env:
       MIC_WORKSPACE_REPO: ${{ inputs.workspace_repo }}
@@ -129,7 +148,7 @@ jobs:
       FLEETS: ${{ inputs.fleets }}
       FIXTURES_ONLY: ${{ inputs.fixtures_only }}
       MIC_TRANSFORMERS_CHECKOUT: /tmp/mic-transformers
-      MIC_BASELINE_IMAGE: ${{ matrix.profile == 'cpu' && vars.MIC_CPU_BASELINE_IMAGE || vars.MIC_GPU_BASELINE_IMAGE }}
+      MIC_BASELINE_IMAGE: ${{ matrix.profile == 'cpu' && needs.validate.outputs.cpu_image || needs.validate.outputs.gpu_image }}
       MIC_PROGRESS_URL: ${{ vars.MIC_PROGRESS_URL || 'https://serge.huggingface.tech/dashboard/mic-progress' }}
     defaults:
       run:
@@ -139,12 +158,11 @@ jobs:
         with:
           ref: ${{ inputs.mic_sha }}
           persist-credentials: false
-      - name: Install MIC and the requested fleet environment
+      - name: Install MIC and the framework commit into the CI image
         run: |
-          python3 -m venv /tmp/mic-runtime
-          echo "/tmp/mic-runtime/bin" >> "$GITHUB_PATH"
-          /tmp/mic-runtime/bin/python -m pip install .
-          /tmp/mic-runtime/bin/python .github/scripts/install_baseline_environment.py
+          # No separate venv: the image's environment (torch, numpy, ...) is what CI runs.
+          python3 -m pip install .
+          python3 .github/scripts/install_baseline_environment.py
       - name: Measure and independently verify every declared case
         env:
           PROFILE: ${{ matrix.profile }}
