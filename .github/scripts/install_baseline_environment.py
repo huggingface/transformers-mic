@@ -67,7 +67,12 @@ def main():
         "\n".join(
             line
             for line in frozen
-            if "==" in line and not line.lower().startswith(("transformers==", "-e"))
+            # Packages installed by name below (the framework, the pinned doc-builder,
+            # as Transformers CI installs them) are not held to the image's version.
+            if "==" in line
+            and not line.lower().startswith(
+                ("transformers==", "hf-doc-builder==", "-e")
+            )
         )
         + "\n"
     )
