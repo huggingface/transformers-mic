@@ -228,3 +228,32 @@ def test_shrink_resamples_longrope_factors_to_the_mla_rotary_width():
         == len(rope["long_factor"])
         == shrunk.qk_rope_head_dim // 2
     )
+
+
+def test_sensitivity_perturbs_list_contexts_and_never_the_forecast_target():
+    import perturb
+
+    class Forecaster(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.scale = torch.nn.Parameter(torch.tensor(2.0))
+
+        def forward(self, past_values, future_values=None):
+            return {
+                "mean_predictions": torch.stack(
+                    [self.scale * row[-3:] for row in past_values]
+                )
+            }
+
+    batch = {
+        "past_values": [torch.arange(1.0, 9.0), torch.arange(10.0, 15.0)],
+        "future_values": torch.zeros(2, 3),
+    }
+    result = perturb.sensitivity(Forecaster(), batch, threshold=1e-3)
+    assert result["pass"]
+    assert set(result["deltas"]) == {
+        "past_values:roll_batch",
+        "past_values:reverse",
+        "past_values:halve",
+    }
+    assert result["no_perturbation_defined"] == []

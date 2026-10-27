@@ -42,8 +42,35 @@ PERTURBATIONS = {
     "input_features": (roll_batch, reverse, halve),
     "input_values": (roll_batch, reverse, halve),
     "state": (roll_batch, reverse, halve),
+    # Time-series forecasters (TimesFM): one context series per row, possibly a
+    # list of 1-D tensors of different lengths.
+    "past_values": (roll_batch, reverse, halve),
 }
-NEVER = {"labels", "actions", "return_loss"}
+# Training targets are never perturbed; future_values is the forecasting target.
+NEVER = {"labels", "actions", "return_loss", "future_values"}
+
+
+def per_row(perturb, rows):
+    """Perturb a list of per-row tensors (variable-length contexts) like a batch."""
+    if perturb is roll_batch:
+        return rows[-1:] + rows[:-1]
+    return [perturb(row) for row in rows]
+
+
+def tensor_list(value):
+    return (
+        isinstance(value, (list, tuple))
+        and bool(value)
+        and all(isinstance(v, torch.Tensor) for v in value)
+    )
+
+
+def same(a, b):
+    if isinstance(a, torch.Tensor):
+        return torch.equal(a, b)
+    return len(a) == len(b) and all(
+        x.shape == y.shape and torch.equal(x, y) for x, y in zip(a, b)
+    )
 
 
 def logits_of(output):
@@ -71,15 +98,15 @@ def sensitivity(model, batch, threshold, accepted=None):
         base = logits_of(model(**batch))
         rows, undefined = {}, []
         for name, value in batch.items():
-            if name in NEVER or not isinstance(value, torch.Tensor):
+            if name in NEVER or not (isinstance(value, torch.Tensor) or tensor_list(value)):
                 continue
             if name not in PERTURBATIONS:
                 undefined.append(name)
                 continue
             for perturb in PERTURBATIONS[name]:
-                changed = perturb(value)
+                changed = perturb(value) if isinstance(value, torch.Tensor) else per_row(perturb, list(value))
                 key = f"{name}:{perturb.__name__}"
-                if torch.equal(changed, value):
+                if same(changed, value):
                     rows[key] = None  # not applicable to these inputs (e.g. no padding)
                     continue
                 rows[key] = max_delta(logits_of(model(**{**batch, name: changed})), base)
