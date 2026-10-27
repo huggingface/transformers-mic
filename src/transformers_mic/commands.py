@@ -178,6 +178,45 @@ def check_parameter_names(plan, config):
         )
 
 
+def check_config_facts(plan, config):
+    """Overrides must name real config fields; requires must cover the model's imports."""
+    full = config
+    try:  # config.json omits defaults; the config class knows every field
+        from transformers import CONFIG_MAPPING
+
+        full = CONFIG_MAPPING[config["model_type"]].from_dict(config).to_dict()
+    except Exception:
+        pass
+    for name, spec in plan["manifest"].get("fixtures", {}).items():
+        fields = (spec.get("build") or {}).get("config_overrides", {}).get("fields", {})
+        for path in fields:
+            node = full
+            for part in path.split(".")[:-1]:
+                node = node.get(part) if isinstance(node, dict) else None
+            if not isinstance(node, dict) or path.split(".")[-1] not in node:
+                subs = sorted(k for k, v in full.items() if isinstance(v, dict))
+                raise ValueError(
+                    f"config_overrides field {path!r} is not in the checkpoint config; "
+                    f"nested configs need their prefix, one of {subs}"
+                )
+    requires = " ".join(
+        plan["manifest"]["integrations"]["transformers"].get("requires", [])
+    )
+    text = json.dumps(config)
+    needed = [
+        package
+        for package, present in (
+            ("timm", '"timm_wrapper"' in text),
+            ("torchvision", "vision_config" in config),
+        )
+        if present and package not in requires
+    ]
+    if needed:
+        raise ValueError(
+            f"requires must list {needed}: the model's vision components import them"
+        )
+
+
 def propose_valid(context, args, model, fixture, old=None):
     # A provider can emit schema-valid JSON that violates runner conventions.
     # Return validation feedback for one repair; never execute an invalid draft.
@@ -192,6 +231,7 @@ def propose_valid(context, args, model, fixture, old=None):
             )
             validate_plan(plan, model, fixture, old)
             if context.get("config"):
+                check_config_facts(plan, context["config"])
                 check_parameter_names(plan, context["config"])
             return plan, llm
         except (ValueError, jsonschema.ValidationError) as exc:

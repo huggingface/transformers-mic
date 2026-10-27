@@ -1066,3 +1066,32 @@ def test_visible_usage_never_shows_runner_plumbing():
     assert commands.visible_plumbing(blocks) == [
         "model = AutoModel.from_pretrained(model_id, **variant).to(device)"
     ]
+
+
+def test_create_rejects_unknown_override_fields_and_missing_requires():
+    plan = {
+        "manifest": {
+            "fixtures": {
+                "org/fixture": {
+                    "build": {"config_overrides": {"fields": {"hidden_size": 64}}}
+                }
+            },
+            "integrations": {"transformers": {"requires": ["torch"]}},
+        }
+    }
+    config = {
+        "model_type": "not-a-registered-type",
+        "text_config": {"hidden_size": 1024},
+        "vision_config": {"model_type": "timm_wrapper"},
+    }
+    with pytest.raises(ValueError, match="text_config"):
+        commands.check_config_facts(plan, config)
+    fields = plan["manifest"]["fixtures"]["org/fixture"]["build"]["config_overrides"]
+    fields["fields"] = {"text_config.hidden_size": 64}
+    with pytest.raises(ValueError, match="timm.*torchvision"):
+        commands.check_config_facts(plan, config)
+    plan["manifest"]["integrations"]["transformers"]["requires"] += [
+        "timm",
+        "torchvision",
+    ]
+    commands.check_config_facts(plan, config)
