@@ -4,8 +4,9 @@ import hashlib
 import json
 from pathlib import Path
 import shutil
+import sys
 
-from . import resources
+from . import fleet, resources
 
 
 def read(path):
@@ -18,6 +19,19 @@ def write(path, value):
     temp = path.with_suffix(path.suffix + ".tmp")
     temp.write_text(json.dumps(value, indent=2, ensure_ascii=False) + "\n")
     temp.replace(path)
+
+
+def fleet_environment(catalog):
+    """Cloud baselines are measured in the fleet's CI image, so new contracts carry its environment."""
+    try:
+        path, _ = fleet.download("prototypes")
+        return read(path)["environment"]
+    except Exception as error:  # offline: fall back to the catalog's pinned environment
+        print(
+            f"warning: fleet environment unavailable ({error}); using the catalog's",
+            file=sys.stderr,
+        )
+        return catalog["environment"]
 
 
 def digest(files):
@@ -152,7 +166,7 @@ class Workspace:
             {
                 "framework": "transformers",
                 "contracts": {name: entry},
-                "environment": catalog["environment"],
+                "environment": fleet_environment(catalog),
                 "local_patches": catalog_patches(catalog, name),
             },
         )
@@ -200,7 +214,7 @@ class Workspace:
             self.lock_path,
             {
                 "framework": "transformers",
-                "environment": catalog["environment"],
+                "environment": fleet_environment(catalog),
                 "contracts": {
                     name: {
                         "integration": {

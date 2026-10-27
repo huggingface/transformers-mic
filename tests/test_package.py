@@ -6,7 +6,7 @@ import pytest
 
 from transformers_mic import commands, history, planner, policy, resources
 from transformers_mic.cli import main, parser
-from transformers_mic.workspace import Workspace, read, write
+from transformers_mic.workspace import Workspace, fleet_environment, read, write
 
 
 @pytest.fixture
@@ -971,6 +971,26 @@ def test_dataset_export_scopes_known_failures_and_uses_prototype_file(
     lock = json.loads(op.path_or_fileobj)
     assert lock["known_failures"]["Other/target"] == {"issue": "keep"}
     assert all(k.startswith(("Other/", "BERT/")) for k in lock["known_failures"])
+
+
+def test_new_contracts_carry_the_fleet_environment(tmp_path, monkeypatch, capsys):
+    from transformers_mic import fleet
+
+    lock = tmp_path / "prototype-fleet.lock"
+    write(lock, {"environment": {"torch": "2.14.0"}})
+    monkeypatch.setattr(fleet, "download", lambda name: (lock, "a" * 40))
+    assert fleet_environment({"environment": {"torch": "2.11.0"}}) == {
+        "torch": "2.14.0"
+    }
+
+    def offline(name):
+        raise OSError("no network")
+
+    monkeypatch.setattr(fleet, "download", offline)
+    assert fleet_environment({"environment": {"torch": "2.11.0"}}) == {
+        "torch": "2.11.0"
+    }
+    assert "fleet environment unavailable (no network)" in capsys.readouterr().err
 
 
 def test_dataset_export_rejects_environment_change(workspace, dataset):
