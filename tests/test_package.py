@@ -1095,3 +1095,15 @@ def test_create_rejects_unknown_override_fields_and_missing_requires():
         "torchvision",
     ]
     commands.check_config_facts(plan, config)
+
+
+def test_fp8_checkpoint_names_drop_their_scales():
+    from transformers_mic.inspection import logical_checkpoint_keys
+
+    config = SimpleNamespace(
+        model_type="minimax_m3_vl", quantization_config={"quant_method": "mxfp8"}
+    )
+    keys = {"layer.w1.weight", "layer.w1.weight_scale_inv", "norm.weight"}
+    assert logical_checkpoint_keys(config, keys) == {"layer.w1.weight", "norm.weight"}
+    with pytest.raises(ValueError, match="scale without its weight"):
+        logical_checkpoint_keys(config, {"layer.w2.weight_scale_inv"})

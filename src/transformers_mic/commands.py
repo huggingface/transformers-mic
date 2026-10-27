@@ -223,9 +223,12 @@ def check_config_facts(plan, config):
         )
         if present and package not in requires
     ]
+    if "device_map" in plan.get("usage", "") and "accelerate" not in requires:
+        needed.append("accelerate")
     if needed:
         raise ValueError(
-            f"requires must list {needed}: the model's vision components import them"
+            f"requires must list {needed}: the model's components or loading options "
+            "(vision towers, device_map) import them"
         )
 
 

@@ -144,10 +144,18 @@ def inspect_checkpoint(cls, source, repo, revision):
 
 
 def logical_checkpoint_keys(config, keys):
-    """Inspect GPT-OSS MXFP4 presence for a dense slim; do not decode weights."""
+    """Map quantized checkpoint names to the dense slim's names; do not decode weights."""
     quantization = getattr(config, "quantization_config", None)
     if not quantization:
         return keys
+    if quantization.get("quant_method") in ("fp8", "mxfp8"):
+        # Block-wise FP8: each quantized `.weight` keeps its name and gains a
+        # `.weight_scale_inv` sibling; the scales are not parameters of a dense model.
+        scales = {k for k in keys if k.endswith(".weight_scale_inv")}
+        orphans = [k for k in scales if k.removesuffix("_scale_inv") not in keys]
+        if orphans:
+            raise ValueError(f"FP8 scale without its weight: {sorted(orphans)[:3]}")
+        return set(keys) - scales
     if config.model_type != "gpt_oss" or quantization.get("quant_method") != "mxfp4":
         raise ValueError("Quantized checkpoint needs a reviewed parameter-name adapter")
     logical = set(keys)

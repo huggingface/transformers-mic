@@ -182,6 +182,8 @@ not memory:
 - Train through the model's public forward (model(**inputs)), never a private
   method; if the public forward runs under inference mode (e.g. video/streaming
   models), use the architecture's image or base model class for the training step.
+- Image processor classes have no Fast suffix in Transformers 5 (use
+  XImageProcessor, not XImageProcessorFast). device_map needs accelerate in requires.
 - CPU runners are memory-limited containers: a checkpoint above ~1B parameters
   declares "devices": ["cuda"] in its resources, so CPU measures only the slim
   fixture and the checkpoint runs on GPU. The exclusion stays visible in results.
