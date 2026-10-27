@@ -176,4 +176,7 @@ not memory:
   gradients on trained parameters and check that one frozen parameter has
   grad None. Declare resources per checkpoint (memory_gb, gpu_memory_gb, and a
   variants.bfloat16 override) from the real parameter count; do not guess low.
+- CPU runners are memory-limited containers: a checkpoint above ~1B parameters
+  declares "devices": ["cuda"] in its resources, so CPU measures only the slim
+  fixture and the checkpoint runs on GPU. The exclusion stays visible in results.
 """
