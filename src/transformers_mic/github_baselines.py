@@ -289,17 +289,19 @@ def run_locked(args, root):
         if job.get("run_id")
         else find_run(job["id"])
     )
-    if (
-        remote
-        and remote.get("conclusion") == "cancelled"
-        and remote["status"] == "completed"
-    ):
-        archive = root / "cancelled" / job["id"]
+    ended = (
+        remote.get("conclusion") if remote and remote["status"] == "completed" else None
+    )
+    # A retry after a cancelled or failed run must measure again, not re-read the
+    # old run; its artifacts were already downloaded and are kept in the archive.
+    if ended in ("cancelled", "failure", "timed_out"):
+        kept = "cancelled" if ended == "cancelled" else "failed"
+        archive = root / kept / job["id"]
         archive.mkdir(parents=True, exist_ok=True)
         for item in root.iterdir():
-            if item.name not in {".cloud.lock", "cancelled"}:
+            if item.name not in {".cloud.lock", "cancelled", "failed"}:
                 shutil.move(str(item), archive / item.name)
-        print("Previous run was cancelled; starting a fresh collection.", flush=True)
+        print(f"Previous run {ended}; starting a fresh collection.", flush=True)
         return run_locked(args, root)
     if not remote and not state.get("dispatch_attempted"):
         # Persist before submission. An ambiguous timeout must never allocate

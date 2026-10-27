@@ -165,8 +165,11 @@ def test_interrupt_finished_run_does_not_prompt(tmp_path, monkeypatch):
     github.interrupt(tmp_path)
 
 
-def test_cancelled_collection_is_archived_before_fresh_submission(
-    tmp_path, monkeypatch
+@pytest.mark.parametrize(
+    ("conclusion", "kept"), [("cancelled", "cancelled"), ("failure", "failed")]
+)
+def test_ended_collection_is_archived_before_fresh_submission(
+    tmp_path, monkeypatch, conclusion, kept
 ):
     from types import SimpleNamespace
     from transformers_mic import github_baselines as github
@@ -190,16 +193,14 @@ def test_cancelled_collection_is_archived_before_fresh_submission(
     (tmp_path / "partial.txt").write_text("preserve evidence")
     (tmp_path / ".cloud.lock").touch()
     monkeypatch.setattr(
-        github, "api", lambda path: {"status": "completed", "conclusion": "cancelled"}
+        github, "api", lambda path: {"status": "completed", "conclusion": conclusion}
     )
     run_locked = github.run_locked
 
     def fresh(args, root):
         assert not (root / "cloud.json").exists()
-        assert (root / "cancelled/old-job/cloud.json").exists()
-        assert (
-            root / "cancelled/old-job/partial.txt"
-        ).read_text() == "preserve evidence"
+        assert (root / kept / "old-job/cloud.json").exists()
+        assert (root / kept / "old-job/partial.txt").read_text() == "preserve evidence"
         assert (root / ".cloud.lock").exists()
         return 42
 
