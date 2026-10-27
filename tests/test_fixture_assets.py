@@ -316,3 +316,28 @@ def test_numeric_health_accepts_masked_logits_but_not_nan(tmp_path, fill, health
 
     rows = build_fixtures.numeric_health(Masked, tmp_path, {"x": torch.ones(2, 2)})
     assert all(row["finite"] is healthy for row in rows.values()), rows
+
+
+def test_numeric_health_rejects_infinities_float32_does_not_have(tmp_path):
+    class Output(dict):
+        __getattr__ = dict.__getitem__
+
+    class Overflow(torch.nn.Module):
+        def __init__(self, dtype):
+            super().__init__()
+            self.dtype_ = dtype
+            self.proj = torch.nn.Linear(2, 3)
+
+        @classmethod
+        def from_pretrained(cls, folder, dtype):
+            return cls(dtype)
+
+        def forward(self, x):
+            logits = self.proj(x)
+            if self.dtype_ == torch.float16:
+                logits = logits + float("inf")
+            return Output(logits=logits, loss=logits.float().clamp(max=1).pow(2).mean())
+
+    rows = build_fixtures.numeric_health(Overflow, tmp_path, {"x": torch.ones(2, 2)})
+    assert rows["float32"]["finite"] and rows["bfloat16"]["finite"]
+    assert not rows["float16"]["finite"]

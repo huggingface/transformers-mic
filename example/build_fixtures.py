@@ -403,8 +403,14 @@ def called_module(model, captured):
 
 
 def numeric_health(cls, folder, batch, captured=None):
-    """Reload the saved fixture per dtype; forward and backward must stay finite."""
-    rows = {}
+    """Reload the saved fixture per dtype; forward and backward must stay finite.
+
+    Some models put infinities in their outputs on purpose (-inf logits at padded
+    text positions, +inf coordinates for masked proposals). Non-finite values are
+    healthy only where float32 has them too; NaN never is. Unscaled float16
+    gradients are reported but do not gate: float16 training needs a loss scaler.
+    """
+    rows, structural = {}, {}
     for name in DTYPES:
         dtype = getattr(torch, name)
         row = {}
@@ -413,17 +419,22 @@ def numeric_health(cls, folder, batch, captured=None):
             with torch.autocast("cpu", dtype=dtype, enabled=dtype != torch.float32):
                 output = model(**as_dtype(batch, dtype))
             logits = logits_of(output)
-            # -inf is a masked logit (e.g. padded text positions), not an overflow.
+            masks = {k: ~torch.isfinite(t) for k, t in logits.items()}
+            if dtype == torch.float32:
+                structural = masks
             row["outputs_finite"] = all(
-                bool((torch.isfinite(t) | (t == float("-inf"))).all() and torch.isfinite(t).any())
-                for t in logits.values()
+                not bool(t.isnan().any())
+                and bool(torch.isfinite(t).any())
+                and (k not in structural or torch.equal(masks[k], structural[k]))
+                for k, t in logits.items()
             )
             if output.get("loss") is not None:
                 output.loss.backward()
                 grads = [p.grad for p in model.parameters() if p.grad is not None]
                 row["loss_finite"] = bool(torch.isfinite(output.loss))
-                row["gradients_finite"] = bool(grads) and all(bool(torch.isfinite(g).all()) for g in grads)
-            row["finite"] = all(v for k, v in row.items() if k.endswith("finite"))
+                finite = bool(grads) and all(bool(torch.isfinite(g).all()) for g in grads)
+                row["gradients_finite" if dtype != torch.float16 else "unscaled_gradients_finite"] = finite
+            row["finite"] = all(v for k, v in row.items() if k.endswith("_finite") and not k.startswith("unscaled"))
         except Exception as exc:  # noqa: BLE001 - recorded, then fails the build below
             row = {"finite": False, "error": f"{type(exc).__name__}: {exc}"[:300]}
         rows[name] = row
