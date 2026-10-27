@@ -279,6 +279,13 @@ def publish(root, execute=False):
         )
         if not execute or repo in publications:
             continue
+        title = "Review cloud MIC baselines " + state["job"]["id"]
+        # A call that stalled after the Hub opened the PR left no receipt: adopt that PR.
+        if existing := open_pull_request(repo, title):
+            publications[repo] = {**existing, "collection": fingerprint(reports)}
+            write(Path(root) / "cloud.json", state)
+            print(json.dumps(publications[repo]))
+            continue
         result = HfApi().create_commit(
             repo_id=repo,
             repo_type="model",
@@ -288,7 +295,7 @@ def publish(root, execute=False):
                 CommitOperationAdd(path_in_repo=name, path_or_fileobj=path.read_bytes())
                 for name, path in sorted(group["files"].items())
             ],
-            commit_message="Review cloud MIC baselines " + state["job"]["id"],
+            commit_message=title,
             commit_description="Measured and independently validated on CPU and CUDA. Review reasons: "
             + json.dumps(receipt["approved"], sort_keys=True),
         )
@@ -300,6 +307,16 @@ def publish(root, execute=False):
         write(Path(root) / "cloud.json", state)
         print(json.dumps(publications[repo]))
     return 0
+
+
+def open_pull_request(repo, title):
+    api = HfApi()
+    for discussion in api.get_repo_discussions(repo, discussion_type="pull_request"):
+        if discussion.status == "open" and discussion.title == title:
+            details = api.get_discussion_details(repo, discussion.num)
+            commits = [e for e in details.events if e.type == "commit"]
+            return {"revision": commits[-1].oid, "url": discussion.url}
+    return None
 
 
 def upload(root, repository, execute):

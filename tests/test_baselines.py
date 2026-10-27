@@ -223,6 +223,9 @@ def test_publishing_opens_hub_prs_and_never_writes_unreviewed_values(
     commits = []
 
     class Api:
+        def get_repo_discussions(self, repo, discussion_type):
+            return []
+
         def create_commit(self, **kwargs):
             commits.append(kwargs)
             return SimpleNamespace(
@@ -238,6 +241,35 @@ def test_publishing_opens_hub_prs_and_never_writes_unreviewed_values(
     assert len(commits[0]["operations"]) == 2
     assert baselines.publish(tmp_path, True) == 0
     assert len(commits) == 1
+
+
+def test_publishing_adopts_a_pr_opened_by_a_stalled_call(tmp_path, monkeypatch):
+    state = make_collection(tmp_path)
+    assert baselines.review(tmp_path, approve=True) == 0
+    title = "Review cloud MIC baselines " + state["job"]["id"]
+    url = "https://huggingface.co/example/discussions/3"
+
+    class Api:
+        def get_repo_discussions(self, repo, discussion_type):
+            return [
+                SimpleNamespace(num=2, status="closed", title=title, url="closed"),
+                SimpleNamespace(num=3, status="open", title=title, url=url),
+            ]
+
+        def get_discussion_details(self, repo, num):
+            assert num == 3
+            return SimpleNamespace(
+                events=[SimpleNamespace(type="commit", oid="2" * 40)]
+            )
+
+        def create_commit(self, **kwargs):
+            raise AssertionError("opened a duplicate PR")
+
+    monkeypatch.setattr(baselines, "HfApi", Api)
+    assert baselines.publish(tmp_path, True) == 0
+    (publication,) = read(tmp_path / "cloud.json")["publications"].values()
+    assert publication["revision"] == "2" * 40
+    assert publication["url"] == url
 
 
 def test_cli_submission_download_resume_and_upload_receipt(tmp_path, monkeypatch):
