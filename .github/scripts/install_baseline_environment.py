@@ -70,16 +70,15 @@ def main():
         ],
         check=True,
     )
-    torch = {"torch", "torchvision", "torchaudio"}
-    torch_pins = [
-        f"{key}=={value}" for key, value in environment.items() if key in torch
-    ]
+    torch = {"torch", "torchvision", "torchaudio", "torchcodec"}
+    # The torch stack comes from the Transformers source being measured, exactly as
+    # its own CI images install it, so baselines and CI run the same kernels.
+    torch_pins, index = transformers_torch_stack(checkout)
     other_pins = [
         f"{key}=={value}"
         for key, value in environment.items()
         if key not in torch | {"python", "transformers"}
     ]
-    index = "cpu" if not os.environ.get("CUDA_VISIBLE_DEVICES") else "cu128"
     if torch_pins:
         subprocess.run(
             [
@@ -94,13 +93,34 @@ def main():
         subprocess.run([*pip, *other_pins], check=True)
     subprocess.run([sys.executable, "-m", "pip", "check"], check=True)
     for key, expected in environment.items():
-        if key in ("python", "transformers"):
-            continue  # Python belongs to the pinned image; framework to the requested SHA.
+        if key in {"python", "transformers"} | torch:
+            continue  # Python belongs to the image; framework and torch to the requested SHA.
         if (
             importlib.metadata.version(key).split("+", 1)[0]
             != expected.split("+", 1)[0]
         ):
             raise ValueError(f"Dependency drift: {key}")
+
+
+def transformers_torch_stack(checkout):
+    """Torch requirements and wheel index from Transformers' CI Dockerfiles."""
+    if not os.environ.get("CUDA_VISIBLE_DEVICES"):
+        # docker/torch-light.dockerfile: uv pip install 'torch<=X' 'torchaudio' ... --index-url .../cpu
+        text = (checkout / "docker/torch-light.dockerfile").read_text()
+        line = next(
+            line for line in text.splitlines()
+            if "pip install" in line and re.search(r"[\s']torch[<=>' ]", line)
+        )
+        specs = re.findall(r"'(torch[a-z]*[^']*)'", line)
+        if not any(re.split(r"[<>=!~ ]", spec)[0] == "torch" for spec in specs):
+            raise ValueError(f"No torch requirement in torch-light.dockerfile: {line}")
+        return specs, "cpu"
+    # docker/transformers-all-latest-gpu/Dockerfile: ARG PYTORCH='X', ARG CUDA='cuNNN'
+    text = (checkout / "docker/transformers-all-latest-gpu/Dockerfile").read_text()
+    args = dict(re.findall(r"^ARG (PYTORCH|CUDA)='([^']+)'", text, re.M))
+    if set(args) != {"PYTORCH", "CUDA"}:
+        raise ValueError("No PYTORCH/CUDA args in transformers-all-latest-gpu/Dockerfile")
+    return [f"torch=={args['PYTORCH']}", "torchvision", "torchaudio"], args["CUDA"]
 
 
 if __name__ == "__main__":
