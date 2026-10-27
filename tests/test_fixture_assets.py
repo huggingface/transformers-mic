@@ -257,3 +257,22 @@ def test_sensitivity_perturbs_list_contexts_and_never_the_forecast_target():
         "past_values:halve",
     }
     assert result["no_perturbation_defined"] == []
+
+
+@pytest.mark.parametrize(
+    "model_type,heads_key",
+    [("pvt", "num_attention_heads"), ("swin", "num_heads")],
+)
+def test_shrink_keeps_per_stage_heads_dividing_per_stage_widths(model_type, heads_key):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import AutoConfig
+
+    original = {"pvt": [1, 2, 5, 8], "swin": [3, 6, 12, 24]}[model_type]
+    config = shrink(AutoConfig.for_model(model_type, **{heads_key: original}))
+    heads = getattr(config, heads_key)
+    widths = getattr(config, "hidden_sizes", None) or [
+        config.embed_dim * 2**i for i in range(len(config.depths))
+    ]
+    assert all(w % h == 0 for w, h in zip(widths, heads))
+    assert all(1 <= h <= o for h, o in zip(heads, original))

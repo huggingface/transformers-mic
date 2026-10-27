@@ -199,6 +199,17 @@ def shrink(config):
             values["hidden_sizes"] = [16 * 2**i for i in range(len(values["hidden_sizes"]))]
         if isinstance(values.get("depths"), list):
             values["depths"] = [1] * len(values["depths"])
+        # Per-stage head counts must divide the shrunk per-stage widths (PVT's
+        # hidden_sizes, Swin's embed_dim doubling per stage): keep the largest
+        # head count, no more than the original, that does.
+        stages = values.get("hidden_sizes")
+        if not isinstance(stages, list) and isinstance(values.get("embed_dim"), int) and isinstance(values.get("depths"), list):
+            stages = [values["embed_dim"] * 2**i for i in range(len(values["depths"]))]
+        if isinstance(stages, list):
+            for key in ("num_attention_heads", "num_heads"):
+                heads = values.get(key)
+                if isinstance(heads, list) and len(heads) == len(stages):
+                    values[key] = [max(d for d in range(1, h + 1) if w % d == 0) for w, h in zip(stages, heads)]
         # Layer-indexed backbones name outputs after the real depth; let them default.
         # Stage-based ones (depths per stage) keep their stage count, so keep them.
         if not isinstance(values.get("depths"), list):
