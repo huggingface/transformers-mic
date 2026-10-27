@@ -52,6 +52,7 @@ import contextlib
 import hashlib
 import importlib.metadata
 import io
+import inspect
 import json
 import os
 import platform
@@ -282,11 +283,21 @@ def captured_calls():
 
     def recording(self, *args, **kwargs):
         if depth[0] == 0:
+            named = dict(kwargs)
+            if args:  # model(pixel_values) passes inputs positionally; replay needs their names
+                try:
+                    bound = inspect.signature(self.forward).bind_partial(*args, **kwargs).arguments
+                except TypeError:
+                    bound = {}
+                extra = {k for k, p in inspect.signature(self.forward).parameters.items() if p.kind == p.VAR_KEYWORD}
+                named = {k: v for k, v in bound.items() if k not in extra}
+                for key in extra:
+                    named.update(bound.get(key, {}))
             calls.append(
                 {
                     "training": self.training,
                     "class": type(self).__name__,
-                    "kwargs": {k: v.detach().clone() if isinstance(v, torch.Tensor) else v for k, v in kwargs.items()},
+                    "kwargs": {k: v.detach().clone() if isinstance(v, torch.Tensor) else v for k, v in named.items()},
                 }
             )
         depth[0] += 1

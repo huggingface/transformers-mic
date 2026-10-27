@@ -157,3 +157,16 @@ def test_shrink_keeps_stage_backbone_outputs_and_matches_encoder_channels():
     assert config.encoder_in_channels == [
         backbone.hidden_sizes[i - 1] for i in backbone.out_indices
     ]
+
+
+def test_capture_names_positional_model_inputs():
+    from transformers import BertConfig, BertModel
+
+    model = BertModel(
+        BertConfig(hidden_size=8, num_hidden_layers=1, num_attention_heads=2, intermediate_size=8)
+    )
+    ids = torch.tensor([[1, 2, 3]])
+    with build_fixtures.captured_calls() as calls:
+        model(ids, attention_mask=torch.ones_like(ids))
+    assert set(calls[0]["kwargs"]) == {"input_ids", "attention_mask"}
+    assert torch.equal(calls[0]["kwargs"]["input_ids"], ids)

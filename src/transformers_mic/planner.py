@@ -176,6 +176,12 @@ not memory:
   gradients on trained parameters and check that one frozen parameter has
   grad None. Declare resources per checkpoint (memory_gb, gpu_memory_gb, and a
   variants.bfloat16 override) from the real parameter count; do not guess low.
+- A checkpoint stored in float16 (config dtype/torch_dtype "float16") cannot train
+  without loss scaling: load the visible model with dtype=torch.float32 (the
+  bfloat16 variant still overrides it), and say why in a comment.
+- Train through the model's public forward (model(**inputs)), never a private
+  method; if the public forward runs under inference mode (e.g. video/streaming
+  models), use the architecture's image or base model class for the training step.
 - CPU runners are memory-limited containers: a checkpoint above ~1B parameters
   declares "devices": ["cuda"] in its resources, so CPU measures only the slim
   fixture and the checkpoint runs on GPU. The exclusion stays visible in results.
