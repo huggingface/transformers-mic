@@ -189,7 +189,16 @@ migrated to the single `<name>-mic` layout before this publication path.
    before allocating ARC runners. CPU and CUDA dependencies come from the same
    pinned fleet environment; doc-builder has an explicit commit pin. Runtime
    details and the full package list are recorded in the collection.
-6. Configure `HF_HUB_READ_TOKEN` for required gated/private snapshots. For direct
+6. Grant `HF_HUB_READ_TOKEN` to `huggingface/transformers-mic`. It is the
+   `huggingface` **organization** secret Transformers' own CI uses for gated test
+   checkpoints (exposed there as `HF_TOKEN`); an org admin adds this repository to
+   the secret's selected repositories, so there is no separate token to create or
+   rotate. `cloud-baselines.yml` and `nightly.yml` pass it as `HF_TOKEN`. Without
+   it the runner logs "You are sending unauthenticated requests to the HF Hub" and
+   every gated checkpoint (Gemma, Llama) fails with `401 GatedRepoError`, on CPU
+   and CUDA alike; slim fixtures are public and unaffected. `tmic create` warns
+   when a checkpoint is gated. The token's account must have accepted each gated
+   model's license. For direct
    upload, configure `MIC_BASELINE_WRITE_TOKEN`, restricted to the intended Hub
    namespace. Set `MIC_BASELINE_UPLOAD_NAMESPACES` (CSV; default `huggingface-mic`)
    and matching dashboard `traceExporter.micJobs.uploadNamespaces` if needed.

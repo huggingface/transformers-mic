@@ -47,6 +47,8 @@ jobs:
       REF: ${{ inputs.transformers_ref || 'main' }}
       MODE: ${{ inputs.mode || 'check' }}
       EVENT: ${{ github.event_name }}
+      # Gated checkpoints (Gemma, Llama): the huggingface org secret Transformers CI uses
+      HF_TOKEN: ${{ secrets.HF_HUB_READ_TOKEN }}
       HF_HOME: /mnt/cache
       HF_HUB_DISABLE_PROGRESS_BARS: "1"
       CUBLAS_WORKSPACE_CONFIG: ":4096:8"
