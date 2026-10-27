@@ -27,6 +27,8 @@ def main(root):
         "fleets": os.environ["FLEETS"].split(","),
         "fixtures_only": os.environ["FIXTURES_ONLY"] == "true",
     }
+    if exclude := sorted({n for n in os.environ.get("EXCLUDE", "").split(",") if n}):
+        request["exclude"] = exclude
     if workspace := cloud_inputs.from_env():
         request["workspace"] = workspace
     write(
