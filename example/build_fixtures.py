@@ -402,12 +402,18 @@ def called_module(model, captured):
     return matches[0]
 
 
+def masked_like(mask, reference, tolerance=0.01):
+    return mask.shape == reference.shape and float((mask != reference).float().mean()) <= tolerance
+
+
 def numeric_health(cls, folder, batch, captured=None):
     """Reload the saved fixture per dtype; forward and backward must stay finite.
 
     Some models put infinities in their outputs on purpose (-inf logits at padded
     text positions, +inf coordinates for masked proposals). Non-finite values are
-    healthy only where float32 has them too; NaN never is. Unscaled float16
+    healthy only where float32 has them too, up to 1% of elements (a train-mode
+    forward is not bit-identical across dtypes, so a value-dependent mask can shift
+    slightly; an overflow is not that small); NaN never is. Unscaled float16
     gradients are reported but do not gate: float16 training needs a loss scaler.
     """
     rows, structural = {}, {}
@@ -425,7 +431,7 @@ def numeric_health(cls, folder, batch, captured=None):
             row["outputs_finite"] = all(
                 not bool(t.isnan().any())
                 and bool(torch.isfinite(t).any())
-                and (k not in structural or torch.equal(masks[k], structural[k]))
+                and (k not in structural or masked_like(masks[k], structural[k]))
                 for k, t in logits.items()
             )
             if output.get("loss") is not None:
