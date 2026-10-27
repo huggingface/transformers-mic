@@ -252,7 +252,12 @@ def shrink(config):
             rope["mrope_section"] = kept
         # LongRoPE keeps one factor per rotary frequency; resample to the resized head.
         if isinstance(rope, dict) and isinstance(rope.get("short_factor"), list):
-            head = values.get("head_dim") or values["hidden_size"] // values["num_attention_heads"]
+            # MLA models (MiniCPM3, DeepSeek) rotate only qk_rope_head_dim channels.
+            head = (
+                values.get("qk_rope_head_dim")
+                or values.get("head_dim")
+                or values["hidden_size"] // values["num_attention_heads"]
+            )
             partial = rope.get("partial_rotary_factor", values.get("partial_rotary_factor", 1.0))
             half = int(head * partial) // 2
             for key in ("short_factor", "long_factor"):

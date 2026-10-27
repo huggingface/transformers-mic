@@ -163,7 +163,12 @@ def test_capture_names_positional_model_inputs():
     from transformers import BertConfig, BertModel
 
     model = BertModel(
-        BertConfig(hidden_size=8, num_hidden_layers=1, num_attention_heads=2, intermediate_size=8)
+        BertConfig(
+            hidden_size=8,
+            num_hidden_layers=1,
+            num_attention_heads=2,
+            intermediate_size=8,
+        )
     )
     ids = torch.tensor([[1, 2, 3]])
     with build_fixtures.captured_calls() as calls:
@@ -195,5 +200,31 @@ def test_shrink_drops_the_checkpoint_quantization_config():
     from sweep import shrink
     from transformers import LlamaConfig
 
-    config = LlamaConfig(quantization_config={"quant_method": "fp8", "weight_block_size": [128, 128]})
+    config = LlamaConfig(
+        quantization_config={"quant_method": "fp8", "weight_block_size": [128, 128]}
+    )
     assert getattr(shrink(config), "quantization_config", None) is None
+
+
+def test_shrink_resamples_longrope_factors_to_the_mla_rotary_width():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import AutoConfig
+
+    config = AutoConfig.for_model(
+        "minicpm3",
+        qk_rope_head_dim=32,
+        rope_scaling={
+            "type": "longrope",
+            "short_factor": [1.0 + i for i in range(16)],
+            "long_factor": [2.0 + i for i in range(16)],
+            "original_max_position_embeddings": 4096,
+        },
+    )
+    shrunk = shrink(config)
+    rope = shrunk.rope_parameters
+    assert (
+        len(rope["short_factor"])
+        == len(rope["long_factor"])
+        == shrunk.qk_rope_head_dim // 2
+    )
