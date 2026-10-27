@@ -1,5 +1,7 @@
 # MIC for Transformers maintainers
 
+Published: [tarekziade/mic-slides](https://huggingface.co/spaces/tarekziade/mic-slides) · [Open the slides directly](https://tarekziade-mic-slides.static.hf.space).
+
 Open [index.html](index.html) in a browser. This is a 9-slide async reading guide
 covering MIC's purpose, the automated model recipe, executable usage, assertions,
 fast CPU checks in CI, how to respond to a failure, and proposed Hub discovery for agents.
