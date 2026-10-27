@@ -236,6 +236,36 @@ def interrupt(root, *, interactive=True):
         )
 
 
+def download(run_id, directory, attempts=3):
+    """Download a run's artifacts, retrying dropped connections on a clean directory."""
+    for attempt in range(1, attempts + 1):
+        try:
+            subprocess.run(
+                [
+                    "gh",
+                    "run",
+                    "download",
+                    str(run_id),
+                    "--repo",
+                    REPO,
+                    "--dir",
+                    str(directory),
+                ],
+                check=True,
+            )
+            return
+        except subprocess.CalledProcessError:
+            if attempt == attempts:
+                raise
+            for child in directory.iterdir():
+                shutil.rmtree(child) if child.is_dir() else child.unlink()
+            print(
+                f"Artifact download failed; retrying ({attempt}/{attempts - 1})",
+                flush=True,
+            )
+            time.sleep(10 * attempt)
+
+
 def run_locked(args, root):
     state_path = root / "cloud.json"
     options = {
@@ -353,19 +383,7 @@ def run_locked(args, root):
     # provenance, complete case matrix and content hashes before review/upload.
     cloud_progress.display({"status": "downloading results", "run_url": job["run_url"]})
     with tempfile.TemporaryDirectory(dir=root) as directory:
-        subprocess.run(
-            [
-                "gh",
-                "run",
-                "download",
-                str(remote["id"]),
-                "--repo",
-                REPO,
-                "--dir",
-                directory,
-            ],
-            check=True,
-        )
+        download(remote["id"], Path(directory))
         for profile in ("cpu", "cuda"):
             source = Path(directory) / ("mic-baselines-" + profile)
             if source.exists():

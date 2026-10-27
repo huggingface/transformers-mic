@@ -114,3 +114,20 @@ def test_watcher_reports_actual_step_and_queue_without_native_watch(monkeypatch)
     assert helper.watch(123)["conclusion"] == "success"
     assert len(views) == 2 and views[0]["workflow_jobs"][0]["total_steps"] == 0
     assert all("123" in call for call in calls)
+
+
+def test_download_retries_a_dropped_connection_on_a_clean_directory(
+    tmp_path, monkeypatch
+):
+    calls = []
+
+    def run(command, check):
+        calls.append(sorted(p.name for p in tmp_path.iterdir()))
+        (tmp_path / "partial").mkdir(exist_ok=True)
+        if len(calls) == 1:
+            raise subprocess.CalledProcessError(1, command)
+
+    monkeypatch.setattr(helper.subprocess, "run", run)
+    monkeypatch.setattr(helper.time, "sleep", lambda seconds: None)
+    helper.download(7, tmp_path)
+    assert calls == [[], []]
