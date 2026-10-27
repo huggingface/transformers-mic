@@ -81,7 +81,17 @@ def logits_of(output):
 
 
 def max_delta(a, b):
-    return max(float((a[k].float() - b[k].float()).abs().max()) for k in a)
+    """Largest change across output tensors. Matching infinities (e.g. -inf logits
+    at masked text positions) are unchanged; an infinity that moves is an infinite
+    change; a NaN anywhere stays NaN, so it fails the gate."""
+    deltas = []
+    for k in a:
+        x, y = a[k].float(), b[k].float()
+        if x.isnan().any() or y.isnan().any():
+            return float("nan")
+        delta = (x - y).abs().masked_fill(x == y, 0)
+        deltas.append(float(torch.nan_to_num(delta, nan=float("inf"), posinf=float("inf")).max()))
+    return max(deltas)
 
 
 def sensitivity(model, batch, threshold, accepted=None):

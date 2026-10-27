@@ -276,3 +276,17 @@ def test_shrink_keeps_per_stage_heads_dividing_per_stage_widths(model_type, head
     ]
     assert all(w % h == 0 for w, h in zip(widths, heads))
     assert all(1 <= h <= o for h, o in zip(heads, original))
+
+
+def test_max_delta_ignores_matching_infinities_but_keeps_nan():
+    import perturb
+
+    inf = float("inf")
+    base = {"logits": torch.tensor([[1.0, -inf], [2.0, -inf]])}
+    moved = {"logits": torch.tensor([[1.5, -inf], [2.0, -inf]])}
+    assert perturb.max_delta(moved, base) == 0.5
+    assert perturb.max_delta(base, base) == 0.0
+    unmasked = {"logits": torch.tensor([[1.0, 0.0], [2.0, -inf]])}
+    assert perturb.max_delta(unmasked, base) == inf
+    broken = {"logits": torch.tensor([[float("nan"), -inf], [2.0, -inf]])}
+    assert perturb.max_delta(broken, base) != perturb.max_delta(broken, base)
