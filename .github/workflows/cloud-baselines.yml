@@ -24,6 +24,11 @@ on:
         required: true
         type: string
         default: "false"
+      exclude:
+        description: "Comma-separated fleet contracts to leave out (their baselines stay unchanged)"
+        required: false
+        type: string
+        default: ""
       upload_repo:
         required: false
         type: string
@@ -92,6 +97,7 @@ jobs:
               assert re.fullmatch(r"[a-f0-9]{40}", os.environ[key]), key
           assert os.environ["FLEETS"] in ("control", "prototypes", "control,prototypes")
           assert os.environ["FIXTURES_ONLY"] in ("true", "false")
+          assert re.fullmatch(r"([A-Za-z0-9][A-Za-z0-9_.-]*(,[A-Za-z0-9][A-Za-z0-9_.-]*)*)?", os.environ["EXCLUDE"])
           workspace_repo = os.environ["MIC_WORKSPACE_REPO"]
           workspace_revision = os.environ["MIC_WORKSPACE_REVISION"]
           if workspace_repo or workspace_revision:
@@ -147,6 +153,7 @@ jobs:
       MIC_SHA: ${{ inputs.mic_sha }}
       FLEETS: ${{ inputs.fleets }}
       FIXTURES_ONLY: ${{ inputs.fixtures_only }}
+      EXCLUDE: ${{ inputs.exclude }}
       MIC_TRANSFORMERS_CHECKOUT: /tmp/mic-transformers
       MIC_BASELINE_IMAGE: ${{ matrix.profile == 'cpu' && needs.validate.outputs.cpu_image || needs.validate.outputs.gpu_image }}
       MIC_PROGRESS_URL: ${{ vars.MIC_PROGRESS_URL || 'https://serge.huggingface.tech/dashboard/mic-progress' }}
@@ -172,7 +179,7 @@ jobs:
           python -m transformers_mic.baseline_worker \
             --job-id "$JOB_ID" --fleet-revision "$FLEET_REVISION" \
             --transformers-sha "$TRANSFORMERS_SHA" --mic-sha "$MIC_SHA" \
-            --fleets "$FLEETS" --profile "$PROFILE" --out "$GITHUB_WORKSPACE/out" "${options[@]}"
+            --fleets "$FLEETS" --exclude "$EXCLUDE" --profile "$PROFILE" --out "$GITHUB_WORKSPACE/out" "${options[@]}"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         if: always()
         with:
@@ -221,6 +228,7 @@ jobs:
           MIC_SHA: ${{ inputs.mic_sha }}
           FLEETS: ${{ inputs.fleets }}
           FIXTURES_ONLY: ${{ inputs.fixtures_only }}
+          EXCLUDE: ${{ inputs.exclude }}
           UPLOAD_REPO: ${{ inputs.upload_repo }}
           UPLOAD_NAMESPACES: ${{ vars.MIC_BASELINE_UPLOAD_NAMESPACES || 'huggingface-mic' }}
           MIC_PROGRESS_URL: ${{ vars.MIC_PROGRESS_URL || 'https://serge.huggingface.tech/dashboard/mic-progress' }}

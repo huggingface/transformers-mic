@@ -140,6 +140,14 @@ See 'tmic run --help' for the protocol and exit codes.""",
                 help="Explicitly exclude real checkpoints",
             )
             command.add_argument(
+                "--exclude",
+                action="append",
+                default=[],
+                metavar="CONTRACT",
+                help="Leave a fleet contract out of this collection; its published "
+                "baselines stay as they are (repeatable, GitHub transport)",
+            )
+            command.add_argument(
                 "--no-wait",
                 action="store_true",
                 help="Submit without waiting; repeat to resume",

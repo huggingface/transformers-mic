@@ -81,6 +81,8 @@ def collection(root):
             or report["profile"] != profile
         ):
             raise ValueError("Artifact provenance does not match the requested job")
+        if request.get("exclude", []) != state["job"].get("exclude", []):
+            raise ValueError("Artifact exclusions do not match the requested job")
         if request.get("workspace") != state["job"].get("workspace"):
             raise ValueError("Artifact model input does not match the requested job")
         if not report.get("complete") or not report.get("cases"):
@@ -367,8 +369,11 @@ def run(args):
                 upload_repo=args.upload_repo or "",
                 transformers_ref=args.transformers_ref,
                 model_workspace=args.model_workspace,
+                exclude=args.exclude,
             )
         )
+    if getattr(args, "exclude", None):
+        raise ValueError("--exclude requires --transport github")
     root = Path(args.out).resolve()
     root.mkdir(parents=True, exist_ok=True)
     try:

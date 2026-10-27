@@ -275,6 +275,11 @@ def run_locked(args, root):
         "transformers_ref": args.transformers_ref,
         "profiles": ["cpu", "cuda"],
     }
+    exclude = sorted(set(getattr(args, "exclude", None) or []))
+    if exclude:
+        if getattr(args, "model_workspace", None):
+            raise ValueError("--exclude applies to fleet collections only")
+        options["exclude"] = exclude
     model = None
     if getattr(args, "model_workspace", None):
         # Check GitHub access before staging inputs on the Hub.
@@ -302,6 +307,8 @@ def run_locked(args, root):
             "fleets": request["fleets"],
             "fixtures_only": request["fixtures_only"],
         }
+        if exclude:
+            job["exclude"] = exclude
         if model:
             job["workspace"] = options["workspace"]
         state = {"transport": "github-test", "request": request, "job": job}
@@ -340,6 +347,8 @@ def run_locked(args, root):
             fixtures_only=str(job["fixtures_only"]).lower(),
             upload_repo=args.upload_repo,
         )
+        if job.get("exclude"):
+            inputs["exclude"] = ",".join(job["exclude"])
         if "workspace" in job:
             inputs.update(
                 workspace_repo=job["workspace"]["repo"],
@@ -417,6 +426,7 @@ def main():
     parser.add_argument("--include-checkpoints", action="store_true")
     parser.add_argument("--transformers-ref", default="main")
     parser.add_argument("--upload-repo", default="")
+    parser.add_argument("--exclude", action="append", default=[])
     args = parser.parse_args()
     try:
         return run(args)

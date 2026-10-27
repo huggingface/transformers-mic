@@ -650,3 +650,83 @@ def test_progress_failure_is_nonfatal_and_uses_a_cooldown(monkeypatch, capsys):
     reporter.emit("validating", 1, 2)
     assert calls == [1]
     assert capsys.readouterr().err.count("relay unavailable") == 1
+
+
+def test_worker_leaves_excluded_contracts_out_of_the_matrix(tmp_path, monkeypatch):
+    import sys
+
+    model = tmp_path / "hub"
+    model.mkdir()
+    write(
+        model / "integration.json",
+        {
+            "fixtures": {"huggingface-mic/demo-mic": {}},
+            "checkpoints": {},
+            "integrations": {
+                "transformers": {"targets": ["fixtures"], "variants": {"default": {}}}
+            },
+            "outputs": {"answer": {"compare": "allclose", "atol": 0.01, "rtol": 0.01}},
+        },
+    )
+
+    def contract(repo):
+        return {
+            "integration": {"repo": repo, "revision": "f" * 40},
+            "fixtures": {repo: {"revision": "f" * 40, "target": repo.split("/")[1]}},
+            "checkpoints": {},
+        }
+
+    lock = tmp_path / "fleet.lock"
+    write(
+        lock,
+        {
+            "contracts": {
+                "Demo": contract("huggingface-mic/demo-mic"),
+                "Broken": contract("huggingface-mic/broken-mic"),
+            }
+        },
+    )
+    checkout = tmp_path / "framework"
+    monkeypatch.setenv("MIC_TRANSFORMERS_CHECKOUT", str(checkout))
+    monkeypatch.delenv("MIC_PROGRESS_URL", raising=False)
+    monkeypatch.setitem(
+        sys.modules,
+        "transformers",
+        SimpleNamespace(__file__=str(checkout / "src/transformers/__init__.py")),
+    )
+    monkeypatch.setattr(baseline_worker, "runtime", lambda profile: {})
+    monkeypatch.setattr(
+        baseline_worker.subprocess,
+        "check_output",
+        lambda *a, **kw: JOB["transformers_sha"],
+    )
+    monkeypatch.setattr(
+        baseline_worker.fleet, "download", lambda *a: (lock, JOB["fleet_revision"])
+    )
+    monkeypatch.setattr(
+        baseline_worker, "hf_hub_download", lambda *a, **kw: model / "integration.json"
+    )
+    monkeypatch.setattr(baseline_worker, "snapshot_download", lambda *a, **kw: model)
+    measured = []
+
+    def execute(root, command, stage):
+        measured.append(command)
+        return 1
+
+    monkeypatch.setattr(baseline_worker, "execute", execute)
+    args = SimpleNamespace(
+        job_id=JOB["id"],
+        fleet_revision=JOB["fleet_revision"],
+        transformers_sha=JOB["transformers_sha"],
+        mic_sha=JOB["mic_sha"],
+        fleets="control",
+        fixtures_only=True,
+        exclude="Broken",
+        profile="cpu",
+        out=tmp_path / "out",
+    )
+    baseline_worker.measure(args)
+    report = read(args.out / "collection.json")
+    assert report["request"]["exclude"] == ["Broken"]
+    assert report["expected_cases"] == ["control/Demo/demo-mic/default"]
+    assert measured and not any("broken" in " ".join(map(str, c)) for c in measured)

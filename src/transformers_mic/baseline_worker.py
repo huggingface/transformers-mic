@@ -216,6 +216,11 @@ def measure(args):
         "fleets": args.fleets.split(","),
         "fixtures_only": args.fixtures_only,
     }
+    # Contracts left out on purpose (e.g. an open upstream bug makes them
+    # unmeasurable); their published baselines are not touched.
+    excluded = sorted({n for n in getattr(args, "exclude", "").split(",") if n})
+    if excluded:
+        request["exclude"] = excluded
     for key in ("fleet_revision", "transformers_sha", "mic_sha"):
         if not re.fullmatch(r"[0-9a-f]{40}", request[key]):
             raise ValueError("Cloud revisions must be immutable commit SHAs")
@@ -260,6 +265,8 @@ def measure(args):
             raise ValueError("Unknown fleet")
         for name, contract in load_lock(fleet_name)["contracts"].items():
             safe(name)
+            if name in excluded:
+                continue
             pin = contract["integration"]
             manifest = read(
                 hf_hub_download(
@@ -334,6 +341,8 @@ def measure(args):
         )  # candidates must satisfy every output assertion
         for name, contract in lock["contracts"].items():
             safe(name)
+            if name in excluded:
+                continue
             # CUDA artifact carries the slim model snapshots as well as baselines.
             # CPU records point to the same immutable pins, without duplicating weights.
             if args.profile == "cuda":
@@ -560,6 +569,7 @@ def main():
         parser.add_argument("--" + name, required=True)
     parser.add_argument("--profile", choices=("cpu", "cuda"), required=True)
     parser.add_argument("--fixtures-only", action="store_true")
+    parser.add_argument("--exclude", default="")
     return measure(parser.parse_args())
 
 

@@ -106,6 +106,11 @@ python tools/try_cloud_baselines.py --out work/arc-hub \
 ```
 
 The downloaded collection works with `tmic baselines review/upload/publish`.
+
+`tmic baselines run --transport github --exclude <Contract>` (repeatable) leaves a
+fleet contract out of the collection, for example while an open upstream bug makes
+its fixture unmeasurable. Its published baselines are not touched, and the
+exclusion is recorded in the collection's provenance.
 Repository image variables must be configured first; direct upload also needs
 `MIC_BASELINE_WRITE_TOKEN`. This tests GitHub Actions/ARC and artifact retrieval;
 it does not test dashboard/Serge authorization or the live case-progress relay.
