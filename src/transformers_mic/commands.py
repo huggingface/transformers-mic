@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import re
+import sys
 import shutil
 import tempfile
 
@@ -248,6 +249,13 @@ def propose_valid(context, args, model, fixture, old=None):
 def model_context(model, revision=None):
     api = HfApi()
     info = api.model_info(model, revision=revision)
+    if info.gated:
+        print(
+            f"tmic: {model} is gated: cloud and nightly measurement of the checkpoint "
+            "need the HF_HUB_READ_TOKEN secret to belong to an account that accepted "
+            "its license; fixtures are unaffected",
+            file=sys.stderr,
+        )
     config = read(hf_hub_download(model, "config.json", revision=info.sha))
     return info.sha, config
 
