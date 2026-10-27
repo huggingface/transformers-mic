@@ -118,6 +118,38 @@ def validate_plan(plan, model, fixture, old=None):
     return manifest
 
 
+def check_parameter_names(plan, config):
+    """Reject usage that names parameters the architecture does not have."""
+    names = set(
+        re.findall(r"[\"']([A-Za-z_][\w.]*\.(?:weight|bias))[\"']", plan["usage"])
+    )
+    if not names:
+        return
+    import torch
+    import transformers
+
+    cls = getattr(transformers, plan["manifest"].get("architecture", ""), None)
+    if not isinstance(cls, type) or not issubclass(cls, transformers.PreTrainedModel):
+        return
+    try:
+        with torch.device("meta"):
+            real = {
+                n for n, _ in cls(cls.config_class.from_dict(config)).named_parameters()
+            }
+    except Exception:  # inspection is advisory; the build still runs the contract
+        return
+    missing = sorted(names - real)
+    if missing:
+        # The first block and the non-repeated modules show the real naming scheme.
+        hints = sorted(n for n in real if ".0." in n or not re.search(r"\.\d+\.", n))[
+            :60
+        ]
+        raise ValueError(
+            f"Usage names parameters {cls.__name__} does not have: {missing}. "
+            f"Real parameter names include: {hints}"
+        )
+
+
 def propose_valid(context, args, model, fixture, old=None):
     # A provider can emit schema-valid JSON that violates runner conventions.
     # Return validation feedback for one repair; never execute an invalid draft.
@@ -131,6 +163,8 @@ def propose_valid(context, args, model, fixture, old=None):
                 bill_to=args.bill_to,
             )
             validate_plan(plan, model, fixture, old)
+            if context.get("config"):
+                check_parameter_names(plan, context["config"])
             return plan, llm
         except (ValueError, jsonschema.ValidationError) as exc:
             if attempt:

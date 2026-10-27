@@ -121,3 +121,26 @@ def test_selected_fixed_tensors_survive_random_initialization(tmp_path, monkeypa
             "pinned-sha",
             {"preserve_frozen_prefixes": ["scratch"]},
         )
+
+
+def test_shrink_resamples_longrope_factors_to_the_resized_head():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import Phi3Config
+
+    half = 3072 // 24 * 3 // 4 // 2
+    config = Phi3Config(
+        hidden_size=3072,
+        num_attention_heads=24,
+        partial_rotary_factor=0.75,
+        max_position_embeddings=131072,
+        original_max_position_embeddings=4096,
+        rope_scaling={
+            "type": "longrope",
+            "short_factor": [1.0 + i for i in range(half)],
+            "long_factor": [2.0 + i for i in range(half)],
+        },
+    )
+    rope = shrink(config).rope_parameters
+    assert len(rope["short_factor"]) == len(rope["long_factor"]) < half
+    assert rope["short_factor"][0] == 1.0 and rope["long_factor"][0] == 2.0

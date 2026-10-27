@@ -105,6 +105,18 @@ def review_changed(args, workspace):
         workspace.save_state(validated=False, validation=None, validations={})
 
 
+def cloud_collection(folder, workspace, transport):
+    """One collection per source and transport; the plain path stays with its first owner."""
+    source = model_baselines.inputs(workspace)[0]
+    plain = folder / "cloud" / source
+    owner = "github" if transport == "github" else "dashboard"
+    if (plain / "cloud.json").exists():
+        recorded = read(plain / "cloud.json").get("transport")
+        if ("github" if recorded == "github-test" else "dashboard") != owner:
+            return folder / "cloud" / f"{source}-{owner}"
+    return plain
+
+
 def run(args):
     args.mode = "agent" if args.non_interactive else args.mode
     if args.local_only:
@@ -639,7 +651,9 @@ def run_locked(args, root, answer):
                         code, log = stage(name, smoke)
             elif name in ("record", "check", "published-check"):
                 if args.baseline_execution == "cloud":
-                    cloud_root = folder / "cloud" / model_baselines.inputs(workspace)[0]
+                    cloud_root = cloud_collection(
+                        folder, workspace, args.baseline_transport
+                    )
                     options = [
                         "baselines",
                         "run" if name == "record" else "verify-model",
@@ -876,7 +890,7 @@ def run_locked(args, root, answer):
 
             if state.get("next_stage") == "record":
                 github_baselines.interrupt(
-                    folder / "cloud" / model_baselines.inputs(workspace)[0],
+                    cloud_collection(folder, workspace, "github"),
                     interactive=args.mode == "human",
                 )
         state["status"] = "interrupted"

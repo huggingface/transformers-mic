@@ -2,6 +2,7 @@
 
 import json
 import subprocess
+import sys
 
 
 def collect(
@@ -19,8 +20,11 @@ def collect(
         dict.fromkeys([model.split("/")[-1], model_type or model.split("/")[-1]])
     )
     found = {}
+    error = None
     for term in terms:
         for kind in ("issues", "prs"):
+            if error:
+                break
             command = [
                 "gh",
                 "search",
@@ -35,9 +39,15 @@ def collect(
             ]
             result = subprocess.run(command, capture_output=True, text=True)
             if result.returncode:
-                raise ValueError(
-                    f"GitHub history query failed: {result.stderr.strip()}"
-                )
+                # Candidates are leads, so a rate-limited search keeps what it
+                # found and says why it stopped; any other failure is an error.
+                if "rate limit" not in result.stderr.lower():
+                    raise ValueError(
+                        f"GitHub history query failed: {result.stderr.strip()}"
+                    )
+                error = result.stderr.strip()
+                print(f"tmic: GitHub history search stopped: {error}", file=sys.stderr)
+                continue
             for row in json.loads(result.stdout):
                 found[row["url"]] = {**row, "kind": kind, "matched": term}
     return {
@@ -48,4 +58,5 @@ def collect(
         "limit_per_query": limit,
         "complete": False,
         "items": list(found.values()),
+        **({"error": error} if error else {}),
     }

@@ -730,3 +730,23 @@ def test_cloud_fixture_preflight_failure_prevents_dispatch(workflow, monkeypatch
     argv.remove("local")
     assert main([*argv, "--baseline-transport", "github"]) != 0
     assert not any("baselines" in cmd for _, cmd in workflow.calls)
+
+
+def test_cloud_collection_is_never_shared_across_transports(tmp_path, monkeypatch):
+    from transformers_mic.workspace import write
+
+    monkeypatch.setattr(
+        automation.model_baselines, "inputs", lambda workspace: ("abc", None)
+    )
+    plain = tmp_path / "cloud/abc"
+    assert automation.cloud_collection(tmp_path, None, "dashboard") == plain
+    write(plain / "cloud.json", {"transport": "github-test", "job": {}})
+    assert automation.cloud_collection(tmp_path, None, "github") == plain
+    assert automation.cloud_collection(tmp_path, None, "dashboard") == (
+        tmp_path / "cloud/abc-dashboard"
+    )
+    write(plain / "cloud.json", {"dashboard": "https://d", "job": {}})
+    assert automation.cloud_collection(tmp_path, None, "dashboard") == plain
+    assert automation.cloud_collection(tmp_path, None, "github") == (
+        tmp_path / "cloud/abc-github"
+    )

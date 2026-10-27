@@ -159,6 +159,46 @@ def test_history_import_and_query_dedup(tmp_path, monkeypatch):
     assert result["complete"] is False
 
 
+def test_history_rate_limit_keeps_partial_candidates(monkeypatch):
+    calls = []
+
+    def run(command, **kwargs):
+        calls.append(command)
+        if len(calls) == 1:
+            return SimpleNamespace(
+                returncode=0, stdout=json.dumps([{"url": "https://example.org/1"}])
+            )
+        return SimpleNamespace(
+            returncode=1, stdout="", stderr="HTTP 403: API rate limit exceeded"
+        )
+
+    monkeypatch.setattr(history.subprocess, "run", run)
+    result = history.collect("org/model", "bert")
+    assert len(calls) == 2
+    assert len(result["items"]) == 1
+    assert "rate limit" in result["error"]
+
+    def denied(command, **kwargs):
+        return SimpleNamespace(
+            returncode=1, stdout="", stderr="HTTP 401: Bad credentials"
+        )
+
+    monkeypatch.setattr(history.subprocess, "run", denied)
+    with pytest.raises(ValueError, match="Bad credentials"):
+        history.collect("org/model", "bert")
+
+
+def test_planner_transport_errors_are_retryable():
+    import httpx2
+
+    class Client:
+        def chat_completion(self, **kwargs):
+            raise httpx2.ReadTimeout("The read operation timed out")
+
+    with pytest.raises(ValueError, match="ReadTimeout"):
+        planner.propose({}, client=Client())
+
+
 def approve_receipts(workspace):
     import hashlib
 
@@ -442,6 +482,43 @@ def test_planner_repairs_invalid_draft(workspace, monkeypatch):
     )
     assert result == plan
     assert "Training contracts require" in calls[1]["validation_error"]
+
+
+def test_planner_repairs_invented_parameter_names(workspace, monkeypatch):
+    pytest.importorskip("torch")
+    from transformers import BertConfig
+
+    usage = (workspace.contract_root / "integrations/transformers/usage.md").read_text()
+    plan = {
+        "name": "BERT",
+        "manifest": workspace.manifest,
+        "usage": usage
+        + '\nchecked = ("bert.encoder.layer.0.attention.self.query.weight",)\n',
+        "rationale": "",
+        "historical_candidates": [],
+    }
+    invented = copy.deepcopy(plan)
+    invented["usage"] = usage + '\nchecked = ("bert.encoder.layers.0.q_proj.weight",)\n'
+    calls = []
+
+    def propose(context, **kwargs):
+        calls.append(context)
+        return (invented if len(calls) == 1 else plan), {}
+
+    monkeypatch.setattr(planner, "propose", propose)
+    config = BertConfig(
+        hidden_size=8, num_hidden_layers=1, num_attention_heads=2, intermediate_size=8
+    ).to_dict()
+    result, _ = commands.propose_valid(
+        {"config": config},
+        SimpleNamespace(llm_model=planner.DEFAULT_MODEL, provider="auto", bill_to=""),
+        workspace.state["model"],
+        workspace.fixture,
+    )
+    assert result == plan
+    error = calls[1]["validation_error"]
+    assert "bert.encoder.layers.0.q_proj.weight" in error
+    assert "attention.self.query.weight" in error
 
 
 def test_update_keeps_fixture_pin_and_old_source(workspace, monkeypatch):

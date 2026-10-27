@@ -3,6 +3,7 @@
 import json
 import re
 
+import httpx2
 from huggingface_hub import InferenceClient
 from huggingface_hub.errors import HfHubHTTPError
 import jsonschema
@@ -48,6 +49,13 @@ def propose(
                 "--bill-to '' to use your own account's credits"
             ) from None
         raise
+    except httpx2.TransportError as error:
+        # A timeout or dropped connection must surface as a retryable failure,
+        # not a traceback that leaves agent mode without its JSON result.
+        raise ValueError(
+            f"Inference Providers request failed ({type(error).__name__}: {error}); "
+            "retry, or try another --provider or --llm-model"
+        ) from None
     return parse(response, model, provider, bill_to)
 
 
@@ -119,7 +127,10 @@ The final JSON must nest training.loss, training.gradients, and training.updated
 under a training object. Declare those exact dotted keys in outputs, using
 allclose, all_true, and true respectively. training.gradients must be a nonempty
 dict of named BOOLEAN checks for finite, nonzero gradients, never raw norms.
-training.updated checks whether SGD actually changes weights. The bfloat16
+training.updated checks whether SGD actually changes weights; snapshot only
+trainable parameters, on the CPU (p.detach().cpu().clone()), so the step fits
+a real checkpoint's accelerator memory. Name only parameters that exist in the
+architecture; tied weights such as lm_head.weight are often absent. The bfloat16
 variant must use {"dtype": "bfloat16"}, not torch_dtype. Cast floating-point
 processor inputs (such as pixel_values or input_features) to model.dtype and
 model.device before every forward; keep integer token IDs, masks and labels

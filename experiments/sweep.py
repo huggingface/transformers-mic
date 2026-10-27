@@ -237,6 +237,15 @@ def shrink(config):
             for i in sorted(range(len(kept)), key=lambda i: scaled[i] - kept[i], reverse=True)[:half_head - sum(kept)]:
                 kept[i] += 1
             rope["mrope_section"] = kept
+        # LongRoPE keeps one factor per rotary frequency; resample to the resized head.
+        if isinstance(rope, dict) and isinstance(rope.get("short_factor"), list):
+            head = values.get("head_dim") or values["hidden_size"] // values["num_attention_heads"]
+            partial = rope.get("partial_rotary_factor", values.get("partial_rotary_factor", 1.0))
+            half = int(head * partial) // 2
+            for key in ("short_factor", "long_factor"):
+                factors = rope.get(key)
+                if isinstance(factors, list) and len(factors) != half:
+                    rope[key] = [factors[i * len(factors) // half] for i in range(half)]
         return type(cfg).from_dict(values)
 
     return rebuilt(config)
