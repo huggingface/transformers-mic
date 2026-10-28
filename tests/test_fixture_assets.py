@@ -356,3 +356,33 @@ def test_shrink_keeps_vision_projections_matching_the_text_width():
     # CLIP's projection is its own joint space, not the text width.
     clip = shrink(CLIPConfig())
     assert clip.projection_dim != clip.text_config.hidden_size
+
+
+def test_shrink_keeps_blt_global_width_tied_to_the_local_models():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import BltConfig
+
+    # As in itazap/blt-1b-hf: global = encoder width x cross_attn_k, named by both local models.
+    local = {"hidden_size": 1024, "hidden_size_global": 2048}
+    config = shrink(
+        BltConfig(
+            cross_attn_k=2,
+            encoder_config=local,
+            decoder_config=local,
+            global_config={
+                "hidden_size": 2048,
+                "head_dim": 128,
+                "num_attention_heads": 16,
+            },
+        )
+    )
+    width = config.global_config.hidden_size
+    assert width == config.encoder_config.hidden_size * config.cross_attn_k
+    assert config.encoder_config.hidden_size_global == width
+    assert config.decoder_config.hidden_size_global == width
+    assert config.global_config.encoder_cross_output_size is None
+    assert (
+        config.global_config.head_dim * config.global_config.num_attention_heads
+        == width
+    )

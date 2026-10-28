@@ -251,6 +251,18 @@ def shrink(config):
             values["upsample_groups"] = gcd(values["upsample_groups"], values["hidden_size"])
         if values.get("model_type") == "paligemma":
             values["projection_dim"] = values["text_config"]["hidden_size"]
+        # BLT's local encoder/decoder name the global transformer's width
+        # (hidden_size_global), and the checkpoint sizes the global transformer to
+        # the encoder's cross_attn_k patch outputs so no extra projection is built.
+        if values.get("model_type") == "blt":
+            glob = values["global_config"]
+            if cfg.global_config.hidden_size == cfg.encoder_config.hidden_size * cfg.cross_attn_k:
+                glob["hidden_size"] = values["encoder_config"]["hidden_size"] * values["cross_attn_k"]
+                if glob.get("head_dim"):  # attention splits hidden_size; rotary reads head_dim
+                    glob["head_dim"] = glob["hidden_size"] // glob["num_attention_heads"]
+            glob["encoder_cross_output_size"] = None  # recomputed from the widths on load
+            for key in ("encoder_config", "decoder_config"):
+                values[key]["hidden_size_global"] = glob["hidden_size"]
         # A sub-config projecting into the language model (Janus's vision aligner)
         # must keep projecting to its resized hidden size.
         text = getattr(cfg, "text_config", None)
