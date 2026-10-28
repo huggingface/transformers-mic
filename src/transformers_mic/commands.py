@@ -49,16 +49,22 @@ def validate_plan(plan, model, fixture, old=None):
     if not isinstance(recipe, dict):
         raise ValueError("Generated fixture needs a build recipe")
     previous_recipe = old["fixtures"][fixture].get("build", {}) if old else {}
-    for key in (
-        "overfit",
-        "accept_insensitive",
-        "copy_assets",
-        "preserve_frozen_prefixes",
-    ):
-        if recipe.get(key) != previous_recipe.get(key):
-            raise ValueError(
-                "The LLM cannot select overfit, exempt insensitive inputs, or preserve source tensors/assets"
-            )
+    chosen = [
+        key
+        for key in (
+            "overfit",
+            "accept_insensitive",
+            "copy_assets",
+            "preserve_frozen_prefixes",
+        )
+        if recipe.get(key) != previous_recipe.get(key)
+    ]
+    if chosen:
+        # Name the keys so a repair attempt knows what to remove.
+        raise ValueError(
+            f"The LLM cannot select overfit, exempt insensitive inputs, or preserve source "
+            f"tensors/assets; remove {', '.join(chosen)} from the build recipe"
+        )
     if (
         manifest["checkpoints"][model]["fixture"] != fixture
         or manifest["fixtures"][fixture]["built_from"] != model

@@ -132,6 +132,12 @@ def test_plan_rejects_relaxed_rules_and_removed_assertions(workspace):
     relaxed["manifest"]["outputs"]["answer_logits"]["atol"] = 1
     with pytest.raises(ValueError, match="tolerances"):
         commands.validate_plan(relaxed, workspace.state["model"], workspace.fixture)
+    assets = copy.deepcopy(plan)
+    assets["manifest"]["fixtures"][workspace.fixture]["build"]["copy_assets"] = [
+        "tokenizer.json"
+    ]
+    with pytest.raises(ValueError, match="remove copy_assets from the build recipe"):
+        commands.validate_plan(assets, workspace.state["model"], workspace.fixture)
     removed = copy.deepcopy(plan)
     del removed["manifest"]["outputs"]["answer_logits"]
     with pytest.raises(ValueError, match="removes"):

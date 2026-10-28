@@ -137,8 +137,9 @@ Use the supplied example usage conventions. One checkpoint
 (context.model) and one fixture (context.fixture_repo). Fix entry_point to
 integrations/transformers/usage.md, format runnable-markdown, default/eager/bfloat16
 variants. Every allclose output uses atol=rtol=1e-4. Seed 17 in the build recipe.
-Do NOT request overfit, accept_insensitive exemptions or relaxed tolerances;
-the CLI chooses weights from measured gates and explicit user preferences.
+Do NOT set overfit, accept_insensitive, copy_assets or preserve_frozen_prefixes in
+the build recipe, nor relax tolerances; the CLI chooses weights from measured gates
+and explicit user preferences, and copies processor files itself.
 Use Transformers and torch, real processors, small representative inputs,
 set_seed(0), model_id overridden by os.environ.get('MIC_MODEL', model_id),
 MIC_MODEL_KWARGS JSON passed at load, device cuda if available else cpu, eval
