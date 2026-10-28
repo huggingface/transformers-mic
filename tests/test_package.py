@@ -1157,3 +1157,19 @@ def test_planner_backs_off_on_rate_limits_then_gives_up(monkeypatch):
     with pytest.raises(HfHubHTTPError):
         planner.complete_with_backoff(Client(), {}, "m", 10)
     assert len(calls) == 4 and waits == [7, 7, 7]
+
+
+def test_planner_context_names_loaded_parameters_without_architectures():
+    from transformers import BertConfig
+
+    from transformers_mic import references
+
+    config = BertConfig(
+        num_hidden_layers=2, hidden_size=32, num_attention_heads=2, intermediate_size=64
+    ).to_dict()
+    config.pop("architectures", None)
+    classes = references.auto_classes(config)
+    assert "BertModel" in classes
+    names = references.parameter_names("BertModel", config)
+    assert "encoder.layer.0.attention.self.query.weight" in names
+    assert not any(".1." in name for name in names)  # one block shows the scheme
