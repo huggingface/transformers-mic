@@ -341,3 +341,18 @@ def test_numeric_health_rejects_infinities_float32_does_not_have(tmp_path):
     rows = build_fixtures.numeric_health(Overflow, tmp_path, {"x": torch.ones(2, 2)})
     assert rows["float32"]["finite"] and rows["bfloat16"]["finite"]
     assert not rows["float16"]["finite"]
+
+
+def test_shrink_keeps_vision_projections_matching_the_text_width():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import CLIPConfig, JanusConfig
+
+    # As in Janus-Pro: both aligners project to the language model's width.
+    config = shrink(JanusConfig(text_config={"hidden_size": 2048}))
+    width = config.text_config.hidden_size
+    assert config.vision_config.projection_dim == width
+    assert config.vq_config.projection_dim == width
+    # CLIP's projection is its own joint space, not the text width.
+    clip = shrink(CLIPConfig())
+    assert clip.projection_dim != clip.text_config.hidden_size

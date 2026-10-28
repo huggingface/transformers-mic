@@ -251,6 +251,18 @@ def shrink(config):
             values["upsample_groups"] = gcd(values["upsample_groups"], values["hidden_size"])
         if values.get("model_type") == "paligemma":
             values["projection_dim"] = values["text_config"]["hidden_size"]
+        # A sub-config projecting into the language model (Janus's vision aligner)
+        # must keep projecting to its resized hidden size.
+        text = getattr(cfg, "text_config", None)
+        for key in getattr(cfg, "sub_configs", {}) or {}:
+            sub = getattr(cfg, key, None)
+            if (
+                key != "text_config"
+                and isinstance(values.get(key), dict)
+                and getattr(sub, "projection_dim", None) is not None
+                and sub.projection_dim == getattr(text, "hidden_size", None)
+            ):
+                values[key]["projection_dim"] = values["text_config"]["hidden_size"]
         # Multimodal RoPE partitions must still cover half the resized head.
         rope = values.get("rope_parameters")
         if isinstance(rope, dict) and rope.get("mrope_section"):
