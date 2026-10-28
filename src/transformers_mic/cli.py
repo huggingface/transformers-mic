@@ -16,7 +16,9 @@ from .workspace import Workspace
 def llm_options(parser):
     parser.add_argument("--llm-model", default=planner.DEFAULT_MODEL)
     parser.add_argument(
-        "--provider", default="auto", help="Hugging Face Inference Provider"
+        "--provider",
+        default=planner.DEFAULT_PROVIDER,
+        help="Hugging Face Inference Provider",
     )
     parser.add_argument(
         "--bill-to",

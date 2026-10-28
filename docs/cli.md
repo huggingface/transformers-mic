@@ -483,8 +483,8 @@ inventory of past failures, and do not count as regression detection.
 
 Catalog reuse requires no inference call. For a new model, or with `create --llm`,
 the planner uses **Hugging Face Inference Providers**, default model
-**`Qwen/Qwen3.8-27B`**, with `provider="auto"`. Set `--provider` or `--llm-model`
-on `create` and `update` to override them. Authentication uses the normal HF token
+**`deepseek-ai/DeepSeek-V4.1-Flash-1017`**, with `provider="together"` and thinking
+disabled. Set `--provider` or `--llm-model` on `create` and `update` to override them. Authentication uses the normal HF token
 (`HF_TOKEN` or `hf auth login`) with Inference Providers permission.
 
 Planner calls are billed to the **`huggingface` organization** by default: each

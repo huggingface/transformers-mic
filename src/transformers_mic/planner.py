@@ -10,7 +10,14 @@ from huggingface_hub import InferenceClient
 from huggingface_hub.errors import HfHubHTTPError
 import jsonschema
 
-DEFAULT_MODEL = "Qwen/Qwen3.8-27B"
+DEFAULT_MODEL = "deepseek-ai/DeepSeek-V4.1-Flash-1017"
+DEFAULT_PROVIDER = "together"
+# Planner drafts need no reasoning. Without these, a reasoning model can spend the
+# whole max_tokens budget thinking and return no content.
+NO_THINKING = {
+    DEFAULT_MODEL: {"chat_template_kwargs": {"thinking": False}},
+    "Qwen/Qwen3.8-27B": {"reasoning_effort": "low"},
+}
 # Requests name the paying organization explicitly; the Hub has no org default.
 DEFAULT_BILL_TO = "huggingface"
 PLAN_SCHEMA = {
@@ -31,7 +38,7 @@ def propose(
     context,
     *,
     model=DEFAULT_MODEL,
-    provider="auto",
+    provider=DEFAULT_PROVIDER,
     bill_to=DEFAULT_BILL_TO,
     max_tokens=16384,
     client=None,
@@ -91,7 +98,7 @@ def complete(client, context, model, max_tokens):
         ],
         temperature=0.7,
         top_p=0.8,
-        extra_body={"reasoning_effort": "low"} if model == DEFAULT_MODEL else None,
+        extra_body=NO_THINKING.get(model),
         max_tokens=max_tokens,
         response_format={"type": "json_object"},
     )

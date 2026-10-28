@@ -7,7 +7,7 @@ See [Hub layout](docs/hub-organization.md).
 
 Python package and CLI for model integration contracts, slim fixtures, and measured
 expectations. See the [CLI guide](docs/cli.md) for installation, HF Inference
-Providers (default `Qwen/Qwen3.8-27B`), and the create/update/publish workflow.
+Providers (default `deepseek-ai/DeepSeek-V4.1-Flash-1017` on Together), and the create/update/publish workflow.
 
 ```sh
 tmic run org/model --mode human

@@ -52,8 +52,8 @@ def test_legacy_fixture_can_only_be_reused():
 
 def test_default_provider_and_model():
     args = parser().parse_args(["create", "model/name", "--out", "project"])
-    assert args.provider == "auto"
-    assert args.llm_model == "Qwen/Qwen3.8-27B"
+    assert args.provider == "together"
+    assert args.llm_model == "deepseek-ai/DeepSeek-V4.1-Flash-1017"
     assert args.bill_to == "huggingface"
 
 
