@@ -506,3 +506,12 @@ def test_shrink_keeps_channels_feeding_a_sibling_encoder():
     vision = shrink(UnlimitedOcrConfig()).vision_config
     assert vision.sam_config.downsample_channels[-1] == vision.encoder_config.hidden_size
     assert list(vision.sam_config.downsample_channels) == [32, 64]
+
+
+def test_shrink_raises_a_vanishing_initializer_range():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import UnlimitedOcrConfig
+
+    sam = shrink(UnlimitedOcrConfig()).vision_config.sam_config
+    assert sam.initializer_range == 0.02
