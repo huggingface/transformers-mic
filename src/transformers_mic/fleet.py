@@ -239,9 +239,14 @@ def download(name="control", revision="main"):
             )
     path = Path(tempfile.gettempdir()) / "tmic-fleet" / revision / FILES[name]
     path.parent.mkdir(parents=True, exist_ok=True)
-    partial = path.with_suffix(".partial")
-    partial.write_text(json.dumps(lock, indent=2) + "\n")
-    partial.replace(path)
+    # One temporary file per call: concurrent downloads (a batch of `tmic create`)
+    # shared one .partial, lost the rename race, and fell back to the catalog's
+    # stale environment, which export then refused after the whole cloud run.
+    with tempfile.NamedTemporaryFile(
+        "w", dir=path.parent, suffix=".partial", delete=False
+    ) as partial:
+        partial.write(json.dumps(lock, indent=2) + "\n")
+    Path(partial.name).replace(path)
     return path, revision
 
 
