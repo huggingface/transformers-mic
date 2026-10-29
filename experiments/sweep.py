@@ -269,8 +269,11 @@ def shrink(config):
                     values[key] = [value[i] for i in kept if i < len(value)]
             if getattr(cfg, "num_kv_shared_layers", None) is not None:
                 values["num_kv_shared_layers"] = sum(i >= cfg.num_hidden_layers - cfg.num_kv_shared_layers for i in kept)
-            if getattr(cfg, "first_k_dense_replace", None) is not None:
-                values["first_k_dense_replace"] = sum(i < cfg.first_k_dense_replace for i in kept)
+            # Leading dense layers: keep at least one MoE layer, or the fixture has no
+            # experts at all (LFM2-MoE: 2 dense of 24, 2 layers kept).
+            for key in ("first_k_dense_replace", "num_dense_layers"):
+                if getattr(cfg, key, None) is not None:
+                    values[key] = min(sum(i < getattr(cfg, key) for i in kept), len(kept) - 1)
             per_layer = values.get("per_layer_config")
             if isinstance(per_layer, dict):
                 # Keys are layer indices, sometimes zero-padded (Gemma 4's "04").
