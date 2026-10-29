@@ -1400,3 +1400,17 @@ def test_planner_slugs_a_dotted_contract_name():
     )
     plan, _ = planner.parse(response, "m", "p", None)
     assert plan["name"] == "Kimi-K2-5"
+
+
+def test_create_rejects_labels_a_forward_does_not_take():
+    def plan(load, call):
+        return {"usage": f"model = {load}.from_pretrained(model_id)\nloss = model(**inputs, {call}).loss\n"}
+
+    owlv2 = {"model_type": "owlv2"}
+    with pytest.raises(ValueError, match="takes no labels"):
+        commands.check_label_arguments(plan("Owlv2ForObjectDetection", "labels=labels"), owlv2)
+    mask2former = {"model_type": "mask2former"}
+    with pytest.raises(ValueError, match="mask_labels"):
+        commands.check_label_arguments(plan("AutoModelForUniversalSegmentation", "labels=labels"), mask2former)
+    commands.check_label_arguments(plan("AutoModelForUniversalSegmentation", "mask_labels=m"), mask2former)
+    commands.check_label_arguments(plan("AutoModelForObjectDetection", "labels=labels"), {"model_type": "yolos"})
