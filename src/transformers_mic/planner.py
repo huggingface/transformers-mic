@@ -202,7 +202,8 @@ not memory:
   bfloat16 variant under torch.autocast(device, dtype=model.dtype,
   enabled=model.dtype != torch.float32) for both inference and training: the
   Hungarian matcher needs float32.
-- Checkpoints above ~3B parameters must fit a 24 GB GPU in bfloat16: train only a
+- Checkpoints above ~3B parameters must fit a 24 GB GPU in bfloat16 (a full
+  training step on a 7B model, weights plus gradients, does not): train only a
   small, meaningful subset (e.g. a VLM's multi_modal_projector, or the task head)
   with requires_grad_(False) on the rest, optimize only trainable parameters, check
   gradients on trained parameters and check that one frozen parameter has
@@ -216,6 +217,17 @@ not memory:
   models), use the architecture's image or base model class for the training step.
 - Image processor classes have no Fast suffix in Transformers 5 (use
   XImageProcessor, not XImageProcessorFast). device_map needs accelerate in requires.
+- Processors take singular keyword arguments in Transformers 5: text=, images=,
+  videos=, audio= (audios= raises).
+- Import only classes transformers exports; take the model class from the
+  config's architectures (there is no AutoModelForConditionalGeneration).
+- The builder already shrinks every config: depth to about 2 layers, widths to 64, experts to
+  4, keeping the vocabulary and dropping quantization_config. Add
+  config_overrides only for a field that rule gets wrong for this architecture,
+  never to restate it. Never override vocab_size (the fixture runs the
+  checkpoint's own tokenizer, so real token and pad ids must stay in range) or
+  quantization_config, and never num_hidden_layers when the config lists per-layer
+  types (layer_types, linear_attn_config layers): their lengths must match.
 - CPU runners are memory-limited containers: a checkpoint above ~1B parameters
   declares "devices": ["cuda"] in its resources, so CPU measures only the slim
   fixture and the checkpoint runs on GPU. The exclusion stays visible in results.
