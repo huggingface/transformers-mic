@@ -182,6 +182,18 @@ def check_imports(plan):
         raise ValueError(f"usage imports names transformers does not export: {hints}")
 
 
+def check_targets(plan):
+    """A drafted contract measures its own fixture: PR CI runs fixtures only."""
+    targets = plan["manifest"]["integrations"]["transformers"].get("targets", [])
+    if len(set(targets)) != len(targets):
+        raise ValueError(f"targets repeat an entry: {targets}")
+    if plan["manifest"].get("fixtures") and "fixtures" not in targets:
+        raise ValueError(
+            f"targets {targets} omit 'fixtures' although the manifest declares a "
+            "fixture; use ['fixtures', 'checkpoints'] (or ['fixtures'])"
+        )
+
+
 def check_undefined_names(plan):
     """Reject usage that reads a name no block sharing its state ever defines."""
     import builtins
@@ -378,6 +390,7 @@ def propose_valid(context, args, model, fixture, old=None):
             validate_plan(plan, model, fixture, old)
             check_imports(plan)
             check_undefined_names(plan)
+            check_targets(plan)
             if context.get("config"):
                 check_config_facts(plan, context["config"])
                 check_model_classes(plan, context["config"])
