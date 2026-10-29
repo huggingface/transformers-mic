@@ -1167,6 +1167,43 @@ def test_fp8_checkpoint_names_drop_their_scales():
         logical_checkpoint_keys(config, {"layer.w2.weight_scale_inv"})
 
 
+def test_split_weights_are_expanded_after_renaming(tmp_path, monkeypatch):
+    # nomic_bert stores a fused encoder.layers.N.attn.Wqkv; Transformers renames
+    # encoder.layers -> layers and chunks it into q/k/v_proj.
+    import torch
+    from transformers import NomicBertConfig, NomicBertModel
+
+    from transformers_mic import inspection
+
+    NomicBertConfig(
+        vocab_size=32,
+        hidden_size=16,
+        num_hidden_layers=2,
+        num_attention_heads=2,
+        intermediate_size=32,
+        max_position_embeddings=16,
+    ).save_pretrained(tmp_path)
+    with torch.device("meta"):
+        model = NomicBertModel(NomicBertConfig.from_pretrained(tmp_path))
+    legacy = {
+        name.replace("layers.", "encoder.layers.")
+        .replace("self_attn.q_proj", "attn.Wqkv")
+        .replace("self_attn.o_proj", "attn.out_proj")
+        .replace("up_proj", "fc11")
+        .replace("gate_proj", "fc12")
+        .replace("down_proj", "fc2")
+        .replace("post_attention_layernorm", "norm1")
+        .replace("post_mlp_layernorm", "norm2")
+        .replace("embeddings.LayerNorm", "emb_ln")
+        for name in model.state_dict()
+        if "k_proj" not in name and "v_proj" not in name
+    }
+    monkeypatch.setattr(inspection, "checkpoint_keys", lambda *args: legacy)
+    assert (
+        inspection.inspect_checkpoint(NomicBertModel, tmp_path, "org/m", "a" * 40) == []
+    )
+
+
 def test_planner_backs_off_on_rate_limits_then_gives_up(monkeypatch):
     from huggingface_hub.errors import HfHubHTTPError
 
