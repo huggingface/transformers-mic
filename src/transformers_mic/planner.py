@@ -277,6 +277,17 @@ not memory:
   an explicit loss from its outputs (match each target box to its nearest predicted
   box: class BCE + box L1). Report at most the top few detections per image, never
   every post-processed box.
+- Some heads raise NotImplementedError when given labels (DPTForDepthEstimation:
+  "Training is not implemented yet"): compute the loss from the outputs instead
+  (L1 between predicted_depth and targets resized to its shape).
+- A processor that returns a BatchEncoding (text + image, CLIPSeg) takes no dtype=
+  in .to(): move it with .to(device) and cast pixel_values on its own.
+- Idefics3/SmolVLM split each image into many crops (over 1,000 tokens): pass
+  do_image_splitting=False to the processor, or the training step OOMs a 24 GB GPU.
+- Model outputs carry no attention_mask: pool image hidden states with .mean(dim=1)
+  and text with the tokenizer's attention_mask.
+- Per-token side inputs (LayoutLM bbox) must be built from the tokenized length,
+  never hard-coded for the words: tokenizers add special tokens.
 - CPU runners are memory-limited containers: a checkpoint above ~1B parameters
   declares "devices": ["cuda"] in its resources, so CPU measures only the slim
   fixture and the checkpoint runs on GPU. The exclusion stays visible in results.
