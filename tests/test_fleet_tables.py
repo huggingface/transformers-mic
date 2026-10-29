@@ -115,15 +115,19 @@ def test_tables_reject_a_contract_without_its_carrying_row():
         fleet.from_tables(tables)
 
 
-def test_export_operations_write_tables_and_the_transition_json():
+def test_export_operations_write_only_the_tables():
     files = fleet.operations("prototypes", LOCK)
     assert sorted(files) == [
-        "prototype-fleet.lock",
         "prototypes/contracts.csv",
         "prototypes/environment.csv",
         "prototypes/known_failures.csv",
     ]
-    assert json.loads(files["prototype-fleet.lock"]) == LOCK
+    assert (
+        fleet.from_tables(
+            {t: files[fleet.table_path("prototypes", t)] for t in fleet.COLUMNS}
+        )
+        == LOCK
+    )
 
 
 def test_download_reads_tables_and_falls_back_to_json_for_old_revisions(
@@ -134,14 +138,17 @@ def test_download_reads_tables_and_falls_back_to_json_for_old_revisions(
         "1" * 40: LOCK,
         "2" * 40: {"legacy": True},
         "3" * 40: {**LOCK, "environment": {}},
+        "4" * 40: None,
     }
-    has_tables = {"1" * 40: True, "2" * 40: False, "3" * 40: True}
+    has_tables = {"1" * 40: True, "2" * 40: False, "3" * 40: True, "4" * 40: True}
 
     def download(repo, filename, repo_type, revision):
         assert (repo, repo_type) == (fleet.REPOSITORY, "dataset")
         path = tmp_path / revision / filename
         path.parent.mkdir(parents=True, exist_ok=True)
         if filename == "fleet-lock.json":
+            if legacy[revision] is None:
+                raise EntryNotFoundError(filename)
             path.write_text(json.dumps({"comment": "ignored", **legacy[revision]}))
         elif has_tables[revision]:
             path.write_text(tables[filename.split("/")[1].removesuffix(".csv")])
@@ -156,6 +163,9 @@ def test_download_reads_tables_and_falls_back_to_json_for_old_revisions(
     assert json.loads(path.read_text()) == LOCK
     path, _ = fleet.download("control", "2" * 40)
     assert json.loads(path.read_text())["legacy"]
-    # During the transition, a JSON-only update by an older tmic is refused, not shadowed
+    # A JSON-only update by a tmic from before the tables is refused, not shadowed
     with pytest.raises(ValueError, match="tables and fleet-lock.json disagree"):
         fleet.download("control", "3" * 40)
+    # Tables alone: the dataset after the JSON locks were removed
+    path, _ = fleet.download("control", "4" * 40)
+    assert json.loads(path.read_text()) == LOCK
