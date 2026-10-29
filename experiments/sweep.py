@@ -191,6 +191,10 @@ def shrink(config):
         # K2.5) set it to qk_rope_head_dim; keep them equal after shrinking.
         if cfg.to_dict().get("head_dim") and cfg.to_dict().get("head_dim") == cfg.to_dict().get("qk_rope_head_dim"):
             values["head_dim"] = values["qk_rope_head_dim"]
+        # SigLIP's text tower projects to projection_size == hidden_size, which
+        # must meet the vision tower's width; keep them equal after shrinking.
+        if cfg.to_dict().get("projection_size") and cfg.to_dict().get("projection_size") == cfg.to_dict().get("hidden_size"):
+            values["projection_size"] = values["hidden_size"]
         if values.get("q_lora_rank"):
             values["q_lora_rank"] = 16
         for key in EXPERTS:
