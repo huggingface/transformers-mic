@@ -314,20 +314,21 @@ def shrink(config):
             glob["encoder_cross_output_size"] = None  # recomputed from the widths on load
             for key in ("encoder_config", "decoder_config"):
                 values[key]["hidden_size_global"] = glob["hidden_size"]
-        # A sub-config projecting into the language model (Janus's vision aligner)
-        # must keep projecting to its resized hidden size.
+        # A sub-config projecting into the language model (Janus's vision aligner,
+        # Qwen3-ASR's audio output_dim) must keep projecting to its resized hidden size.
         text = getattr(cfg, "text_config", None)
         for key in getattr(cfg, "sub_configs", {}) or {}:
             sub = getattr(cfg, key, None)
-            if (
-                key != "text_config"
-                and isinstance(values.get(key), dict)
-                and getattr(sub, "projection_dim", None) is not None
-                and sub.projection_dim == getattr(text, "hidden_size", None)
-            ):
-                # BART-style text configs (Florence-2) name their width d_model.
-                text_values = values["text_config"]
-                values[key]["projection_dim"] = text_values.get("hidden_size") or text_values["d_model"]
+            for field in ("projection_dim", "output_dim"):
+                if (
+                    key != "text_config"
+                    and isinstance(values.get(key), dict)
+                    and getattr(sub, field, None) is not None
+                    and getattr(sub, field) == getattr(text, "hidden_size", None)
+                ):
+                    # BART-style text configs (Florence-2) name their width d_model.
+                    text_values = values["text_config"]
+                    values[key][field] = text_values.get("hidden_size") or text_values["d_model"]
         # Multimodal RoPE partitions must still cover half the resized head.
         rope = values.get("rope_parameters")
         if isinstance(rope, dict) and rope.get("mrope_section"):

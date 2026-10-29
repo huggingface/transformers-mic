@@ -456,3 +456,13 @@ def test_shrink_keeps_siglip_text_projection_at_the_shared_width():
 
     config = shrink(SiglipConfig())  # text projection_size defaults to its hidden_size (768)
     assert config.text_config.projection_size == config.text_config.hidden_size == config.vision_config.hidden_size
+
+def test_shrink_keeps_an_audio_output_dim_at_the_text_width():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import Qwen3ASRConfig
+
+    # As in Qwen/Qwen3-ASR-0.6B-hf: the audio tower projects to the text hidden size.
+    config = Qwen3ASRConfig(audio_config={"output_dim": 1024}, text_config={"hidden_size": 1024})
+    config = shrink(config)
+    assert config.audio_config.output_dim == config.text_config.hidden_size
