@@ -1433,3 +1433,18 @@ def test_create_rejects_the_broadcast_image_idiom():
     with pytest.raises(ValueError, match="view"):
         commands.check_image_shapes({"usage": bad})
     commands.check_image_shapes({"usage": bad.replace("view(H, 1, 1)", "view(1, H, 1)").replace("view(1, W, 1)", "view(1, 1, W)")})
+
+
+def test_create_rejects_a_loss_built_only_from_no_grad_outputs():
+    usage = (
+        "```py runnable:a\nwith torch.no_grad():\n    outputs = model(**inputs)\n"
+        "features = outputs.last_hidden_state.mean(1)\n```\n\n"
+        "```py runnable:a:2\nlogits = probe(features)\nloss = ce(logits, labels)\n```\n"
+    )
+    with pytest.raises(ValueError, match="no_grad"):
+        commands.check_loss_has_gradients({"usage": usage})
+    fresh = usage.replace("probe(features)", "probe(model(**inputs).last_hidden_state.mean(1))")
+    commands.check_loss_has_gradients({"usage": fresh})
+    # A constant target computed under no_grad is fine.
+    target = fresh.replace("loss = ce(logits, labels)", "loss = ce(logits, features)")
+    commands.check_loss_has_gradients({"usage": target})

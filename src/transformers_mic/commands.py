@@ -314,6 +314,88 @@ def check_image_shapes(plan):
         )
 
 
+def check_loss_has_gradients(plan):
+    """Reject a loss whose dependencies never call the model with gradients.
+
+    A target computed under no_grad is fine; a loss built only from tensors computed
+    under no_grad / inference_mode has no gradient path into the model.
+
+    The prompt says so; EmbeddingGemma2 and DINOv2-with-registers drafts still
+    trained on their inference-block features and failed with no grad_fn or with
+    every gradient False.
+    """
+    import ast
+
+    groups = {}
+    for name, block in re.findall(
+        r"^```py runnable:([\w-]+)[^\n]*\n(.*?)^```", plan["usage"], re.M | re.S
+    ):
+        groups[name] = groups.get(name, "") + block
+
+    def without_grad(node):
+        return any(
+            isinstance(item.context_expr, ast.Call)
+            and getattr(item.context_expr.func, "attr", "") in ("no_grad", "inference_mode")
+            for item in node.items
+        )
+
+    for code in groups.values():
+        try:
+            tree = ast.parse(code)
+        except SyntaxError:
+            continue
+        frozen, deps, calls = set(), {}, set()
+
+        def calls_model(node):
+            return any(
+                isinstance(n, ast.Call)
+                and isinstance(n.func, (ast.Name, ast.Attribute))
+                and (getattr(n.func, "id", None) or getattr(getattr(n.func, "value", None), "id", None)) == "model"
+                for n in ast.walk(node)
+            )
+
+        def visit(statements, inside):
+            for statement in statements:
+                if isinstance(statement, ast.With):
+                    visit(statement.body, inside or without_grad(statement))
+                    continue
+                if isinstance(statement, (ast.Assign, ast.AugAssign, ast.AnnAssign)):
+                    targets = statement.targets if isinstance(statement, ast.Assign) else [statement.target]
+                    names = {n.id for t in targets for n in ast.walk(t) if isinstance(n, ast.Name)}
+                    read = {n.id for n in ast.walk(statement.value) if isinstance(n, ast.Name)}
+                    for name in names:
+                        if inside:
+                            frozen.add(name)
+                        else:
+                            frozen.discard(name)
+                            if calls_model(statement.value):
+                                calls.add(name)
+                            else:
+                                calls.discard(name)
+                            deps[name] = read - {name} | (deps.get(name, set()) if isinstance(statement, ast.AugAssign) else set())
+                for field in ("body", "orelse"):
+                    if isinstance(getattr(statement, field, None), list) and not isinstance(statement, ast.With):
+                        visit(getattr(statement, field), inside)
+
+        visit(tree.body, False)
+        if "loss" not in deps:
+            continue
+        seen, stack, stale = set(), ["loss"], []
+        while stack:
+            name = stack.pop()
+            if name in seen:
+                continue
+            seen.add(name)
+            if name in frozen:
+                stale.append(name)
+            stack += deps.get(name, ())
+        if stale and not seen & calls:
+            raise ValueError(
+                f"the training loss only uses {sorted(stale)}, computed under torch.no_grad(): "
+                "recompute the model outputs with gradients in the training block"
+            )
+
+
 def check_float16_load(plan, config):
     """A float16 checkpoint loaded at its stored dtype overflows and cannot train."""
     stored = config.get("dtype") or config.get("torch_dtype")
@@ -495,6 +577,7 @@ def propose_valid(context, args, model, fixture, old=None):
             check_targets(plan)
             check_code_fences(plan)
             check_image_shapes(plan)
+            check_loss_has_gradients(plan)
             if context.get("config"):
                 check_float16_load(plan, context["config"])
                 check_config_facts(plan, context["config"])
