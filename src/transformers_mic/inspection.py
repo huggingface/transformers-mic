@@ -133,11 +133,13 @@ def inspect_checkpoint(cls, source, repo, revision):
         converted.add(renamed)
         if matched:
             for converter in converters:
-                candidate, source_pattern = converter.rename_source_key(key)
+                _, source_pattern = converter.rename_source_key(key)
                 if source_pattern == matched and len(converter.target_patterns) > 1:
+                    # Expand the fully renamed key: the converter alone skips
+                    # renamings such as encoder.layers -> layers.
                     first = converter.target_patterns[0]
                     converted.update(
-                        candidate.replace(first, target)
+                        renamed.replace(first, target)
                         for target in converter.target_patterns
                     )
     return missing_from_keys(model, converted)
