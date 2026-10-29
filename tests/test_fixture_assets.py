@@ -466,3 +466,31 @@ def test_shrink_keeps_an_audio_output_dim_at_the_text_width():
     config = Qwen3ASRConfig(audio_config={"output_dim": 1024}, text_config={"hidden_size": 1024})
     config = shrink(config)
     assert config.audio_config.output_dim == config.text_config.hidden_size
+
+
+def test_a_rebuild_reuses_the_recorded_config_even_when_the_rule_changes(tmp_path, monkeypatch):
+    import json
+
+    from transformers import BertConfig, BertModel
+
+    BertConfig(num_hidden_layers=4).save_pretrained(tmp_path / "source")
+    source = tmp_path / "source"
+    recipe = {"seed": 17, "model_class": "BertModel"}
+    key, config = build_fixtures.fixture_key(source, BertModel, [], recipe)
+    out = tmp_path / "fixture"
+    out.mkdir()
+    fixture = {"build": recipe, "built_from": "org/model"}
+    record = {"recipe": recipe, "built_from": {"repo": "org/model"}, "key_fields": config}
+    (out / "build.json").write_text(json.dumps(record))
+    assert build_fixtures.recorded_config(out, fixture) == json.loads(json.dumps(config))
+
+    # Today's rule makes something else; the recorded config still reproduces the key.
+    monkeypatch.setattr(build_fixtures, "shrink", lambda c: BertConfig(hidden_size=32, num_attention_heads=2))
+    assert build_fixtures.fixture_key(source, BertModel, [], recipe)[0] != key
+    recorded = {**recipe, "recorded_config": build_fixtures.recorded_config(out, fixture)}
+    assert build_fixtures.fixture_key(source, BertModel, [], recorded)[0] == key
+
+    # An edited recipe, or a record from before provenance, re-shrinks.
+    assert build_fixtures.recorded_config(out, {**fixture, "build": {**recipe, "seed": 3}}) is None
+    (out / "build.json").write_text(json.dumps({**record, "recipe": None}))
+    assert build_fixtures.recorded_config(out, fixture) is None

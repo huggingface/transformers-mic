@@ -324,6 +324,11 @@ No Git commit or framework PR is created automatically.""",
         "build", help="Reuse or build a fixture using measured weight-selection gates"
     )
     build.add_argument("--rebuild", action="store_true")
+    build.add_argument(
+        "--reshrink",
+        action="store_true",
+        help="With --rebuild: apply the current shrink rule instead of the config the last build recorded",
+    )
     weights_options(build)
     for name in ("record", "check"):
         run = sub.add_parser(
