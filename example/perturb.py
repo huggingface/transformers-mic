@@ -8,6 +8,8 @@ the model's logits before and after each perturbation; labels are never
 perturbed, and the model's own loss is not compared.
 """
 
+import inspect
+
 import torch
 
 
@@ -106,9 +108,15 @@ def sensitivity(model, batch, threshold, accepted=None):
     parameter = next(model.parameters())
     with torch.no_grad(), torch.autocast(parameter.device.type, dtype=parameter.dtype, enabled=parameter.dtype in (torch.float16, torch.bfloat16)):
         base = logits_of(model(**batch))
-        rows, undefined = {}, []
+        rows, undefined, ignored = {}, [], []
+        # A tokenizer can return an input the model only absorbs in **kwargs
+        # (DistilBERT's token_type_ids): it cannot move the logits, so do not gate on it.
+        declared = inspect.signature(model.forward).parameters
         for name, value in batch.items():
             if name in NEVER or not (isinstance(value, torch.Tensor) or tensor_list(value)):
+                continue
+            if name not in declared:
+                ignored.append(name)
                 continue
             if name not in PERTURBATIONS:
                 undefined.append(name)
@@ -129,4 +137,5 @@ def sensitivity(model, batch, threshold, accepted=None):
         "deltas": rows,
         "weakest": weakest,
         "no_perturbation_defined": undefined,
+        "not_a_forward_parameter": ignored,
     }
