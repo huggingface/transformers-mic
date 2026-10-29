@@ -86,7 +86,7 @@ Fixed `num_hidden_layers = 2` can break mixed layers: 170 configs define `layer_
 | `ibm-granite/granite-4.0-h-tiny` | 40: 5 mamba, 1 attention, repeated; MoE | 2 mamba; forward crashes | mamba + attention |
 | `deepseek-ai/DeepSeek-V2-Lite` | 27: 1 dense, then sparse | 1 dense + 1 sparse, by luck | dense + sparse |
 
-**Rule:** kind = `layer_types` + dense/sparse MLP (`first_k_dense_replace`/`moe_layer_freq` or `mlp_only_layers`/`decoder_sparse_step`). Keep the first of each kind in order; re-index per-layer fields. Periodic patterns (Jamba) and index-dependent cross-layer KV sharing need architecture rules.
+**Rule:** kind = `layer_types` + dense/sparse MLP (`first_k_dense_replace`/`moe_layer_freq` or `mlp_only_layers`/`decoder_sparse_step`). Keep the first of each kind in order; re-index per-layer fields. When the config computes the kinds from the layer index instead of storing them (a `layer_types` or `layers_block_type` property: Jamba's attention period, Zamba's hybrid layers, RecurrentGemma cycling `block_types`), re-indexing can't keep them, so the fixture keeps the prefix up to each kind's first layer (RecurrentGemma 26 → 3, Jamba 32 → 5, Zamba2 54 → 7). Index-dependent cross-layer KV sharing still needs architecture rules.
 
 ## Does it scale to every architecture?
 

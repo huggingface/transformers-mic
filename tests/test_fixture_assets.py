@@ -386,3 +386,23 @@ def test_shrink_keeps_blt_global_width_tied_to_the_local_models():
         config.global_config.head_dim * config.global_config.num_attention_heads
         == width
     )
+
+
+def test_shrink_keeps_every_block_kind_of_an_index_derived_pattern():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import RecurrentGemmaConfig
+
+    # As in google/recurrentgemma-2b: 26 layers cycling (recurrent, recurrent, attention).
+    config = shrink(RecurrentGemmaConfig(num_hidden_layers=26))
+    assert config.layers_block_type == ["recurrent", "recurrent", "attention"]
+
+
+def test_shrink_keeps_attention_layers_a_period_places():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import JambaConfig
+
+    # layer_types is computed from attn_layer_period/offset, not stored, so it can't be re-indexed.
+    config = shrink(JambaConfig(num_hidden_layers=32, attn_layer_period=8, attn_layer_offset=4))
+    assert set(config.layer_types) == {"linear_attention", "full_attention"}

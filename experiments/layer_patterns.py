@@ -61,8 +61,23 @@ def is_sparse(config, i):
     return None
 
 
+def derived_types(config):
+    """Per-layer kinds the config computes from the layer index rather than stores
+    (a `layer_types` or `layers_block_type` property, e.g. Jamba's attention period
+    or RecurrentGemma cycling `block_types`): re-indexing cannot keep these."""
+    if "layer_types" in config.to_dict():
+        return None
+    for name in ("layer_types", "layers_block_type"):
+        try:
+            types = getattr(config, name, None)
+        except Exception:  # some configs compute it from fields a sub-config lacks
+            types = None
+        if types:
+            return list(types)
+    return None
+
 def layer_kind(config, i):
-    types = getattr(config, "layer_types", None)
+    types = getattr(config, "layer_types", None) or derived_types(config)
     shared = getattr(config, "num_kv_shared_layers", 0)
     kv_shared = i >= config.num_hidden_layers - shared if shared else False
     return (types[i] if types else None, is_sparse(config, i), kv_shared)

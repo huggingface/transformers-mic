@@ -228,6 +228,12 @@ def shrink(config):
         if isinstance(values.get("num_hidden_layers"), int):
             kept = layer_pattern(cfg) if hasattr(cfg, "num_hidden_layers") else [0, 1]
             kept = kept if len(kept) > 1 else list(range(min(2, values["num_hidden_layers"])))
+            sys.path.insert(0, str(HERE))
+            from layer_patterns import derived_types
+
+            if derived_types(cfg):
+                # Kinds follow the layer index, so only a prefix keeps them: up to each kind's first layer.
+                kept = list(range(max(kept) + 1))
             for key, value in cfg.to_dict().items():
                 if isinstance(value, list) and len(value) == values["num_hidden_layers"]:
                     values[key] = [value[i] for i in kept if i < len(value)]
