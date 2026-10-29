@@ -1125,7 +1125,7 @@ def test_visible_usage_never_shows_runner_plumbing():
     ]
 
 
-def test_create_rejects_unknown_override_fields_and_missing_requires():
+def test_create_rejects_unknown_override_fields_and_adds_missing_requires():
     plan = {
         "manifest": {
             "fixtures": {
@@ -1145,16 +1145,14 @@ def test_create_rejects_unknown_override_fields_and_missing_requires():
         commands.check_config_facts(plan, config)
     fields = plan["manifest"]["fixtures"]["org/fixture"]["build"]["config_overrides"]
     fields["fields"] = {"text_config.hidden_size": 64}
-    with pytest.raises(ValueError, match="timm.*torchvision"):
-        commands.check_config_facts(plan, config)
-    plan["manifest"]["integrations"]["transformers"]["requires"] += [
-        "timm",
-        "torchvision",
-    ]
     commands.check_config_facts(plan, config)
+    requires = plan["manifest"]["integrations"]["transformers"]["requires"]
+    assert requires == ["torch", "timm", "torchvision"]
+    commands.check_config_facts(plan, config)  # idempotent
+    assert requires == ["torch", "timm", "torchvision"]
     plan["usage"] = 'model = AutoModel.from_pretrained(model_id, device_map="auto")'
-    with pytest.raises(ValueError, match="accelerate"):
-        commands.check_config_facts(plan, config)
+    commands.check_config_facts(plan, config)
+    assert plan["manifest"]["integrations"]["transformers"]["requires"][-1] == "accelerate"
 
 
 def test_fp8_checkpoint_names_drop_their_scales():

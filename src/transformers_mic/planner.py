@@ -187,7 +187,8 @@ Never show **variant in a visible line.
 Checkpoint facts come from the supplied config, processor files and references,
 not memory:
 - Processor outputs: move them with BatchFeature.to(device, dtype=model.dtype),
-  which casts only floating tensors. Use attention_mask only if the processor
+  which casts only floating tensors. Tokenizer outputs (BatchEncoding) take no
+  dtype: move them with inputs.to(device). Use attention_mask only if the processor
   returns it (`"attention_mask" in inputs`); some audio processors do not.
 - Pick the head the checkpoint was trained for: a pretraining-only checkpoint has
   no tokenizer and no task head, so do not build a CTC or classification path on it.

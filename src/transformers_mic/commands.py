@@ -197,7 +197,7 @@ def check_parameter_names(plan, config):
 
 
 def check_config_facts(plan, config):
-    """Overrides must name real config fields; requires must cover the model's imports."""
+    """Overrides must name real config fields; requires gains the model's imports."""
     full = config
     try:  # config.json omits defaults; the config class knows every field
         from transformers import CONFIG_MAPPING
@@ -217,9 +217,8 @@ def check_config_facts(plan, config):
                     f"config_overrides field {path!r} is not in the checkpoint config; "
                     f"nested configs need their prefix, one of {subs}"
                 )
-    requires = " ".join(
-        plan["manifest"]["integrations"]["transformers"].get("requires", [])
-    )
+    integration = plan["manifest"]["integrations"]["transformers"]
+    requires = " ".join(integration.get("requires", []))
     text = json.dumps(config)
     needed = [
         package
@@ -231,11 +230,10 @@ def check_config_facts(plan, config):
     ]
     if "device_map" in plan.get("usage", "") and "accelerate" not in requires:
         needed.append("accelerate")
+    # The config and usage determine these packages, so add them rather than
+    # spending a planner retry on a fact the draft cannot get wrong twice.
     if needed:
-        raise ValueError(
-            f"requires must list {needed}: the model's components or loading options "
-            "(vision towers, device_map) import them"
-        )
+        integration["requires"] = [*integration.get("requires", []), *needed]
 
 
 def propose_valid(context, args, model, fixture, old=None):
