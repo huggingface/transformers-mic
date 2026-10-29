@@ -174,6 +174,8 @@ def shrunk_config(source, cls, recipe=None):
         for key in parents:
             target = target[key]
         if field not in target:
+            if value is None:
+                continue  # dropping a field the shrunk config already lacks
             raise SystemExit(f"config_overrides: the shrunk config has no field {dotted}")
         target[field] = value
     return type(config).from_dict(values)

@@ -437,3 +437,14 @@ def test_config_without_token_types_accepts_their_perturbation():
     assert set(build_fixtures.config_insensitive(DebertaV2Config(type_vocab_size=0), batch)) == {"token_type_ids:all_ones"}
     assert build_fixtures.config_insensitive(BertConfig(type_vocab_size=2), batch) == {}
     assert build_fixtures.config_insensitive(DebertaV2Config(type_vocab_size=0), {"input_ids": batch["input_ids"]}) == {}
+
+def test_null_override_of_a_field_shrink_already_dropped_is_a_no_op(tmp_path):
+    from transformers import BertConfig, BertModel
+
+    BertConfig(num_hidden_layers=4).save_pretrained(tmp_path)
+    fields = {"hidden_size": 64, "quantization_config": None}
+    config = build_fixtures.shrunk_config(tmp_path, BertModel, {"config_overrides": {"fields": fields}})
+    assert config.hidden_size == 64 and getattr(config, "quantization_config", None) is None
+    fields["not_a_field"] = 1
+    with pytest.raises(SystemExit, match="not_a_field"):
+        build_fixtures.shrunk_config(tmp_path, BertModel, {"config_overrides": {"fields": fields}})
