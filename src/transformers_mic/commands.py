@@ -259,10 +259,32 @@ def check_config_facts(plan, config):
     ]
     if "device_map" in plan.get("usage", "") and "accelerate" not in requires:
         needed.append("accelerate")
+    if sentencepiece_tokenizer(config.get("model_type")):
+        needed += [p for p in ("sentencepiece", "protobuf") if p not in requires]
     # The config and usage determine these packages, so add them rather than
     # spending a planner retry on a fact the draft cannot get wrong twice.
     if needed:
         integration["requires"] = [*integration.get("requires", []), *needed]
+
+
+def sentencepiece_tokenizer(model_type):
+    """Whether the model type's tokenizer is SentencePiece-backed (e.g. SiglipTokenizer)."""
+    try:
+        import transformers
+        from transformers.models.auto.tokenization_auto import TOKENIZER_MAPPING_NAMES
+    except ImportError:
+        return False
+    names = TOKENIZER_MAPPING_NAMES.get(model_type) or ()
+    for name in names if isinstance(names, (tuple, list)) else (names,):
+        cls = getattr(transformers, name, None) if name else None
+        if cls is None:
+            continue
+        # Without sentencepiece installed the class is a dummy naming its backends.
+        if "sentencepiece" in (getattr(cls, "_backends", None) or ()):
+            return True
+        if any(base.__name__ == "SentencePieceBackend" for base in getattr(cls, "__mro__", ())):
+            return True
+    return False
 
 
 def propose_valid(context, args, model, fixture, old=None):

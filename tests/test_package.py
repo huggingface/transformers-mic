@@ -1155,6 +1155,16 @@ def test_create_rejects_unknown_override_fields_and_adds_missing_requires():
     assert plan["manifest"]["integrations"]["transformers"]["requires"][-1] == "accelerate"
 
 
+def test_sentencepiece_tokenizers_add_their_backends_to_requires():
+    plan = {"manifest": {"integrations": {"transformers": {"requires": ["torch"]}}}}
+    commands.check_config_facts(plan, {"model_type": "siglip"})
+    requires = plan["manifest"]["integrations"]["transformers"]["requires"]
+    assert requires == ["torch", "sentencepiece", "protobuf"]
+    plan = {"manifest": {"integrations": {"transformers": {"requires": ["torch"]}}}}
+    commands.check_config_facts(plan, {"model_type": "bert"})
+    assert plan["manifest"]["integrations"]["transformers"]["requires"] == ["torch"]
+
+
 def test_fp8_checkpoint_names_drop_their_scales():
     from transformers_mic.inspection import logical_checkpoint_keys
 
