@@ -2,7 +2,7 @@
 
 The dataset stores each fleet as readable CSV tables under ``<fleet>/``; tmic
 converts them to and from the JSON lock the runners read. Revisions from before
-the tables only have the JSON files, which are still read as they are.
+the tables only have the JSON files (``FILES``), which are still read as they are.
 """
 
 import csv
@@ -31,9 +31,6 @@ COLUMNS = {
     "environment": ("package", "version"),
     "known_failures": ("contract", "target", "issue", "match", "skip_outputs"),
 }
-# Transition: the JSON locks are still written next to the tables until the
-# Transformers CI runner (transformers-ci, pinned by ci_sha) reads the tables.
-WRITE_JSON = True
 
 
 def table_path(name, table):
@@ -193,11 +190,8 @@ def from_tables(tables):
 
 
 def operations(name, lock):
-    """Dataset files for one fleet: its tables, plus the JSON lock during the transition."""
-    files = {table_path(name, table): text for table, text in to_tables(lock).items()}
-    if WRITE_JSON:
-        files[FILES[name]] = json.dumps(from_tables(to_tables(lock)), indent=2) + "\n"
-    return files
+    """Dataset files for one fleet: its tables."""
+    return {table_path(name, table): text for table, text in to_tables(lock).items()}
 
 
 def resolve(revision="main"):
@@ -231,9 +225,12 @@ def download(name="control", revision="main"):
     except EntryNotFoundError:  # a revision from before the tables
         return fetch(FILES[name]), revision
     lock = from_tables(tables)
-    if WRITE_JSON:
-        # The runners still read the JSON; an older tmic would have updated only that.
+    try:
         legacy = json.loads(fetch(FILES[name]).read_text())
+    except EntryNotFoundError:
+        legacy = None
+    if legacy is not None:
+        # A tmic from before the tables writes only the JSON; never shadow that with stale tables.
         legacy.pop("comment", None)
         if legacy != lock:
             raise ValueError(

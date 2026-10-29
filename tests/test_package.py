@@ -286,18 +286,14 @@ def dataset(workspace, monkeypatch, tmp_path):
 
 
 def exported(call, name):
-    """The lock a fleet export uploaded, read back from its tables; the transition JSON must match."""
+    """The lock a fleet export uploaded, read back from its tables."""
     from transformers_mic import fleet
 
     files = {op.path_in_repo: op.path_or_fileobj.decode() for op in call["operations"]}
-    assert set(files) == {fleet.table_path(name, t) for t in fleet.COLUMNS} | {
-        fleet.FILES[name]
-    }
-    lock = fleet.from_tables(
+    assert set(files) == {fleet.table_path(name, t) for t in fleet.COLUMNS}
+    return fleet.from_tables(
         {t: files[fleet.table_path(name, t)] for t in fleet.COLUMNS}
     )
-    assert json.loads(files[fleet.FILES[name]]) == lock
-    return lock
 
 
 def test_export_publishes_dataset_and_writes_only_sha(workspace, dataset, tmp_path):
