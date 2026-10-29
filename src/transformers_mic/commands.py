@@ -287,6 +287,38 @@ def check_model_classes(plan, config):
             raise ValueError(f"{auto} does not map {model_type!r}; {hint}")
 
 
+def check_label_arguments(plan, config):
+    """Reject model(..., labels=) on a class whose forward takes no labels.
+
+    Most forwards swallow unknown keywords, so the mistake surfaces at build time
+    as a None loss (Owlv2ForObjectDetection has no loss at all; Mask2Former takes
+    mask_labels and class_labels).
+    """
+    import inspect
+
+    import transformers
+
+    if not re.search(r"\bmodel\([^)]*\blabels=", plan["usage"]):
+        return
+    model_type = config.get("model_type")
+    names = set(re.findall(r"\b(\w+)\.from_pretrained", plan["usage"]))
+    classes = []
+    for name in sorted(names):
+        cls = getattr(transformers, name, None)
+        mapping = getattr(getattr(cls, "_model_mapping", None), "_model_mapping", None)
+        if isinstance(mapping, dict):  # an Auto class: the class it loads for this type
+            cls = getattr(transformers, mapping.get(model_type) or "", None)
+        if isinstance(cls, type) and issubclass(cls, transformers.PreTrainedModel):
+            classes.append(cls)
+    params = {cls.__name__: inspect.signature(cls.forward).parameters for cls in classes}
+    if params and not any("labels" in p for p in params.values()):
+        found = {name: [p for p in ps if "label" in p] for name, ps in params.items()}
+        raise ValueError(
+            f"usage passes labels= but the forward takes no labels argument (label "
+            f"arguments: {found}); pass those, or compute the loss from the outputs"
+        )
+
+
 def check_parameter_names(plan, config):
     """Reject usage that names parameters the architecture does not have."""
     names = set(
@@ -421,6 +453,7 @@ def propose_valid(context, args, model, fixture, old=None):
             if context.get("config"):
                 check_config_facts(plan, context["config"])
                 check_model_classes(plan, context["config"])
+                check_label_arguments(plan, context["config"])
                 check_parameter_names(plan, context["config"])
             return plan, llm
         except (ValueError, jsonschema.ValidationError) as exc:
