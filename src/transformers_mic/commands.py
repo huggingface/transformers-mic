@@ -886,7 +886,7 @@ def export(args):
         if key.startswith(name + "/"):
             target = key[len(name) + 1 :]
             known[destination_name + "/" + renamed_targets.get(target, target)] = value
-    payload = (json.dumps(old, indent=2, allow_nan=False) + "\n").encode()
+    files = fleet.operations(fleet_name, old)
     executed = getattr(args, "execute", False)
     checkout = getattr(args, "transformers_checkout", None)
     if executed:
@@ -895,9 +895,8 @@ def export(args):
             repo_type="dataset",
             parent_commit=revision,
             operations=[
-                CommitOperationAdd(
-                    path_in_repo=fleet.FILES[fleet_name], path_or_fileobj=payload
-                )
+                CommitOperationAdd(path_in_repo=path, path_or_fileobj=text.encode())
+                for path, text in files.items()
             ],
             commit_message=f"Update {destination_name} in the {fleet_name} fleet",
         )

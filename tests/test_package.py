@@ -1,5 +1,6 @@
 import copy
 import json
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -254,7 +255,22 @@ def dataset(workspace, monkeypatch, tmp_path):
         {
             "framework": "transformers",
             "environment": workspace.lock["environment"],
-            "contracts": {"Other": {"keep": True}},
+            "contracts": {
+                "Other": {
+                    "integration": {
+                        "repo": "huggingface-mic/other-mic",
+                        "revision": "c" * 40,
+                        "files_sha256": "d" * 64,
+                    },
+                    "fixtures": {
+                        "huggingface-mic/other-mic": {
+                            "revision": "c" * 40,
+                            "files_sha256": "e" * 64,
+                        }
+                    },
+                    "checkpoints": {"org/other": "f" * 40},
+                }
+            },
         },
     )
     monkeypatch.setattr(fleet, "download", lambda *args: (path, "a" * 40))
@@ -267,6 +283,21 @@ def dataset(workspace, monkeypatch, tmp_path):
 
     monkeypatch.setattr(commands, "HfApi", API)
     return path, calls
+
+
+def exported(call, name):
+    """The lock a fleet export uploaded, read back from its tables; the transition JSON must match."""
+    from transformers_mic import fleet
+
+    files = {op.path_in_repo: op.path_or_fileobj.decode() for op in call["operations"]}
+    assert set(files) == {fleet.table_path(name, t) for t in fleet.COLUMNS} | {
+        fleet.FILES[name]
+    }
+    lock = fleet.from_tables(
+        {t: files[fleet.table_path(name, t)] for t in fleet.COLUMNS}
+    )
+    assert json.loads(files[fleet.FILES[name]]) == lock
+    return lock
 
 
 def test_export_publishes_dataset_and_writes_only_sha(workspace, dataset, tmp_path):
@@ -284,10 +315,8 @@ def test_export_publishes_dataset_and_writes_only_sha(workspace, dataset, tmp_pa
     assert call["repo_id"] == "huggingface-mic/transformers-fleet"
     assert call["repo_type"] == "dataset"
     assert call["parent_commit"] == "a" * 40
-    operation = call["operations"][0]
-    assert operation.path_in_repo == "fleet-lock.json"
-    lock = json.loads(operation.path_or_fileobj)
-    assert lock["contracts"]["Other"] == {"keep": True}
+    lock = exported(call, "control")
+    assert lock["contracts"]["Other"] == read(dataset[0])["contracts"]["Other"]
     assert "path" not in lock["contracts"]["BERT"]["integration"]
     assert all("path" not in p for p in lock["contracts"]["BERT"]["fixtures"].values())
     assert list(target.rglob("*")) == [
@@ -303,14 +332,14 @@ def test_export_publishes_dataset_and_writes_only_sha(workspace, dataset, tmp_pa
 def test_export_rejects_case_collision_and_allows_explicit_name(workspace, dataset):
     approve_receipts(workspace)
     old = read(dataset[0])
-    old["contracts"]["bert"] = {}
+    old["contracts"]["bert"] = old["contracts"]["Other"]
     write(dataset[0], old)
     args = SimpleNamespace(workspace=workspace.root, execute=True)
     with pytest.raises(ValueError, match="differs only by case"):
         commands.export(args)
     args.contract_name = "mic-bert"
     commands.export(args)
-    lock = json.loads(dataset[1][0]["operations"][0].path_or_fileobj)
+    lock = exported(dataset[1][0], "control")
     assert "mic-bert" in lock["contracts"]
     assert "bert" in lock["contracts"]
 
@@ -949,10 +978,19 @@ def test_dataset_pin_resolves_main_once_and_checks_both_fleets(monkeypatch, tmp_
             calls.append((repo, revision))
             return SimpleNamespace(sha="d" * 40)
 
+    lock = {"framework": "transformers", "environment": {}, "contracts": {}}
+    tables = {
+        **fleet.to_tables(lock),
+        **dict.fromkeys(fleet.FILES.values(), json.dumps(lock)),
+    }
+
     def download(repo, filename, **kwargs):
         assert repo == fleet.REPOSITORY
         assert kwargs == {"repo_type": "dataset", "revision": "d" * 40}
-        return str(tmp_path / filename)
+        path = tmp_path / filename
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(tables.get(filename) or tables[Path(filename).stem])
+        return str(path)
 
     monkeypatch.setattr(fleet, "HfApi", API)
     monkeypatch.setattr(fleet, "hf_hub_download", download)
@@ -972,10 +1010,9 @@ def test_dataset_export_scopes_known_failures_and_uses_prototype_file(
     commands.export(
         SimpleNamespace(workspace=workspace.root, fleet="prototypes", execute=True)
     )
-    op = dataset[1][0]["operations"][0]
-    assert op.path_in_repo == "prototype-fleet.lock"
-    lock = json.loads(op.path_or_fileobj)
-    assert lock["known_failures"]["Other/target"] == {"issue": "keep"}
+    lock = exported(dataset[1][0], "prototypes")
+    # An issue-only entry is the schema's plain string form
+    assert lock["known_failures"]["Other/target"] == "keep"
     assert all(k.startswith(("Other/", "BERT/")) for k in lock["known_failures"])
 
 
@@ -1043,12 +1080,10 @@ def test_export_moves_known_failure_to_the_renamed_target(
 
     monkeypatch.setattr(commands, "upgrade_contract", canonical)
     commands.export(SimpleNamespace(workspace=workspace.root, execute=True))
-    exported = json.loads(dataset[1][0]["operations"][0].path_or_fileobj)
+    lock = exported(dataset[1][0], "control")
     target = fixture.split("/")[-1]
-    assert exported["known_failures"][f"BERT/{target}"]["skip_outputs"] == [
-        "training.loss"
-    ]
-    assert f"BERT/{old_target}" not in exported["known_failures"]
+    assert lock["known_failures"][f"BERT/{target}"]["skip_outputs"] == ["training.loss"]
+    assert f"BERT/{old_target}" not in lock["known_failures"]
 
 
 def test_binary_only_checkpoint_reads_names_from_conversion_pr(tmp_path, monkeypatch):
