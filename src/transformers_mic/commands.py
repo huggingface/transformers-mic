@@ -246,6 +246,14 @@ def check_config_facts(plan, config):
                     f"config_overrides field {path!r} is not in the checkpoint config; "
                     f"nested configs need their prefix, one of {subs}"
                 )
+        # The fixture runs the checkpoint's own tokenizer and shrink keeps its
+        # vocabulary; a smaller vocab_size makes real token ids out of range.
+        for path in [p for p in fields if p.split(".")[-1] == "vocab_size"]:
+            node = full
+            for part in path.split("."):
+                node = node.get(part) if isinstance(node, dict) else None
+            if isinstance(node, int) and fields[path] < node:
+                del fields[path]
     integration = plan["manifest"]["integrations"]["transformers"]
     requires = " ".join(integration.get("requires", []))
     text = json.dumps(config)
