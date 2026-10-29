@@ -133,8 +133,16 @@ def inspect_checkpoint(cls, source, repo, revision):
         converted.add(renamed)
         if matched:
             for converter in converters:
+                # A sub-model's converter is scoped to its renamed prefix
+                # (vision_model -> vision_tower.vision_encoder), so it cannot
+                # re-match the original key: identify it by the matched pattern.
+                scope = getattr(converter, "scope_prefix", None)
+                if scope and f"{scope}." not in renamed:
+                    continue
                 _, source_pattern = converter.rename_source_key(key)
-                if source_pattern == matched and len(converter.target_patterns) > 1:
+                if (
+                    source_pattern == matched or matched in converter.source_patterns
+                ) and len(converter.target_patterns) > 1:
                     # Expand the fully renamed key: the converter alone skips
                     # renamings such as encoder.layers -> layers.
                     first = converter.target_patterns[0]

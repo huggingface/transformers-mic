@@ -1313,6 +1313,35 @@ def test_split_weights_are_expanded_after_renaming(tmp_path, monkeypatch):
     )
 
 
+def test_scoped_split_weights_are_expanded(tmp_path, monkeypatch):
+    # Unlimited-OCR's fused vision qkv_proj is split by a converter scoped to the
+    # renamed sub-model (vision_model -> vision_tower.vision_encoder), which never
+    # matches the checkpoint's original key.
+    import torch
+    from transformers import (
+        UnlimitedOcrConfig,
+        UnlimitedOcrForConditionalGeneration as Model,
+    )
+
+    from transformers_mic import inspection
+
+    UnlimitedOcrConfig().save_pretrained(tmp_path)
+    with torch.device("meta"):
+        model = Model._from_config(UnlimitedOcrConfig.from_pretrained(tmp_path))
+    encoder = "model.vision_tower.vision_encoder.encoder.layers."
+    original = {
+        name.replace(encoder, "model.vision_model.transformer.layers.").replace(
+            "self_attn.q_proj", "self_attn.qkv_proj"
+        )
+        if name.startswith(encoder)
+        else name
+        for name in model.state_dict()
+        if not (name.startswith(encoder) and ("k_proj" in name or "v_proj" in name))
+    }
+    monkeypatch.setattr(inspection, "checkpoint_keys", lambda *args: original)
+    assert inspection.inspect_checkpoint(Model, tmp_path, "org/m", "a" * 40) == []
+
+
 def test_planner_backs_off_on_rate_limits_then_gives_up(monkeypatch):
     from huggingface_hub.errors import HfHubHTTPError
 
