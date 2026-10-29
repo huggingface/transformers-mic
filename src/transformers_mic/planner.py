@@ -234,6 +234,12 @@ not memory:
 - An encoder-decoder forward needs decoder inputs: for an inference probe pass
   decoder_input_ids starting from config.decoder_start_token_id (or labels=).
   Without them Marian raises a misleading "cannot specify both".
+- The training step runs its own forward with gradients: never build the loss
+  from tensors computed under torch.no_grad() in the inference block.
+- Every key declared in outputs must appear in the printed result; a nested value
+  is declared by its dotted path (logits.probe for {"logits": {"probe": ...}}).
+- When a tokenizer has no pad token, set one it actually has: eos_token can be
+  None too (Inkling); then use its end-of-text special token by name.
 - Get a word's token id with tokenizer.encode(word, add_special_tokens=False)[0];
   convert_tokens_to_ids(" Paris") returns None in BPE vocabularies, which spell
   the leading space inside the token.
