@@ -89,6 +89,16 @@ GATE_FACTOR = 10
 DTYPES = ("float32", "bfloat16", "float16")
 
 
+def config_insensitive(config, batch):
+    """Perturbations the config makes inert by construction, with the reason.
+
+    A config without token types (DeBERTa-v3: type_vocab_size 0) has no embedding
+    for them, so a tokenizer's token_type_ids cannot move the logits.
+    """
+    if "token_type_ids" in batch and getattr(config.get_text_config(), "type_vocab_size", None) == 0:
+        return {"token_type_ids:all_ones": "type_vocab_size is 0: the model has no token type embedding"}
+    return {}
+
 def report_phase(phase, detail=""):
     print("MIC_PROGRESS " + json.dumps({"phase": phase, "detail": detail}), flush=True)
 
@@ -568,7 +578,7 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
     entry = root / manifest["integrations"]["transformers"]["entry_point"]
     report_phase("Run contract and capture training inputs")
     batch, captured = contract_batch(entry, out)
-    accepted = recipe.get("accept_insensitive", {})
+    accepted = {**config_insensitive(model.config, batch), **recipe.get("accept_insensitive", {})}
     report_phase("Check random-weight input sensitivity")
     gate = {"random": sensitivity(called_module(model, captured), as_dtype(batch, dtype), threshold, accepted)}
     weights, training = "random", None

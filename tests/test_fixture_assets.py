@@ -428,3 +428,12 @@ def test_shrink_keeps_attention_layers_a_period_places():
     # layer_types is computed from attn_layer_period/offset, not stored, so it can't be re-indexed.
     config = shrink(JambaConfig(num_hidden_layers=32, attn_layer_period=8, attn_layer_offset=4))
     assert set(config.layer_types) == {"linear_attention", "full_attention"}
+
+
+def test_config_without_token_types_accepts_their_perturbation():
+    from transformers import BertConfig, DebertaV2Config
+
+    batch = {"input_ids": torch.ones(1, 3, dtype=torch.long), "token_type_ids": torch.zeros(1, 3, dtype=torch.long)}
+    assert set(build_fixtures.config_insensitive(DebertaV2Config(type_vocab_size=0), batch)) == {"token_type_ids:all_ones"}
+    assert build_fixtures.config_insensitive(BertConfig(type_vocab_size=2), batch) == {}
+    assert build_fixtures.config_insensitive(DebertaV2Config(type_vocab_size=0), {"input_ids": batch["input_ids"]}) == {}
