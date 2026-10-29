@@ -222,6 +222,14 @@ not memory:
   with processor.apply_chat_template(messages, add_generation_prompt=True,
   tokenize=False), then call processor(text=texts, images=images, ...); passing
   images= to apply_chat_template(tokenize=True) raises "multiple values".
+- Pass audio as a list of 1-D float NumPy arrays: some feature extractors (CLAP)
+  read a list of torch tensors as one unbatched clip and allocate tens of GB. A
+  fusion extractor (CLAP, enable_fusion) marks a random clip "longer" when none
+  exceeds its max_length_s window, so use clips longer than that window: then
+  every clip takes the fusion branch and its batch norm trains on the full batch.
+- get_text_features / get_image_features / get_audio_features take only their own
+  modality's inputs (never **inputs) and return a model output in Transformers 5:
+  the projected embedding is .pooler_output.
 - Import only classes transformers exports; take the model class from the
   config's architectures (there is no AutoModelForConditionalGeneration).
 - The builder already shrinks every config: depth to about 2 layers, widths to 64, experts to
