@@ -182,6 +182,43 @@ def check_imports(plan):
         raise ValueError(f"usage imports names transformers does not export: {hints}")
 
 
+def check_undefined_names(plan):
+    """Reject usage that reads a name no block sharing its state ever defines."""
+    import builtins
+    import symtable
+
+    groups = {}
+    for name, block in re.findall(
+        r"^```py runnable:([\w-]+)[^\n]*\n(.*?)^```", plan["usage"], re.M | re.S
+    ):
+        groups[name] = groups.get(name, "") + block
+    missing = set()
+    for code in groups.values():
+        try:
+            top = symtable.symtable(code, "usage", "exec")
+        except SyntaxError:  # the build reports real syntax errors
+            continue
+        known = set(dir(builtins)) | {
+            s.get_name()
+            for s in top.get_symbols()
+            if s.is_assigned() or s.is_imported() or s.is_namespace()
+        }
+        tables = [top]
+        while tables:
+            table = tables.pop()
+            tables += table.get_children()
+            for symbol in table.get_symbols():
+                read = symbol.is_referenced() and (
+                    symbol.is_global()
+                    if table is not top
+                    else not (symbol.is_assigned() or symbol.is_imported())
+                )
+                if read and symbol.get_name() not in known:
+                    missing.add(symbol.get_name())
+    if missing:
+        raise ValueError(f"usage reads names it never defines: {sorted(missing)}")
+
+
 def check_parameter_names(plan, config):
     """Reject usage that names parameters the architecture does not have."""
     names = set(
@@ -311,6 +348,7 @@ def propose_valid(context, args, model, fixture, old=None):
                 plan["name"] = re.sub(r"[^A-Za-z0-9_-]", "-", plan["name"])
             validate_plan(plan, model, fixture, old)
             check_imports(plan)
+            check_undefined_names(plan)
             if context.get("config"):
                 check_config_facts(plan, context["config"])
                 check_parameter_names(plan, context["config"])

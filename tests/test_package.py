@@ -1178,6 +1178,23 @@ def test_sentencepiece_tokenizers_add_their_backends_to_requires():
     assert plan["manifest"]["integrations"]["transformers"]["requires"] == ["torch"]
 
 
+def test_create_rejects_usage_reading_names_it_never_defines():
+    usage = (
+        "```py runnable:a\nimport torch\nlogits = torch.ones(2)\n```\n"
+        "```py runnable:a:2\nchecked = ('w',)\nresult = {n: logits[0] for n in checked}\n```\n"
+    )
+    commands.check_undefined_names({"usage": usage})  # state carries across :2
+    with pytest.raises(ValueError, match="gradients"):
+        commands.check_undefined_names(
+            {"usage": usage.replace("for n in checked", "for n in gradients")}
+        )
+    # A separate runnable id does not see the first block's names.
+    with pytest.raises(ValueError, match="logits"):
+        commands.check_undefined_names(
+            {"usage": usage.replace("runnable:a:2", "runnable:b")}
+        )
+
+
 def test_fp8_checkpoint_names_drop_their_scales():
     from transformers_mic.inspection import logical_checkpoint_keys
 
