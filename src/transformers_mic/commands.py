@@ -219,6 +219,35 @@ def check_undefined_names(plan):
         raise ValueError(f"usage reads names it never defines: {sorted(missing)}")
 
 
+def check_model_classes(plan, config):
+    """Reject a fixture model_class or Auto class that cannot load this model type."""
+    import transformers
+    from transformers.models.auto import modeling_auto
+
+    model_type = config.get("model_type")
+    supported = sorted(
+        {
+            (name.removesuffix("_MAPPING_NAMES"), mapping[model_type])
+            for name in dir(modeling_auto)
+            if name.startswith("MODEL") and name.endswith("_MAPPING_NAMES")
+            for mapping in [getattr(modeling_auto, name)]
+            if isinstance(mapping, dict) and isinstance(mapping.get(model_type), str)
+        }
+    )
+    if not supported:  # a type Transformers does not map: nothing to compare with
+        return
+    hint = f"classes that load {model_type!r}: {sorted({c for _, c in supported})}"
+    for name, spec in plan["manifest"].get("fixtures", {}).items():
+        cls = (spec.get("build") or {}).get("model_class")
+        if cls and not hasattr(transformers, cls):
+            raise ValueError(f"fixture model_class {cls!r} is not a Transformers class; {hint}")
+    for auto in sorted(set(re.findall(r"\b(AutoModel\w*)\.from_pretrained", plan["usage"]))):
+        mapping = getattr(getattr(transformers, auto, None), "_model_mapping", None)
+        names = getattr(mapping, "_model_mapping", None)
+        if isinstance(names, dict) and model_type not in names:
+            raise ValueError(f"{auto} does not map {model_type!r}; {hint}")
+
+
 def check_parameter_names(plan, config):
     """Reject usage that names parameters the architecture does not have."""
     names = set(
@@ -351,6 +380,7 @@ def propose_valid(context, args, model, fixture, old=None):
             check_undefined_names(plan)
             if context.get("config"):
                 check_config_facts(plan, context["config"])
+                check_model_classes(plan, context["config"])
                 check_parameter_names(plan, context["config"])
             return plan, llm
         except (ValueError, jsonschema.ValidationError) as exc:

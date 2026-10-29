@@ -1195,6 +1195,21 @@ def test_create_rejects_usage_reading_names_it_never_defines():
         )
 
 
+def test_create_rejects_model_classes_that_cannot_load_the_type():
+    def plan(model_class, auto):
+        return {
+            "manifest": {"fixtures": {"org/f": {"build": {"model_class": model_class}}}},
+            "usage": f"model = {auto}.from_pretrained(model_id)",
+        }
+
+    config = {"model_type": "m2m_100"}
+    commands.check_model_classes(plan("M2M100ForConditionalGeneration", "AutoModelForSeq2SeqLM"), config)
+    with pytest.raises(ValueError, match="M2M100ForConditionalGeneration"):
+        commands.check_model_classes(plan("M2m100ForConditionalGeneration", "AutoModelForSeq2SeqLM"), config)
+    with pytest.raises(ValueError, match="AutoModelForCausalLM does not map"):
+        commands.check_model_classes(plan("M2M100ForConditionalGeneration", "AutoModelForCausalLM"), config)
+
+
 def test_fp8_checkpoint_names_drop_their_scales():
     from transformers_mic.inspection import logical_checkpoint_keys
 
