@@ -300,6 +300,16 @@ def shrink(config):
                         if isinstance(linear.get(key), int):
                             linear[key] = value
             values["num_hidden_layers"] = len(kept)
+        # DPT reads one hidden state per backbone_out_indices entry, one per neck
+        # width: keep a layer per entry, renumbered, and shrink the neck.
+        outs = values.get("backbone_out_indices")
+        if isinstance(outs, list) and isinstance(values.get("num_hidden_layers"), int) and not values.get("is_hybrid"):
+            values["num_hidden_layers"] = len(outs)
+            values["backbone_out_indices"] = list(range(len(outs)))
+            if isinstance(values.get("neck_hidden_sizes"), list):
+                values["neck_hidden_sizes"] = [16 * 2 ** min(i, 2) for i in range(len(values["neck_hidden_sizes"]))]
+            if isinstance(values.get("fusion_hidden_size"), int):
+                values["fusion_hidden_size"] = 64
         if isinstance(values.get("intermediate_size"), list):
             values["intermediate_size"] = [min(size, 128) for size in values["intermediate_size"]]
         if values.get("upsample_groups") and values.get("hidden_size"):
