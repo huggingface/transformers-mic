@@ -297,6 +297,22 @@ def check_code_fences(plan):
         )
 
 
+def check_image_shapes(plan):
+    """Reject the broadcast-image idiom that builds (H, W, 1) instead of (3, H, W).
+
+    view(H, 1, 1) + view(1, W, 1) is (H, W, 1); .expand(3, H, W) then raises. Three
+    drafts in a row (DINOv3, ResNet, Swinv2) did this despite the prompt bullet.
+    """
+    usage = plan["usage"]
+    rows = re.search(r"\.view\(\s*\w+\s*,\s*1\s*,\s*1\s*\)", usage)
+    cols = re.search(r"\.view\(\s*1\s*,\s*\w+\s*,\s*1\s*\)", usage)
+    if rows and cols and re.search(r"\.expand\(\s*3\s*,", usage):
+        raise ValueError(
+            "view(H, 1, 1) + view(1, W, 1) is (H, W, 1), and .expand(3, H, W) raises: "
+            "build images as view(1, H, 1) + view(1, 1, W), or as (H, W, 3) uint8 arrays"
+        )
+
+
 def check_float16_load(plan, config):
     """A float16 checkpoint loaded at its stored dtype overflows and cannot train."""
     stored = config.get("dtype") or config.get("torch_dtype")
@@ -477,6 +493,7 @@ def propose_valid(context, args, model, fixture, old=None):
             check_undefined_names(plan)
             check_targets(plan)
             check_code_fences(plan)
+            check_image_shapes(plan)
             if context.get("config"):
                 check_float16_load(plan, context["config"])
                 check_config_facts(plan, context["config"])

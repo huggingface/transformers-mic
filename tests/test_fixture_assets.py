@@ -526,3 +526,22 @@ def test_shrink_keeps_projection_dim_equal_to_the_text_width():
 
     config = shrink(Owlv2Config())
     assert config.projection_dim == config.text_config.hidden_size
+
+
+def test_shrink_keeps_one_dpt_layer_per_out_index():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import DPTConfig
+
+    config = shrink(DPTConfig(backbone_out_indices=[5, 11, 17, 23], num_hidden_layers=24))
+    assert config.num_hidden_layers == 4
+    assert config.backbone_out_indices == [0, 1, 2, 3]
+    assert len(config.neck_hidden_sizes) == 4
+
+
+def test_save_accepts_a_missing_tied_alias(tmp_path):
+    from transformers import BertConfig, BertForMaskedLM
+
+    model = BertForMaskedLM(BertConfig(vocab_size=50, hidden_size=16, num_hidden_layers=1, num_attention_heads=2, intermediate_size=32))
+    model.config.save_pretrained(tmp_path / "src")
+    build_fixtures.save(model, tmp_path / "out", tmp_path / "src", ["cls.predictions.decoder.bias"])

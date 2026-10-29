@@ -1426,3 +1426,10 @@ def test_create_rejects_plain_fences_and_float16_loads():
     commands.check_float16_load({"usage": usage}, {"dtype": "bfloat16"})
     fixed = usage.replace("(model_id)", "(model_id, dtype=torch.float32)")
     commands.check_float16_load({"usage": fixed}, {"torch_dtype": "float16"})
+
+
+def test_create_rejects_the_broadcast_image_idiom():
+    bad = "y = a.view(H, 1, 1)\nx = b.view(1, W, 1)\nimage = (x + y).expand(3, H, W)\n"
+    with pytest.raises(ValueError, match="view"):
+        commands.check_image_shapes({"usage": bad})
+    commands.check_image_shapes({"usage": bad.replace("view(H, 1, 1)", "view(1, H, 1)").replace("view(1, W, 1)", "view(1, 1, W)")})

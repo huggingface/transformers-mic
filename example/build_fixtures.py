@@ -302,7 +302,14 @@ def save(model, out, source, missing, recipe=None):
     model.save_pretrained(out)
     weights = out / "model.safetensors"
     tensors = load_file(weights)
-    absent = [name for name in missing if name not in tensors]
+    # A tied alias (BERT-style cls.predictions.decoder.bias) is never serialized:
+    # it is already absent from the fixture, as from the checkpoint.
+    state = model.state_dict()
+    saved = {state[name].data_ptr() for name in tensors if name in state}
+    absent = [
+        name for name in missing
+        if name not in tensors and not (name in state and state[name].data_ptr() in saved)
+    ]
     if absent:
         raise SystemExit(f"cannot mirror the real checkpoint: the fixture has no tensor named {absent}")
     save_file({k: v for k, v in tensors.items() if k not in missing}, weights, metadata={"format": "pt"})
