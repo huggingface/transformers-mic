@@ -545,3 +545,13 @@ def test_save_accepts_a_missing_tied_alias(tmp_path):
     model = BertForMaskedLM(BertConfig(vocab_size=50, hidden_size=16, num_hidden_layers=1, num_attention_heads=2, intermediate_size=32))
     model.config.save_pretrained(tmp_path / "src")
     build_fixtures.save(model, tmp_path / "out", tmp_path / "src", ["cls.predictions.decoder.bias"])
+
+
+def test_shrink_keeps_clipseg_extract_layers_within_the_vision_depth():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import CLIPSegConfig
+
+    config = shrink(CLIPSegConfig(extract_layers=[3, 6, 9]))
+    assert config.extract_layers == [0, 1, 1]
+    assert max(config.extract_layers) < config.vision_config.num_hidden_layers

@@ -300,6 +300,12 @@ def shrink(config):
                         if isinstance(linear.get(key), int):
                             linear[key] = value
             values["num_hidden_layers"] = len(kept)
+        # CLIPSeg's decoder reads vision hidden states extract_layers (3, 6, 9): keep
+        # one entry each, within the shrunk vision depth.
+        vision = values.get("vision_config")
+        if isinstance(values.get("extract_layers"), list) and isinstance(vision, dict) and vision.get("num_hidden_layers"):
+            depth, top = vision["num_hidden_layers"], max(values["extract_layers"]) + 1
+            values["extract_layers"] = [min(i * depth // top, depth - 1) for i in values["extract_layers"]]
         # DPT reads one hidden state per backbone_out_indices entry, one per neck
         # width: keep a layer per entry, renumbered, and shrink the neck.
         outs = values.get("backbone_out_indices")
