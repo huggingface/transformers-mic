@@ -329,6 +329,19 @@ def shrink(config):
                     # BART-style text configs (Florence-2) name their width d_model.
                     text_values = values["text_config"]
                     values[key][field] = text_values.get("hidden_size") or text_values["d_model"]
+        # A sub-config's channel list that ends at a sibling's width feeds that sibling
+        # (Unlimited-OCR's SAM downsample_channels [512, 1024] are the CLIP encoder's
+        # patch embeddings): scale it to the sibling's resized width.
+        subs = {key: getattr(cfg, key, None) for key in getattr(cfg, "sub_configs", {}) or {}}
+        for key, sub in subs.items():
+            channels = getattr(sub, "downsample_channels", None)
+            if not (isinstance(channels, (list, tuple)) and channels and isinstance(values.get(key), dict)):
+                continue
+            for other, sibling in subs.items():
+                width = getattr(sibling, "hidden_size", None)
+                if other != key and width == channels[-1] and isinstance(values.get(other), dict):
+                    resized = values[other]["hidden_size"]
+                    values[key]["downsample_channels"] = [c * resized // width for c in channels]
         # Multimodal RoPE partitions must still cover half the resized head.
         rope = values.get("rope_parameters")
         if isinstance(rope, dict) and rope.get("mrope_section"):
