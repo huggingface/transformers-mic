@@ -218,7 +218,10 @@ not memory:
 - Image processor classes have no Fast suffix in Transformers 5 (use
   XImageProcessor, not XImageProcessorFast). device_map needs accelerate in requires.
 - Processors take singular keyword arguments in Transformers 5: text=, images=,
-  videos=, audio= (audios= raises).
+  videos=, audio= (audios= raises). For a chat-template VLM, render the prompts
+  with processor.apply_chat_template(messages, add_generation_prompt=True,
+  tokenize=False), then call processor(text=texts, images=images, ...); passing
+  images= to apply_chat_template(tokenize=True) raises "multiple values".
 - Import only classes transformers exports; take the model class from the
   config's architectures (there is no AutoModelForConditionalGeneration).
 - The builder already shrinks every config: depth to about 2 layers, widths to 64, experts to
