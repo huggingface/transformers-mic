@@ -271,6 +271,12 @@ not memory:
   checkpoint's own tokenizer, so real token and pad ids must stay in range) or
   quantization_config, and never num_hidden_layers when the config lists per-layer
   types (layer_types, linear_attn_config layers): their lengths must match.
+- The GPU runner is one A10G that reports about 22 GB: declare gpu_memory_gb of
+  at most 22, or the runner skips the checkpoint as unsupported.
+- A detection head with no loss in Transformers (Owlv2ForObjectDetection) trains on
+  an explicit loss from its outputs (match each target box to its nearest predicted
+  box: class BCE + box L1). Report at most the top few detections per image, never
+  every post-processed box.
 - CPU runners are memory-limited containers: a checkpoint above ~1B parameters
   declares "devices": ["cuda"] in its resources, so CPU measures only the slim
   fixture and the checkpoint runs on GPU. The exclusion stays visible in results.

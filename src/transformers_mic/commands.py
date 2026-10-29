@@ -287,6 +287,32 @@ def check_model_classes(plan, config):
             raise ValueError(f"{auto} does not map {model_type!r}; {hint}")
 
 
+def check_code_fences(plan):
+    """Every Python block runs: a plain ```python fence is skipped by the runner."""
+    plain = re.findall(r"^```(?:python|py)[ \t]*$", plan["usage"], re.M)
+    if plain:
+        raise ValueError(
+            f"{len(plain)} code block(s) are not runnable; fence every block as "
+            "```py runnable:<name> (continuations ```py runnable:<name>:2)"
+        )
+
+
+def check_float16_load(plan, config):
+    """A float16 checkpoint loaded at its stored dtype overflows and cannot train."""
+    stored = config.get("dtype") or config.get("torch_dtype")
+    if stored != "float16":
+        return
+    loads = re.findall(r"^[^#\n]*\b(\w+)\.from_pretrained\(model_id[^\n]*$", plan["usage"], re.M)
+    lines = re.findall(r"^[^#\n]*\b\w+\.from_pretrained\(model_id[^\n]*$", plan["usage"], re.M)
+    for name, line in zip(loads, lines):
+        if re.search(r"Processor|Tokenizer|Extractor", name) or "dtype" in line:
+            continue
+        raise ValueError(
+            f"the checkpoint is stored in float16: load {name} with dtype=torch.float32 "
+            "(the bfloat16 variant still overrides it)"
+        )
+
+
 def check_label_arguments(plan, config):
     """Reject model(..., labels=) on a class whose forward takes no labels.
 
@@ -450,7 +476,9 @@ def propose_valid(context, args, model, fixture, old=None):
             check_imports(plan)
             check_undefined_names(plan)
             check_targets(plan)
+            check_code_fences(plan)
             if context.get("config"):
+                check_float16_load(plan, context["config"])
                 check_config_facts(plan, context["config"])
                 check_model_classes(plan, context["config"])
                 check_label_arguments(plan, context["config"])

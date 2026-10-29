@@ -1414,3 +1414,15 @@ def test_create_rejects_labels_a_forward_does_not_take():
         commands.check_label_arguments(plan("AutoModelForUniversalSegmentation", "labels=labels"), mask2former)
     commands.check_label_arguments(plan("AutoModelForUniversalSegmentation", "mask_labels=m"), mask2former)
     commands.check_label_arguments(plan("AutoModelForObjectDetection", "labels=labels"), {"model_type": "yolos"})
+
+
+def test_create_rejects_plain_fences_and_float16_loads():
+    usage = "```py runnable:a\nmodel = AutoModel.from_pretrained(model_id)\n```\n\n```python\nx = 1\n```\n"
+    with pytest.raises(ValueError, match="not runnable"):
+        commands.check_code_fences({"usage": usage})
+    commands.check_code_fences({"usage": usage.replace("```python", "```py runnable:a:2")})
+    with pytest.raises(ValueError, match="dtype=torch.float32"):
+        commands.check_float16_load({"usage": usage}, {"torch_dtype": "float16"})
+    commands.check_float16_load({"usage": usage}, {"dtype": "bfloat16"})
+    fixed = usage.replace("(model_id)", "(model_id, dtype=torch.float32)")
+    commands.check_float16_load({"usage": fixed}, {"torch_dtype": "float16"})
