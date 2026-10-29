@@ -182,7 +182,10 @@ hidden block. Load the model with a plain visible call, then reload hidden:
     if variant:  # doc-builder: hide
         del model  # doc-builder: hide
         model = AutoModelForX.from_pretrained(model_id, **variant).to(device)  # doc-builder: hide
-Never show **variant in a visible line.
+Never show **variant in a visible line. If the visible load passes dtype, the
+hidden reload keeps it under the variant: from_pretrained(model_id,
+**{"dtype": torch.float32, **variant}); otherwise the eager variant silently
+loads a float16 checkpoint in float16.
 
 Checkpoint facts come from the supplied config, processor files and references,
 not memory:
