@@ -288,6 +288,11 @@ not memory:
   and text with the tokenizer's attention_mask.
 - Per-token side inputs (LayoutLM bbox) must be built from the tokenized length,
   never hard-coded for the words: tokenizers add special tokens.
+- Eager attention materializes the full attention matrix: with thousands of image
+  tokens (OWLv2 at 960 px: 3600; EmbeddingGemma2 images: 2520) a training step OOMs
+  a 24 GB GPU. Such contracts declare only the default and bfloat16 variants.
+- An embedding model's processor packs a list of images into one sequence
+  (EmbeddingGemma2): embed each image with its own processor call.
 - CPU runners are memory-limited containers: a checkpoint above ~1B parameters
   declares "devices": ["cuda"] in its resources, so CPU measures only the slim
   fixture and the checkpoint runs on GPU. The exclusion stays visible in results.
