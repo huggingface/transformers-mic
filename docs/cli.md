@@ -566,9 +566,16 @@ Upload requires write access to the MIC model namespace, which defaults to
 retaining an existing `BERT` contract. Export rejects names that differ only
 by case.
 
-`export --fleet control` updates `fleet-lock.json` in the shared dataset;
-`--fleet prototypes` updates `prototype-fleet.lock`. The default is `control`.
-Exports preserve other entries and strip local paths. Environment changes must
+`export --fleet control` updates the `control/` tables in the shared dataset;
+`--fleet prototypes` updates `prototypes/`. The default is `control`. Each fleet
+is three CSV tables the dataset viewer shows: `contracts.csv` (one row per
+contract and slim model; the row with `contract_sha256` carries the contract and
+its checkpoints), `environment.csv` and `known_failures.csv`. tmic converts them
+to and from the JSON lock the runners read, and refuses a lock the tables cannot
+hold exactly. Until the Transformers CI runner reads the tables, export also
+writes the JSON lock (`fleet-lock.json`, `prototype-fleet.lock`), and reading a
+revision whose tables and JSON disagree fails. Revisions from before the tables
+are read from their JSON. Exports preserve other entries and strip local paths. Environment changes must
 be reviewed separately. Preview first, then use `--execute` to upload. A concurrent
 Hub update rejects the commit; rerun to review the new state.
 `--transformers-checkout PATH` writes only `tests/contracts.lock` after upload.
