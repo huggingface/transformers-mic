@@ -1210,6 +1210,22 @@ def test_create_rejects_model_classes_that_cannot_load_the_type():
         commands.check_model_classes(plan("M2M100ForConditionalGeneration", "AutoModelForCausalLM"), config)
 
 
+def test_create_rejects_targets_without_the_drafted_fixture():
+    def plan(targets):
+        return {
+            "manifest": {
+                "fixtures": {"org/f": {}},
+                "integrations": {"transformers": {"targets": targets}},
+            }
+        }
+
+    commands.check_targets(plan(["fixtures", "checkpoints"]))
+    with pytest.raises(ValueError, match="repeat"):
+        commands.check_targets(plan(["checkpoints", "checkpoints"]))
+    with pytest.raises(ValueError, match="omit 'fixtures'"):
+        commands.check_targets(plan(["checkpoints"]))
+
+
 def test_fp8_checkpoint_names_drop_their_scales():
     from transformers_mic.inspection import logical_checkpoint_keys
 
