@@ -238,8 +238,17 @@ not memory:
   from tensors computed under torch.no_grad() in the inference block.
 - Every key declared in outputs must appear in the printed result; a nested value
   is declared by its dotted path (logits.probe for {"logits": {"probe": ...}}).
-- When a tokenizer has no pad token, set one it actually has: eos_token can be
-  None too (Inkling); then use its end-of-text special token by name.
+- Many causal-LM tokenizers define no pad token (MiniMax-M2.5, Llama-style):
+  before any padding=True call, set tokenizer.pad_token = tokenizer.eos_token and
+  padding_side = "left" unless the tokenizer config names a pad token. eos_token
+  can be None too (Inkling); then use its end-of-text special token by name.
+- A base model class (AutoModel: WavLMModel, DINOv3ViTModel) returns no loss and
+  takes no labels, and Transformers may have no pretraining head for it: train it
+  with a small linear probe on pooled hidden states, optimizing the model's and
+  the probe's parameters together.
+- Build synthetic image tensors as (3, H, W) explicitly: a sum of broadcast views
+  like arange(H).view(H, 1, 1) + arange(W).view(1, W, 1) is (H, W, 1) and
+  .expand(3, H, W) raises.
 - Get a word's token id with tokenizer.encode(word, add_special_tokens=False)[0];
   convert_tokens_to_ids(" Paris") returns None in BPE vocabularies, which spell
   the leading space inside the token.
