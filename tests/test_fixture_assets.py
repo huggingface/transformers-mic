@@ -494,3 +494,15 @@ def test_a_rebuild_reuses_the_recorded_config_even_when_the_rule_changes(tmp_pat
     assert build_fixtures.recorded_config(out, {**fixture, "build": {**recipe, "seed": 3}}) is None
     (out / "build.json").write_text(json.dumps({**record, "recipe": None}))
     assert build_fixtures.recorded_config(out, fixture) is None
+
+
+def test_shrink_keeps_channels_feeding_a_sibling_encoder():
+    # Unlimited-OCR's SAM tower ends at the CLIP encoder's width: its output is
+    # the encoder's patch embedding.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import UnlimitedOcrConfig
+
+    vision = shrink(UnlimitedOcrConfig()).vision_config
+    assert vision.sam_config.downsample_channels[-1] == vision.encoder_config.hidden_size
+    assert list(vision.sam_config.downsample_channels) == [32, 64]
