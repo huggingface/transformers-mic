@@ -293,6 +293,13 @@ not memory:
   a 24 GB GPU. Such contracts declare only the default and bfloat16 variants.
 - An embedding model's processor packs a list of images into one sequence
   (EmbeddingGemma2): embed each image with its own processor call.
+- Give image processors uint8 images (PIL, (H, W, 3) uint8 arrays, or (3, H, W)
+  .byte() tensors). A float tensor in [0, 1] is rescaled by 1/255 again and becomes
+  near-constant: the fixture cannot tell two images apart (ConvNeXt, Swin-v2 failed
+  their sensitivity gate this way). Make the two images differ in colour, not only
+  in texture: global pooling averages random noise away.
+- OWL-ViT/OWLv2 processors pad each image's text queries separately: pass
+  padding="max_length" so the query batches concatenate.
 - CPU runners are memory-limited containers: a checkpoint above ~1B parameters
   declares "devices": ["cuda"] in its resources, so CPU measures only the slim
   fixture and the checkpoint runs on GPU. The exclusion stays visible in results.
