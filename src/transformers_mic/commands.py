@@ -248,6 +248,8 @@ def propose_valid(context, args, model, fixture, old=None):
                 provider=args.provider,
                 bill_to=args.bill_to,
             )
+            if isinstance(plan.get("name"), str):  # "Qwen3.5-0.8B" is a slug away from valid
+                plan["name"] = re.sub(r"[^A-Za-z0-9_-]", "-", plan["name"])
             validate_plan(plan, model, fixture, old)
             if context.get("config"):
                 check_config_facts(plan, context["config"])
