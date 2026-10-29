@@ -448,3 +448,11 @@ def test_null_override_of_a_field_shrink_already_dropped_is_a_no_op(tmp_path):
     fields["not_a_field"] = 1
     with pytest.raises(SystemExit, match="not_a_field"):
         build_fixtures.shrunk_config(tmp_path, BertModel, {"config_overrides": {"fields": fields}})
+
+def test_shrink_keeps_siglip_text_projection_at_the_shared_width():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import SiglipConfig
+
+    config = shrink(SiglipConfig())  # text projection_size defaults to its hidden_size (768)
+    assert config.text_config.projection_size == config.text_config.hidden_size == config.vision_config.hidden_size
