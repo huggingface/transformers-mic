@@ -1155,6 +1155,19 @@ def test_create_rejects_unknown_override_fields_and_adds_missing_requires():
     assert plan["manifest"]["integrations"]["transformers"]["requires"][-1] == "accelerate"
 
 
+def test_overrides_never_shrink_the_checkpoint_vocabulary():
+    fields = {"hidden_size": 64, "vocab_size": 1024, "text_config.vocab_size": 512}
+    plan = {
+        "manifest": {
+            "fixtures": {"org/f": {"build": {"config_overrides": {"fields": fields}}}},
+            "integrations": {"transformers": {"requires": ["torch"]}},
+        }
+    }
+    config = {"model_type": "x", "hidden_size": 4096, "vocab_size": 32000, "text_config": {"vocab_size": 256}}
+    commands.check_config_facts(plan, config)
+    assert fields == {"hidden_size": 64, "text_config.vocab_size": 512}
+
+
 def test_sentencepiece_tokenizers_add_their_backends_to_requires():
     plan = {"manifest": {"integrations": {"transformers": {"requires": ["torch"]}}}}
     commands.check_config_facts(plan, {"model_type": "siglip"})
