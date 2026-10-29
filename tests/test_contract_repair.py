@@ -91,6 +91,15 @@ def test_repairs_cannot_weaken_manifest(setup, change):
     assert s.workspace.contract_digest() == before
 
 
+def test_repair_runs_the_draft_usage_checks(setup):
+    s = setup
+    s.plan["usage"] += "\n```py runnable:extra\nprint(undefined_name)\n```\n"
+    before = s.workspace.contract_digest()
+    assert propose(s) is None
+    assert s.state["repairs"][0]["status"] == "rejected"
+    assert s.workspace.contract_digest() == before
+
+
 def test_repair_keeps_the_contract_name(setup):
     s = setup
     s.plan["name"] = "bert-base-uncased.v2"  # invalid slug, and a rename
