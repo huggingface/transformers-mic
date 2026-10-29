@@ -153,6 +153,35 @@ def visible_plumbing(blocks):
     return leaked
 
 
+def check_imports(plan):
+    """Reject usage that imports names Transformers does not export."""
+    import ast
+
+    imported = []
+    for block in re.findall(r"^```py[^\n]*\n(.*?)^```", plan["usage"], re.M | re.S):
+        try:
+            tree = ast.parse(block)
+        except SyntaxError:  # a continuation block; the build reports real errors
+            continue
+        imported += [
+            alias.name
+            for node in ast.walk(tree)
+            if isinstance(node, ast.ImportFrom) and node.module == "transformers"
+            for alias in node.names
+        ]
+    if not imported:
+        return
+    import difflib
+
+    import transformers
+
+    missing = [n for n in imported if not hasattr(transformers, n)]
+    if missing:
+        known = [n for n in dir(transformers) if not n.startswith("_")]
+        hints = {n: difflib.get_close_matches(n, known, n=3) for n in missing}
+        raise ValueError(f"usage imports names transformers does not export: {hints}")
+
+
 def check_parameter_names(plan, config):
     """Reject usage that names parameters the architecture does not have."""
     names = set(
@@ -251,6 +280,7 @@ def propose_valid(context, args, model, fixture, old=None):
             if isinstance(plan.get("name"), str):  # "Qwen3.5-0.8B" is a slug away from valid
                 plan["name"] = re.sub(r"[^A-Za-z0-9_-]", "-", plan["name"])
             validate_plan(plan, model, fixture, old)
+            check_imports(plan)
             if context.get("config"):
                 check_config_facts(plan, context["config"])
                 check_parameter_names(plan, context["config"])

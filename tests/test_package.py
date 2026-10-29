@@ -1202,3 +1202,10 @@ def test_planner_context_names_loaded_parameters_without_architectures():
     names = references.parameter_names("BertModel", config)
     assert "encoder.layer.0.attention.self.query.weight" in names
     assert not any(".1." in name for name in names)  # one block shows the scheme
+
+
+def test_create_rejects_imports_transformers_does_not_export():
+    usage = "```py runnable:x\nfrom transformers import (\n    AutoModelForConditionalGeneration,\n    AutoProcessor,\n)\n```\n"
+    with pytest.raises(ValueError, match="AutoModelForConditionalGeneration"):
+        commands.check_imports({"usage": usage})
+    commands.check_imports({"usage": usage.replace("AutoModelForConditionalGeneration", "AutoModelForImageTextToText")})
