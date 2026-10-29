@@ -1226,6 +1226,22 @@ def test_create_rejects_targets_without_the_drafted_fixture():
         commands.check_targets(plan(["checkpoints"]))
 
 
+def test_create_keeps_large_checkpoints_off_the_cpu_runner():
+    manifest = {
+        "checkpoints": {"org/big": {}, "org/small": {}, "org/gpu": {}},
+        "integrations": {"transformers": {"resources": {
+            "org/big": {"memory_gb": 16},
+            "org/gpu": {"devices": ["cuda"]},
+        }}},
+    }
+    parameters = {"org/big": 2_600_000_000, "org/small": 500_000_000, "org/gpu": 9e9}
+    assert commands.keep_large_checkpoints_off_cpu(manifest, parameters) == ["org/big"]
+    resources = manifest["integrations"]["transformers"]["resources"]
+    assert resources["org/big"] == {"memory_gb": 16, "devices": ["cuda"]}
+    assert "org/small" not in resources
+    assert commands.keep_large_checkpoints_off_cpu(manifest, {"org/big": None}) == []
+
+
 def test_github_api_reads_retry_transient_failures(monkeypatch):
     import subprocess
 

@@ -194,6 +194,33 @@ def check_targets(plan):
         )
 
 
+CPU_PARAMETER_LIMIT = 1_000_000_000
+
+
+def keep_large_checkpoints_off_cpu(manifest, parameters):
+    """A checkpoint above ~1B parameters runs on GPU only.
+
+    The CPU runner is a memory-limited container: a float32 training step on a
+    2B checkpoint (gemma-2-2b-it, SmolLM-1.7B) kills it with exit 137, and the
+    artifact upload dies with it, so the failure has no log.
+    """
+    resources = manifest["integrations"]["transformers"].setdefault("resources", {})
+    changed = []
+    for repo in manifest.get("checkpoints", {}):
+        if (parameters.get(repo) or 0) <= CPU_PARAMETER_LIMIT:
+            continue
+        spec = resources.setdefault(repo, {})
+        if "cpu" in spec.get("devices", ["cpu", "cuda"]):
+            spec["devices"] = ["cuda"]
+            changed.append(repo)
+    return changed
+
+
+def parameter_count(model, revision):
+    info = HfApi().model_info(model, revision=revision, expand=["safetensors"])
+    return getattr(info.safetensors, "total", None)
+
+
 def check_undefined_names(plan):
     """Reject usage that reads a name no block sharing its state ever defines."""
     import builtins
@@ -554,6 +581,10 @@ def create(args):
             plan["name"] = args.name
         if args.fixtures_only:
             manifest["integrations"]["transformers"]["targets"] = ["fixtures"]
+        for repo in keep_large_checkpoints_off_cpu(
+            manifest, {args.model: parameter_count(args.model, revision)}
+        ):
+            print(f"tmic: {repo} is above 1B parameters: measuring it on GPU only", file=sys.stderr)
         workspace.from_plan(
             args.model,
             revision,
