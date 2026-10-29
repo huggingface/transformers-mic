@@ -259,6 +259,28 @@ def test_sensitivity_perturbs_list_contexts_and_never_the_forecast_target():
     assert result["no_perturbation_defined"] == []
 
 
+def test_sensitivity_skips_inputs_only_absorbed_by_kwargs():
+    import perturb
+
+    class MaskedLM(torch.nn.Module):  # DistilBERT: the tokenizer adds token_type_ids
+        def __init__(self):
+            super().__init__()
+            self.embed = torch.nn.Embedding(10, 4)
+
+        def forward(self, input_ids, attention_mask=None, **kwargs):
+            return {"logits": self.embed(input_ids) * attention_mask[..., None]}
+
+    batch = {
+        "input_ids": torch.tensor([[1, 2, 3], [4, 5, 0]]),
+        "token_type_ids": torch.zeros(2, 3, dtype=torch.long),
+        "attention_mask": torch.tensor([[1, 1, 1], [1, 1, 0]]),
+    }
+    result = perturb.sensitivity(MaskedLM(), batch, threshold=1e-3)
+    assert result["pass"]
+    assert result["not_a_forward_parameter"] == ["token_type_ids"]
+    assert not any(key.startswith("token_type_ids") for key in result["deltas"])
+
+
 @pytest.mark.parametrize(
     "model_type,heads_key",
     [("pvt", "num_attention_heads"), ("swin", "num_heads")],
