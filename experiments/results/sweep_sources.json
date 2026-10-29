@@ -183,6 +183,14 @@
   "source": "hub",
   "status": "ok"
  },
+ "bailing_hybrid": {
+  "doc_checkpoint": "inclusionAI/Ling-3.0-Flash",
+  "doc_status": "ok",
+  "repo": "inclusionAI/Ling-3.0-Flash",
+  "revision": "fcc60a52b34c69c6271d0ac8a8cb0815020b6a43",
+  "source": "doc",
+  "status": "ok"
+ },
  "bamba": {
   "doc_checkpoint": null,
   "doc_status": "no_doc_checkpoint",
@@ -204,6 +212,14 @@
   "doc_status": "ok",
   "repo": "facebook/bart-large",
   "revision": "cb48c1365bd826bd521f650dc2e0940aee54720c",
+  "source": "doc",
+  "status": "ok"
+ },
+ "beam": {
+  "doc_checkpoint": "reflection/Beam-1.0-501B-A23B",
+  "doc_status": "ok",
+  "repo": "reflection/Beam-1.0-501B-A23B",
+  "revision": "24595dc986af66da3e40229d46aa5f6d1fd2d0c7",
   "source": "doc",
   "status": "ok"
  },
@@ -1120,6 +1136,16 @@
   "doc_status": "wrong_model_type",
   "status": "no_checkpoint"
  },
+ "edgetam_mask_decoder": {
+  "doc_checkpoint": "yonigozlan/EdgeTAM-hf",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "edgetam_prompt_encoder": {
+  "doc_checkpoint": "yonigozlan/EdgeTAM-hf",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
  "edgetam_video": {
   "doc_checkpoint": "yonigozlan/EdgeTAM-hf",
   "doc_status": "ok",
@@ -1127,6 +1153,16 @@
   "revision": "c266ce53b3fc00f0f495b583f6a116c4e57f53bb",
   "source": "doc",
   "status": "ok"
+ },
+ "edgetam_video_mask_decoder": {
+  "doc_checkpoint": "yonigozlan/EdgeTAM-hf",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "edgetam_video_prompt_encoder": {
+  "doc_checkpoint": "yonigozlan/EdgeTAM-hf",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
  },
  "edgetam_vision_model": {
   "doc_checkpoint": "yonigozlan/EdgeTAM-hf",
@@ -1157,6 +1193,22 @@
   "doc_status": "ok",
   "repo": "google/electra-small-discriminator",
   "revision": "fa8239aadc095e9164941d05878b98afe9b953c3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "embedding_gemma2": {
+  "doc_checkpoint": "google/embeddinggemma-2",
+  "doc_status": "ok",
+  "repo": "google/embeddinggemma-2",
+  "revision": "f9972ac22e696a105c482202646979e33e4b5a1e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "embedding_gemma2_text": {
+  "doc_checkpoint": "google/embeddinggemma-2",
+  "doc_status": "ok",
+  "repo": "google/embeddinggemma-2",
+  "revision": "f9972ac22e696a105c482202646979e33e4b5a1e",
   "source": "doc",
   "status": "ok"
  },
@@ -1260,10 +1312,10 @@
  },
  "esm": {
   "doc_checkpoint": "facebook/esm-1b",
-  "doc_status": "ok",
-  "repo": "facebook/esm-1b",
-  "revision": "6fb10624652aa86b64c620ae624baa5b5b8c3b78",
-  "source": "doc",
+  "doc_status": "ConfigLoadError",
+  "repo": "facebook/esm2_t33_650M_UR50D",
+  "revision": "08e4846e537177426273712802403f7ba8261b6c",
+  "source": "hub",
   "status": "ok"
  },
  "esmc": {
@@ -1396,6 +1448,14 @@
   "source": "doc",
   "status": "ok"
  },
+ "flava_image_codebook": {
+  "doc_checkpoint": "facebook/flava-full",
+  "doc_status": "ok",
+  "repo": "facebook/flava-full",
+  "revision": "51e2b5fac49169959b01da7f3708d8e0d8d7304a",
+  "source": "doc",
+  "status": "ok"
+ },
  "flava_image_model": {
   "doc_checkpoint": "facebook/flava-full",
   "doc_status": "ok",
@@ -1425,6 +1485,14 @@
   "doc_status": "ok",
   "repo": "allenai/FlexOlmo-7x7B-1T",
   "revision": "0dabfa2e5fd7d8c4bec7e3d3b1a05608255fb096",
+  "source": "doc",
+  "status": "ok"
+ },
+ "flint": {
+  "doc_checkpoint": "RecursiveSI/flint",
+  "doc_status": "ok",
+  "repo": "RecursiveSI/flint",
+  "revision": "2a247be0c0aec895ccb0ac7ca92229ec6df37288",
   "source": "doc",
   "status": "ok"
  },
@@ -1852,6 +1920,11 @@
   "source": "hub",
   "status": "ok"
  },
+ "got_ocr2_vision": {
+  "doc_checkpoint": "facebook/sam-vit-huge",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
  "gpt-sw3": {
   "doc_checkpoint": null,
   "doc_status": "no_doc_checkpoint",
@@ -1910,6 +1983,14 @@
   "doc_status": "ok",
   "repo": "EleutherAI/gpt-j-6B",
   "revision": "47e169305d2e8376be1d31e765533382721b2cc1",
+  "source": "doc",
+  "status": "ok"
+ },
+ "gradium_phonon_tts": {
+  "doc_checkpoint": "gradium/phonon-31m-en",
+  "doc_status": "ok",
+  "repo": "gradium/phonon-31m-en",
+  "revision": "92741c5b07d085ff840e26fea8ce43110b87852f",
   "source": "doc",
   "status": "ok"
  },
@@ -2417,6 +2498,14 @@
   "source": "doc",
   "status": "ok"
  },
+ "kolibri1": {
+  "doc_checkpoint": "Aleph-Alpha/Kolibri-1",
+  "doc_status": "ok",
+  "repo": "Aleph-Alpha/Kolibri-1",
+  "revision": "5bb7075ba22db733e3834b1c71d2245537cc14ed",
+  "source": "doc",
+  "status": "ok"
+ },
  "kosmos-2": {
   "doc_checkpoint": "microsoft/kosmos-2-patch14-224",
   "doc_status": "ok",
@@ -2829,6 +2918,16 @@
   "source": "doc",
   "status": "ok"
  },
+ "mimi_decoder": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "status": "no_checkpoint"
+ },
+ "mimi_encoder": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "status": "no_checkpoint"
+ },
  "mimo_v2_flash": {
   "doc_checkpoint": "XiaomiMiMo/MiMo-V2-Flash",
   "doc_status": "ok",
@@ -2842,6 +2941,22 @@
   "doc_status": "ok",
   "repo": "openbmb/MiniCPM3-4B",
   "revision": "d6b14ddaefdb11c624dd75c3c779549bc90b08cb",
+  "source": "doc",
+  "status": "ok"
+ },
+ "minicpm_ocr": {
+  "doc_checkpoint": "openbmb/MiniCPM-OCR-1.0",
+  "doc_status": "ok",
+  "repo": "openbmb/MiniCPM-OCR-1.0",
+  "revision": "a2dcd080c44e455f2dafdcead27c702c75ac3326",
+  "source": "doc",
+  "status": "ok"
+ },
+ "minicpm_ocr_vision": {
+  "doc_checkpoint": "openbmb/MiniCPM-OCR-1.0",
+  "doc_status": "ok",
+  "repo": "openbmb/MiniCPM-OCR-1.0",
+  "revision": "a2dcd080c44e455f2dafdcead27c702c75ac3326",
   "source": "doc",
   "status": "ok"
  },
@@ -3065,6 +3180,32 @@
   "source": "doc",
   "status": "ok"
  },
+ "molmo2": {
+  "doc_checkpoint": "allenai/Molmo2-8B",
+  "doc_status": "ok",
+  "repo": "allenai/Molmo2-8B",
+  "revision": "e28fa28597e5ec5e0cca2201dd8ab33d48bc4a1b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "molmo2_adapter": {
+  "doc_checkpoint": "allenai/Molmo2-8B",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "molmo2_text": {
+  "doc_checkpoint": "allenai/Molmo2-8B",
+  "doc_status": "ok",
+  "repo": "allenai/Molmo2-8B",
+  "revision": "e28fa28597e5ec5e0cca2201dd8ab33d48bc4a1b",
+  "source": "doc",
+  "status": "ok"
+ },
+ "molmo2_vision": {
+  "doc_checkpoint": "allenai/Molmo2-8B",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
  "moonshine": {
   "doc_checkpoint": "UsefulSensors/moonshine-tiny",
   "doc_status": "ok",
@@ -3102,6 +3243,22 @@
   "doc_status": "ok",
   "repo": "kmhf/hf-moshiko",
   "revision": "06e3abeb0efb7452a21736d39dcde39411c09982",
+  "source": "doc",
+  "status": "ok"
+ },
+ "moss_transcribe_diarize": {
+  "doc_checkpoint": "hf-audio/MOSS-Transcribe-Diarize-HF",
+  "doc_status": "ok",
+  "repo": "hf-audio/MOSS-Transcribe-Diarize-HF",
+  "revision": "897f7e92f01e8f241a2351eab8e4163ded1e3af4",
+  "source": "doc",
+  "status": "ok"
+ },
+ "moss_transcribe_diarize_audio": {
+  "doc_checkpoint": "hf-audio/MOSS-Transcribe-Diarize-HF",
+  "doc_status": "ok",
+  "repo": "hf-audio/MOSS-Transcribe-Diarize-HF",
+  "revision": "897f7e92f01e8f241a2351eab8e4163ded1e3af4",
   "source": "doc",
   "status": "ok"
  },
@@ -3169,6 +3326,29 @@
   "source": "doc",
   "status": "ok"
  },
+ "muse_spark": {
+  "doc_checkpoint": "meta-models/Muse-Spark-Open-816B-A42B",
+  "doc_status": "GatedRepoError",
+  "repo": "hf-internal-testing/tiny-muse-spark",
+  "revision": "707ff6048b15d720706f8fdbd670d99cc7cc8413",
+  "source": "hub",
+  "status": "ok"
+ },
+ "muse_spark_audio": {
+  "doc_checkpoint": "meta-models/Muse-Spark-Open-816B-A42B",
+  "doc_status": "GatedRepoError",
+  "status": "no_checkpoint"
+ },
+ "muse_spark_text": {
+  "doc_checkpoint": "meta-models/Muse-Spark-Open-816B-A42B",
+  "doc_status": "GatedRepoError",
+  "status": "no_checkpoint"
+ },
+ "muse_spark_vision": {
+  "doc_checkpoint": "meta-models/Muse-Spark-Open-816B-A42B",
+  "doc_status": "GatedRepoError",
+  "status": "no_checkpoint"
+ },
  "musicflamingo": {
   "doc_checkpoint": "nvidia/music-flamingo-2601-hf",
   "doc_status": "ok",
@@ -3225,6 +3405,14 @@
   "source": "hub",
   "status": "ok"
  },
+ "nemo_speechlm": {
+  "doc_checkpoint": "nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
+  "doc_status": "ok",
+  "repo": "nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
+  "revision": "a99e33f698257b8b69ca7834f19c73582eb1fa7e",
+  "source": "doc",
+  "status": "ok"
+ },
  "nemotron": {
   "doc_checkpoint": "thhaus/nemotron3-8b",
   "doc_status": "ok",
@@ -3238,6 +3426,30 @@
   "doc_status": "ok",
   "repo": "nvidia/nemotron-3.5-asr-streaming-0.6b",
   "revision": "ea30d66debe3740a08b573244286791d423d6b3e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "nemotron3_5_transcribe_asr_audio": {
+  "doc_checkpoint": "nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
+  "doc_status": "ok",
+  "repo": "nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
+  "revision": "a99e33f698257b8b69ca7834f19c73582eb1fa7e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "nemotron3_5_transcribe_audio": {
+  "doc_checkpoint": "nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
+  "doc_status": "ok",
+  "repo": "nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
+  "revision": "a99e33f698257b8b69ca7834f19c73582eb1fa7e",
+  "source": "doc",
+  "status": "ok"
+ },
+ "nemotron3_5_transcribe_word_timestamp": {
+  "doc_checkpoint": "nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
+  "doc_status": "ok",
+  "repo": "nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
+  "revision": "a99e33f698257b8b69ca7834f19c73582eb1fa7e",
   "source": "doc",
   "status": "ok"
  },
@@ -3421,6 +3633,11 @@
   "revision": "9d91fce00dd32ac9bc5b53bc93c5d4ef804e0c8b",
   "source": "doc",
   "status": "ok"
+ },
+ "ovis2_vision": {
+  "doc_checkpoint": "thisisiron/Ovis2-1B-hf",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
  },
  "owlv2": {
   "doc_checkpoint": null,
@@ -3718,6 +3935,32 @@
   "source": "doc",
   "status": "ok"
  },
+ "pocket_tts": {
+  "doc_checkpoint": "eustlb/pocket-tts",
+  "doc_status": "ok",
+  "repo": "eustlb/pocket-tts",
+  "revision": "5eba794f79851f8743f2dcc6a1c4c198257f99c4",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pocket_tts_audio_tokenizer": {
+  "doc_checkpoint": "eustlb/pocket-tts-audio-tokenizer",
+  "doc_status": "ok",
+  "repo": "eustlb/pocket-tts-audio-tokenizer",
+  "revision": "cb8ae9c090fd05162f86d9d9b1cd1c359a2b240f",
+  "source": "doc",
+  "status": "ok"
+ },
+ "pocket_tts_audio_tokenizer_decoder": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "status": "no_checkpoint"
+ },
+ "pocket_tts_audio_tokenizer_encoder": {
+  "doc_checkpoint": null,
+  "doc_status": "no_doc_checkpoint",
+  "status": "no_checkpoint"
+ },
  "poolformer": {
   "doc_checkpoint": "sail/poolformer_s12",
   "doc_status": "ok",
@@ -3742,6 +3985,11 @@
   "source": "doc",
   "status": "ok"
  },
+ "pp_chart2table_vision": {
+  "doc_checkpoint": "facebook/sam-vit-huge",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
  "pp_doclayout_v2": {
   "doc_checkpoint": "PaddlePaddle/PP-DocLayoutV2_safetensors",
   "doc_status": "ok",
@@ -3758,6 +4006,11 @@
   "source": "doc",
   "status": "ok"
  },
+ "pp_doclayout_v4": {
+  "doc_checkpoint": "PaddlePaddle/PP-DocLayoutV4_safetensors",
+  "doc_status": "RepositoryNotFoundError",
+  "status": "no_checkpoint"
+ },
  "pp_formulanet": {
   "doc_checkpoint": "PaddlePaddle/PP-FormulaNet_plus-L_safetensors",
   "doc_status": "ok",
@@ -3765,6 +4018,16 @@
   "revision": "6cc004a8e91ea3f3819b05317f40b290cbe99c2b",
   "source": "doc",
   "status": "ok"
+ },
+ "pp_formulanet_text": {
+  "doc_checkpoint": "PaddlePaddle/PP-FormulaNet_plus-L_safetensors",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "pp_formulanet_vision": {
+  "doc_checkpoint": "PaddlePaddle/PP-FormulaNet_plus-L_safetensors",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
  },
  "pp_lcnet": {
   "doc_checkpoint": "PaddlePaddle/PP-LCNet_x1_0_doc_ori_safetensors",
@@ -4397,6 +4660,16 @@
   "source": "doc",
   "status": "ok"
  },
+ "sam2_mask_decoder": {
+  "doc_checkpoint": "facebook/sam2.1-hiera-tiny",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "sam2_prompt_encoder": {
+  "doc_checkpoint": "facebook/sam2.1-hiera-tiny",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
  "sam2_video": {
   "doc_checkpoint": "facebook/sam2.1-hiera-tiny",
   "doc_status": "ok",
@@ -4404,6 +4677,16 @@
   "revision": "de431c4043854a71d8101e17995dfe596bf101a5",
   "source": "doc",
   "status": "ok"
+ },
+ "sam2_video_mask_decoder": {
+  "doc_checkpoint": "facebook/sam2_video.1-hiera-tiny",
+  "doc_status": "RepositoryNotFoundError",
+  "status": "no_checkpoint"
+ },
+ "sam2_video_prompt_encoder": {
+  "doc_checkpoint": "facebook/sam2_video.1-hiera-tiny",
+  "doc_status": "RepositoryNotFoundError",
+  "status": "no_checkpoint"
  },
  "sam2_vision_model": {
   "doc_checkpoint": "facebook/sam2.1-hiera-tiny",
@@ -4494,7 +4777,27 @@
   "doc_status": "GatedRepoError",
   "status": "no_checkpoint"
  },
+ "sam3_tracker_mask_decoder": {
+  "doc_checkpoint": "facebook/sam3",
+  "doc_status": "GatedRepoError",
+  "status": "no_checkpoint"
+ },
+ "sam3_tracker_prompt_encoder": {
+  "doc_checkpoint": "facebook/sam3",
+  "doc_status": "GatedRepoError",
+  "status": "no_checkpoint"
+ },
  "sam3_tracker_video": {
+  "doc_checkpoint": "facebook/sam3",
+  "doc_status": "GatedRepoError",
+  "status": "no_checkpoint"
+ },
+ "sam3_tracker_video_mask_decoder": {
+  "doc_checkpoint": "facebook/sam3",
+  "doc_status": "GatedRepoError",
+  "status": "no_checkpoint"
+ },
+ "sam3_tracker_video_prompt_encoder": {
   "doc_checkpoint": "facebook/sam3",
   "doc_status": "GatedRepoError",
   "status": "no_checkpoint"
@@ -4525,6 +4828,16 @@
   "source": "doc",
   "status": "ok"
  },
+ "sam_hq_mask_decoder": {
+  "doc_checkpoint": "syscv-community/sam-hq-vit-base",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "sam_hq_prompt_encoder": {
+  "doc_checkpoint": "syscv-community/sam-hq-vit-base",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
  "sam_hq_vision_model": {
   "doc_checkpoint": "syscv-community/sam-hq-vit-base",
   "doc_status": "ok",
@@ -4532,6 +4845,16 @@
   "revision": "f906a2e3f60fda2f12eb717cef18614f66c43124",
   "source": "doc",
   "status": "ok"
+ },
+ "sam_mask_decoder": {
+  "doc_checkpoint": "facebook/sam-vit-huge",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "sam_prompt_encoder": {
+  "doc_checkpoint": "facebook/sam-vit-huge",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
  },
  "sam_vision_model": {
   "doc_checkpoint": "facebook/sam-vit-huge",
@@ -4684,6 +5007,11 @@
   "revision": "d97b77b5078951c313807747f77ec07beab07e4e",
   "source": "doc",
   "status": "ok"
+ },
+ "slanext_vision": {
+  "doc_checkpoint": "PaddlePaddle/SLANeXt_wired_safetensors",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
  },
  "smollm3": {
   "doc_checkpoint": "HuggingFaceTB/SmolLM3-3B",
@@ -5033,6 +5361,22 @@
   "source": "doc",
   "status": "ok"
  },
+ "ultrabert": {
+  "doc_checkpoint": "dmis-lab/UltraBERT-150M",
+  "doc_status": "ok",
+  "repo": "dmis-lab/UltraBERT-150M",
+  "revision": "545ac9d9c7aece444f014ada5a1e9818132b4d35",
+  "source": "doc",
+  "status": "ok"
+ },
+ "ultravbert": {
+  "doc_checkpoint": "athrael-soju/UltraVBERT",
+  "doc_status": "ok",
+  "repo": "athrael-soju/UltraVBERT",
+  "revision": "7522de0c135da2bfd98dbcd199f41a802f41aa95",
+  "source": "doc",
+  "status": "ok"
+ },
  "umt5": {
   "doc_checkpoint": "google/umt5-small",
   "doc_status": "wrong_model_type",
@@ -5064,6 +5408,34 @@
   "revision": "fbfdd9ac17e7708deb785156e18131e7aee10ee3",
   "source": "doc",
   "status": "ok"
+ },
+ "unlimited_ocr": {
+  "doc_checkpoint": "baidu/Unlimited-OCR",
+  "doc_status": "ok",
+  "repo": "baidu/Unlimited-OCR",
+  "revision": "8249d20b2822a7d8a4c22c8d8c9069b5ac36bda3",
+  "source": "doc",
+  "status": "ok"
+ },
+ "unlimited_ocr_sam_vision_model": {
+  "doc_checkpoint": "baidu/Unlimited-OCR",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "unlimited_ocr_text": {
+  "doc_checkpoint": "baidu/Unlimited-OCR",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "unlimited_ocr_vision": {
+  "doc_checkpoint": "baidu/Unlimited-OCR",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
+ },
+ "unlimited_ocr_vision_encoder": {
+  "doc_checkpoint": "baidu/Unlimited-OCR",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
  },
  "upernet": {
   "doc_checkpoint": "openmmlab/upernet-convnext-tiny",
@@ -5130,6 +5502,11 @@
   "revision": "f22241c2062b3b25272bf117397e03d73381037a",
   "source": "doc",
   "status": "ok"
+ },
+ "vibevoice_diffusion": {
+  "doc_checkpoint": "vibevoice/VibeVoice-1.5B-hf",
+  "doc_status": "wrong_model_type",
+  "status": "no_checkpoint"
  },
  "video_llama_3": {
   "doc_checkpoint": "lkhl/VideoLLaMA3-2B-Image-HF",

@@ -90,21 +90,23 @@ Fixed `num_hidden_layers = 2` can break mixed layers: 170 configs define `layer_
 
 ## Does it scale to every architecture?
 
-Config-only sweep of all 725 Transformers model types at `4d536e1f` ([script](../experiments/sweep.py), [results](../experiments/results/sweep.json), [checkpoints](../experiments/results/sweep_sources.json)): widths by field name in every sub-config, depth by layer pattern, 4 MoE experts; primary-head forward/backward with random weights and synthetic inputs.
+Config-only sweep of all 786 Transformers model types at `bb666bd0` ([script](../experiments/sweep.py), [results](../experiments/results/sweep.json), [checkpoints](../experiments/results/sweep_sources.json)): widths by field name in every sub-config, depth by layer pattern, 4 MoE experts; primary-head forward/backward with random weights and synthetic inputs.
 
 | | Model types |
 | --- | ---: |
-| No usable checkpoint (none documented or on the Hub, or gated) | 86 |
-| Component only (`*_vision_model`, `*_text_model`) | 80 |
-| **Usage paths tried** | **559** |
-| Built and ran forward and backward, all finite | **314 (56%)** |
-| Failed: coupled size fields, other per-architecture constraints | 167 |
-| Failed: synthetic inputs not accepted (video, time series, extra inputs) | 61 |
-| Failed: config round-trip or optional dependency | 17 |
+| No usable checkpoint (none documented or on the Hub, or gated) | 123 |
+| Component only (`*_vision_model`, `*_text_model`) | 81 |
+| **Usage paths tried** | **582** |
+| Built and ran forward and backward, all finite | **382 (66%)** |
+| Failed in the forward pass: coupled size fields, inputs the model rejects | 138 |
+| Failed in shrink or build: per-architecture constraints | 32 |
+| Failed: no synthetic inputs (video, time series) | 22 |
+| Failed: config load or backward | 8 |
 
-- **Passes:** 131 causal LMs, 42 image-text-to-text, 28 image classifiers, 24 masked LMs, 20 seq2seq, 8 CTC; 15/17 #49103 models (MusicGen fails config round-trip, Qwen2.5-VL M-RoPE sections). Median 6.5M parameters.
+- **Passes:** 155 causal LMs, 73 base models, 55 image-text-to-text, 32 image classifiers, 28 masked LMs, 20 seq2seq, 8 CTC; 16/17 #49103 models (MusicGen fails config round-trip). Median 8.3M parameters.
+- **2026-10-29 rerun (314 → 382):** the most downloaded unreachable types now pass—Qwen3.5 (+MoE), Gemma 4, DeBERTa-v2, CLAP, GLM-5.3, ESM, Qwen4-Exp, DeepSeek-V3, Kimi K2.5. Fixes: a text-only head of a composite model takes its text config; zero-padded per-layer keys; `attention_head_size`, `pooler_hidden_size`, `ple_embed_dim` are widths; a 0 width (NoPE) stays 0; MLA `head_dim` follows `qk_rope_head_dim`; layer-id lists move to a kept layer of the same kind; stage-based configs keep their stage count; text-audio dual encoders get mel features. `facebook/esm-1b` fails config load on Transformers `main` (`hidden_dropout_prob: 0` is an int), so ESM sweeps ESM-2.
 - **Main repair cost:** family rules for coupled fields—M-RoPE (GLM-4V, Qwen-VL), conv groups, hierarchical per-stage widths (Swin v2, PVT), backbone-tied necks, mamba-hybrid caches, EnCodec `codebook_dim` and doubling `num_filters` (Melody overrides both).
-- **Input limit:** contracts use real processor outputs; 62 passing multimodal models ran text only.
+- **Input limit:** contracts use real processor outputs; 81 passing multimodal models ran text only.
 
 About half need no model-specific work; remaining shrink fixes are per family, not checkpoint.
 

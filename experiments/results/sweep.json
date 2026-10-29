@@ -3,7 +3,7 @@
   "EvollaModel": {
    "config_model_type": "EvollaModel",
    "finite": true,
-   "forward_seconds": 0.0062940840143710375,
+   "forward_seconds": 0.003249750006943941,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -21,7 +21,7 @@
   "afmoe": {
    "config_model_type": "afmoe",
    "finite": true,
-   "forward_seconds": 0.02076812495943159,
+   "forward_seconds": 0.010909709031693637,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -39,7 +39,7 @@
   "aimv2": {
    "config_model_type": "aimv2",
    "finite": true,
-   "forward_seconds": 0.003406708943657577,
+   "forward_seconds": 0.0037611249135807157,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -67,7 +67,7 @@
   "aimv2_vision_model": {
    "config_model_type": "aimv2",
    "finite": true,
-   "forward_seconds": 0.0028460000175982714,
+   "forward_seconds": 0.003705583978444338,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -85,7 +85,7 @@
   "albert": {
    "config_model_type": "albert",
    "finite": true,
-   "forward_seconds": 0.0039992500096559525,
+   "forward_seconds": 0.003819167031906545,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -139,7 +139,7 @@
   "altclip": {
    "config_model_type": "altclip",
    "finite": true,
-   "forward_seconds": 0.0034091658890247345,
+   "forward_seconds": 0.0033263328950852156,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -176,7 +176,7 @@
   "apertus": {
    "config_model_type": "apertus",
    "finite": true,
-   "forward_seconds": 0.04657433298416436,
+   "forward_seconds": 0.0036298329941928387,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -194,7 +194,7 @@
   "arcee": {
    "config_model_type": "arcee",
    "finite": true,
-   "forward_seconds": 0.005369334015995264,
+   "forward_seconds": 0.003997332998551428,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -263,7 +263,7 @@
   "audioflamingo3": {
    "config_model_type": "audioflamingo3",
    "finite": true,
-   "forward_seconds": 0.004724249942228198,
+   "forward_seconds": 0.005122083006426692,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -308,7 +308,8 @@
   },
   "axk1": {
    "config_model_type": "axk1",
-   "error": "RuntimeError: The size of tensor a (4) must match the size of tensor b (8) at non-singleton dimension 3",
+   "finite": true,
+   "forward_seconds": 0.0101972920820117,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -320,13 +321,13 @@
    "parameters": 21048000,
    "repo": "skt/A.X-K1",
    "revision": "bb56f50f36b6c0b7b0c108da02db47a5e3bd9ee1",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "axk2": {
    "config_model_type": "axk2",
    "finite": true,
-   "forward_seconds": 0.009689250029623508,
+   "forward_seconds": 0.010313041973859072,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -344,7 +345,7 @@
   "aya_vision": {
    "config_model_type": "aya_vision",
    "finite": true,
-   "forward_seconds": 0.007603541016578674,
+   "forward_seconds": 0.005649957922287285,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -359,21 +360,39 @@
    "stage": "ok",
    "text_only_multimodal": true
   },
-  "bamba": {
-   "config_model_type": "bamba",
-   "error": "ValueError: `get_seq_length` can only be called on Attention layers, and the current Cache seem to only contain LinearAttention layers.",
+  "bailing_hybrid": {
+   "config_model_type": "bailing_hybrid",
+   "error": "RuntimeError: shape '[-1, 8, 0]' is invalid for input of size 128",
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
     "input_ids"
    ],
-   "layers": 2,
+   "layers": 3,
+   "main_input": "input_ids",
+   "model_type": "bailing_hybrid",
+   "parameters": 23477264,
+   "repo": "inclusionAI/Ling-3.0-Flash",
+   "revision": "fcc60a52b34c69c6271d0ac8a8cb0815020b6a43",
+   "stage": "forward",
+   "text_only_multimodal": false
+  },
+  "bamba": {
+   "config_model_type": "bamba",
+   "finite": true,
+   "forward_seconds": 0.014530790969729424,
+   "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 10,
    "main_input": "input_ids",
    "model_type": "bamba",
-   "parameters": 16522416,
+   "parameters": 16928952,
    "repo": "ibm-ai-platform/Bamba-9B-v1",
    "revision": "50ec8766310eae056e05e42ba70df45645912e1e",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "bark": {
@@ -396,7 +415,7 @@
   "bart": {
    "config_model_type": "bart",
    "finite": true,
-   "forward_seconds": 0.002671792055480182,
+   "forward_seconds": 0.002690250054001808,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -411,10 +430,28 @@
    "stage": "ok",
    "text_only_multimodal": false
   },
+  "beam": {
+   "config_model_type": "beam",
+   "finite": true,
+   "forward_seconds": 0.025108665926381946,
+   "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
+   "model_type": "beam",
+   "parameters": 19530632,
+   "repo": "reflection/Beam-1.0-501B-A23B",
+   "revision": "24595dc986af66da3e40229d46aa5f6d1fd2d0c7",
+   "stage": "ok",
+   "text_only_multimodal": false
+  },
   "beit": {
    "config_model_type": "beit",
    "finite": true,
-   "forward_seconds": 0.008627583039924502,
+   "forward_seconds": 0.004779750015586615,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -431,7 +468,7 @@
   "bert": {
    "config_model_type": "bert",
    "finite": true,
-   "forward_seconds": 0.0019107500556856394,
+   "forward_seconds": 0.0016688749892637134,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -449,7 +486,7 @@
   "bert-generation": {
    "config_model_type": "bert-generation",
    "finite": true,
-   "forward_seconds": 0.004388374974951148,
+   "forward_seconds": 0.002128124935552478,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -467,7 +504,7 @@
   "big_bird": {
    "config_model_type": "big_bird",
    "finite": true,
-   "forward_seconds": 0.0026574169751256704,
+   "forward_seconds": 0.002145625068806112,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -485,7 +522,7 @@
   "bigbird_pegasus": {
    "config_model_type": "bigbird_pegasus",
    "finite": true,
-   "forward_seconds": 0.005069875041954219,
+   "forward_seconds": 0.004911832977086306,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -503,7 +540,7 @@
   "biogpt": {
    "config_model_type": "biogpt",
    "finite": true,
-   "forward_seconds": 0.0016756250988692045,
+   "forward_seconds": 0.001948041026480496,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -530,7 +567,7 @@
   "bitnet": {
    "config_model_type": "bitnet",
    "finite": true,
-   "forward_seconds": 0.004904374945908785,
+   "forward_seconds": 0.004981125006452203,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -548,7 +585,7 @@
   "blenderbot": {
    "config_model_type": "blenderbot",
    "finite": true,
-   "forward_seconds": 0.003297290997579694,
+   "forward_seconds": 0.001071792095899582,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -566,7 +603,7 @@
   "blenderbot-small": {
    "config_model_type": "blenderbot-small",
    "finite": true,
-   "forward_seconds": 0.004009832977317274,
+   "forward_seconds": 0.0031477080192416906,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -661,7 +698,7 @@
   "bloom": {
    "config_model_type": "bloom",
    "finite": true,
-   "forward_seconds": 0.00880779093131423,
+   "forward_seconds": 0.0072477919748052955,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -687,7 +724,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "blt",
-   "parameters": 192683136,
+   "parameters": 192576896,
    "repo": "itazap/blt-1b-hf",
    "revision": "91aa6b8e168046ad91e517d2191e1e974f50cc01",
    "stage": "forward",
@@ -712,7 +749,7 @@
   "bridgetower": {
    "config_model_type": "bridgetower",
    "finite": true,
-   "forward_seconds": 0.06770820799283683,
+   "forward_seconds": 0.02063045895192772,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -756,7 +793,7 @@
   "camembert": {
    "config_model_type": "camembert",
    "finite": true,
-   "forward_seconds": 0.0018947909120470285,
+   "forward_seconds": 0.0015287090791389346,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -800,7 +837,7 @@
   "canine": {
    "config_model_type": "canine",
    "finite": true,
-   "forward_seconds": 0.0017040830571204424,
+   "forward_seconds": 0.006759000010788441,
    "head": "MODEL_FOR_SEQUENCE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -818,7 +855,7 @@
   "chameleon": {
    "config_model_type": "chameleon",
    "finite": true,
-   "forward_seconds": 0.015096166986040771,
+   "forward_seconds": 0.005947292083874345,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -844,7 +881,7 @@
   "chinese_clip": {
    "config_model_type": "chinese_clip",
    "finite": true,
-   "forward_seconds": 0.003290582913905382,
+   "forward_seconds": 0.0038524999981746078,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -872,7 +909,7 @@
   "chinese_clip_vision_model": {
    "config_model_type": "chinese_clip",
    "finite": true,
-   "forward_seconds": 0.001915541011840105,
+   "forward_seconds": 0.002149250009097159,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -905,19 +942,22 @@
   },
   "clap": {
    "config_model_type": "clap",
-   "error": "AttributeError: 'NoneType' object has no attribute 'transpose'",
+   "finite": true,
+   "forward_seconds": 0.02276899991557002,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
-    "input_ids"
+    "input_features",
+    "input_ids",
+    "is_longer"
    ],
-   "layers": 2,
+   "layers": 6,
    "main_input": "input_ids",
    "model_type": "clap",
-   "parameters": 4537706,
+   "parameters": 3652966,
    "repo": "laion/clap-htsat-fused",
    "revision": "365dea6ef167def6676140ed93bbc43f84dabb28",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": true
   },
   "clap_audio_model": {
@@ -941,7 +981,7 @@
   "clip": {
    "config_model_type": "clip",
    "finite": true,
-   "forward_seconds": 0.0016750419745221734,
+   "forward_seconds": 0.0012671248987317085,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -958,7 +998,7 @@
   "clip_text_model": {
    "config_model_type": "clip",
    "finite": true,
-   "forward_seconds": 0.001596541958861053,
+   "forward_seconds": 0.0007049581035971642,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -977,7 +1017,7 @@
   "clip_vision_model": {
    "config_model_type": "clip",
    "finite": true,
-   "forward_seconds": 0.003056999994441867,
+   "forward_seconds": 0.0012511250097304583,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -995,7 +1035,7 @@
   "clipseg": {
    "config_model_type": "clipseg",
    "finite": true,
-   "forward_seconds": 0.005099665955640376,
+   "forward_seconds": 0.002578291925601661,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1040,7 +1080,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "clvp",
-   "parameters": 2055107,
+   "parameters": 2057155,
    "repo": "susnato/clvp_dev",
    "revision": "5dee0e6a8386f5abe33e6df17da708f02e659eaf",
    "stage": "forward",
@@ -1084,7 +1124,7 @@
   "cohere": {
    "config_model_type": "cohere",
    "finite": true,
-   "forward_seconds": 0.008604457951150835,
+   "forward_seconds": 0.008780375006608665,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1102,7 +1142,7 @@
   "cohere2": {
    "config_model_type": "cohere2",
    "finite": true,
-   "forward_seconds": 0.07861312502063811,
+   "forward_seconds": 0.012989499955438077,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1120,7 +1160,7 @@
   "cohere2_moe": {
    "config_model_type": "cohere2_vision",
    "finite": true,
-   "forward_seconds": 0.012552374973893166,
+   "forward_seconds": 0.009914624970406294,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
@@ -1139,7 +1179,7 @@
   "cohere2_vision": {
    "config_model_type": "cohere2_vision",
    "finite": true,
-   "forward_seconds": 0.006634916993789375,
+   "forward_seconds": 0.008199082920327783,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1173,22 +1213,40 @@
   },
   "cohere_compass": {
    "config_model_type": "cohere_compass",
-   "error": "RuntimeError: The expanded size of the tensor (8) must match the existing size (0) at non-singleton dimension 0.  Target sizes: [8].  Tensor sizes: [0]",
+   "finite": true,
+   "forward_seconds": 0.014530958025716245,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": null,
+   "main_input": "input_ids",
    "model_type": "cohere_compass",
+   "parameters": 18331328,
    "repo": "CohereLabs/North-Micro-Vision-Instruct",
    "revision": "fa548d9aa62c1220bfd21fc6cfc465f1bd2a1a40",
-   "stage": "build"
+   "stage": "ok",
+   "text_only_multimodal": true
   },
   "cohere_compass_text": {
    "config_model_type": "cohere_compass",
-   "error": "RuntimeError: The expanded size of the tensor (8) must match the existing size (0) at non-singleton dimension 0.  Target sizes: [8].  Tensor sizes: [0]",
+   "finite": true,
+   "forward_seconds": 0.009007332962937653,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
    "model_type": "cohere_compass_text",
+   "parameters": 16851136,
    "repo": "CohereLabs/North-Micro-Vision-Instruct",
    "revision": "fa548d9aa62c1220bfd21fc6cfc465f1bd2a1a40",
-   "stage": "build"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "cohere_compass_vision": {
    "config_model_type": "cohere_compass",
@@ -1202,7 +1260,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "cohere_compass_vision",
-   "parameters": 3519744,
+   "parameters": 1480192,
    "repo": "CohereLabs/North-Micro-Vision-Instruct",
    "revision": "fa548d9aa62c1220bfd21fc6cfc465f1bd2a1a40",
    "stage": "forward",
@@ -1215,7 +1273,7 @@
   "colpali": {
    "config_model_type": "colpali",
    "finite": true,
-   "forward_seconds": 0.0025937920436263084,
+   "forward_seconds": 0.0016754160169512033,
    "head": "MODEL_FOR_PRETRAINING_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1224,7 +1282,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "colpali",
-   "parameters": 16716576,
+   "parameters": 16718656,
    "repo": "vidore/colpali-v1.3-hf",
    "revision": "133a9eb02947310513f52f8f0d39d622e0eab8dc",
    "stage": "ok",
@@ -1232,7 +1290,8 @@
   },
   "colqwen2": {
    "config_model_type": "colqwen2",
-   "error": "RuntimeError: split_with_sizes expects split_sizes to sum exactly to 8 (input tensor's size at dimension -1), but got split_sizes=[16, 24, 24]",
+   "finite": true,
+   "forward_seconds": 0.0018403750145807862,
    "head": "MODEL_FOR_PRETRAINING_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1244,13 +1303,13 @@
    "parameters": 11563648,
    "repo": "vidore/colqwen2-v1.0-hf",
    "revision": "ddc07d2317c80f75fc742b7362ee9ad1912908f9",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "conditional_detr": {
    "config_model_type": "conditional_detr",
    "finite": true,
-   "forward_seconds": 0.10047158296220005,
+   "forward_seconds": 0.08269170799758285,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -1267,7 +1326,7 @@
   "convbert": {
    "config_model_type": "convbert",
    "finite": true,
-   "forward_seconds": 0.005192124983295798,
+   "forward_seconds": 0.007995208026841283,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1285,7 +1344,7 @@
   "convnext": {
    "config_model_type": "convnext",
    "finite": true,
-   "forward_seconds": 0.044556334032677114,
+   "forward_seconds": 0.04730366705916822,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -1302,7 +1361,7 @@
   "convnextv2": {
    "config_model_type": "convnextv2",
    "finite": true,
-   "forward_seconds": 0.048881083028391004,
+   "forward_seconds": 0.04056733299512416,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -1318,20 +1377,40 @@
   },
   "cosmos3_edge": {
    "config_model_type": "cosmos3_edge",
-   "error": "StrictDataclassClassValidationError: Class validation error for validator 'validate_architecture':\n    ValueError: `rope_parameters.mrope_section` must contain three sections whose sum equals half of `head_dim`, got [24, 20, 20] for head_dim=16.",
+   "finite": true,
+   "forward_seconds": 0.008221041993238032,
+   "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": null,
+   "main_input": "input_ids",
    "model_type": "cosmos3_edge",
+   "parameters": 20665664,
    "repo": "nvidia/Cosmos3-Edge",
    "revision": "344d602b128d1bbdacb43b08d0a3626f46343e29",
-   "stage": "shrink"
+   "stage": "ok",
+   "text_only_multimodal": true
   },
   "cosmos3_edge_text": {
    "config_model_type": "cosmos3_edge",
-   "error": "StrictDataclassClassValidationError: Class validation error for validator 'validate_architecture':\n    ValueError: `rope_parameters.mrope_section` must contain three sections whose sum equals half of `head_dim`, got [24, 20, 20] for head_dim=16.",
+   "finite": true,
+   "forward_seconds": 0.001310667023062706,
    "from_parent": true,
+   "head": "MODEL_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
    "model_type": "cosmos3_edge_text",
+   "parameters": 8446272,
    "repo": "nvidia/Cosmos3-Edge",
    "revision": "344d602b128d1bbdacb43b08d0a3626f46343e29",
-   "stage": "shrink"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "cosmos3_edge_vision": {
    "config_model_type": "cosmos3_edge",
@@ -1353,7 +1432,7 @@
   "cosmos3_omni": {
    "config_model_type": "cosmos3_omni",
    "finite": true,
-   "forward_seconds": 0.004201042000204325,
+   "forward_seconds": 0.007215082994662225,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1362,7 +1441,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "cosmos3_omni",
-   "parameters": 25147008,
+   "parameters": 21002112,
    "repo": "nvidia/Cosmos3-Nano",
    "revision": "e59a53c25979a090fa8706c9acc0c254a6e89b92",
    "stage": "ok",
@@ -1371,7 +1450,7 @@
   "cpmant": {
    "config_model_type": "cpmant",
    "finite": true,
-   "forward_seconds": 0.09050954203121364,
+   "forward_seconds": 0.014369250042364001,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1388,12 +1467,21 @@
   },
   "csm": {
    "config_model_type": "csm",
-   "error": "ValueError: in_channels must be divisible by groups",
+   "finite": true,
+   "forward_seconds": 0.0013327909400686622,
    "head": "MODEL_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
    "model_type": "csm",
+   "parameters": 170082049,
    "repo": "cartesia/azzurra-voice",
    "revision": "f41947b939470b49181f77d8d89827938a2a915b",
-   "stage": "build"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "csm_depth_decoder_model": {
    "model_type": "csm_depth_decoder_model",
@@ -1402,7 +1490,7 @@
   "ctrl": {
    "config_model_type": "ctrl",
    "finite": true,
-   "forward_seconds": 0.013096999959088862,
+   "forward_seconds": 0.00927362497895956,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1420,7 +1508,7 @@
   "cvt": {
    "config_model_type": "cvt",
    "finite": true,
-   "forward_seconds": 0.32466425001621246,
+   "forward_seconds": 0.26401308306958526,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -1440,12 +1528,19 @@
   },
   "d_fine": {
    "config_model_type": "d_fine",
-   "error": "IndexError: list index out of range",
+   "error": "RuntimeError: Given groups=1, weight of size [384, 32, 1, 1], expected input[2, 512, 28, 28] to have 32 channels, but got 512 channels instead",
    "head": "MODEL_MAPPING_NAMES",
+   "inputs": [
+    "pixel_values"
+   ],
+   "layers": null,
+   "main_input": "pixel_values",
    "model_type": "d_fine",
+   "parameters": 51401756,
    "repo": "ustc-community/dfine-xlarge-coco",
    "revision": "ea4f6be7350bbe3c199ec6febc74168346cb5a68",
-   "stage": "build"
+   "stage": "forward",
+   "text_only_multimodal": false
   },
   "dab-detr": {
    "error": "OfflineModeIsEnabled: Cannot reach https://huggingface.co/api/models/resnet50: offline mode is enabled. To disable it, please unset the `HF_HUB_OFFLINE` environment variable.",
@@ -1473,7 +1568,7 @@
   "data2vec-audio": {
    "config_model_type": "data2vec-audio",
    "finite": true,
-   "forward_seconds": 0.059637082973495126,
+   "forward_seconds": 0.05300183407962322,
    "head": "MODEL_FOR_CTC_MAPPING_NAMES",
    "inputs": [
     "input_values"
@@ -1490,7 +1585,7 @@
   "data2vec-text": {
    "config_model_type": "data2vec-text",
    "finite": true,
-   "forward_seconds": 0.002352209063246846,
+   "forward_seconds": 0.004228167003020644,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1515,16 +1610,26 @@
   },
   "dbrx": {
    "config_model_type": "dbrx",
-   "error": "ValueError: Found unknown kwargs={'_name_or_path': '', 'output_attentions': False}",
+   "finite": true,
+   "forward_seconds": 0.00461191707290709,
+   "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
    "model_type": "dbrx",
+   "parameters": 12907328,
    "repo": "trl-internal-testing/tiny-DbrxForCausalLM",
    "revision": "9b8efa12d99cf8c94c6b2afc7026c18d32b95104",
-   "stage": "shrink"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "deberta": {
    "config_model_type": "deberta",
    "finite": true,
-   "forward_seconds": 0.0401190419215709,
+   "forward_seconds": 0.02266687504015863,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1541,7 +1646,8 @@
   },
   "deberta-v2": {
    "config_model_type": "deberta-v2",
-   "error": "RuntimeError: mat1 and mat2 shapes cannot be multiplied (32x256 and 64x64)",
+   "finite": true,
+   "forward_seconds": 0.02528812491800636,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1550,10 +1656,10 @@
    "layers": 2,
    "main_input": "input_ids",
    "model_type": "deberta-v2",
-   "parameters": 8518116,
+   "parameters": 8443236,
    "repo": "microsoft/deberta-v2-xlarge",
    "revision": "1d134961d4db8e7e8eb1bc1ab81cb370244c57f7",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "decision_transformer": {
@@ -1617,7 +1723,7 @@
   "deepseek_v2": {
    "config_model_type": "deepseek_v2",
    "finite": true,
-   "forward_seconds": 0.003654250060208142,
+   "forward_seconds": 0.00456158397719264,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1634,7 +1740,8 @@
   },
   "deepseek_v3": {
    "config_model_type": "deepseek_v3",
-   "error": "RuntimeError: The size of tensor a (4) must match the size of tensor b (8) at non-singleton dimension 3",
+   "finite": true,
+   "forward_seconds": 0.00783458398655057,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1646,13 +1753,13 @@
    "parameters": 16624256,
    "repo": "bzantium/tiny-deepseek-v3",
    "revision": "634c1d1f51816415fa371e51281e435ce4422469",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "deepseek_v32": {
    "config_model_type": "deepseek_v32",
    "finite": true,
-   "forward_seconds": 0.011456333100795746,
+   "forward_seconds": 0.005451250006444752,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1670,7 +1777,7 @@
   "deepseek_v4": {
    "config_model_type": "deepseek_v4",
    "finite": true,
-   "forward_seconds": 0.011717415996827185,
+   "forward_seconds": 0.015350667061284184,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1688,7 +1795,7 @@
   "deepseek_vl": {
    "config_model_type": "deepseek_vl",
    "finite": true,
-   "forward_seconds": 0.002964499988593161,
+   "forward_seconds": 0.004880208056420088,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1706,7 +1813,7 @@
   "deepseek_vl_hybrid": {
    "config_model_type": "deepseek_vl_hybrid",
    "finite": true,
-   "forward_seconds": 0.0030174580169841647,
+   "forward_seconds": 0.004183375043794513,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1724,7 +1831,7 @@
   "deformable_detr": {
    "config_model_type": "deformable_detr",
    "finite": true,
-   "forward_seconds": 0.1149946249788627,
+   "forward_seconds": 0.09376325004268438,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -1757,7 +1864,7 @@
   "deit": {
    "config_model_type": "deit",
    "finite": true,
-   "forward_seconds": 0.00432254106272012,
+   "forward_seconds": 0.0036055409582331777,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -1806,7 +1913,7 @@
   "detr": {
    "config_model_type": "detr",
    "finite": true,
-   "forward_seconds": 0.08544720895588398,
+   "forward_seconds": 0.08266983402427286,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -1835,7 +1942,7 @@
   "diffllama": {
    "config_model_type": "diffllama",
    "finite": true,
-   "forward_seconds": 0.005558667005971074,
+   "forward_seconds": 0.0035542499972507358,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1861,7 +1968,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "diffusion_gemma",
-   "parameters": 18370824,
+   "parameters": 18689256,
    "repo": "google/diffusiongemma-26B-A4B-it",
    "revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
    "stage": "forward",
@@ -1888,7 +1995,7 @@
   "dinov2": {
    "config_model_type": "dinov2",
    "finite": true,
-   "forward_seconds": 0.03912337508518249,
+   "forward_seconds": 0.039392958977259696,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -1905,7 +2012,7 @@
   "dinov2_with_registers": {
    "config_model_type": "dinov2_with_registers",
    "finite": true,
-   "forward_seconds": 0.04625241691246629,
+   "forward_seconds": 0.03647720895241946,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -1922,7 +2029,7 @@
   "dinov3_convnext": {
    "config_model_type": "dinov3_convnext",
    "finite": true,
-   "forward_seconds": 0.05265279102604836,
+   "forward_seconds": 0.03446995792910457,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -1939,7 +2046,7 @@
   "dinov3_vit": {
    "config_model_type": "dinov3_vit",
    "finite": true,
-   "forward_seconds": 0.005057582980953157,
+   "forward_seconds": 0.0029637920670211315,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -1956,7 +2063,7 @@
   "distilbert": {
    "config_model_type": "distilbert",
    "finite": true,
-   "forward_seconds": 0.0019967079861089587,
+   "forward_seconds": 0.0013550419826060534,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1974,7 +2081,7 @@
   "doge": {
    "config_model_type": "doge",
    "finite": true,
-   "forward_seconds": 0.002917042002081871,
+   "forward_seconds": 0.0029198749689385295,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1992,7 +2099,7 @@
   "donut-swin": {
    "config_model_type": "vision-encoder-decoder",
    "finite": true,
-   "forward_seconds": 9.925239917007275,
+   "forward_seconds": 4.135984624968842,
    "from_parent": true,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
@@ -2010,7 +2117,7 @@
   "dots1": {
    "config_model_type": "dots1",
    "finite": true,
-   "forward_seconds": 0.006264875060878694,
+   "forward_seconds": 0.005218417034484446,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2028,7 +2135,7 @@
   "dpr": {
    "config_model_type": "dpr",
    "finite": true,
-   "forward_seconds": 0.00214395800139755,
+   "forward_seconds": 0.0009337920928373933,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2037,7 +2144,7 @@
    "layers": 2,
    "main_input": "input_ids",
    "model_type": "dpr",
-   "parameters": 2055456,
+   "parameters": 2053376,
    "repo": "facebook/dpr-ctx_encoder-single-nq-base",
    "revision": "bb21a3c2b1656d60c6a8e920283bc40dabddadb8",
    "stage": "ok",
@@ -2046,7 +2153,7 @@
   "dpt": {
    "config_model_type": "dpt",
    "finite": true,
-   "forward_seconds": 0.01998583402018994,
+   "forward_seconds": 0.007472375058569014,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -2064,19 +2171,55 @@
    "model_type": "edgetam",
    "stage": "no_checkpoint"
   },
+  "edgetam_mask_decoder": {
+   "model_type": "edgetam_mask_decoder",
+   "stage": "no_checkpoint"
+  },
+  "edgetam_prompt_encoder": {
+   "model_type": "edgetam_prompt_encoder",
+   "stage": "no_checkpoint"
+  },
   "edgetam_video": {
-   "error": "OSError: We couldn't connect to 'https://huggingface.co' to load the files, and couldn't find them in the cached files.\nCheck your internet connection or see how to run the library in offline mode at 'https://huggingface.co/docs/transformers/installation#offline-mode'.",
+   "config_model_type": "edgetam_video",
+   "error": "TypeError: EdgeTamVideoModel.forward() missing 1 required positional argument: 'inference_session'",
+   "head": "MODEL_MAPPING_NAMES",
+   "inputs": [
+    "pixel_values"
+   ],
+   "layers": null,
+   "main_input": "pixel_values",
    "model_type": "edgetam_video",
+   "parameters": 10414786,
    "repo": "yonigozlan/EdgeTAM-hf",
    "revision": "c266ce53b3fc00f0f495b583f6a116c4e57f53bb",
-   "stage": "load_config"
+   "stage": "forward",
+   "text_only_multimodal": false
+  },
+  "edgetam_video_mask_decoder": {
+   "model_type": "edgetam_video_mask_decoder",
+   "stage": "no_checkpoint"
+  },
+  "edgetam_video_prompt_encoder": {
+   "model_type": "edgetam_video_prompt_encoder",
+   "stage": "no_checkpoint"
   },
   "edgetam_vision_model": {
-   "error": "OSError: We couldn't connect to 'https://huggingface.co' to load the files, and couldn't find them in the cached files.\nCheck your internet connection or see how to run the library in offline mode at 'https://huggingface.co/docs/transformers/installation#offline-mode'.",
+   "config_model_type": "edgetam_video",
+   "finite": true,
+   "forward_seconds": 0.06294924998655915,
+   "from_parent": true,
+   "head": "MODEL_MAPPING_NAMES",
+   "inputs": [
+    "pixel_values"
+   ],
+   "layers": null,
+   "main_input": "pixel_values",
    "model_type": "edgetam_vision_model",
+   "parameters": 4899056,
    "repo": "yonigozlan/EdgeTAM-hf",
    "revision": "c266ce53b3fc00f0f495b583f6a116c4e57f53bb",
-   "stage": "load_config"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "efficientloftr": {
    "config_model_type": "efficientloftr",
@@ -2105,7 +2248,7 @@
   "electra": {
    "config_model_type": "electra",
    "finite": true,
-   "forward_seconds": 0.011787750059738755,
+   "forward_seconds": 0.007403791998513043,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2120,14 +2263,60 @@
    "stage": "ok",
    "text_only_multimodal": false
   },
+  "embedding_gemma2": {
+   "config_model_type": "embedding_gemma2",
+   "finite": true,
+   "forward_seconds": 0.005651624989695847,
+   "head": "MODEL_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": null,
+   "main_input": "input_ids",
+   "model_type": "embedding_gemma2",
+   "parameters": 19361120,
+   "repo": "google/embeddinggemma-2",
+   "revision": "f9972ac22e696a105c482202646979e33e4b5a1e",
+   "stage": "ok",
+   "text_only_multimodal": true
+  },
+  "embedding_gemma2_text": {
+   "config_model_type": "embedding_gemma2",
+   "finite": true,
+   "forward_seconds": 0.004214916960336268,
+   "from_parent": true,
+   "head": "MODEL_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
+   "model_type": "embedding_gemma2_text",
+   "parameters": 17414368,
+   "repo": "google/embeddinggemma-2",
+   "revision": "f9972ac22e696a105c482202646979e33e4b5a1e",
+   "stage": "ok",
+   "text_only_multimodal": false
+  },
   "emu3": {
    "config_model_type": "emu3",
-   "error": "AttributeError: 'Emu3Config' object has no attribute 'pad_token_id'",
+   "finite": true,
+   "forward_seconds": 0.012378917075693607,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
    "model_type": "emu3",
+   "parameters": 23705664,
    "repo": "Emu3-community/Emu3-Chat-hf",
    "revision": "414c0a163edad789827ee473a71b75c7de546347",
-   "stage": "build"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "emu3_text_model": {
    "config_model_type": "emu3",
@@ -2166,7 +2355,7 @@
   "encoder-decoder": {
    "config_model_type": "encoder-decoder",
    "finite": true,
-   "forward_seconds": 0.031185582978650928,
+   "forward_seconds": 0.0027985828928649426,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2217,7 +2406,7 @@
   "ernie": {
    "config_model_type": "ernie",
    "finite": true,
-   "forward_seconds": 0.00325970898848027,
+   "forward_seconds": 0.002397041069343686,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2235,7 +2424,7 @@
   "ernie4_5": {
    "config_model_type": "ernie4_5",
    "finite": true,
-   "forward_seconds": 0.0060215420089662075,
+   "forward_seconds": 0.004876042017713189,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2269,12 +2458,20 @@
   },
   "ernie4_5_vl_moe": {
    "config_model_type": "ernie4_5_vl_moe",
-   "error": "RuntimeError: The expanded size of the tensor (8) must match the existing size (0) at non-singleton dimension 0.  Target sizes: [8].  Tensor sizes: [0]",
+   "error": "RuntimeError: selected index k out of range",
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": null,
+   "main_input": "input_ids",
    "model_type": "ernie4_5_vl_moe",
+   "parameters": 9483592,
    "repo": "hf-internal-testing/Ernie-VL-Moe-Small",
    "revision": "79b1756030ffb47115ede5d5cd301e3be63c1d29",
-   "stage": "build"
+   "stage": "forward",
+   "text_only_multimodal": true
   },
   "ernie4_5_vl_moe_text": {
    "model_type": "ernie4_5_vl_moe_text",
@@ -2285,16 +2482,27 @@
    "stage": "no_checkpoint"
   },
   "esm": {
-   "error": "StrictDataclassFieldValidationError: Validation error for field 'hidden_dropout_prob':\n    TypeError: Field 'hidden_dropout_prob' with value 0 doesn't match any type in (<class 'float'>, <class 'NoneType'>). Errors: Field 'hidden_dropout_prob' expected float, got int (value: 0); Field 'hidden_dropout_prob' expected NoneType, got int (value: 0)",
+   "config_model_type": "esm",
+   "finite": true,
+   "forward_seconds": 0.0017476669745519757,
+   "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
    "model_type": "esm",
-   "repo": "facebook/esm-1b",
-   "revision": "6fb10624652aa86b64c620ae624baa5b5b8c3b78",
-   "stage": "load_config"
+   "parameters": 73514,
+   "repo": "facebook/esm2_t33_650M_UR50D",
+   "revision": "08e4846e537177426273712802403f7ba8261b6c",
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "esmc": {
    "config_model_type": "esmc",
    "finite": true,
-   "forward_seconds": 0.0010543339885771275,
+   "forward_seconds": 0.0008504580473527312,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2320,7 +2528,7 @@
   "eurobert": {
    "config_model_type": "eurobert",
    "finite": true,
-   "forward_seconds": 0.0054738749749958515,
+   "forward_seconds": 0.0036214590072631836,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2342,7 +2550,7 @@
   "exaone4": {
    "config_model_type": "exaone4",
    "finite": true,
-   "forward_seconds": 0.027117917081341147,
+   "forward_seconds": 0.003007040941156447,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2360,7 +2568,7 @@
   "exaone4_5": {
    "config_model_type": "exaone4_5",
    "finite": true,
-   "forward_seconds": 0.00825245794840157,
+   "forward_seconds": 0.003906750003807247,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2369,7 +2577,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "exaone4_5",
-   "parameters": 22241984,
+   "parameters": 20942592,
    "repo": "LGAI-EXAONE/EXAONE-4.5-33B",
    "revision": "570aa4b15a4f45ba1133072b45f50198f6e3b4fd",
    "stage": "ok",
@@ -2387,7 +2595,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "exaone4_5_vision",
-   "parameters": 2507072,
+   "parameters": 1207680,
    "repo": "LGAI-EXAONE/EXAONE-4.5-33B",
    "revision": "570aa4b15a4f45ba1133072b45f50198f6e3b4fd",
    "stage": "forward",
@@ -2396,7 +2604,7 @@
   "exaone_moe": {
    "config_model_type": "exaone_moe",
    "finite": true,
-   "forward_seconds": 0.010756459087133408,
+   "forward_seconds": 0.006583875045180321,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2414,7 +2622,7 @@
   "falcon": {
    "config_model_type": "falcon",
    "finite": true,
-   "forward_seconds": 0.019995875074528158,
+   "forward_seconds": 0.004320749896578491,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2432,7 +2640,7 @@
   "falcon_h1": {
    "config_model_type": "falcon_h1",
    "finite": true,
-   "forward_seconds": 0.04761966597288847,
+   "forward_seconds": 0.013182125054299831,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2450,7 +2658,7 @@
   "falcon_mamba": {
    "config_model_type": "falcon_mamba",
    "finite": true,
-   "forward_seconds": 0.004364457912743092,
+   "forward_seconds": 0.004115874995477498,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2468,7 +2676,7 @@
   "fast_vlm": {
    "config_model_type": "fast_vlm",
    "finite": true,
-   "forward_seconds": 0.01064054190646857,
+   "forward_seconds": 0.0036724170204252005,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2525,7 +2733,7 @@
   "flaubert": {
    "config_model_type": "flaubert",
    "finite": true,
-   "forward_seconds": 0.006314250058494508,
+   "forward_seconds": 0.002669874927960336,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2543,7 +2751,7 @@
   "flava": {
    "config_model_type": "flava",
    "finite": true,
-   "forward_seconds": 0.0034580840729177,
+   "forward_seconds": 0.0008017909713089466,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2557,6 +2765,15 @@
    "revision": "51e2b5fac49169959b01da7f3708d8e0d8d7304a",
    "stage": "ok",
    "text_only_multimodal": false
+  },
+  "flava_image_codebook": {
+   "config_model_type": "flava",
+   "from_parent": true,
+   "head": null,
+   "model_type": "flava_image_codebook",
+   "repo": "facebook/flava-full",
+   "revision": "51e2b5fac49169959b01da7f3708d8e0d8d7304a",
+   "stage": "component"
   },
   "flava_image_model": {
    "config_model_type": "flava",
@@ -2588,7 +2805,7 @@
   "flex_olmo": {
    "config_model_type": "flex_olmo",
    "finite": true,
-   "forward_seconds": 0.0035795000148937106,
+   "forward_seconds": 0.004823499941267073,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2603,10 +2820,28 @@
    "stage": "ok",
    "text_only_multimodal": false
   },
+  "flint": {
+   "config_model_type": "flint",
+   "finite": true,
+   "forward_seconds": 0.006268500001169741,
+   "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 3,
+   "main_input": "input_ids",
+   "model_type": "flint",
+   "parameters": 19379244,
+   "repo": "RecursiveSI/flint",
+   "revision": "2a247be0c0aec895ccb0ac7ca92229ec6df37288",
+   "stage": "ok",
+   "text_only_multimodal": false
+  },
   "florence2": {
    "config_model_type": "florence2",
    "finite": true,
-   "forward_seconds": 0.004845416988246143,
+   "forward_seconds": 0.003720249980688095,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2616,7 +2851,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "florence2",
-   "parameters": 43434048,
+   "parameters": 43466880,
    "repo": "florence-community/Florence-2-base",
    "revision": "00921df66db728a9ceb750f5eca43e5c203a2051",
    "stage": "ok",
@@ -2634,7 +2869,7 @@
   "fnet": {
    "config_model_type": "fnet",
    "finite": true,
-   "forward_seconds": 0.0034273751080036163,
+   "forward_seconds": 0.0023491670144721866,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2652,7 +2887,7 @@
   "focalnet": {
    "config_model_type": "focalnet",
    "finite": true,
-   "forward_seconds": 0.07830216700676829,
+   "forward_seconds": 0.05221404193434864,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -2669,7 +2904,7 @@
   "fsmt": {
    "config_model_type": "fsmt",
    "finite": true,
-   "forward_seconds": 0.016213165945373476,
+   "forward_seconds": 0.003503624931909144,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2713,7 +2948,7 @@
   "funnel": {
    "config_model_type": "funnel",
    "finite": true,
-   "forward_seconds": 0.016858916962519288,
+   "forward_seconds": 0.010597457992844284,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2731,7 +2966,7 @@
   "fuyu": {
    "config_model_type": "fuyu",
    "finite": true,
-   "forward_seconds": 0.011535665951669216,
+   "forward_seconds": 0.006004667025990784,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2749,7 +2984,7 @@
   "gemma": {
    "config_model_type": "gemma",
    "finite": true,
-   "forward_seconds": 0.006459208088926971,
+   "forward_seconds": 0.006238750065676868,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2767,7 +3002,7 @@
   "gemma2": {
    "config_model_type": "gemma2",
    "finite": true,
-   "forward_seconds": 0.047733583021909,
+   "forward_seconds": 0.03888016601558775,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2785,7 +3020,7 @@
   "gemma3": {
    "config_model_type": "gemma3",
    "finite": true,
-   "forward_seconds": 0.02959112508688122,
+   "forward_seconds": 0.007773083983920515,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2803,7 +3038,7 @@
   "gemma3_text": {
    "config_model_type": "gemma3",
    "finite": true,
-   "forward_seconds": 0.0139102500397712,
+   "forward_seconds": 0.004611541051417589,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
@@ -2821,12 +3056,21 @@
   },
   "gemma3n": {
    "config_model_type": "gemma3n",
-   "error": "ValueError: 'sliding_attention' is not in list",
+   "finite": true,
+   "forward_seconds": 0.034350582980550826,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": null,
+   "main_input": "input_ids",
    "model_type": "gemma3n",
+   "parameters": 581072032,
    "repo": "google/gemma-3n-E4B",
    "revision": "af70430f84ea4d7ac191aaa2bd8e14d2a5e8f6ee",
-   "stage": "build"
+   "stage": "ok",
+   "text_only_multimodal": true
   },
   "gemma3n_audio": {
    "config_model_type": "gemma3n",
@@ -2842,18 +3086,27 @@
   },
   "gemma3n_text": {
    "config_model_type": "gemma3n",
-   "error": "ValueError: 'sliding_attention' is not in list",
+   "finite": true,
+   "forward_seconds": 0.03631075005978346,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 4,
+   "main_input": "input_ids",
    "model_type": "gemma3n_text",
+   "parameters": 285626080,
    "repo": "google/gemma-3n-E4B",
    "revision": "af70430f84ea4d7ac191aaa2bd8e14d2a5e8f6ee",
-   "stage": "build"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "gemma3n_vision": {
    "config_model_type": "gemma3n",
    "finite": true,
-   "forward_seconds": 1.15776262502186,
+   "forward_seconds": 0.4929145839996636,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -2870,20 +3123,38 @@
   },
   "gemma4": {
    "config_model_type": "gemma4",
-   "error": "ValueError: 'sliding_attention' is not in list",
+   "finite": true,
+   "forward_seconds": 0.03755250002723187,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": null,
+   "main_input": "input_ids",
    "model_type": "gemma4",
+   "parameters": 288182512,
    "repo": "google/gemma-4-e2b-it",
    "revision": "3e22461f65e89153144f8adb70e3b8c2cc9845a7",
-   "stage": "build"
+   "stage": "ok",
+   "text_only_multimodal": true
   },
   "gemma4_assistant": {
    "config_model_type": "gemma4_assistant",
-   "error": "StrictDataclassClassValidationError: Class validation error for validator 'validate_architecture':\n    ValueError: All layers in a Gemma 4 Assistant models must be shared. Expected 2. Got 4",
+   "error": "ValueError: inputs_embeds and shared_kv_states cannot be None.",
+   "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": null,
+   "main_input": "input_ids",
    "model_type": "gemma4_assistant",
+   "parameters": 18130000,
    "repo": "google/gemma-4-31B-it-assistant",
    "revision": "627c5ec1458b9086b841a91e0512fd31fd2fbbf1",
-   "stage": "shrink"
+   "stage": "forward",
+   "text_only_multimodal": false
   },
   "gemma4_audio": {
    "config_model_type": "gemma4",
@@ -2904,18 +3175,27 @@
   },
   "gemma4_text": {
    "config_model_type": "gemma4",
-   "error": "ValueError: 'sliding_attention' is not in list",
+   "finite": true,
+   "forward_seconds": 0.037349916994571686,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 4,
+   "main_input": "input_ids",
    "model_type": "gemma4_text",
+   "parameters": 286235760,
    "repo": "google/gemma-4-e2b-it",
    "revision": "3e22461f65e89153144f8adb70e3b8c2cc9845a7",
-   "stage": "build"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "gemma4_unified": {
    "config_model_type": "gemma4_unified",
    "finite": true,
-   "forward_seconds": 0.04588637489359826,
+   "forward_seconds": 0.04279154201503843,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2924,7 +3204,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "gemma4_unified",
-   "parameters": 52312960,
+   "parameters": 52598624,
    "repo": "google/gemma-4-12B-it",
    "revision": "707f0a3b8a3c7ad586ed01e27eafbad8a27dd0f7",
    "stage": "ok",
@@ -2932,12 +3212,20 @@
   },
   "gemma4_unified_assistant": {
    "config_model_type": "gemma4_unified_assistant",
-   "error": "ValueError: 'sliding_attention' is not in list",
+   "error": "ValueError: inputs_embeds and shared_kv_states cannot be None.",
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": null,
+   "main_input": "input_ids",
    "model_type": "gemma4_unified_assistant",
+   "parameters": 17835088,
    "repo": "google/gemma-4-12B-it-assistant",
    "revision": "46d4c6f13f0ac0ad827b915669b8df9b81c64c51",
-   "stage": "build"
+   "stage": "forward",
+   "text_only_multimodal": false
   },
   "gemma4_unified_audio": {
    "config_model_type": "gemma4_unified",
@@ -2951,7 +3239,7 @@
   "gemma4_unified_text": {
    "config_model_type": "gemma4_unified",
    "finite": true,
-   "forward_seconds": 0.04218466591555625,
+   "forward_seconds": 0.04022879200056195,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
@@ -2961,7 +3249,7 @@
    "layers": 2,
    "main_input": "input_ids",
    "model_type": "gemma4_unified_text",
-   "parameters": 16849536,
+   "parameters": 17135200,
    "repo": "google/gemma-4-12B-it",
    "revision": "707f0a3b8a3c7ad586ed01e27eafbad8a27dd0f7",
    "stage": "ok",
@@ -2997,7 +3285,7 @@
   "git": {
    "config_model_type": "git",
    "finite": true,
-   "forward_seconds": 0.045103332959115505,
+   "forward_seconds": 0.014130374998785555,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3029,7 +3317,7 @@
   "glm4": {
    "config_model_type": "glm4",
    "finite": true,
-   "forward_seconds": 0.009029250009916723,
+   "forward_seconds": 0.0042284580413252115,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3051,7 +3339,7 @@
   "glm4_moe": {
    "config_model_type": "glm4_moe",
    "finite": true,
-   "forward_seconds": 0.006083833985030651,
+   "forward_seconds": 0.0058155839797109365,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3069,7 +3357,7 @@
   "glm4_moe_lite": {
    "config_model_type": "glm4_moe_lite",
    "finite": true,
-   "forward_seconds": 0.005925791920162737,
+   "forward_seconds": 0.0043445409974083304,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3086,7 +3374,7 @@
   },
   "glm4v": {
    "config_model_type": "glm4v",
-   "error": "RuntimeError: split_with_sizes expects split_sizes to sum exactly to 4 (input tensor's size at dimension -1), but got split_sizes=[8, 12, 12]",
+   "error": "RuntimeError: split_with_sizes expects split_sizes to sum exactly to 4 (input tensor's size at dimension -1), but got split_sizes=[2, 3, 3]",
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3095,7 +3383,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "glm4v",
-   "parameters": 58267136,
+   "parameters": 20321984,
    "repo": "zai-org/GLM-4.1V-9B-Thinking",
    "revision": "3c1471e51dc811b589d4d12b1c1c7c1c941267c2",
    "stage": "forward",
@@ -3103,7 +3391,7 @@
   },
   "glm4v_moe": {
    "config_model_type": "glm4v_moe",
-   "error": "RuntimeError: split_with_sizes expects split_sizes to sum exactly to 4 (input tensor's size at dimension -1), but got split_sizes=[8, 12, 12]",
+   "error": "RuntimeError: split_with_sizes expects split_sizes to sum exactly to 4 (input tensor's size at dimension -1), but got split_sizes=[2, 3, 3]",
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3112,7 +3400,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "glm4v_moe",
-   "parameters": 58273280,
+   "parameters": 20328128,
    "repo": "zai-org/GLM-4.5V",
    "revision": "ed47433b37111465ec527affaaddceff371bca04",
    "stage": "forward",
@@ -3120,7 +3408,7 @@
   },
   "glm4v_moe_text": {
    "config_model_type": "glm4v_moe",
-   "error": "RuntimeError: split_with_sizes expects split_sizes to sum exactly to 4 (input tensor's size at dimension -1), but got split_sizes=[8, 12, 12]",
+   "error": "RuntimeError: split_with_sizes expects split_sizes to sum exactly to 4 (input tensor's size at dimension -1), but got split_sizes=[2, 3, 3]",
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -3142,7 +3430,7 @@
   },
   "glm4v_text": {
    "config_model_type": "glm4v",
-   "error": "RuntimeError: split_with_sizes expects split_sizes to sum exactly to 4 (input tensor's size at dimension -1), but got split_sizes=[8, 12, 12]",
+   "error": "RuntimeError: split_with_sizes expects split_sizes to sum exactly to 4 (input tensor's size at dimension -1), but got split_sizes=[2, 3, 3]",
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -3170,7 +3458,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "glm4v_vision",
-   "parameters": 38793920,
+   "parameters": 848768,
    "repo": "zai-org/GLM-4.1V-9B-Thinking",
    "revision": "3c1471e51dc811b589d4d12b1c1c7c1c941267c2",
    "stage": "forward",
@@ -3178,20 +3466,40 @@
   },
   "glm5_next": {
    "config_model_type": "glm5_next",
-   "error": "StrictDataclassClassValidationError: Class validation error for validator 'validate_architecture':\n    ValueError: Expecting NoPE for the DSA attention layers, but got 8 as RoPE dim.",
+   "finite": true,
+   "forward_seconds": 0.014233833993785083,
+   "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": null,
+   "main_input": "input_ids",
    "model_type": "glm5_next",
+   "parameters": 23148650,
    "repo": "zai-org/GLM-5.3-Flash",
    "revision": "eb9eb208eb0d988989d07a6a12d0fdeb5f52574a",
-   "stage": "shrink"
+   "stage": "ok",
+   "text_only_multimodal": true
   },
   "glm5_next_text": {
    "config_model_type": "glm5_next",
-   "error": "StrictDataclassClassValidationError: Class validation error for validator 'validate_architecture':\n    ValueError: Expecting NoPE for the DSA attention layers, but got 8 as RoPE dim.",
+   "finite": true,
+   "forward_seconds": 0.012324040988460183,
    "from_parent": true,
+   "head": "MODEL_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 3,
+   "main_input": "input_ids",
    "model_type": "glm5_next_text",
+   "parameters": 10173482,
    "repo": "zai-org/GLM-5.3-Flash",
    "revision": "eb9eb208eb0d988989d07a6a12d0fdeb5f52574a",
-   "stage": "shrink"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "glm5_next_vision": {
    "config_model_type": "glm5_next",
@@ -3205,7 +3513,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "glm5_next_vision",
-   "parameters": 144743296,
+   "parameters": 3062848,
    "repo": "zai-org/GLM-5.3-Flash",
    "revision": "eb9eb208eb0d988989d07a6a12d0fdeb5f52574a",
    "stage": "forward",
@@ -3230,7 +3538,7 @@
   "glm_moe_dsa": {
    "config_model_type": "glm_moe_dsa",
    "finite": true,
-   "forward_seconds": 0.007770917029120028,
+   "forward_seconds": 0.009794916026294231,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3247,7 +3555,8 @@
   },
   "glm_ocr": {
    "config_model_type": "glm_ocr",
-   "error": "RuntimeError: split_with_sizes expects split_sizes to sum exactly to 8 (input tensor's size at dimension -1), but got split_sizes=[16, 24, 24]",
+   "finite": true,
+   "forward_seconds": 0.002286790986545384,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3256,15 +3565,16 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "glm_ocr",
-   "parameters": 32743360,
+   "parameters": 8810112,
    "repo": "zai-org/GLM-OCR",
    "revision": "2e85a62840ccac27daa451df36c736c4636b8628",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": true
   },
   "glm_ocr_text": {
    "config_model_type": "glm_ocr",
-   "error": "RuntimeError: split_with_sizes expects split_sizes to sum exactly to 8 (input tensor's size at dimension -1), but got split_sizes=[16, 24, 24]",
+   "finite": true,
+   "forward_seconds": 0.001095915911719203,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -3277,7 +3587,7 @@
    "parameters": 3875392,
    "repo": "zai-org/GLM-OCR",
    "revision": "2e85a62840ccac27daa451df36c736c4636b8628",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "glm_ocr_vision": {
@@ -3292,7 +3602,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "glm_ocr_vision",
-   "parameters": 25066880,
+   "parameters": 1133632,
    "repo": "zai-org/GLM-OCR",
    "revision": "2e85a62840ccac27daa451df36c736c4636b8628",
    "stage": "forward",
@@ -3301,7 +3611,7 @@
   "glmasr": {
    "config_model_type": "glmasr",
    "finite": true,
-   "forward_seconds": 0.002700209035538137,
+   "forward_seconds": 0.004236041102558374,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3319,7 +3629,7 @@
   "glmasr_encoder": {
    "config_model_type": "glmasr",
    "finite": true,
-   "forward_seconds": 0.05458862497471273,
+   "forward_seconds": 0.045396875008009374,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -3340,17 +3650,25 @@
   },
   "glpn": {
    "config_model_type": "glpn",
-   "error": "ValueError: The hidden size (64) is not a multiple of the number of attention heads (5)",
+   "finite": true,
+   "forward_seconds": 0.04577241698279977,
    "head": "MODEL_MAPPING_NAMES",
+   "inputs": [
+    "pixel_values"
+   ],
+   "layers": null,
+   "main_input": "pixel_values",
    "model_type": "glpn",
+   "parameters": 423648,
    "repo": "vinvino02/glpn-kitti",
    "revision": "e9e84852cb27aa6347db0f98bf86e296505ac014",
-   "stage": "build"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "got_ocr2": {
    "config_model_type": "got_ocr2",
    "finite": true,
-   "forward_seconds": 0.0028931659180670977,
+   "forward_seconds": 0.0027721249498426914,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3365,6 +3683,10 @@
    "stage": "ok",
    "text_only_multimodal": true
   },
+  "got_ocr2_vision": {
+   "model_type": "got_ocr2_vision",
+   "stage": "no_checkpoint"
+  },
   "gpt-sw3": {
    "model_type": "gpt-sw3",
    "stage": "no_checkpoint"
@@ -3372,7 +3694,7 @@
   "gpt2": {
    "config_model_type": "gpt2",
    "finite": true,
-   "forward_seconds": 0.002586000016890466,
+   "forward_seconds": 0.0021400420228019357,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3390,7 +3712,7 @@
   "gpt_bigcode": {
    "config_model_type": "gpt_bigcode",
    "finite": true,
-   "forward_seconds": 0.004791417042724788,
+   "forward_seconds": 0.0039050409104675055,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3416,7 +3738,7 @@
   "gpt_neox": {
    "config_model_type": "gpt_neox",
    "finite": true,
-   "forward_seconds": 0.0043897079303860664,
+   "forward_seconds": 0.002800749964080751,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3434,7 +3756,7 @@
   "gpt_neox_japanese": {
    "config_model_type": "gpt_neox_japanese",
    "finite": true,
-   "forward_seconds": 0.0016577080823481083,
+   "forward_seconds": 0.004089374910108745,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3452,7 +3774,7 @@
   "gpt_oss": {
    "config_model_type": "gpt_oss",
    "finite": true,
-   "forward_seconds": 0.009276374941691756,
+   "forward_seconds": 0.015810250071808696,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3484,10 +3806,18 @@
    "stage": "forward",
    "text_only_multimodal": false
   },
+  "gradium_phonon_tts": {
+   "config_model_type": "gradium_phonon_tts",
+   "error": "StrictDataclassClassValidationError: Class validation error for validator 'validate_architecture':\n    ValueError: `flow_head_config.condition_dim` (512) must equal the backbone `hidden_size` (64).",
+   "model_type": "gradium_phonon_tts",
+   "repo": "gradium/phonon-31m-en",
+   "revision": "92741c5b07d085ff840e26fea8ce43110b87852f",
+   "stage": "shrink"
+  },
   "granite": {
    "config_model_type": "granite",
    "finite": true,
-   "forward_seconds": 0.002940832986496389,
+   "forward_seconds": 0.0026459579821676016,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3505,7 +3835,7 @@
   "granite4_vision": {
    "config_model_type": "granite4_vision",
    "finite": true,
-   "forward_seconds": 0.0069380420027300715,
+   "forward_seconds": 0.003991125035099685,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3514,7 +3844,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "granite4_vision",
-   "parameters": 8275520,
+   "parameters": 7161408,
    "repo": "ibm-granite/granite-vision-4.1-4b",
    "revision": "37d591f06319e8f1638b5adcf58bdf50e0f84f7a",
    "stage": "ok",
@@ -3527,7 +3857,7 @@
   "granite_speech": {
    "config_model_type": "granite_speech",
    "finite": true,
-   "forward_seconds": 0.007934291963465512,
+   "forward_seconds": 0.0016469169640913606,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3604,7 +3934,7 @@
   "granite_swa": {
    "config_model_type": "granite_swa",
    "finite": true,
-   "forward_seconds": 0.007884624996222556,
+   "forward_seconds": 0.0053910830756649375,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3622,7 +3952,7 @@
   "granitemoe": {
    "config_model_type": "granitemoe",
    "finite": true,
-   "forward_seconds": 0.003121291985735297,
+   "forward_seconds": 0.0033351669553667307,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3640,7 +3970,7 @@
   "granitemoe_swa": {
    "config_model_type": "granitemoe_swa",
    "finite": true,
-   "forward_seconds": 0.0071270420448854566,
+   "forward_seconds": 0.0074645839631557465,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3658,7 +3988,7 @@
   "granitemoehybrid": {
    "config_model_type": "granitemoehybrid",
    "finite": true,
-   "forward_seconds": 0.0073552499525249004,
+   "forward_seconds": 0.010939125088043511,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3687,7 +4017,7 @@
    "layers": null,
    "main_input": "pixel_values",
    "model_type": "grounding-dino",
-   "parameters": 7756729,
+   "parameters": 7705810,
    "repo": "IDEA-Research/grounding-dino-tiny",
    "revision": "a2bb814dd30d776dcf7e30523b00659f4f141c71",
    "stage": "forward",
@@ -3696,7 +4026,7 @@
   "groupvit": {
    "config_model_type": "groupvit",
    "finite": true,
-   "forward_seconds": 0.005120416055433452,
+   "forward_seconds": 0.005153916077688336,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3733,7 +4063,7 @@
   "gte": {
    "config_model_type": "gte",
    "finite": true,
-   "forward_seconds": 0.0076669169357046485,
+   "forward_seconds": 0.005802457919344306,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3751,7 +4081,7 @@
   "helium": {
    "config_model_type": "helium",
    "finite": true,
-   "forward_seconds": 0.002281834022141993,
+   "forward_seconds": 0.0018993329722434282,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3786,7 +4116,7 @@
   "hiera": {
    "config_model_type": "hiera",
    "finite": true,
-   "forward_seconds": 0.04732312494888902,
+   "forward_seconds": 0.03352412499953061,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -3803,7 +4133,7 @@
   "higgs_audio_v2": {
    "config_model_type": "higgs_audio_v2",
    "finite": true,
-   "forward_seconds": 0.0019663339480757713,
+   "forward_seconds": 0.0039771250449121,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3820,19 +4150,12 @@
   },
   "higgs_audio_v2_tokenizer": {
    "config_model_type": "higgs_audio_v2_tokenizer",
-   "error": "ValueError: Audio must be mono, but got 16000",
+   "error": "ImportError: \nHiggsAudioV2TokenizerModel requires the torchaudio library but it was not found in your environment. Please install it and restart your\nruntime.\n",
    "head": "MODEL_MAPPING_NAMES",
-   "inputs": [
-    "input_values"
-   ],
-   "layers": null,
-   "main_input": "input_values",
    "model_type": "higgs_audio_v2_tokenizer",
-   "parameters": 73713825,
    "repo": "bosonai/higgs-audio-v2-tokenizer",
    "revision": "815a03f1b57dcb5ae918db415f22cd0c8a6f0f54",
-   "stage": "forward",
-   "text_only_multimodal": false
+   "stage": "build"
   },
   "hrm_text": {
    "config_model_type": "hrm_text",
@@ -3854,7 +4177,7 @@
   "hubert": {
    "config_model_type": "hubert",
    "finite": true,
-   "forward_seconds": 0.07793833303730935,
+   "forward_seconds": 0.044067207956686616,
    "head": "MODEL_FOR_CTC_MAPPING_NAMES",
    "inputs": [
     "input_values"
@@ -3871,7 +4194,7 @@
   "hunyuan_v1_dense": {
    "config_model_type": "hunyuan_v1_dense",
    "finite": true,
-   "forward_seconds": 0.006999792065471411,
+   "forward_seconds": 0.006195000023581088,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3905,11 +4228,21 @@
   },
   "hunyuan_vl": {
    "config_model_type": "hunyuan_vl",
-   "error": "ValueError: Illegal mrope partition: expected half-head sections summing to 8, got [16, 16, 16, 16]",
+   "finite": true,
+   "forward_seconds": 0.003662999952211976,
+   "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": null,
+   "main_input": "input_ids",
    "model_type": "hunyuan_vl",
+   "parameters": 9054208,
    "repo": "tencent/HunyuanOCR",
    "revision": "47644ecc4fc854efa4f505155158831f36773ee4",
-   "stage": "shrink"
+   "stage": "ok",
+   "text_only_multimodal": true
   },
   "hunyuan_vl_text": {
    "model_type": "hunyuan_vl_text",
@@ -3922,7 +4255,7 @@
   "hy_v3": {
    "config_model_type": "hy_v3",
    "finite": true,
-   "forward_seconds": 0.0042722090147435665,
+   "forward_seconds": 0.004190500010736287,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3940,7 +4273,7 @@
   "hy_v4": {
    "config_model_type": "hy_v4",
    "finite": true,
-   "forward_seconds": 0.01048170798458159,
+   "forward_seconds": 0.004704958060756326,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3958,7 +4291,7 @@
   "hyperclovax": {
    "config_model_type": "hyperclovax",
    "finite": true,
-   "forward_seconds": 0.006017333013005555,
+   "forward_seconds": 0.008417584002017975,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3976,7 +4309,7 @@
   "hyperclovax_vision_v2": {
    "config_model_type": "hyperclovax_vision_v2",
    "finite": true,
-   "forward_seconds": 0.004761375021189451,
+   "forward_seconds": 0.00483520794659853,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3985,7 +4318,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "hyperclovax_vision_v2",
-   "parameters": 11400384,
+   "parameters": 9777408,
    "repo": "naver-hyperclovax/HyperCLOVAX-SEED-Think-32B",
    "revision": "3c2b6338613c4e5ede30788d868363125a262934",
    "stage": "ok",
@@ -3994,7 +4327,7 @@
   "ibert": {
    "config_model_type": "ibert",
    "finite": true,
-   "forward_seconds": 0.005885708029381931,
+   "forward_seconds": 0.0035217920085415244,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4030,7 +4363,7 @@
   "idefics2": {
    "config_model_type": "idefics2",
    "finite": true,
-   "forward_seconds": 0.0032246659975498915,
+   "forward_seconds": 0.0017752079293131828,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4056,7 +4389,7 @@
   "idefics3": {
    "config_model_type": "idefics3",
    "finite": true,
-   "forward_seconds": 0.00708875001873821,
+   "forward_seconds": 0.003878292045556009,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4086,7 +4419,7 @@
   "ijepa": {
    "config_model_type": "ijepa",
    "finite": true,
-   "forward_seconds": 0.012372083030641079,
+   "forward_seconds": 0.004932665964588523,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -4103,7 +4436,7 @@
   "imagegpt": {
    "config_model_type": "imagegpt",
    "finite": true,
-   "forward_seconds": 0.0011990830535069108,
+   "forward_seconds": 0.0010635409271344543,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4136,7 +4469,7 @@
   "inkling_mm_model": {
    "config_model_type": "inkling_mm_model",
    "finite": true,
-   "forward_seconds": 0.019252249971032143,
+   "forward_seconds": 0.01608162501361221,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4208,7 +4541,7 @@
   "internvl": {
    "config_model_type": "internvl",
    "finite": true,
-   "forward_seconds": 0.0040170419961214066,
+   "forward_seconds": 0.004150458029471338,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4226,7 +4559,7 @@
   "internvl_vision": {
    "config_model_type": "internvl",
    "finite": true,
-   "forward_seconds": 0.04078604211099446,
+   "forward_seconds": 0.019752874970436096,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -4244,7 +4577,7 @@
   "jais2": {
    "config_model_type": "jais2",
    "finite": true,
-   "forward_seconds": 0.00719287502579391,
+   "forward_seconds": 0.007596125011332333,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4261,25 +4594,26 @@
   },
   "jamba": {
    "config_model_type": "jamba",
-   "error": "ValueError: `get_seq_length` can only be called on Attention layers, and the current Cache seem to only contain LinearAttention layers.",
+   "finite": true,
+   "forward_seconds": 0.010216208989731967,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
     "input_ids"
    ],
-   "layers": 2,
+   "layers": 5,
    "main_input": "input_ids",
    "model_type": "jamba",
-   "parameters": 8706944,
+   "parameters": 9062208,
    "repo": "ai21labs/Jamba-v0.1",
    "revision": "9efd11575ba791d9e3d25d4c8b670e78506b2df7",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "janus": {
    "config_model_type": "janus",
    "finite": true,
-   "forward_seconds": 0.009887750027701259,
+   "forward_seconds": 0.0041291669476777315,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4288,7 +4622,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "janus",
-   "parameters": 81312739,
+   "parameters": 81912963,
    "repo": "deepseek-community/Janus-Pro-1B",
    "revision": "1655280bb75959cc1cb85529a2a8b26e7016072e",
    "stage": "ok",
@@ -4315,7 +4649,7 @@
   "jetmoe": {
    "config_model_type": "jetmoe",
    "finite": true,
-   "forward_seconds": 0.006832334096543491,
+   "forward_seconds": 0.005024582962505519,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4333,7 +4667,7 @@
   "jina_embeddings_v3": {
    "config_model_type": "jina_embeddings_v3",
    "finite": true,
-   "forward_seconds": 0.013148875092156231,
+   "forward_seconds": 0.010717750061303377,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4350,7 +4684,8 @@
   },
   "kimi_k25": {
    "config_model_type": "kimi_k25",
-   "error": "RuntimeError: The size of tensor a (4) must match the size of tensor b (8) at non-singleton dimension 3",
+   "finite": true,
+   "forward_seconds": 0.004883082932792604,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4362,7 +4697,7 @@
    "parameters": 21499392,
    "repo": "moonshotai/Kimi-K2.6",
    "revision": "7eb5002f6aadc958aed6a9177b7ed26bb94011bb",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": true
   },
   "kimi_k25_vision": {
@@ -4371,19 +4706,28 @@
   },
   "kimi_linear": {
    "config_model_type": "kimi_linear",
-   "error": "RuntimeError: selected index k out of range",
+   "error": "IndexError: list index out of range",
+   "model_type": "kimi_linear",
+   "repo": "moonshotai/Kimi-Linear-48B-A3B-Instruct",
+   "revision": "e1df551a447157d4658b573f9a695d57658590e9",
+   "stage": "shrink"
+  },
+  "kolibri1": {
+   "config_model_type": "kolibri1",
+   "finite": true,
+   "forward_seconds": 0.0046232909662649035,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
     "input_ids"
    ],
-   "layers": 3,
+   "layers": 2,
    "main_input": "input_ids",
-   "model_type": "kimi_linear",
-   "parameters": 25410320,
-   "repo": "moonshotai/Kimi-Linear-48B-A3B-Instruct",
-   "revision": "e1df551a447157d4658b573f9a695d57658590e9",
-   "stage": "forward",
+   "model_type": "kolibri1",
+   "parameters": 16508032,
+   "repo": "Aleph-Alpha/Kolibri-1",
+   "revision": "5bb7075ba22db733e3834b1c71d2245537cc14ed",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "kosmos-2": {
@@ -4405,7 +4749,7 @@
   "kosmos-2.5": {
    "config_model_type": "kosmos-2.5",
    "finite": true,
-   "forward_seconds": 0.015484375064261258,
+   "forward_seconds": 0.008325667004100978,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4458,17 +4802,25 @@
   },
   "kyutai_speech_to_text": {
    "config_model_type": "kyutai_speech_to_text",
-   "error": "ValueError: in_channels must be divisible by groups",
+   "error": "RuntimeError: The size of tensor a (16) must match the size of tensor b (33) at non-singleton dimension 1",
    "head": "MODEL_FOR_SPEECH_SEQ_2_SEQ_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
    "model_type": "kyutai_speech_to_text",
+   "parameters": 27745921,
    "repo": "kyutai/stt-2.6b-en-trfs",
    "revision": "005de8e7800698a4c9963a5ac000e185b410c2f5",
-   "stage": "build"
+   "stage": "forward",
+   "text_only_multimodal": false
   },
   "laguna": {
    "config_model_type": "laguna",
    "finite": true,
-   "forward_seconds": 0.0206934999441728,
+   "forward_seconds": 0.00476829195395112,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4506,7 +4858,7 @@
   "layoutlm": {
    "config_model_type": "layoutlm",
    "finite": true,
-   "forward_seconds": 0.003359875059686601,
+   "forward_seconds": 0.0032837919425219297,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4563,7 +4915,7 @@
   "levit": {
    "config_model_type": "levit",
    "finite": true,
-   "forward_seconds": 0.010649374919012189,
+   "forward_seconds": 0.0064646250102669,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -4571,7 +4923,7 @@
    "layers": null,
    "main_input": "pixel_values",
    "model_type": "levit",
-   "parameters": 337960,
+   "parameters": 331462,
    "repo": "facebook/levit-128S",
    "revision": "46576b0c1bead4e89d89eb42e0a1ad4cb236fb20",
    "stage": "ok",
@@ -4580,7 +4932,7 @@
   "lfm2": {
    "config_model_type": "lfm2",
    "finite": true,
-   "forward_seconds": 0.012430749949999154,
+   "forward_seconds": 0.003067875048145652,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4598,7 +4950,7 @@
   "lfm2_moe": {
    "config_model_type": "lfm2_moe",
    "finite": true,
-   "forward_seconds": 0.009874959010630846,
+   "forward_seconds": 0.002920583006925881,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4616,7 +4968,7 @@
   "lfm2_vl": {
    "config_model_type": "lfm2_vl",
    "finite": true,
-   "forward_seconds": 0.004587249946780503,
+   "forward_seconds": 0.004130416898988187,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4641,7 +4993,7 @@
    "layers": 2,
    "main_input": "pixel_values",
    "model_type": "lightglue",
-   "parameters": 1599940,
+   "parameters": 4065988,
    "repo": "ETH-CVG/lightglue_superpoint",
    "revision": "5f5f626efee99f37dbc9eafea879d24d297aeab8",
    "stage": "forward",
@@ -4650,7 +5002,7 @@
   "lighton_ocr": {
    "config_model_type": "lighton_ocr",
    "finite": true,
-   "forward_seconds": 0.008936916943639517,
+   "forward_seconds": 0.004146832972764969,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4685,7 +5037,7 @@
   "llama": {
    "config_model_type": "llama",
    "finite": true,
-   "forward_seconds": 0.0019226250005885959,
+   "forward_seconds": 0.00302341696806252,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4702,17 +5054,26 @@
   },
   "llama4": {
    "config_model_type": "llama4",
-   "error": "AttributeError: 'Llama4Config' object has no attribute 'vocab_size'",
+   "finite": true,
+   "forward_seconds": 0.0073831669287756085,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
    "model_type": "llama4",
+   "parameters": 29155904,
    "repo": "unsloth/Llama-4-Scout-17B-16E-Instruct-GGUF",
    "revision": "72a6853f56a66dc13a3a4b6bdc9cf7ee4c364b47",
-   "stage": "build"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "llama4_text": {
    "config_model_type": "llama4_text",
    "finite": true,
-   "forward_seconds": 0.00815437501296401,
+   "forward_seconds": 0.008218459086492658,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4734,7 +5095,7 @@
   "llava": {
    "config_model_type": "llava",
    "finite": true,
-   "forward_seconds": 0.0019123749807476997,
+   "forward_seconds": 0.001645167008973658,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4752,7 +5113,7 @@
   "llava_next": {
    "config_model_type": "llava_next",
    "finite": true,
-   "forward_seconds": 0.004272624966688454,
+   "forward_seconds": 0.0021622920176014304,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4770,7 +5131,7 @@
   "llava_next_video": {
    "config_model_type": "llava_next_video",
    "finite": true,
-   "forward_seconds": 0.002012416021898389,
+   "forward_seconds": 0.002454833942465484,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4788,7 +5149,7 @@
   "llava_onevision": {
    "config_model_type": "llava_onevision",
    "finite": true,
-   "forward_seconds": 0.005040457937866449,
+   "forward_seconds": 0.00849541591014713,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4823,7 +5184,7 @@
   "longformer": {
    "config_model_type": "longformer",
    "finite": true,
-   "forward_seconds": 0.04905612498987466,
+   "forward_seconds": 0.04556783300358802,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4841,7 +5202,7 @@
   "longt5": {
    "config_model_type": "longt5",
    "finite": true,
-   "forward_seconds": 0.019903542008250952,
+   "forward_seconds": 0.008146042004227638,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4860,7 +5221,7 @@
   "luke": {
    "config_model_type": "luke",
    "finite": true,
-   "forward_seconds": 0.0026157500687986612,
+   "forward_seconds": 0.002271207980811596,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4878,7 +5239,7 @@
   "lw_detr": {
    "config_model_type": "lw_detr",
    "finite": true,
-   "forward_seconds": 0.24583304196130484,
+   "forward_seconds": 0.2106442090589553,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -4896,7 +5257,7 @@
    "config_model_type": "lw_detr",
    "error": "IndexError: list index out of range",
    "finite": true,
-   "forward_seconds": 0.04777066607493907,
+   "forward_seconds": 0.0461490829475224,
    "from_parent": true,
    "head": "MODEL_FOR_BACKBONE_MAPPING_NAMES",
    "inputs": [
@@ -4935,7 +5296,7 @@
   "m2m_100": {
    "config_model_type": "m2m_100",
    "finite": true,
-   "forward_seconds": 0.0046131249982863665,
+   "forward_seconds": 0.008281584014184773,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4954,7 +5315,7 @@
   "mamba": {
    "config_model_type": "mamba",
    "finite": true,
-   "forward_seconds": 0.0074277910171076655,
+   "forward_seconds": 0.006133125047199428,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4980,7 +5341,7 @@
   "marian": {
    "config_model_type": "marian",
    "finite": true,
-   "forward_seconds": 0.0019492499995976686,
+   "forward_seconds": 0.0023695409763604403,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4998,7 +5359,7 @@
   "markuplm": {
    "config_model_type": "markuplm",
    "finite": true,
-   "forward_seconds": 0.008426916087046266,
+   "forward_seconds": 0.0018551659304648638,
    "head": "MODEL_FOR_SEQUENCE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5015,7 +5376,8 @@
   },
   "mask2former": {
    "config_model_type": "mask2former",
-   "error": "RuntimeError: shape '[128, 49, -1, 21]' is invalid for input of size 401408",
+   "finite": true,
+   "forward_seconds": 0.09524045791476965,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -5023,16 +5385,16 @@
    "layers": 2,
    "main_input": "pixel_values",
    "model_type": "mask2former",
-   "parameters": 7957333,
+   "parameters": 8039534,
    "repo": "facebook/mask2former-swin-small-coco-instance",
    "revision": "1b7ac418a0f3cb5edfc5037e488d53587b8bb76b",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "maskformer": {
    "config_model_type": "maskformer",
    "finite": true,
-   "forward_seconds": 0.5565156670054421,
+   "forward_seconds": 0.21374125010333955,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -5053,7 +5415,7 @@
   "mbart": {
    "config_model_type": "mbart",
    "finite": true,
-   "forward_seconds": 0.004861040972173214,
+   "forward_seconds": 0.004170082975178957,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5071,7 +5433,7 @@
   "megatron-bert": {
    "config_model_type": "megatron-bert",
    "finite": true,
-   "forward_seconds": 0.0009172910358756781,
+   "forward_seconds": 0.0015356669900938869,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5089,7 +5451,7 @@
   "mellum": {
    "config_model_type": "mellum",
    "finite": true,
-   "forward_seconds": 0.006946083041839302,
+   "forward_seconds": 0.0034420840675011277,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5107,7 +5469,7 @@
   "metaclip_2": {
    "config_model_type": "metaclip_2",
    "finite": true,
-   "forward_seconds": 0.0024672080762684345,
+   "forward_seconds": 0.0023150830529630184,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -5157,17 +5519,32 @@
   },
   "mimi": {
    "config_model_type": "mimi",
-   "error": "ValueError: in_channels must be divisible by groups",
+   "error": "ValueError: not enough values to unpack (expected 3, got 2)",
    "head": "MODEL_MAPPING_NAMES",
+   "inputs": [
+    "input_values"
+   ],
+   "layers": 2,
+   "main_input": "input_values",
    "model_type": "mimi",
+   "parameters": 22979713,
    "repo": "kyutai/mimi",
    "revision": "89091b3e466eb6a9d11e537bf26b144f194978f7",
-   "stage": "build"
+   "stage": "forward",
+   "text_only_multimodal": false
+  },
+  "mimi_decoder": {
+   "model_type": "mimi_decoder",
+   "stage": "no_checkpoint"
+  },
+  "mimi_encoder": {
+   "model_type": "mimi_encoder",
+   "stage": "no_checkpoint"
   },
   "mimo_v2_flash": {
    "config_model_type": "mimo_v2_flash",
    "finite": true,
-   "forward_seconds": 0.009567666915245354,
+   "forward_seconds": 0.004644167027436197,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5184,17 +5561,61 @@
   },
   "minicpm3": {
    "config_model_type": "minicpm3",
-   "error": "KeyError: 'factor'",
+   "finite": true,
+   "forward_seconds": 0.0034781250869855285,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
    "model_type": "minicpm3",
+   "parameters": 4770688,
    "repo": "openbmb/MiniCPM3-4B",
    "revision": "d6b14ddaefdb11c624dd75c3c779549bc90b08cb",
-   "stage": "build"
+   "stage": "ok",
+   "text_only_multimodal": false
+  },
+  "minicpm_ocr": {
+   "config_model_type": "minicpm_ocr",
+   "finite": true,
+   "forward_seconds": 0.018679708009585738,
+   "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": null,
+   "main_input": "input_ids",
+   "model_type": "minicpm_ocr",
+   "parameters": 17309248,
+   "repo": "openbmb/MiniCPM-OCR-1.0",
+   "revision": "a2dcd080c44e455f2dafdcead27c702c75ac3326",
+   "stage": "ok",
+   "text_only_multimodal": true
+  },
+  "minicpm_ocr_vision": {
+   "config_model_type": "minicpm_ocr",
+   "error": "AttributeError: 'NoneType' object has no attribute 'device'",
+   "from_parent": true,
+   "head": "MODEL_MAPPING_NAMES",
+   "inputs": [
+    "pixel_values"
+   ],
+   "layers": 2,
+   "main_input": "pixel_values",
+   "model_type": "minicpm_ocr_vision",
+   "parameters": 600064,
+   "repo": "openbmb/MiniCPM-OCR-1.0",
+   "revision": "a2dcd080c44e455f2dafdcead27c702c75ac3326",
+   "stage": "forward",
+   "text_only_multimodal": false
   },
   "minicpmv4_6": {
    "config_model_type": "minicpmv4_6",
    "finite": true,
-   "forward_seconds": 0.029213957954198122,
+   "forward_seconds": 0.023331916076131165,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5229,7 +5650,7 @@
   "minimax": {
    "config_model_type": "minimax",
    "finite": true,
-   "forward_seconds": 0.00837529101409018,
+   "forward_seconds": 0.0054810839937999845,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5247,7 +5668,7 @@
   "minimax_m2": {
    "config_model_type": "minimax_m2",
    "finite": true,
-   "forward_seconds": 0.009355749934911728,
+   "forward_seconds": 0.0068917080061510205,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5265,7 +5686,7 @@
   "minimax_m3_vl": {
    "config_model_type": "minimax_m3_vl",
    "finite": true,
-   "forward_seconds": 0.007363542099483311,
+   "forward_seconds": 0.011842832900583744,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5274,7 +5695,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "minimax_m3_vl",
-   "parameters": 180486144,
+   "parameters": 31064064,
    "repo": "MiniMaxAI/MiniMax-M3",
    "revision": "f0e1c1e04d40177e4673a22097036854f536e9c0",
    "stage": "ok",
@@ -5283,7 +5704,7 @@
   "minimax_m3_vl_text": {
    "config_model_type": "minimax_m3_vl_text",
    "finite": true,
-   "forward_seconds": 0.011510083917528391,
+   "forward_seconds": 0.006935708923265338,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5313,7 +5734,7 @@
   "ministral3": {
    "config_model_type": "mistral3",
    "finite": true,
-   "forward_seconds": 0.010426041088066995,
+   "forward_seconds": 0.0037409160286188126,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
@@ -5332,7 +5753,7 @@
   "mistral": {
    "config_model_type": "mistral",
    "finite": true,
-   "forward_seconds": 0.0045565839391201735,
+   "forward_seconds": 0.0016665409784764051,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5350,7 +5771,7 @@
   "mistral3": {
    "config_model_type": "mistral3",
    "finite": true,
-   "forward_seconds": 0.00734162493608892,
+   "forward_seconds": 0.004051708034239709,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5368,7 +5789,7 @@
   "mistral4": {
    "config_model_type": "mistral3",
    "finite": true,
-   "forward_seconds": 0.004353374941274524,
+   "forward_seconds": 0.005067917052656412,
    "from_parent": true,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
@@ -5387,7 +5808,7 @@
   "mixtral": {
    "config_model_type": "mixtral",
    "finite": true,
-   "forward_seconds": 0.0020880840020254254,
+   "forward_seconds": 0.0031281670089811087,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5405,7 +5826,7 @@
   "mlcd": {
    "config_model_type": "mlcd",
    "finite": true,
-   "forward_seconds": 0.014612792059779167,
+   "forward_seconds": 0.008202957920730114,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -5426,20 +5847,20 @@
   "mllama": {
    "config_model_type": "mllama",
    "finite": true,
-   "forward_seconds": 0.00602016702760011,
+   "forward_seconds": 0.004892416065558791,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
     "input_ids"
    ],
-   "layers": null,
+   "layers": 2,
    "main_input": "input_ids",
    "model_type": "mllama",
    "parameters": 16491328,
    "repo": "unsloth/Llama-3.2-11B-Vision-Instruct",
    "revision": "677b0c1b7008230a0fb88708c5550748e72b9a83",
    "stage": "ok",
-   "text_only_multimodal": true
+   "text_only_multimodal": false
   },
   "mllama_text_model": {
    "config_model_type": "mllama_text_model",
@@ -5467,7 +5888,7 @@
    "layers": null,
    "main_input": "pixel_values",
    "model_type": "mm-grounding-dino",
-   "parameters": 7756730,
+   "parameters": 7705811,
    "repo": "openmmlab-community/mm_grounding_dino_tiny_o365v1_goldg_v3det",
    "revision": "ef2053aa1e0cc9d9cee1df31ca919ee9aae4fc8e",
    "stage": "forward",
@@ -5485,7 +5906,7 @@
   "mobilenet_v1": {
    "config_model_type": "mobilenet_v1",
    "finite": true,
-   "forward_seconds": 0.06816462497226894,
+   "forward_seconds": 0.04644037503749132,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -5502,7 +5923,7 @@
   "mobilenet_v2": {
    "config_model_type": "mobilenet_v2",
    "finite": true,
-   "forward_seconds": 0.06837070803157985,
+   "forward_seconds": 0.07344004209153354,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -5519,7 +5940,7 @@
   "mobilevit": {
    "config_model_type": "mobilevit",
    "finite": true,
-   "forward_seconds": 0.06596941698808223,
+   "forward_seconds": 0.05262337496969849,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -5536,7 +5957,7 @@
   "mobilevitv2": {
    "config_model_type": "mobilevitv2",
    "finite": true,
-   "forward_seconds": 0.19209883303847164,
+   "forward_seconds": 0.14673800009768456,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -5553,7 +5974,7 @@
   "modernbert": {
    "config_model_type": "modernbert",
    "finite": true,
-   "forward_seconds": 0.00502987508662045,
+   "forward_seconds": 0.0017569580813869834,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5571,7 +5992,7 @@
   "modernbert-decoder": {
    "config_model_type": "modernbert-decoder",
    "finite": true,
-   "forward_seconds": 0.001976416911929846,
+   "forward_seconds": 0.002071542083285749,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5589,7 +6010,7 @@
   "modernvbert": {
    "config_model_type": "modernvbert",
    "finite": true,
-   "forward_seconds": 0.004166290978901088,
+   "forward_seconds": 0.0020815840689465404,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5603,6 +6024,41 @@
    "revision": "1d1bece9df23cb109642f3ee5d1ceb331a3d1ee5",
    "stage": "ok",
    "text_only_multimodal": true
+  },
+  "molmo2": {
+   "config_model_type": "molmo2",
+   "error": "StrictDataclassClassValidationError: Class validation error for validator 'validate_architecture':\n    ValueError: `adapter_config.vision_feature_layer` [24, 18] must index the 2 layers of `vision_config`.",
+   "model_type": "molmo2",
+   "repo": "allenai/Molmo2-8B",
+   "revision": "e28fa28597e5ec5e0cca2201dd8ab33d48bc4a1b",
+   "stage": "shrink"
+  },
+  "molmo2_adapter": {
+   "model_type": "molmo2_adapter",
+   "stage": "no_checkpoint"
+  },
+  "molmo2_text": {
+   "config_model_type": "molmo2",
+   "finite": true,
+   "forward_seconds": 0.0015046660555526614,
+   "from_parent": true,
+   "head": "MODEL_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
+   "model_type": "molmo2_text",
+   "parameters": 9806208,
+   "repo": "allenai/Molmo2-8B",
+   "revision": "e28fa28597e5ec5e0cca2201dd8ab33d48bc4a1b",
+   "stage": "ok",
+   "text_only_multimodal": false
+  },
+  "molmo2_vision": {
+   "model_type": "molmo2_vision",
+   "stage": "no_checkpoint"
   },
   "moonshine": {
    "config_model_type": "moonshine",
@@ -5648,7 +6104,7 @@
   "moshi": {
    "config_model_type": "moshi",
    "finite": true,
-   "forward_seconds": 0.001594041008502245,
+   "forward_seconds": 0.0017541249981150031,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5672,10 +6128,46 @@
    "revision": "06e3abeb0efb7452a21736d39dcde39411c09982",
    "stage": "component"
   },
+  "moss_transcribe_diarize": {
+   "config_model_type": "moss_transcribe_diarize",
+   "finite": true,
+   "forward_seconds": 0.005833292030729353,
+   "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": null,
+   "main_input": "input_ids",
+   "model_type": "moss_transcribe_diarize",
+   "parameters": 10009472,
+   "repo": "hf-audio/MOSS-Transcribe-Diarize-HF",
+   "revision": "897f7e92f01e8f241a2351eab8e4163ded1e3af4",
+   "stage": "ok",
+   "text_only_multimodal": true
+  },
+  "moss_transcribe_diarize_audio": {
+   "config_model_type": "moss_transcribe_diarize",
+   "finite": true,
+   "forward_seconds": 0.037878082948736846,
+   "from_parent": true,
+   "head": "MODEL_MAPPING_NAMES",
+   "inputs": [
+    "input_features"
+   ],
+   "layers": 2,
+   "main_input": "input_features",
+   "model_type": "moss_transcribe_diarize_audio",
+   "parameters": 190720,
+   "repo": "hf-audio/MOSS-Transcribe-Diarize-HF",
+   "revision": "897f7e92f01e8f241a2351eab8e4163ded1e3af4",
+   "stage": "ok",
+   "text_only_multimodal": false
+  },
   "mpnet": {
    "config_model_type": "mpnet",
    "finite": true,
-   "forward_seconds": 0.005959999980404973,
+   "forward_seconds": 0.0015405409503728151,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5693,7 +6185,7 @@
   "mpt": {
    "config_model_type": "mpt",
    "finite": true,
-   "forward_seconds": 0.002390083041973412,
+   "forward_seconds": 0.001015709014609456,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5711,7 +6203,7 @@
   "mra": {
    "config_model_type": "mra",
    "finite": true,
-   "forward_seconds": 0.0037382919108495116,
+   "forward_seconds": 0.0020649170037359,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5729,7 +6221,7 @@
   "mt5": {
    "config_model_type": "mt5",
    "finite": true,
-   "forward_seconds": 0.008713459013961256,
+   "forward_seconds": 0.007437874912284315,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5748,7 +6240,7 @@
   "muse_glimmer": {
    "config_model_type": "muse_glimmer",
    "finite": true,
-   "forward_seconds": 0.03335025010164827,
+   "forward_seconds": 0.029997542034834623,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5757,7 +6249,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "muse_glimmer",
-   "parameters": 68357824,
+   "parameters": 43454144,
    "repo": "meta-models/Muse-Glimmer-30B",
    "revision": "a4e59da52a7bc87ae7251dd5545c0dd437c44b68",
    "stage": "ok",
@@ -5777,7 +6269,7 @@
   "muse_glimmer_text": {
    "config_model_type": "muse_glimmer",
    "finite": true,
-   "forward_seconds": 0.001184375025331974,
+   "forward_seconds": 0.0019681249978020787,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -5810,10 +6302,40 @@
    "stage": "forward",
    "text_only_multimodal": false
   },
+  "muse_spark": {
+   "config_model_type": "muse_spark",
+   "finite": true,
+   "forward_seconds": 0.030338124954141676,
+   "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": null,
+   "main_input": "input_ids",
+   "model_type": "muse_spark",
+   "parameters": 47849024,
+   "repo": "hf-internal-testing/tiny-muse-spark",
+   "revision": "707ff6048b15d720706f8fdbd670d99cc7cc8413",
+   "stage": "ok",
+   "text_only_multimodal": true
+  },
+  "muse_spark_audio": {
+   "model_type": "muse_spark_audio",
+   "stage": "no_checkpoint"
+  },
+  "muse_spark_text": {
+   "model_type": "muse_spark_text",
+   "stage": "no_checkpoint"
+  },
+  "muse_spark_vision": {
+   "model_type": "muse_spark_vision",
+   "stage": "no_checkpoint"
+  },
   "musicflamingo": {
    "config_model_type": "musicflamingo",
    "finite": true,
-   "forward_seconds": 0.009144417010247707,
+   "forward_seconds": 0.0071559170028194785,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5830,7 +6352,7 @@
   },
   "musicgen": {
    "config_model_type": "musicgen",
-   "error": "AttributeError: 'MusicgenConfig' object has no attribute 'dropout'",
+   "error": "ValueError: Multiple valid text configs were found in the model config: ['text_encoder', 'decoder']. In this case, using `get_text_config()` would be ambiguous. Please specify the desired text config directly, e.g. `text_config = config.sub_config_name`",
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "model_type": "musicgen",
    "repo": "facebook/musicgen-small",
@@ -5848,7 +6370,7 @@
   },
   "musicgen_melody": {
    "config_model_type": "musicgen_melody",
-   "error": "AttributeError: 'MusicgenMelodyConfig' object has no attribute 'dropout'",
+   "error": "ValueError: Multiple valid text configs were found in the model config: ['text_encoder', 'decoder']. In this case, using `get_text_config()` would be ambiguous. Please specify the desired text config directly, e.g. `text_config = config.sub_config_name`",
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "model_type": "musicgen_melody",
    "repo": "facebook/musicgen-melody",
@@ -5867,7 +6389,7 @@
   "mvp": {
    "config_model_type": "mvp",
    "finite": true,
-   "forward_seconds": 0.0022355830296874046,
+   "forward_seconds": 0.0031679170206189156,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5885,7 +6407,7 @@
   "nanochat": {
    "config_model_type": "nanochat",
    "finite": true,
-   "forward_seconds": 0.014480917016044259,
+   "forward_seconds": 0.007537833065725863,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5900,10 +6422,18 @@
    "stage": "ok",
    "text_only_multimodal": false
   },
+  "nemo_speechlm": {
+   "config_model_type": "nemo_speechlm",
+   "error": "StrictDataclassClassValidationError: Class validation error for validator 'validate_architecture':\n    ValueError: `head_config.audio_hidden_size` (512) must match `audio_config.hidden_size` (64).",
+   "model_type": "nemo_speechlm",
+   "repo": "nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
+   "revision": "a99e33f698257b8b69ca7834f19c73582eb1fa7e",
+   "stage": "shrink"
+  },
   "nemotron": {
    "config_model_type": "nemotron",
    "finite": true,
-   "forward_seconds": 0.0061814169166609645,
+   "forward_seconds": 0.009706832934170961,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5934,6 +6464,44 @@
    "revision": "ea30d66debe3740a08b573244286791d423d6b3e",
    "stage": "forward",
    "text_only_multimodal": false
+  },
+  "nemotron3_5_transcribe_asr_audio": {
+   "config_model_type": "nemo_speechlm",
+   "error": "RuntimeError: mat1 and mat2 shapes cannot be multiplied (32x24000 and 1024x64)",
+   "from_parent": true,
+   "head": "MODEL_MAPPING_NAMES",
+   "inputs": [
+    "input_features"
+   ],
+   "layers": 2,
+   "main_input": "input_features",
+   "model_type": "nemotron3_5_transcribe_asr_audio",
+   "parameters": 132480,
+   "repo": "nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
+   "revision": "a99e33f698257b8b69ca7834f19c73582eb1fa7e",
+   "stage": "forward",
+   "text_only_multimodal": false
+  },
+  "nemotron3_5_transcribe_audio": {
+   "config_model_type": "nemo_speechlm",
+   "error": "StrictDataclassClassValidationError: Class validation error for validator 'validate_architecture':\n    ValueError: `head_config.audio_hidden_size` (512) must match `audio_config.hidden_size` (64).",
+   "from_parent": true,
+   "model_type": "nemotron3_5_transcribe_audio",
+   "repo": "nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
+   "revision": "a99e33f698257b8b69ca7834f19c73582eb1fa7e",
+   "stage": "shrink"
+  },
+  "nemotron3_5_transcribe_word_timestamp": {
+   "config_model_type": "nemo_speechlm",
+   "error": "NotImplementedError: no synthetic inputs for inputs_embeds",
+   "from_parent": true,
+   "head": "MODEL_MAPPING_NAMES",
+   "layers": 2,
+   "model_type": "nemotron3_5_transcribe_word_timestamp",
+   "parameters": 75200,
+   "repo": "nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
+   "revision": "a99e33f698257b8b69ca7834f19c73582eb1fa7e",
+   "stage": "inputs"
   },
   "nemotron3_diarization": {
    "config_model_type": "nemotron3_diarization",
@@ -5997,7 +6565,7 @@
   "nemotron_h": {
    "config_model_type": "nemotron_h",
    "finite": true,
-   "forward_seconds": 0.7865753329824656,
+   "forward_seconds": 0.35127616696991026,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6019,7 +6587,7 @@
   "neomme": {
    "config_model_type": "neomme",
    "finite": true,
-   "forward_seconds": 0.013586124987341464,
+   "forward_seconds": 0.00583887507673353,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6053,7 +6621,7 @@
   "nllb-moe": {
    "config_model_type": "nllb-moe",
    "finite": true,
-   "forward_seconds": 0.09735233301762491,
+   "forward_seconds": 0.009971083025448024,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6072,7 +6640,7 @@
   "nomic_bert": {
    "config_model_type": "nomic_bert",
    "finite": true,
-   "forward_seconds": 0.002986209001392126,
+   "forward_seconds": 0.0013270420022308826,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6088,7 +6656,7 @@
    "text_only_multimodal": false
   },
   "nougat": {
-   "error": "ValueError: A configuration of type nougat cannot be instantiated because one of both `encoder` or `decoder` sub-configurations is not passed.",
+   "error": "ValueError: Unrecognized model type for subconfig: donut_swin. Should contain one of gpt-sw3, afmoe, aimv2, aimv2_text_model, aimv2_vision_model, albert, align, align_text_model, align_vision_model, altclip, altclip_text_model, altclip_vision_model, apertus, arcee, aria, aria_text, audio-spectrogram-transformer, audioflamingo3, audioflamingo3_encoder, autoformer, axk1, axk2, aya_vision, bailing_hy",
    "model_type": "nougat",
    "repo": "zphilip48/nougat-middle-cn",
    "revision": "e83c63fad272bc1636881c42b4f7bcc02d128e8a",
@@ -6097,7 +6665,7 @@
   "nystromformer": {
    "config_model_type": "nystromformer",
    "finite": true,
-   "forward_seconds": 0.001845582970418036,
+   "forward_seconds": 0.0029848749982193112,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6115,7 +6683,7 @@
   "olmo": {
    "config_model_type": "olmo",
    "finite": true,
-   "forward_seconds": 0.002362250001169741,
+   "forward_seconds": 0.0020217919955030084,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6133,7 +6701,7 @@
   "olmo2": {
    "config_model_type": "olmo2",
    "finite": true,
-   "forward_seconds": 0.005832916940562427,
+   "forward_seconds": 0.004475833033211529,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6151,7 +6719,7 @@
   "olmo3": {
    "config_model_type": "olmo3",
    "finite": true,
-   "forward_seconds": 0.00659224996343255,
+   "forward_seconds": 0.0044527079444378614,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6169,7 +6737,7 @@
   "olmo_hybrid": {
    "config_model_type": "olmo_hybrid",
    "finite": true,
-   "forward_seconds": 0.043707249918952584,
+   "forward_seconds": 0.032657124917022884,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6187,7 +6755,7 @@
   "olmoe": {
    "config_model_type": "olmoe",
    "finite": true,
-   "forward_seconds": 0.006615874939598143,
+   "forward_seconds": 0.00241283408831805,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6215,7 +6783,7 @@
    "head": "MODEL_MAPPING_NAMES",
    "layers": 2,
    "model_type": "oneformer",
-   "parameters": 9348716,
+   "parameters": 9332229,
    "repo": "shi-labs/oneformer_ade20k_swin_tiny",
    "revision": "05f2812b1eccf9909b3897777450f8d68148cafc",
    "stage": "inputs"
@@ -6223,7 +6791,7 @@
   "openai-gpt": {
    "config_model_type": "openai-gpt",
    "finite": true,
-   "forward_seconds": 0.0033606250071898103,
+   "forward_seconds": 0.002162249991670251,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6241,7 +6809,7 @@
   "openai_privacy_filter": {
    "config_model_type": "openai_privacy_filter",
    "finite": true,
-   "forward_seconds": 0.0017317919991910458,
+   "forward_seconds": 0.0017527500167489052,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6259,7 +6827,7 @@
   "opt": {
    "config_model_type": "opt",
    "finite": true,
-   "forward_seconds": 0.0072210419457405806,
+   "forward_seconds": 0.004332666052505374,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6277,7 +6845,7 @@
   "ovis2": {
    "config_model_type": "ovis2",
    "finite": true,
-   "forward_seconds": 0.009549666079692543,
+   "forward_seconds": 0.00459841697011143,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6292,10 +6860,14 @@
    "stage": "ok",
    "text_only_multimodal": true
   },
+  "ovis2_vision": {
+   "model_type": "ovis2_vision",
+   "stage": "no_checkpoint"
+  },
   "owlv2": {
    "config_model_type": "owlv2",
    "finite": true,
-   "forward_seconds": 0.36730116698890924,
+   "forward_seconds": 0.21193762496113777,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6322,7 +6894,7 @@
   "owlvit": {
    "config_model_type": "owlvit",
    "finite": true,
-   "forward_seconds": 0.1269604170229286,
+   "forward_seconds": 0.09533737506717443,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6358,7 +6930,8 @@
   },
   "paddleocr_vl": {
    "config_model_type": "paddleocr_vl",
-   "error": "RuntimeError: split_with_sizes expects split_sizes to sum exactly to 8 (input tensor's size at dimension -1), but got split_sizes=[16, 24, 24]",
+   "finite": true,
+   "forward_seconds": 0.0037967920070514083,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6370,7 +6943,7 @@
    "parameters": 6926976,
    "repo": "PaddlePaddle/PaddleOCR-VL",
    "revision": "7fa00a8c55b735ba51ba49a9058f3f9c57a99a11",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": true
   },
   "paddleocr_vl_text": {
@@ -6384,7 +6957,7 @@
   "paligemma": {
    "config_model_type": "paligemma",
    "finite": true,
-   "forward_seconds": 0.019629249931313097,
+   "forward_seconds": 0.004626082954928279,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6393,7 +6966,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "paligemma",
-   "parameters": 16659104,
+   "parameters": 16661184,
    "repo": "google/paligemma-3b-pt-224",
    "revision": "35e4f46485b4d07967e7e9935bc3786aad50687c",
    "stage": "ok",
@@ -6520,7 +7093,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "pe_audio_video",
-   "parameters": 345267404,
+   "parameters": 344154446,
    "repo": "facebook/pe-av-large",
    "revision": "0d24878d4107d64bef49e53602fc34ce6f94f6d8",
    "stage": "forward",
@@ -6537,7 +7110,7 @@
    "layers": 2,
    "main_input": "input_values",
    "model_type": "pe_audio_video_encoder",
-   "parameters": 341919360,
+   "parameters": 340806402,
    "repo": "facebook/pe-av-large",
    "revision": "0d24878d4107d64bef49e53602fc34ce6f94f6d8",
    "stage": "forward",
@@ -6554,7 +7127,7 @@
    "head": "MODEL_MAPPING_NAMES",
    "layers": 2,
    "model_type": "pe_video_encoder",
-   "parameters": 317333376,
+   "parameters": 316220418,
    "repo": "facebook/pe-av-large",
    "revision": "0d24878d4107d64bef49e53602fc34ce6f94f6d8",
    "stage": "inputs"
@@ -6562,7 +7135,7 @@
   "pegasus": {
    "config_model_type": "pegasus",
    "finite": true,
-   "forward_seconds": 0.0029975000070407987,
+   "forward_seconds": 0.0030496249673888087,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6581,7 +7154,7 @@
   "pegasus_x": {
    "config_model_type": "pegasus_x",
    "finite": true,
-   "forward_seconds": 0.22144433297216892,
+   "forward_seconds": 0.06820166599936783,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6611,7 +7184,7 @@
   "perception_lm": {
    "config_model_type": "perception_lm",
    "finite": true,
-   "forward_seconds": 0.008080292027443647,
+   "forward_seconds": 0.003135833074338734,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6629,7 +7202,7 @@
   "persimmon": {
    "config_model_type": "persimmon",
    "finite": true,
-   "forward_seconds": 0.012484292034059763,
+   "forward_seconds": 0.013870875001884997,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6647,7 +7220,7 @@
   "phi": {
    "config_model_type": "phi",
    "finite": true,
-   "forward_seconds": 0.0024343329714611173,
+   "forward_seconds": 0.0022077499888837337,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6665,7 +7238,7 @@
   "phi3": {
    "config_model_type": "phi3",
    "finite": true,
-   "forward_seconds": 0.002412874950096011,
+   "forward_seconds": 0.0030461250571534038,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6682,11 +7255,21 @@
   },
   "phi4_multimodal": {
    "config_model_type": "phi4_multimodal",
-   "error": "StrictDataclassClassValidationError: Class validation error for validator 'validate_rope':\n    ValueError: `rope_parameters`'s short_factor field must have length 6, got 48",
+   "finite": true,
+   "forward_seconds": 0.008801207994110882,
+   "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
    "model_type": "phi4_multimodal",
+   "parameters": 23951072,
    "repo": "JacobLinCool/phi-4-audio",
    "revision": "66ef9938bf6887dacd127e9a4d6d4f526b73444b",
-   "stage": "shrink"
+   "stage": "ok",
+   "text_only_multimodal": true
   },
   "phi4_multimodal_audio": {
    "model_type": "phi4_multimodal_audio",
@@ -6698,12 +7281,21 @@
   },
   "phimoe": {
    "config_model_type": "phimoe",
-   "error": "RuntimeError: The size of tensor a (64) must match the size of tensor b (8) at non-singleton dimension 0",
+   "finite": true,
+   "forward_seconds": 0.004409666988067329,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
    "model_type": "phimoe",
+   "parameters": 4358976,
    "repo": "microsoft/Phi-3.5-MoE-instruct",
    "revision": "43688451b462a3351d8580625ebe1931adb3986d",
-   "stage": "build"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "pi0": {
    "config_model_type": "pi0",
@@ -6711,7 +7303,7 @@
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "layers": null,
    "model_type": "pi0",
-   "parameters": 33205504,
+   "parameters": 33207584,
    "repo": "yinchenghust/openpi_libero_all",
    "revision": "3d4f7b18f369fae2d6a5e4dbc3c26ae17072ba4a",
    "stage": "inputs"
@@ -6748,7 +7340,7 @@
   "pixio": {
    "config_model_type": "pixio",
    "finite": true,
-   "forward_seconds": 0.008851082995533943,
+   "forward_seconds": 0.002628374961204827,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -6765,7 +7357,7 @@
   "pixtral": {
    "config_model_type": "llava",
    "finite": true,
-   "forward_seconds": 1.168045499944128,
+   "forward_seconds": 0.8726815419504419,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -6783,7 +7375,7 @@
   "plbart": {
    "config_model_type": "plbart",
    "finite": true,
-   "forward_seconds": 0.0021184160141274333,
+   "forward_seconds": 0.0023757920134812593,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6798,15 +7390,47 @@
    "stage": "ok",
    "text_only_multimodal": false
   },
+  "pocket_tts": {
+   "config_model_type": "pocket_tts",
+   "error": "StrictDataclassClassValidationError: Class validation error for validator 'validate_architecture':\n    ValueError: `flow_head_config.condition_dim` (1024) must equal the backbone `hidden_size` (64).",
+   "model_type": "pocket_tts",
+   "repo": "eustlb/pocket-tts",
+   "revision": "5eba794f79851f8743f2dcc6a1c4c198257f99c4",
+   "stage": "shrink"
+  },
+  "pocket_tts_audio_tokenizer": {
+   "config_model_type": "pocket_tts_audio_tokenizer",
+   "error": "ValueError: not enough values to unpack (expected 3, got 2)",
+   "head": "MODEL_MAPPING_NAMES",
+   "inputs": [
+    "input_values"
+   ],
+   "layers": 2,
+   "main_input": "input_values",
+   "model_type": "pocket_tts_audio_tokenizer",
+   "parameters": 4810113,
+   "repo": "eustlb/pocket-tts-audio-tokenizer",
+   "revision": "cb8ae9c090fd05162f86d9d9b1cd1c359a2b240f",
+   "stage": "forward",
+   "text_only_multimodal": false
+  },
+  "pocket_tts_audio_tokenizer_decoder": {
+   "model_type": "pocket_tts_audio_tokenizer_decoder",
+   "stage": "no_checkpoint"
+  },
+  "pocket_tts_audio_tokenizer_encoder": {
+   "model_type": "pocket_tts_audio_tokenizer_encoder",
+   "stage": "no_checkpoint"
+  },
   "poolformer": {
    "config_model_type": "poolformer",
    "finite": true,
-   "forward_seconds": 0.0068087909603491426,
+   "forward_seconds": 0.0049435419496148825,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
    ],
-   "layers": 2,
+   "layers": 12,
    "main_input": "pixel_values",
    "model_type": "poolformer",
    "parameters": 405336,
@@ -6818,7 +7442,7 @@
   "pop2piano": {
    "config_model_type": "pop2piano",
    "finite": true,
-   "forward_seconds": 0.005483333021402359,
+   "forward_seconds": 0.006142791942693293,
    "head": "MODEL_FOR_SPEECH_SEQ_2_SEQ_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6837,7 +7461,7 @@
   "pp_chart2table": {
    "config_model_type": "pp_chart2table",
    "finite": true,
-   "forward_seconds": 0.006465874961577356,
+   "forward_seconds": 0.005475415964610875,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6852,9 +7476,13 @@
    "stage": "ok",
    "text_only_multimodal": true
   },
+  "pp_chart2table_vision": {
+   "model_type": "pp_chart2table_vision",
+   "stage": "no_checkpoint"
+  },
   "pp_doclayout_v2": {
    "config_model_type": "pp_doclayout_v2",
-   "error": "RuntimeError: Given groups=1, weight of size [256, 128, 1, 1], expected input[2, 2048, 7, 7] to have 128 channels, but got 2048 channels instead",
+   "error": "RuntimeError: Given groups=1, weight of size [256, 32, 1, 1], expected input[2, 512, 28, 28] to have 32 channels, but got 512 channels instead",
    "head": "MODEL_FOR_OBJECT_DETECTION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -6862,7 +7490,7 @@
    "layers": null,
    "main_input": "pixel_values",
    "model_type": "pp_doclayout_v2",
-   "parameters": 25189403,
+   "parameters": 25215003,
    "repo": "PaddlePaddle/PP-DocLayoutV2_safetensors",
    "revision": "880e8971b88938518611c54fc0f59ad57849c9d4",
    "stage": "forward",
@@ -6870,7 +7498,7 @@
   },
   "pp_doclayout_v3": {
    "config_model_type": "pp_doclayout_v3",
-   "error": "IndexError: list index out of range",
+   "error": "RuntimeError: Given groups=1, weight of size [256, 32, 1, 1], expected input[2, 512, 28, 28] to have 32 channels, but got 512 channels instead",
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -6878,11 +7506,15 @@
    "layers": null,
    "main_input": "pixel_values",
    "model_type": "pp_doclayout_v3",
-   "parameters": 24913821,
+   "parameters": 30093725,
    "repo": "PaddlePaddle/PP-DocLayoutV3_safetensors",
    "revision": "e4f489dc536556fc1be02b973ba06756e0d4a2ac",
    "stage": "forward",
    "text_only_multimodal": false
+  },
+  "pp_doclayout_v4": {
+   "model_type": "pp_doclayout_v4",
+   "stage": "no_checkpoint"
   },
   "pp_formulanet": {
    "config_model_type": "pp_formulanet",
@@ -6900,10 +7532,18 @@
    "stage": "forward",
    "text_only_multimodal": false
   },
+  "pp_formulanet_text": {
+   "model_type": "pp_formulanet_text",
+   "stage": "no_checkpoint"
+  },
+  "pp_formulanet_vision": {
+   "model_type": "pp_formulanet_vision",
+   "stage": "no_checkpoint"
+  },
   "pp_lcnet": {
    "config_model_type": "pp_lcnet",
    "finite": true,
-   "forward_seconds": 0.052109416923485696,
+   "forward_seconds": 0.04077129194047302,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -6927,7 +7567,8 @@
   },
   "pp_ocrv5_mobile_det": {
    "config_model_type": "pp_ocrv5_mobile_det",
-   "error": "IndexError: list index out of range",
+   "finite": true,
+   "forward_seconds": 0.1320237920153886,
    "head": "MODEL_FOR_OBJECT_DETECTION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -6935,16 +7576,16 @@
    "layers": null,
    "main_input": "pixel_values",
    "model_type": "pp_ocrv5_mobile_det",
-   "parameters": 3347613,
+   "parameters": 3492033,
    "repo": "PaddlePaddle/PP-OCRv5_mobile_det_safetensors",
    "revision": "c5041d225cf951ff06900ab81a3c7d543c45e2ad",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "pp_ocrv5_mobile_rec": {
    "config_model_type": "pp_ocrv5_mobile_rec",
    "finite": true,
-   "forward_seconds": 1.2735565840266645,
+   "forward_seconds": 0.7384189160075039,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -6960,7 +7601,8 @@
   },
   "pp_ocrv5_server_det": {
    "config_model_type": "pp_ocrv5_server_det",
-   "error": "RuntimeError: Given groups=1, weight of size [256, 128, 1, 1], expected input[2, 2048, 7, 7] to have 128 channels, but got 2048 channels instead",
+   "finite": true,
+   "forward_seconds": 0.37875220901332796,
    "head": "MODEL_FOR_OBJECT_DETECTION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -6971,13 +7613,13 @@
    "parameters": 21933090,
    "repo": "PaddlePaddle/PP-OCRv5_server_det_safetensors",
    "revision": "cbea9f3c3254c6ff7b0016cfbf90549e1ad4c5bb",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "pp_ocrv5_server_rec": {
    "config_model_type": "pp_ocrv5_server_rec",
    "finite": true,
-   "forward_seconds": 0.6706177089363337,
+   "forward_seconds": 0.4371418330119923,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -6993,7 +7635,8 @@
   },
   "pp_ocrv6_medium_det": {
    "config_model_type": "pp_ocrv6_medium_det",
-   "error": "RuntimeError: Given groups=1, weight of size [256, 128, 1, 1], expected input[2, 896, 7, 7] to have 128 channels, but got 896 channels instead",
+   "finite": true,
+   "forward_seconds": 0.3139734169235453,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7004,12 +7647,13 @@
    "parameters": 21790784,
    "repo": "PaddlePaddle/PP-OCRv6_medium_det_safetensors",
    "revision": "4236c2b61741a259c091fd879dcc4edc339e916c",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "pp_ocrv6_small_det": {
    "config_model_type": "pp_ocrv6_small_det",
-   "error": "RuntimeError: Given groups=1, weight of size [96, 48, 1, 1], expected input[2, 384, 7, 7] to have 48 channels, but got 384 channels instead",
+   "finite": true,
+   "forward_seconds": 0.062432499951682985,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7020,13 +7664,13 @@
    "parameters": 2437452,
    "repo": "PaddlePaddle/PP-OCRv6_small_det_safetensors",
    "revision": "eae2ee920a39fb3087637d3dbb58df1896ec1f24",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "pp_ocrv6_small_rec": {
    "config_model_type": "pp_ocrv6_small_rec",
    "finite": true,
-   "forward_seconds": 0.2680885420413688,
+   "forward_seconds": 0.12973829195834696,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7043,7 +7687,7 @@
   "pp_ocrv6_tiny_rec": {
    "config_model_type": "pp_ocrv6_tiny_rec",
    "finite": true,
-   "forward_seconds": 0.04357724997680634,
+   "forward_seconds": 0.03409441700205207,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7076,7 +7720,7 @@
   "prophetnet": {
    "config_model_type": "prophetnet",
    "finite": true,
-   "forward_seconds": 0.014693040982820094,
+   "forward_seconds": 0.009972624946385622,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7094,26 +7738,42 @@
   },
   "pvt": {
    "config_model_type": "pvt",
-   "error": "ValueError: The hidden size (64) is not a multiple of the number of attention heads (5)",
+   "finite": true,
+   "forward_seconds": 0.0058287500869482756,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
+   "inputs": [
+    "pixel_values"
+   ],
+   "layers": null,
+   "main_input": "pixel_values",
    "model_type": "pvt",
+   "parameters": 592248,
    "repo": "Xrenya/pvt-tiny-224",
    "revision": "634950b5fe4a8bb8264f2f1b3c0a89068181f455",
-   "stage": "build"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "pvt_v2": {
    "config_model_type": "pvt_v2",
-   "error": "ValueError: The hidden size (64) is not a multiple of the number of attention heads (5)",
+   "finite": true,
+   "forward_seconds": 0.060158625012263656,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
+   "inputs": [
+    "pixel_values"
+   ],
+   "layers": null,
+   "main_input": "pixel_values",
    "model_type": "pvt_v2",
+   "parameters": 565000,
    "repo": "OpenGVLab/pvt_v2_b0",
    "revision": "bafa29fe7664535848bf1b64b72ade2ab27b9360",
-   "stage": "build"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "qianfan_ocr": {
    "config_model_type": "qianfan_ocr",
    "finite": true,
-   "forward_seconds": 0.0065278749680146575,
+   "forward_seconds": 0.00427837495226413,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7131,7 +7791,7 @@
   "qianfan_ocr_vision": {
    "config_model_type": "qianfan_ocr",
    "finite": true,
-   "forward_seconds": 0.02796658396255225,
+   "forward_seconds": 0.020748334005475044,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -7149,7 +7809,7 @@
   "qwen2": {
    "config_model_type": "qwen2",
    "finite": true,
-   "forward_seconds": 0.00506366603076458,
+   "forward_seconds": 0.007710875011980534,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7175,7 +7835,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "qwen2_5_omni",
-   "parameters": 171277504,
+   "parameters": 170372864,
    "repo": "Qwen/Qwen2.5-Omni-7B",
    "revision": "ae9e1690543ffd5c0221dc27f79834d0294cba00",
    "stage": "forward",
@@ -7228,7 +7888,8 @@
   },
   "qwen2_5_omni_thinker": {
    "config_model_type": "qwen2_5_omni",
-   "error": "RuntimeError: split_with_sizes expects split_sizes to sum exactly to 8 (input tensor's size at dimension -1), but got split_sizes=[16, 24, 24]",
+   "finite": true,
+   "forward_seconds": 0.00494529097341001,
    "from_parent": true,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
@@ -7238,10 +7899,10 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "qwen2_5_omni_thinker",
-   "parameters": 22278016,
+   "parameters": 21373376,
    "repo": "Qwen/Qwen2.5-Omni-7B",
    "revision": "ae9e1690543ffd5c0221dc27f79834d0294cba00",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": true
   },
   "qwen2_5_omni_token2wav": {
@@ -7264,7 +7925,8 @@
   },
   "qwen2_5_vl": {
    "config_model_type": "qwen2_5_vl",
-   "error": "RuntimeError: split_with_sizes expects split_sizes to sum exactly to 8 (input tensor's size at dimension -1), but got split_sizes=[16, 24, 24]",
+   "finite": true,
+   "forward_seconds": 0.004019833053462207,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7273,15 +7935,16 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "qwen2_5_vl",
-   "parameters": 21933952,
+   "parameters": 21029312,
    "repo": "Qwen/Qwen2.5-VL-7B-Instruct",
    "revision": "cc594898137f460bfe9f0759e9844b3ce807cfb5",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": true
   },
   "qwen2_5_vl_text": {
    "config_model_type": "qwen2_5_vl",
-   "error": "RuntimeError: split_with_sizes expects split_sizes to sum exactly to 8 (input tensor's size at dimension -1), but got split_sizes=[16, 24, 24]",
+   "finite": true,
+   "forward_seconds": 0.0009860420832410455,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -7294,7 +7957,7 @@
    "parameters": 9806400,
    "repo": "centralpark/unsloth_Qwen2.5-VL-7B-Instruct_lr_0.0002_linear_adamw_torch_fused_True_fp16_v1_16_32_2_linear",
    "revision": "863ae6de82a1f71f0e9f43b112c50e58ac93c272",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "qwen2_5_vl_vision": {
@@ -7304,7 +7967,7 @@
   "qwen2_audio": {
    "config_model_type": "qwen2_audio",
    "finite": true,
-   "forward_seconds": 0.007613708032295108,
+   "forward_seconds": 0.006679041078314185,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7322,7 +7985,7 @@
   "qwen2_audio_encoder": {
    "config_model_type": "qwen2_audio",
    "finite": true,
-   "forward_seconds": 0.04847783292643726,
+   "forward_seconds": 0.046535125002264977,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -7340,7 +8003,7 @@
   "qwen2_moe": {
    "config_model_type": "qwen2_moe",
    "finite": true,
-   "forward_seconds": 0.008504416095092893,
+   "forward_seconds": 0.006282374961301684,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7357,7 +8020,8 @@
   },
   "qwen2_vl": {
    "config_model_type": "qwen2_vl",
-   "error": "RuntimeError: split_with_sizes expects split_sizes to sum exactly to 8 (input tensor's size at dimension -1), but got split_sizes=[16, 24, 24]",
+   "finite": true,
+   "forward_seconds": 0.007095417007803917,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7369,12 +8033,13 @@
    "parameters": 21295616,
    "repo": "Qwen/Qwen2-VL-7B-Instruct",
    "revision": "eed13092ef92e448dd6875b2a00151bd3f7db0ac",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": true
   },
   "qwen2_vl_text": {
    "config_model_type": "qwen2_vl",
-   "error": "RuntimeError: split_with_sizes expects split_sizes to sum exactly to 8 (input tensor's size at dimension -1), but got split_sizes=[16, 24, 24]",
+   "finite": true,
+   "forward_seconds": 0.0009132500272244215,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -7387,7 +8052,7 @@
    "parameters": 9798208,
    "repo": "Abdullah-123/qwen2vl-2b-hrvqa-merged",
    "revision": "37a6591981879be13b1a31e23e59f64af507e4ca",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "qwen2_vl_vision": {
@@ -7397,7 +8062,7 @@
   "qwen3": {
    "config_model_type": "qwen3",
    "finite": true,
-   "forward_seconds": 0.003909624996595085,
+   "forward_seconds": 0.0069676670245826244,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7414,26 +8079,44 @@
   },
   "qwen3_5": {
    "config_model_type": "qwen3_5",
-   "error": "AttributeError: 'Qwen3_5Config' object has no attribute 'vocab_size'",
+   "finite": true,
+   "forward_seconds": 0.0396980409277603,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
    "model_type": "qwen3_5",
+   "parameters": 33339968,
    "repo": "Qwen/Qwen3.5-27B",
    "revision": "fc05daec18b0a78c049392ed2e771dde82bdf654",
-   "stage": "build"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "qwen3_5_moe": {
    "config_model_type": "qwen3_5_moe",
-   "error": "AttributeError: 'Qwen3_5MoeConfig' object has no attribute 'vocab_size'",
+   "finite": true,
+   "forward_seconds": 0.034250416909344494,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
    "model_type": "qwen3_5_moe",
+   "parameters": 32986272,
    "repo": "Qwen/Qwen3.5-35B-A3B",
    "revision": "59d61f3ce65a6d9863b86d2e96597125219dc754",
-   "stage": "build"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "qwen3_5_moe_text": {
    "config_model_type": "qwen3_5_moe",
    "finite": true,
-   "forward_seconds": 0.03969791601411998,
+   "forward_seconds": 0.034764040959998965,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
@@ -7456,7 +8139,7 @@
   "qwen3_5_text": {
    "config_model_type": "qwen3_5",
    "finite": true,
-   "forward_seconds": 0.060616750037297606,
+   "forward_seconds": 0.057415249990299344,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
@@ -7483,7 +8166,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "qwen3_5_vision",
-   "parameters": 2531328,
+   "parameters": 1231936,
    "repo": "immanuelpeter/Qwen3.8-27B-Vision",
    "revision": "60a1bf9336197d19458290fd43f3d527f6cf3078",
    "stage": "forward",
@@ -7492,7 +8175,7 @@
   "qwen3_asr": {
    "config_model_type": "qwen3_asr",
    "finite": true,
-   "forward_seconds": 0.007116542081348598,
+   "forward_seconds": 0.004127457970753312,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7527,7 +8210,7 @@
   "qwen3_moe": {
    "config_model_type": "qwen3_moe",
    "finite": true,
-   "forward_seconds": 0.009538416052237153,
+   "forward_seconds": 0.004504750017076731,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7545,7 +8228,7 @@
   "qwen3_next": {
    "config_model_type": "qwen3_next",
    "finite": true,
-   "forward_seconds": 0.04265541699714959,
+   "forward_seconds": 0.033134000026620924,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7571,7 +8254,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "qwen3_omni_moe",
-   "parameters": 77283777,
+   "parameters": 75244225,
    "repo": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
    "revision": "26291f793822fb6be9555850f06dfe95f2d7e695",
    "stage": "forward",
@@ -7611,7 +8294,7 @@
   "qwen3_omni_moe_thinker": {
    "config_model_type": "qwen3_omni_moe",
    "finite": true,
-   "forward_seconds": 0.005120750050991774,
+   "forward_seconds": 0.004990207962691784,
    "from_parent": true,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
@@ -7621,7 +8304,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "qwen3_omni_moe_thinker",
-   "parameters": 27907392,
+   "parameters": 25867840,
    "repo": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
    "revision": "26291f793822fb6be9555850f06dfe95f2d7e695",
    "stage": "ok",
@@ -7639,7 +8322,7 @@
   "qwen3_vl": {
    "config_model_type": "qwen3_vl",
    "finite": true,
-   "forward_seconds": 0.003950124955736101,
+   "forward_seconds": 0.0038477079942822456,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7648,7 +8331,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "qwen3_vl",
-   "parameters": 13743680,
+   "parameters": 11177792,
    "repo": "Qwen/Qwen3-VL-4B-Instruct",
    "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
    "stage": "ok",
@@ -7657,7 +8340,7 @@
   "qwen3_vl_moe": {
    "config_model_type": "qwen3_vl_moe",
    "finite": true,
-   "forward_seconds": 0.009220625041052699,
+   "forward_seconds": 0.006452250061556697,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7666,7 +8349,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "qwen3_vl_moe",
-   "parameters": 23042176,
+   "parameters": 21002624,
    "repo": "Qwen/Qwen3-VL-30B-A3B-Instruct",
    "revision": "9c4b90e1e4ba969fd3b5378b57d966d725f1b86c",
    "stage": "ok",
@@ -7675,7 +8358,7 @@
   "qwen3_vl_moe_text": {
    "config_model_type": "qwen3_vl_moe",
    "finite": true,
-   "forward_seconds": 0.0026330839609727263,
+   "forward_seconds": 0.0014447090215981007,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -7698,7 +8381,7 @@
   "qwen3_vl_text": {
    "config_model_type": "qwen3_vl",
    "finite": true,
-   "forward_seconds": 0.0011522920103743672,
+   "forward_seconds": 0.0010212499182671309,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -7725,7 +8408,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "qwen3_vl_vision",
-   "parameters": 6677760,
+   "parameters": 1480192,
    "repo": "giovannioliveira/Qwen3-VL-32B-vision-encoder",
    "revision": "3a25bb0029fece248b62e0e72ca387802c563231",
    "stage": "forward",
@@ -7733,19 +8416,39 @@
   },
   "qwen4_exp": {
    "config_model_type": "qwen4_exp",
-   "error": "StrictDataclassClassValidationError: Class validation error for validator 'validate_architecture':\n    ValueError: Qwen4-Exp PLE is only supported on linear_attention layers, got PLE on layers [2].",
+   "finite": true,
+   "forward_seconds": 0.04096866701729596,
+   "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
    "model_type": "qwen4_exp",
+   "parameters": 354263680,
    "repo": "Qwen/Qwen3.8-Flash-Next",
    "revision": "de4b8e4d43b917e7706784d8bb445c9af86a3540",
-   "stage": "shrink"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "qwen4_exp_text": {
    "config_model_type": "qwen4_exp_text",
-   "error": "StrictDataclassClassValidationError: Class validation error for validator 'validate_architecture':\n    ValueError: Qwen4-Exp PLE is only supported on linear_attention layers, got PLE on layers [2].",
+   "finite": true,
+   "forward_seconds": 0.07666416699066758,
+   "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
    "model_type": "qwen4_exp_text",
+   "parameters": 49486176,
    "repo": "logic65/Whittle-Next-27B-A3B",
    "revision": "458cdfe6e89bfb241b8d487a245d962c5745a7a5",
-   "stage": "shrink"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "qwen4_exp_vision": {
    "model_type": "qwen4_exp_vision",
@@ -7762,16 +8465,16 @@
   "recurrent_gemma": {
    "config_model_type": "recurrent_gemma",
    "finite": true,
-   "forward_seconds": 0.08339733397588134,
+   "forward_seconds": 0.05617624998558313,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
     "input_ids"
    ],
-   "layers": 2,
+   "layers": 3,
    "main_input": "input_ids",
    "model_type": "recurrent_gemma",
-   "parameters": 23997248,
+   "parameters": 24022208,
    "repo": "google/recurrentgemma-2b",
    "revision": "3620f4ca9c5d16ee56c00180474a3201ec7f734a",
    "stage": "ok",
@@ -7789,7 +8492,7 @@
   "regnet": {
    "config_model_type": "regnet",
    "finite": true,
-   "forward_seconds": 0.01401375001296401,
+   "forward_seconds": 0.008163374965079129,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7806,7 +8509,7 @@
   "rembert": {
    "config_model_type": "rembert",
    "finite": true,
-   "forward_seconds": 0.06707499991171062,
+   "forward_seconds": 0.04269129200838506,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7824,7 +8527,7 @@
   "resnet": {
    "config_model_type": "resnet",
    "finite": true,
-   "forward_seconds": 0.027980542043223977,
+   "forward_seconds": 0.014957499923184514,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7874,7 +8577,7 @@
   "roberta": {
    "config_model_type": "roberta",
    "finite": true,
-   "forward_seconds": 0.0208338750526309,
+   "forward_seconds": 0.004059750004671514,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7892,7 +8595,7 @@
   "roberta-prelayernorm": {
    "config_model_type": "roberta-prelayernorm",
    "finite": true,
-   "forward_seconds": 0.003350083017721772,
+   "forward_seconds": 0.003712208941578865,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7910,7 +8613,7 @@
   "roc_bert": {
    "config_model_type": "roc_bert",
    "finite": true,
-   "forward_seconds": 0.0028091249987483025,
+   "forward_seconds": 0.001822665915824473,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7928,7 +8631,7 @@
   "roformer": {
    "config_model_type": "roformer",
    "finite": true,
-   "forward_seconds": 0.006044583977200091,
+   "forward_seconds": 0.008485333994030952,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7945,7 +8648,8 @@
   },
   "rt_detr": {
    "config_model_type": "rt_detr",
-   "error": "IndexError: list index out of range",
+   "finite": true,
+   "forward_seconds": 0.07069345796480775,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7953,10 +8657,10 @@
    "layers": null,
    "main_input": "pixel_values",
    "model_type": "rt_detr",
-   "parameters": 10850596,
+   "parameters": 10876196,
    "repo": "PekingU/rtdetr_r50vd",
    "revision": "df939e661d8c52e80608d1ec566561aabd25a4e7",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "rt_detr_resnet": {
@@ -7973,7 +8677,7 @@
    "layers": null,
    "main_input": "pixel_values",
    "model_type": "rt_detr_v2",
-   "parameters": 4834196,
+   "parameters": 4859796,
    "repo": "PekingU/rtdetr_v2_r18vd",
    "revision": "5650961749fa93567c0d46fc7f43ea4f9e914107",
    "stage": "forward",
@@ -7982,7 +8686,7 @@
   "rwkv": {
    "config_model_type": "rwkv",
    "finite": true,
-   "forward_seconds": 0.008165291976183653,
+   "forward_seconds": 0.003088250057771802,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8046,6 +8750,14 @@
    "stage": "forward",
    "text_only_multimodal": false
   },
+  "sam2_mask_decoder": {
+   "model_type": "sam2_mask_decoder",
+   "stage": "no_checkpoint"
+  },
+  "sam2_prompt_encoder": {
+   "model_type": "sam2_prompt_encoder",
+   "stage": "no_checkpoint"
+  },
   "sam2_video": {
    "config_model_type": "sam2_video",
    "error": "TypeError: Sam2VideoModel.forward() missing 1 required positional argument: 'inference_session'",
@@ -8061,6 +8773,14 @@
    "revision": "de431c4043854a71d8101e17995dfe596bf101a5",
    "stage": "forward",
    "text_only_multimodal": false
+  },
+  "sam2_video_mask_decoder": {
+   "model_type": "sam2_video_mask_decoder",
+   "stage": "no_checkpoint"
+  },
+  "sam2_video_prompt_encoder": {
+   "model_type": "sam2_video_prompt_encoder",
+   "stage": "no_checkpoint"
   },
   "sam2_vision_model": {
    "config_model_type": "sam2_video",
@@ -8185,8 +8905,24 @@
    "model_type": "sam3_tracker",
    "stage": "no_checkpoint"
   },
+  "sam3_tracker_mask_decoder": {
+   "model_type": "sam3_tracker_mask_decoder",
+   "stage": "no_checkpoint"
+  },
+  "sam3_tracker_prompt_encoder": {
+   "model_type": "sam3_tracker_prompt_encoder",
+   "stage": "no_checkpoint"
+  },
   "sam3_tracker_video": {
    "model_type": "sam3_tracker_video",
+   "stage": "no_checkpoint"
+  },
+  "sam3_tracker_video_mask_decoder": {
+   "model_type": "sam3_tracker_video_mask_decoder",
+   "stage": "no_checkpoint"
+  },
+  "sam3_tracker_video_prompt_encoder": {
+   "model_type": "sam3_tracker_video_prompt_encoder",
    "stage": "no_checkpoint"
   },
   "sam3_video": {
@@ -8229,10 +8965,18 @@
    "stage": "forward",
    "text_only_multimodal": false
   },
+  "sam_hq_mask_decoder": {
+   "model_type": "sam_hq_mask_decoder",
+   "stage": "no_checkpoint"
+  },
+  "sam_hq_prompt_encoder": {
+   "model_type": "sam_hq_prompt_encoder",
+   "stage": "no_checkpoint"
+  },
   "sam_hq_vision_model": {
    "config_model_type": "sam_hq",
    "finite": true,
-   "forward_seconds": 0.3575913329841569,
+   "forward_seconds": 0.2520838750060648,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -8247,10 +8991,18 @@
    "stage": "ok",
    "text_only_multimodal": false
   },
+  "sam_mask_decoder": {
+   "model_type": "sam_mask_decoder",
+   "stage": "no_checkpoint"
+  },
+  "sam_prompt_encoder": {
+   "model_type": "sam_prompt_encoder",
+   "stage": "no_checkpoint"
+  },
   "sam_vision_model": {
    "config_model_type": "sam_vision_model",
    "finite": true,
-   "forward_seconds": 0.0697188749909401,
+   "forward_seconds": 0.05515491694677621,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -8292,7 +9044,7 @@
   "seamless_m4t": {
    "config_model_type": "seamless_m4t",
    "finite": true,
-   "forward_seconds": 0.0113959169248119,
+   "forward_seconds": 0.006525333039462566,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8311,7 +9063,7 @@
   "seamless_m4t_v2": {
    "config_model_type": "seamless_m4t_v2",
    "finite": true,
-   "forward_seconds": 0.007234833086840808,
+   "forward_seconds": 0.0066454579355195165,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8330,7 +9082,7 @@
   "seed_oss": {
    "config_model_type": "seed_oss",
    "finite": true,
-   "forward_seconds": 0.006104875006712973,
+   "forward_seconds": 0.007033457979559898,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8348,7 +9100,7 @@
   "segformer": {
    "config_model_type": "segformer",
    "finite": true,
-   "forward_seconds": 0.05401037505362183,
+   "forward_seconds": 0.03449745802208781,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -8356,7 +9108,7 @@
    "layers": null,
    "main_input": "pixel_values",
    "model_type": "segformer",
-   "parameters": 441962,
+   "parameters": 442998,
    "repo": "nvidia/segformer-b0-finetuned-ade-512-512",
    "revision": "489d5cd81a0b59fab9b7ea758d3548ebe99677da",
    "stage": "ok",
@@ -8381,7 +9133,7 @@
   "sew": {
    "config_model_type": "sew",
    "finite": true,
-   "forward_seconds": 0.08991170802619308,
+   "forward_seconds": 0.06971120904199779,
    "head": "MODEL_FOR_CTC_MAPPING_NAMES",
    "inputs": [
     "input_values"
@@ -8398,7 +9150,7 @@
   "sew-d": {
    "config_model_type": "sew-d",
    "finite": true,
-   "forward_seconds": 0.010585209005512297,
+   "forward_seconds": 0.015152124920859933,
    "head": "MODEL_FOR_CTC_MAPPING_NAMES",
    "inputs": [
     "input_values"
@@ -8415,7 +9167,7 @@
   "shieldgemma2": {
    "config_model_type": "shieldgemma2",
    "finite": true,
-   "forward_seconds": 0.004327292088419199,
+   "forward_seconds": 0.011740499990992248,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8433,7 +9185,7 @@
   "siglip": {
    "config_model_type": "siglip",
    "finite": true,
-   "forward_seconds": 0.004668666981160641,
+   "forward_seconds": 0.004476082976907492,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -8501,7 +9253,7 @@
   "siglip_vision_model": {
    "config_model_type": "siglip",
    "finite": true,
-   "forward_seconds": 0.0028296669479459524,
+   "forward_seconds": 0.003900582902133465,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -8518,7 +9270,8 @@
   },
   "slanet": {
    "config_model_type": "slanet",
-   "error": "RuntimeError: Given groups=1, weight of size [96, 64, 1, 1], expected input[2, 512, 7, 7] to have 64 channels, but got 512 channels instead",
+   "finite": true,
+   "forward_seconds": 0.14668058301322162,
    "head": "MODEL_FOR_TABLE_RECOGNITION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -8529,13 +9282,13 @@
    "parameters": 1408338,
    "repo": "PaddlePaddle/SLANet_plus_safetensors",
    "revision": "e44d12b3fe695792170dd46623075f63d8544461",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "slanext": {
    "config_model_type": "slanext",
    "finite": true,
-   "forward_seconds": 0.2856766249751672,
+   "forward_seconds": 0.20796708401758224,
    "head": "MODEL_FOR_TABLE_RECOGNITION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -8549,10 +9302,14 @@
    "stage": "ok",
    "text_only_multimodal": false
   },
+  "slanext_vision": {
+   "model_type": "slanext_vision",
+   "stage": "no_checkpoint"
+  },
   "smollm3": {
    "config_model_type": "smollm3",
    "finite": true,
-   "forward_seconds": 0.003545084036886692,
+   "forward_seconds": 0.007129084086045623,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8570,7 +9327,7 @@
   "smolvlm": {
    "config_model_type": "smolvlm",
    "finite": true,
-   "forward_seconds": 0.004551750025711954,
+   "forward_seconds": 0.003298124996945262,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8606,7 +9363,7 @@
   "solar_open": {
    "config_model_type": "solar_open",
    "finite": true,
-   "forward_seconds": 0.010985166998580098,
+   "forward_seconds": 0.004784000106155872,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8672,7 +9429,7 @@
   "splinter": {
    "config_model_type": "splinter",
    "finite": true,
-   "forward_seconds": 0.0008983329171314836,
+   "forward_seconds": 0.0009126251097768545,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8699,7 +9456,7 @@
   "stablelm": {
    "config_model_type": "stablelm",
    "finite": true,
-   "forward_seconds": 0.004530249978415668,
+   "forward_seconds": 0.0032260000007227063,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8717,7 +9474,7 @@
   "starcoder2": {
    "config_model_type": "starcoder2",
    "finite": true,
-   "forward_seconds": 0.0034741669660434127,
+   "forward_seconds": 0.0021074999822303653,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8773,7 +9530,7 @@
    "config_model_type": "superpoint",
    "error": "RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn",
    "finite": true,
-   "forward_seconds": 0.2637825420824811,
+   "forward_seconds": 0.2116492500063032,
    "head": "MODEL_FOR_KEYPOINT_DETECTION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -8790,7 +9547,7 @@
   "swiftformer": {
    "config_model_type": "swiftformer",
    "finite": true,
-   "forward_seconds": 0.031895791995339096,
+   "forward_seconds": 0.019268125062808394,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -8806,7 +9563,8 @@
   },
   "swin": {
    "config_model_type": "swin",
-   "error": "RuntimeError: shape '[128, 49, -1, 21]' is invalid for input of size 401408",
+   "finite": true,
+   "forward_seconds": 0.01795258396305144,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -8814,34 +9572,50 @@
    "layers": 2,
    "main_input": "pixel_values",
    "model_type": "swin",
-   "parameters": 5407005,
+   "parameters": 5404470,
    "repo": "microsoft/swin-tiny-patch4-window7-224",
    "revision": "d00d478bfaf1f417d34a1186673ad4b4be264c51",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "swin2sr": {
    "config_model_type": "swin2sr",
-   "error": "ValueError: The hidden size (64) is not a multiple of the number of attention heads (6)",
+   "finite": true,
+   "forward_seconds": 0.1037422080989927,
    "head": "MODEL_MAPPING_NAMES",
+   "inputs": [
+    "pixel_values"
+   ],
+   "layers": 2,
+   "main_input": "pixel_values",
    "model_type": "swin2sr",
+   "parameters": 511640,
    "repo": "caidas/swin2SR-classical-sr-x2-64",
    "revision": "cee1c923c6a37361c6e5650b65dcf4be821e5d52",
-   "stage": "build"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "swinv2": {
    "config_model_type": "swinv2",
-   "error": "ValueError: The hidden size (64) is not a multiple of the number of attention heads (3)",
+   "finite": true,
+   "forward_seconds": 0.029606875032186508,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
+   "inputs": [
+    "pixel_values"
+   ],
+   "layers": 2,
+   "main_input": "pixel_values",
    "model_type": "swinv2",
+   "parameters": 5418182,
    "repo": "microsoft/swinv2-tiny-patch4-window8-256",
    "revision": "40213dad8563a5a916d434a1291443c0fa6358f0",
-   "stage": "build"
+   "stage": "ok",
+   "text_only_multimodal": false
   },
   "switch_transformers": {
    "config_model_type": "switch_transformers",
    "finite": true,
-   "forward_seconds": 0.004640541039407253,
+   "forward_seconds": 0.006210374995134771,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8860,7 +9634,7 @@
   "t5": {
    "config_model_type": "t5",
    "finite": true,
-   "forward_seconds": 0.006484166020527482,
+   "forward_seconds": 0.003412500023841858,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8918,7 +9692,7 @@
   "t5gemma2_encoder": {
    "config_model_type": "t5gemma2",
    "finite": true,
-   "forward_seconds": 0.004482000018469989,
+   "forward_seconds": 0.00328962504863739,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -8946,7 +9720,7 @@
   "table-transformer": {
    "config_model_type": "table-transformer",
    "finite": true,
-   "forward_seconds": 0.06118912505917251,
+   "forward_seconds": 0.0342670000391081,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -8963,7 +9737,7 @@
   "tapas": {
    "config_model_type": "tapas",
    "finite": true,
-   "forward_seconds": 0.001861250028014183,
+   "forward_seconds": 0.0051021670224145055,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9066,7 +9840,7 @@
   "tipsv2": {
    "config_model_type": "tipsv2",
    "finite": true,
-   "forward_seconds": 0.024849790963344276,
+   "forward_seconds": 0.022259875084273517,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9101,7 +9875,7 @@
   "tipsv2_text_model": {
    "config_model_type": "tipsv2",
    "finite": true,
-   "forward_seconds": 0.0011576249962672591,
+   "forward_seconds": 0.0007040409836918116,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -9120,7 +9894,7 @@
   "tipsv2_vision_model": {
    "config_model_type": "tipsv2",
    "finite": true,
-   "forward_seconds": 0.02768295898567885,
+   "forward_seconds": 0.024572000023908913,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -9138,7 +9912,7 @@
   "trocr": {
    "config_model_type": "vision-encoder-decoder",
    "finite": true,
-   "forward_seconds": 0.003875040914863348,
+   "forward_seconds": 0.001883000019006431,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
@@ -9189,10 +9963,46 @@
    "stage": "forward",
    "text_only_multimodal": false
   },
+  "ultrabert": {
+   "config_model_type": "ultrabert",
+   "finite": true,
+   "forward_seconds": 0.0018422920256853104,
+   "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
+   "model_type": "ultrabert",
+   "parameters": 6472000,
+   "repo": "dmis-lab/UltraBERT-150M",
+   "revision": "545ac9d9c7aece444f014ada5a1e9818132b4d35",
+   "stage": "ok",
+   "text_only_multimodal": false
+  },
+  "ultravbert": {
+   "config_model_type": "ultravbert",
+   "finite": true,
+   "forward_seconds": 0.0018968749791383743,
+   "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": null,
+   "main_input": "input_ids",
+   "model_type": "ultravbert",
+   "parameters": 6735808,
+   "repo": "athrael-soju/UltraVBERT",
+   "revision": "7522de0c135da2bfd98dbcd199f41a802f41aa95",
+   "stage": "ok",
+   "text_only_multimodal": true
+  },
   "umt5": {
    "config_model_type": "umt5",
    "finite": true,
-   "forward_seconds": 0.004745249985717237,
+   "forward_seconds": 0.0032933750189840794,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9211,7 +10021,7 @@
   "unispeech": {
    "config_model_type": "unispeech",
    "finite": true,
-   "forward_seconds": 0.07569483295083046,
+   "forward_seconds": 0.047107832971960306,
    "head": "MODEL_FOR_CTC_MAPPING_NAMES",
    "inputs": [
     "input_values"
@@ -9228,7 +10038,7 @@
   "unispeech-sat": {
    "config_model_type": "unispeech-sat",
    "finite": true,
-   "forward_seconds": 0.03421800001524389,
+   "forward_seconds": 0.0402263340074569,
    "head": "MODEL_FOR_CTC_MAPPING_NAMES",
    "inputs": [
     "input_values"
@@ -9258,9 +10068,43 @@
    "stage": "forward",
    "text_only_multimodal": false
   },
+  "unlimited_ocr": {
+   "config_model_type": "unlimited_ocr",
+   "finite": true,
+   "forward_seconds": 0.005548750050365925,
+   "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
+   "inputs": [
+    "attention_mask",
+    "input_ids"
+   ],
+   "layers": 2,
+   "main_input": "input_ids",
+   "model_type": "unlimited_ocr",
+   "parameters": 24441088,
+   "repo": "baidu/Unlimited-OCR",
+   "revision": "8249d20b2822a7d8a4c22c8d8c9069b5ac36bda3",
+   "stage": "ok",
+   "text_only_multimodal": true
+  },
+  "unlimited_ocr_sam_vision_model": {
+   "model_type": "unlimited_ocr_sam_vision_model",
+   "stage": "no_checkpoint"
+  },
+  "unlimited_ocr_text": {
+   "model_type": "unlimited_ocr_text",
+   "stage": "no_checkpoint"
+  },
+  "unlimited_ocr_vision": {
+   "model_type": "unlimited_ocr_vision",
+   "stage": "no_checkpoint"
+  },
+  "unlimited_ocr_vision_encoder": {
+   "model_type": "unlimited_ocr_vision_encoder",
+   "stage": "no_checkpoint"
+  },
   "upernet": {
    "config_model_type": "upernet",
-   "error": "IndexError: tuple index out of range",
+   "error": "RuntimeError: Given groups=1, weight of size [256, 384, 3, 3], expected input[2, 64, 14, 14] to have 384 channels, but got 64 channels instead",
    "head": "MODEL_FOR_SEMANTIC_SEGMENTATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -9268,7 +10112,7 @@
    "layers": null,
    "main_input": "pixel_values",
    "model_type": "upernet",
-   "parameters": 1457660,
+   "parameters": 1687004,
    "repo": "openmmlab/upernet-convnext-tiny",
    "revision": "876ffc56b819a829448f7e81e9f8606deef6fb65",
    "stage": "forward",
@@ -9276,7 +10120,8 @@
   },
   "uvdoc": {
    "config_model_type": "uvdoc",
-   "error": "RuntimeError: Given groups=1, weight of size [128, 768, 1, 1], expected input[2, 128, 14, 14] to have 768 channels, but got 128 channels instead",
+   "finite": true,
+   "forward_seconds": 0.09038820792920887,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -9287,14 +10132,14 @@
    "parameters": 7898595,
    "repo": "PaddlePaddle/UVDoc_safetensors",
    "revision": "bfa6aad03b549c7e2cf89cefd2fb02ba3bef2ae4",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "uvdoc_backbone": {
    "config_model_type": "uvdoc",
    "error": "IndexError: list index out of range",
    "finite": true,
-   "forward_seconds": 0.12015579198487103,
+   "forward_seconds": 0.08135291596408933,
    "from_parent": true,
    "head": "MODEL_FOR_BACKBONE_MAPPING_NAMES",
    "inputs": [
@@ -9312,7 +10157,7 @@
   "vaultgemma": {
    "config_model_type": "vaultgemma",
    "finite": true,
-   "forward_seconds": 0.00948266708292067,
+   "forward_seconds": 0.011604249943047762,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9330,7 +10175,7 @@
   "vibevoice": {
    "config_model_type": "vibevoice",
    "finite": true,
-   "forward_seconds": 0.006810166989453137,
+   "forward_seconds": 0.003876292030327022,
    "head": "MODEL_FOR_SPEECH_SEQ_2_SEQ_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9346,11 +10191,21 @@
    "text_only_multimodal": true
   },
   "vibevoice_acoustic_tokenizer": {
-   "error": "StrictDataclassClassValidationError: Class validation error for validator 'validate_architecture':\n    ValueError: `diffusion_head_config.hidden_size` (1536) must match `text_config.hidden_size` (4096).",
+   "config_model_type": "vibevoice",
+   "error": "RuntimeError: Given groups=1, weight of size [32, 1, 7], expected input[1, 2, 16006] to have 1 channels, but got 2 channels instead",
+   "from_parent": true,
+   "head": "MODEL_MAPPING_NAMES",
+   "inputs": [
+    "input_values"
+   ],
+   "layers": null,
+   "main_input": "input_values",
    "model_type": "vibevoice_acoustic_tokenizer",
+   "parameters": 172277121,
    "repo": "microsoft/VibeVoice-1.5B",
    "revision": "c00898d257e6b46004e3e2866a47534085fb685a",
-   "stage": "load_config"
+   "stage": "forward",
+   "text_only_multimodal": false
   },
   "vibevoice_acoustic_tokenizer_decoder": {
    "model_type": "vibevoice_acoustic_tokenizer_decoder",
@@ -9363,7 +10218,7 @@
   "vibevoice_asr": {
    "config_model_type": "vibevoice_asr",
    "finite": true,
-   "forward_seconds": 0.008832458057440817,
+   "forward_seconds": 0.0050836669979617,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9378,10 +10233,14 @@
    "stage": "ok",
    "text_only_multimodal": false
   },
+  "vibevoice_diffusion": {
+   "model_type": "vibevoice_diffusion",
+   "stage": "no_checkpoint"
+  },
   "video_llama_3": {
    "config_model_type": "video_llama_3",
    "finite": true,
-   "forward_seconds": 0.00550462503451854,
+   "forward_seconds": 0.003920958028174937,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9416,7 +10275,7 @@
   "video_llava": {
    "config_model_type": "video_llava",
    "finite": true,
-   "forward_seconds": 0.0019135000184178352,
+   "forward_seconds": 0.0017998339608311653,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9504,7 +10363,7 @@
   "vipllava": {
    "config_model_type": "vipllava",
    "finite": true,
-   "forward_seconds": 0.0018085420597344637,
+   "forward_seconds": 0.002953500021249056,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9547,7 +10406,7 @@
   "visual_bert": {
    "config_model_type": "visual_bert",
    "finite": true,
-   "forward_seconds": 0.0026739579625427723,
+   "forward_seconds": 0.0009687499841675162,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9565,7 +10424,7 @@
   "vit": {
    "config_model_type": "vit",
    "finite": true,
-   "forward_seconds": 0.00209416588768363,
+   "forward_seconds": 0.0038512919563800097,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -9582,7 +10441,7 @@
   "vit_mae": {
    "config_model_type": "vit_mae",
    "finite": true,
-   "forward_seconds": 0.0017400000942870975,
+   "forward_seconds": 0.006156416959129274,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -9599,7 +10458,7 @@
   "vit_msn": {
    "config_model_type": "vit_msn",
    "finite": true,
-   "forward_seconds": 0.010135708027519286,
+   "forward_seconds": 0.005228457972407341,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -9620,7 +10479,7 @@
   "vitmatte": {
    "config_model_type": "vitmatte",
    "finite": true,
-   "forward_seconds": 0.9600212500663474,
+   "forward_seconds": 0.7685916660120711,
    "head": "MODEL_FOR_IMAGE_MATTING_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -9670,7 +10529,7 @@
   "vits": {
    "config_model_type": "vits",
    "finite": true,
-   "forward_seconds": 1.1984044580021873,
+   "forward_seconds": 0.6677938749780878,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9715,7 +10574,7 @@
   "voxtral": {
    "config_model_type": "voxtral",
    "finite": true,
-   "forward_seconds": 0.009964041993953288,
+   "forward_seconds": 0.006951667019166052,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9733,7 +10592,7 @@
   "voxtral_encoder": {
    "config_model_type": "voxtral",
    "finite": true,
-   "forward_seconds": 0.07002737489528954,
+   "forward_seconds": 0.04351866606157273,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -9768,7 +10627,7 @@
   "voxtral_realtime_encoder": {
    "config_model_type": "voxtral_realtime",
    "finite": true,
-   "forward_seconds": 0.078897750005126,
+   "forward_seconds": 0.06972991698421538,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -9796,7 +10655,7 @@
   "wav2vec2": {
    "config_model_type": "wav2vec2",
    "finite": true,
-   "forward_seconds": 0.03815779206342995,
+   "forward_seconds": 0.05041604209691286,
    "head": "MODEL_FOR_CTC_MAPPING_NAMES",
    "inputs": [
     "input_values"
@@ -9831,7 +10690,7 @@
   "wavlm": {
    "config_model_type": "wavlm",
    "finite": true,
-   "forward_seconds": 0.06794104189611971,
+   "forward_seconds": 0.03301975002977997,
    "head": "MODEL_FOR_CTC_MAPPING_NAMES",
    "inputs": [
     "input_values"
@@ -9848,7 +10707,7 @@
   "whisper": {
    "config_model_type": "whisper",
    "finite": true,
-   "forward_seconds": 0.004743541940115392,
+   "forward_seconds": 0.0033170829992741346,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9900,7 +10759,7 @@
    "stage": "component"
   },
   "xcodec": {
-   "error": "AttributeError: can't set attribute 'num_quantizers'",
+   "error": "AttributeError: property 'num_quantizers' of 'XcodecConfig' object has no setter",
    "model_type": "xcodec",
    "repo": "Manel/X-Codec",
    "revision": "12c89aed4c2c6ea9df96ca67e6d3848f8df8069d",
@@ -9925,7 +10784,7 @@
   "xglm": {
    "config_model_type": "xglm",
    "finite": true,
-   "forward_seconds": 0.010870042024180293,
+   "forward_seconds": 0.009360666968859732,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9943,7 +10802,7 @@
   "xlm": {
    "config_model_type": "xlm",
    "finite": true,
-   "forward_seconds": 0.002479415968991816,
+   "forward_seconds": 0.001618291949853301,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9961,7 +10820,7 @@
   "xlm-roberta": {
    "config_model_type": "xlm-roberta",
    "finite": true,
-   "forward_seconds": 0.023808667086996138,
+   "forward_seconds": 0.010747583000920713,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9979,7 +10838,7 @@
   "xlm-roberta-xl": {
    "config_model_type": "xlm-roberta-xl",
    "finite": true,
-   "forward_seconds": 0.03814779105596244,
+   "forward_seconds": 0.010042499983683228,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10029,7 +10888,7 @@
   "yolos": {
    "config_model_type": "yolos",
    "finite": true,
-   "forward_seconds": 0.1426057080971077,
+   "forward_seconds": 0.10679158300627023,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -10046,7 +10905,7 @@
   "yoso": {
    "config_model_type": "yoso",
    "finite": true,
-   "forward_seconds": 0.0027742079691961408,
+   "forward_seconds": 0.0026757089653983712,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10063,7 +10922,8 @@
   },
   "youtu": {
    "config_model_type": "youtu",
-   "error": "RuntimeError: The size of tensor a (4) must match the size of tensor b (8) at non-singleton dimension 3",
+   "finite": true,
+   "forward_seconds": 0.004407583037391305,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10075,12 +10935,12 @@
    "parameters": 8278400,
    "repo": "tencent/Youtu-LLM-2B",
    "revision": "8b0e73594661a945a7f5aafc737b63e3d8ad3f75",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "zamba": {
    "config_model_type": "zamba",
-   "error": "ValueError: There is an issue with your definition of `tie_weights_keys` for ^layers.1.shared_transf:^layers.(?!1\\.)\\d+.shared_transf. We found ['layers.1.shared_transf.feed_forward.down_proj.weight', 'layers.1.shared_transf.feed_forward.gate_proj.weight', 'layers.1.shared_transf.feed_forward.up_proj.weight', 'layers.1.shared_transf.input_layernorm.weight', 'layers.1.shared_transf.pre_ff_layernorm",
+   "error": "ValueError: There is an issue with your definition of `tie_weights_keys` for ^layers.2.shared_transf:^layers.(?!2\\.)\\d+.shared_transf. We found ['layers.2.shared_transf.feed_forward.down_proj.weight', 'layers.2.shared_transf.feed_forward.gate_proj.weight', 'layers.2.shared_transf.feed_forward.up_proj.weight', 'layers.2.shared_transf.input_layernorm.weight', 'layers.2.shared_transf.pre_ff_layernorm",
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "model_type": "zamba",
    "repo": "Zyphra/Zamba-7B-v1",
@@ -10095,10 +10955,10 @@
     "attention_mask",
     "input_ids"
    ],
-   "layers": 2,
+   "layers": 7,
    "main_input": "input_ids",
    "model_type": "zamba2",
-   "parameters": 3339808,
+   "parameters": 3504688,
    "repo": "Zyphra/Zamba2-2.7B",
    "revision": "31afeeac4c66b4851a54290ba57c995a68c87861",
    "stage": "forward",
@@ -10107,7 +10967,7 @@
   "zaya": {
    "config_model_type": "zaya",
    "finite": true,
-   "forward_seconds": 0.00803662498947233,
+   "forward_seconds": 0.008022958994843066,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10139,5 +10999,5 @@
    "text_only_multimodal": false
   }
  },
- "transformers": "5.19.0.dev0"
+ "transformers": "5.22.0.dev0"
 }

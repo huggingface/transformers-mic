@@ -38,6 +38,10 @@ WIDTHS = {
     "embed_dim": 64, "out_hidden_size": 64, "ffn_dim": 128, "encoder_ffn_dim": 128, "decoder_ffn_dim": 128,
     "num_attention_heads": 4, "num_heads": 4, "encoder_attention_heads": 4,
     "decoder_attention_heads": 4, "head_dim": 16, "d_kv": 16, "attention_head_dim": 16,
+    # DeBERTa-v2 names its head size and pooler width explicitly.
+    "attention_head_size": 16, "pooler_hidden_size": 64,
+    # Per-layer embeddings (Qwen4-Exp) are vocab-sized: shrink their width too.
+    "ple_embed_dim": 16,
     "moe_intermediate_size": 32, "shared_intermediate_size": 128,
     "shared_expert_intermediate_size": 128, "projection_dim": 32,
     "kv_lora_rank": 16, "qk_nope_head_dim": 16, "qk_rope_head_dim": 8, "v_head_dim": 16,
@@ -177,11 +181,16 @@ def shrink(config):
             if isinstance(sub, PretrainedConfig):
                 values[key] = rebuilt(sub).to_dict()
         for key, value in WIDTHS.items():
-            if key in values and values[key] is not None and not isinstance(values[key], (list, dict)):
+            # 0 is a choice, not a width (GLM-5.3's NoPE qk_rope_head_dim).
+            if key in values and values[key] not in (None, 0) and not isinstance(values[key], (list, dict)):
                 values[key] = value
         if "num_key_value_heads" in values and values["num_key_value_heads"]:
             heads = cfg.num_attention_heads if hasattr(cfg, "num_attention_heads") else None
             values["num_key_value_heads"] = 4 if heads and values["num_key_value_heads"] >= heads else 2
+        # MLA models whose rotary tables are sized by head_dim (DeepSeek-V3, Kimi
+        # K2.5) set it to qk_rope_head_dim; keep them equal after shrinking.
+        if cfg.to_dict().get("head_dim") and cfg.to_dict().get("head_dim") == cfg.to_dict().get("qk_rope_head_dim"):
+            values["head_dim"] = values["qk_rope_head_dim"]
         if values.get("q_lora_rank"):
             values["q_lora_rank"] = 16
         for key in EXPERTS:
@@ -202,9 +211,20 @@ def shrink(config):
         # Per-stage head counts must divide the shrunk per-stage widths (PVT's
         # hidden_sizes, Swin's embed_dim doubling per stage): keep the largest
         # head count, no more than the original, that does.
+        # A Swin whose last stage is the model width (CLAP's audio tower:
+        # patch_embeds_hidden_size doubled per stage == hidden_size) keeps that link.
+        if isinstance(values.get("patch_embeds_hidden_size"), int) and isinstance(values.get("depths"), list):
+            last = 2 ** (len(values["depths"]) - 1)
+            if cfg.patch_embeds_hidden_size * last == cfg.hidden_size:
+                values["patch_embeds_hidden_size"] = 16
+                values["hidden_size"] = 16 * last
+                if values.get("projection_hidden_size") == cfg.hidden_size:
+                    values["projection_hidden_size"] = values["hidden_size"]
         stages = values.get("hidden_sizes")
         if not isinstance(stages, list) and isinstance(values.get("embed_dim"), int) and isinstance(values.get("depths"), list):
             stages = [values["embed_dim"] * 2**i for i in range(len(values["depths"]))]
+        if not isinstance(stages, list) and isinstance(values.get("patch_embeds_hidden_size"), int) and isinstance(values.get("depths"), list):
+            stages = [values["patch_embeds_hidden_size"] * 2**i for i in range(len(values["depths"]))]
         if isinstance(stages, list):
             for key in ("num_attention_heads", "num_heads"):
                 heads = values.get(key)
@@ -225,7 +245,8 @@ def shrink(config):
             and backbone.get("out_indices")
         ):
             values["encoder_in_channels"] = [backbone["hidden_sizes"][i - 1] for i in backbone["out_indices"]]
-        if isinstance(values.get("num_hidden_layers"), int):
+        # Stage-based models (depths per stage) count stages in num_hidden_layers: keep them.
+        if isinstance(values.get("num_hidden_layers"), int) and not isinstance(values.get("depths"), list):
             kept = layer_pattern(cfg) if hasattr(cfg, "num_hidden_layers") else [0, 1]
             kept = kept if len(kept) > 1 else list(range(min(2, values["num_hidden_layers"])))
             sys.path.insert(0, str(HERE))
@@ -243,12 +264,32 @@ def shrink(config):
                 values["first_k_dense_replace"] = sum(i < cfg.first_k_dense_replace for i in kept)
             per_layer = values.get("per_layer_config")
             if isinstance(per_layer, dict):
+                # Keys are layer indices, sometimes zero-padded (Gemma 4's "04").
                 values["per_layer_config"] = {
-                    str(n): per_layer[k] for n, i in enumerate(kept)
-                    for k in (str(i), i) if k in per_layer
+                    str(n): value for n, i in enumerate(kept)
+                    for key, value in per_layer.items() if int(key) == i
                 }
             if getattr(cfg, "mlp_only_layers", None):
                 values["mlp_only_layers"] = [n for n, i in enumerate(kept) if i in cfg.mlp_only_layers]
+            # A layer-id list naming a layer that was dropped moves to the kept
+            # layer of the same kind (Qwen4-Exp's PLE layer must stay linear attention).
+            kinds = getattr(cfg, "layer_types", None)
+            if isinstance(kinds, list) and len(kinds) == cfg.num_hidden_layers:
+                def moved(ids):
+                    same = {kinds[i]: n for n, i in reversed(list(enumerate(kept)))}
+                    return sorted({kept.index(i) if i in kept else same[kinds[i]] for i in ids if kinds[i] in same})
+
+                if isinstance(values.get("ple_layer_ids"), list):  # one-indexed
+                    values["ple_layer_ids"] = [n + 1 for n in moved([i - 1 for i in values["ple_layer_ids"]])]
+                linear = values.get("linear_attn_config")
+                if isinstance(linear, dict):
+                    # GLM-5.3 lists its linear and full attention layers by index.
+                    for key in ("kda_layers", "full_attn_layers"):
+                        if isinstance(linear.get(key), list):
+                            linear[key] = moved(linear[key])
+                    for key, value in (("num_heads", 4), ("head_dim", 16)):
+                        if isinstance(linear.get(key), int):
+                            linear[key] = value
             values["num_hidden_layers"] = len(kept)
         if isinstance(values.get("intermediate_size"), list):
             values["intermediate_size"] = [min(size, 128) for size in values["intermediate_size"]]
@@ -280,7 +321,9 @@ def shrink(config):
                 and getattr(sub, "projection_dim", None) is not None
                 and sub.projection_dim == getattr(text, "hidden_size", None)
             ):
-                values[key]["projection_dim"] = values["text_config"]["hidden_size"]
+                # BART-style text configs (Florence-2) name their width d_model.
+                text_values = values["text_config"]
+                values[key]["projection_dim"] = text_values.get("hidden_size") or text_values["d_model"]
         # Multimodal RoPE partitions must still cover half the resized head.
         rope = values.get("rope_parameters")
         if isinstance(rope, dict) and rope.get("mrope_section"):
@@ -326,6 +369,16 @@ def primary_head(config):
     return None, None
 
 
+def head_config(model_class, config):
+    """The config the head is built from: a text-only head of a composite model
+    (Qwen3.5's causal LM) takes its text config, as AutoModel would pass it."""
+    expected = getattr(model_class, "config_class", None)
+    if expected is None or isinstance(config, expected):
+        return config
+    text = config.get_text_config()
+    return text if isinstance(text, expected) else config
+
+
 def synthetic_inputs(model, config):
     """Inputs for main_input_name and its usual companions, sized from the config."""
     import torch
@@ -367,6 +420,13 @@ def synthetic_inputs(model, config):
         size = getattr(vision, "image_size", 224)
         size = size if isinstance(size, int) else (size.get("height") if isinstance(size, dict) else size[0])
         inputs["pixel_values"] = torch.randn(batch, getattr(vision, "num_channels", 3), size, size)
+    # Text-audio dual encoders (CLAP) take mel features beside the text, as the
+    # feature extractor shapes them: (batch, channels, frames, mel bins).
+    audio = getattr(config, "audio_config", None)
+    if name == "input_ids" and "input_features" in accepted and audio is not None and getattr(audio, "spec_size", None):
+        inputs["input_features"] = torch.randn(batch, 1, 1001, audio.num_mel_bins)
+        if "is_longer" in accepted:  # fusion models flag clips longer than the window
+            inputs["is_longer"] = torch.zeros(batch, 1, dtype=torch.bool)
     return inputs
 
 
@@ -403,6 +463,7 @@ def run_one(model_type):
             # Only reachable inside a composite model, not a usage path of its own.
             row["stage"] = "component"
             return row
+        small = head_config(getattr(transformers, class_name), small)
         model = getattr(transformers, class_name)._from_config(small, dtype=torch.float32)
         row["parameters"] = sum(p.numel() for p in model.parameters())
         row["layers"] = getattr(small, "num_hidden_layers", None)
