@@ -227,6 +227,16 @@ not memory:
   fusion extractor (CLAP, enable_fusion) marks a random clip "longer" when none
   exceeds its max_length_s window, so use clips longer than that window: then
   every clip takes the fusion branch and its batch norm trains on the full batch.
+- Train through the checkpoint's language-model head class (AutoModelForCausalLM,
+  AutoModelForSeq2SeqLM) with labels=, even when the config lists a base class
+  (BartModel): never compute cross-entropy over hidden states. Build the fixture
+  with the same head class.
+- An encoder-decoder forward needs decoder inputs: for an inference probe pass
+  decoder_input_ids starting from config.decoder_start_token_id (or labels=).
+  Without them Marian raises a misleading "cannot specify both".
+- Get a word's token id with tokenizer.encode(word, add_special_tokens=False)[0];
+  convert_tokens_to_ids(" Paris") returns None in BPE vocabularies, which spell
+  the leading space inside the token.
 - get_text_features / get_image_features / get_audio_features take only their own
   modality's inputs (never **inputs) and return a model output in Transformers 5:
   the projected embedding is .pooler_output.
