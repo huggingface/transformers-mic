@@ -151,7 +151,7 @@ Frozen fixtures and real baselines under benign changes and dependency upgrades 
 
 ## 9. Architecture sweep
 
-[`sweep.py`](../experiments/sweep.py): the generic shrink rule on 559 usage paths, offline after `prefetch`; 314 run ([results](../experiments/results/sweep.json)). [`layer_patterns.py`](../experiments/layer_patterns.py): depth by layer pattern vs fixed count ([results](../experiments/results/layer_patterns.json)).
+[`sweep.py`](../experiments/sweep.py): the generic shrink rule on 582 usage paths, offline after `prefetch`; 382 run ([results](../experiments/results/sweep.json)). [`layer_patterns.py`](../experiments/layer_patterns.py): depth by layer pattern vs fixed count ([results](../experiments/results/layer_patterns.json)).
 
 ## 10. WebGPU golden
 

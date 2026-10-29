@@ -157,7 +157,7 @@ Contracts are arbitrary code: the runner needs isolation, resource limits, secre
 
 ## Open questions
 
-1. How many architectures shrink reliably? One generic rule covers 314 of 559 usage paths ([sweep](fixtures.md#does-it-scale-to-every-architecture)).
+1. How many architectures shrink reliably? One generic rule covers 382 of 582 usage paths ([sweep](fixtures.md#does-it-scale-to-every-architecture)).
 2. Which failures need the real checkpoint or real hardware?
 3. Is model directory the right selection unit? Prototype: it runs nothing on 52% of `main` commits and everything on 46% (shared code).
 4. How expensive is baseline review in practice?
