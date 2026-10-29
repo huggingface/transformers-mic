@@ -305,12 +305,9 @@ def shrink(config):
         if values.get("upsample_groups") and values.get("hidden_size"):
             from math import gcd
             values["upsample_groups"] = gcd(values["upsample_groups"], values["hidden_size"])
-        # A top-level projection_dim equal to the text width is that width (PaliGemma;
-        # OWLv2's class head contracts text query embeds against it).
-        text_width = getattr(getattr(cfg, "text_config", None), "hidden_size", None)
-        if values.get("model_type") == "paligemma" or (
-            text_width and getattr(cfg, "projection_dim", None) == text_width
-        ):
+        # These models need projection_dim == the text width (OWL's class head contracts
+        # text query embeds against it); CLIP's projection is its own joint space.
+        if values.get("model_type") in ("paligemma", "owlv2", "owlvit"):
             values["projection_dim"] = values["text_config"]["hidden_size"]
         # BLT's local encoder/decoder name the global transformer's width
         # (hidden_size_global), and the checkpoint sizes the global transformer to
