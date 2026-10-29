@@ -637,7 +637,10 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
         raise SystemExit(f"{name}: fixture lacks {mirrored}, the real checkpoint lacks {lacks}")
     report_phase("Check float32, bfloat16 and float16 numeric health")
     health = numeric_health(cls, out, batch, captured)
-    if not all(row["finite"] for row in health.values()):
+    # A model that cannot run a half dtype (DeBERTa's mask fill overflows, FNet's FFT
+    # rejects it on CPU) declares it; the row is still recorded in build.json.
+    unhealthy = recipe.get("accept_unhealthy", {})
+    if not all(row["finite"] for dtype, row in health.items() if dtype not in unhealthy):
         raise SystemExit(f"{name}: numeric health check failed: {health}")
     build = {
         "fixture": name,

@@ -54,6 +54,7 @@ def validate_plan(plan, model, fixture, old=None):
         for key in (
             "overfit",
             "accept_insensitive",
+            "accept_unhealthy",
             "copy_assets",
             "preserve_frozen_prefixes",
         )
