@@ -176,6 +176,11 @@ def shrink(config):
         values = cfg.to_dict()
         # A slim fixture holds dense random weights, whatever the checkpoint's format.
         values.pop("quantization_config", None)
+        # Random fixture weights need a signal: Unlimited-OCR's SAM tower inits with
+        # 1e-10, which vanishes to 1e-37 over the tower and makes images inert.
+        init = values.get("initializer_range")
+        if isinstance(init, float) and 0 < init < 1e-3:
+            values["initializer_range"] = 0.02
         for key in getattr(cfg, "sub_configs", {}) or {}:
             sub = getattr(cfg, key, None)
             if isinstance(sub, PretrainedConfig):
