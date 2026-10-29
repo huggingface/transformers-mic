@@ -515,3 +515,14 @@ def test_shrink_raises_a_vanishing_initializer_range():
 
     sam = shrink(UnlimitedOcrConfig()).vision_config.sam_config
     assert sam.initializer_range == 0.02
+
+
+def test_shrink_keeps_projection_dim_equal_to_the_text_width():
+    # OWLv2's class head contracts text query embeds (projection_dim) with a
+    # projection of the image embeds to the text width.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import Owlv2Config
+
+    config = shrink(Owlv2Config())
+    assert config.projection_dim == config.text_config.hidden_size
