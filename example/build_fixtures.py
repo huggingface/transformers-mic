@@ -57,6 +57,7 @@ import json
 import os
 import platform
 import shutil
+import subprocess
 import sys
 
 import time
@@ -163,6 +164,9 @@ def model_class(source, recipe):
 
 
 def shrunk_config(source, cls, recipe=None):
+    recorded = (recipe or {}).get("recorded_config")
+    if recorded is not None:  # a rebuild reproduces the published config, not today's rule
+        return cls.config_class.from_dict(recorded)
     config = shrink(cls.config_class.from_pretrained(source))
     overrides = (recipe or {}).get("config_overrides", {}).get("fields", {})
     if not overrides:
@@ -199,6 +203,27 @@ def source_dtype(source):
     """The dtype the checkpoint loads in by default (dtype="auto"): its config's, else float32."""
     config = json.loads((source / "config.json").read_text())
     return config.get("dtype") or config.get("torch_dtype") or "float32"
+
+
+def builder_revision():
+    """The transformers-mic commit whose shrink rule built the fixture ("+dirty" if edited)."""
+    try:
+        head = subprocess.check_output(["git", "-C", str(HERE), "rev-parse", "HEAD"], text=True, stderr=subprocess.DEVNULL).strip()
+        dirty = subprocess.run(["git", "-C", str(HERE), "diff", "--quiet", "HEAD", "--", "."], stderr=subprocess.DEVNULL).returncode
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    return head + ("+dirty" if dirty else "")
+
+
+def recorded_config(out, fixture):
+    """The shrunk config a previous build of this exact recipe and source recorded, if any."""
+    path = Path(out) / "build.json"
+    if not path.exists():
+        return None
+    previous = json.loads(path.read_text())
+    if previous.get("recipe") != fixture["build"] or previous.get("built_from", {}).get("repo") != fixture["built_from"]:
+        return None  # an edited recipe (or a pre-provenance record) re-shrinks with the current rule
+    return previous.get("key_fields")
 
 
 def fixture_key(source, cls, missing, recipe=None, frozen_hashes=None):
@@ -543,8 +568,9 @@ def environment():
     }
 
 
-def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, keep_random=False, inspect_checkpoint=None, contract_repo=None):
-    recipe = fixture["build"]
+def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, keep_random=False, inspect_checkpoint=None, contract_repo=None, reshrink=False):
+    recorded = None if reshrink else recorded_config(out, fixture)
+    recipe = {**fixture["build"], "recorded_config": recorded} if recorded is not None else fixture["build"]
     keys, missing = {}, {}
     for repo in fixture["covers"]:
         report_phase("Inspect checkpoint", repo)
@@ -615,6 +641,9 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
         "seed": recipe["seed"],
         "dtype": str(dtype).removeprefix("torch."),
         "builder": "example/build_fixtures.py",
+        "builder_revision": builder_revision(),
+        "recipe": fixture["build"],
+        "shrink": "recorded" if recorded is not None else "rule",
         "model_class": cls.__name__,
         "parameters": sum(p.numel() for p in model.parameters()),
         "missing_parameters": lacks,
@@ -644,6 +673,7 @@ def main():
     parser.add_argument("--keys-only", action="store_true", help="check that covered checkpoints share a key")
     parser.add_argument("--out", type=Path, help="build into this directory instead, leaving the fixtures and lock untouched (reproducibility checks)")
     parser.add_argument("--keep-random", action="store_true", help="with --out: keep the random weights even where the recipe overfits (random-vs-overfit experiments)")
+    parser.add_argument("--reshrink", action="store_true", help="apply today's shrink rule instead of the config a matching build.json recorded")
     parser.add_argument("--threads", type=int, default=2)
     args = parser.parse_args()
     if args.keep_random and not args.out:
@@ -682,7 +712,7 @@ def main():
                 continue
             start = time.perf_counter()
             out = args.out / short(name) if args.out else (lock_dir / pin["path"]).resolve()
-            build = build_fixture(name, fixture, contract_name, manifest, root, contract["checkpoints"], out, args.keep_random, contract_repo=contract["integration"]["repo"])
+            build = build_fixture(name, fixture, contract_name, manifest, root, contract["checkpoints"], out, args.keep_random, contract_repo=contract["integration"]["repo"], reshrink=args.reshrink)
             if args.out:
                 same = run.digest(build["sha256"]) == pin.get("files_sha256")
                 print(json.dumps({"fixture": name, "matches_pin": same, "differs": [] if same else sorted(

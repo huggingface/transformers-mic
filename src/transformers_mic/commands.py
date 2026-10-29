@@ -662,6 +662,11 @@ def build(args):
         prefix="build-", dir=workspace.root / ".mic"
     ) as temp:
         out = Path(temp) / "fixture"
+        if local_metadata.exists() and not getattr(args, "reshrink", False):
+            # The builder reuses the shrunk config this record holds when the
+            # recipe is unchanged, so a rebuild does not depend on today's rule.
+            out.mkdir()
+            shutil.copy(local_metadata, out / "build.json")
         # Explicit random builds must not silently fall back to overfit.
         stage_args = [state["contract"], fixture, str(out)]
         if requested == "random":
