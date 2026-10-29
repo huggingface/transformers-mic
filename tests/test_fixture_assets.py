@@ -555,3 +555,12 @@ def test_shrink_keeps_clipseg_extract_layers_within_the_vision_depth():
     config = shrink(CLIPSegConfig(extract_layers=[3, 6, 9]))
     assert config.extract_layers == [0, 1, 1]
     assert max(config.extract_layers) < config.vision_config.num_hidden_layers
+
+
+def test_shrink_keeps_one_moe_layer_after_leading_dense_layers():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import Lfm2MoeConfig
+
+    config = shrink(Lfm2MoeConfig(num_dense_layers=2, num_hidden_layers=24))
+    assert config.num_dense_layers < config.num_hidden_layers
