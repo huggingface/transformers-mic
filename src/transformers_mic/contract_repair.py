@@ -202,6 +202,16 @@ def propose(args, workspace, stage, log, folder, state, save, command=()):
         commands.validate_plan(
             plan, workspace.state["model"], workspace.fixture, workspace.manifest
         )
+        # The draft's usage checks apply to a repair too: one renamed a loop
+        # variable and read the stale `n` (LLaVA-OneVision).
+        for check in (
+            commands.check_imports,
+            commands.check_undefined_names,
+            commands.check_code_fences,
+            commands.check_image_shapes,
+            commands.check_loss_has_gradients,
+        ):
+            check(plan)
         if plan["manifest"] != workspace.manifest:
             raise ValueError(
                 "Repair must preserve the entire manifest, including assertions, targets, variants, resources and build gates"
