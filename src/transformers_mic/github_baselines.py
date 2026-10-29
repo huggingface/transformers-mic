@@ -91,7 +91,13 @@ def gh(*args):
     return subprocess.check_output(["gh", *args], text=True).strip()
 
 
-def api(path):
+def api(path, waits=(5, 15, 45)):
+    # A read is idempotent; a transient gh/API failure must not kill an hours-long watch.
+    for wait in waits:
+        try:
+            return json.loads(gh("api", path))
+        except subprocess.CalledProcessError:
+            time.sleep(wait)
     return json.loads(gh("api", path))
 
 

@@ -1226,6 +1226,28 @@ def test_create_rejects_targets_without_the_drafted_fixture():
         commands.check_targets(plan(["checkpoints"]))
 
 
+def test_github_api_reads_retry_transient_failures(monkeypatch):
+    import subprocess
+
+    from transformers_mic import github_baselines
+
+    calls = []
+
+    def flaky(*args):
+        calls.append(args)
+        if len(calls) < 3:
+            raise subprocess.CalledProcessError(1, ["gh", *args])
+        return '{"status": "in_progress"}'
+
+    monkeypatch.setattr(github_baselines, "gh", flaky)
+    monkeypatch.setattr(github_baselines.time, "sleep", lambda s: None)
+    assert github_baselines.api("repos/x/runs/1") == {"status": "in_progress"}
+    assert len(calls) == 3
+    monkeypatch.setattr(github_baselines, "gh", lambda *a: (_ for _ in ()).throw(subprocess.CalledProcessError(1, "gh")))
+    with pytest.raises(subprocess.CalledProcessError):
+        github_baselines.api("repos/x/runs/1")
+
+
 def test_fp8_checkpoint_names_drop_their_scales():
     from transformers_mic.inspection import logical_checkpoint_keys
 
