@@ -1384,3 +1384,19 @@ def test_create_rejects_imports_transformers_does_not_export():
     with pytest.raises(ValueError, match="AutoModelForConditionalGeneration"):
         commands.check_imports({"usage": usage})
     commands.check_imports({"usage": usage.replace("AutoModelForConditionalGeneration", "AutoModelForImageTextToText")})
+
+
+def test_planner_slugs_a_dotted_contract_name():
+    from types import SimpleNamespace
+
+    from transformers_mic import planner
+
+    content = json.dumps(
+        {"name": "Kimi-K2.5", "manifest": {}, "usage": "x" * 100, "rationale": "", "historical_candidates": []}
+    )
+    response = SimpleNamespace(
+        choices=[SimpleNamespace(message=SimpleNamespace(content=content), finish_reason="stop")],
+        usage=None,
+    )
+    plan, _ = planner.parse(response, "m", "p", None)
+    assert plan["name"] == "Kimi-K2-5"

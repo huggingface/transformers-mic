@@ -112,6 +112,9 @@ def parse(response, model, provider, bill_to):
         )
     content = re.sub(r"^```(?:json)?\s*|\s*```$", "", content.strip())
     plan = json.loads(content)
+    if isinstance(plan, dict) and isinstance(plan.get("name"), str):
+        # "Kimi-K2.5" is a slug away from valid: never spend a retry on it.
+        plan["name"] = re.sub(r"[^A-Za-z0-9_-]", "-", plan["name"])
     jsonschema.validate(plan, PLAN_SCHEMA)
     return plan, {
         "model": model,
