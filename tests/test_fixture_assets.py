@@ -572,3 +572,27 @@ def test_shrink_keeps_one_moe_layer_after_leading_dense_layers():
 
     config = shrink(Lfm2MoeConfig(num_dense_layers=2, num_hidden_layers=24))
     assert config.num_dense_layers < config.num_hidden_layers
+
+def test_shrink_keeps_llama4_pixel_shuffle_and_projector_widths():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import Llama4Config
+
+    # As in Llama-4-Scout: the adapter MLP reads hidden_size / ratio**2 channels and
+    # projects to the text width.
+    config = shrink(Llama4Config(
+        vision_config={"hidden_size": 768, "intermediate_size": 3072, "pixel_shuffle_ratio": 0.5,
+                       "projector_input_dim": 2048, "projector_output_dim": 2048, "vision_output_dim": 2048},
+        text_config={"hidden_size": 2048},
+    ))
+    vision, width = config.vision_config, config.text_config.hidden_size
+    assert vision.intermediate_size == vision.hidden_size * 4
+    assert vision.projector_input_dim == vision.projector_output_dim == vision.vision_output_dim == width
+
+def test_shrink_keeps_csm_depth_decoder_reading_the_backbone_width():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import CsmConfig
+
+    config = shrink(CsmConfig(hidden_size=2048, depth_decoder_config={"backbone_hidden_size": 2048}))
+    assert config.depth_decoder_config.backbone_hidden_size == config.hidden_size
