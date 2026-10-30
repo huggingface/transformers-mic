@@ -104,6 +104,11 @@ def sensitivity(model, batch, threshold, accepted=None):
     measured and reported, but do not fail the gate.
     """
     accepted = accepted or {}
+    # Labels only feed the loss unless an encoder-decoder shifts them into its decoder
+    # inputs; a perturbed input can leave them inconsistent (CSM rewrites audio-token
+    # labels from input_values), so a decoder-only gate runs without them.
+    if "labels" in batch and not getattr(getattr(model, "config", None), "is_encoder_decoder", False):
+        batch = {k: v for k, v in batch.items() if k != "labels"}
     model.eval()
     parameter = next(model.parameters())
     with torch.no_grad(), torch.autocast(parameter.device.type, dtype=parameter.dtype, enabled=parameter.dtype in (torch.float16, torch.bfloat16)):

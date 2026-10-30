@@ -3,6 +3,7 @@
 import hashlib
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -287,6 +288,25 @@ def test_sensitivity_skips_inputs_only_absorbed_by_kwargs():
     assert result["pass"]
     assert result["not_a_forward_parameter"] == ["token_type_ids"]
     assert not any(key.startswith("token_type_ids") for key in result["deltas"])
+
+
+def test_sensitivity_runs_a_decoder_only_model_without_its_labels():
+    import perturb
+
+    class CausalLM(torch.nn.Module):  # CSM: labels only valid for the unperturbed audio
+        config = SimpleNamespace(is_encoder_decoder=False)
+
+        def __init__(self):
+            super().__init__()
+            self.embed = torch.nn.Embedding(10, 4)
+
+        def forward(self, input_ids, labels=None):
+            if labels is not None:
+                raise IndexError("Target 128002 is out of bounds.")
+            return {"logits": self.embed(input_ids)}
+
+    ids = torch.tensor([[1, 2, 3], [4, 5, 6]])
+    assert perturb.sensitivity(CausalLM(), {"input_ids": ids, "labels": ids}, threshold=1e-3)["pass"]
 
 
 @pytest.mark.parametrize(
