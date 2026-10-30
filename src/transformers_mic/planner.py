@@ -217,11 +217,11 @@ not memory:
 - Resources: the only GPU is one A10G reporting about 22 GB, so declare
   gpu_memory_gb of at most 22 (more skips the checkpoint), and memory_gb from the
   real parameter count; do not guess low. Do not declare devices: tmic makes a
-  checkpoint above 1B GPU-only and bfloat16-only itself.
+  checkpoint above 1B GPU-only and bfloat16-only itself, so load it visibly with
+  dtype=torch.bfloat16 (a float32 copy does not fit the GPU).
 - A checkpoint stored in float16 (config dtype/torch_dtype "float16") cannot train
   without loss scaling: load the visible model with dtype=torch.float32 (the
-  bfloat16 variant still overrides it; above 1B parameters use dtype=torch.bfloat16:
-  float32 does not fit the GPU), and say why in a comment.
+  bfloat16 variant still overrides it), and say why in a comment.
 - Train through the model's public forward (model(**inputs)), never a private
   method; if the public forward runs under inference mode (e.g. video/streaming
   models), use the architecture's image or base model class for the training step.

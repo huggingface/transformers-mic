@@ -1286,6 +1286,12 @@ def test_create_keeps_large_checkpoints_off_the_cpu_runner():
     assert resources["org/big"] == {"memory_gb": 16, "devices": ["cuda"], "variants": float32_off}
     assert resources["org/gpu"] == {"devices": ["cuda"], "variants": float32_off}
     assert "org/small" not in resources
+    # The checkpoint loads visibly in bfloat16, so the fixture's float32 variants say so explicitly.
+    assert manifest["integrations"]["transformers"]["variants"] == {
+        "default": {"dtype": "float32"},
+        "eager": {"dtype": "float32", "attn_implementation": "eager"},
+        "bfloat16": {"dtype": "bfloat16"},
+    }
     assert commands.keep_large_checkpoints_off_cpu(manifest, parameters) == []
     assert commands.keep_large_checkpoints_off_cpu(manifest, {"org/big": None}) == []
     jsonschema = pytest.importorskip("jsonschema")
@@ -1482,6 +1488,8 @@ def test_create_rejects_plain_fences_and_float16_loads():
         commands.check_float16_load({"usage": fixed}, {"torch_dtype": "float16"}, 8_000_000_000)
     large = usage.replace("(model_id)", "(model_id, dtype=torch.bfloat16)")
     commands.check_float16_load({"usage": large}, {"torch_dtype": "float16"}, 8_000_000_000)
+    with pytest.raises(ValueError, match="dtype=torch.bfloat16"):  # Audio Flamingo 3: stored float32
+        commands.check_float16_load({"usage": usage}, {"dtype": "float32"}, 8_000_000_000)
 
 
 def test_create_rejects_the_broadcast_image_idiom():

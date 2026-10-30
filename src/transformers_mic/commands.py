@@ -228,6 +228,14 @@ def keep_large_checkpoints_off_cpu(manifest, parameters):
             spec.setdefault("variants", {}).setdefault(name, {})["devices"] = []
         if json.dumps(spec, sort_keys=True) != before:
             changed.append(repo)
+    if any((parameters.get(repo) or 0) > CPU_PARAMETER_LIMIT for repo in manifest.get("checkpoints", {})):
+        # Such a checkpoint is loaded visibly in bfloat16 (check_float16_load), so a
+        # variant without kwargs would never reload: the slim fixture keeps its float32
+        # coverage only if the full-precision variants say so.
+        for name in full_precision:
+            kwargs = integration["variants"][name] or {}
+            if "dtype" not in kwargs:
+                integration["variants"][name] = {"dtype": "float32", **kwargs}
     return changed
 
 
@@ -431,25 +439,29 @@ def check_loss_has_gradients(plan):
 
 
 def check_float16_load(plan, config, parameters=None):
-    """A float16 checkpoint loaded at its stored dtype overflows and cannot train.
+    """Load the model in a dtype that trains and fits the GPU.
 
-    Below 1B it loads in float32. Above, the contract is measured in bfloat16 only
-    and a float32 copy does not fit the GPU (Aya Expanse 8B: 32 GB before the
-    hidden bfloat16 reload), so it loads in bfloat16.
+    Above 1B the contract is measured in bfloat16 only, and a float32 copy does not
+    fit the GPU before the hidden bfloat16 reload (Aya Expanse 8B stored in float16,
+    Audio Flamingo 3 stored in float32: about 33 GB), so it loads in bfloat16.
+    Below, a float16 checkpoint overflows without loss scaling: it loads in float32.
     """
     stored = config.get("dtype") or config.get("torch_dtype")
-    if stored != "float16":
+    if (parameters or 0) > CPU_PARAMETER_LIMIT:
+        wanted = "bfloat16"
+    elif stored == "float16":
+        wanted = "float32"
+    else:
         return
-    wanted = "bfloat16" if (parameters or 0) > CPU_PARAMETER_LIMIT else "float32"
     loads = re.findall(r"^[^#\n]*\b(\w+)\.from_pretrained\(model_id[^\n]*$", plan["usage"], re.M)
     lines = re.findall(r"^[^#\n]*\b\w+\.from_pretrained\(model_id[^\n]*$", plan["usage"], re.M)
     for name, line in zip(loads, lines):
         if re.search(r"Processor|Tokenizer|Extractor", name) or f"torch.{wanted}" in line:
             continue
         raise ValueError(
-            f"the checkpoint is stored in float16: load {name} with dtype=torch.{wanted}"
-            + (" (above 1B it is measured in bfloat16 only; float32 does not fit the GPU)"
-               if wanted == "bfloat16" else " (the bfloat16 variant still overrides it)")
+            f"load {name} with dtype=torch.{wanted}: "
+            + ("above 1B parameters the contract is measured in bfloat16 only and float32 does not fit the GPU"
+               if wanted == "bfloat16" else "the checkpoint is stored in float16 (the bfloat16 variant still overrides it)")
         )
 
 
