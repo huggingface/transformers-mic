@@ -153,7 +153,8 @@ assets are already provided. Use at least two distinct input examples so batch
 perturbation is meaningful, and padding where supported. Report compact numeric
 probes (a few selected logits), never entire vocabulary logits or parameter arrays. Prefer named top-level model kwargs so the builder
 can capture the training inputs. Print a final JSON object only when MIC_RUNNER
-is set. Include runtime device/dtype/attn_implementation and meaningful outputs.
+is set, plain JSON only (device as model.device.type, never a torch.device).
+Include runtime device/dtype/attn_implementation and meaningful outputs.
 The final JSON must nest training.loss, training.gradients, and training.updated
 under a training object. Declare those exact dotted keys in outputs, using
 allclose, all_true, and true respectively. training.gradients must be a nonempty
@@ -233,6 +234,8 @@ not memory:
   fusion extractor (CLAP, enable_fusion) marks a random clip "longer" when none
   exceeds its max_length_s window, so use clips longer than that window: then
   every clip takes the fusion branch and its batch norm trains on the full batch.
+  Mistral-backed chat templates (Voxtral) take audio only as a path, url or
+  base64 entry: write each clip to a WAV file with soundfile.
 - Train through the checkpoint's language-model head class (AutoModelForCausalLM,
   AutoModelForSeq2SeqLM) with labels=, even when the config lists a base class
   (BartModel): never compute cross-entropy over hidden states. Build the fixture
@@ -252,11 +255,10 @@ not memory:
   can be None too (Inkling); then use its end-of-text special token by name.
 - A base model class (AutoModel: WavLMModel, DINOv3ViTModel) returns no loss and
   takes no labels, and Transformers may have no pretraining head for it: train it
-  with a small linear probe on pooled hidden states, optimizing the model's and
-  the probe's parameters together.
-- Get a word's token id with tokenizer.encode(word, add_special_tokens=False)[0];
-  convert_tokens_to_ids(" Paris") returns None in BPE vocabularies, which spell
-  the leading space inside the token.
+  with a small linear probe on pooled hidden states, built with .to(device,
+  model.dtype) so the bfloat16 variant runs, optimizing both together.
+- Get a word's token id with tokenizer.encode(word, add_special_tokens=False)[0],
+  not convert_tokens_to_ids (None for BPE tokens with a leading space).
 - get_text_features / get_image_features / get_audio_features take only their own
   modality's inputs (never **inputs) and return a model output in Transformers 5:
   the projected embedding is .pooler_output.
@@ -286,9 +288,8 @@ not memory:
   and text with the tokenizer's attention_mask.
 - Per-token side inputs (LayoutLM bbox) must be built from the tokenized length,
   never hard-coded for the words: tokenizers add special tokens.
-- Eager attention materializes the full attention matrix: with thousands of image
-  tokens (OWLv2 at 960 px: 3600; EmbeddingGemma2 images: 2520) a training step OOMs
-  the GPU. Such contracts declare only the default and bfloat16 variants.
+- With thousands of image tokens (OWLv2 at 960 px, EmbeddingGemma2) eager attention
+  OOMs the GPU in training: declare only the default and bfloat16 variants.
 - An embedding model's processor packs a list of images into one sequence
   (EmbeddingGemma2): embed each image with its own processor call.
 - Build each image as an (H, W, 3) uint8 NumPy array (then PIL if the processor
