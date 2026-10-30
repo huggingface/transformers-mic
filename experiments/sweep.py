@@ -328,6 +328,11 @@ def shrink(config):
         # text query embeds against it); CLIP's projection is its own joint space.
         if values.get("model_type") in ("paligemma", "owlv2", "owlvit"):
             values["projection_dim"] = values["text_config"]["hidden_size"]
+        # Voxtral's projector stacks intermediate_size / hidden_size consecutive audio
+        # frames into one token (reshape(-1, intermediate_size)): keep that factor.
+        if values.get("model_type") == "voxtral" and isinstance(values.get("audio_config"), dict):
+            audio = values["audio_config"]
+            audio["intermediate_size"] = audio["hidden_size"] * (cfg.audio_config.intermediate_size // cfg.audio_config.hidden_size)
         # BLT's local encoder/decoder name the global transformer's width
         # (hidden_size_global), and the checkpoint sizes the global transformer to
         # the encoder's cross_attn_k patch outputs so no extra projection is built.

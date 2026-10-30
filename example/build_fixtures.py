@@ -391,12 +391,13 @@ def overfit(model, batch, max_steps, target_loss=0.05):
         if loss is None:
             # Models without a built-in loss (SAM2): fit the predictions the gate
             # measures to fixed, distinct targets per example, as labels would.
-            # A sigmoid output (VitMatte's alphas) cannot reach normal targets.
+            # A non-negative output (VitMatte's sigmoid alphas, DPT's ReLU depth)
+            # cannot reach normal targets.
             predictions = logits_of(output)
             if targets is None:
                 generator = torch.Generator().manual_seed(17)
                 targets = {
-                    k: (torch.rand if 0 <= v.min() and v.max() <= 1 else torch.randn)(v.shape, generator=generator).to(v.device, v.dtype)
+                    k: (torch.rand if v.min() >= 0 else torch.randn)(v.shape, generator=generator).to(v.device, v.dtype)
                     for k, v in predictions.items()
                 }
             loss = sum(torch.nn.functional.mse_loss(v, targets[k]) for k, v in predictions.items())
