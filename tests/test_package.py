@@ -1505,6 +1505,10 @@ def test_create_rejects_plain_fences_and_float16_loads():
     commands.check_float16_load({"usage": large}, {"torch_dtype": "float16"}, 8_000_000_000)
     with pytest.raises(ValueError, match="dtype=torch.bfloat16"):  # Audio Flamingo 3: stored float32
         commands.check_float16_load({"usage": usage}, {"dtype": "float32"}, 8_000_000_000)
+    # A fixtures-only contract loads only its slim fixture.
+    huge = {"parameters": 1_026_879_376_368, "fixtures_only": True}
+    commands.check_float16_load({"usage": usage}, {"dtype": "bfloat16"}, commands.loaded_parameters(huge))
+    assert commands.loaded_parameters({**huge, "fixtures_only": False}) == huge["parameters"]
 
 
 def test_create_rejects_the_broadcast_image_idiom():
