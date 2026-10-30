@@ -290,6 +290,27 @@ def test_sensitivity_skips_inputs_only_absorbed_by_kwargs():
     assert not any(key.startswith("token_type_ids") for key in result["deltas"])
 
 
+def test_near_zero_batch_norm_scales_reset_to_one_before_overfitting():
+    net = torch.nn.Sequential(torch.nn.Conv2d(3, 4, 3), torch.nn.BatchNorm2d(4), torch.nn.BatchNorm2d(4))
+    torch.nn.init.normal_(net[1].weight, std=0.02)  # VitMatte's BatchNorm init
+    assert build_fixtures.unit_batch_norm(net) == 1
+    assert torch.equal(net[1].weight, torch.ones(4))
+
+
+def test_overfit_reaches_targets_for_a_sigmoid_output_without_a_loss():
+    class Matting(torch.nn.Module):  # VitMatte: alphas in [0, 1], no built-in loss
+        def __init__(self):
+            super().__init__()
+            self.linear = torch.nn.Linear(4, 4)
+
+        def forward(self, pixel_values):
+            return {"alphas": torch.sigmoid(self.linear(pixel_values))}
+
+    torch.manual_seed(0)
+    result = build_fixtures.overfit(Matting(), {"pixel_values": torch.randn(2, 4)}, max_steps=500)
+    assert result["converged"]
+
+
 def test_sensitivity_runs_a_decoder_only_model_without_its_labels():
     import perturb
 

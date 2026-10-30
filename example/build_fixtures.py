@@ -391,11 +391,12 @@ def overfit(model, batch, max_steps, target_loss=0.05):
         if loss is None:
             # Models without a built-in loss (SAM2): fit the predictions the gate
             # measures to fixed, distinct targets per example, as labels would.
+            # A sigmoid output (VitMatte's alphas) cannot reach normal targets.
             predictions = logits_of(output)
             if targets is None:
                 generator = torch.Generator().manual_seed(17)
                 targets = {
-                    k: torch.randn(v.shape, generator=generator).to(v.device, v.dtype)
+                    k: (torch.rand if 0 <= v.min() and v.max() <= 1 else torch.randn)(v.shape, generator=generator).to(v.device, v.dtype)
                     for k, v in predictions.items()
                 }
             loss = sum(torch.nn.functional.mse_loss(v, targets[k]) for k, v in predictions.items())
@@ -412,6 +413,23 @@ def overfit(model, batch, max_steps, target_loss=0.05):
     model.zero_grad(set_to_none=True)
     model.eval()
     return {"seconds": round(time.perf_counter() - start, 2), "steps": step, "loss": loss.item(), "converged": stable == 2}
+
+
+def unit_batch_norm(model):
+    """Reset BatchNorm scales drawn near zero to PyTorch's unit default; return how many.
+
+    VitMatte initializes every BatchNorm weight from N(0, 0.02), so each conv block
+    scales activations and gradients by ~0.02: outputs sit at sigmoid(0) and 500
+    overfit steps cannot move them. Used only before overfitting a failing fixture.
+    """
+    norms = [module for module in model.modules()
+             if isinstance(module, torch.nn.modules.batchnorm._BatchNorm)
+             and module.affine and module.weight.abs().mean() < 0.1]
+    with torch.no_grad():
+        for module in norms:
+            module.weight.fill_(1.0)
+            module.bias.zero_()
+    return len(norms)
 
 
 def calibrate_batch_norm(model, batch):
@@ -628,11 +646,14 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
     if not keep_random and (not gate["random"]["pass"] or recipe.get("overfit")):
         torch.manual_seed(recipe["seed"])  # dropout and SpecAugment stay on while training
         model = model.float()  # trained in float32, saved in the source dtype
+        unit_scales = unit_batch_norm(model)
         training = overfit(called_module(model, captured), as_dtype(batch, torch.float32), recipe.get("max_steps", 500), recipe.get("target_loss", 0.05))
         report_phase("Calibrate BatchNorm statistics")
         calibrated = calibrate_batch_norm(called_module(model, captured), as_dtype(batch, torch.float32))
         if calibrated:
             training["batch_norm_calibration"] = {"layers": calibrated, "batches": 1}
+        if unit_scales:
+            training["batch_norm_unit_scale"] = unit_scales
         model = model.to(dtype)
         report_phase("Verify trained fixture sensitivity")
         gate["overfit"] = sensitivity(called_module(model, captured), as_dtype(batch, dtype), threshold, accepted)
