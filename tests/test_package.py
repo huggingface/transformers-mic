@@ -1138,6 +1138,25 @@ def test_binary_only_checkpoint_reads_names_from_conversion_pr(tmp_path, monkeyp
     }
 
 
+@pytest.mark.parametrize("zipped", [True, False])
+def test_binary_keys_read_names_without_tensor_data(monkeypatch, tmp_path, zipped):
+    import torch
+
+    from transformers_mic import inspection
+
+    state = {"encoder.weight": torch.ones(2, 2), "head.bias": torch.zeros(2), "config": {"a": 1}}
+    path = tmp_path / "pytorch_model.bin"
+    torch.save(state, path, _use_new_zipfile_serialization=zipped)
+
+    class FileSystem:
+        def open(self, name, revision, block_size):
+            assert name == "org/model/pytorch_model.bin" and revision == "a" * 40
+            return path.open("rb")
+
+    monkeypatch.setattr(inspection, "HfFileSystem", FileSystem)
+    assert inspection.binary_keys("org/model", "a" * 40) == {"encoder.weight", "head.bias"}
+
+
 def test_checkpoint_keys_read_shard_headers_over_a_stale_index(monkeypatch, tmp_path):
     from types import SimpleNamespace
 

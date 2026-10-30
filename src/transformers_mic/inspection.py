@@ -1,10 +1,13 @@
-"""Inspect parameter names from headers/indexes, with a bounded binary fallback."""
+"""Inspect parameter names from headers/indexes, or a binary checkpoint's pickle."""
 
+import collections
 import json
 from pathlib import Path
+import pickle
 import re
+import zipfile
 
-from huggingface_hub import HfApi
+from huggingface_hub import HfApi, HfFileSystem
 
 
 def checkpoint_keys(repo, revision, source):
@@ -27,24 +30,41 @@ def checkpoint_keys(repo, revision, source):
         converted = conversion_pr_keys(api, repo)
         if converted:
             return converted
-        import torch
-        from huggingface_hub import hf_hub_download
-
-        info = api.model_info(repo, revision=revision, files_metadata=True)
-        file = next(
-            (f for f in info.siblings if f.rfilename == "pytorch_model.bin"), None
-        )
-        if file is None or file.size is None or file.size > 1024**3:
-            raise ValueError(
-                "No parameter index available; binary-only checkpoint exceeds the 1 GiB inspection limit"
-            )
-        path = hf_hub_download(repo, "pytorch_model.bin", revision=revision)
-        return set(torch.load(path, map_location="meta", weights_only=True))
+        return binary_keys(repo, revision)
     return set(
         api.parse_safetensors_file_metadata(
             repo, "model.safetensors", revision=revision, timeout=60
         ).tensors
     )
+
+
+class _Names(pickle.Unpickler):
+    """Unpickle a state dict's structure only: every tensor becomes None, no storage is read."""
+
+    def find_class(self, module, name):
+        if (module, name) == ("collections", "OrderedDict"):
+            return collections.OrderedDict
+        return lambda *args, **kwargs: None
+
+    def persistent_load(self, pid):
+        return None
+
+
+def binary_keys(repo, revision):
+    """Tensor names of a pytorch_model.bin, read by range requests (a few MB of a 1.6 GB DeBERTa)."""
+    path = f"{repo}/pytorch_model.bin"
+    with HfFileSystem().open(path, revision=revision, block_size=1 << 20) as f:
+        if zipfile.is_zipfile(f):
+            archive = zipfile.ZipFile(f)
+            name = next(n for n in archive.namelist() if n.endswith("data.pkl"))
+            state = _Names(archive.open(name)).load()
+        else:
+            f.seek(0)
+            for _ in range(3):  # legacy format: magic number, protocol, system info
+                _Names(f).load()
+            state = _Names(f).load()
+    # Non-tensor entries (DeBERTa stores its config) are not parameters.
+    return {key for key, value in state.items() if value is None}
 
 
 def loads_binary(repo, revision, source):
