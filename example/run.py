@@ -79,7 +79,8 @@ machine's CPU platform.
 
 An unsupported target records why it was skipped (skip): declared in the
 manifest, missing hardware on this host, or an undefined variant. A run in
-which no target ran (all unsupported, or nothing matched) fails; with
+which no target ran (all unsupported, or nothing matched) fails, unless every
+skip is declared in the manifest; with
 --require-all, any skip the manifest does not declare fails too.
 """
 
@@ -642,6 +643,8 @@ def main():
 
         patches.apply(local_patches)
 
+    declared = [0]
+
     def emit(record):
         nonlocal status
         entry = known_entry(known, record.get("contract_name", record["contract"]), record["target"])
@@ -658,6 +661,7 @@ def main():
             with args.output.open("a") as f:
                 f.write(json.dumps(record) + "\n")
         counts[record["status"]] = counts.get(record["status"], 0) + 1
+        declared[0] += record["status"] == "unsupported" and record.get("skip") == "declared"
         status |= record["status"] in ("fail", "error")
         status |= args.require_all and record["status"] == "unsupported" and record["skip"] != "declared"
 
@@ -799,6 +803,10 @@ def main():
         # Both are valid "nothing to do" outcomes, not failures.
         if selected_by is not None and not args.run_all:
             print("no contract matched the changed files — nothing to run", file=sys.stderr)
+        elif counts and declared[0] == counts["unsupported"]:
+            # The manifest declares every target unmeasured in this variant (TIPSv2's bfloat16
+            # until an upstream fix): a reviewed decision, not a missing check.
+            print(f"every target is declared unmeasured: {declared[0]}", file=sys.stderr)
         else:
             print(f"no target ran: {counts['unsupported']} unsupported" if counts else "no target matched", file=sys.stderr)
             status = 1
