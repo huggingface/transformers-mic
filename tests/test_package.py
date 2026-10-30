@@ -1229,17 +1229,26 @@ def test_create_rejects_targets_without_the_drafted_fixture():
 def test_create_keeps_large_checkpoints_off_the_cpu_runner():
     manifest = {
         "checkpoints": {"org/big": {}, "org/small": {}, "org/gpu": {}},
-        "integrations": {"transformers": {"resources": {
-            "org/big": {"memory_gb": 16},
-            "org/gpu": {"devices": ["cuda"]},
-        }}},
+        "integrations": {"transformers": {
+            "variants": {"default": {}, "eager": {"attn_implementation": "eager"}, "bfloat16": {"dtype": "bfloat16"}},
+            "resources": {
+                "org/big": {"memory_gb": 16},
+                "org/gpu": {"devices": ["cuda"]},
+            },
+        }},
     }
     parameters = {"org/big": 2_600_000_000, "org/small": 500_000_000, "org/gpu": 9e9}
-    assert commands.keep_large_checkpoints_off_cpu(manifest, parameters) == ["org/big"]
+    assert commands.keep_large_checkpoints_off_cpu(manifest, parameters) == ["org/big", "org/gpu"]
     resources = manifest["integrations"]["transformers"]["resources"]
-    assert resources["org/big"] == {"memory_gb": 16, "devices": ["cuda"]}
+    float32_off = {"default": {"devices": []}, "eager": {"devices": []}}
+    assert resources["org/big"] == {"memory_gb": 16, "devices": ["cuda"], "variants": float32_off}
+    assert resources["org/gpu"] == {"devices": ["cuda"], "variants": float32_off}
     assert "org/small" not in resources
+    assert commands.keep_large_checkpoints_off_cpu(manifest, parameters) == []
     assert commands.keep_large_checkpoints_off_cpu(manifest, {"org/big": None}) == []
+    jsonschema = pytest.importorskip("jsonschema")
+    schema = commands.manifest_schema()["properties"]["integrations"]["additionalProperties"]["properties"]["resources"]
+    jsonschema.validate(resources, schema)
 
 
 def test_github_api_reads_retry_transient_failures(monkeypatch):

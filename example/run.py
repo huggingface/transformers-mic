@@ -704,6 +704,9 @@ def main():
                 resources = integration.get("resources", {})
                 short_names = {short(r): r for r in manifest["checkpoints"]}
                 spec = resources.get("fixture") if kind == "fixture" else resources.get(short_names.get(target))
+                if (spec or {}).get("variants", {}).get(args.variant, {}).get("devices") == []:
+                    emit({**record, "status": "unsupported", "skip": "declared", "failures": [f"not measured in the {args.variant} variant (resources declare no devices)"]})
+                    continue
                 too_small = resource_problem(spec, args.variant)
                 if too_small:
                     emit({**record, "status": "unsupported", "skip": "hardware", "failures": [too_small]})

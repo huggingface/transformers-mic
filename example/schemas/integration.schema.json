@@ -294,9 +294,9 @@
               "cuda"
              ]
             },
-            "minItems": 1,
+            "minItems": 0,
             "uniqueItems": true,
-            "description": "devices the target can run on (default: cpu and cuda); [\"cuda\"] for GPU-only targets"
+            "description": "devices the target can run on in this variant; [] when the variant is not measured on this target (a checkpoint above 1B runs only in bfloat16)"
            },
            "gpus": {
             "type": "integer",

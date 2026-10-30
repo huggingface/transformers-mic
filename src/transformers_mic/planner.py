@@ -302,5 +302,9 @@ not memory:
   padding="max_length" so the query batches concatenate.
 - CPU runners are memory-limited containers: a checkpoint above ~1B parameters
   declares "devices": ["cuda"] in its resources, so CPU measures only the slim
-  fixture and the checkpoint runs on GPU. The exclusion stays visible in results.
+  fixture and the checkpoint runs on GPU. A float32 training step on such a
+  checkpoint does not fit the GPU either: it runs only in the bfloat16 variant,
+  declared per variant as "variants": {"default": {"devices": []}, "eager":
+  {"devices": []}}. The float32 variants still run on the slim fixture. The
+  exclusions stay visible in results.
 """

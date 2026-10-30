@@ -199,20 +199,34 @@ CPU_PARAMETER_LIMIT = 1_000_000_000
 
 
 def keep_large_checkpoints_off_cpu(manifest, parameters):
-    """A checkpoint above ~1B parameters runs on GPU only.
+    """A checkpoint above ~1B parameters runs on GPU only, and only in bfloat16.
 
     The CPU runner is a memory-limited container: a float32 training step on a
     2B checkpoint (gemma-2-2b-it, SmolLM-1.7B) kills it with exit 137, and the
-    artifact upload dies with it, so the failure has no log.
+    artifact upload dies with it, so the failure has no log. On the 22 GB A10G a
+    float32 step on gemma-2b (weights + gradients) runs out of memory too, so the
+    float32 variants stay on the slim fixture.
     """
-    resources = manifest["integrations"]["transformers"].setdefault("resources", {})
+    integration = manifest["integrations"]["transformers"]
+    resources = integration.setdefault("resources", {})
+    full_precision = [
+        name
+        for name, kwargs in integration.get("variants", {}).items()
+        if (kwargs or {}).get("dtype") != "bfloat16"
+    ]
+    if len(full_precision) == len(integration.get("variants", {})):
+        full_precision = []  # no bfloat16 variant to keep
     changed = []
     for repo in manifest.get("checkpoints", {}):
         if (parameters.get(repo) or 0) <= CPU_PARAMETER_LIMIT:
             continue
         spec = resources.setdefault(repo, {})
+        before = json.dumps(spec, sort_keys=True)
         if "cpu" in spec.get("devices", ["cpu", "cuda"]):
             spec["devices"] = ["cuda"]
+        for name in full_precision:
+            spec.setdefault("variants", {}).setdefault(name, {})["devices"] = []
+        if json.dumps(spec, sort_keys=True) != before:
             changed.append(repo)
     return changed
 
@@ -746,7 +760,7 @@ def create(args):
         for repo in keep_large_checkpoints_off_cpu(
             manifest, {args.model: parameter_count(args.model, revision)}
         ):
-            print(f"tmic: {repo} is above 1B parameters: measuring it on GPU only", file=sys.stderr)
+            print(f"tmic: {repo} is above 1B parameters: measuring it on GPU, in bfloat16 only", file=sys.stderr)
         workspace.from_plan(
             args.model,
             revision,
