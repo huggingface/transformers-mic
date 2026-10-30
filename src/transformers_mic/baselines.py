@@ -14,7 +14,7 @@ from io import BytesIO
 from filelock import FileLock
 from huggingface_hub import HfApi
 
-from . import dashboard_auth, fleet, cloud_progress
+from . import cloud_inputs, dashboard_auth, fleet, cloud_progress
 from .workspace import read, write
 
 TERMINAL = {"completed", "failed", "cancelled", "unknown"}
@@ -62,6 +62,7 @@ def collection(root):
     root = Path(root)
     state = read(root / "cloud.json")
     reports = []
+    pins = None
     for profile in state["request"]["profiles"]:
         folder = root / "artifacts" / profile
         report = read(folder / "collection.json")
@@ -93,6 +94,19 @@ def collection(root):
         if len(keys) != len(set(keys)) or set(keys) != set(report["expected_cases"]):
             raise ValueError("Collection does not cover its declared case matrix")
         for model in report.get("models", []) + report.get("contracts", []):
+            if "files" not in model:
+                if pins is None:
+                    pins = pinned_sources(state["job"])
+                if (
+                    model["repo"],
+                    model["revision"],
+                    model["files_sha256"],
+                ) not in pins:
+                    raise ValueError(
+                        f"{profile}: measured {model['repo']}@{model['revision'][:10]}, which the requested fleet does not pin"
+                    )
+                continue
+            # Older artifacts carried copies of the sources.
             for relative, expected in model["files"].items():
                 path = PurePosixPath(relative)
                 if (
@@ -125,6 +139,26 @@ def collection(root):
     ):
         raise ValueError("Collection contains no validated measurements")
     return state, reports
+
+
+def pinned_sources(job):
+    """(repo, revision, files_sha256) of every contract and fixture the job's fleet pins."""
+    if job.get("workspace"):
+        locks = [cloud_inputs.lock(job["workspace"])]
+    else:
+        locks = [
+            read(fleet.download(name, job["fleet_revision"])[0])
+            for name in job["fleets"]
+        ]
+    return {
+        (repo, pin["revision"], pin.get("files_sha256"))
+        for lock in locks
+        for contract in lock["contracts"].values()
+        for repo, pin in [
+            (contract["integration"]["repo"], contract["integration"]),
+            *contract.get("fixtures", {}).items(),
+        ]
+    }
 
 
 def fingerprint(reports):
@@ -346,7 +380,7 @@ def upload(root, repository, execute):
         for case in report["cases"]:
             allowed.update(prefix + relative for relative in case.get("files", {}))
         for model in report.get("models", []) + report.get("contracts", []):
-            allowed.update(prefix + relative for relative in model["files"])
+            allowed.update(prefix + relative for relative in model.get("files", {}))
     result = api.upload_folder(
         repo_id=repository,
         repo_type="dataset",

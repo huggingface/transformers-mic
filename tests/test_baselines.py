@@ -132,10 +132,30 @@ def test_complete_collection_upload_is_previewed_and_idempotent(tmp_path, monkey
         "incomplete",
         "wrong-profile",
         "model-tamper",
+        "unpinned-source",
     ],
 )
-def test_incomplete_or_modified_measurements_cannot_be_uploaded(tmp_path, problem):
+def test_incomplete_or_modified_measurements_cannot_be_uploaded(
+    tmp_path, monkeypatch, problem
+):
     make_collection(tmp_path)
+    lock = tmp_path / "fleet.lock"
+    write(
+        lock,
+        {
+            "contracts": {
+                "Demo": {
+                    "integration": {
+                        "repo": "huggingface-mic/demo-mic",
+                        "revision": "f" * 40,
+                        "files_sha256": "1" * 64,
+                    },
+                    "fixtures": {},
+                }
+            }
+        },
+    )
+    monkeypatch.setattr(baselines.fleet, "download", lambda *a: (lock, "b" * 40))
     folder = tmp_path / "artifacts/cuda"
     path = folder / "collection.json"
     report = read(path)
@@ -152,6 +172,14 @@ def test_incomplete_or_modified_measurements_cannot_be_uploaded(tmp_path, proble
     elif problem == "model-tamper":
         write(folder / "models/config.json", {})
         report["models"] = [{"files": {"models/config.json": "0" * 64}}]
+    elif problem == "unpinned-source":
+        report["contracts"] = [
+            {
+                "repo": "huggingface-mic/demo-mic",
+                "revision": "f" * 40,
+                "files_sha256": "2" * 64,
+            }
+        ]
     else:
         report["profile"] = "cpu"
     write(path, report)
@@ -422,8 +450,13 @@ def test_manifest_target_matrix_includes_checkpoints_unless_explicitly_excluded(
     manifest["integrations"]["transformers"]["resources"]["org/full"]["variants"] = {
         "default": {"devices": []}
     }
-    assert baseline_worker.profile_exclusions(contract, manifest, "default", "cuda") == {"full"}
-    assert baseline_worker.profile_exclusions(contract, manifest, "bfloat16", "cuda") == set()
+    assert baseline_worker.profile_exclusions(
+        contract, manifest, "default", "cuda"
+    ) == {"full"}
+    assert (
+        baseline_worker.profile_exclusions(contract, manifest, "bfloat16", "cuda")
+        == set()
+    )
 
 
 @pytest.mark.parametrize("omit_case,runner_code", [(False, 0), (True, 0), (False, 2)])
@@ -531,7 +564,15 @@ def test_worker_records_verifies_and_accounts_for_the_whole_matrix(
         report = read(args.out / "collection.json")
         assert len(report["expected_cases"]) == 4 and len(report["cases"]) == 4
         assert report["complete"] is (not omit_case and not runner_code)
-        assert bool(report["models"]) is (profile == "cuda")
+        # Both profiles name the pinned sources; neither carries copies.
+        assert report["models"] == [
+            {
+                "repo": "huggingface-mic/demo-mic",
+                "revision": "f" * 40,
+                "files_sha256": None,
+            }
+        ]
+        assert not (args.out / "models").exists()
     assert len(stages) == 8
     write(out / "cloud.json", {"job": JOB, "request": {"profiles": ["cpu", "cuda"]}})
     if omit_case or runner_code:

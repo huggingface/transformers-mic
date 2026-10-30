@@ -109,9 +109,12 @@ job and immutable MIC, Transformers and fleet revisions. If dispatch was
 ambiguous, the dashboard searches for the exact workflow correlation ID rather
 than blindly dispatching again. An unresolved dispatch is reported as unknown.
 
-Model files are under `artifacts/cuda/models/`; candidate expectations and reports
-are under `artifacts/<profile>/<fleet>/<contract>/`. The CUDA artifact carries
-the pinned slim snapshots once, avoiding duplicate CPU copies. Each profile has
+Candidate expectations and reports are under
+`artifacts/<profile>/<fleet>/<contract>/`. Artifacts carry results only: the
+runner refuses any contract or fixture whose files differ from the fleet lock's
+`files_sha256`, so `collection.json` lists the `repo`, `revision` and
+`files_sha256` it measured, and the collection is accepted only when each of
+them is pinned by the requested fleet. Each profile has
 `collection.json` with the complete expected matrix, execution evidence,
 runtime/package information and file hashes. Failed runs retain available
 artifacts for investigation and cannot masquerade as complete collections.
