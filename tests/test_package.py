@@ -1477,6 +1477,11 @@ def test_create_rejects_plain_fences_and_float16_loads():
     commands.check_float16_load({"usage": usage}, {"dtype": "bfloat16"})
     fixed = usage.replace("(model_id)", "(model_id, dtype=torch.float32)")
     commands.check_float16_load({"usage": fixed}, {"torch_dtype": "float16"})
+    # Above 1B the contract runs in bfloat16 only and a float32 copy does not fit the GPU.
+    with pytest.raises(ValueError, match="dtype=torch.bfloat16"):
+        commands.check_float16_load({"usage": fixed}, {"torch_dtype": "float16"}, 8_000_000_000)
+    large = usage.replace("(model_id)", "(model_id, dtype=torch.bfloat16)")
+    commands.check_float16_load({"usage": large}, {"torch_dtype": "float16"}, 8_000_000_000)
 
 
 def test_create_rejects_the_broadcast_image_idiom():
