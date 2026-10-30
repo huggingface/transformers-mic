@@ -312,6 +312,15 @@ def check_code_fences(plan):
         )
 
 
+def check_no_remote_code(plan):
+    """The contract tests Transformers' own implementation, never a checkpoint's remote code."""
+    if re.search(r"trust_remote_code\s*=\s*True", plan["usage"]):
+        raise ValueError(
+            "usage passes trust_remote_code=True; load the class Transformers maps for "
+            "the model_type and use its public API (a checkpoint's auto_map is ignored)"
+        )
+
+
 def check_image_shapes(plan):
     """Reject the broadcast-image idiom that builds (H, W, 1) instead of (3, H, W).
 
@@ -590,6 +599,7 @@ def propose_valid(context, args, model, fixture, old=None):
             check_undefined_names(plan)
             check_targets(plan)
             check_code_fences(plan)
+            check_no_remote_code(plan)
             check_image_shapes(plan)
             check_loss_has_gradients(plan)
             if context.get("config"):
