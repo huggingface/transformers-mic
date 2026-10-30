@@ -82,9 +82,9 @@ import run  # noqa: E402
 from perturb import logits_of, sensitivity  # noqa: E402
 from sweep import shrink  # noqa: E402
 
-WEIGHTS = (".safetensors", ".bin", ".pt", ".pth", ".msgpack", ".h5", ".ot", ".onnx", ".tflite", ".ckpt", ".gguf", ".npz", ".pdparams")
+WEIGHTS = (".safetensors", ".bin", ".pt", ".pth", ".msgpack", ".h5", ".ot", ".onnx", ".tflite", ".ckpt", ".gguf", ".npz", ".pdparams", ".pkl")
 # Processor files are a few MB; anything this large is weights in a format WEIGHTS
-# misses (gemma-2b ships a 9.5 GB .gguf, which inflated the fixture and every
+# misses (gemma-2b ships a 9.5 GB .gguf, pegasus-xsum a 2.3 GB .pkl, which inflated the fixture and every
 # CUDA baseline artifact carrying it).
 MAX_COPIED_BYTES = 128 * 1024**2
 NOT_COPIED = {"config.json", "README.md", ".gitattributes"}
