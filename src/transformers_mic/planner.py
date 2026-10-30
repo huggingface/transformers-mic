@@ -158,7 +158,9 @@ Include runtime device/dtype/attn_implementation and meaningful outputs.
 The final JSON must nest training.loss, training.gradients, and training.updated
 under a training object. Declare those exact dotted keys in outputs, using
 allclose, all_true, and true respectively. training.gradients must be a nonempty
-dict of named BOOLEAN checks for finite, nonzero gradients, never raw norms.
+dict of named BOOLEAN checks for finite, nonzero gradients, never raw norms, on
+parameters the loss reaches: not a decoder training never runs (VibeVoice's
+acoustic decoder) nor a router whose routing can give zero (PhiMoE's sparsemixer).
 training.updated checks whether SGD actually changes weights; snapshot only
 trainable parameters, on the CPU, so the step fits a real checkpoint's
 accelerator memory. Use exactly these hidden lines around optimizer.step():
@@ -220,7 +222,7 @@ not memory:
   check gradients on trained parameters and that one frozen parameter has grad None.
 - Resources: the only GPU is one A10G reporting about 22 GB, so declare
   gpu_memory_gb of at most 22 (more skips the checkpoint), and memory_gb from the
-  real parameter count; do not guess low. Do not declare devices: tmic makes a
+  real parameter count; do not guess low, and none for the fixture. Do not declare devices: tmic makes a
   checkpoint above 1B GPU-only and bfloat16-only itself, so load it visibly with
   dtype=torch.bfloat16 (a float32 copy does not fit the GPU).
 - A checkpoint stored in float16 (config dtype/torch_dtype "float16") cannot train

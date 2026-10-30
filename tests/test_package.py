@@ -1470,6 +1470,18 @@ def test_planner_context_replaces_a_config_class_transformers_lacks(monkeypatch)
     assert "BertForEverything" not in context["transformers_classes"]
 
 
+def test_fixture_resources_drop_hardware_requirements():
+    manifest = {"integrations": {"transformers": {"resources": {
+        "fixture": {"devices": ["cuda"], "gpus": 1, "gpu_memory_gb": 22, "memory_gb": 64, "download_mb": 200},
+        "org/large": {"devices": ["cuda"], "gpus": 1},
+    }}}}
+    assert commands.fixture_runs_anywhere(manifest) == ["devices", "gpu_memory_gb", "gpus", "memory_gb"]
+    resources = manifest["integrations"]["transformers"]["resources"]
+    assert resources["fixture"] == {"download_mb": 200}
+    assert resources["org/large"] == {"devices": ["cuda"], "gpus": 1}
+    assert commands.fixture_runs_anywhere({"integrations": {"transformers": {}}}) == []
+
+
 def test_create_rejects_imports_transformers_does_not_export():
     usage = "```py runnable:x\nfrom transformers import (\n    AutoModelForConditionalGeneration,\n    AutoProcessor,\n)\n```\n"
     with pytest.raises(ValueError, match="AutoModelForConditionalGeneration"):
