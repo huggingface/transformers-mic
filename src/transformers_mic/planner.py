@@ -165,12 +165,9 @@ accelerator memory. Use exactly these hidden lines around optimizer.step():
     ...
     "updated": any(not torch.equal(p.detach().cpu(), before[n]) for n, p in model.named_parameters() if n in before), Name only parameters that exist in the
 architecture; tied weights such as lm_head.weight are often absent. The bfloat16
-variant must use {"dtype": "bfloat16"}, not torch_dtype. Cast floating-point
-processor inputs (such as pixel_values or input_features) to model.dtype and
-model.device before every forward; keep integer token IDs, masks and labels
-in their original dtype. Moving inputs to the device alone does not match dtype.
-Preserve inference
-outputs before the training step and report them along with training outputs. Use runnable
+variant must use {"dtype": "bfloat16"}, not torch_dtype. Keep inference outputs
+under names the training block never rebinds (a training `labels` tensor once
+replaced the predicted labels in the result), and report both. Use runnable
 fences ```py runnable:usage```. Multiple blocks sharing state use the same
 runnable identifier, with :2 etc. In an update, retain every existing call and
 output name and add the requested path; do not replace old checks. All proposed
@@ -192,26 +189,32 @@ loads a float16 checkpoint in float16.
 
 Checkpoint facts come from the supplied config, processor files and references,
 not memory:
-- Processor outputs: move them with BatchFeature.to(device, dtype=model.dtype),
-  which casts only floating tensors. Tokenizer outputs (BatchEncoding) take no
-  dtype: move them with inputs.to(device). Use attention_mask only if the processor
-  returns it (`"attention_mask" in inputs`); some audio processors do not.
+- Before every forward, move processor outputs with BatchFeature.to(device,
+  dtype=model.dtype), which casts only floating tensors (pixel_values,
+  input_features). Tokenizer outputs (BatchEncoding: text, or text + image as in
+  CLIPSeg) take no dtype: .to(device), then cast pixel_values on their own. Use
+  attention_mask only if the processor returns it; some audio processors do not.
 - Pick the head the checkpoint was trained for: a pretraining-only checkpoint has
   no tokenizer and no task head, so do not build a CTC or classification path on it.
-- Language-model labels: copy input_ids and set padded positions to -100. With
-  left padding, probe the last position, never position 0.
+- Language-model labels: copy input_ids and set padded positions to -100, unless
+  the processor already returns labels (PaliGemma): then model(**inputs).loss,
+  since passing labels= again raises "multiple values". With left padding, probe
+  the last position, never position 0.
 - Object detection: labels are a list of dicts with "class_labels" (int64) and
   normalized "boxes" (cx, cy, w, h; float32), on the model device. Run the
   bfloat16 variant under torch.autocast(device, dtype=model.dtype,
   enabled=model.dtype != torch.float32) for both inference and training: the
   Hungarian matcher needs float32.
-- Checkpoints above ~3B parameters must fit a 24 GB GPU in bfloat16 (a full
+- Checkpoints above ~3B parameters must fit the GPU in bfloat16 (a full
   training step on a 7B model, weights plus gradients, does not): train only a
   small, meaningful subset (e.g. a VLM's multi_modal_projector, or the task head)
   with requires_grad_(False) on the rest, optimize only trainable parameters, check
   gradients on trained parameters and check that one frozen parameter has
-  grad None. Declare resources per checkpoint (memory_gb, gpu_memory_gb, and a
-  variants.bfloat16 override) from the real parameter count; do not guess low.
+  grad None.
+- Resources: the only GPU is one A10G reporting about 22 GB, so declare
+  gpu_memory_gb of at most 22 (more skips the checkpoint), and memory_gb from the
+  real parameter count; do not guess low. Do not declare devices: tmic makes a
+  checkpoint above 1B GPU-only and bfloat16-only itself.
 - A checkpoint stored in float16 (config dtype/torch_dtype "float16") cannot train
   without loss scaling: load the visible model with dtype=torch.float32 (the
   bfloat16 variant still overrides it), and say why in a comment.
@@ -236,7 +239,9 @@ not memory:
   with the same head class.
 - An encoder-decoder forward needs decoder inputs: for an inference probe pass
   decoder_input_ids starting from config.decoder_start_token_id (or labels=).
-  Without them Marian raises a misleading "cannot specify both".
+  Without them Marian raises a misleading "cannot specify both". Speech input
+  (input_features) has no input_ids: take decoder_input_ids and labels from
+  tokenized target text (SeamlessM4T).
 - The training step runs its own forward with gradients: never build the loss
   from tensors computed under torch.no_grad() in the inference block.
 - Every key declared in outputs must appear in the printed result; a nested value
@@ -249,21 +254,18 @@ not memory:
   takes no labels, and Transformers may have no pretraining head for it: train it
   with a small linear probe on pooled hidden states, optimizing the model's and
   the probe's parameters together.
-- Build synthetic image tensors as (3, H, W) explicitly: a sum of broadcast views
-  like arange(H).view(H, 1, 1) + arange(W).view(1, W, 1) is (H, W, 1) and
-  .expand(3, H, W) raises.
 - Get a word's token id with tokenizer.encode(word, add_special_tokens=False)[0];
   convert_tokens_to_ids(" Paris") returns None in BPE vocabularies, which spell
   the leading space inside the token.
 - get_text_features / get_image_features / get_audio_features take only their own
   modality's inputs (never **inputs) and return a model output in Transformers 5:
   the projected embedding is .pooler_output.
-- Import only classes transformers exports (there is no
-  AutoModelForConditionalGeneration). The config's architectures can name a
-  remote-code class (Unlimited-OCR lists UnlimitedOCRForCausalLM; Transformers
-  has UnlimitedOcrForConditionalGeneration): use the class and Auto class that
-  Transformers maps for the model_type, with its exact capitalization
-  (M2M100ForConditionalGeneration).
+- Load the class the config's architectures names when Transformers exports it:
+  an Auto class can resolve to another head (AutoModelForTextEncoding gives
+  CLIPTextModel, which has no text_embeds). Import only exported classes (there is
+  no AutoModelForConditionalGeneration); for a remote-code name (Unlimited-OCR's
+  UnlimitedOCRForCausalLM) use the class Transformers maps for the model_type,
+  with its exact capitalization (UnlimitedOcrForConditionalGeneration).
 - The builder already shrinks every config: depth to about 2 layers, widths to 64, experts to
   4, keeping the vocabulary and dropping quantization_config. Add
   config_overrides only for a field that rule gets wrong for this architecture,
@@ -271,8 +273,6 @@ not memory:
   checkpoint's own tokenizer, so real token and pad ids must stay in range) or
   quantization_config, and never num_hidden_layers when the config lists per-layer
   types (layer_types, linear_attn_config layers): their lengths must match.
-- The GPU runner is one A10G that reports about 22 GB: declare gpu_memory_gb of
-  at most 22, or the runner skips the checkpoint as unsupported.
 - A detection head with no loss in Transformers (Owlv2ForObjectDetection) trains on
   an explicit loss from its outputs (match each target box to its nearest predicted
   box: class BCE + box L1). Report at most the top few detections per image, never
@@ -280,31 +280,26 @@ not memory:
 - Some heads raise NotImplementedError when given labels (DPTForDepthEstimation:
   "Training is not implemented yet"): compute the loss from the outputs instead
   (L1 between predicted_depth and targets resized to its shape).
-- A processor that returns a BatchEncoding (text + image, CLIPSeg) takes no dtype=
-  in .to(): move it with .to(device) and cast pixel_values on its own.
 - Idefics3/SmolVLM split each image into many crops (over 1,000 tokens): pass
-  do_image_splitting=False to the processor, or the training step OOMs a 24 GB GPU.
+  do_image_splitting=False to the processor, or the training step OOMs the GPU.
 - Model outputs carry no attention_mask: pool image hidden states with .mean(dim=1)
   and text with the tokenizer's attention_mask.
 - Per-token side inputs (LayoutLM bbox) must be built from the tokenized length,
   never hard-coded for the words: tokenizers add special tokens.
 - Eager attention materializes the full attention matrix: with thousands of image
   tokens (OWLv2 at 960 px: 3600; EmbeddingGemma2 images: 2520) a training step OOMs
-  a 24 GB GPU. Such contracts declare only the default and bfloat16 variants.
+  the GPU. Such contracts declare only the default and bfloat16 variants.
 - An embedding model's processor packs a list of images into one sequence
   (EmbeddingGemma2): embed each image with its own processor call.
-- Give image processors uint8 images (PIL, (H, W, 3) uint8 arrays, or (3, H, W)
-  .byte() tensors). A float tensor in [0, 1] is rescaled by 1/255 again and becomes
-  near-constant: the fixture cannot tell two images apart (ConvNeXt, Swin-v2 failed
-  their sensitivity gate this way). Make the two images differ in colour, not only
+- Build each image as an (H, W, 3) uint8 NumPy array (then PIL if the processor
+  wants it; masks and trimaps as (H, W) uint8, mode "L"). A float tensor in [0, 1]
+  is rescaled by 1/255 again and becomes near-constant: the fixture cannot tell two
+  images apart (ConvNeXt, Swin-v2). Make the two images differ in colour, not only
   in texture: global pooling averages random noise away.
 - OWL-ViT/OWLv2 processors pad each image's text queries separately: pass
   padding="max_length" so the query batches concatenate.
-- CPU runners are memory-limited containers: a checkpoint above ~1B parameters
-  declares "devices": ["cuda"] in its resources, so CPU measures only the slim
-  fixture and the checkpoint runs on GPU. A float32 training step on such a
-  checkpoint does not fit the GPU either: it runs only in the bfloat16 variant,
-  declared per variant as "variants": {"default": {"devices": []}, "eager":
-  {"devices": []}}. The float32 variants still run on the slim fixture. The
-  exclusions stay visible in results.
+- The fixture ships the checkpoint's own processor files: never patch a chat
+  template, pad token or processor attribute in hidden lines. A missing one means
+  the checkpoint lacks it (handle it visibly, as for pad tokens above) or needs a
+  tokenizer backend (Voxtral's chat template comes from mistral-common).
 """
