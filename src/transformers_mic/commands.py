@@ -236,6 +236,17 @@ def parameter_count(model, revision):
     return getattr(info.safetensors, "total", None)
 
 
+def check_partial_training(plan, context):
+    """Above ~3B parameters the real checkpoint's training step must freeze most of it."""
+    count = context.get("parameters") or 0
+    if count > 3e9 and not context.get("fixtures_only") and "requires_grad_(" not in plan["usage"]:
+        raise ValueError(
+            f"the checkpoint has {count / 1e9:.1f}B parameters: a full bfloat16 training step "
+            "(weights plus gradients) does not fit the 22 GB GPU; freeze the model with "
+            "requires_grad_(False) and train a small meaningful subset"
+        )
+
+
 def check_undefined_names(plan):
     """Reject usage that reads a name no block sharing its state ever defines."""
     import builtins
@@ -608,6 +619,7 @@ def propose_valid(context, args, model, fixture, old=None):
                 check_model_classes(plan, context["config"])
                 check_label_arguments(plan, context["config"])
                 check_parameter_names(plan, context["config"])
+            check_partial_training(plan, context)
             return plan, llm
         except (ValueError, jsonschema.ValidationError) as exc:
             if attempt == 2:
@@ -748,6 +760,8 @@ def create(args):
             "fixture_repo": fixture,
             "manifest_schema": manifest_schema(),
             "failure_candidates": evidence["items"][:30],
+            "parameters": parameter_count(args.model, revision),
+            "fixtures_only": bool(args.fixtures_only),
             "request": "Design a small useful integration path; include inference and a training step where supported.",
         }
         context.update(references.collect(args.model, revision, config))
@@ -768,7 +782,7 @@ def create(args):
         if args.fixtures_only:
             manifest["integrations"]["transformers"]["targets"] = ["fixtures"]
         for repo in keep_large_checkpoints_off_cpu(
-            manifest, {args.model: parameter_count(args.model, revision)}
+            manifest, {args.model: context["parameters"]}
         ):
             print(f"tmic: {repo} is above 1B parameters: measuring it on GPU, in bfloat16 only", file=sys.stderr)
         workspace.from_plan(

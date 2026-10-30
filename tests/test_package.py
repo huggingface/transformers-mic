@@ -63,6 +63,15 @@ def test_usage_must_not_enable_remote_code():
     commands.check_no_remote_code({"usage": "AutoModel.from_pretrained(model_id)"})
 
 
+def test_a_large_checkpoint_must_train_a_subset():
+    full = {"usage": "optimizer = torch.optim.SGD(model.parameters(), lr=0.01)"}
+    with pytest.raises(ValueError, match="4.7B parameters"):
+        commands.check_partial_training(full, {"parameters": 4_676_271_104})
+    commands.check_partial_training(full, {"parameters": 4_676_271_104, "fixtures_only": True})
+    commands.check_partial_training(full, {"parameters": 2_000_000_000})
+    commands.check_partial_training({"usage": "model.requires_grad_(False)"}, {"parameters": 4_676_271_104})
+
+
 def test_legacy_fixture_can_only_be_reused():
     metadata = {"training": {"steps": 20}}
     assert policy.decision(metadata, reused=True)["accepted"]

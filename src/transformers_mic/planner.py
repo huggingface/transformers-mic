@@ -207,7 +207,7 @@ not memory:
   bfloat16 variant under torch.autocast(device, dtype=model.dtype,
   enabled=model.dtype != torch.float32) for both inference and training: the
   Hungarian matcher needs float32.
-- Checkpoints above ~3B parameters must fit the GPU in bfloat16 (a full
+- Checkpoints above ~3B parameters (context parameters, not the name) must fit the GPU in bfloat16 (a full
   training step on a 7B model, weights plus gradients, does not): train only a
   small, meaningful subset (e.g. a VLM's multi_modal_projector, or the task head)
   with requires_grad_(False) on the rest, optimize only trainable parameters, check
