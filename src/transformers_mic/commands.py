@@ -198,6 +198,20 @@ def check_targets(plan):
 CPU_PARAMETER_LIMIT = 1_000_000_000
 
 
+def fixture_runs_anywhere(manifest):
+    """Drop hardware requirements a draft declares for the slim fixture.
+
+    It is a few MB and must run on the CPU runner too; Cosmos3-Nano's draft copied
+    the checkpoint's cuda-only, 64 GB requirements onto it.
+    """
+    resources = manifest["integrations"]["transformers"].get("resources", {})
+    spec = resources.get("fixture") or {}
+    dropped = sorted(k for k in ("devices", "gpus", "gpu_memory_gb", "memory_gb") if k in spec)
+    for key in dropped:
+        del spec[key]
+    return dropped
+
+
 def keep_large_checkpoints_off_cpu(manifest, parameters):
     """A checkpoint above ~1B parameters runs on GPU only, and only in bfloat16.
 
@@ -805,6 +819,8 @@ def create(args):
             plan["name"] = args.name
         if args.fixtures_only:
             manifest["integrations"]["transformers"]["targets"] = ["fixtures"]
+        if dropped := fixture_runs_anywhere(manifest):
+            print(f"tmic: the slim fixture runs anywhere: dropped its {', '.join(dropped)}", file=sys.stderr)
         for repo in keep_large_checkpoints_off_cpu(
             manifest, {args.model: context["parameters"]}
         ):
