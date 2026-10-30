@@ -364,6 +364,18 @@ def test_shrink_renumbers_layer_indices_into_the_shrunk_depth():
     assert granite.spatial_target_layers and all(0 <= t < layers for t in granite.spatial_target_layers)
 
 
+def test_shrink_keeps_projector_inputs_tied_to_the_shrunk_encoders():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import GraniteSpeechConfig, MllamaConfig
+
+    vision = shrink(MllamaConfig()).vision_config
+    assert vision.vision_output_dim == vision.hidden_size * (len(vision.intermediate_layers_indices) + 1)
+    # granite-4.0-1b-speech: the projector cross-attends to the 1024-wide encoder.
+    speech = shrink(GraniteSpeechConfig(projector_config={"model_type": "blip_2_qformer", "encoder_hidden_size": 1024}))
+    assert speech.projector_config.encoder_hidden_size == speech.encoder_config.hidden_dim
+
+
 def test_near_zero_batch_norm_scales_reset_to_one_before_overfitting():
     net = torch.nn.Sequential(torch.nn.Conv2d(3, 4, 3), torch.nn.BatchNorm2d(4), torch.nn.BatchNorm2d(4))
     torch.nn.init.normal_(net[1].weight, std=0.02)  # VitMatte's BatchNorm init
