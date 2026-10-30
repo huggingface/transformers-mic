@@ -345,6 +345,25 @@ def test_fixture_keeps_a_head_checkpoint_prefix_and_binary_format(tmp_path):
     assert all(torch.equal(v, back.state_dict()[k]) for k, v in model.state_dict().items())
 
 
+def test_shrink_renumbers_layer_indices_into_the_shrunk_depth():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import Granite4VisionConfig, MllamaConfig
+
+    mllama = shrink(MllamaConfig())
+    vision_states = mllama.vision_config.num_hidden_layers + 1
+    assert all(0 <= i < vision_states for i in mllama.vision_config.intermediate_layers_indices)
+    text = mllama.text_config
+    assert text.cross_attention_layers and all(0 < i < text.num_hidden_layers for i in text.cross_attention_layers)
+
+    granite = Granite4VisionConfig(deepstack_layer_map=[(-19, 9), (-13, 6), (-7, 3), (-1, 0)], spatial_target_layers=[12, 15, 18, 21])
+    granite.vision_config.num_hidden_layers = 27  # granite-vision-4.1-4b
+    granite = shrink(granite)
+    states, layers = granite.vision_config.num_hidden_layers + 1, granite.text_config.num_hidden_layers
+    assert all(-states <= v < 0 and 0 <= t < layers for v, t in granite.deepstack_layer_map)
+    assert granite.spatial_target_layers and all(0 <= t < layers for t in granite.spatial_target_layers)
+
+
 def test_near_zero_batch_norm_scales_reset_to_one_before_overfitting():
     net = torch.nn.Sequential(torch.nn.Conv2d(3, 4, 3), torch.nn.BatchNorm2d(4), torch.nn.BatchNorm2d(4))
     torch.nn.init.normal_(net[1].weight, std=0.02)  # VitMatte's BatchNorm init
