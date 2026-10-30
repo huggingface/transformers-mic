@@ -196,6 +196,9 @@ def check_targets(plan):
 
 
 CPU_PARAMETER_LIMIT = 1_000_000_000
+# Above ~10B the bfloat16 weights alone (20 GB) leave no room for a forward pass on
+# the 22 GB A10G (Llama-3.2-11B-Vision, Cosmos3-Nano at 15.7B ran out of memory).
+GPU_PARAMETER_LIMIT = 10_000_000_000
 
 
 def fixture_runs_anywhere(manifest):
@@ -238,7 +241,8 @@ def keep_large_checkpoints_off_cpu(manifest, parameters):
         before = json.dumps(spec, sort_keys=True)
         if "cpu" in spec.get("devices", ["cpu", "cuda"]):
             spec["devices"] = ["cuda"]
-        for name in full_precision:
+        too_large = (parameters.get(repo) or 0) > GPU_PARAMETER_LIMIT
+        for name in integration.get("variants", {}) if too_large else full_precision:
             spec.setdefault("variants", {}).setdefault(name, {})["devices"] = []
         if json.dumps(spec, sort_keys=True) != before:
             changed.append(repo)
@@ -824,7 +828,10 @@ def create(args):
         for repo in keep_large_checkpoints_off_cpu(
             manifest, {args.model: context["parameters"]}
         ):
-            print(f"tmic: {repo} is above 1B parameters: measuring it on GPU, in bfloat16 only", file=sys.stderr)
+            if (context["parameters"] or 0) > GPU_PARAMETER_LIMIT:
+                print(f"tmic: {repo} is above 10B parameters and does not fit the GPU: only the slim fixture is measured", file=sys.stderr)
+            else:
+                print(f"tmic: {repo} is above 1B parameters: measuring it on GPU, in bfloat16 only", file=sys.stderr)
         workspace.from_plan(
             args.model,
             revision,

@@ -150,7 +150,9 @@ for inference, then a real seeded training step with labels when supported.
 Do not install dependencies, invoke shell commands, fetch datasets or enable
 trust_remote_code. Never access credentials. Use synthetic inputs unless frozen
 assets are already provided. Use at least two distinct input examples so batch
-perturbation is meaningful, and padding where supported. Report compact numeric
+perturbation is meaningful, and padding where supported. Keep sequences short:
+turn off image splitting/tiling (Idefics3 makes 17 crops of a 512 px image, and an
+eager training step then runs out of GPU memory). Report compact numeric
 probes (a few selected logits), never entire vocabulary logits or parameter arrays. Prefer named top-level model kwargs so the builder
 can capture the training inputs. Print a final JSON object only when MIC_RUNNER
 is set, plain JSON only (device as model.device.type, never a torch.device).

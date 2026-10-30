@@ -1313,6 +1313,10 @@ def test_create_keeps_large_checkpoints_off_the_cpu_runner():
     }
     assert commands.keep_large_checkpoints_off_cpu(manifest, parameters) == []
     assert commands.keep_large_checkpoints_off_cpu(manifest, {"org/big": None}) == []
+    # Above 10B even the bfloat16 weights do not fit the GPU: every variant is declared unmeasured.
+    manifest["checkpoints"]["org/huge"] = {}
+    assert commands.keep_large_checkpoints_off_cpu(manifest, {"org/huge": 15_750_057_456}) == ["org/huge"]
+    assert resources["org/huge"]["variants"] == {v: {"devices": []} for v in ("default", "eager", "bfloat16")}
     jsonschema = pytest.importorskip("jsonschema")
     schema = commands.manifest_schema()["properties"]["integrations"]["additionalProperties"]["properties"]["resources"]
     jsonschema.validate(resources, schema)
