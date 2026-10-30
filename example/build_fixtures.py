@@ -82,7 +82,11 @@ import run  # noqa: E402
 from perturb import logits_of, sensitivity  # noqa: E402
 from sweep import shrink  # noqa: E402
 
-WEIGHTS = (".safetensors", ".bin", ".pt", ".pth", ".msgpack", ".h5", ".ot", ".onnx", ".tflite", ".ckpt")
+WEIGHTS = (".safetensors", ".bin", ".pt", ".pth", ".msgpack", ".h5", ".ot", ".onnx", ".tflite", ".ckpt", ".gguf", ".npz", ".pdparams")
+# Processor files are a few MB; anything this large is weights in a format WEIGHTS
+# misses (gemma-2b ships a 9.5 GB .gguf, which inflated the fixture and every
+# CUDA baseline artifact carrying it).
+MAX_COPIED_BYTES = 128 * 1024**2
 NOT_COPIED = {"config.json", "README.md", ".gitattributes"}
 # Config fields that name or date the source rather than describe the model.
 VOLATILE = {"_name_or_path", "transformers_version", "dtype", "torch_dtype", "_commit_hash"}
@@ -136,7 +140,7 @@ def source_snapshot(repo, revision, recipe=None):
 
 def copied_files(source, recipe=None):
     assets = set((recipe or {}).get("copy_assets", []))
-    return sorted(
+    names = sorted(
         f.name
         for f in source.iterdir()
         if f.is_file()
@@ -144,6 +148,10 @@ def copied_files(source, recipe=None):
         and (not f.name.endswith(WEIGHTS) or f.name == "spk_dict.pt" or f.name in assets)
         and not f.name.endswith(".index.json")
     )
+    for name in names:
+        if (source / name).stat().st_size > MAX_COPIED_BYTES:
+            raise ValueError(f"{name} is too large to be a processor file; add its suffix to WEIGHTS")
+    return names
 
 
 def model_class(source, recipe):

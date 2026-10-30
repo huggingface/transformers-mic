@@ -23,6 +23,14 @@ def test_weight_named_processor_asset_is_copied(tmp_path):
     assert "model.safetensors" not in build_fixtures.copied_files(tmp_path, recipe)
 
 
+def test_checkpoint_formats_and_oversized_files_are_not_copied(tmp_path, monkeypatch):
+    (tmp_path / "tokenizer.json").write_text("{}")
+    (tmp_path / "gemma-2b.gguf").write_bytes(b"weights")
+    assert build_fixtures.copied_files(tmp_path) == ["tokenizer.json"]
+    monkeypatch.setattr(build_fixtures, "MAX_COPIED_BYTES", 1)
+    with pytest.raises(ValueError, match="tokenizer.json is too large"):
+        build_fixtures.copied_files(tmp_path)
+
 def test_batch_norm_calibration_recovers_evaluation_sensitivity_without_changing_weights():
     model = torch.nn.Sequential(
         torch.nn.Linear(4, 4, bias=False),
