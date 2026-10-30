@@ -265,12 +265,11 @@ not memory:
 - get_text_features / get_image_features / get_audio_features take only their own
   modality's inputs (never **inputs) and return a model output in Transformers 5:
   the projected embedding is .pooler_output.
-- Load the class the config's architectures names when Transformers exports it:
-  an Auto class can resolve to another head (AutoModelForTextEncoding gives
-  CLIPTextModel, which has no text_embeds). Import only exported classes (there is
-  no AutoModelForConditionalGeneration); for a remote-code name (Unlimited-OCR's
-  UnlimitedOCRForCausalLM) use the class Transformers maps for the model_type,
-  with its exact capitalization (UnlimitedOcrForConditionalGeneration).
+- Load a class from context transformers_classes (the config's architectures when
+  Transformers exports them, else the classes it maps the model_type to), never a
+  config name it lacks: an Auto class can resolve to another head
+  (AutoModelForTextEncoding gives CLIPTextModel, which has no text_embeds), and
+  there is no AutoModelForConditionalGeneration.
 - The builder already shrinks every config: depth to about 2 layers, widths to 64, experts to
   4, keeping the vocabulary and dropping quantization_config. Add
   config_overrides only for a field that rule gets wrong for this architecture,

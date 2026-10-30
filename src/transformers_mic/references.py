@@ -16,6 +16,11 @@ def collect(model, revision, config):
         result["model_card_examples"] = "\n\n".join(blocks)[:18000]
     except (OSError, ValueError):
         pass
+    # A config can name a class Transformers does not have (Cosmos3-Nano's
+    # Cosmos3ForConditionalGeneration): show the classes it maps the model_type to.
+    classes = exported(config.get("architectures") or []) or auto_classes(config)
+    if classes:
+        result["transformers_classes"] = classes
     spec = importlib.util.find_spec("transformers")
     if spec and spec.submodule_search_locations:
         family = config.get("model_type", "").replace("-", "_")
@@ -27,7 +32,7 @@ def collect(model, revision, config):
         )
         if path.exists():
             tree = ast.parse(path.read_text())
-            architectures = set(config.get("architectures", []))
+            architectures = set(classes)
             api = {}
             for node in tree.body:
                 if isinstance(node, ast.ClassDef) and node.name in architectures:
@@ -45,7 +50,7 @@ def collect(model, revision, config):
             result["architecture_api"] = api
     names = {
         architecture: found
-        for architecture in config.get("architectures") or auto_classes(config)
+        for architecture in classes
         if (found := parameter_names(architecture, config))
     }
     if names:
@@ -55,8 +60,15 @@ def collect(model, revision, config):
     return result
 
 
+def exported(names):
+    """The names Transformers exports as model classes."""
+    import transformers
+
+    return [n for n in names if isinstance(getattr(transformers, n, None), type)]
+
+
 def auto_classes(config, limit=3):
-    """Head classes the Auto factories map this model_type to, for configs without architectures."""
+    """Head classes the Auto factories map this model_type to, for configs without exported architectures."""
     from transformers.models.auto import modeling_auto
 
     first = ("MODEL_MAPPING_NAMES", "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES")
