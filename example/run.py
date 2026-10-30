@@ -598,6 +598,8 @@ def main():
     parser.add_argument("--lock", type=Path, help="fleet lock to run (default <framework>/tests/contracts/fleet.lock next to this script); expectations/ sits next to it")
     parser.add_argument("--expectations", type=Path, help="override baseline directory")
     parser.add_argument("--variant", default="default")
+    parser.add_argument("--run-declared", action="store_true",
+                        help="also run variants the manifest declares unmeasured (reproduce the bug behind the declaration, or check its fix)")
     parser.add_argument("--isolate", action="store_true", help="run each target in its own process")
     parser.add_argument("--record", action="store_true", help="write candidate baselines for review")
     parser.add_argument("--golden", metavar="PLATFORM", help="check discrete outputs against this platform's baseline")
@@ -708,7 +710,7 @@ def main():
                 resources = integration.get("resources", {})
                 short_names = {short(r): r for r in manifest["checkpoints"]}
                 spec = resources.get("fixture") if kind == "fixture" else resources.get(short_names.get(target))
-                if (spec or {}).get("variants", {}).get(args.variant, {}).get("devices") == []:
+                if (spec or {}).get("variants", {}).get(args.variant, {}).get("devices") == [] and not args.run_declared:
                     emit({**record, "status": "unsupported", "skip": "declared", "failures": [f"not measured in the {args.variant} variant (resources declare no devices)"]})
                     continue
                 too_small = resource_problem(spec, args.variant)
