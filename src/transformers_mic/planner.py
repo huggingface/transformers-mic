@@ -164,11 +164,14 @@ trainable parameters, on the CPU, so the step fits a real checkpoint's
 accelerator memory. Use exactly these hidden lines around optimizer.step():
     before = {n: p.detach().cpu().clone() for n, p in model.named_parameters() if p.requires_grad}  # doc-builder: hide
     ...
-    "updated": any(not torch.equal(p.detach().cpu(), before[n]) for n, p in model.named_parameters() if n in before), Name only parameters that exist in the
-architecture; tied weights such as lm_head.weight are often absent. The bfloat16
+    "updated": any(not torch.equal(p.detach().cpu(), before[n]) for n, p in model.named_parameters() if n in before). The bfloat16
 variant must use {"dtype": "bfloat16"}, not torch_dtype. Keep inference outputs
-under names the training block never rebinds (a training `labels` tensor once
-replaced the predicted labels in the result), and report both. Use runnable
+under names the training block never rebinds, and report both. Train on labels
+the model does not predict ((predicted + 1) % num_labels): its own predictions on
+the overfit fixture give zero loss and bfloat16 gradients underflow (MobileNetV2).
+Shape a synthetic target from the output it is compared with, not a config field
+that sounds alike (VITS outputs.spectrogram has flow_size channels, not
+spectrogram_bins). Use runnable
 fences ```py runnable:usage```. Multiple blocks sharing state use the same
 runnable identifier, with :2 etc. In an update, retain every existing call and
 output name and add the requested path; do not replace old checks. All proposed
@@ -210,7 +213,8 @@ not memory:
   Hungarian matcher needs float32.
 - Checkpoints above ~3B parameters (context parameters, not the name) must fit the GPU in bfloat16 (a full
   training step on a 7B model, weights plus gradients, does not): train only a
-  small subset near the output (the last decoder layer or the task head; a
+  small subset near the output (the last decoder layer, indexed from the config's
+  num_hidden_layers - 1 since the fixture keeps about 2 layers, or the task head; a
   projector at the input backpropagates through every layer and still OOMs on long
   audio), with requires_grad_(False) on the rest, optimize only trainable parameters,
   check gradients on trained parameters and that one frozen parameter has grad None.
