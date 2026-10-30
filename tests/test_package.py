@@ -1138,6 +1138,21 @@ def test_binary_only_checkpoint_reads_names_from_conversion_pr(tmp_path, monkeyp
     }
 
 
+def test_checkpoint_keys_read_shard_headers_over_a_stale_index(monkeypatch, tmp_path):
+    from types import SimpleNamespace
+
+    from transformers_mic import inspection
+
+    (tmp_path / "model.safetensors.index.json").write_text(json.dumps({"weight_map": {"lm.weight": "a.safetensors"}}))
+
+    class Api:  # MOSS-Transcribe-Diarize-HF: the index omits the audio tower its shards hold
+        def get_safetensors_metadata(self, repo, revision=None):
+            return SimpleNamespace(weight_map={"lm.weight": "a.safetensors", "audio.weight": "b.safetensors"})
+
+    monkeypatch.setattr(inspection, "HfApi", Api)
+    assert inspection.checkpoint_keys("org/model", "a" * 40, tmp_path) == {"lm.weight", "audio.weight"}
+
+
 def test_visible_usage_never_shows_runner_plumbing():
     blocks = [
         "model = AutoModel.from_pretrained(model_id).to(device)\n"

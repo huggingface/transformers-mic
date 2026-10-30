@@ -11,7 +11,12 @@ def checkpoint_keys(repo, revision, source):
     source = Path(source)
     index = source / "model.safetensors.index.json"
     if index.exists():
-        return set(json.loads(index.read_text())["weight_map"])
+        # The shard headers, not the index: an index can be stale (MOSS-Transcribe-
+        # Diarize-HF's omits its whole audio tower), and loading reads the shards.
+        try:
+            return set(HfApi().get_safetensors_metadata(repo, revision=revision).weight_map)
+        except Exception:
+            return set(json.loads(index.read_text())["weight_map"])
     binary_index = source / "pytorch_model.bin.index.json"
     if binary_index.exists():
         return set(json.loads(binary_index.read_text())["weight_map"])
