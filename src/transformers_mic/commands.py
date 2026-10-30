@@ -430,19 +430,26 @@ def check_loss_has_gradients(plan):
             )
 
 
-def check_float16_load(plan, config):
-    """A float16 checkpoint loaded at its stored dtype overflows and cannot train."""
+def check_float16_load(plan, config, parameters=None):
+    """A float16 checkpoint loaded at its stored dtype overflows and cannot train.
+
+    Below 1B it loads in float32. Above, the contract is measured in bfloat16 only
+    and a float32 copy does not fit the GPU (Aya Expanse 8B: 32 GB before the
+    hidden bfloat16 reload), so it loads in bfloat16.
+    """
     stored = config.get("dtype") or config.get("torch_dtype")
     if stored != "float16":
         return
+    wanted = "bfloat16" if (parameters or 0) > CPU_PARAMETER_LIMIT else "float32"
     loads = re.findall(r"^[^#\n]*\b(\w+)\.from_pretrained\(model_id[^\n]*$", plan["usage"], re.M)
     lines = re.findall(r"^[^#\n]*\b\w+\.from_pretrained\(model_id[^\n]*$", plan["usage"], re.M)
     for name, line in zip(loads, lines):
-        if re.search(r"Processor|Tokenizer|Extractor", name) or "dtype" in line:
+        if re.search(r"Processor|Tokenizer|Extractor", name) or f"torch.{wanted}" in line:
             continue
         raise ValueError(
-            f"the checkpoint is stored in float16: load {name} with dtype=torch.float32 "
-            "(the bfloat16 variant still overrides it)"
+            f"the checkpoint is stored in float16: load {name} with dtype=torch.{wanted}"
+            + (" (above 1B it is measured in bfloat16 only; float32 does not fit the GPU)"
+               if wanted == "bfloat16" else " (the bfloat16 variant still overrides it)")
         )
 
 
@@ -614,7 +621,7 @@ def propose_valid(context, args, model, fixture, old=None):
             check_image_shapes(plan)
             check_loss_has_gradients(plan)
             if context.get("config"):
-                check_float16_load(plan, context["config"])
+                check_float16_load(plan, context["config"], context.get("parameters"))
                 check_config_facts(plan, context["config"])
                 check_model_classes(plan, context["config"])
                 check_label_arguments(plan, context["config"])
