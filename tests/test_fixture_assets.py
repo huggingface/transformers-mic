@@ -31,6 +31,7 @@ def test_checkpoint_formats_and_oversized_files_are_not_copied(tmp_path, monkeyp
     with pytest.raises(ValueError, match="tokenizer.json is too large"):
         build_fixtures.copied_files(tmp_path)
 
+
 def test_batch_norm_calibration_recovers_evaluation_sensitivity_without_changing_weights():
     model = torch.nn.Sequential(
         torch.nn.Linear(4, 4, bias=False),
@@ -289,6 +290,29 @@ def test_sensitivity_skips_inputs_only_absorbed_by_kwargs():
     assert not any(key.startswith("token_type_ids") for key in result["deltas"])
 
 
+def test_sensitivity_runs_a_decoder_only_model_without_its_labels():
+    import perturb
+    from types import SimpleNamespace
+
+    class CausalLM(torch.nn.Module):  # CSM: labels only valid for the unperturbed audio
+        config = SimpleNamespace(is_encoder_decoder=False)
+
+        def __init__(self):
+            super().__init__()
+            self.embed = torch.nn.Embedding(10, 4)
+
+        def forward(self, input_ids, labels=None):
+            if labels is not None:
+                raise IndexError("Target 128002 is out of bounds.")
+            return {"logits": self.embed(input_ids)}
+
+    batch = {
+        "input_ids": torch.tensor([[1, 2, 3], [4, 5, 6]]),
+        "labels": torch.tensor([[1, 2, 3], [4, 5, 6]]),
+    }
+    assert perturb.sensitivity(CausalLM(), batch, threshold=1e-3)["pass"]
+
+
 @pytest.mark.parametrize(
     "model_type,heads_key",
     [("pvt", "num_attention_heads"), ("swin", "num_heads")],
@@ -434,36 +458,64 @@ def test_shrink_keeps_attention_layers_a_period_places():
     from transformers import JambaConfig
 
     # layer_types is computed from attn_layer_period/offset, not stored, so it can't be re-indexed.
-    config = shrink(JambaConfig(num_hidden_layers=32, attn_layer_period=8, attn_layer_offset=4))
+    config = shrink(
+        JambaConfig(num_hidden_layers=32, attn_layer_period=8, attn_layer_offset=4)
+    )
     assert set(config.layer_types) == {"linear_attention", "full_attention"}
 
 
 def test_config_without_token_types_accepts_their_perturbation():
     from transformers import BertConfig, DebertaV2Config
 
-    batch = {"input_ids": torch.ones(1, 3, dtype=torch.long), "token_type_ids": torch.zeros(1, 3, dtype=torch.long)}
-    assert set(build_fixtures.config_insensitive(DebertaV2Config(type_vocab_size=0), batch)) == {"token_type_ids:all_ones"}
+    batch = {
+        "input_ids": torch.ones(1, 3, dtype=torch.long),
+        "token_type_ids": torch.zeros(1, 3, dtype=torch.long),
+    }
+    assert set(
+        build_fixtures.config_insensitive(DebertaV2Config(type_vocab_size=0), batch)
+    ) == {"token_type_ids:all_ones"}
     assert build_fixtures.config_insensitive(BertConfig(type_vocab_size=2), batch) == {}
-    assert build_fixtures.config_insensitive(DebertaV2Config(type_vocab_size=0), {"input_ids": batch["input_ids"]}) == {}
+    assert (
+        build_fixtures.config_insensitive(
+            DebertaV2Config(type_vocab_size=0), {"input_ids": batch["input_ids"]}
+        )
+        == {}
+    )
+
 
 def test_null_override_of_a_field_shrink_already_dropped_is_a_no_op(tmp_path):
     from transformers import BertConfig, BertModel
 
     BertConfig(num_hidden_layers=4).save_pretrained(tmp_path)
     fields = {"hidden_size": 64, "quantization_config": None}
-    config = build_fixtures.shrunk_config(tmp_path, BertModel, {"config_overrides": {"fields": fields}})
-    assert config.hidden_size == 64 and getattr(config, "quantization_config", None) is None
+    config = build_fixtures.shrunk_config(
+        tmp_path, BertModel, {"config_overrides": {"fields": fields}}
+    )
+    assert (
+        config.hidden_size == 64
+        and getattr(config, "quantization_config", None) is None
+    )
     fields["not_a_field"] = 1
     with pytest.raises(SystemExit, match="not_a_field"):
-        build_fixtures.shrunk_config(tmp_path, BertModel, {"config_overrides": {"fields": fields}})
+        build_fixtures.shrunk_config(
+            tmp_path, BertModel, {"config_overrides": {"fields": fields}}
+        )
+
 
 def test_shrink_keeps_siglip_text_projection_at_the_shared_width():
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
     from sweep import shrink
     from transformers import SiglipConfig
 
-    config = shrink(SiglipConfig())  # text projection_size defaults to its hidden_size (768)
-    assert config.text_config.projection_size == config.text_config.hidden_size == config.vision_config.hidden_size
+    config = shrink(
+        SiglipConfig()
+    )  # text projection_size defaults to its hidden_size (768)
+    assert (
+        config.text_config.projection_size
+        == config.text_config.hidden_size
+        == config.vision_config.hidden_size
+    )
+
 
 def test_shrink_keeps_an_audio_output_dim_at_the_text_width():
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
@@ -471,12 +523,16 @@ def test_shrink_keeps_an_audio_output_dim_at_the_text_width():
     from transformers import Qwen3ASRConfig
 
     # As in Qwen/Qwen3-ASR-0.6B-hf: the audio tower projects to the text hidden size.
-    config = Qwen3ASRConfig(audio_config={"output_dim": 1024}, text_config={"hidden_size": 1024})
+    config = Qwen3ASRConfig(
+        audio_config={"output_dim": 1024}, text_config={"hidden_size": 1024}
+    )
     config = shrink(config)
     assert config.audio_config.output_dim == config.text_config.hidden_size
 
 
-def test_a_rebuild_reuses_the_recorded_config_even_when_the_rule_changes(tmp_path, monkeypatch):
+def test_a_rebuild_reuses_the_recorded_config_even_when_the_rule_changes(
+    tmp_path, monkeypatch
+):
     import json
 
     from transformers import BertConfig, BertModel
@@ -488,18 +544,34 @@ def test_a_rebuild_reuses_the_recorded_config_even_when_the_rule_changes(tmp_pat
     out = tmp_path / "fixture"
     out.mkdir()
     fixture = {"build": recipe, "built_from": "org/model"}
-    record = {"recipe": recipe, "built_from": {"repo": "org/model"}, "key_fields": config}
+    record = {
+        "recipe": recipe,
+        "built_from": {"repo": "org/model"},
+        "key_fields": config,
+    }
     (out / "build.json").write_text(json.dumps(record))
-    assert build_fixtures.recorded_config(out, fixture) == json.loads(json.dumps(config))
+    assert build_fixtures.recorded_config(out, fixture) == json.loads(
+        json.dumps(config)
+    )
 
     # Today's rule makes something else; the recorded config still reproduces the key.
-    monkeypatch.setattr(build_fixtures, "shrink", lambda c: BertConfig(hidden_size=32, num_attention_heads=2))
+    monkeypatch.setattr(
+        build_fixtures,
+        "shrink",
+        lambda c: BertConfig(hidden_size=32, num_attention_heads=2),
+    )
     assert build_fixtures.fixture_key(source, BertModel, [], recipe)[0] != key
-    recorded = {**recipe, "recorded_config": build_fixtures.recorded_config(out, fixture)}
+    recorded = {
+        **recipe,
+        "recorded_config": build_fixtures.recorded_config(out, fixture),
+    }
     assert build_fixtures.fixture_key(source, BertModel, [], recorded)[0] == key
 
     # An edited recipe, or a record from before provenance, re-shrinks.
-    assert build_fixtures.recorded_config(out, {**fixture, "build": {**recipe, "seed": 3}}) is None
+    assert (
+        build_fixtures.recorded_config(out, {**fixture, "build": {**recipe, "seed": 3}})
+        is None
+    )
     (out / "build.json").write_text(json.dumps({**record, "recipe": None}))
     assert build_fixtures.recorded_config(out, fixture) is None
 
@@ -512,7 +584,9 @@ def test_shrink_keeps_channels_feeding_a_sibling_encoder():
     from transformers import UnlimitedOcrConfig
 
     vision = shrink(UnlimitedOcrConfig()).vision_config
-    assert vision.sam_config.downsample_channels[-1] == vision.encoder_config.hidden_size
+    assert (
+        vision.sam_config.downsample_channels[-1] == vision.encoder_config.hidden_size
+    )
     assert list(vision.sam_config.downsample_channels) == [32, 64]
 
 
@@ -541,7 +615,9 @@ def test_shrink_keeps_one_dpt_layer_per_out_index():
     from sweep import shrink
     from transformers import DPTConfig
 
-    config = shrink(DPTConfig(backbone_out_indices=[5, 11, 17, 23], num_hidden_layers=24))
+    config = shrink(
+        DPTConfig(backbone_out_indices=[5, 11, 17, 23], num_hidden_layers=24)
+    )
     assert config.num_hidden_layers == 4
     assert config.backbone_out_indices == [0, 1, 2, 3]
     assert len(config.neck_hidden_sizes) == 4
@@ -550,9 +626,19 @@ def test_shrink_keeps_one_dpt_layer_per_out_index():
 def test_save_accepts_a_missing_tied_alias(tmp_path):
     from transformers import BertConfig, BertForMaskedLM
 
-    model = BertForMaskedLM(BertConfig(vocab_size=50, hidden_size=16, num_hidden_layers=1, num_attention_heads=2, intermediate_size=32))
+    model = BertForMaskedLM(
+        BertConfig(
+            vocab_size=50,
+            hidden_size=16,
+            num_hidden_layers=1,
+            num_attention_heads=2,
+            intermediate_size=32,
+        )
+    )
     model.config.save_pretrained(tmp_path / "src")
-    build_fixtures.save(model, tmp_path / "out", tmp_path / "src", ["cls.predictions.decoder.bias"])
+    build_fixtures.save(
+        model, tmp_path / "out", tmp_path / "src", ["cls.predictions.decoder.bias"]
+    )
 
 
 def test_shrink_keeps_clipseg_extract_layers_within_the_vision_depth():
@@ -573,6 +659,7 @@ def test_shrink_keeps_one_moe_layer_after_leading_dense_layers():
     config = shrink(Lfm2MoeConfig(num_dense_layers=2, num_hidden_layers=24))
     assert config.num_dense_layers < config.num_hidden_layers
 
+
 def test_shrink_keeps_llama4_pixel_shuffle_and_projector_widths():
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
     from sweep import shrink
@@ -580,19 +667,35 @@ def test_shrink_keeps_llama4_pixel_shuffle_and_projector_widths():
 
     # As in Llama-4-Scout: the adapter MLP reads hidden_size / ratio**2 channels and
     # projects to the text width.
-    config = shrink(Llama4Config(
-        vision_config={"hidden_size": 768, "intermediate_size": 3072, "pixel_shuffle_ratio": 0.5,
-                       "projector_input_dim": 2048, "projector_output_dim": 2048, "vision_output_dim": 2048},
-        text_config={"hidden_size": 2048},
-    ))
+    config = shrink(
+        Llama4Config(
+            vision_config={
+                "hidden_size": 768,
+                "intermediate_size": 3072,
+                "pixel_shuffle_ratio": 0.5,
+                "projector_input_dim": 2048,
+                "projector_output_dim": 2048,
+                "vision_output_dim": 2048,
+            },
+            text_config={"hidden_size": 2048},
+        )
+    )
     vision, width = config.vision_config, config.text_config.hidden_size
     assert vision.intermediate_size == vision.hidden_size * 4
-    assert vision.projector_input_dim == vision.projector_output_dim == vision.vision_output_dim == width
+    assert (
+        vision.projector_input_dim
+        == vision.projector_output_dim
+        == vision.vision_output_dim
+        == width
+    )
+
 
 def test_shrink_keeps_csm_depth_decoder_reading_the_backbone_width():
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
     from sweep import shrink
     from transformers import CsmConfig
 
-    config = shrink(CsmConfig(hidden_size=2048, depth_decoder_config={"backbone_hidden_size": 2048}))
+    config = shrink(
+        CsmConfig(hidden_size=2048, depth_decoder_config={"backbone_hidden_size": 2048})
+    )
     assert config.depth_decoder_config.backbone_hidden_size == config.hidden_size
