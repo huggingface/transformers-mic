@@ -60,6 +60,8 @@ def restore_hidden_sources(root):
         report = read(folder / "collection.json")
         for kind in ("models", "contracts"):
             for source in report.get(kind, []):
+                if "files" not in source:
+                    continue
                 repo, revision = source["repo"], source["revision"]
                 if not re.fullmatch(r"[a-f0-9]{40}", revision):
                     raise ValueError(

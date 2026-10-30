@@ -3,7 +3,7 @@
 import argparse
 import json
 import os
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 import platform
 import re
 import shutil
@@ -273,46 +273,23 @@ def measure(args):
                     pin["repo"], "integration.json", revision=pin["revision"]
                 )
             )
-            if args.profile == "cuda" and not any(
-                item["repo"] == pin["repo"] and item["revision"] == pin["revision"]
-                for item in report["contracts"]
-            ):
-                source = Path(snapshot_download(pin["repo"], revision=pin["revision"]))
-                layout = source / ".mic-repo.json"
-                names = (
-                    [*read(layout)["contract_files"], ".mic-repo.json"]
-                    if layout.exists()
-                    else [
-                        path.relative_to(source).as_posix()
-                        for path in source.rglob("*")
-                        if path.is_file()
-                        and ".cache" not in path.relative_to(source).parts
-                    ]
-                )
-                destination = (
-                    root
-                    / "contracts"
-                    / pin["repo"].replace("/", "--")
-                    / pin["revision"]
-                )
-                for file_name in names:
-                    path = PurePosixPath(file_name)
-                    if path.is_absolute() or ".." in path.parts or "\\" in file_name:
-                        raise ValueError("Unsafe contract source path")
-                    target = destination / file_name
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(source / file_name, target)
-                report["contracts"].append(
-                    {
-                        "repo": pin["repo"],
-                        "revision": pin["revision"],
-                        "files": {
-                            path.relative_to(root).as_posix(): sha256(path)
-                            for path in destination.rglob("*")
-                            if path.is_file()
-                        },
-                    }
-                )
+            # Runs only see sources at these pins: run.py refuses files that differ
+            # from the lock's files_sha256, so the artifact names them instead of
+            # carrying copies (the collection checks them against the fleet).
+            for kind, repo, source in [
+                ("contracts", pin["repo"], pin),
+                *(
+                    ("models", repo, fixture)
+                    for repo, fixture in contract.get("fixtures", {}).items()
+                ),
+            ]:
+                entry = {
+                    "repo": repo,
+                    "revision": source["revision"],
+                    "files_sha256": source.get("files_sha256"),
+                }
+                if entry not in report[kind]:
+                    report[kind].append(entry)
             planned_variants = manifest["integrations"]["transformers"].get(
                 "variants", {"default": {}}
             )
@@ -343,40 +320,6 @@ def measure(args):
             safe(name)
             if name in excluded:
                 continue
-            # CUDA artifact carries the slim model snapshots as well as baselines.
-            # CPU records point to the same immutable pins, without duplicating weights.
-            if args.profile == "cuda":
-                for repo, fixture in contract.get("fixtures", {}).items():
-                    if any(
-                        model["repo"] == repo
-                        and model["revision"] == fixture["revision"]
-                        for model in report["models"]
-                    ):
-                        continue
-                    progress.emit("downloading-models", completed, total, repo)
-                    source = Path(snapshot_download(repo, revision=fixture["revision"]))
-                    destination = (
-                        root / "models" / repo.replace("/", "--") / fixture["revision"]
-                    )
-                    shutil.copytree(
-                        source,
-                        destination,
-                        dirs_exist_ok=True,
-                        ignore=shutil.ignore_patterns(
-                            ".cache", ".git", "__pycache__", "*.candidate.json"
-                        ),
-                    )
-                    report["models"].append(
-                        {
-                            "repo": repo,
-                            "revision": fixture["revision"],
-                            "files": {
-                                path.relative_to(root).as_posix(): sha256(path)
-                                for path in destination.rglob("*")
-                                if path.is_file()
-                            },
-                        }
-                    )
             pin = contract["integration"]
             manifest = read(
                 hf_hub_download(
