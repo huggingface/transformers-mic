@@ -45,6 +45,18 @@ def test_weight_policy(weights, passed, finite, requested, readable, accepted):
     )
 
 
+def test_weight_policy_skips_dtypes_declared_unhealthy():
+    build = {
+        "weights": "random",
+        "gate": {"random": {"pass": True}},
+        "numeric_health": {"float32": {"finite": True}, "bfloat16": {"finite": False}},
+        "recipe": {"accept_unhealthy": {"bfloat16": "FNet's FFT rejects half precision on CPU"}},
+    }
+    assert policy.decision(build)["accepted"]
+    build["recipe"] = {}
+    assert not policy.decision(build)["accepted"]
+
+
 def test_legacy_fixture_can_only_be_reused():
     metadata = {"training": {"steps": 20}}
     assert policy.decision(metadata, reused=True)["accepted"]

@@ -5,10 +5,13 @@ def decision(build, requested="auto", readable=False, reused=False):
     weights = build.get("weights") or ("overfit" if build.get("training") else None)
     gate = build.get("gate", {}).get(weights, {})
     health = build.get("numeric_health", {})
+    # A dtype the recipe declares unhealthy (FNet's FFT rejects bfloat16 on CPU) was
+    # reviewed and already passed the builder; it is recorded, not gated.
+    declared = (build.get("recipe") or {}).get("accept_unhealthy", {})
     accepted = (
         bool(gate.get("pass"))
         and bool(health)
-        and all(x.get("finite") for x in health.values())
+        and all(x.get("finite") for dtype, x in health.items() if dtype not in declared)
     )
     if requested != "auto" and requested != weights:
         accepted = False
