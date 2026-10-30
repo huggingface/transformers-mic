@@ -299,6 +299,52 @@ def test_shrink_keeps_voxtral_audio_frames_per_token():
     assert audio.intermediate_size == 4 * audio.hidden_size
 
 
+def _tiny_llava():
+    from transformers import CLIPVisionConfig, LlamaConfig, LlavaConfig, LlavaForConditionalGeneration
+
+    config = LlavaConfig(
+        vision_config=CLIPVisionConfig(hidden_size=16, intermediate_size=32, num_hidden_layers=1, num_attention_heads=2, image_size=28, patch_size=14),
+        text_config=LlamaConfig(hidden_size=16, intermediate_size=32, num_hidden_layers=1, num_attention_heads=2, num_key_value_heads=2, vocab_size=64),
+        image_token_id=63,
+    )
+    torch.manual_seed(0)
+    return LlavaForConditionalGeneration(config).eval()
+
+
+def test_fixture_keeps_the_checkpoint_legacy_names_and_reloads_exactly(tmp_path):
+    from safetensors import safe_open
+    from transformers import LlavaForConditionalGeneration
+    from transformers.core_model_loading import revert_weight_conversion
+    from transformers.conversion_mapping import get_model_conversion_mapping
+
+    model = _tiny_llava()
+    model._weight_conversions = get_model_conversion_mapping(model)  # legacy layout
+    legacy = set(revert_weight_conversion(model, model.state_dict()))
+    del model._weight_conversions
+    assert any(k.startswith("vision_tower.vision_model.") for k in legacy)
+    (tmp_path / "source").mkdir()
+    build_fixtures.save(model, tmp_path / "out", tmp_path / "source", [], checkpoint={"keys": legacy, "binary": False})
+    with safe_open(tmp_path / "out" / "model.safetensors", "pt") as f:
+        assert set(f.keys()) <= legacy
+    back = LlavaForConditionalGeneration.from_pretrained(tmp_path / "out")
+    assert all(torch.equal(v, back.state_dict()[k]) for k, v in model.state_dict().items())
+
+
+def test_fixture_keeps_a_head_checkpoint_prefix_and_binary_format(tmp_path):
+    from transformers import BertConfig, BertModel
+
+    torch.manual_seed(0)
+    model = BertModel(BertConfig(hidden_size=16, intermediate_size=32, num_hidden_layers=1, num_attention_heads=2, vocab_size=64)).eval()
+    keys = {f"bert.{k}" for k in model.state_dict()}
+    (tmp_path / "source").mkdir()
+    build_fixtures.save(model, tmp_path / "out", tmp_path / "source", [], checkpoint={"keys": keys, "binary": True})
+    assert not (tmp_path / "out" / "model.safetensors").exists()
+    saved = torch.load(tmp_path / "out" / "pytorch_model.bin", weights_only=True)
+    assert saved and all(k.startswith("bert.") for k in saved)
+    back = BertModel.from_pretrained(tmp_path / "out")
+    assert all(torch.equal(v, back.state_dict()[k]) for k, v in model.state_dict().items())
+
+
 def test_near_zero_batch_norm_scales_reset_to_one_before_overfitting():
     net = torch.nn.Sequential(torch.nn.Conv2d(3, 4, 3), torch.nn.BatchNorm2d(4), torch.nn.BatchNorm2d(4))
     torch.nn.init.normal_(net[1].weight, std=0.02)  # VitMatte's BatchNorm init

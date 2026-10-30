@@ -298,29 +298,60 @@ def restore_frozen(model, source, repo, revision, recipe):
     return hashes
 
 
-def save(model, out, source, missing, recipe=None):
+def checkpoint_conversions(model, keys):
+    """The weight transforms from_pretrained uses for these checkpoint names.
+
+    Loading keeps exactly the transforms some checkpoint key matched, and
+    save_pretrained reverts them; attached to the fixture, they make it keep the
+    checkpoint's names (LLaVA's legacy vision_tower.vision_model, Qwen3.5-MoE's
+    fused experts), so loading the fixture runs the same converters.
+    """
+    from transformers.conversion_mapping import get_model_conversion_mapping
+    from transformers.core_model_loading import WeightConverter, WeightRenaming, rename_source_key
+
+    mapping = get_model_conversion_mapping(model)
+    renamings = [t for t in mapping if isinstance(t, WeightRenaming)]
+    converters = [t for t in mapping if isinstance(t, WeightConverter)]
+    state = model.state_dict()
+    for key in sorted(keys):
+        rename_source_key(key, renamings, converters, model.base_model_prefix, state)
+    return [t for t in mapping if t.was_used()]
+
+
+def save(model, out, source, missing, recipe=None, checkpoint=None):
     """Write the fixture: new config and weights without the parameters the real
-    checkpoint lacks, every processor file copied unchanged."""
+    checkpoint lacks, every processor file copied unchanged.
+
+    `checkpoint` ({"keys", "binary"}) is the real checkpoint's serialization: the
+    fixture keeps its tensor names, base-model prefix and file format.
+    """
     from safetensors.torch import load_file, save_file
 
     out.mkdir(parents=True, exist_ok=True)
     for file in out.iterdir():
         if file.is_file() and file.name != "README.md":
             file.unlink()
-    model.save_pretrained(out)
-    weights = out / "model.safetensors"
-    tensors = load_file(weights)
-    # A tied alias (BERT-style cls.predictions.decoder.bias) is never serialized:
-    # it is already absent from the fixture, as from the checkpoint.
     state = model.state_dict()
-    saved = {state[name].data_ptr() for name in tensors if name in state}
-    absent = [
-        name for name in missing
-        if name not in tensors and not (name in state and state[name].data_ptr() in saved)
-    ]
+    absent = [name for name in missing if name not in state]
     if absent:
         raise SystemExit(f"cannot mirror the real checkpoint: the fixture has no tensor named {absent}")
-    save_file({k: v for k, v in tensors.items() if k not in missing}, weights, metadata={"format": "pt"})
+    if checkpoint:
+        model._weight_conversions = checkpoint_conversions(model, checkpoint["keys"])
+    # A tied alias (BERT-style cls.predictions.decoder.bias) is never serialized.
+    model.save_pretrained(out, state_dict={k: v for k, v in state.items() if k not in missing})
+    weights = out / "model.safetensors"
+    tensors = load_file(weights)
+    prefix = f"{model.base_model_prefix}." if model.base_model_prefix else None
+    if (checkpoint and prefix and checkpoint["keys"]
+            and all(k.startswith(prefix) for k in checkpoint["keys"])
+            and not any(k.startswith(prefix) for k in tensors)):
+        # A base model loaded from a head checkpoint (Jina's roberta.*): the loader strips the prefix.
+        tensors = {prefix + k: v for k, v in tensors.items()}
+    if checkpoint and checkpoint["binary"]:
+        weights.unlink()
+        torch.save(tensors, out / "pytorch_model.bin")
+    else:
+        save_file(tensors, weights, metadata={"format": "pt"})
     copied = copied_files(source, recipe)
     for name in copied:
         shutil.copyfile(source / name, out / name)  # overwrites the generation config save_pretrained wrote
@@ -624,6 +655,11 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
     source_repo = fixture["built_from"]
     lacks = missing[source_repo]
     source = source_snapshot(source_repo, revisions[source_repo], recipe)
+    from transformers_mic import inspection
+    checkpoint = {
+        "keys": inspection.checkpoint_keys(source_repo, revisions[source_repo], source),
+        "binary": inspection.loads_binary(source_repo, revisions[source_repo], source),
+    }
     cls = model_class(source, recipe)
     tolerance = recipe.get("gate_tolerance") or max(
         r["atol"] for r in manifest["outputs"].values() if r["compare"] == "allclose"
@@ -636,7 +672,7 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
     # Initialized in float32 like every other fixture, then cast: the seed gives the same weights in any dtype.
     model = cls._from_config(shrunk_config(source, cls, recipe), dtype=torch.float32).eval().to(dtype)
     frozen_hashes = restore_frozen(model, source, source_repo, revisions[source_repo], recipe)
-    copied = save(model, out, source, lacks, recipe)
+    copied = save(model, out, source, lacks, recipe, checkpoint)
     entry = root / manifest["integrations"]["transformers"]["entry_point"]
     report_phase("Run contract and capture training inputs")
     batch, captured = contract_batch(entry, out)
@@ -661,7 +697,7 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
         if not training["converged"] or not gate["overfit"]["pass"]:
             raise SystemExit(f"{name}: random weights fail the gate and overfitting did not fix it: {training}, {gate}")
         weights = "overfit"
-        save(model, out, source, lacks, recipe)
+        save(model, out, source, lacks, recipe, checkpoint)
     mirrored = missing_parameters(cls, out)
     if mirrored != lacks:
         raise SystemExit(f"{name}: fixture lacks {mirrored}, the real checkpoint lacks {lacks}")
@@ -687,6 +723,13 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
         "model_class": cls.__name__,
         "parameters": sum(p.numel() for p in model.parameters()),
         "missing_parameters": lacks,
+        "serialization": {
+            "file": "pytorch_model.bin" if checkpoint["binary"] else "model.safetensors",
+            "reverted_conversions": [
+                f"{type(t).__name__}: {t.source_patterns} -> {t.target_patterns}"
+                for t in getattr(model, "_weight_conversions", None) or []
+            ],
+        },
         **({"preserved_frozen_sha256": frozen_hashes} if frozen_hashes is not None else {}),
         "checkpoint_inspection": "parameter headers/indexes; bounded binary fallback" if inspect_checkpoint else "full checkpoint load",
         "numeric_health_scope": "CPU float32/bfloat16/float16; autocast for low-precision losses",
