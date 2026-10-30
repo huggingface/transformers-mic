@@ -309,6 +309,54 @@ def shrink(config):
         if isinstance(values.get("extract_layers"), list) and isinstance(vision, dict) and vision.get("num_hidden_layers"):
             depth, top = vision["num_hidden_layers"], max(values["extract_layers"]) + 1
             values["extract_layers"] = [min(i * depth // top, depth - 1) for i in values["extract_layers"]]
+        # Fields that name layers of the original depth must name layers of the shrunk
+        # one, in order (Mllama's vision intermediate_layers_indices and text
+        # cross_attention_layers, Granite 4 Vision's deepstack_layer_map of
+        # (vision hidden state, text layer) pairs and spatial_target_layers). Hidden-state indices count the
+        # embeddings too (depth + 1 entries) and keep their sign.
+        def depth(key):
+            sub = getattr(cfg, key, None) if key else cfg
+            new = values.get(key) if key else values
+            return getattr(sub, "num_hidden_layers", None), (new or {}).get("num_hidden_layers")
+
+        def state(i, old, new):
+            position = i if i >= 0 else old + 1 + i
+            moved = min(position * new // old, new)
+            return moved if i >= 0 else moved - (new + 1)
+
+        old_v, new_v = depth("vision_config")
+        old_t, new_t = depth("text_config")
+        vision_values = values.get("vision_config")
+        if isinstance(vision_values, dict) and old_v and new_v and old_v != new_v:
+            original = getattr(cfg.vision_config, "intermediate_layers_indices", None)
+            if isinstance(original, list):
+                vision_values["intermediate_layers_indices"] = sorted({state(i, old_v, new_v) for i in original})
+        text_values = values.get("text_config")
+        if isinstance(text_values, dict) and old_t and new_t and old_t != new_t:
+            original = getattr(cfg.text_config, "cross_attention_layers", None)
+            if isinstance(original, list):
+                # Keep layer 0 a self-attention layer when the original's is (Llama 3.2 Vision: [3, 8, ...]).
+                first = 0 if 0 in original or new_t == 1 else 1
+                kept = sorted({min(max(i * new_t // old_t, first), new_t - 1) for i in original if 0 <= i < old_t})
+                text_values["cross_attention_layers"] = kept or [new_t - 1]
+        targets = getattr(cfg, "spatial_target_layers", None)  # Granite 4 Vision: text layers
+        if isinstance(targets, list) and old_t and new_t:
+            values["spatial_target_layers"] = sorted({min(t * new_t // old_t, new_t - 1) for t in targets})
+        mapping = getattr(cfg, "deepstack_layer_map", None)
+        if isinstance(mapping, (list, tuple)) and old_v and new_v and old_t and new_t:
+            values["deepstack_layer_map"] = [
+                [state(v, old_v, new_v), min(t * new_t // old_t, new_t - 1)] for v, t in mapping
+            ]
+        # A top-level out_hidden_size that is a multiple of the vision width is the
+        # merged patch width (Muse-Glimmer: 4 x 64): keep the multiple.
+        vision = getattr(cfg, "vision_config", None)
+        if (
+            isinstance(values.get("out_hidden_size"), int)
+            and isinstance(vision_values, dict)
+            and getattr(vision, "hidden_size", None)
+            and cfg.out_hidden_size % vision.hidden_size == 0
+        ):
+            values["out_hidden_size"] = vision_values["hidden_size"] * (cfg.out_hidden_size // vision.hidden_size)
         # DPT reads one hidden state per backbone_out_indices entry, one per neck
         # width: keep a layer per entry, renumbered, and shrink the neck.
         outs = values.get("backbone_out_indices")

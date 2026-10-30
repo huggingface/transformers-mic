@@ -197,7 +197,8 @@ not memory:
   attention_mask only if the processor returns it; some audio processors do not.
 - Pick the head the checkpoint was trained for: a pretraining-only checkpoint has
   no tokenizer and no task head, so do not build a CTC or classification path on it.
-- Language-model labels: copy input_ids and set padded positions to -100, unless
+- Language-model labels: copy input_ids and set padded positions and image/audio
+  placeholder tokens (Mllama's image_token_index is past the vocabulary) to -100, unless
   the processor returns labels (PaliGemma, given suffix=; without it every label
   is masked and the loss is NaN): then model(**inputs).loss, since labels= again
   raises "multiple values". With left padding, probe
