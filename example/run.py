@@ -522,10 +522,13 @@ def resource_problem(spec, variant):
     """Why this host cannot run a target with these minimum specs, or None."""
     if not spec:
         return None
+    target_devices = spec.get("devices", ["cpu", "cuda"])
     spec = {**spec, **spec.get("variants", {}).get(variant, {})}
     h = host()
     device = "cuda" if h["gpus_gb"] else "cpu"  # what the contracts pick
-    devices = spec.get("devices", ["cpu", "cuda"])
+    # A variant declared unmeasured (devices: []) only reaches here under --run-declared:
+    # it then runs wherever the target itself can.
+    devices = spec.get("devices", ["cpu", "cuda"]) or target_devices
     if spec.get("gpus", 0) and "cpu" in devices:
         devices = [d for d in devices if d != "cpu"]
     if device not in devices:
