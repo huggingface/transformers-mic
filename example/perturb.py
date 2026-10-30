@@ -85,12 +85,16 @@ def logits_of(output):
 def max_delta(a, b):
     """Largest change across output tensors. Matching infinities (e.g. -inf logits
     at masked text positions) are unchanged; an infinity that moves is an infinite
-    change; a NaN anywhere stays NaN, so it fails the gate."""
+    change; a NaN anywhere stays NaN, so it fails the gate. An output whose shape
+    changes (VITS's waveform length follows the predicted durations) moved."""
     deltas = []
     for k in a:
         x, y = a[k].float(), b[k].float()
         if x.isnan().any() or y.isnan().any():
             return float("nan")
+        if x.shape != y.shape:
+            deltas.append(float("inf"))
+            continue
         delta = (x - y).abs().masked_fill(x == y, 0)
         deltas.append(float(torch.nan_to_num(delta, nan=float("inf"), posinf=float("inf")).max()))
     return max(deltas)

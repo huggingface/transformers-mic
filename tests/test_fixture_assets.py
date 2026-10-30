@@ -435,6 +435,9 @@ def test_max_delta_ignores_matching_infinities_but_keeps_nan():
     assert perturb.max_delta(unmasked, base) == inf
     broken = {"logits": torch.tensor([[float("nan"), -inf], [2.0, -inf]])}
     assert perturb.max_delta(broken, base) != perturb.max_delta(broken, base)
+    # VITS: a perturbed input changes the waveform length.
+    longer = {"waveform": torch.zeros(2, 7)}
+    assert perturb.max_delta(longer, {"waveform": torch.zeros(2, 5)}) == inf
 
 
 @pytest.mark.parametrize("fill,healthy", [(float("-inf"), True), (float("nan"), False)])
