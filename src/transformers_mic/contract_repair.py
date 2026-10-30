@@ -208,6 +208,7 @@ def propose(args, workspace, stage, log, folder, state, save, command=()):
             commands.check_imports,
             commands.check_undefined_names,
             commands.check_code_fences,
+            commands.check_no_remote_code,
             commands.check_image_shapes,
             commands.check_loss_has_gradients,
         ):

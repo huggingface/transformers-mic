@@ -57,6 +57,12 @@ def test_weight_policy_skips_dtypes_declared_unhealthy():
     assert not policy.decision(build)["accepted"]
 
 
+def test_usage_must_not_enable_remote_code():
+    with pytest.raises(ValueError, match="trust_remote_code"):
+        commands.check_no_remote_code({"usage": "AutoModel.from_pretrained(model_id, trust_remote_code=True)"})
+    commands.check_no_remote_code({"usage": "AutoModel.from_pretrained(model_id)"})
+
+
 def test_legacy_fixture_can_only_be_reused():
     metadata = {"training": {"steps": 20}}
     assert policy.decision(metadata, reused=True)["accepted"]
