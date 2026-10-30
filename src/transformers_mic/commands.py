@@ -438,6 +438,11 @@ def check_loss_has_gradients(plan):
             )
 
 
+def loaded_parameters(context):
+    """The checkpoint size the contract loads: none for a fixtures-only contract (Kimi K2.5's 1T)."""
+    return None if context.get("fixtures_only") else context.get("parameters")
+
+
 def check_float16_load(plan, config, parameters=None):
     """Load the model in a dtype that trains and fits the GPU.
 
@@ -633,7 +638,7 @@ def propose_valid(context, args, model, fixture, old=None):
             check_image_shapes(plan)
             check_loss_has_gradients(plan)
             if context.get("config"):
-                check_float16_load(plan, context["config"], context.get("parameters"))
+                check_float16_load(plan, context["config"], loaded_parameters(context))
                 check_config_facts(plan, context["config"])
                 check_model_classes(plan, context["config"])
                 check_label_arguments(plan, context["config"])
