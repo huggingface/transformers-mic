@@ -1436,6 +1436,21 @@ def test_planner_context_names_loaded_parameters_without_architectures():
     assert not any(".1." in name for name in names)  # one block shows the scheme
 
 
+def test_planner_context_replaces_a_config_class_transformers_lacks(monkeypatch):
+    from transformers import BertConfig
+
+    from transformers_mic import references
+
+    monkeypatch.setattr(references, "hf_hub_download", lambda *a, **kw: "/missing")
+    config = BertConfig(
+        num_hidden_layers=2, hidden_size=32, num_attention_heads=2, intermediate_size=64
+    ).to_dict()
+    config["architectures"] = ["BertForEverything"]
+    context = references.collect("org/bert", "main", config)
+    assert "BertModel" in context["transformers_classes"]
+    assert "BertForEverything" not in context["transformers_classes"]
+
+
 def test_create_rejects_imports_transformers_does_not_export():
     usage = "```py runnable:x\nfrom transformers import (\n    AutoModelForConditionalGeneration,\n    AutoProcessor,\n)\n```\n"
     with pytest.raises(ValueError, match="AutoModelForConditionalGeneration"):
