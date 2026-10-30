@@ -290,6 +290,15 @@ def test_sensitivity_skips_inputs_only_absorbed_by_kwargs():
     assert not any(key.startswith("token_type_ids") for key in result["deltas"])
 
 
+def test_shrink_keeps_voxtral_audio_frames_per_token():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import VoxtralConfig
+
+    audio = shrink(VoxtralConfig()).audio_config
+    assert audio.intermediate_size == 4 * audio.hidden_size
+
+
 def test_near_zero_batch_norm_scales_reset_to_one_before_overfitting():
     net = torch.nn.Sequential(torch.nn.Conv2d(3, 4, 3), torch.nn.BatchNorm2d(4), torch.nn.BatchNorm2d(4))
     torch.nn.init.normal_(net[1].weight, std=0.02)  # VitMatte's BatchNorm init

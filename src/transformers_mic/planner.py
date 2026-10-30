@@ -198,8 +198,9 @@ not memory:
 - Pick the head the checkpoint was trained for: a pretraining-only checkpoint has
   no tokenizer and no task head, so do not build a CTC or classification path on it.
 - Language-model labels: copy input_ids and set padded positions to -100, unless
-  the processor already returns labels (PaliGemma): then model(**inputs).loss,
-  since passing labels= again raises "multiple values". With left padding, probe
+  the processor returns labels (PaliGemma, given suffix=; without it every label
+  is masked and the loss is NaN): then model(**inputs).loss, since labels= again
+  raises "multiple values". With left padding, probe
   the last position, never position 0.
 - Object detection: labels are a list of dicts with "class_labels" (int64) and
   normalized "boxes" (cx, cy, w, h; float32), on the model device. Run the
