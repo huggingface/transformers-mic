@@ -341,11 +341,21 @@ def shrink(config):
             for key in ("encoder_config", "decoder_config"):
                 values[key]["hidden_size_global"] = glob["hidden_size"]
         # A sub-config projecting into the language model (Janus's vision aligner,
-        # Qwen3-ASR's audio output_dim) must keep projecting to its resized hidden size.
+        # Qwen3-ASR's audio output_dim, Llama 4's vision projector) must keep
+        # projecting to its resized hidden size.
         text = getattr(cfg, "text_config", None)
         for key in getattr(cfg, "sub_configs", {}) or {}:
             sub = getattr(cfg, key, None)
-            for field in ("projection_dim", "output_dim"):
+            ratio = getattr(sub, "pixel_shuffle_ratio", None)
+            if (
+                ratio
+                and isinstance(values.get(key), dict)
+                and sub.intermediate_size == sub.hidden_size / ratio**2
+            ):
+                # Llama 4's pixel shuffle turns hidden_size channels into
+                # hidden_size / ratio**2, which its adapter MLP reads as intermediate_size.
+                values[key]["intermediate_size"] = int(values[key]["hidden_size"] / ratio**2)
+            for field in ("projection_dim", "output_dim", "vision_output_dim", "projector_input_dim", "projector_output_dim"):
                 if (
                     key != "text_config"
                     and isinstance(values.get(key), dict)
@@ -355,6 +365,15 @@ def shrink(config):
                     # BART-style text configs (Florence-2) name their width d_model.
                     text_values = values["text_config"]
                     values[key][field] = text_values.get("hidden_size") or text_values["d_model"]
+        # CSM's depth decoder projects the backbone's hidden states (backbone_hidden_size).
+        for key in getattr(cfg, "sub_configs", {}) or {}:
+            sub = getattr(cfg, key, None)
+            if (
+                isinstance(values.get(key), dict)
+                and getattr(sub, "backbone_hidden_size", None) == getattr(cfg, "hidden_size", None)
+                and values.get("hidden_size")
+            ):
+                values[key]["backbone_hidden_size"] = values["hidden_size"]
         # A sub-config's channel list that ends at a sibling's width feeds that sibling
         # (Unlimited-OCR's SAM downsample_channels [512, 1024] are the CLIP encoder's
         # patch embeddings): scale it to the sibling's resized width.
