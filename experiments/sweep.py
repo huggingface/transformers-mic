@@ -381,6 +381,29 @@ def shrink(config):
         if values.get("model_type") == "voxtral" and isinstance(values.get("audio_config"), dict):
             audio = values["audio_config"]
             audio["intermediate_size"] = audio["hidden_size"] * (cfg.audio_config.intermediate_size // cfg.audio_config.hidden_size)
+        # Mllama's projector reads the vision tower's last state concatenated with
+        # each intermediate one: vision_output_dim = hidden_size x (indices + 1).
+        old_vision = getattr(cfg, "vision_config", None)
+        if (
+            isinstance(vision_values, dict)
+            and isinstance(vision_values.get("vision_output_dim"), int)
+            and isinstance(vision_values.get("intermediate_layers_indices"), list)
+            and old_vision.vision_output_dim
+            == old_vision.hidden_size * (len(old_vision.intermediate_layers_indices) + 1)
+        ):
+            vision_values["vision_output_dim"] = vision_values["hidden_size"] * (
+                len(vision_values["intermediate_layers_indices"]) + 1
+            )
+        # Granite Speech's Q-Former projector cross-attends to the audio encoder's
+        # hidden states: its encoder_hidden_size is the encoder's hidden_dim.
+        projector, encoder = values.get("projector_config"), values.get("encoder_config")
+        if (
+            isinstance(projector, dict)
+            and isinstance(encoder, dict)
+            and "encoder_hidden_size" in projector
+            and getattr(cfg.encoder_config, "hidden_dim", None) == cfg.projector_config.encoder_hidden_size
+        ):
+            projector["encoder_hidden_size"] = encoder["hidden_dim"]
         # BLT's local encoder/decoder name the global transformer's width
         # (hidden_size_global), and the checkpoint sizes the global transformer to
         # the encoder's cross_attn_k patch outputs so no extra projection is built.
