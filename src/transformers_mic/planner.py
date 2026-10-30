@@ -171,8 +171,10 @@ accelerator memory. Use exactly these hidden lines around optimizer.step():
     "updated": any(not torch.equal(p.detach().cpu(), before[n]) for n, p in model.named_parameters() if n in before). The bfloat16
 variant must use {"dtype": "bfloat16"}, not torch_dtype. Keep inference outputs
 under names the training block never rebinds, and report both. Train on labels
-the model does not predict ((predicted + 1) % num_labels): its own predictions on
-the overfit fixture give zero loss and bfloat16 gradients underflow (MobileNetV2).
+the model does not predict ((predicted + 1) % num_labels; for a language model,
+unmasked label tokens + 1 modulo the vocabulary): the overfit fixture predicts its
+own outputs, and the near-zero loss leaves bfloat16 weights unchanged (MobileNetV2,
+Llama 3.2 Vision).
 Shape a synthetic target from the output it is compared with, not a config field
 that sounds alike (VITS outputs.spectrogram has flow_size channels, not
 spectrogram_bins). Use runnable
