@@ -77,11 +77,7 @@ def same(a, b):
 
 def logits_of(output):
     """The prediction tensors of a model output: every floating field named *logits*."""
-    tensors = {
-        k: v
-        for k, v in output.items()
-        if isinstance(v, torch.Tensor) and v.is_floating_point()
-    }
+    tensors = {k: v for k, v in output.items() if isinstance(v, torch.Tensor) and v.is_floating_point()}
     picked = {k: v for k, v in tensors.items() if "logits" in k}
     return picked or {k: v for k, v in tensors.items() if k != "loss"}
 
@@ -96,9 +92,7 @@ def max_delta(a, b):
         if x.isnan().any() or y.isnan().any():
             return float("nan")
         delta = (x - y).abs().masked_fill(x == y, 0)
-        deltas.append(
-            float(torch.nan_to_num(delta, nan=float("inf"), posinf=float("inf")).max())
-        )
+        deltas.append(float(torch.nan_to_num(delta, nan=float("inf"), posinf=float("inf")).max()))
     return max(deltas)
 
 
@@ -113,29 +107,18 @@ def sensitivity(model, batch, threshold, accepted=None):
     # Labels only feed the loss unless an encoder-decoder shifts them into its decoder
     # inputs; a perturbed input can leave them inconsistent (CSM rewrites audio-token
     # labels from input_values), so a decoder-only gate runs without them.
-    if "labels" in batch and not getattr(
-        getattr(model, "config", None), "is_encoder_decoder", False
-    ):
+    if "labels" in batch and not getattr(getattr(model, "config", None), "is_encoder_decoder", False):
         batch = {k: v for k, v in batch.items() if k != "labels"}
     model.eval()
     parameter = next(model.parameters())
-    with (
-        torch.no_grad(),
-        torch.autocast(
-            parameter.device.type,
-            dtype=parameter.dtype,
-            enabled=parameter.dtype in (torch.float16, torch.bfloat16),
-        ),
-    ):
+    with torch.no_grad(), torch.autocast(parameter.device.type, dtype=parameter.dtype, enabled=parameter.dtype in (torch.float16, torch.bfloat16)):
         base = logits_of(model(**batch))
         rows, undefined, ignored = {}, [], []
         # A tokenizer can return an input the model only absorbs in **kwargs
         # (DistilBERT's token_type_ids): it cannot move the logits, so do not gate on it.
         declared = inspect.signature(model.forward).parameters
         for name, value in batch.items():
-            if name in NEVER or not (
-                isinstance(value, torch.Tensor) or tensor_list(value)
-            ):
+            if name in NEVER or not (isinstance(value, torch.Tensor) or tensor_list(value)):
                 continue
             if name not in declared:
                 ignored.append(name)
@@ -144,25 +127,17 @@ def sensitivity(model, batch, threshold, accepted=None):
                 undefined.append(name)
                 continue
             for perturb in PERTURBATIONS[name]:
-                changed = (
-                    perturb(value)
-                    if isinstance(value, torch.Tensor)
-                    else per_row(perturb, list(value))
-                )
+                changed = perturb(value) if isinstance(value, torch.Tensor) else per_row(perturb, list(value))
                 key = f"{name}:{perturb.__name__}"
                 if same(changed, value):
                     rows[key] = None  # not applicable to these inputs (e.g. no padding)
                     continue
-                rows[key] = max_delta(
-                    logits_of(model(**{**batch, name: changed})), base
-                )
+                rows[key] = max_delta(logits_of(model(**{**batch, name: changed})), base)
     applied = {k: v for k, v in rows.items() if v is not None and k not in accepted}
     weakest = min(applied, key=applied.get) if applied else None
     return {
         "pass": bool(applied) and all(v >= threshold for v in applied.values()),
-        "accepted_insensitive": {
-            k: {"delta": rows.get(k), "reason": r} for k, r in accepted.items()
-        },
+        "accepted_insensitive": {k: {"delta": rows.get(k), "reason": r} for k, r in accepted.items()},
         "threshold": threshold,
         "deltas": rows,
         "weakest": weakest,
