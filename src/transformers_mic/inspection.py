@@ -42,6 +42,17 @@ def checkpoint_keys(repo, revision, source):
     )
 
 
+def loads_binary(repo, revision, source):
+    """Whether from_pretrained reads this pinned checkpoint's pytorch_model.bin.
+
+    It falls back to .bin when the revision has no safetensors file; the bot's
+    conversion PR is only used for use_safetensors=True at revision main.
+    """
+    if (Path(source) / "model.safetensors.index.json").exists():
+        return False
+    return not HfApi().file_exists(repo, "model.safetensors", revision=revision)
+
+
 def conversion_pr_keys(api, repo):
     for discussion in api.get_repo_discussions(
         repo,
