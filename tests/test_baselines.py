@@ -418,6 +418,12 @@ def test_manifest_target_matrix_includes_checkpoints_unless_explicitly_excluded(
         baseline_worker.profile_exclusions(contract, manifest, "default", "cuda")
         == set()
     )
+    # A checkpoint above 1B is measured on GPU in bfloat16 only.
+    manifest["integrations"]["transformers"]["resources"]["org/full"]["variants"] = {
+        "default": {"devices": []}
+    }
+    assert baseline_worker.profile_exclusions(contract, manifest, "default", "cuda") == {"full"}
+    assert baseline_worker.profile_exclusions(contract, manifest, "bfloat16", "cuda") == set()
 
 
 @pytest.mark.parametrize("omit_case,runner_code", [(False, 0), (True, 0), (False, 2)])
