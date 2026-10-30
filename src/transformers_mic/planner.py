@@ -210,10 +210,10 @@ not memory:
   Hungarian matcher needs float32.
 - Checkpoints above ~3B parameters (context parameters, not the name) must fit the GPU in bfloat16 (a full
   training step on a 7B model, weights plus gradients, does not): train only a
-  small, meaningful subset (e.g. a VLM's multi_modal_projector, or the task head)
-  with requires_grad_(False) on the rest, optimize only trainable parameters, check
-  gradients on trained parameters and check that one frozen parameter has
-  grad None.
+  small subset near the output (the last decoder layer or the task head; a
+  projector at the input backpropagates through every layer and still OOMs on long
+  audio), with requires_grad_(False) on the rest, optimize only trainable parameters,
+  check gradients on trained parameters and that one frozen parameter has grad None.
 - Resources: the only GPU is one A10G reporting about 22 GB, so declare
   gpu_memory_gb of at most 22 (more skips the checkpoint), and memory_gb from the
   real parameter count; do not guess low. Do not declare devices: tmic makes a
