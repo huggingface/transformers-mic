@@ -163,6 +163,8 @@ allclose, all_true, and true respectively. training.gradients must be a nonempty
 dict of named BOOLEAN checks for finite, nonzero gradients, never raw norms, on
 parameters the loss reaches: not a decoder training never runs (VibeVoice's
 acoustic decoder) nor a router whose routing can give zero (PhiMoE's sparsemixer).
+Find a layer of one kind by name, never by index: next(n for n in names if
+n.endswith("experts.gate_up_proj")), since the fixture's depth follows its layer kinds.
 training.updated checks whether SGD actually changes weights; snapshot only
 trainable parameters, on the CPU, so the step fits a real checkpoint's
 accelerator memory. Use exactly these hidden lines around optimizer.step():
