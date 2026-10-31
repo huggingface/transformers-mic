@@ -163,8 +163,8 @@ allclose, all_true, and true respectively. training.gradients must be a nonempty
 dict of named BOOLEAN checks for finite, nonzero gradients, never raw norms, on
 parameters the loss reaches: not a decoder training never runs (VibeVoice's
 acoustic decoder), a router whose routing can give zero (PhiMoE's sparsemixer), or
-an intermediate DETR box head (RT-DETR detaches reference points between decoder
-layers, so without auxiliary losses only bbox_embed[decoder_layers - 1] trains).
+a layer behind a zero-initialized one (RT-DETR's bbox_embed MLP zero-inits its
+output layer, so on the first step only that last linear gets a gradient).
 Find a layer of one kind by name, never by index: next(n for n in names if
 n.endswith("experts.gate_up_proj")), since the fixture's depth follows its layer kinds.
 training.updated checks whether SGD actually changes weights; snapshot only
