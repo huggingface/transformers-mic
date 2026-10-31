@@ -443,6 +443,27 @@ No Git commit or framework PR is created automatically.""",
     sub.add_parser(
         "status", help="Show project provenance, weight choice and check receipts"
     )
+    shrink = sub.add_parser(
+        "shrink",
+        help="Show how the slim fixture was shrunk from its source checkpoint (HTML)",
+    )
+    shrink.add_argument(
+        "fixture",
+        nargs="?",
+        help="Fixture repo[@revision] or directory (default: the workspace's fixture)",
+    )
+    shrink.add_argument(
+        "--source", help="Source checkpoint repo[@revision] when build.json names none"
+    )
+    shrink.add_argument(
+        "--html", type=Path, help="Output page (default: shrink-<fixture>.html)"
+    )
+    shrink.add_argument(
+        "--open", action="store_true", help="Open the page in a browser"
+    )
+    shrink.add_argument(
+        "--json", action="store_true", help="Print the comparison as JSON"
+    )
     batch = sub.add_parser(
         "batch", help="Regenerate a declared prototype fleet and report every stage"
     )
@@ -590,6 +611,10 @@ def main(argv=None):
         if args.command == "auto":
             project = Workspace(args.workspace)
             return backend.invoke("auto-stage", project.root).returncode
+        if args.command == "shrink":
+            from .shrink_view import run
+
+            return run(args)
         if args.command == "status":
             print(json.dumps(Workspace(args.workspace).state, indent=2))
             return 0

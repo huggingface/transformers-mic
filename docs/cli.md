@@ -397,6 +397,29 @@ the contract's inputs move the outputs (the sensitivity gate).
    fail the build. Their source hashes are included in the fixture key and build
    record. The planner cannot add these options; review and edit the recipe yourself.
 
+   Then check that the fixture keeps the spirit of the original:
+
+   ```sh
+   tmic shrink --open                                  # this workspace's fixture
+   tmic shrink huggingface-mic/deberta-large-mnli-mic  # any fixture with a build.json
+   ```
+
+   It builds the source checkpoint and the fixture on the meta device from their
+   configs (no weights are downloaded) and writes `shrink-<fixture>.html`:
+   - every layer stack, one square per layer colored by kind (module classes plus
+     `layer_type`/`attention_type`)
+   - where the parameters sit
+   - preserved properties: attention style (MHA/GQA/MQA), MoE routing, vocabulary, RoPE
+   - every module class
+   - every changed config field
+
+   Its findings list what the original has and the fixture lost: a layer kind, a
+   module class, or a property. For example, DeepSeek-V4-Flash's 20
+   compressed-sparse-attention layers without a hash router have no counterpart
+   in the fixture, and its MQA becomes GQA. `--json` prints the comparison.
+   Fix a finding with a `config_overrides` entry or a shrink rule, then
+   `tmic build --rebuild --reshrink`.
+
 4. **Record the candidate expectations.**
 
    ```sh
