@@ -19,7 +19,26 @@ PR checks need models that run on CPU in seconds and exercise real integration p
 
 ## Recipe
 
-1. **Shrink the real config:** hidden 64, intermediate 128, 4 heads; depth [by layer pattern](#shrinking-depth-by-layer-pattern). Reviewed `config_overrides` handle missed fields (MusicGen Melody: EnCodec `num_filters`, `codebook_dim`; the latter must match shrunk width). Preserve vocabulary, special tokens, image/patch/audio dimensions, RoPE, MoE structure, and seeded Dropout/LayerDrop/SpecAugment. Preserve checkpoint tensor names and missing parameters, so loading initializes omissions as for users (Wav2Vec2 [#49385](https://github.com/huggingface/transformers/issues/49385)). Save in the source's default dtype, float32 if unspecified: mic-SmolLM-slim is bfloat16, others float32.
+1. **Shrink the real config** ([`shrink()`](../experiments/sweep.py)), in every sub-config, innermost first:
+   - **Widths:** hidden 64, intermediate 128, 4 heads, by field name.
+   - **Attention style:** KV heads become 4 under MHA, 2 otherwise.
+   - **MoE:** 4 experts, top-2, one expert group.
+   - **Depth:** [by layer pattern](#shrinking-depth-by-layer-pattern), with at least one MoE layer after leading dense layers.
+   - **Stage-based models** (Swin, PVT, ConvNeXt) keep their stage count at depth 1 per stage, with head counts that divide each stage width.
+   - **Coupled fields follow the shrunk value** they were equal to in the original:
+     - a projection that equals the text width, or projects into the language model
+     - MLA `head_dim = qk_rope_head_dim`
+     - Mllama's `vision_output_dim`, Granite Speech's projector `encoder_hidden_size`, BLT's global width
+     - Llama 4's pixel-shuffle adapter, a merged patch width
+   - **Layer-index fields** are renumbered into the shrunk depth: cross-attention layers, intermediate and deepstack indices, CLIPSeg `extract_layers`, DPT `backbone_out_indices`.
+   - **RoPE:** M-RoPE sections and LongRoPE factors are resampled to the shrunk head.
+   - **Dropped:** `quantization_config`, since fixtures are dense. A vanishing `initializer_range` (< 1e-3) becomes 0.02.
+   - **Reviewed `config_overrides`** handle missed fields (MusicGen Melody: EnCodec `num_filters`, `codebook_dim`; the latter must match the shrunk width).
+
+   Preserve vocabulary, special tokens, image/patch/audio dimensions, RoPE type, and seeded Dropout/LayerDrop/SpecAugment. Check the result with [`tmic shrink`](cli.md#step-by-step-one-model): it compares the layer kinds, module classes and properties the original builds with the fixture's, and lists what was lost.
+   - **Keep the checkpoint's form:** tensor names, prefix, file format (safetensors or `pytorch_model.bin`, sharded or not), and missing parameters, so loading runs the same converters and initializes omissions as for users (Wav2Vec2 [#49385](https://github.com/huggingface/transformers/issues/49385)).
+   - **Weights files that are not in a supported format** (`.pkl`, gguf, npz, pdparams) are not copied, and copied files over 128 MiB are refused.
+   - **dtype:** save in the source's default dtype, float32 if unspecified: mic-SmolLM-slim is bfloat16, others float32.
 2. **Copy processors byte for byte.** Identical processor files, preserved config fields, and dtype permit sharing a fixture ([example](../example/README.md#the-parts)).
 3. **Weights:** seed, then run the input-sensitivity gate.
    - Pass: keep random weights (CLIP, BERT, T5, UMT5, Wav2Vec2).
