@@ -21,10 +21,10 @@ PR checks need models that run on CPU in seconds and exercise real integration p
 
 1. **Shrink the real config** ([`shrink()`](../experiments/sweep.py)), in every sub-config, innermost first:
    - **Widths:** hidden 64, intermediate 128, 4 heads, by field name.
-   - **Attention style:** KV heads become 4 under MHA, 2 otherwise.
+   - **Attention style kept:** KV heads become 4 under MHA, stay 1 under MQA, 2 under GQA.
    - **MoE:** 4 experts, top-2, one expert group.
-   - **Depth:** [by layer pattern](#shrinking-depth-by-layer-pattern), with at least one MoE layer after leading dense layers.
-   - **Stage-based models** (Swin, PVT, ConvNeXt) keep their stage count at depth 1 per stage, with head counts that divide each stage width.
+   - **Depth:** [by layer pattern](#shrinking-depth-by-layer-pattern), with at least one MoE layer after leading dense layers. The builder then builds the original and shrunk stacks on the meta device and compares their layer kinds (module classes plus `layer_type`). If a kind is lost (one the config derives from the layer index: DeepSeek-V4's hash-routed layers, GLM-5.3's indexer every few MoE layers, Llama 4's `moe_layers`), it keeps the prefix up to each kind's first layer, at most 8 layers.
+   - **Stage-based models** (Swin, PVT, ConvNeXt) keep their stage count at depth 1 per stage, with head counts that divide each stage width; ResNet's stem keeps stage 0's width, so its identity shortcut survives.
    - **Coupled fields follow the shrunk value** they were equal to in the original:
      - a projection that equals the text width, or projects into the language model
      - MLA `head_dim = qk_rope_head_dim`
@@ -105,7 +105,7 @@ Fixed `num_hidden_layers = 2` can break mixed layers: 170 configs define `layer_
 | `ibm-granite/granite-4.0-h-tiny` | 40: 5 mamba, 1 attention, repeated; MoE | 2 mamba; forward crashes | mamba + attention |
 | `deepseek-ai/DeepSeek-V2-Lite` | 27: 1 dense, then sparse | 1 dense + 1 sparse, by luck | dense + sparse |
 
-**Rule:** kind = `layer_types` + dense/sparse MLP (`first_k_dense_replace`/`moe_layer_freq` or `mlp_only_layers`/`decoder_sparse_step`). Keep the first of each kind in order; re-index per-layer fields. When the config computes the kinds from the layer index instead of storing them (a `layer_types` or `layers_block_type` property: Jamba's attention period, Zamba's hybrid layers, RecurrentGemma cycling `block_types`), re-indexing can't keep them, so the fixture keeps the prefix up to each kind's first layer (RecurrentGemma 26 → 3, Jamba 32 → 5, Zamba2 54 → 7). Index-dependent cross-layer KV sharing still needs architecture rules.
+**Rule:** kind = `layer_types` + dense/sparse MLP (`first_k_dense_replace`/`moe_layer_freq` or `mlp_only_layers`/`decoder_sparse_step`). Keep the first of each kind in order; re-index per-layer fields. When the config computes the kinds from the layer index instead of storing them (a `layer_types` or `layers_block_type` property: Jamba's attention period, Zamba's hybrid layers, RecurrentGemma cycling `block_types`), re-indexing can't keep them, so the fixture keeps the prefix up to each kind's first layer (RecurrentGemma 26 → 3, Jamba 32 → 5, Zamba2 54 → 7). Index-dependent cross-layer KV sharing still needs architecture rules. Since 2026-10-31 the builder also compares the layer kinds the modules actually build (see the recipe), which catches kinds no config field names.
 
 ## Does it scale to every architecture?
 
@@ -116,13 +116,14 @@ Config-only sweep of all 786 Transformers model types at `bb666bd0` ([script](..
 | No usable checkpoint (none documented or on the Hub, or gated) | 123 |
 | Component only (`*_vision_model`, `*_text_model`) | 81 |
 | **Usage paths tried** | **582** |
-| Built and ran forward and backward, all finite | **382 (66%)** |
+| Built and ran forward and backward, all finite | **383 (66%)** |
 | Failed in the forward pass: coupled size fields, inputs the model rejects | 138 |
-| Failed in shrink or build: per-architecture constraints | 32 |
+| Failed in shrink or build: per-architecture constraints | 31 |
 | Failed: no synthetic inputs (video, time series) | 22 |
 | Failed: config load or backward | 8 |
 
 - **Passes:** 155 causal LMs, 73 base models, 55 image-text-to-text, 32 image classifiers, 28 masked LMs, 20 seq2seq, 8 CTC; 16/17 #49103 models (MusicGen fails config round-trip). Median 8.3M parameters.
+- **2026-10-31 rerun (382 → 383):** the layer-kind check, MQA and ResNet-stem rules; RT-DETRv2 now passes, nothing regressed.
 - **2026-10-29 rerun (314 → 382):** the most downloaded unreachable types now pass—Qwen3.5 (+MoE), Gemma 4, DeBERTa-v2, CLAP, GLM-5.3, ESM, Qwen4-Exp, DeepSeek-V3, Kimi K2.5. Fixes: a text-only head of a composite model takes its text config; zero-padded per-layer keys; `attention_head_size`, `pooler_hidden_size`, `ple_embed_dim` are widths; a 0 width (NoPE) stays 0; MLA `head_dim` follows `qk_rope_head_dim`; layer-id lists move to a kept layer of the same kind; stage-based configs keep their stage count; text-audio dual encoders get mel features. `facebook/esm-1b` fails config load on Transformers `main` (`hidden_dropout_prob: 0` is an int), so ESM sweeps ESM-2.
 - **Main repair cost:** family rules for coupled fields—M-RoPE (GLM-4V, Qwen-VL), conv groups, hierarchical per-stage widths (Swin v2, PVT), backbone-tied necks, mamba-hybrid caches, EnCodec `codebook_dim` and doubling `num_filters` (Melody overrides both).
 - **Input limit:** contracts use real processor outputs; 81 passing multimodal models ran text only.

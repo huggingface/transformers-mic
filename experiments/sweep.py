@@ -51,6 +51,8 @@ WIDTHS = {
     "n_embd": 64, "n_inner": 128, "n_head": 4, "emb_dim": 64, "dim": 64, "hidden_dim": 128,
     "n_heads": 4,
 }
+# The longest layer prefix a fixture keeps to build every layer kind.
+MAX_PREFIX = 8
 EXPERTS = ("num_experts", "num_local_experts", "n_routed_experts", "moe_num_experts")
 DEPTHS = ("num_layers", "num_decoder_layers", "encoder_layers", "decoder_layers", "n_layer", "n_layers")
 # Primary head, first match wins: the usage path a contract would cover first.
@@ -172,7 +174,7 @@ def shrink(config):
     """Apply the generic rule in place, innermost configs first, then rebuild each."""
     from transformers import PretrainedConfig
 
-    def rebuilt(cfg):
+    def rebuilt(cfg, through=None):
         values = cfg.to_dict()
         # A slim fixture holds dense random weights, whatever the checkpoint's format.
         values.pop("quantization_config", None)
@@ -191,7 +193,9 @@ def shrink(config):
                 values[key] = value
         if "num_key_value_heads" in values and values["num_key_value_heads"]:
             heads = cfg.num_attention_heads if hasattr(cfg, "num_attention_heads") else None
-            values["num_key_value_heads"] = 4 if heads and values["num_key_value_heads"] >= heads else 2
+            kv = values["num_key_value_heads"]
+            # MHA stays MHA, MQA keeps its single KV head, GQA groups stay groups.
+            values["num_key_value_heads"] = 4 if heads and kv >= heads else 1 if kv == 1 else 2
         # MLA models whose rotary tables are sized by head_dim (DeepSeek-V3, Kimi
         # K2.5) set it to qk_rope_head_dim; keep them equal after shrinking.
         if cfg.to_dict().get("head_dim") and cfg.to_dict().get("head_dim") == cfg.to_dict().get("qk_rope_head_dim"):
@@ -215,6 +219,9 @@ def shrink(config):
                 values[key] = min(values[key], 2)
         if isinstance(values.get("hidden_sizes"), list):
             values["hidden_sizes"] = [16 * 2**i for i in range(len(values["hidden_sizes"]))]
+            # ResNet's first stage keeps its identity shortcut when the stem width equals it.
+            if cfg.to_dict().get("embedding_size") == cfg.hidden_sizes[0]:
+                values["embedding_size"] = values["hidden_sizes"][0]
         if isinstance(values.get("depths"), list):
             values["depths"] = [1] * len(values["depths"])
         # Per-stage head counts must divide the shrunk per-stage widths (PVT's
@@ -264,6 +271,8 @@ def shrink(config):
             if derived_types(cfg):
                 # Kinds follow the layer index, so only a prefix keeps them: up to each kind's first layer.
                 kept = list(range(max(kept) + 1))
+            if through:
+                kept = list(range(through))
             for key, value in cfg.to_dict().items():
                 if isinstance(value, list) and len(value) == values["num_hidden_layers"]:
                     values[key] = [value[i] for i in kept if i < len(value)]
@@ -487,7 +496,19 @@ def shrink(config):
                 factors = rope.get(key)
                 if isinstance(factors, list) and len(factors) != half:
                     rope[key] = [factors[i * len(factors) // half] for i in range(half)]
-        return type(cfg).from_dict(values)
+        shrunk = type(cfg).from_dict(values)
+        depth = getattr(cfg, "num_hidden_layers", None)
+        if through is None and isinstance(depth, int) and isinstance(values.get("num_hidden_layers"), int) and values["num_hidden_layers"] < depth:
+            # Kinds the config derives from the layer index (DeepSeek-V4's hash-routed
+            # layers, GLM-5.3's indexer every few MoE layers, Llama 4's moe_layers) are
+            # lost by re-indexing: build both stacks on the meta device and, if a kind
+            # is missing, keep the prefix up to each kind's first layer.
+            from transformers_mic.shrink_view import kind_prefix
+
+            prefix = kind_prefix(cfg, shrunk)
+            if prefix and prefix <= MAX_PREFIX:
+                return rebuilt(cfg, through=prefix)
+        return shrunk
 
     return rebuilt(config)
 

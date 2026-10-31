@@ -3,16 +3,16 @@
   "EvollaModel": {
    "config_model_type": "EvollaModel",
    "finite": true,
-   "forward_seconds": 0.003249750006943941,
+   "forward_seconds": 0.007058541057631373,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
     "input_ids"
    ],
-   "layers": 2,
+   "layers": 4,
    "main_input": "input_ids",
    "model_type": "EvollaModel",
-   "parameters": 17679364,
+   "parameters": 17852552,
    "repo": "westlake-repl/Evolla-10B-hf",
    "revision": "ca9a046b9106bd7a7c23de020f1b950f42554ad1",
    "stage": "ok",
@@ -21,7 +21,7 @@
   "afmoe": {
    "config_model_type": "afmoe",
    "finite": true,
-   "forward_seconds": 0.010909709031693637,
+   "forward_seconds": 0.01094141707289964,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -30,7 +30,7 @@
    "layers": 2,
    "main_input": "input_ids",
    "model_type": "afmoe",
-   "parameters": 25707136,
+   "parameters": 25713540,
    "repo": "arcee-ai/Trinity-Mini",
    "revision": "cdb81e8130815fec299cccc8f8700004b8366e1e",
    "stage": "ok",
@@ -39,7 +39,7 @@
   "aimv2": {
    "config_model_type": "aimv2",
    "finite": true,
-   "forward_seconds": 0.0037611249135807157,
+   "forward_seconds": 0.006343082990497351,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -67,7 +67,7 @@
   "aimv2_vision_model": {
    "config_model_type": "aimv2",
    "finite": true,
-   "forward_seconds": 0.003705583978444338,
+   "forward_seconds": 0.01700854196678847,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -85,7 +85,7 @@
   "albert": {
    "config_model_type": "albert",
    "finite": true,
-   "forward_seconds": 0.003819167031906545,
+   "forward_seconds": 0.015300082974135876,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -139,7 +139,7 @@
   "altclip": {
    "config_model_type": "altclip",
    "finite": true,
-   "forward_seconds": 0.0033263328950852156,
+   "forward_seconds": 0.005613500019535422,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -176,7 +176,7 @@
   "apertus": {
    "config_model_type": "apertus",
    "finite": true,
-   "forward_seconds": 0.0036298329941928387,
+   "forward_seconds": 0.004325582995079458,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -194,7 +194,7 @@
   "arcee": {
    "config_model_type": "arcee",
    "finite": true,
-   "forward_seconds": 0.003997332998551428,
+   "forward_seconds": 0.006403208943083882,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -263,7 +263,7 @@
   "audioflamingo3": {
    "config_model_type": "audioflamingo3",
    "finite": true,
-   "forward_seconds": 0.005122083006426692,
+   "forward_seconds": 0.009211500058881938,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -309,7 +309,7 @@
   "axk1": {
    "config_model_type": "axk1",
    "finite": true,
-   "forward_seconds": 0.0101972920820117,
+   "forward_seconds": 0.007166040944866836,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -327,7 +327,7 @@
   "axk2": {
    "config_model_type": "axk2",
    "finite": true,
-   "forward_seconds": 0.010313041973859072,
+   "forward_seconds": 0.011205459013581276,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -345,7 +345,7 @@
   "aya_vision": {
    "config_model_type": "aya_vision",
    "finite": true,
-   "forward_seconds": 0.005649957922287285,
+   "forward_seconds": 0.006545833079144359,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -380,7 +380,7 @@
   "bamba": {
    "config_model_type": "bamba",
    "finite": true,
-   "forward_seconds": 0.014530790969729424,
+   "forward_seconds": 0.014757957891561091,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -415,7 +415,7 @@
   "bart": {
    "config_model_type": "bart",
    "finite": true,
-   "forward_seconds": 0.002690250054001808,
+   "forward_seconds": 0.003110332996584475,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -433,7 +433,7 @@
   "beam": {
    "config_model_type": "beam",
    "finite": true,
-   "forward_seconds": 0.025108665926381946,
+   "forward_seconds": 0.02495529199950397,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -451,7 +451,7 @@
   "beit": {
    "config_model_type": "beit",
    "finite": true,
-   "forward_seconds": 0.004779750015586615,
+   "forward_seconds": 0.005211415933445096,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -468,7 +468,7 @@
   "bert": {
    "config_model_type": "bert",
    "finite": true,
-   "forward_seconds": 0.0016688749892637134,
+   "forward_seconds": 0.005350499995984137,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -486,7 +486,7 @@
   "bert-generation": {
    "config_model_type": "bert-generation",
    "finite": true,
-   "forward_seconds": 0.002128124935552478,
+   "forward_seconds": 0.0030895420350134373,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -504,7 +504,7 @@
   "big_bird": {
    "config_model_type": "big_bird",
    "finite": true,
-   "forward_seconds": 0.002145625068806112,
+   "forward_seconds": 0.0020840420620515943,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -522,7 +522,7 @@
   "bigbird_pegasus": {
    "config_model_type": "bigbird_pegasus",
    "finite": true,
-   "forward_seconds": 0.004911832977086306,
+   "forward_seconds": 0.004925540997646749,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -540,7 +540,7 @@
   "biogpt": {
    "config_model_type": "biogpt",
    "finite": true,
-   "forward_seconds": 0.001948041026480496,
+   "forward_seconds": 0.0017795829335227609,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -567,7 +567,7 @@
   "bitnet": {
    "config_model_type": "bitnet",
    "finite": true,
-   "forward_seconds": 0.004981125006452203,
+   "forward_seconds": 0.004888458061031997,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -585,7 +585,7 @@
   "blenderbot": {
    "config_model_type": "blenderbot",
    "finite": true,
-   "forward_seconds": 0.001071792095899582,
+   "forward_seconds": 0.0017388330306857824,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -603,7 +603,7 @@
   "blenderbot-small": {
    "config_model_type": "blenderbot-small",
    "finite": true,
-   "forward_seconds": 0.0031477080192416906,
+   "forward_seconds": 0.0017383330268785357,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -698,7 +698,7 @@
   "bloom": {
    "config_model_type": "bloom",
    "finite": true,
-   "forward_seconds": 0.0072477919748052955,
+   "forward_seconds": 0.016874207998625934,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -749,17 +749,17 @@
   "bridgetower": {
    "config_model_type": "bridgetower",
    "finite": true,
-   "forward_seconds": 0.02063045895192772,
+   "forward_seconds": 0.013804292073473334,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
     "input_ids",
     "pixel_values"
    ],
-   "layers": 2,
+   "layers": 1,
    "main_input": "input_ids",
    "model_type": "bridgetower",
-   "parameters": 3705600,
+   "parameters": 3604864,
    "repo": "regisss/bridgetower-newyorker-a100-8x",
    "revision": "ff2eb8ee982639c2571b11eb5e199355188cbe5a",
    "stage": "ok",
@@ -793,7 +793,7 @@
   "camembert": {
    "config_model_type": "camembert",
    "finite": true,
-   "forward_seconds": 0.0015287090791389346,
+   "forward_seconds": 0.003509166999720037,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -837,7 +837,7 @@
   "canine": {
    "config_model_type": "canine",
    "finite": true,
-   "forward_seconds": 0.006759000010788441,
+   "forward_seconds": 0.0082504169549793,
    "head": "MODEL_FOR_SEQUENCE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -855,7 +855,7 @@
   "chameleon": {
    "config_model_type": "chameleon",
    "finite": true,
-   "forward_seconds": 0.005947292083874345,
+   "forward_seconds": 0.005705207935534418,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -881,7 +881,7 @@
   "chinese_clip": {
    "config_model_type": "chinese_clip",
    "finite": true,
-   "forward_seconds": 0.0038524999981746078,
+   "forward_seconds": 0.002974791917949915,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -909,7 +909,7 @@
   "chinese_clip_vision_model": {
    "config_model_type": "chinese_clip",
    "finite": true,
-   "forward_seconds": 0.002149250009097159,
+   "forward_seconds": 0.0021077499259263277,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -943,7 +943,7 @@
   "clap": {
    "config_model_type": "clap",
    "finite": true,
-   "forward_seconds": 0.02276899991557002,
+   "forward_seconds": 0.03567450004629791,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -981,7 +981,7 @@
   "clip": {
    "config_model_type": "clip",
    "finite": true,
-   "forward_seconds": 0.0012671248987317085,
+   "forward_seconds": 0.004355958080850542,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -998,7 +998,7 @@
   "clip_text_model": {
    "config_model_type": "clip",
    "finite": true,
-   "forward_seconds": 0.0007049581035971642,
+   "forward_seconds": 0.0011306250235065818,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -1017,7 +1017,7 @@
   "clip_vision_model": {
    "config_model_type": "clip",
    "finite": true,
-   "forward_seconds": 0.0012511250097304583,
+   "forward_seconds": 0.0023908750154078007,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -1035,7 +1035,7 @@
   "clipseg": {
    "config_model_type": "clipseg",
    "finite": true,
-   "forward_seconds": 0.002578291925601661,
+   "forward_seconds": 0.005310333915986121,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1124,7 +1124,7 @@
   "cohere": {
    "config_model_type": "cohere",
    "finite": true,
-   "forward_seconds": 0.008780375006608665,
+   "forward_seconds": 0.009079375071451068,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1142,7 +1142,7 @@
   "cohere2": {
    "config_model_type": "cohere2",
    "finite": true,
-   "forward_seconds": 0.012989499955438077,
+   "forward_seconds": 0.011393125052563846,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1160,7 +1160,7 @@
   "cohere2_moe": {
    "config_model_type": "cohere2_vision",
    "finite": true,
-   "forward_seconds": 0.009914624970406294,
+   "forward_seconds": 0.011708582984283566,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
@@ -1179,7 +1179,7 @@
   "cohere2_vision": {
    "config_model_type": "cohere2_vision",
    "finite": true,
-   "forward_seconds": 0.008199082920327783,
+   "forward_seconds": 0.009288499946705997,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1202,10 +1202,10 @@
     "decoder_input_ids",
     "input_features"
    ],
-   "layers": 2,
+   "layers": 1,
    "main_input": "input_features",
    "model_type": "cohere_asr",
-   "parameters": 2821248,
+   "parameters": 2771008,
    "repo": "syvai/hviske-v5.3",
    "revision": "5d1a09822018702dc51d763e3a867b62d26b3501",
    "stage": "forward",
@@ -1214,7 +1214,7 @@
   "cohere_compass": {
    "config_model_type": "cohere_compass",
    "finite": true,
-   "forward_seconds": 0.014530958025716245,
+   "forward_seconds": 0.01298891706392169,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1232,7 +1232,7 @@
   "cohere_compass_text": {
    "config_model_type": "cohere_compass",
    "finite": true,
-   "forward_seconds": 0.009007332962937653,
+   "forward_seconds": 0.016011375002563,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
@@ -1273,7 +1273,7 @@
   "colpali": {
    "config_model_type": "colpali",
    "finite": true,
-   "forward_seconds": 0.0016754160169512033,
+   "forward_seconds": 0.0018614169675856829,
    "head": "MODEL_FOR_PRETRAINING_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1282,7 +1282,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "colpali",
-   "parameters": 16718656,
+   "parameters": 16714560,
    "repo": "vidore/colpali-v1.3-hf",
    "revision": "133a9eb02947310513f52f8f0d39d622e0eab8dc",
    "stage": "ok",
@@ -1291,7 +1291,7 @@
   "colqwen2": {
    "config_model_type": "colqwen2",
    "finite": true,
-   "forward_seconds": 0.0018403750145807862,
+   "forward_seconds": 0.0010682919528335333,
    "head": "MODEL_FOR_PRETRAINING_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1309,7 +1309,7 @@
   "conditional_detr": {
    "config_model_type": "conditional_detr",
    "finite": true,
-   "forward_seconds": 0.08269170799758285,
+   "forward_seconds": 0.07971995789557695,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -1326,7 +1326,7 @@
   "convbert": {
    "config_model_type": "convbert",
    "finite": true,
-   "forward_seconds": 0.007995208026841283,
+   "forward_seconds": 0.008398749982006848,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1344,7 +1344,7 @@
   "convnext": {
    "config_model_type": "convnext",
    "finite": true,
-   "forward_seconds": 0.04730366705916822,
+   "forward_seconds": 0.045157874934375286,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -1361,7 +1361,7 @@
   "convnextv2": {
    "config_model_type": "convnextv2",
    "finite": true,
-   "forward_seconds": 0.04056733299512416,
+   "forward_seconds": 0.044147833017632365,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -1378,7 +1378,7 @@
   "cosmos3_edge": {
    "config_model_type": "cosmos3_edge",
    "finite": true,
-   "forward_seconds": 0.008221041993238032,
+   "forward_seconds": 0.008487042039632797,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1396,7 +1396,7 @@
   "cosmos3_edge_text": {
    "config_model_type": "cosmos3_edge",
    "finite": true,
-   "forward_seconds": 0.001310667023062706,
+   "forward_seconds": 0.0016569159924983978,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -1432,7 +1432,7 @@
   "cosmos3_omni": {
    "config_model_type": "cosmos3_omni",
    "finite": true,
-   "forward_seconds": 0.007215082994662225,
+   "forward_seconds": 0.004618834005668759,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1450,7 +1450,7 @@
   "cpmant": {
    "config_model_type": "cpmant",
    "finite": true,
-   "forward_seconds": 0.014369250042364001,
+   "forward_seconds": 0.009615416056476533,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1468,7 +1468,7 @@
   "csm": {
    "config_model_type": "csm",
    "finite": true,
-   "forward_seconds": 0.0013327909400686622,
+   "forward_seconds": 0.0011775830062106252,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1477,7 +1477,7 @@
    "layers": 2,
    "main_input": "input_ids",
    "model_type": "csm",
-   "parameters": 170082049,
+   "parameters": 39741185,
    "repo": "cartesia/azzurra-voice",
    "revision": "f41947b939470b49181f77d8d89827938a2a915b",
    "stage": "ok",
@@ -1490,7 +1490,7 @@
   "ctrl": {
    "config_model_type": "ctrl",
    "finite": true,
-   "forward_seconds": 0.00927362497895956,
+   "forward_seconds": 0.009180708089843392,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1508,7 +1508,7 @@
   "cvt": {
    "config_model_type": "cvt",
    "finite": true,
-   "forward_seconds": 0.26401308306958526,
+   "forward_seconds": 0.2943723750067875,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -1568,7 +1568,7 @@
   "data2vec-audio": {
    "config_model_type": "data2vec-audio",
    "finite": true,
-   "forward_seconds": 0.05300183407962322,
+   "forward_seconds": 0.06333949998952448,
    "head": "MODEL_FOR_CTC_MAPPING_NAMES",
    "inputs": [
     "input_values"
@@ -1585,7 +1585,7 @@
   "data2vec-text": {
    "config_model_type": "data2vec-text",
    "finite": true,
-   "forward_seconds": 0.004228167003020644,
+   "forward_seconds": 0.0031556669855490327,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1611,7 +1611,7 @@
   "dbrx": {
    "config_model_type": "dbrx",
    "finite": true,
-   "forward_seconds": 0.00461191707290709,
+   "forward_seconds": 0.005599374999292195,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1629,7 +1629,7 @@
   "deberta": {
    "config_model_type": "deberta",
    "finite": true,
-   "forward_seconds": 0.02266687504015863,
+   "forward_seconds": 0.026407709112390876,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1647,7 +1647,7 @@
   "deberta-v2": {
    "config_model_type": "deberta-v2",
    "finite": true,
-   "forward_seconds": 0.02528812491800636,
+   "forward_seconds": 0.02939741697628051,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1679,7 +1679,7 @@
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "layers": null,
    "model_type": "deepseek_ocr2",
-   "parameters": 23801984,
+   "parameters": 18597248,
    "repo": "deepseek-community/DeepSeek-OCR-2",
    "revision": "838dc37567aa97106fcd590e2be6a8f279881813",
    "stage": "inputs"
@@ -1723,7 +1723,7 @@
   "deepseek_v2": {
    "config_model_type": "deepseek_v2",
    "finite": true,
-   "forward_seconds": 0.00456158397719264,
+   "forward_seconds": 0.007186166942119598,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1741,7 +1741,7 @@
   "deepseek_v3": {
    "config_model_type": "deepseek_v3",
    "finite": true,
-   "forward_seconds": 0.00783458398655057,
+   "forward_seconds": 0.006439000018872321,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1759,7 +1759,7 @@
   "deepseek_v32": {
    "config_model_type": "deepseek_v32",
    "finite": true,
-   "forward_seconds": 0.005451250006444752,
+   "forward_seconds": 0.005103833042085171,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1777,16 +1777,16 @@
   "deepseek_v4": {
    "config_model_type": "deepseek_v4",
    "finite": true,
-   "forward_seconds": 0.015350667061284184,
+   "forward_seconds": 0.018718292005360126,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
     "input_ids"
    ],
-   "layers": 3,
+   "layers": 5,
    "main_input": "input_ids",
    "model_type": "deepseek_v4",
-   "parameters": 18635507,
+   "parameters": 20081591,
    "repo": "deepseek-ai/DeepSeek-V4-Flash-Base",
    "revision": "8855555deef230a27a21a8d6f294b7b7497759b6",
    "stage": "ok",
@@ -1795,7 +1795,7 @@
   "deepseek_vl": {
    "config_model_type": "deepseek_vl",
    "finite": true,
-   "forward_seconds": 0.004880208056420088,
+   "forward_seconds": 0.0037836250849068165,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1813,7 +1813,7 @@
   "deepseek_vl_hybrid": {
    "config_model_type": "deepseek_vl_hybrid",
    "finite": true,
-   "forward_seconds": 0.004183375043794513,
+   "forward_seconds": 0.00365108298137784,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1831,7 +1831,7 @@
   "deformable_detr": {
    "config_model_type": "deformable_detr",
    "finite": true,
-   "forward_seconds": 0.09376325004268438,
+   "forward_seconds": 0.07841112499590963,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -1864,7 +1864,7 @@
   "deit": {
    "config_model_type": "deit",
    "finite": true,
-   "forward_seconds": 0.0036055409582331777,
+   "forward_seconds": 0.0037924579810351133,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -1913,7 +1913,7 @@
   "detr": {
    "config_model_type": "detr",
    "finite": true,
-   "forward_seconds": 0.08266983402427286,
+   "forward_seconds": 0.05899375001899898,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -1942,7 +1942,7 @@
   "diffllama": {
    "config_model_type": "diffllama",
    "finite": true,
-   "forward_seconds": 0.0035542499972507358,
+   "forward_seconds": 0.0057677499717101455,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -1995,7 +1995,7 @@
   "dinov2": {
    "config_model_type": "dinov2",
    "finite": true,
-   "forward_seconds": 0.039392958977259696,
+   "forward_seconds": 0.036198333953507245,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -2012,7 +2012,7 @@
   "dinov2_with_registers": {
    "config_model_type": "dinov2_with_registers",
    "finite": true,
-   "forward_seconds": 0.03647720895241946,
+   "forward_seconds": 0.0363247919594869,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -2029,7 +2029,7 @@
   "dinov3_convnext": {
    "config_model_type": "dinov3_convnext",
    "finite": true,
-   "forward_seconds": 0.03446995792910457,
+   "forward_seconds": 0.03746033401694149,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -2046,7 +2046,7 @@
   "dinov3_vit": {
    "config_model_type": "dinov3_vit",
    "finite": true,
-   "forward_seconds": 0.0029637920670211315,
+   "forward_seconds": 0.00441558298189193,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -2063,7 +2063,7 @@
   "distilbert": {
    "config_model_type": "distilbert",
    "finite": true,
-   "forward_seconds": 0.0013550419826060534,
+   "forward_seconds": 0.001859333016909659,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2081,7 +2081,7 @@
   "doge": {
    "config_model_type": "doge",
    "finite": true,
-   "forward_seconds": 0.0029198749689385295,
+   "forward_seconds": 0.004783500102348626,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2099,7 +2099,7 @@
   "donut-swin": {
    "config_model_type": "vision-encoder-decoder",
    "finite": true,
-   "forward_seconds": 4.135984624968842,
+   "forward_seconds": 7.832291166996583,
    "from_parent": true,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
@@ -2117,7 +2117,7 @@
   "dots1": {
    "config_model_type": "dots1",
    "finite": true,
-   "forward_seconds": 0.005218417034484446,
+   "forward_seconds": 0.011663875076919794,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2135,7 +2135,7 @@
   "dpr": {
    "config_model_type": "dpr",
    "finite": true,
-   "forward_seconds": 0.0009337920928373933,
+   "forward_seconds": 0.001265041995793581,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2153,15 +2153,15 @@
   "dpt": {
    "config_model_type": "dpt",
    "finite": true,
-   "forward_seconds": 0.007472375058569014,
+   "forward_seconds": 0.018023792072199285,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
    ],
-   "layers": 2,
+   "layers": 4,
    "main_input": "pixel_values",
    "model_type": "dpt",
-   "parameters": 219840,
+   "parameters": 286784,
    "repo": "Intel/dpt-large",
    "revision": "bc15f29aa3a80d532f2ed650b5e16ac48d8958f9",
    "stage": "ok",
@@ -2206,7 +2206,7 @@
   "edgetam_vision_model": {
    "config_model_type": "edgetam_video",
    "finite": true,
-   "forward_seconds": 0.06294924998655915,
+   "forward_seconds": 0.11214154202025384,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -2248,7 +2248,7 @@
   "electra": {
    "config_model_type": "electra",
    "finite": true,
-   "forward_seconds": 0.007403791998513043,
+   "forward_seconds": 0.006868791999295354,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2266,7 +2266,7 @@
   "embedding_gemma2": {
    "config_model_type": "embedding_gemma2",
    "finite": true,
-   "forward_seconds": 0.005651624989695847,
+   "forward_seconds": 0.00373412505723536,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2284,7 +2284,7 @@
   "embedding_gemma2_text": {
    "config_model_type": "embedding_gemma2",
    "finite": true,
-   "forward_seconds": 0.004214916960336268,
+   "forward_seconds": 0.004811957944184542,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -2303,7 +2303,7 @@
   "emu3": {
    "config_model_type": "emu3",
    "finite": true,
-   "forward_seconds": 0.012378917075693607,
+   "forward_seconds": 0.008765082922764122,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2355,7 +2355,7 @@
   "encoder-decoder": {
    "config_model_type": "encoder-decoder",
    "finite": true,
-   "forward_seconds": 0.0027985828928649426,
+   "forward_seconds": 0.003736665938049555,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2406,7 +2406,7 @@
   "ernie": {
    "config_model_type": "ernie",
    "finite": true,
-   "forward_seconds": 0.002397041069343686,
+   "forward_seconds": 0.002150749904103577,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2424,7 +2424,7 @@
   "ernie4_5": {
    "config_model_type": "ernie4_5",
    "finite": true,
-   "forward_seconds": 0.004876042017713189,
+   "forward_seconds": 0.003536959062330425,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2484,7 +2484,7 @@
   "esm": {
    "config_model_type": "esm",
    "finite": true,
-   "forward_seconds": 0.0017476669745519757,
+   "forward_seconds": 0.0017752500716596842,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2502,7 +2502,7 @@
   "esmc": {
    "config_model_type": "esmc",
    "finite": true,
-   "forward_seconds": 0.0008504580473527312,
+   "forward_seconds": 0.0016487078974023461,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2528,7 +2528,7 @@
   "eurobert": {
    "config_model_type": "eurobert",
    "finite": true,
-   "forward_seconds": 0.0036214590072631836,
+   "forward_seconds": 0.003190250019542873,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2550,7 +2550,7 @@
   "exaone4": {
    "config_model_type": "exaone4",
    "finite": true,
-   "forward_seconds": 0.003007040941156447,
+   "forward_seconds": 0.004718333948403597,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2568,7 +2568,7 @@
   "exaone4_5": {
    "config_model_type": "exaone4_5",
    "finite": true,
-   "forward_seconds": 0.003906750003807247,
+   "forward_seconds": 0.0073850000044330955,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2604,7 +2604,7 @@
   "exaone_moe": {
    "config_model_type": "exaone_moe",
    "finite": true,
-   "forward_seconds": 0.006583875045180321,
+   "forward_seconds": 0.004875375074334443,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2622,7 +2622,7 @@
   "falcon": {
    "config_model_type": "falcon",
    "finite": true,
-   "forward_seconds": 0.004320749896578491,
+   "forward_seconds": 0.006549332989379764,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2640,7 +2640,7 @@
   "falcon_h1": {
    "config_model_type": "falcon_h1",
    "finite": true,
-   "forward_seconds": 0.013182125054299831,
+   "forward_seconds": 0.015608791029080749,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2658,7 +2658,7 @@
   "falcon_mamba": {
    "config_model_type": "falcon_mamba",
    "finite": true,
-   "forward_seconds": 0.004115874995477498,
+   "forward_seconds": 0.005551166948862374,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2676,7 +2676,7 @@
   "fast_vlm": {
    "config_model_type": "fast_vlm",
    "finite": true,
-   "forward_seconds": 0.0036724170204252005,
+   "forward_seconds": 0.004255041945725679,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2733,7 +2733,7 @@
   "flaubert": {
    "config_model_type": "flaubert",
    "finite": true,
-   "forward_seconds": 0.002669874927960336,
+   "forward_seconds": 0.002553667058236897,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2751,7 +2751,7 @@
   "flava": {
    "config_model_type": "flava",
    "finite": true,
-   "forward_seconds": 0.0008017909713089466,
+   "forward_seconds": 0.0008515000808984041,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2805,7 +2805,7 @@
   "flex_olmo": {
    "config_model_type": "flex_olmo",
    "finite": true,
-   "forward_seconds": 0.004823499941267073,
+   "forward_seconds": 0.0032585840672254562,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2823,7 +2823,7 @@
   "flint": {
    "config_model_type": "flint",
    "finite": true,
-   "forward_seconds": 0.006268500001169741,
+   "forward_seconds": 0.006664042011834681,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2841,7 +2841,7 @@
   "florence2": {
    "config_model_type": "florence2",
    "finite": true,
-   "forward_seconds": 0.003720249980688095,
+   "forward_seconds": 0.004316542064771056,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2869,7 +2869,7 @@
   "fnet": {
    "config_model_type": "fnet",
    "finite": true,
-   "forward_seconds": 0.0023491670144721866,
+   "forward_seconds": 0.006149584078229964,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2887,7 +2887,7 @@
   "focalnet": {
    "config_model_type": "focalnet",
    "finite": true,
-   "forward_seconds": 0.05221404193434864,
+   "forward_seconds": 0.04057583294343203,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -2904,7 +2904,7 @@
   "fsmt": {
    "config_model_type": "fsmt",
    "finite": true,
-   "forward_seconds": 0.003503624931909144,
+   "forward_seconds": 0.0021722499513998628,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2948,7 +2948,7 @@
   "funnel": {
    "config_model_type": "funnel",
    "finite": true,
-   "forward_seconds": 0.010597457992844284,
+   "forward_seconds": 0.012940541026182473,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2966,7 +2966,7 @@
   "fuyu": {
    "config_model_type": "fuyu",
    "finite": true,
-   "forward_seconds": 0.006004667025990784,
+   "forward_seconds": 0.009351375047117472,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -2984,7 +2984,7 @@
   "gemma": {
    "config_model_type": "gemma",
    "finite": true,
-   "forward_seconds": 0.006238750065676868,
+   "forward_seconds": 0.01184216607362032,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3002,7 +3002,7 @@
   "gemma2": {
    "config_model_type": "gemma2",
    "finite": true,
-   "forward_seconds": 0.03888016601558775,
+   "forward_seconds": 0.054749124916270375,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3020,7 +3020,7 @@
   "gemma3": {
    "config_model_type": "gemma3",
    "finite": true,
-   "forward_seconds": 0.007773083983920515,
+   "forward_seconds": 0.005849000066518784,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3038,7 +3038,7 @@
   "gemma3_text": {
    "config_model_type": "gemma3",
    "finite": true,
-   "forward_seconds": 0.004611541051417589,
+   "forward_seconds": 0.008935875026509166,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
@@ -3057,7 +3057,7 @@
   "gemma3n": {
    "config_model_type": "gemma3n",
    "finite": true,
-   "forward_seconds": 0.034350582980550826,
+   "forward_seconds": 0.04189945792313665,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3087,7 +3087,7 @@
   "gemma3n_text": {
    "config_model_type": "gemma3n",
    "finite": true,
-   "forward_seconds": 0.03631075005978346,
+   "forward_seconds": 0.05844241695012897,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
@@ -3106,7 +3106,7 @@
   "gemma3n_vision": {
    "config_model_type": "gemma3n",
    "finite": true,
-   "forward_seconds": 0.4929145839996636,
+   "forward_seconds": 0.777258540969342,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -3124,7 +3124,7 @@
   "gemma4": {
    "config_model_type": "gemma4",
    "finite": true,
-   "forward_seconds": 0.03755250002723187,
+   "forward_seconds": 0.034793291008099914,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3133,7 +3133,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "gemma4",
-   "parameters": 288182512,
+   "parameters": 288114928,
    "repo": "google/gemma-4-e2b-it",
    "revision": "3e22461f65e89153144f8adb70e3b8c2cc9845a7",
    "stage": "ok",
@@ -3176,7 +3176,7 @@
   "gemma4_text": {
    "config_model_type": "gemma4",
    "finite": true,
-   "forward_seconds": 0.037349916994571686,
+   "forward_seconds": 0.045180166023783386,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
@@ -3186,7 +3186,7 @@
    "layers": 4,
    "main_input": "input_ids",
    "model_type": "gemma4_text",
-   "parameters": 286235760,
+   "parameters": 286168176,
    "repo": "google/gemma-4-e2b-it",
    "revision": "3e22461f65e89153144f8adb70e3b8c2cc9845a7",
    "stage": "ok",
@@ -3195,7 +3195,7 @@
   "gemma4_unified": {
    "config_model_type": "gemma4_unified",
    "finite": true,
-   "forward_seconds": 0.04279154201503843,
+   "forward_seconds": 0.05597770900931209,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3239,7 +3239,7 @@
   "gemma4_unified_text": {
    "config_model_type": "gemma4_unified",
    "finite": true,
-   "forward_seconds": 0.04022879200056195,
+   "forward_seconds": 0.04774587496649474,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
@@ -3285,17 +3285,17 @@
   "git": {
    "config_model_type": "git",
    "finite": true,
-   "forward_seconds": 0.014130374998785555,
+   "forward_seconds": 0.01622966700233519,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
     "input_ids",
     "pixel_values"
    ],
-   "layers": 2,
+   "layers": 1,
    "main_input": "input_ids",
    "model_type": "git",
-   "parameters": 4203258,
+   "parameters": 4169786,
    "repo": "microsoft/git-base",
    "revision": "1f7fe8444292beb4a259e3a5b6eba440cd5999d4",
    "stage": "ok",
@@ -3317,7 +3317,7 @@
   "glm4": {
    "config_model_type": "glm4",
    "finite": true,
-   "forward_seconds": 0.0042284580413252115,
+   "forward_seconds": 0.007920041913166642,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3339,7 +3339,7 @@
   "glm4_moe": {
    "config_model_type": "glm4_moe",
    "finite": true,
-   "forward_seconds": 0.0058155839797109365,
+   "forward_seconds": 0.006630499963648617,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3357,7 +3357,7 @@
   "glm4_moe_lite": {
    "config_model_type": "glm4_moe_lite",
    "finite": true,
-   "forward_seconds": 0.0043445409974083304,
+   "forward_seconds": 0.004459124989807606,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3467,7 +3467,7 @@
   "glm5_next": {
    "config_model_type": "glm5_next",
    "finite": true,
-   "forward_seconds": 0.014233833993785083,
+   "forward_seconds": 0.02583154197782278,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3485,7 +3485,7 @@
   "glm5_next_text": {
    "config_model_type": "glm5_next",
    "finite": true,
-   "forward_seconds": 0.012324040988460183,
+   "forward_seconds": 0.018690124968998134,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -3538,7 +3538,7 @@
   "glm_moe_dsa": {
    "config_model_type": "glm_moe_dsa",
    "finite": true,
-   "forward_seconds": 0.009794916026294231,
+   "forward_seconds": 0.009965750039555132,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3556,7 +3556,7 @@
   "glm_ocr": {
    "config_model_type": "glm_ocr",
    "finite": true,
-   "forward_seconds": 0.002286790986545384,
+   "forward_seconds": 0.002237000036984682,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3574,7 +3574,7 @@
   "glm_ocr_text": {
    "config_model_type": "glm_ocr",
    "finite": true,
-   "forward_seconds": 0.001095915911719203,
+   "forward_seconds": 0.00224770896602422,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -3611,7 +3611,7 @@
   "glmasr": {
    "config_model_type": "glmasr",
    "finite": true,
-   "forward_seconds": 0.004236041102558374,
+   "forward_seconds": 0.00428795802872628,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3629,7 +3629,7 @@
   "glmasr_encoder": {
    "config_model_type": "glmasr",
    "finite": true,
-   "forward_seconds": 0.045396875008009374,
+   "forward_seconds": 0.034583000000566244,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -3651,7 +3651,7 @@
   "glpn": {
    "config_model_type": "glpn",
    "finite": true,
-   "forward_seconds": 0.04577241698279977,
+   "forward_seconds": 0.04189716593828052,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -3668,7 +3668,7 @@
   "got_ocr2": {
    "config_model_type": "got_ocr2",
    "finite": true,
-   "forward_seconds": 0.0027721249498426914,
+   "forward_seconds": 0.0032391250133514404,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3694,7 +3694,7 @@
   "gpt2": {
    "config_model_type": "gpt2",
    "finite": true,
-   "forward_seconds": 0.0021400420228019357,
+   "forward_seconds": 0.00468145904596895,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3712,7 +3712,7 @@
   "gpt_bigcode": {
    "config_model_type": "gpt_bigcode",
    "finite": true,
-   "forward_seconds": 0.0039050409104675055,
+   "forward_seconds": 0.0021838750690221786,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3738,7 +3738,7 @@
   "gpt_neox": {
    "config_model_type": "gpt_neox",
    "finite": true,
-   "forward_seconds": 0.002800749964080751,
+   "forward_seconds": 0.001947290962561965,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3756,7 +3756,7 @@
   "gpt_neox_japanese": {
    "config_model_type": "gpt_neox_japanese",
    "finite": true,
-   "forward_seconds": 0.004089374910108745,
+   "forward_seconds": 0.005358624970540404,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3774,7 +3774,7 @@
   "gpt_oss": {
    "config_model_type": "gpt_oss",
    "finite": true,
-   "forward_seconds": 0.015810250071808696,
+   "forward_seconds": 0.007818875019438565,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3817,7 +3817,7 @@
   "granite": {
    "config_model_type": "granite",
    "finite": true,
-   "forward_seconds": 0.0026459579821676016,
+   "forward_seconds": 0.003948332974687219,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3835,7 +3835,7 @@
   "granite4_vision": {
    "config_model_type": "granite4_vision",
    "finite": true,
-   "forward_seconds": 0.003991125035099685,
+   "forward_seconds": 0.006643624976277351,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3857,7 +3857,7 @@
   "granite_speech": {
    "config_model_type": "granite_speech",
    "finite": true,
-   "forward_seconds": 0.0016469169640913606,
+   "forward_seconds": 0.0034228749573230743,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3866,7 +3866,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "granite_speech",
-   "parameters": 5180480,
+   "parameters": 4951104,
    "repo": "ibm-granite/granite-speech-3.3-2b",
    "revision": "4ac2f02f413c6169ae8c0ccc217115a366e552d7",
    "stage": "ok",
@@ -3882,7 +3882,7 @@
    "layers": null,
    "main_input": "input_features",
    "model_type": "granite_speech5_ctc",
-   "parameters": 2319520,
+   "parameters": 2412208,
    "repo": "ibm-granite/granite-speech-5.0-470m-turboctc",
    "revision": "947f59af40db9791170a0628cf0f3f4812d720f1",
    "stage": "forward",
@@ -3896,10 +3896,10 @@
    "inputs": [
     "input_features"
    ],
-   "layers": 2,
+   "layers": 3,
    "main_input": "input_features",
    "model_type": "granite_speech5_encoder",
-   "parameters": 2319520,
+   "parameters": 2412208,
    "repo": "ibm-granite/granite-speech-5.0-470m-turboctc",
    "revision": "947f59af40db9791170a0628cf0f3f4812d720f1",
    "stage": "forward",
@@ -3934,7 +3934,7 @@
   "granite_swa": {
    "config_model_type": "granite_swa",
    "finite": true,
-   "forward_seconds": 0.0053910830756649375,
+   "forward_seconds": 0.009432791033759713,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3952,7 +3952,7 @@
   "granitemoe": {
    "config_model_type": "granitemoe",
    "finite": true,
-   "forward_seconds": 0.0033351669553667307,
+   "forward_seconds": 0.0033008750760927796,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3970,7 +3970,7 @@
   "granitemoe_swa": {
    "config_model_type": "granitemoe_swa",
    "finite": true,
-   "forward_seconds": 0.0074645839631557465,
+   "forward_seconds": 0.006596999941393733,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -3988,7 +3988,7 @@
   "granitemoehybrid": {
    "config_model_type": "granitemoehybrid",
    "finite": true,
-   "forward_seconds": 0.010939125088043511,
+   "forward_seconds": 0.011702374904416502,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4026,7 +4026,7 @@
   "groupvit": {
    "config_model_type": "groupvit",
    "finite": true,
-   "forward_seconds": 0.005153916077688336,
+   "forward_seconds": 0.005189958028495312,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4063,7 +4063,7 @@
   "gte": {
    "config_model_type": "gte",
    "finite": true,
-   "forward_seconds": 0.005802457919344306,
+   "forward_seconds": 0.006028625066392124,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4081,7 +4081,7 @@
   "helium": {
    "config_model_type": "helium",
    "finite": true,
-   "forward_seconds": 0.0018993329722434282,
+   "forward_seconds": 0.003022250020876527,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4116,7 +4116,7 @@
   "hiera": {
    "config_model_type": "hiera",
    "finite": true,
-   "forward_seconds": 0.03352412499953061,
+   "forward_seconds": 0.03150875004939735,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -4133,7 +4133,7 @@
   "higgs_audio_v2": {
    "config_model_type": "higgs_audio_v2",
    "finite": true,
-   "forward_seconds": 0.0039771250449121,
+   "forward_seconds": 0.004330417024902999,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4150,12 +4150,19 @@
   },
   "higgs_audio_v2_tokenizer": {
    "config_model_type": "higgs_audio_v2_tokenizer",
-   "error": "ImportError: \nHiggsAudioV2TokenizerModel requires the torchaudio library but it was not found in your environment. Please install it and restart your\nruntime.\n",
+   "error": "ValueError: Audio must be mono, but got 16000",
    "head": "MODEL_MAPPING_NAMES",
+   "inputs": [
+    "input_values"
+   ],
+   "layers": null,
+   "main_input": "input_values",
    "model_type": "higgs_audio_v2_tokenizer",
+   "parameters": 73713825,
    "repo": "bosonai/higgs-audio-v2-tokenizer",
    "revision": "815a03f1b57dcb5ae918db415f22cd0c8a6f0f54",
-   "stage": "build"
+   "stage": "forward",
+   "text_only_multimodal": false
   },
   "hrm_text": {
    "config_model_type": "hrm_text",
@@ -4177,7 +4184,7 @@
   "hubert": {
    "config_model_type": "hubert",
    "finite": true,
-   "forward_seconds": 0.044067207956686616,
+   "forward_seconds": 0.04247204097919166,
    "head": "MODEL_FOR_CTC_MAPPING_NAMES",
    "inputs": [
     "input_values"
@@ -4194,7 +4201,7 @@
   "hunyuan_v1_dense": {
    "config_model_type": "hunyuan_v1_dense",
    "finite": true,
-   "forward_seconds": 0.006195000023581088,
+   "forward_seconds": 0.0031501250341534615,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4229,7 +4236,7 @@
   "hunyuan_vl": {
    "config_model_type": "hunyuan_vl",
    "finite": true,
-   "forward_seconds": 0.003662999952211976,
+   "forward_seconds": 0.00496887497138232,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4255,7 +4262,7 @@
   "hy_v3": {
    "config_model_type": "hy_v3",
    "finite": true,
-   "forward_seconds": 0.004190500010736287,
+   "forward_seconds": 0.0058301250683143735,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4273,16 +4280,16 @@
   "hy_v4": {
    "config_model_type": "hy_v4",
    "finite": true,
-   "forward_seconds": 0.004704958060756326,
+   "forward_seconds": 0.007790957926772535,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
     "input_ids"
    ],
-   "layers": 2,
+   "layers": 3,
    "main_input": "input_ids",
    "model_type": "hy_v4",
-   "parameters": 15712437,
+   "parameters": 15762029,
    "repo": "tencent/Hy4-preview",
    "revision": "705d81ee51566a186d645b74c974d642ef2828fe",
    "stage": "ok",
@@ -4291,7 +4298,7 @@
   "hyperclovax": {
    "config_model_type": "hyperclovax",
    "finite": true,
-   "forward_seconds": 0.008417584002017975,
+   "forward_seconds": 0.004187750048004091,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4309,7 +4316,7 @@
   "hyperclovax_vision_v2": {
    "config_model_type": "hyperclovax_vision_v2",
    "finite": true,
-   "forward_seconds": 0.00483520794659853,
+   "forward_seconds": 0.004966749926097691,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4327,7 +4334,7 @@
   "ibert": {
    "config_model_type": "ibert",
    "finite": true,
-   "forward_seconds": 0.0035217920085415244,
+   "forward_seconds": 0.007668166887015104,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4363,7 +4370,7 @@
   "idefics2": {
    "config_model_type": "idefics2",
    "finite": true,
-   "forward_seconds": 0.0017752079293131828,
+   "forward_seconds": 0.0031326659955084324,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4389,7 +4396,7 @@
   "idefics3": {
    "config_model_type": "idefics3",
    "finite": true,
-   "forward_seconds": 0.003878292045556009,
+   "forward_seconds": 0.0037547500105574727,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4419,7 +4426,7 @@
   "ijepa": {
    "config_model_type": "ijepa",
    "finite": true,
-   "forward_seconds": 0.004932665964588523,
+   "forward_seconds": 0.0026288749650120735,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -4436,7 +4443,7 @@
   "imagegpt": {
    "config_model_type": "imagegpt",
    "finite": true,
-   "forward_seconds": 0.0010635409271344543,
+   "forward_seconds": 0.0011231250828132033,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4469,7 +4476,7 @@
   "inkling_mm_model": {
    "config_model_type": "inkling_mm_model",
    "finite": true,
-   "forward_seconds": 0.01608162501361221,
+   "forward_seconds": 0.06975295802112669,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4478,7 +4485,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "inkling_mm_model",
-   "parameters": 28062178,
+   "parameters": 33805414,
    "repo": "thinkingmachines/Inkling",
    "revision": "828496eeae4c243ff1a22f7f28ff83694f2f7bc9",
    "stage": "ok",
@@ -4541,7 +4548,7 @@
   "internvl": {
    "config_model_type": "internvl",
    "finite": true,
-   "forward_seconds": 0.004150458029471338,
+   "forward_seconds": 0.007057207985781133,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4559,7 +4566,7 @@
   "internvl_vision": {
    "config_model_type": "internvl",
    "finite": true,
-   "forward_seconds": 0.019752874970436096,
+   "forward_seconds": 0.019351040944457054,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -4577,7 +4584,7 @@
   "jais2": {
    "config_model_type": "jais2",
    "finite": true,
-   "forward_seconds": 0.007596125011332333,
+   "forward_seconds": 0.004526042030192912,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4595,7 +4602,7 @@
   "jamba": {
    "config_model_type": "jamba",
    "finite": true,
-   "forward_seconds": 0.010216208989731967,
+   "forward_seconds": 0.007144875009544194,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4613,7 +4620,7 @@
   "janus": {
    "config_model_type": "janus",
    "finite": true,
-   "forward_seconds": 0.0041291669476777315,
+   "forward_seconds": 0.004856250016018748,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4649,7 +4656,7 @@
   "jetmoe": {
    "config_model_type": "jetmoe",
    "finite": true,
-   "forward_seconds": 0.005024582962505519,
+   "forward_seconds": 0.002924541011452675,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4667,7 +4674,7 @@
   "jina_embeddings_v3": {
    "config_model_type": "jina_embeddings_v3",
    "finite": true,
-   "forward_seconds": 0.010717750061303377,
+   "forward_seconds": 0.009657624992541969,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4685,7 +4692,7 @@
   "kimi_k25": {
    "config_model_type": "kimi_k25",
    "finite": true,
-   "forward_seconds": 0.004883082932792604,
+   "forward_seconds": 0.0065981249790638685,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4715,7 +4722,7 @@
   "kolibri1": {
    "config_model_type": "kolibri1",
    "finite": true,
-   "forward_seconds": 0.0046232909662649035,
+   "forward_seconds": 0.006914375000633299,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4749,7 +4756,7 @@
   "kosmos-2.5": {
    "config_model_type": "kosmos-2.5",
    "finite": true,
-   "forward_seconds": 0.008325667004100978,
+   "forward_seconds": 0.009488124982453883,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4820,7 +4827,7 @@
   "laguna": {
    "config_model_type": "laguna",
    "finite": true,
-   "forward_seconds": 0.00476829195395112,
+   "forward_seconds": 0.0076832500053569674,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4858,7 +4865,7 @@
   "layoutlm": {
    "config_model_type": "layoutlm",
    "finite": true,
-   "forward_seconds": 0.0032837919425219297,
+   "forward_seconds": 0.0038602499989792705,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4915,7 +4922,7 @@
   "levit": {
    "config_model_type": "levit",
    "finite": true,
-   "forward_seconds": 0.0064646250102669,
+   "forward_seconds": 0.005940874922089279,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -4932,7 +4939,7 @@
   "lfm2": {
    "config_model_type": "lfm2",
    "finite": true,
-   "forward_seconds": 0.003067875048145652,
+   "forward_seconds": 0.0029745419742539525,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4950,16 +4957,16 @@
   "lfm2_moe": {
    "config_model_type": "lfm2_moe",
    "finite": true,
-   "forward_seconds": 0.002920583006925881,
+   "forward_seconds": 0.005591999972239137,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
     "input_ids"
    ],
-   "layers": 2,
+   "layers": 4,
    "main_input": "input_ids",
    "model_type": "lfm2_moe",
-   "parameters": 4272672,
+   "parameters": 4355744,
    "repo": "LiquidAI/LFM2-8B-A1B",
    "revision": "c1c44ff9fc00db3ebf4516970563f5f383d23670",
    "stage": "ok",
@@ -4968,7 +4975,7 @@
   "lfm2_vl": {
    "config_model_type": "lfm2_vl",
    "finite": true,
-   "forward_seconds": 0.004130416898988187,
+   "forward_seconds": 0.004514792002737522,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5002,7 +5009,7 @@
   "lighton_ocr": {
    "config_model_type": "lighton_ocr",
    "finite": true,
-   "forward_seconds": 0.004146832972764969,
+   "forward_seconds": 0.023264082963578403,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5037,7 +5044,7 @@
   "llama": {
    "config_model_type": "llama",
    "finite": true,
-   "forward_seconds": 0.00302341696806252,
+   "forward_seconds": 0.006787832942791283,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5055,16 +5062,16 @@
   "llama4": {
    "config_model_type": "llama4",
    "finite": true,
-   "forward_seconds": 0.0073831669287756085,
+   "forward_seconds": 0.010336584062315524,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
     "input_ids"
    ],
-   "layers": 2,
+   "layers": 4,
    "main_input": "input_ids",
    "model_type": "llama4",
-   "parameters": 29155904,
+   "parameters": 26404416,
    "repo": "unsloth/Llama-4-Scout-17B-16E-Instruct-GGUF",
    "revision": "72a6853f56a66dc13a3a4b6bdc9cf7ee4c364b47",
    "stage": "ok",
@@ -5073,7 +5080,7 @@
   "llama4_text": {
    "config_model_type": "llama4_text",
    "finite": true,
-   "forward_seconds": 0.008218459086492658,
+   "forward_seconds": 0.008375540957786143,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5095,7 +5102,7 @@
   "llava": {
    "config_model_type": "llava",
    "finite": true,
-   "forward_seconds": 0.001645167008973658,
+   "forward_seconds": 0.0016992499586194754,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5113,7 +5120,7 @@
   "llava_next": {
    "config_model_type": "llava_next",
    "finite": true,
-   "forward_seconds": 0.0021622920176014304,
+   "forward_seconds": 0.004273333004675806,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5131,7 +5138,7 @@
   "llava_next_video": {
    "config_model_type": "llava_next_video",
    "finite": true,
-   "forward_seconds": 0.002454833942465484,
+   "forward_seconds": 0.00162341701798141,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5149,7 +5156,7 @@
   "llava_onevision": {
    "config_model_type": "llava_onevision",
    "finite": true,
-   "forward_seconds": 0.00849541591014713,
+   "forward_seconds": 0.01041537499986589,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5184,7 +5191,7 @@
   "longformer": {
    "config_model_type": "longformer",
    "finite": true,
-   "forward_seconds": 0.04556783300358802,
+   "forward_seconds": 0.051177959074266255,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5202,7 +5209,7 @@
   "longt5": {
    "config_model_type": "longt5",
    "finite": true,
-   "forward_seconds": 0.008146042004227638,
+   "forward_seconds": 0.010911500081419945,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5221,7 +5228,7 @@
   "luke": {
    "config_model_type": "luke",
    "finite": true,
-   "forward_seconds": 0.002271207980811596,
+   "forward_seconds": 0.0030590840615332127,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5239,7 +5246,7 @@
   "lw_detr": {
    "config_model_type": "lw_detr",
    "finite": true,
-   "forward_seconds": 0.2106442090589553,
+   "forward_seconds": 0.37561416695825756,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -5257,7 +5264,7 @@
    "config_model_type": "lw_detr",
    "error": "IndexError: list index out of range",
    "finite": true,
-   "forward_seconds": 0.0461490829475224,
+   "forward_seconds": 0.07287545804865658,
    "from_parent": true,
    "head": "MODEL_FOR_BACKBONE_MAPPING_NAMES",
    "inputs": [
@@ -5296,7 +5303,7 @@
   "m2m_100": {
    "config_model_type": "m2m_100",
    "finite": true,
-   "forward_seconds": 0.008281584014184773,
+   "forward_seconds": 0.008921458036638796,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5315,7 +5322,7 @@
   "mamba": {
    "config_model_type": "mamba",
    "finite": true,
-   "forward_seconds": 0.006133125047199428,
+   "forward_seconds": 0.009281959035433829,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5341,7 +5348,7 @@
   "marian": {
    "config_model_type": "marian",
    "finite": true,
-   "forward_seconds": 0.0023695409763604403,
+   "forward_seconds": 0.004019084037281573,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5359,7 +5366,7 @@
   "markuplm": {
    "config_model_type": "markuplm",
    "finite": true,
-   "forward_seconds": 0.0018551659304648638,
+   "forward_seconds": 0.0038151670014485717,
    "head": "MODEL_FOR_SEQUENCE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5377,7 +5384,7 @@
   "mask2former": {
    "config_model_type": "mask2former",
    "finite": true,
-   "forward_seconds": 0.09524045791476965,
+   "forward_seconds": 0.16069383302237839,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -5394,7 +5401,7 @@
   "maskformer": {
    "config_model_type": "maskformer",
    "finite": true,
-   "forward_seconds": 0.21374125010333955,
+   "forward_seconds": 0.2950441249413416,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -5415,7 +5422,7 @@
   "mbart": {
    "config_model_type": "mbart",
    "finite": true,
-   "forward_seconds": 0.004170082975178957,
+   "forward_seconds": 0.008949834038503468,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5433,7 +5440,7 @@
   "megatron-bert": {
    "config_model_type": "megatron-bert",
    "finite": true,
-   "forward_seconds": 0.0015356669900938869,
+   "forward_seconds": 0.001995458034798503,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5451,7 +5458,7 @@
   "mellum": {
    "config_model_type": "mellum",
    "finite": true,
-   "forward_seconds": 0.0034420840675011277,
+   "forward_seconds": 0.0065130420261994,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5469,7 +5476,7 @@
   "metaclip_2": {
    "config_model_type": "metaclip_2",
    "finite": true,
-   "forward_seconds": 0.0023150830529630184,
+   "forward_seconds": 0.004650957998819649,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -5544,16 +5551,16 @@
   "mimo_v2_flash": {
    "config_model_type": "mimo_v2_flash",
    "finite": true,
-   "forward_seconds": 0.004644167027436197,
+   "forward_seconds": 0.006035541999153793,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
     "input_ids"
    ],
-   "layers": 2,
+   "layers": 6,
    "main_input": "input_ids",
    "model_type": "mimo_v2_flash",
-   "parameters": 19608132,
+   "parameters": 19769424,
    "repo": "XiaomiMiMo/MiMo-V2-Flash",
    "revision": "1afd314a2406c282e0956375c34a676501c78649",
    "stage": "ok",
@@ -5562,7 +5569,7 @@
   "minicpm3": {
    "config_model_type": "minicpm3",
    "finite": true,
-   "forward_seconds": 0.0034781250869855285,
+   "forward_seconds": 0.004482749965973198,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5580,7 +5587,7 @@
   "minicpm_ocr": {
    "config_model_type": "minicpm_ocr",
    "finite": true,
-   "forward_seconds": 0.018679708009585738,
+   "forward_seconds": 0.034804207971319556,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5615,7 +5622,7 @@
   "minicpmv4_6": {
    "config_model_type": "minicpmv4_6",
    "finite": true,
-   "forward_seconds": 0.023331916076131165,
+   "forward_seconds": 0.028625541948713362,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5650,7 +5657,7 @@
   "minimax": {
    "config_model_type": "minimax",
    "finite": true,
-   "forward_seconds": 0.0054810839937999845,
+   "forward_seconds": 0.010250666993670166,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5668,7 +5675,7 @@
   "minimax_m2": {
    "config_model_type": "minimax_m2",
    "finite": true,
-   "forward_seconds": 0.0068917080061510205,
+   "forward_seconds": 0.008858916000463068,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5686,7 +5693,7 @@
   "minimax_m3_vl": {
    "config_model_type": "minimax_m3_vl",
    "finite": true,
-   "forward_seconds": 0.011842832900583744,
+   "forward_seconds": 0.014235624927096069,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5704,7 +5711,7 @@
   "minimax_m3_vl_text": {
    "config_model_type": "minimax_m3_vl_text",
    "finite": true,
-   "forward_seconds": 0.006935708923265338,
+   "forward_seconds": 0.013751833001151681,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5734,7 +5741,7 @@
   "ministral3": {
    "config_model_type": "mistral3",
    "finite": true,
-   "forward_seconds": 0.0037409160286188126,
+   "forward_seconds": 0.007217000005766749,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
@@ -5753,7 +5760,7 @@
   "mistral": {
    "config_model_type": "mistral",
    "finite": true,
-   "forward_seconds": 0.0016665409784764051,
+   "forward_seconds": 0.0036114590475335717,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5771,7 +5778,7 @@
   "mistral3": {
    "config_model_type": "mistral3",
    "finite": true,
-   "forward_seconds": 0.004051708034239709,
+   "forward_seconds": 0.00476887496188283,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5789,7 +5796,7 @@
   "mistral4": {
    "config_model_type": "mistral3",
    "finite": true,
-   "forward_seconds": 0.005067917052656412,
+   "forward_seconds": 0.004586667055264115,
    "from_parent": true,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
@@ -5808,7 +5815,7 @@
   "mixtral": {
    "config_model_type": "mixtral",
    "finite": true,
-   "forward_seconds": 0.0031281670089811087,
+   "forward_seconds": 0.005332875065505505,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5826,7 +5833,7 @@
   "mlcd": {
    "config_model_type": "mlcd",
    "finite": true,
-   "forward_seconds": 0.008202957920730114,
+   "forward_seconds": 0.017472915933467448,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -5847,7 +5854,7 @@
   "mllama": {
    "config_model_type": "mllama",
    "finite": true,
-   "forward_seconds": 0.004892416065558791,
+   "forward_seconds": 0.005473375087603927,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5856,7 +5863,7 @@
    "layers": 2,
    "main_input": "input_ids",
    "model_type": "mllama",
-   "parameters": 16491328,
+   "parameters": 16491362,
    "repo": "unsloth/Llama-3.2-11B-Vision-Instruct",
    "revision": "677b0c1b7008230a0fb88708c5550748e72b9a83",
    "stage": "ok",
@@ -5906,7 +5913,7 @@
   "mobilenet_v1": {
    "config_model_type": "mobilenet_v1",
    "finite": true,
-   "forward_seconds": 0.04644037503749132,
+   "forward_seconds": 0.08352099999319762,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -5923,7 +5930,7 @@
   "mobilenet_v2": {
    "config_model_type": "mobilenet_v2",
    "finite": true,
-   "forward_seconds": 0.07344004209153354,
+   "forward_seconds": 0.0944340000860393,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -5940,7 +5947,7 @@
   "mobilevit": {
    "config_model_type": "mobilevit",
    "finite": true,
-   "forward_seconds": 0.05262337496969849,
+   "forward_seconds": 0.06859433301724494,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -5957,7 +5964,7 @@
   "mobilevitv2": {
    "config_model_type": "mobilevitv2",
    "finite": true,
-   "forward_seconds": 0.14673800009768456,
+   "forward_seconds": 0.1913676660042256,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -5974,7 +5981,7 @@
   "modernbert": {
    "config_model_type": "modernbert",
    "finite": true,
-   "forward_seconds": 0.0017569580813869834,
+   "forward_seconds": 0.006068209069781005,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -5992,7 +5999,7 @@
   "modernbert-decoder": {
    "config_model_type": "modernbert-decoder",
    "finite": true,
-   "forward_seconds": 0.002071542083285749,
+   "forward_seconds": 0.002020334010012448,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6010,7 +6017,7 @@
   "modernvbert": {
    "config_model_type": "modernvbert",
    "finite": true,
-   "forward_seconds": 0.0020815840689465404,
+   "forward_seconds": 0.0025390839437022805,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6040,7 +6047,7 @@
   "molmo2_text": {
    "config_model_type": "molmo2",
    "finite": true,
-   "forward_seconds": 0.0015046660555526614,
+   "forward_seconds": 0.0018884580349549651,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -6104,7 +6111,7 @@
   "moshi": {
    "config_model_type": "moshi",
    "finite": true,
-   "forward_seconds": 0.0017541249981150031,
+   "forward_seconds": 0.0029720410238951445,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6131,7 +6138,7 @@
   "moss_transcribe_diarize": {
    "config_model_type": "moss_transcribe_diarize",
    "finite": true,
-   "forward_seconds": 0.005833292030729353,
+   "forward_seconds": 0.004071584087796509,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6149,7 +6156,7 @@
   "moss_transcribe_diarize_audio": {
    "config_model_type": "moss_transcribe_diarize",
    "finite": true,
-   "forward_seconds": 0.037878082948736846,
+   "forward_seconds": 0.048488999949768186,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -6167,7 +6174,7 @@
   "mpnet": {
    "config_model_type": "mpnet",
    "finite": true,
-   "forward_seconds": 0.0015405409503728151,
+   "forward_seconds": 0.0035637080436572433,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6185,7 +6192,7 @@
   "mpt": {
    "config_model_type": "mpt",
    "finite": true,
-   "forward_seconds": 0.001015709014609456,
+   "forward_seconds": 0.0011568749323487282,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6203,7 +6210,7 @@
   "mra": {
    "config_model_type": "mra",
    "finite": true,
-   "forward_seconds": 0.0020649170037359,
+   "forward_seconds": 0.005617332994006574,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6221,7 +6228,7 @@
   "mt5": {
    "config_model_type": "mt5",
    "finite": true,
-   "forward_seconds": 0.007437874912284315,
+   "forward_seconds": 0.00794462498743087,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6240,7 +6247,7 @@
   "muse_glimmer": {
    "config_model_type": "muse_glimmer",
    "finite": true,
-   "forward_seconds": 0.029997542034834623,
+   "forward_seconds": 0.039932332932949066,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6249,7 +6256,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "muse_glimmer",
-   "parameters": 43454144,
+   "parameters": 44240576,
    "repo": "meta-models/Muse-Glimmer-30B",
    "revision": "a4e59da52a7bc87ae7251dd5545c0dd437c44b68",
    "stage": "ok",
@@ -6269,7 +6276,7 @@
   "muse_glimmer_text": {
    "config_model_type": "muse_glimmer",
    "finite": true,
-   "forward_seconds": 0.0019681249978020787,
+   "forward_seconds": 0.0011080419644713402,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -6305,7 +6312,7 @@
   "muse_spark": {
    "config_model_type": "muse_spark",
    "finite": true,
-   "forward_seconds": 0.030338124954141676,
+   "forward_seconds": 0.05423762497957796,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6314,7 +6321,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "muse_spark",
-   "parameters": 47849024,
+   "parameters": 48635456,
    "repo": "hf-internal-testing/tiny-muse-spark",
    "revision": "707ff6048b15d720706f8fdbd670d99cc7cc8413",
    "stage": "ok",
@@ -6335,7 +6342,7 @@
   "musicflamingo": {
    "config_model_type": "musicflamingo",
    "finite": true,
-   "forward_seconds": 0.0071559170028194785,
+   "forward_seconds": 0.006323665962554514,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6389,7 +6396,7 @@
   "mvp": {
    "config_model_type": "mvp",
    "finite": true,
-   "forward_seconds": 0.0031679170206189156,
+   "forward_seconds": 0.0020275419810786843,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6407,7 +6414,7 @@
   "nanochat": {
    "config_model_type": "nanochat",
    "finite": true,
-   "forward_seconds": 0.007537833065725863,
+   "forward_seconds": 0.008041874971240759,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6433,7 +6440,7 @@
   "nemotron": {
    "config_model_type": "nemotron",
    "finite": true,
-   "forward_seconds": 0.009706832934170961,
+   "forward_seconds": 0.008582708076573908,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6459,7 +6466,7 @@
    "layers": null,
    "main_input": "input_features",
    "model_type": "nemotron3_5_asr",
-   "parameters": 24859680,
+   "parameters": 24792672,
    "repo": "nvidia/nemotron-3.5-asr-streaming-0.6b",
    "revision": "ea30d66debe3740a08b573244286791d423d6b3e",
    "stage": "forward",
@@ -6539,7 +6546,7 @@
    "layers": null,
    "main_input": "input_features",
    "model_type": "nemotron_asr_streaming",
-   "parameters": 8880577,
+   "parameters": 8813569,
    "repo": "nvidia/nemotron-speech-streaming-en-0.6b",
    "revision": "ebe59e5a817142986528bbbee5dba8db7b38ed50",
    "stage": "forward",
@@ -6553,10 +6560,10 @@
    "inputs": [
     "input_features"
    ],
-   "layers": 2,
+   "layers": 1,
    "main_input": "input_features",
    "model_type": "nemotron_asr_streaming_encoder",
-   "parameters": 551872,
+   "parameters": 484864,
    "repo": "nvidia/nemotron-speech-streaming-en-0.6b",
    "revision": "ebe59e5a817142986528bbbee5dba8db7b38ed50",
    "stage": "forward",
@@ -6565,7 +6572,7 @@
   "nemotron_h": {
    "config_model_type": "nemotron_h",
    "finite": true,
-   "forward_seconds": 0.35127616696991026,
+   "forward_seconds": 0.5537675829837099,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6587,7 +6594,7 @@
   "neomme": {
    "config_model_type": "neomme",
    "finite": true,
-   "forward_seconds": 0.00583887507673353,
+   "forward_seconds": 0.006449082982726395,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6609,10 +6616,10 @@
    "inputs": [
     "input_values"
    ],
-   "layers": 2,
+   "layers": 1,
    "main_input": "input_values",
    "model_type": "neucodec",
-   "parameters": 34595850,
+   "parameters": 34562954,
    "repo": "bezzam/neucodec-hf",
    "revision": "11873db8f834e8dc5b132d64b421fc4890ec45fe",
    "stage": "forward",
@@ -6621,7 +6628,7 @@
   "nllb-moe": {
    "config_model_type": "nllb-moe",
    "finite": true,
-   "forward_seconds": 0.009971083025448024,
+   "forward_seconds": 0.013984375051222742,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6640,7 +6647,7 @@
   "nomic_bert": {
    "config_model_type": "nomic_bert",
    "finite": true,
-   "forward_seconds": 0.0013270420022308826,
+   "forward_seconds": 0.004874625010415912,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6665,7 +6672,7 @@
   "nystromformer": {
    "config_model_type": "nystromformer",
    "finite": true,
-   "forward_seconds": 0.0029848749982193112,
+   "forward_seconds": 0.002519667032174766,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6683,7 +6690,7 @@
   "olmo": {
    "config_model_type": "olmo",
    "finite": true,
-   "forward_seconds": 0.0020217919955030084,
+   "forward_seconds": 0.001980625092983246,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6701,7 +6708,7 @@
   "olmo2": {
    "config_model_type": "olmo2",
    "finite": true,
-   "forward_seconds": 0.004475833033211529,
+   "forward_seconds": 0.0030184590723365545,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6719,7 +6726,7 @@
   "olmo3": {
    "config_model_type": "olmo3",
    "finite": true,
-   "forward_seconds": 0.0044527079444378614,
+   "forward_seconds": 0.0065281669376417994,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6737,7 +6744,7 @@
   "olmo_hybrid": {
    "config_model_type": "olmo_hybrid",
    "finite": true,
-   "forward_seconds": 0.032657124917022884,
+   "forward_seconds": 0.03641687496565282,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6755,7 +6762,7 @@
   "olmoe": {
    "config_model_type": "olmoe",
    "finite": true,
-   "forward_seconds": 0.00241283408831805,
+   "forward_seconds": 0.00239091704133898,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6791,7 +6798,7 @@
   "openai-gpt": {
    "config_model_type": "openai-gpt",
    "finite": true,
-   "forward_seconds": 0.002162249991670251,
+   "forward_seconds": 0.003941457951441407,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6809,7 +6816,7 @@
   "openai_privacy_filter": {
    "config_model_type": "openai_privacy_filter",
    "finite": true,
-   "forward_seconds": 0.0017527500167489052,
+   "forward_seconds": 0.0020806249231100082,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6827,7 +6834,7 @@
   "opt": {
    "config_model_type": "opt",
    "finite": true,
-   "forward_seconds": 0.004332666052505374,
+   "forward_seconds": 0.008551666978746653,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6845,7 +6852,7 @@
   "ovis2": {
    "config_model_type": "ovis2",
    "finite": true,
-   "forward_seconds": 0.00459841697011143,
+   "forward_seconds": 0.005705167073756456,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6867,7 +6874,7 @@
   "owlv2": {
    "config_model_type": "owlv2",
    "finite": true,
-   "forward_seconds": 0.21193762496113777,
+   "forward_seconds": 0.32079008303117007,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6877,7 +6884,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "owlv2",
-   "parameters": 3581185,
+   "parameters": 3585281,
    "repo": "google/owlv2-base-patch16-ensemble",
    "revision": "cfd3195ba4ea9592eec887ded089f4c08eff231d",
    "stage": "ok",
@@ -6894,7 +6901,7 @@
   "owlvit": {
    "config_model_type": "owlvit",
    "finite": true,
-   "forward_seconds": 0.09533737506717443,
+   "forward_seconds": 0.21100295905489475,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6904,7 +6911,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "owlvit",
-   "parameters": 3498241,
+   "parameters": 3502337,
    "repo": "google/owlvit-base-patch16",
    "revision": "4b420debb9c806fc4caf9ecc8efb72208c0db892",
    "stage": "ok",
@@ -6931,7 +6938,7 @@
   "paddleocr_vl": {
    "config_model_type": "paddleocr_vl",
    "finite": true,
-   "forward_seconds": 0.0037967920070514083,
+   "forward_seconds": 0.10690095799509436,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6957,7 +6964,7 @@
   "paligemma": {
    "config_model_type": "paligemma",
    "finite": true,
-   "forward_seconds": 0.004626082954928279,
+   "forward_seconds": 0.010120749939233065,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -6966,7 +6973,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "paligemma",
-   "parameters": 16661184,
+   "parameters": 16657088,
    "repo": "google/paligemma-3b-pt-224",
    "revision": "35e4f46485b4d07967e7e9935bc3786aad50687c",
    "stage": "ok",
@@ -7093,7 +7100,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "pe_audio_video",
-   "parameters": 344154446,
+   "parameters": 344113326,
    "repo": "facebook/pe-av-large",
    "revision": "0d24878d4107d64bef49e53602fc34ce6f94f6d8",
    "stage": "forward",
@@ -7107,10 +7114,10 @@
    "inputs": [
     "input_values"
    ],
-   "layers": 2,
+   "layers": 1,
    "main_input": "input_values",
    "model_type": "pe_audio_video_encoder",
-   "parameters": 340806402,
+   "parameters": 340765282,
    "repo": "facebook/pe-av-large",
    "revision": "0d24878d4107d64bef49e53602fc34ce6f94f6d8",
    "stage": "forward",
@@ -7135,7 +7142,7 @@
   "pegasus": {
    "config_model_type": "pegasus",
    "finite": true,
-   "forward_seconds": 0.0030496249673888087,
+   "forward_seconds": 0.005760875064879656,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7154,7 +7161,7 @@
   "pegasus_x": {
    "config_model_type": "pegasus_x",
    "finite": true,
-   "forward_seconds": 0.06820166599936783,
+   "forward_seconds": 0.08481916598975658,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7184,7 +7191,7 @@
   "perception_lm": {
    "config_model_type": "perception_lm",
    "finite": true,
-   "forward_seconds": 0.003135833074338734,
+   "forward_seconds": 0.004885041969828308,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7202,7 +7209,7 @@
   "persimmon": {
    "config_model_type": "persimmon",
    "finite": true,
-   "forward_seconds": 0.013870875001884997,
+   "forward_seconds": 0.008842375013045967,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7220,7 +7227,7 @@
   "phi": {
    "config_model_type": "phi",
    "finite": true,
-   "forward_seconds": 0.0022077499888837337,
+   "forward_seconds": 0.0027695000171661377,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7238,7 +7245,7 @@
   "phi3": {
    "config_model_type": "phi3",
    "finite": true,
-   "forward_seconds": 0.0030461250571534038,
+   "forward_seconds": 0.0017172090010717511,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7256,7 +7263,7 @@
   "phi4_multimodal": {
    "config_model_type": "phi4_multimodal",
    "finite": true,
-   "forward_seconds": 0.008801207994110882,
+   "forward_seconds": 0.005309500033035874,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7282,7 +7289,7 @@
   "phimoe": {
    "config_model_type": "phimoe",
    "finite": true,
-   "forward_seconds": 0.004409666988067329,
+   "forward_seconds": 0.004022540990263224,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7303,7 +7310,7 @@
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "layers": null,
    "model_type": "pi0",
-   "parameters": 33207584,
+   "parameters": 33199392,
    "repo": "yinchenghust/openpi_libero_all",
    "revision": "3d4f7b18f369fae2d6a5e4dbc3c26ae17072ba4a",
    "stage": "inputs"
@@ -7340,7 +7347,7 @@
   "pixio": {
    "config_model_type": "pixio",
    "finite": true,
-   "forward_seconds": 0.002628374961204827,
+   "forward_seconds": 0.0075033329194411635,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7357,7 +7364,7 @@
   "pixtral": {
    "config_model_type": "llava",
    "finite": true,
-   "forward_seconds": 0.8726815419504419,
+   "forward_seconds": 1.3498517500702292,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -7375,7 +7382,7 @@
   "plbart": {
    "config_model_type": "plbart",
    "finite": true,
-   "forward_seconds": 0.0023757920134812593,
+   "forward_seconds": 0.005567040992900729,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7425,7 +7432,7 @@
   "poolformer": {
    "config_model_type": "poolformer",
    "finite": true,
-   "forward_seconds": 0.0049435419496148825,
+   "forward_seconds": 0.0070227079559117556,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7442,7 +7449,7 @@
   "pop2piano": {
    "config_model_type": "pop2piano",
    "finite": true,
-   "forward_seconds": 0.006142791942693293,
+   "forward_seconds": 0.0030956659466028214,
    "head": "MODEL_FOR_SPEECH_SEQ_2_SEQ_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7461,7 +7468,7 @@
   "pp_chart2table": {
    "config_model_type": "pp_chart2table",
    "finite": true,
-   "forward_seconds": 0.005475415964610875,
+   "forward_seconds": 0.005491417017765343,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7543,7 +7550,7 @@
   "pp_lcnet": {
    "config_model_type": "pp_lcnet",
    "finite": true,
-   "forward_seconds": 0.04077129194047302,
+   "forward_seconds": 0.056880958029069006,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7568,7 +7575,7 @@
   "pp_ocrv5_mobile_det": {
    "config_model_type": "pp_ocrv5_mobile_det",
    "finite": true,
-   "forward_seconds": 0.1320237920153886,
+   "forward_seconds": 0.18266345793381333,
    "head": "MODEL_FOR_OBJECT_DETECTION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7585,7 +7592,7 @@
   "pp_ocrv5_mobile_rec": {
    "config_model_type": "pp_ocrv5_mobile_rec",
    "finite": true,
-   "forward_seconds": 0.7384189160075039,
+   "forward_seconds": 0.9169839579844847,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7602,7 +7609,7 @@
   "pp_ocrv5_server_det": {
    "config_model_type": "pp_ocrv5_server_det",
    "finite": true,
-   "forward_seconds": 0.37875220901332796,
+   "forward_seconds": 0.4448130829259753,
    "head": "MODEL_FOR_OBJECT_DETECTION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7619,7 +7626,7 @@
   "pp_ocrv5_server_rec": {
    "config_model_type": "pp_ocrv5_server_rec",
    "finite": true,
-   "forward_seconds": 0.4371418330119923,
+   "forward_seconds": 0.6017917500576004,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7636,7 +7643,7 @@
   "pp_ocrv6_medium_det": {
    "config_model_type": "pp_ocrv6_medium_det",
    "finite": true,
-   "forward_seconds": 0.3139734169235453,
+   "forward_seconds": 0.5315770419547334,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7653,7 +7660,7 @@
   "pp_ocrv6_small_det": {
    "config_model_type": "pp_ocrv6_small_det",
    "finite": true,
-   "forward_seconds": 0.062432499951682985,
+   "forward_seconds": 0.09495279099792242,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7670,7 +7677,7 @@
   "pp_ocrv6_small_rec": {
    "config_model_type": "pp_ocrv6_small_rec",
    "finite": true,
-   "forward_seconds": 0.12973829195834696,
+   "forward_seconds": 0.19651220901869237,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7687,7 +7694,7 @@
   "pp_ocrv6_tiny_rec": {
    "config_model_type": "pp_ocrv6_tiny_rec",
    "finite": true,
-   "forward_seconds": 0.03409441700205207,
+   "forward_seconds": 0.04758645803667605,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7720,7 +7727,7 @@
   "prophetnet": {
    "config_model_type": "prophetnet",
    "finite": true,
-   "forward_seconds": 0.009972624946385622,
+   "forward_seconds": 0.02024662494659424,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7739,7 +7746,7 @@
   "pvt": {
    "config_model_type": "pvt",
    "finite": true,
-   "forward_seconds": 0.0058287500869482756,
+   "forward_seconds": 0.007397374953143299,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7756,7 +7763,7 @@
   "pvt_v2": {
    "config_model_type": "pvt_v2",
    "finite": true,
-   "forward_seconds": 0.060158625012263656,
+   "forward_seconds": 0.11990033404435962,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -7773,7 +7780,7 @@
   "qianfan_ocr": {
    "config_model_type": "qianfan_ocr",
    "finite": true,
-   "forward_seconds": 0.00427837495226413,
+   "forward_seconds": 0.00442029198165983,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7791,7 +7798,7 @@
   "qianfan_ocr_vision": {
    "config_model_type": "qianfan_ocr",
    "finite": true,
-   "forward_seconds": 0.020748334005475044,
+   "forward_seconds": 0.023179291049018502,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -7809,7 +7816,7 @@
   "qwen2": {
    "config_model_type": "qwen2",
    "finite": true,
-   "forward_seconds": 0.007710875011980534,
+   "forward_seconds": 0.004677082994021475,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7835,7 +7842,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "qwen2_5_omni",
-   "parameters": 170372864,
+   "parameters": 170137024,
    "repo": "Qwen/Qwen2.5-Omni-7B",
    "revision": "ae9e1690543ffd5c0221dc27f79834d0294cba00",
    "stage": "forward",
@@ -7889,7 +7896,7 @@
   "qwen2_5_omni_thinker": {
    "config_model_type": "qwen2_5_omni",
    "finite": true,
-   "forward_seconds": 0.00494529097341001,
+   "forward_seconds": 0.009408124955371022,
    "from_parent": true,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
@@ -7899,7 +7906,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "qwen2_5_omni_thinker",
-   "parameters": 21373376,
+   "parameters": 21137536,
    "repo": "Qwen/Qwen2.5-Omni-7B",
    "revision": "ae9e1690543ffd5c0221dc27f79834d0294cba00",
    "stage": "ok",
@@ -7926,7 +7933,7 @@
   "qwen2_5_vl": {
    "config_model_type": "qwen2_5_vl",
    "finite": true,
-   "forward_seconds": 0.004019833053462207,
+   "forward_seconds": 0.007706625037826598,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7944,7 +7951,7 @@
   "qwen2_5_vl_text": {
    "config_model_type": "qwen2_5_vl",
    "finite": true,
-   "forward_seconds": 0.0009860420832410455,
+   "forward_seconds": 0.0014717919984832406,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -7967,7 +7974,7 @@
   "qwen2_audio": {
    "config_model_type": "qwen2_audio",
    "finite": true,
-   "forward_seconds": 0.006679041078314185,
+   "forward_seconds": 0.00413783302064985,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -7985,7 +7992,7 @@
   "qwen2_audio_encoder": {
    "config_model_type": "qwen2_audio",
    "finite": true,
-   "forward_seconds": 0.046535125002264977,
+   "forward_seconds": 0.05184662505052984,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -8003,7 +8010,7 @@
   "qwen2_moe": {
    "config_model_type": "qwen2_moe",
    "finite": true,
-   "forward_seconds": 0.006282374961301684,
+   "forward_seconds": 0.008733917027711868,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8021,7 +8028,7 @@
   "qwen2_vl": {
    "config_model_type": "qwen2_vl",
    "finite": true,
-   "forward_seconds": 0.007095417007803917,
+   "forward_seconds": 0.009135166998021305,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8039,7 +8046,7 @@
   "qwen2_vl_text": {
    "config_model_type": "qwen2_vl",
    "finite": true,
-   "forward_seconds": 0.0009132500272244215,
+   "forward_seconds": 0.0010496670147404075,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -8062,7 +8069,7 @@
   "qwen3": {
    "config_model_type": "qwen3",
    "finite": true,
-   "forward_seconds": 0.0069676670245826244,
+   "forward_seconds": 0.004574833088554442,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8080,7 +8087,7 @@
   "qwen3_5": {
    "config_model_type": "qwen3_5",
    "finite": true,
-   "forward_seconds": 0.0396980409277603,
+   "forward_seconds": 0.05822204099968076,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8098,7 +8105,7 @@
   "qwen3_5_moe": {
    "config_model_type": "qwen3_5_moe",
    "finite": true,
-   "forward_seconds": 0.034250416909344494,
+   "forward_seconds": 0.11482954199891537,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8116,7 +8123,7 @@
   "qwen3_5_moe_text": {
    "config_model_type": "qwen3_5_moe",
    "finite": true,
-   "forward_seconds": 0.034764040959998965,
+   "forward_seconds": 0.044781040982343256,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
@@ -8139,7 +8146,7 @@
   "qwen3_5_text": {
    "config_model_type": "qwen3_5",
    "finite": true,
-   "forward_seconds": 0.057415249990299344,
+   "forward_seconds": 0.05905858299229294,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
@@ -8175,7 +8182,7 @@
   "qwen3_asr": {
    "config_model_type": "qwen3_asr",
    "finite": true,
-   "forward_seconds": 0.004127457970753312,
+   "forward_seconds": 0.0044441670179367065,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8184,7 +8191,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "qwen3_asr",
-   "parameters": 14646848,
+   "parameters": 14517888,
    "repo": "Qwen/Qwen3-ASR-1.7B-hf",
    "revision": "bcd2b5b7f32b480ab5790554cfa8347f246a14f3",
    "stage": "ok",
@@ -8210,7 +8217,7 @@
   "qwen3_moe": {
    "config_model_type": "qwen3_moe",
    "finite": true,
-   "forward_seconds": 0.004504750017076731,
+   "forward_seconds": 0.004389666020870209,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8228,7 +8235,7 @@
   "qwen3_next": {
    "config_model_type": "qwen3_next",
    "finite": true,
-   "forward_seconds": 0.033134000026620924,
+   "forward_seconds": 0.03892079193610698,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8254,7 +8261,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "qwen3_omni_moe",
-   "parameters": 75244225,
+   "parameters": 75115265,
    "repo": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
    "revision": "26291f793822fb6be9555850f06dfe95f2d7e695",
    "stage": "forward",
@@ -8294,7 +8301,7 @@
   "qwen3_omni_moe_thinker": {
    "config_model_type": "qwen3_omni_moe",
    "finite": true,
-   "forward_seconds": 0.004990207962691784,
+   "forward_seconds": 0.005404125084169209,
    "from_parent": true,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
@@ -8304,7 +8311,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "qwen3_omni_moe_thinker",
-   "parameters": 25867840,
+   "parameters": 25738880,
    "repo": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
    "revision": "26291f793822fb6be9555850f06dfe95f2d7e695",
    "stage": "ok",
@@ -8322,7 +8329,7 @@
   "qwen3_vl": {
    "config_model_type": "qwen3_vl",
    "finite": true,
-   "forward_seconds": 0.0038477079942822456,
+   "forward_seconds": 0.006819832953624427,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8340,7 +8347,7 @@
   "qwen3_vl_moe": {
    "config_model_type": "qwen3_vl_moe",
    "finite": true,
-   "forward_seconds": 0.006452250061556697,
+   "forward_seconds": 0.005677292007021606,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8358,7 +8365,7 @@
   "qwen3_vl_moe_text": {
    "config_model_type": "qwen3_vl_moe",
    "finite": true,
-   "forward_seconds": 0.0014447090215981007,
+   "forward_seconds": 0.003109541954472661,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -8381,7 +8388,7 @@
   "qwen3_vl_text": {
    "config_model_type": "qwen3_vl",
    "finite": true,
-   "forward_seconds": 0.0010212499182671309,
+   "forward_seconds": 0.001799624995328486,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -8417,16 +8424,16 @@
   "qwen4_exp": {
    "config_model_type": "qwen4_exp",
    "finite": true,
-   "forward_seconds": 0.04096866701729596,
+   "forward_seconds": 0.13629437505733222,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
     "input_ids"
    ],
-   "layers": 2,
+   "layers": 4,
    "main_input": "input_ids",
    "model_type": "qwen4_exp",
-   "parameters": 354263680,
+   "parameters": 358001344,
    "repo": "Qwen/Qwen3.8-Flash-Next",
    "revision": "de4b8e4d43b917e7706784d8bb445c9af86a3540",
    "stage": "ok",
@@ -8435,16 +8442,16 @@
   "qwen4_exp_text": {
    "config_model_type": "qwen4_exp_text",
    "finite": true,
-   "forward_seconds": 0.07666416699066758,
+   "forward_seconds": 0.15231095801573247,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
     "input_ids"
    ],
-   "layers": 2,
+   "layers": 4,
    "main_input": "input_ids",
    "model_type": "qwen4_exp_text",
-   "parameters": 49486176,
+   "parameters": 52416864,
    "repo": "logic65/Whittle-Next-27B-A3B",
    "revision": "458cdfe6e89bfb241b8d487a245d962c5745a7a5",
    "stage": "ok",
@@ -8465,7 +8472,7 @@
   "recurrent_gemma": {
    "config_model_type": "recurrent_gemma",
    "finite": true,
-   "forward_seconds": 0.05617624998558313,
+   "forward_seconds": 0.06015141704119742,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8474,7 +8481,7 @@
    "layers": 3,
    "main_input": "input_ids",
    "model_type": "recurrent_gemma",
-   "parameters": 24022208,
+   "parameters": 24020160,
    "repo": "google/recurrentgemma-2b",
    "revision": "3620f4ca9c5d16ee56c00180474a3201ec7f734a",
    "stage": "ok",
@@ -8492,7 +8499,7 @@
   "regnet": {
    "config_model_type": "regnet",
    "finite": true,
-   "forward_seconds": 0.008163374965079129,
+   "forward_seconds": 0.011219416977837682,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -8509,7 +8516,7 @@
   "rembert": {
    "config_model_type": "rembert",
    "finite": true,
-   "forward_seconds": 0.04269129200838506,
+   "forward_seconds": 0.0651591659989208,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8527,7 +8534,7 @@
   "resnet": {
    "config_model_type": "resnet",
    "finite": true,
-   "forward_seconds": 0.014957499923184514,
+   "forward_seconds": 0.018246916006319225,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -8577,7 +8584,7 @@
   "roberta": {
    "config_model_type": "roberta",
    "finite": true,
-   "forward_seconds": 0.004059750004671514,
+   "forward_seconds": 0.005773374927230179,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8595,7 +8602,7 @@
   "roberta-prelayernorm": {
    "config_model_type": "roberta-prelayernorm",
    "finite": true,
-   "forward_seconds": 0.003712208941578865,
+   "forward_seconds": 0.002418957999907434,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8613,7 +8620,7 @@
   "roc_bert": {
    "config_model_type": "roc_bert",
    "finite": true,
-   "forward_seconds": 0.001822665915824473,
+   "forward_seconds": 0.0018565829377621412,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8631,7 +8638,7 @@
   "roformer": {
    "config_model_type": "roformer",
    "finite": true,
-   "forward_seconds": 0.008485333994030952,
+   "forward_seconds": 0.011197624960914254,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8649,7 +8656,7 @@
   "rt_detr": {
    "config_model_type": "rt_detr",
    "finite": true,
-   "forward_seconds": 0.07069345796480775,
+   "forward_seconds": 0.09741862502414733,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -8669,7 +8676,8 @@
   },
   "rt_detr_v2": {
    "config_model_type": "rt_detr_v2",
-   "error": "RuntimeError: The size of tensor a (56) must match the size of tensor b (28) at non-singleton dimension 3",
+   "finite": true,
+   "forward_seconds": 0.05262229195795953,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -8677,16 +8685,16 @@
    "layers": null,
    "main_input": "pixel_values",
    "model_type": "rt_detr_v2",
-   "parameters": 4859796,
+   "parameters": 4825548,
    "repo": "PekingU/rtdetr_v2_r18vd",
    "revision": "5650961749fa93567c0d46fc7f43ea4f9e914107",
-   "stage": "forward",
+   "stage": "ok",
    "text_only_multimodal": false
   },
   "rwkv": {
    "config_model_type": "rwkv",
    "finite": true,
-   "forward_seconds": 0.003088250057771802,
+   "forward_seconds": 0.003271042020060122,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -8976,7 +8984,7 @@
   "sam_hq_vision_model": {
    "config_model_type": "sam_hq",
    "finite": true,
-   "forward_seconds": 0.2520838750060648,
+   "forward_seconds": 0.23096037504728884,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -9002,7 +9010,7 @@
   "sam_vision_model": {
    "config_model_type": "sam_vision_model",
    "finite": true,
-   "forward_seconds": 0.05515491694677621,
+   "forward_seconds": 0.0835936670191586,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -9044,7 +9052,7 @@
   "seamless_m4t": {
    "config_model_type": "seamless_m4t",
    "finite": true,
-   "forward_seconds": 0.006525333039462566,
+   "forward_seconds": 0.008385916939005256,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9063,7 +9071,7 @@
   "seamless_m4t_v2": {
    "config_model_type": "seamless_m4t_v2",
    "finite": true,
-   "forward_seconds": 0.0066454579355195165,
+   "forward_seconds": 0.011156874941661954,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9082,7 +9090,7 @@
   "seed_oss": {
    "config_model_type": "seed_oss",
    "finite": true,
-   "forward_seconds": 0.007033457979559898,
+   "forward_seconds": 0.008133625029586256,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9100,7 +9108,7 @@
   "segformer": {
    "config_model_type": "segformer",
    "finite": true,
-   "forward_seconds": 0.03449745802208781,
+   "forward_seconds": 0.0431062919087708,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -9133,7 +9141,7 @@
   "sew": {
    "config_model_type": "sew",
    "finite": true,
-   "forward_seconds": 0.06971120904199779,
+   "forward_seconds": 0.08433537499513477,
    "head": "MODEL_FOR_CTC_MAPPING_NAMES",
    "inputs": [
     "input_values"
@@ -9150,7 +9158,7 @@
   "sew-d": {
    "config_model_type": "sew-d",
    "finite": true,
-   "forward_seconds": 0.015152124920859933,
+   "forward_seconds": 0.012683624983765185,
    "head": "MODEL_FOR_CTC_MAPPING_NAMES",
    "inputs": [
     "input_values"
@@ -9167,7 +9175,7 @@
   "shieldgemma2": {
    "config_model_type": "shieldgemma2",
    "finite": true,
-   "forward_seconds": 0.011740499990992248,
+   "forward_seconds": 0.009897958021610975,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9185,7 +9193,7 @@
   "siglip": {
    "config_model_type": "siglip",
    "finite": true,
-   "forward_seconds": 0.004476082976907492,
+   "forward_seconds": 0.003421708010137081,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -9253,7 +9261,7 @@
   "siglip_vision_model": {
    "config_model_type": "siglip",
    "finite": true,
-   "forward_seconds": 0.003900582902133465,
+   "forward_seconds": 0.0024024590384215117,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -9271,7 +9279,7 @@
   "slanet": {
    "config_model_type": "slanet",
    "finite": true,
-   "forward_seconds": 0.14668058301322162,
+   "forward_seconds": 0.19206433300860226,
    "head": "MODEL_FOR_TABLE_RECOGNITION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -9288,7 +9296,7 @@
   "slanext": {
    "config_model_type": "slanext",
    "finite": true,
-   "forward_seconds": 0.20796708401758224,
+   "forward_seconds": 0.3171121249906719,
    "head": "MODEL_FOR_TABLE_RECOGNITION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -9309,7 +9317,7 @@
   "smollm3": {
    "config_model_type": "smollm3",
    "finite": true,
-   "forward_seconds": 0.007129084086045623,
+   "forward_seconds": 0.0053544590482488275,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9327,7 +9335,7 @@
   "smolvlm": {
    "config_model_type": "smolvlm",
    "finite": true,
-   "forward_seconds": 0.003298124996945262,
+   "forward_seconds": 0.004815416992641985,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9363,7 +9371,7 @@
   "solar_open": {
    "config_model_type": "solar_open",
    "finite": true,
-   "forward_seconds": 0.004784000106155872,
+   "forward_seconds": 0.008539499947801232,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9429,7 +9437,7 @@
   "splinter": {
    "config_model_type": "splinter",
    "finite": true,
-   "forward_seconds": 0.0009126251097768545,
+   "forward_seconds": 0.000949417008087039,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9456,7 +9464,7 @@
   "stablelm": {
    "config_model_type": "stablelm",
    "finite": true,
-   "forward_seconds": 0.0032260000007227063,
+   "forward_seconds": 0.0018713329918682575,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9474,7 +9482,7 @@
   "starcoder2": {
    "config_model_type": "starcoder2",
    "finite": true,
-   "forward_seconds": 0.0021074999822303653,
+   "forward_seconds": 0.0030141669558361173,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9530,7 +9538,7 @@
    "config_model_type": "superpoint",
    "error": "RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn",
    "finite": true,
-   "forward_seconds": 0.2116492500063032,
+   "forward_seconds": 0.26640299998689443,
    "head": "MODEL_FOR_KEYPOINT_DETECTION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -9547,7 +9555,7 @@
   "swiftformer": {
    "config_model_type": "swiftformer",
    "finite": true,
-   "forward_seconds": 0.019268125062808394,
+   "forward_seconds": 0.02368437498807907,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -9564,7 +9572,7 @@
   "swin": {
    "config_model_type": "swin",
    "finite": true,
-   "forward_seconds": 0.01795258396305144,
+   "forward_seconds": 0.021589457988739014,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -9581,7 +9589,7 @@
   "swin2sr": {
    "config_model_type": "swin2sr",
    "finite": true,
-   "forward_seconds": 0.1037422080989927,
+   "forward_seconds": 0.12140820804052055,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -9598,7 +9606,7 @@
   "swinv2": {
    "config_model_type": "swinv2",
    "finite": true,
-   "forward_seconds": 0.029606875032186508,
+   "forward_seconds": 0.03360050008632243,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -9615,7 +9623,7 @@
   "switch_transformers": {
    "config_model_type": "switch_transformers",
    "finite": true,
-   "forward_seconds": 0.006210374995134771,
+   "forward_seconds": 0.00476870802231133,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9634,7 +9642,7 @@
   "t5": {
    "config_model_type": "t5",
    "finite": true,
-   "forward_seconds": 0.003412500023841858,
+   "forward_seconds": 0.003689041011966765,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9674,7 +9682,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "t5gemma2",
-   "parameters": 17297088,
+   "parameters": 17288896,
    "repo": "google/t5gemma-2-270m-270m",
    "revision": "7c38f16641f455ef0685b18431faf1b17722d5a1",
    "stage": "forward",
@@ -9692,7 +9700,7 @@
   "t5gemma2_encoder": {
    "config_model_type": "t5gemma2",
    "finite": true,
-   "forward_seconds": 0.00328962504863739,
+   "forward_seconds": 0.009424458956345916,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -9702,7 +9710,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "t5gemma2_encoder",
-   "parameters": 17222720,
+   "parameters": 17218624,
    "repo": "google/t5gemma-2-270m-270m",
    "revision": "7c38f16641f455ef0685b18431faf1b17722d5a1",
    "stage": "ok",
@@ -9720,7 +9728,7 @@
   "table-transformer": {
    "config_model_type": "table-transformer",
    "finite": true,
-   "forward_seconds": 0.0342670000391081,
+   "forward_seconds": 0.05578037491068244,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -9737,7 +9745,7 @@
   "tapas": {
    "config_model_type": "tapas",
    "finite": true,
-   "forward_seconds": 0.0051021670224145055,
+   "forward_seconds": 0.005505042034201324,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9840,7 +9848,7 @@
   "tipsv2": {
    "config_model_type": "tipsv2",
    "finite": true,
-   "forward_seconds": 0.022259875084273517,
+   "forward_seconds": 0.024169040960259736,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9875,7 +9883,7 @@
   "tipsv2_text_model": {
    "config_model_type": "tipsv2",
    "finite": true,
-   "forward_seconds": 0.0007040409836918116,
+   "forward_seconds": 0.0008946669986471534,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -9894,7 +9902,7 @@
   "tipsv2_vision_model": {
    "config_model_type": "tipsv2",
    "finite": true,
-   "forward_seconds": 0.024572000023908913,
+   "forward_seconds": 0.023455166956409812,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -9912,7 +9920,7 @@
   "trocr": {
    "config_model_type": "vision-encoder-decoder",
    "finite": true,
-   "forward_seconds": 0.001883000019006431,
+   "forward_seconds": 0.002050000010058284,
    "from_parent": true,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
@@ -9966,7 +9974,7 @@
   "ultrabert": {
    "config_model_type": "ultrabert",
    "finite": true,
-   "forward_seconds": 0.0018422920256853104,
+   "forward_seconds": 0.004429791937582195,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -9984,7 +9992,7 @@
   "ultravbert": {
    "config_model_type": "ultravbert",
    "finite": true,
-   "forward_seconds": 0.0018968749791383743,
+   "forward_seconds": 0.003997332998551428,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10002,7 +10010,7 @@
   "umt5": {
    "config_model_type": "umt5",
    "finite": true,
-   "forward_seconds": 0.0032933750189840794,
+   "forward_seconds": 0.002212374936789274,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10021,7 +10029,7 @@
   "unispeech": {
    "config_model_type": "unispeech",
    "finite": true,
-   "forward_seconds": 0.047107832971960306,
+   "forward_seconds": 0.05306266597472131,
    "head": "MODEL_FOR_CTC_MAPPING_NAMES",
    "inputs": [
     "input_values"
@@ -10038,7 +10046,7 @@
   "unispeech-sat": {
    "config_model_type": "unispeech-sat",
    "finite": true,
-   "forward_seconds": 0.0402263340074569,
+   "forward_seconds": 0.038765667006373405,
    "head": "MODEL_FOR_CTC_MAPPING_NAMES",
    "inputs": [
     "input_values"
@@ -10071,7 +10079,7 @@
   "unlimited_ocr": {
    "config_model_type": "unlimited_ocr",
    "finite": true,
-   "forward_seconds": 0.005548750050365925,
+   "forward_seconds": 0.005874917027540505,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10080,7 +10088,7 @@
    "layers": 2,
    "main_input": "input_ids",
    "model_type": "unlimited_ocr",
-   "parameters": 24441088,
+   "parameters": 18573568,
    "repo": "baidu/Unlimited-OCR",
    "revision": "8249d20b2822a7d8a4c22c8d8c9069b5ac36bda3",
    "stage": "ok",
@@ -10121,7 +10129,7 @@
   "uvdoc": {
    "config_model_type": "uvdoc",
    "finite": true,
-   "forward_seconds": 0.09038820792920887,
+   "forward_seconds": 0.10497733403462917,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -10139,7 +10147,7 @@
    "config_model_type": "uvdoc",
    "error": "IndexError: list index out of range",
    "finite": true,
-   "forward_seconds": 0.08135291596408933,
+   "forward_seconds": 0.124318000045605,
    "from_parent": true,
    "head": "MODEL_FOR_BACKBONE_MAPPING_NAMES",
    "inputs": [
@@ -10157,7 +10165,7 @@
   "vaultgemma": {
    "config_model_type": "vaultgemma",
    "finite": true,
-   "forward_seconds": 0.011604249943047762,
+   "forward_seconds": 0.009508208953775465,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10175,7 +10183,7 @@
   "vibevoice": {
    "config_model_type": "vibevoice",
    "finite": true,
-   "forward_seconds": 0.003876292030327022,
+   "forward_seconds": 0.007585959043353796,
    "head": "MODEL_FOR_SPEECH_SEQ_2_SEQ_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10218,7 +10226,7 @@
   "vibevoice_asr": {
    "config_model_type": "vibevoice_asr",
    "finite": true,
-   "forward_seconds": 0.0050836669979617,
+   "forward_seconds": 0.007699875044636428,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10240,7 +10248,7 @@
   "video_llama_3": {
    "config_model_type": "video_llama_3",
    "finite": true,
-   "forward_seconds": 0.003920958028174937,
+   "forward_seconds": 0.00932691607158631,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10275,7 +10283,7 @@
   "video_llava": {
    "config_model_type": "video_llava",
    "finite": true,
-   "forward_seconds": 0.0017998339608311653,
+   "forward_seconds": 0.0033589169615879655,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10363,7 +10371,7 @@
   "vipllava": {
    "config_model_type": "vipllava",
    "finite": true,
-   "forward_seconds": 0.002953500021249056,
+   "forward_seconds": 0.0016536660259589553,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10406,7 +10414,7 @@
   "visual_bert": {
    "config_model_type": "visual_bert",
    "finite": true,
-   "forward_seconds": 0.0009687499841675162,
+   "forward_seconds": 0.0017785419477149844,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10424,7 +10432,7 @@
   "vit": {
    "config_model_type": "vit",
    "finite": true,
-   "forward_seconds": 0.0038512919563800097,
+   "forward_seconds": 0.0031392499804496765,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -10441,7 +10449,7 @@
   "vit_mae": {
    "config_model_type": "vit_mae",
    "finite": true,
-   "forward_seconds": 0.006156416959129274,
+   "forward_seconds": 0.004086666041985154,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -10458,7 +10466,7 @@
   "vit_msn": {
    "config_model_type": "vit_msn",
    "finite": true,
-   "forward_seconds": 0.005228457972407341,
+   "forward_seconds": 0.006152958027087152,
    "head": "MODEL_FOR_IMAGE_CLASSIFICATION_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -10479,7 +10487,7 @@
   "vitmatte": {
    "config_model_type": "vitmatte",
    "finite": true,
-   "forward_seconds": 0.7685916660120711,
+   "forward_seconds": 0.8896409999579191,
    "head": "MODEL_FOR_IMAGE_MATTING_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -10487,7 +10495,7 @@
    "layers": null,
    "main_input": "pixel_values",
    "model_type": "vitmatte",
-   "parameters": 1511585,
+   "parameters": 1577153,
    "repo": "hustvl/vitmatte-small-composition-1k",
    "revision": "6a58ad7646403c1df626fbd746900aec7361ea1d",
    "stage": "ok",
@@ -10529,7 +10537,7 @@
   "vits": {
    "config_model_type": "vits",
    "finite": true,
-   "forward_seconds": 0.6677938749780878,
+   "forward_seconds": 0.7652057909872383,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10574,7 +10582,7 @@
   "voxtral": {
    "config_model_type": "voxtral",
    "finite": true,
-   "forward_seconds": 0.006951667019166052,
+   "forward_seconds": 0.009223207947798073,
    "head": "MODEL_FOR_SEQ_TO_SEQ_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10583,7 +10591,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "voxtral",
-   "parameters": 17063488,
+   "parameters": 17104704,
    "repo": "mistralai/Voxtral-Mini-3B-2507",
    "revision": "3060fe34b35ba5d44202ce9ff3c097642914f8f3",
    "stage": "ok",
@@ -10592,7 +10600,7 @@
   "voxtral_encoder": {
    "config_model_type": "voxtral",
    "finite": true,
-   "forward_seconds": 0.04351866606157273,
+   "forward_seconds": 0.07041824993211776,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -10627,7 +10635,7 @@
   "voxtral_realtime_encoder": {
    "config_model_type": "voxtral_realtime",
    "finite": true,
-   "forward_seconds": 0.06972991698421538,
+   "forward_seconds": 0.08260424993932247,
    "from_parent": true,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
@@ -10655,7 +10663,7 @@
   "wav2vec2": {
    "config_model_type": "wav2vec2",
    "finite": true,
-   "forward_seconds": 0.05041604209691286,
+   "forward_seconds": 0.05460045801009983,
    "head": "MODEL_FOR_CTC_MAPPING_NAMES",
    "inputs": [
     "input_values"
@@ -10690,7 +10698,7 @@
   "wavlm": {
    "config_model_type": "wavlm",
    "finite": true,
-   "forward_seconds": 0.03301975002977997,
+   "forward_seconds": 0.04749895806889981,
    "head": "MODEL_FOR_CTC_MAPPING_NAMES",
    "inputs": [
     "input_values"
@@ -10707,7 +10715,7 @@
   "whisper": {
    "config_model_type": "whisper",
    "finite": true,
-   "forward_seconds": 0.0033170829992741346,
+   "forward_seconds": 0.001581083983182907,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10772,10 +10780,10 @@
    "inputs": [
     "input_values"
    ],
-   "layers": 2,
+   "layers": 1,
    "main_input": "input_values",
    "model_type": "xcodec2",
-   "parameters": 34554250,
+   "parameters": 34521354,
    "repo": "HKUSTAudio/xcodec2-hf",
    "revision": "64bd034d12d441299cdd535b15c33efd6ccdf252",
    "stage": "forward",
@@ -10784,7 +10792,7 @@
   "xglm": {
    "config_model_type": "xglm",
    "finite": true,
-   "forward_seconds": 0.009360666968859732,
+   "forward_seconds": 0.0107981669716537,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10802,7 +10810,7 @@
   "xlm": {
    "config_model_type": "xlm",
    "finite": true,
-   "forward_seconds": 0.001618291949853301,
+   "forward_seconds": 0.001720750005915761,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10820,7 +10828,7 @@
   "xlm-roberta": {
    "config_model_type": "xlm-roberta",
    "finite": true,
-   "forward_seconds": 0.010747583000920713,
+   "forward_seconds": 0.008989208028651774,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10838,7 +10846,7 @@
   "xlm-roberta-xl": {
    "config_model_type": "xlm-roberta-xl",
    "finite": true,
-   "forward_seconds": 0.010042499983683228,
+   "forward_seconds": 0.012995166005566716,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10888,7 +10896,7 @@
   "yolos": {
    "config_model_type": "yolos",
    "finite": true,
-   "forward_seconds": 0.10679158300627023,
+   "forward_seconds": 0.12489766604267061,
    "head": "MODEL_MAPPING_NAMES",
    "inputs": [
     "pixel_values"
@@ -10905,7 +10913,7 @@
   "yoso": {
    "config_model_type": "yoso",
    "finite": true,
-   "forward_seconds": 0.0026757089653983712,
+   "forward_seconds": 0.0025505420053377748,
    "head": "MODEL_FOR_MASKED_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10923,7 +10931,7 @@
   "youtu": {
    "config_model_type": "youtu",
    "finite": true,
-   "forward_seconds": 0.004407583037391305,
+   "forward_seconds": 0.005263207945972681,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -10967,7 +10975,7 @@
   "zaya": {
    "config_model_type": "zaya",
    "finite": true,
-   "forward_seconds": 0.008022958994843066,
+   "forward_seconds": 0.007216124911792576,
    "head": "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
