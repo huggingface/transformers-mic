@@ -726,3 +726,29 @@ def test_shrink_keeps_csm_depth_decoder_reading_the_backbone_width():
 
     config = shrink(CsmConfig(hidden_size=2048, depth_decoder_config={"backbone_hidden_size": 2048}))
     assert config.depth_decoder_config.backbone_hidden_size == config.hidden_size
+
+
+def test_shrink_keeps_mqa_and_the_resnet_identity_shortcut():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import GemmaConfig, LlamaConfig, ResNetConfig
+
+    assert shrink(GemmaConfig(num_attention_heads=8, num_key_value_heads=1)).num_key_value_heads == 1
+    assert shrink(LlamaConfig(num_attention_heads=32, num_key_value_heads=8)).num_key_value_heads == 2
+    assert shrink(LlamaConfig(num_attention_heads=32, num_key_value_heads=32)).num_key_value_heads == 4
+    resnet = shrink(ResNetConfig(embedding_size=64, hidden_sizes=[64, 128, 256, 512]))
+    assert resnet.embedding_size == resnet.hidden_sizes[0]
+
+
+def test_shrink_keeps_layer_kinds_the_config_derives_from_the_index():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import Llama4TextConfig
+    from transformers_mic.shrink_view import kind_prefix
+
+    # Scout: every layer MoE, every fourth without RoPE. moe_layers is an index list
+    # as long as the depth, so re-indexing it as a per-layer list drops the MoE.
+    config = Llama4TextConfig(num_hidden_layers=48, interleave_moe_layer_step=1)
+    shrunk = shrink(config)
+    assert kind_prefix(config, shrunk) is None
+    assert shrunk.num_hidden_layers == 4

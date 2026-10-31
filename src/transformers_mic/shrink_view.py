@@ -84,10 +84,11 @@ def load(fixture, source=None):
         raise ValueError(
             "The fixture's build.json names no source checkpoint; pass --source REPO[@REVISION]"
         )
-    original = config_dict(
-        Path(hf_hub_download(repo, "config.json", revision=revision or None)).parent
-    )
     shrunk = config_dict(path)
+    original = config_dict(
+        Path(hf_hub_download(repo, "config.json", revision=revision or None)).parent,
+        shrunk["model_type"],
+    )
     return {
         "fixture": fixture,
         "source": f"{repo}@{revision}" if revision else repo,
@@ -97,12 +98,19 @@ def load(fixture, source=None):
     }
 
 
-def config_dict(directory):
+def config_dict(directory, model_type=None):
     """The config as this Transformers reads it, so both sides use one schema
     (v5 moves rope_theta into rope_parameters; non-finite floats are encoded)."""
     from transformers import AutoConfig
 
-    return AutoConfig.from_pretrained(directory).to_dict()
+    try:
+        return AutoConfig.from_pretrained(directory).to_dict()
+    except ValueError:
+        if not model_type:
+            raise
+        # Older configs omit model_type (google/umt5-small): read it as the fixture's.
+        values = json.loads((Path(directory) / "config.json").read_text())
+        return AutoConfig.for_model(model_type, **values).to_dict()
 
 
 def build_meta(values, class_name):
@@ -134,9 +142,17 @@ def stacks(model):
     return found
 
 
+def structural(name):
+    """Dropout and drop-path are regularization: a 1-block stage gets Identity
+    where a deeper one gets DropPath (rates grow with depth)."""
+    return not re.search(r"Drop(out|Path)|^Identity$", name)
+
+
 def signature(layer):
     features = set()
     for module in layer.modules():
+        if not structural(type(module).__name__):
+            continue
         features.add(type(module).__name__)
         for key in KIND_ATTRIBUTES:
             value = getattr(module, key, None)
@@ -147,6 +163,35 @@ def signature(layer):
     return frozenset(features)
 
 
+def kind_prefix(original, shrunk):
+    """When the shrunk config loses a layer kind, the layer prefix that builds
+    every kind (up to each kind's first layer); None otherwise, or when either
+    config's base model cannot be built."""
+    import torch
+    from transformers.models.auto.modeling_auto import MODEL_MAPPING
+
+    def kinds(config):
+        try:
+            with torch.device("meta"):
+                model = MODEL_MAPPING[type(config)]._from_config(config)
+        except Exception:
+            return None
+        depth = config.num_hidden_layers
+        stack = next(
+            (layers for layers in stacks(model).values() if len(layers) == depth), None
+        )
+        return [signature(layer) for layer in stack] if stack else None
+
+    before, after = kinds(original), kinds(shrunk)
+    if before is None or after is None:
+        return None
+    first = {}
+    for i, kind in enumerate(before):
+        first.setdefault(kind, i)
+    lost = set(first) - set(after)
+    return max(first.values()) + 1 if lost else None
+
+
 def label_kinds(signatures, prefix):
     """Name each kind by what sets it apart from the stack's other kinds."""
     kinds = list(dict.fromkeys(signatures))
@@ -155,7 +200,11 @@ def label_kinds(signatures, prefix):
     for kind in kinds:
         own = sorted(kind - common, key=lambda f: ("=" not in f, f))
         if len(kinds) == 1:
-            own = [max(kind, key=lambda f: ("Layer" in f or "Block" in f, -len(f)))]
+            own = [
+                max(
+                    kind, key=lambda f: (bool(re.search(r"(Layer|Block)$", f)), -len(f))
+                )
+            ]
         elif not own:
             others = sorted(set().union(*kinds) - kind)
             own = [f"no {short(others[0], prefix)}"] if others else ["base"]
@@ -416,7 +465,7 @@ def verdict(report):
     """Findings a reviewer should look at: what the original has and the fixture lost."""
     findings = []
     for row in report.get("classes", []):
-        if row["original"] and not row["fixture"]:
+        if row["original"] and not row["fixture"] and structural(row["class"]):
             findings.append(f"module class {row['class']} is not in the fixture")
     for stack in report.get("stacks", []):
         for kind in stack["kinds"]:
@@ -607,6 +656,8 @@ def render(report):
     )
     if report.get("weights"):
         meta += f" · {e(report['weights'])} weights"
+    if not report.get("build_shrink"):
+        meta += " · built before the shrink rule (no recorded recipe)"
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Shrunk architecture</title>

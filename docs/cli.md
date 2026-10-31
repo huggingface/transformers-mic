@@ -397,28 +397,8 @@ the contract's inputs move the outputs (the sensitivity gate).
    fail the build. Their source hashes are included in the fixture key and build
    record. The planner cannot add these options; review and edit the recipe yourself.
 
-   Then check that the fixture keeps the spirit of the original:
-
-   ```sh
-   tmic shrink --open                                  # this workspace's fixture
-   tmic shrink huggingface-mic/deberta-large-mnli-mic  # any fixture with a build.json
-   ```
-
-   It builds the source checkpoint and the fixture on the meta device from their
-   configs (no weights are downloaded) and writes `shrink-<fixture>.html`:
-   - every layer stack, one square per layer colored by kind (module classes plus
-     `layer_type`/`attention_type`)
-   - where the parameters sit
-   - preserved properties: attention style (MHA/GQA/MQA), MoE routing, vocabulary, RoPE
-   - every module class
-   - every changed config field
-
-   Its findings list what the original has and the fixture lost: a layer kind, a
-   module class, or a property. For example, DeepSeek-V4-Flash's 20
-   compressed-sparse-attention layers without a hash router have no counterpart
-   in the fixture, and its MQA becomes GQA. `--json` prints the comparison.
-   Fix a finding with a `config_overrides` entry or a shrink rule, then
-   `tmic build --rebuild --reshrink`.
+   Then check that the fixture keeps the spirit of the original with
+   [`tmic shrink --open`](#how-was-the-fixture-shrunk).
 
 4. **Record the candidate expectations.**
 
@@ -501,6 +481,64 @@ Otherwise, `gh` must be installed and authenticated for GitHub history searches.
 list from relore or another source. A failure object can contain `url`, `title`,
 `body`, and revision information. Searches are bounded candidates, not a complete
 inventory of past failures, and do not count as regression detection.
+
+## How was the fixture shrunk?
+
+`tmic shrink` shows whether a slim fixture keeps the spirit of its checkpoint. It
+builds the source checkpoint and the fixture on the meta device from their configs
+(no weights are downloaded), compares the modules Transformers builds, and writes
+`shrink-<fixture>.html`.
+
+```sh
+tmic shrink --open                                     # the workspace's fixture, opened in a browser
+tmic shrink huggingface-mic/gemma-3n-E2B-it-mic        # any published fixture
+tmic shrink huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic@<revision> --html llama4.html
+tmic shrink ./fixture-dir --source org/model@<revision> # a local build whose build.json names no source
+tmic shrink huggingface-mic/resnet-18-mic --json | jq '.stacks[].kinds'
+```
+
+The summary goes to stderr. A clean fixture:
+
+```text
+huggingface-mic/gemma-3n-E2B-it-mic <- google/gemma-3n-E2B-it@5e092eb… (Gemma3nForConditionalGeneration)
+parameters: 5.4B -> 581.1M
+model.language_model.layers: 30 -> 4 layers (sliding_attention 24->2; full_attention 6->2)
+model.audio_tower.conformer: 12 -> 12 layers (AudioConformerBlock 12->12)
+0 finding(s)
+```
+
+A fixture that lost a layer kind: Llama 4 Scout's `moe_layers` is an index list
+as long as the depth, so the shrink rule used to slice it like a per-layer list
+and build a dense layer instead of MoE. Fixed since; rebuilt fixtures keep 4 layers.
+
+```text
+huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic <- RedHatAI/Llama-4-Scout-17B-16E-Instruct@5996646… (Llama4ForConditionalGeneration)
+parameters: 108.6B -> 47.4M
+vision_model.model.layers: 34 -> 2 layers (VisionEncoderLayer 34->2)
+language_model.model.layers: 48 -> 2 layers (Router, TextExperts, TextL2Norm … 36->1; Router, TextExperts, TextMoe 12->0; no Router 0->1)
+2 finding(s)
+  - language_model.model.layers: layer kind 'Router, TextExperts, TextMoe' is not in the fixture
+  - language_model.model.layers: layer kind 'no Router' exists only in the fixture
+```
+
+![tmic shrink page for Llama 4 Scout](assets/tmic-shrink.png)
+
+The page shows:
+- **Layer stacks:** one square per layer, colored by kind. A kind is the layer's
+  module classes plus its `layer_type`/`attention_type`; dropout and drop-path are
+  ignored. Hover a square for its index.
+- **Where the parameters are:** each component's share. The vocabulary and patch
+  sizes are kept, so embeddings usually dominate the fixture.
+- **Preserved properties:** attention style (MHA/GQA/MQA), MoE routing, vocabulary,
+  tied embeddings, activation, RoPE.
+- **Module classes**, and **config changes** field by field.
+
+The findings list what the original has and the fixture lost. Fix one with a
+reviewed `config_overrides` entry or a shrink rule, then
+`tmic build --rebuild --reshrink`. The builder runs the same layer-kind
+comparison, so a new fixture keeps every kind of its checkpoint's layers (see
+the [recipe](fixtures.md#recipe)). A fixture built before the shrink rule
+existed says so on the page: its changes were chosen by hand.
 
 ## When the LLM is used
 
