@@ -45,6 +45,8 @@ jobs:
       PIP_OVERRIDES: ${{ inputs.pip_overrides }}
       GH_TOKEN: ${{ github.token }}
       HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      # MIC repos built from gated checkpoints (Gemma) are gated like their sources.
+      HF_TOKEN: ${{ secrets.HF_HUB_READ_TOKEN }}
       PYTHONUNBUFFERED: "1"
       OUT: ${{ github.workspace }}/out
     steps:
