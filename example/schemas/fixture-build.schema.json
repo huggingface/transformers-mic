@@ -70,7 +70,8 @@
   "weights": {
    "enum": [
     "random",
-    "overfit"
+    "overfit",
+    "real"
    ]
   },
   "gate": {
@@ -209,9 +210,10 @@
   "shrink": {
    "enum": [
     "rule",
-    "recorded"
+    "recorded",
+    "none"
    ],
-   "description": "rule: the current shrink rule made the config; recorded: a previous build.json's key_fields did"
+   "description": "rule: the current shrink rule made the config; recorded: a previous build.json's key_fields did; none: a small source kept whole with its trained weights"
   }
  }
 }

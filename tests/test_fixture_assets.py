@@ -752,3 +752,30 @@ def test_shrink_keeps_layer_kinds_the_config_derives_from_the_index():
     shrunk = shrink(config)
     assert kind_prefix(config, shrunk) is None
     assert shrunk.num_hidden_layers == 4
+
+
+def test_test_checkpoints_are_never_mic_sources():
+    from transformers_mic.hub import is_test_checkpoint
+
+    assert is_test_checkpoint("optimum-intel-internal-testing/tiny-random-aya-base")
+    assert is_test_checkpoint("peft-internal-testing/tiny-clip-text-2")
+    assert is_test_checkpoint("hf-internal-testing/tiny-random-LlamaForCausalLM")
+    assert not is_test_checkpoint("openai/whisper-tiny")
+    assert not is_test_checkpoint("ai21labs/Jamba-tiny-dev")
+    assert not is_test_checkpoint("tiiuae/Falcon-H1-Tiny-90M-Instruct")
+
+
+def test_a_small_source_is_kept_whole_and_a_large_one_is_shrunk(tmp_path):
+    from transformers import LlamaConfig, LlamaForCausalLM
+
+    small = LlamaConfig(vocab_size=1000, hidden_size=64, intermediate_size=128, num_hidden_layers=4, num_attention_heads=4)
+    small.save_pretrained(tmp_path / "small")
+    config = build_fixtures.shrunk_config(tmp_path / "small", LlamaForCausalLM)
+    assert config.num_hidden_layers == 4 and config.hidden_size == 64
+    assert build_fixtures.keeps_source(tmp_path / "small", LlamaForCausalLM, config)
+
+    large = LlamaConfig(vocab_size=32000, hidden_size=1024, intermediate_size=4096, num_hidden_layers=8, num_attention_heads=16)
+    large.save_pretrained(tmp_path / "large")
+    config = build_fixtures.shrunk_config(tmp_path / "large", LlamaForCausalLM)
+    assert config.num_hidden_layers < 8
+    assert not build_fixtures.keeps_source(tmp_path / "large", LlamaForCausalLM, config)

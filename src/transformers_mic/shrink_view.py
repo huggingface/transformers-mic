@@ -461,9 +461,23 @@ def analyze(data):
     return report
 
 
+# A shrunk fixture keeping at least this share of the source's parameters was not really shrunk.
+MAX_KEPT = 0.5
+
+
 def verdict(report):
     """Findings a reviewer should look at: what the original has and the fixture lost."""
+    from .hub import is_test_checkpoint
+
     findings = []
+    source = report.get("source", "").partition("@")[0]
+    if is_test_checkpoint(source):
+        findings.append(f"{source} is a test checkpoint (untrained): build from a trained checkpoint of this model type")
+    p = report.get("parameters")
+    if p and p["original"] and report.get("build_shrink") != "none" and p["fixture"] >= MAX_KEPT * p["original"]:
+        findings.append(
+            f"the fixture keeps {p['fixture'] / p['original']:.0%} of the original's {human(p['original'])} parameters"
+        )
     for row in report.get("classes", []):
         if row["original"] and not row["fixture"] and structural(row["class"]):
             findings.append(f"module class {row['class']} is not in the fixture")

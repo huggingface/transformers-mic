@@ -25,6 +25,8 @@ def decision(build, requested="auto", readable=False, reused=False):
                 not readable or weights == "overfit"
             )
         reason = "Reuse the pinned fixture; validate the new usage path before considering retraining."
+    elif weights == "real":
+        reason = "The source is small enough to be the fixture: its trained weights pass the sensitivity and numeric-health gates."
     elif weights == "random":
         reason = "Random weights pass the measured sensitivity and numeric-health gates; training is unnecessary."
     elif build.get("overfit_reason"):

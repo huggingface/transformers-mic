@@ -112,11 +112,15 @@ def prefetch(args):
             raise ValueError(f"config.json has model_type {config.get('model_type')}")
         return sha
 
+    from transformers_mic.hub import is_test_checkpoint
+
     def fetch(item):
         model_type, repo = item
         row = {"doc_checkpoint": repo}
         if repo is None:
             row["doc_status"] = "no_doc_checkpoint"
+        elif is_test_checkpoint(repo):
+            row["doc_status"] = "test_checkpoint"
         else:
             try:
                 row.update(repo=repo, revision=try_repo(model_type, repo), source="doc", status="ok")
@@ -126,13 +130,13 @@ def prefetch(args):
                 row["doc_status"] = (
                     "wrong_model_type" if isinstance(exc, ValueError) else type(exc).__name__
                 )
-        # Fall back to the most downloaded ungated Transformers model with this type.
+        # Fall back to the most downloaded ungated, trained Transformers model with this type.
         try:
             candidates = api.list_models(
                 filter=[model_type, "transformers"], sort="downloads", limit=10, expand=["gated"]
             )
             for candidate in candidates:
-                if candidate.gated:
+                if candidate.gated or is_test_checkpoint(candidate.id):
                     continue
                 try:
                     sha = try_repo(model_type, candidate.id)
