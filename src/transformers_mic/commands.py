@@ -17,6 +17,7 @@ from . import backend, fleet, history, planner, policy, references, resources
 from .hub import (
     DEFAULT_NAMESPACE,
     canonical_references,
+    is_test_checkpoint,
     umbrella_references,
     upgrade_contract,
 )
@@ -779,6 +780,10 @@ def create(args):
         if args.offline:
             raise ValueError(
                 "No catalog contract matches this model; new models need Hub metadata and an LLM usage plan"
+            )
+        if is_test_checkpoint(args.model):
+            raise ValueError(
+                f"{args.model} is a test checkpoint (untrained); build the contract from a trained checkpoint of this model type"
             )
         revision, config = model_context(args.model, args.revision)
         namespace = args.namespace or DEFAULT_NAMESPACE

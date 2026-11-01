@@ -533,7 +533,12 @@ The page shows:
   tied embeddings, activation, RoPE.
 - **Module classes**, and **config changes** field by field.
 
-The findings list what the original has and the fixture lost. Fix one with a
+The findings list what the original has and the fixture lost, plus two source
+checks: a fixture that keeps half or more of its source's parameters (the rule did
+not apply), and a source that is another project's untrained test model
+(`tiny-random-*`, a `*-testing` org). A source of 20M parameters or fewer is kept
+whole with its trained weights (`real weights` on the page), so it is not flagged.
+Fix one with a
 reviewed `config_overrides` entry or a shrink rule, then
 `tmic build --rebuild --reshrink`. The builder runs the same layer-kind
 comparison, so a new fixture keeps every kind of its checkpoint's layers (see

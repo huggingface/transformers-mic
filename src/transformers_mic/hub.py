@@ -1,6 +1,7 @@
 """Current Hub ownership; preserve immutable historical manifests and pins."""
 
 from functools import cache
+import re
 
 DEFAULT_NAMESPACE = "huggingface-mic"
 
@@ -11,6 +12,18 @@ def canonical_repo(repo):
         DEFAULT_NAMESPACE + "/mic-" + repo[len(prefix) :]
         if repo.startswith(prefix)
         else repo
+    )
+
+
+def is_test_checkpoint(repo):
+    """Another project's untrained test model: a *-testing org, or a tiny-random/dummy name.
+
+    A contract built from one tests no trained behaviour, and its config and processor
+    files are not the ones users load, so it is never a MIC source.
+    """
+    owner, _, name = repo.partition("/")
+    return owner.lower().endswith("testing") or bool(
+        re.search(r"(^|[-_])(tiny[-_]random|random[-_]tiny|dummy)([-_]|$)", name, re.I)
     )
 
 

@@ -19,7 +19,8 @@ PR checks need models that run on CPU in seconds and exercise real integration p
 
 ## Recipe
 
-1. **Shrink the real config** ([`shrink()`](../experiments/sweep.py)), in every sub-config, innermost first:
+0. **Pick a trained source checkpoint:** the model type's documented checkpoint, else its most downloaded ungated one. Never another project's test model (a `*-testing` org, a `tiny-random`/`dummy` name, [`is_test_checkpoint`](../src/transformers_mic/hub.py)): it is untrained and its config and processor files are not the ones users load. The sweep skips them and `tmic create` refuses them. A model type whose only checkpoints are test models is not Reachable.
+1. **Shrink the real config** ([`shrink()`](../experiments/sweep.py)), in every sub-config, innermost first. **A source of 20M parameters or fewer is not shrunk** ([`SMALL_SOURCE`](../example/build_fixtures.py)): the fixture is the checkpoint itself, config and trained weights unchanged, since it is no bigger than a slim fixture (median ~9M) and tests trained behaviour. Its `build.json` records `shrink: none`, `weights: real`.
    - **Widths:** hidden 64, intermediate 128, 4 heads, by field name.
    - **Attention style kept:** KV heads become 4 under MHA, stay 1 under MQA, 2 under GQA.
    - **MoE:** 4 experts, top-2, one expert group.
@@ -35,12 +36,13 @@ PR checks need models that run on CPU in seconds and exercise real integration p
    - **Dropped:** `quantization_config`, since fixtures are dense. A vanishing `initializer_range` (< 1e-3) becomes 0.02.
    - **Reviewed `config_overrides`** handle missed fields (MusicGen Melody: EnCodec `num_filters`, `codebook_dim`; the latter must match the shrunk width).
 
-   Preserve vocabulary, special tokens, image/patch/audio dimensions, RoPE type, and seeded Dropout/LayerDrop/SpecAugment. Check the result with [`tmic shrink`](cli.md#step-by-step-one-model): it compares the layer kinds, module classes and properties the original builds with the fixture's, and lists what was lost.
+   Preserve vocabulary, special tokens, image/patch/audio dimensions, RoPE type, and seeded Dropout/LayerDrop/SpecAugment. Check the result with [`tmic shrink`](cli.md#how-was-the-fixture-shrunk): it compares the layer kinds, module classes and properties the original builds with the fixture's, and lists what was lost. It also flags a shrunk fixture that keeps half or more of the source's parameters (the rule did not apply: Perceiver, DETR's ResNet backbone) and a test-checkpoint source.
    - **Keep the checkpoint's form:** tensor names, prefix, file format (safetensors or `pytorch_model.bin`, sharded or not), and missing parameters, so loading runs the same converters and initializes omissions as for users (Wav2Vec2 [#49385](https://github.com/huggingface/transformers/issues/49385)).
    - **Weights files that are not in a supported format** (`.pkl`, gguf, npz, pdparams) are not copied, and copied files over 128 MiB are refused.
    - **dtype:** save in the source's default dtype, float32 if unspecified: mic-SmolLM-slim is bfloat16, others float32.
 2. **Copy processors byte for byte.** Identical processor files, preserved config fields, and dtype permit sharing a fixture ([example](../example/README.md#the-parts)).
 3. **Weights:** seed, then run the input-sensitivity gate.
+   - A small source kept whole runs the gate on its trained weights and is never trained further; a failure means the contract's inputs do not reach the model, so the build fails.
    - Pass: keep random weights (CLIP, BERT, T5, UMT5, Wav2Vec2).
    - Fail: overfit the contract's training batch in float32 (AdamW, lr 5e-3, clipping, ≤ 500 steps, loss < 0.05 twice), cast to fixture dtype, pass the gate (Whisper); otherwise fail the build.
    - Recipes may require overfit with a reviewed reason and target loss: the gate reads teacher-forced logits, while random [SmolLM](evidence.md#bfloat16-on-cpu) and [MusicGen Melody](evidence.md#overfit-or-random-weights-on-real-regressions) generate one answer for every prompt.
@@ -139,6 +141,8 @@ Fixture files run unchanged on A10G; baselines do not transfer ([numbers](eviden
 Transformers' `tiny-random-*` pipeline (`utils/create_dummy_models.py`, fast tests in [#49103](https://github.com/huggingface/transformers/pull/49103)) uses unit-test configs that lose real RoPE/sliding-window/MoE settings, re-saved/resized processors, no seed or revision pin, and forward-only checks. In our study, a passing forward caught **0/126 synthetic faults**; re-saved processors hid **three real regressions**.
 
 **Proposal:** adopt real configs, copied processors, seeds, and gates; retain the pipeline's shrinking, processor discovery, and publishing machinery.
+
+These `tiny-random-*` models are never MIC sources ([recipe step 0](#recipe)). A real model with "tiny" in its name is a trained checkpoint and is shrunk like any other: whisper-tiny 38M → 3.6M, Jamba-tiny-dev 319M → 8.8M.
 
 ## How the experiments were run
 

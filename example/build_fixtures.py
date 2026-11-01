@@ -16,6 +16,9 @@ For each fixture in a contract's manifest that has a `build` recipe:
    SpecAugment stay as configured (contracts seed them). Seeded random weights,
    saved in the source checkpoint's dtype (float32 when its config names none),
    so the fixture loads in the dtype users of the checkpoint get by default.
+   A source of SMALL_SOURCE parameters or fewer is not shrunk: the fixture is
+   the checkpoint itself, config and trained weights unchanged (`weights:
+   real`), since it costs no more than a slim fixture and tests trained behaviour.
 3. Copy. Every non-weight file of the source checkpoint (tokenizer,
    processor, generation config) is copied unchanged. A recipe can explicitly
    include a processor asset with a weight-like extension and preserve selected
@@ -33,7 +36,8 @@ For each fixture in a contract's manifest that has a `build` recipe:
    Otherwise the fixture is overfit on the contract's training batch and must
    then pass the gate; BatchNorm running statistics are recalibrated on the captured
    batch before evaluation, with dropout disabled. A fixture that does neither
-   is a build failure. A
+   is a build failure. Real weights get the same gate and are never trained;
+   failing it means the contract's inputs do not reach the model. A
    recipe can ask for overfitting anyway (`overfit`, with the reason), e.g.
    when random weights generate the same text for every prompt.
 6. Numeric health. The saved fixture is reloaded in float32, bfloat16, and
@@ -91,6 +95,8 @@ NOT_COPIED = {"config.json", "README.md", ".gitattributes"}
 # Config fields that name or date the source rather than describe the model.
 VOLATILE = {"_name_or_path", "transformers_version", "dtype", "torch_dtype", "_commit_hash"}
 GATE_FACTOR = 10
+# Sources at or under this size are kept whole with their trained weights (the median slim fixture is ~9M).
+SMALL_SOURCE = 20_000_000
 DTYPES = ("float32", "bfloat16", "float16")
 
 
@@ -171,11 +177,24 @@ def model_class(source, recipe):
     return getattr(transformers, name)
 
 
+def parameter_count(cls, config):
+    with torch.device("meta"):
+        return sum(p.numel() for p in cls._from_config(config).parameters())
+
+
+def keeps_source(source, cls, config):
+    """A small source is the fixture itself: same config, trained weights."""
+    full = cls.config_class.from_pretrained(source)
+    return parameter_count(cls, full) <= SMALL_SOURCE and parameter_count(cls, config) == parameter_count(cls, full)
+
+
 def shrunk_config(source, cls, recipe=None):
     recorded = (recipe or {}).get("recorded_config")
     if recorded is not None:  # a rebuild reproduces the published config, not today's rule
         return cls.config_class.from_dict(recorded)
-    config = shrink(cls.config_class.from_pretrained(source))
+    config = cls.config_class.from_pretrained(source)
+    if parameter_count(cls, config) > SMALL_SOURCE:
+        config = shrink(config)
     overrides = (recipe or {}).get("config_overrides", {}).get("fields", {})
     if not overrides:
         return config
@@ -568,8 +587,14 @@ def readme(name, contract, build, cls, config, contract_repo=None):
         else "The real checkpoint has every parameter, and so does the fixture."
     )
     covers = ", ".join(f"[`{r}`](https://huggingface.co/{r})" for r in build["covers"])
-    gate = build["gate"]["random"]
-    if build["weights"] == "random":
+    gate = build["gate"].get("random") or build["gate"].get("real")
+    if build["weights"] == "real":
+        weights = (
+            f"**The checkpoint's own trained weights**, unchanged: at {build['parameters'] / 1e6:.1f}M parameters it is "
+            f"no bigger than a slim fixture. They passed the input-sensitivity gate (weakest: `{gate['weakest']}`, "
+            f"{gate['deltas'][gate['weakest']]:.3g})."
+        )
+    elif build["weights"] == "random":
         weights = (
             f"**Random weights (seed {build['seed']}).** They passed the input-sensitivity gate: every perturbation "
             f"of the contract's inputs moved the logits by at least {gate['threshold']:g} (weakest: `{gate['weakest']}`, "
@@ -586,6 +611,11 @@ def readme(name, contract, build, cls, config, contract_repo=None):
             f"the input-sensitivity gate: `{gate['weakest']}` moved the logits by only {gate['deltas'][gate['weakest']]:.2g} "
             f"(threshold {gate['threshold']:g})."
         )
+    shape = (
+        f"**The checkpoint's own config, not shrunk:** `{cls.__name__}` at {build['parameters'] / 1e6:.1f}M parameters is at or under the {SMALL_SOURCE // 10**6}M below which a source is kept whole."
+        if build.get("shrink") == "none"
+        else f"**Same architecture, smaller config:** `{cls.__name__}`, shrunk by the generic rule in [`sweep.py`](https://github.com/huggingface/model-integration-contracts/blob/main/experiments/sweep.py) ({depth(config)})."
+    )
     preserved = build.get("preserved_frozen_sha256", {})
     fixed = (
         f"- **Fixed tensors preserved** from the pinned checkpoint: {', '.join(f'`{n}`' for n in preserved)}.\n"
@@ -603,7 +633,7 @@ base_model: {build['built_from']['repo']}
 A {build['parameters'] / 1e6:.1f}M-parameter fixture for the [{contract} MIC](https://huggingface.co/{contract_repo}), covering {covers}. It is a test artifact, not a usable model, tagged `test-artifact` to keep it out of candidate-model search.
 
 - **Fixture key `{build['key'][:12]}`.** It covers every checkpoint whose processor files are byte-identical and whose config matches after shrinking.
-- **Same architecture, smaller config:** `{cls.__name__}`, shrunk by the generic rule in [`sweep.py`](https://github.com/huggingface/model-integration-contracts/blob/main/experiments/sweep.py) ({depth(config)}).
+- {shape}
 - **Processor files copied byte for byte** from `{build['built_from']['repo']}`: {', '.join(f'`{f}`' for f in build['copied_unchanged'])}.
 - {weights}
 - **Same tensor names as the real checkpoint.** {mirror}
@@ -667,20 +697,28 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
     threshold = GATE_FACTOR * tolerance
     dtype = getattr(torch, source_dtype(source))
 
-    report_phase("Initialize slim fixture")
-    torch.manual_seed(recipe["seed"])
-    # Initialized in float32 like every other fixture, then cast: the seed gives the same weights in any dtype.
-    model = cls._from_config(shrunk_config(source, cls, recipe), dtype=torch.float32).eval().to(dtype)
-    frozen_hashes = restore_frozen(model, source, source_repo, revisions[source_repo], recipe)
+    real = keeps_source(source, cls, shrunk_config(source, cls, recipe))
+    if real:
+        report_phase("Load the small source checkpoint unchanged")
+        model = cls.from_pretrained(run.checkpoint_path(source_repo, revisions[source_repo]), dtype=dtype).eval()
+        frozen_hashes = None
+    else:
+        report_phase("Initialize slim fixture")
+        torch.manual_seed(recipe["seed"])
+        # Initialized in float32 like every other fixture, then cast: the seed gives the same weights in any dtype.
+        model = cls._from_config(shrunk_config(source, cls, recipe), dtype=torch.float32).eval().to(dtype)
+        frozen_hashes = restore_frozen(model, source, source_repo, revisions[source_repo], recipe)
     copied = save(model, out, source, lacks, recipe, checkpoint)
     entry = root / manifest["integrations"]["transformers"]["entry_point"]
     report_phase("Run contract and capture training inputs")
     batch, captured = contract_batch(entry, out)
     accepted = {**config_insensitive(model.config, batch), **recipe.get("accept_insensitive", {})}
-    report_phase("Check random-weight input sensitivity")
-    gate = {"random": sensitivity(called_module(model, captured), as_dtype(batch, dtype), threshold, accepted)}
-    weights, training = "random", None
-    if not keep_random and (not gate["random"]["pass"] or recipe.get("overfit")):
+    weights, training = ("real" if real else "random"), None
+    report_phase(f"Check {weights}-weight input sensitivity")
+    gate = {weights: sensitivity(called_module(model, captured), as_dtype(batch, dtype), threshold, accepted)}
+    if real and not gate["real"]["pass"]:
+        raise SystemExit(f"{name}: the trained weights are insensitive to the contract's inputs: {gate['real']}")
+    if not real and not keep_random and (not gate["random"]["pass"] or recipe.get("overfit")):
         torch.manual_seed(recipe["seed"])  # dropout and SpecAugment stay on while training
         model = model.float()  # trained in float32, saved in the source dtype
         unit_scales = unit_batch_norm(model)
@@ -719,7 +757,7 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
         "builder": "example/build_fixtures.py",
         "builder_revision": builder_revision(),
         "recipe": fixture["build"],
-        "shrink": "recorded" if recorded is not None else "rule",
+        "shrink": "none" if real else "recorded" if recorded is not None else "rule",
         "model_class": cls.__name__,
         "parameters": sum(p.numel() for p in model.parameters()),
         "missing_parameters": lacks,

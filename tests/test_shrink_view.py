@@ -68,3 +68,12 @@ def test_the_page_is_titled_by_the_model_and_links_both_pins():
     assert "<h1>creator/Demo-7B</h1>" in page
     assert f'href="https://huggingface.co/huggingface-mic/demo-mic/tree/{"a" * 40}"' in page
     assert f'href="https://huggingface.co/creator/Demo-7B/tree/{"b" * 40}"' in page
+
+
+def test_a_barely_shrunk_fixture_and_a_test_checkpoint_source_are_findings():
+    original = gemma(["sliding_attention"] * 5 + ["full_attention"])
+    result = report(original, original)
+    assert any("keeps 100% of the original" in f for f in shrink_view.verdict(result))
+    assert not any("keeps" in f for f in shrink_view.verdict(result | {"build_shrink": "none"}))
+    result["source"] = "optimum-intel-internal-testing/tiny-random-demo@" + "c" * 40
+    assert any("is a test checkpoint" in f for f in shrink_view.verdict(result))
