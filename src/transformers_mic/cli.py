@@ -422,6 +422,13 @@ No Git commit or framework PR is created automatically.""",
     export.add_argument(
         "--execute", action="store_true", help="Upload the previewed fleet update"
     )
+    retire = sub.add_parser(
+        "retire", help="Preview or remove one contract from a fleet (e.g. a replaced test-checkpoint source)"
+    )
+    retire.add_argument("contract")
+    retire.add_argument("--fleet", choices=tuple(fleet.FILES), required=True)
+    retire.add_argument("--reason", required=True, help="Recorded in the dataset commit message")
+    retire.add_argument("--execute", action="store_true", help="Upload the previewed removal")
     pin = sub.add_parser(
         "pin", help="Pin a dataset revision in a Transformers checkout"
     )

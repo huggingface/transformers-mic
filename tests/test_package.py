@@ -352,6 +352,19 @@ def test_export_publishes_dataset_and_writes_only_sha(workspace, dataset, tmp_pa
     )  # cached download is never edited
 
 
+def test_retire_removes_one_contract_after_a_preview(workspace, dataset):
+    args = SimpleNamespace(fleet="prototypes", contract="Other", reason="test source", execute=False)
+    commands.retire(args)
+    assert dataset[1] == []
+    args.execute = True
+    commands.retire(args)
+    call = dataset[1][0]
+    assert call["parent_commit"] == "a" * 40
+    assert "Other" not in exported(call, "prototypes")["contracts"]
+    with pytest.raises(ValueError, match="not in the prototypes fleet"):
+        commands.retire(SimpleNamespace(fleet="prototypes", contract="Missing", reason="x", execute=False))
+
+
 def test_export_rejects_case_collision_and_allows_explicit_name(workspace, dataset):
     approve_receipts(workspace)
     old = read(dataset[0])

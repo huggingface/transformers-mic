@@ -1243,6 +1243,46 @@ def publish(args):
     return result.returncode
 
 
+def retire(args):
+    """Remove one contract (and its known failures) from a fleet; preview unless --execute."""
+    path, revision = fleet.download(args.fleet)
+    lock = read(path)
+    if args.contract not in lock["contracts"]:
+        raise ValueError(f"{args.contract} is not in the {args.fleet} fleet at {revision}")
+    removed = lock["contracts"].pop(args.contract)
+    known = lock.get("known_failures", {})
+    for key in [k for k in known if k.startswith(args.contract + "/")]:
+        del known[key]
+    if args.execute:
+        commit = HfApi().create_commit(
+            repo_id=fleet.REPOSITORY,
+            repo_type="dataset",
+            parent_commit=revision,
+            operations=[
+                CommitOperationAdd(path_in_repo=p, path_or_fileobj=text.encode())
+                for p, text in fleet.operations(args.fleet, lock).items()
+            ],
+            commit_message=f"Retire {args.contract} from the {args.fleet} fleet: {args.reason}",
+        )
+        revision = commit.oid
+    print(
+        json.dumps(
+            {
+                "repository": fleet.REPOSITORY,
+                "fleet": args.fleet,
+                "retired": args.contract,
+                "integration": removed["integration"]["repo"],
+                "reason": args.reason,
+                "revision": revision,
+                "execute": args.execute,
+                "next": "Done." if args.execute else "Review, then repeat with --execute to upload.",
+            },
+            indent=2,
+        )
+    )
+    return 0
+
+
 def export(args):
     workspace = Workspace(args.workspace)
     publication_ready(workspace)
