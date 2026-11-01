@@ -58,3 +58,13 @@ def test_a_faithful_shrink_has_no_findings():
     ]
     assert result["parameters"]["original"] > result["parameters"]["fixture"]
     assert "Same architecture, smaller" in shrink_view.render(result)
+
+
+def test_the_page_is_titled_by_the_model_and_links_both_pins():
+    original = gemma(["sliding_attention"] * 5 + ["full_attention"])
+    result = report(original, gemma(["sliding_attention", "full_attention"]))
+    result |= {"fixture": "huggingface-mic/demo-mic@" + "a" * 40, "source": "creator/Demo-7B@" + "b" * 40}
+    page = shrink_view.render(result)
+    assert "<h1>creator/Demo-7B</h1>" in page
+    assert f'href="https://huggingface.co/huggingface-mic/demo-mic/tree/{"a" * 40}"' in page
+    assert f'href="https://huggingface.co/creator/Demo-7B/tree/{"b" * 40}"' in page
