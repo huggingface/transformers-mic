@@ -988,6 +988,7 @@ def test_merged_hub_card_keeps_both_descriptions(monkeypatch):
     assert "Original usage explanation." in card
     assert "Original parameter count and build details." in card
     assert "integrations/transformers/expectations" in card
+    assert "mic-coverage.static.hf.space/shrink/example-mic.html" in card
     assert card.startswith("---\n")
 
 

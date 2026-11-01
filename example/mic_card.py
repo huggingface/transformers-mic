@@ -2,6 +2,8 @@
 
 import re
 
+SHRINK_PAGES = "https://huggingface-mic-mic-coverage.static.hf.space/shrink"
+
 
 def merged_card(repo, integration, fixture, checkpoint):
     pattern = re.compile(r"\A---\r?\n(.*?)\r?\n---\r?\n", re.DOTALL)
@@ -39,7 +41,8 @@ def merged_card(repo, integration, fixture, checkpoint):
         "- [Contract manifest](integration.json)\n"
         "- [Transformers usage](integrations/transformers/usage.md)\n"
         "- [Transformers expectations](integrations/transformers/expectations)\n"
-        "- [Fixture provenance](build.json)\n\n"
+        "- [Fixture provenance](build.json)\n"
+        f"- [How the fixture was shrunk]({SHRINK_PAGES}/{repo.split('/')[-1]}.html)\n\n"
         "## Contract\n\n"
         + body(integration)
         + "\n\n## Slim model\n\n"
