@@ -651,16 +651,24 @@ def render(report):
     light = "".join(f"--s{i}:{c[0]};" for i, c in enumerate((*PALETTE, OTHER)))
     dark = "".join(f"--s{i}:{c[1]};" for i, c in enumerate((*PALETTE, OTHER)))
     dark_tokens = f"--bg:#1a1a19;--fg:#f0efec;--muted:#c3c2b7;--line:#3a3936;--ok:#2f9e5a;--warn:#d9822b;{dark}"
-    meta = (
-        f"{e(report['fixture'])} ← {e(report['source'])} · {e(report['model_class'])}"
-    )
+    def pin(value):
+        """A Hub repo@sha links to the repo at that commit; anything else stays text."""
+        repo, _, revision = value.partition("@")
+        if not re.fullmatch(r"[\w.-]+/[\w.-]+", repo):
+            return e(value)
+        url = f"https://huggingface.co/{repo}" + (f"/tree/{revision}" if revision else "")
+        label = f"{repo}@{revision[:12]}" if revision else repo
+        return f'<a href="{e(url)}" title="{e(value)}">{e(label)}</a>'
+
+    model = report["source"].partition("@")[0]
+    meta = f"{pin(report['fixture'])} ← {pin(report['source'])} · {e(report['model_class'])}"
     if report.get("weights"):
         meta += f" · {e(report['weights'])} weights"
     if not report.get("build_shrink"):
         meta += " · built before the shrink rule (no recorded recipe)"
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Shrunk architecture</title>
+<title>{e(model)}: shrunk architecture</title>
 <style>
 :root{{--bg:#fcfcfb;--fg:#0b0b0b;--muted:#52514e;--line:#e4e3df;--ok:#1d7a43;--warn:#b35c00;{light}}}
 @media (prefers-color-scheme:dark){{:root:not([data-theme="light"]){{{dark_tokens}}}}}
@@ -669,6 +677,7 @@ body{{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,sans
 main{{max-width:1040px;margin:0 auto;padding:24px 16px 64px}}
 h1{{font-size:24px;margin:0 0 4px}}h2{{font-size:18px;margin:36px 0 8px}}h3{{font-size:14px;margin:0 0 8px;font-family:ui-monospace,monospace}}
 .meta,.note{{color:var(--muted);margin:0 0 12px;overflow-wrap:anywhere}}
+a{{color:inherit}}
 .stats{{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:20px 0}}
 .stat{{border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column}}
 .stat .v{{font-size:26px;font-weight:600}}.stat .k{{color:var(--muted);font-size:13px}}
@@ -689,7 +698,7 @@ td i{{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right
 tr.bad td{{color:var(--warn)}}
 {swatches}
 </style></head><body><main>
-<h1>Shrunk architecture</h1><p class="meta">{meta}</p>
+<h1>{e(model)}</h1><p class="meta">{meta}</p>
 {"".join(out)}
 </main></body></html>"""
 
