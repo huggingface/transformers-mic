@@ -16,15 +16,14 @@ def canonical_repo(repo):
 
 
 def is_test_checkpoint(repo):
-    """Another project's untrained test model: a *-testing org, or a tiny-random/dummy name.
+    """Another project's untrained test model: a *-testing org, or a tiny-random/dummy org or name.
 
     A contract built from one tests no trained behaviour, and its config and processor
     files are not the ones users load, so it is never a MIC source.
     """
     owner, _, name = repo.partition("/")
-    return owner.lower().endswith("testing") or bool(
-        re.search(r"(^|[-_])(tiny[-_]random|random[-_]tiny|dummy)([-_]|$)", name, re.I)
-    )
+    marker = re.compile(r"(^|[-_])(tiny[-_]random|random[-_]tiny|dummy)([-_]|$)", re.I)
+    return owner.lower().endswith("testing") or any(marker.search(part) for part in (owner, name))
 
 
 def canonical_references(value):

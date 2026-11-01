@@ -760,6 +760,7 @@ def test_test_checkpoints_are_never_mic_sources():
     assert is_test_checkpoint("optimum-intel-internal-testing/tiny-random-aya-base")
     assert is_test_checkpoint("peft-internal-testing/tiny-clip-text-2")
     assert is_test_checkpoint("hf-internal-testing/tiny-random-LlamaForCausalLM")
+    assert is_test_checkpoint("tiny-random/mistral-3")
     assert not is_test_checkpoint("openai/whisper-tiny")
     assert not is_test_checkpoint("ai21labs/Jamba-tiny-dev")
     assert not is_test_checkpoint("tiiuae/Falcon-H1-Tiny-90M-Instruct")
