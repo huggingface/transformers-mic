@@ -7,7 +7,7 @@ name: tmic run
 #
 #   gh workflow run tmic-run.yml --repo huggingface/transformers-mic \
 #     -f model=mistralai/Mistral-Large-4-1T-A52B [--ref <tmic branch>]
-#   gh run download <id> --repo huggingface/transformers-mic -n tmic-workspace
+#   gh run download <id> --repo huggingface/transformers-mic -n tmic-workspace   # or -n tmic-shrink: the shrink page only
 #
 # What it needs and why (each cost one failed attempt to find):
 #   GH_TOKEN   create queries GitHub history through gh
@@ -98,6 +98,23 @@ jobs:
               print("gate", json.dumps(b.get("gate"))[:1500])
               print("health", json.dumps(b.get("numeric_health")))
           PY
+      - name: Shrink page
+        if: always()
+        run: |
+          # tmic shrink builds the checkpoint and the fixture on the meta device (configs only).
+          for build in work/run/.mic/artifacts/*/*/build.json; do
+            [ -f "$build" ] || continue
+            folder=$(dirname "$build")
+            tmic shrink "$folder" --source "$MODEL${REVISION:+@$REVISION}" --html "shrink-$(basename "$(dirname "$folder")").html" || true
+          done
+          ls shrink-*.html 2>/dev/null || echo "no fixture was built"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: tmic-shrink
+          path: shrink-*.html
+          if-no-files-found: ignore
+          retention-days: 7
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
