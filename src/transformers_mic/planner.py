@@ -143,8 +143,8 @@ values. Output comparison RULES only; actual executions will produce expectation
 Use the supplied manifest schema, public model-card examples, and architecture
 API signatures. The BERT example illustrates the JSON/reporting conventions only;
 use this checkpoint's actual processor, model head, input names and loss signature.
-Do not invent gradient parameter names: select meaningful existing parameters
-from named_parameters, retaining their names in the boolean checks.
+Do not invent gradient parameter names: context.parameter_names lists one loaded
+name per layer kind (its first layer of that kind); select from it.
 Use the supplied example usage conventions. One checkpoint
 (context.model) and one fixture (context.fixture_repo). Fix entry_point to
 integrations/transformers/usage.md, format runnable-markdown, default/eager/bfloat16

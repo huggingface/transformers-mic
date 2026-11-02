@@ -622,6 +622,21 @@ def test_unknown_manifest_keys_are_dropped_from_drafts():
     assert plan["manifest"] == {"mic": "0.3", "name": "M"}
 
 
+def test_checkpoints_above_the_gpu_limit_are_not_loaded():
+    context = {"parameters": 1_053_000_000_000}
+    assert commands.loaded_parameters(context) is None
+    commands.check_partial_training({"usage": "model(**inputs).loss.backward()"}, context)
+    with pytest.raises(ValueError, match="requires_grad_"):
+        commands.check_partial_training({"usage": "model(**inputs).loss.backward()"}, {"parameters": 8e9})
+
+
+def test_planner_context_names_one_parameter_per_layer_kind():
+    names = {"model.layers.0.mlp.down_proj.weight", "model.layers.1.mlp.experts.down_proj",
+             "model.layers.2.mlp.experts.down_proj", "lm_head.weight"}
+    assert commands.names_per_layer_kind(names) == [
+        "lm_head.weight", "model.layers.0.mlp.down_proj.weight", "model.layers.1.mlp.experts.down_proj"]
+
+
 def test_update_keeps_fixture_pin_and_old_source(workspace, monkeypatch):
     plan = {
         "name": "BERT",
@@ -1679,7 +1694,9 @@ def test_create_rejects_plain_fences_and_float16_loads():
     # A fixtures-only contract loads only its slim fixture.
     huge = {"parameters": 1_026_879_376_368, "fixtures_only": True}
     commands.check_float16_load({"usage": usage}, {"dtype": "bfloat16"}, commands.loaded_parameters(huge))
-    assert commands.loaded_parameters({**huge, "fixtures_only": False}) == huge["parameters"]
+    # Above GPU_PARAMETER_LIMIT only the slim fixture is measured, fixtures-only or not.
+    assert commands.loaded_parameters({**huge, "fixtures_only": False}) is None
+    assert commands.loaded_parameters({"parameters": 8_000_000_000, "fixtures_only": False}) == 8_000_000_000
 
 
 def test_create_rejects_the_broadcast_image_idiom():
