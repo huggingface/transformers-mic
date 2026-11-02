@@ -1,6 +1,6 @@
 # transformers-mic
 
-![logo](/docs/mic-logo.png)
+![logo](https://raw.githubusercontent.com/huggingface/transformers-mic/main/docs/mic-logo.png)
 
 A **Model Integration Contract (MIC)** is a proposed standard: next to a Hub
 model, an executable check that it works in a framework, run by that
@@ -23,7 +23,7 @@ coverage is in the [coverage space](https://huggingface.co/spaces/huggingface-mi
 In Transformers, the contracts job runs on PRs and reports failures without
 blocking ([status](docs/evidence.md#transformers-ci-proof)).
 
-![A proposed link lets agents discover a model's MIC on the Hub. Transformers checks slim fixtures on PRs and real checkpoints in run-slow or nightly jobs; Transformers.js has its own contract entry point and baseline, with CI triggers still to define.](docs/assets/mic-overview.svg)
+![A proposed link lets agents discover a model's MIC on the Hub. Transformers checks slim fixtures on PRs and real checkpoints in run-slow or nightly jobs; Transformers.js has its own contract entry point and baseline, with CI triggers still to define.](https://raw.githubusercontent.com/huggingface/transformers-mic/main/docs/assets/mic-overview.svg)
 
 ## Try it locally
 
@@ -57,4 +57,5 @@ Details: [full example](example/README.md), [technical design](docs/design.md),
 [Transformers CI proof](docs/transformers-ci-proof.md), [improving contracts](docs/improving-contracts.md),
 [smoke vs assertions](docs/smoke-vs-assertions.md), [problems and open questions](docs/problems-and-opened-questions.md),
 [cloud baselines](docs/cloud-baselines.md), [end-to-end tests](docs/end-to-end-tests.md),
-[agent walkthroughs](docs/agent-walkthrough/README.md), [maintainer slides](docs/slides/index.html).
+[agent walkthroughs](docs/agent-walkthrough/README.md), [maintainer slides](docs/slides/index.html),
+[changelog](CHANGELOG.md), [releasing](docs/release.md).
