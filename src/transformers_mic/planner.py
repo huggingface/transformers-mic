@@ -150,7 +150,8 @@ API signatures. context.example_plan is the closest approved contract
 and adapt it to this checkpoint's actual processor, model head, inputs, parameter
 names and loss signature.
 Do not invent gradient parameter names: context.parameter_names lists one loaded
-name per layer kind (its first layer of that kind); select from it.
+name per layer kind, N standing for the layer index, which differs between the
+fixture and the checkpoint; find each by its suffix after N, never by index.
 Use the supplied example usage conventions. One checkpoint
 (context.model) and one fixture (context.fixture_repo). Fix entry_point to
 integrations/transformers/usage.md, format runnable-markdown, default/eager/bfloat16

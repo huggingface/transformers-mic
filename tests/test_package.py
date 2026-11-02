@@ -635,6 +635,8 @@ def test_planner_context_names_one_parameter_per_layer_kind():
              "model.layers.2.mlp.experts.down_proj", "lm_head.weight"}
     assert commands.names_per_layer_kind(names) == [
         "lm_head.weight", "model.layers.0.mlp.down_proj.weight", "model.layers.1.mlp.experts.down_proj"]
+    assert commands.names_per_layer_kind(names, pattern=True) == [
+        "lm_head.weight", "model.layers.N.mlp.down_proj.weight", "model.layers.N.mlp.experts.down_proj"]
 
 
 def test_update_keeps_fixture_pin_and_old_source(workspace, monkeypatch):
@@ -1757,3 +1759,16 @@ def test_nearest_contract_prefers_shared_structure(monkeypatch, tmp_path):
     monkeypatch.setenv("TMIC_EXAMPLE_SKIP_SELF", "1")
     # Without its own contract, nothing else here shares Llama's structure.
     assert examples.nearest_contract(configs["org/llama"], rows=rows, model="org/llama") is None
+
+
+def test_encoder_decoder_calls_need_decoder_inputs():
+    whisper = {"is_encoder_decoder": True, "architectures": ["WhisperForConditionalGeneration"]}
+    usage = "```py runnable:t\nlogits = model(inputs.input_features).logits\n```\n"
+    with pytest.raises(ValueError, match="decoder_input_ids"):
+        commands.check_encoder_decoder_calls({"usage": usage}, whisper)
+    for ok in ("model(inputs.input_features, decoder_input_ids=ids)", "model(x, labels=labels)", "model(**inputs)"):
+        commands.check_encoder_decoder_calls({"usage": f"```py runnable:t\nout = {ok}\n```\n"}, whisper)
+    commands.check_encoder_decoder_calls({"usage": usage}, {"is_encoder_decoder": False})
+    # RT-DETR is an encoder-decoder over pixel_values that builds its own queries.
+    commands.check_encoder_decoder_calls({"usage": usage}, {"is_encoder_decoder": True, "architectures": ["RTDetrForObjectDetection"]})
+

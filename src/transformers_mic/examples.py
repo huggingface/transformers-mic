@@ -25,11 +25,20 @@ def signature(config):
         if isinstance(value, dict) and value.get("model_type"):
             types.add(value["model_type"])
     head = re.sub(r"^.*?(For\w+)$", r"\1", architecture) if "For" in architecture else ""
+    try:  # the modality: input_features (speech), pixel_values (vision), input_ids (text)
+        import transformers
+
+        main_input = getattr(getattr(transformers, architecture, None), "main_input_name", None)
+    except Exception:
+        main_input = None
     return {
         "architecture": architecture,
         "model_type": config.get("model_type"),
         "types": {t for t in types if t},
         "head": head,
+        "main_input": main_input,
+        # deepseek_v32 ~ deepseek_v3, mistral_large4 ~ mistral3
+        "family": (re.match(r"[a-z]+", config.get("model_type") or "") or [None])[0],
     }
 
 
@@ -40,14 +49,19 @@ def similarity(a, b):
     if a["model_type"] and a["model_type"] == b["model_type"]:
         return 50, f"same model_type {a['model_type']}"
     shared = sorted(a["types"] & b["types"])
-    if shared:
-        same_head = a["head"] and a["head"] == b["head"]
-        return 10 * len(shared) + (5 if same_head else 0), (
-            f"shares {', '.join(shared)}" + (f" and the {a['head']} head" if same_head else "")
-        )
-    if a["head"] and a["head"] == b["head"]:
-        return 5, f"same {a['head']} head"
-    return 0, ""
+    same_head = bool(a["head"]) and a["head"] == b["head"]
+    # Whisper's head-only match was T5, a text model: its example never passes
+    # decoder inputs with input_features. The input modality outranks the head.
+    same_input = bool(a["main_input"]) and a["main_input"] == b["main_input"]
+    same_family = bool(a["family"]) and a["family"] == b["family"]
+    score = 10 * len(shared) + (9 if same_family else 0) + (8 if same_input else 0) + (5 if same_head else 0)
+    if not shared and not same_head and not same_family:
+        return 0, ""
+    parts = ([f"shares {', '.join(shared)}"] if shared else []) + (
+        [f"same {a['family']} family"] if same_family else []) + (
+        [f"same {a['main_input']} input"] if same_input else []) + (
+        [f"same {a['head']} head"] if same_head else [])
+    return score, " and ".join(parts)
 
 
 def candidates():
