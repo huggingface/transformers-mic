@@ -106,9 +106,17 @@ def config_insensitive(config, batch):
     A config without token types (DeBERTa-v3: type_vocab_size 0) has no embedding
     for them, so a tokenizer's token_type_ids cannot move the logits.
     """
+    inert = {}
     if "token_type_ids" in batch and getattr(config.get_text_config(), "type_vocab_size", None) == 0:
-        return {"token_type_ids:all_ones": "type_vocab_size is 0: the model has no token type embedding"}
-    return {}
+        inert["token_type_ids:all_ones"] = "type_vocab_size is 0: the model has no token type embedding"
+    vision = getattr(config, "vision_config", None) or config
+    if "pixel_values" in batch and getattr(vision, "model_type", None) == "pixtral":
+        # Mistral-Large-4: delta 0.0 random and trained. Same shape as Wav2Vec2's input_values:halve.
+        inert["pixel_values:halve"] = (
+            "Pixtral's bias-free patch convolution feeds an RMSNorm (ln_pre), so scaling the pixel "
+            "values cannot move the output"
+        )
+    return inert
 
 def report_phase(phase, detail=""):
     print("MIC_PROGRESS " + json.dumps({"phase": phase, "detail": detail}), flush=True)

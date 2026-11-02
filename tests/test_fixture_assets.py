@@ -792,3 +792,13 @@ def test_fixture_mirrors_transformers_weights(tmp_path, name):
         assert json.loads((tmp_path / name).read_text())["weight_map"] == {"a.weight": "model.safetensors", "b.weight": "model.safetensors"}
     else:
         assert (tmp_path / name).read_bytes() == b"weights" and not (tmp_path / "model.safetensors").exists()
+
+
+def test_pixtral_vision_is_inert_to_pixel_scale():
+    from transformers import Mistral3Config
+
+    config = Mistral3Config()
+    assert config.vision_config.model_type == "pixtral"
+    assert "pixel_values:halve" in build_fixtures.config_insensitive(config, {"pixel_values": None})
+    assert "pixel_values:halve" not in build_fixtures.config_insensitive(config, {"input_ids": None})
+
