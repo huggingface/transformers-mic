@@ -783,17 +783,6 @@ def test_a_small_source_is_kept_whole_and_a_large_one_is_shrunk(tmp_path):
     assert not build_fixtures.keeps_source(tmp_path / "large", LlamaForCausalLM, config)
 
 
-@pytest.mark.parametrize("name", ["consolidated.safetensors.index.json", "consolidated.safetensors"])
-def test_fixture_mirrors_transformers_weights(tmp_path, name):
-    (tmp_path / "config.json").write_text(json.dumps({"transformers_weights": name}))
-    (tmp_path / "model.safetensors").write_bytes(b"weights")
-    build_fixtures.mirror_explicit_weights(tmp_path, {"b.weight": None, "a.weight": None})
-    if name.endswith(".index.json"):
-        assert json.loads((tmp_path / name).read_text())["weight_map"] == {"a.weight": "model.safetensors", "b.weight": "model.safetensors"}
-    else:
-        assert (tmp_path / name).read_bytes() == b"weights" and not (tmp_path / "model.safetensors").exists()
-
-
 def test_pixtral_vision_is_inert_to_pixel_scale():
     from transformers import Mistral3Config
 

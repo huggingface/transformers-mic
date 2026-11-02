@@ -255,7 +255,9 @@ not memory:
   videos=, audio= (audios= raises). For a chat-template VLM, render the prompts
   with processor.apply_chat_template(messages, add_generation_prompt=True,
   tokenize=False), then call processor(text=texts, images=images, ...); passing
-  images= to apply_chat_template(tokenize=True) raises "multiple values".
+  images= to apply_chat_template(tokenize=True) raises "multiple values". Pass
+  exactly one image per image placeholder: an extra image for a text-only prompt
+  raises "Image features and image tokens do not match" (Mistral-Large-4).
 - Pass audio as a list of 1-D float NumPy arrays: some feature extractors (CLAP)
   read a list of torch tensors as one unbatched clip and allocate tens of GB. A
   fusion extractor (CLAP, enable_fusion) marks a random clip "longer" when none
