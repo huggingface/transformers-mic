@@ -125,7 +125,8 @@ def failure_details(log, command=()):
 PRE_CONTRACT_PHASES = (
     "Inspect checkpoint",
     "Load the small source checkpoint unchanged",
-    "Initialize slim fixture",
+    "Initialize fixture",
+    "Initialize slim fixture",  # the phase name before 2026-11-02
 )
 
 
@@ -216,6 +217,8 @@ def propose(args, workspace, stage, log, folder, state, save, command=()):
             model=args.llm_model,
             provider=args.provider,
             bill_to=args.bill_to,
+            # Greedy first (this attempt is already recorded); a second repair samples.
+            temperature=0.0 if len(state.get("repairs", [])) <= 1 else 0.7,
         )
         # A repair cannot rename the contract; the model often re-derives the
         # name from the checkpoint id (Qwen3-0.6B), which the plan schema rejects.

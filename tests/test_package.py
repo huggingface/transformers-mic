@@ -635,6 +635,8 @@ def test_planner_context_names_one_parameter_per_layer_kind():
              "model.layers.2.mlp.experts.down_proj", "lm_head.weight"}
     assert commands.names_per_layer_kind(names) == [
         "lm_head.weight", "model.layers.0.mlp.down_proj.weight", "model.layers.1.mlp.experts.down_proj"]
+    assert commands.names_per_layer_kind(names, pattern=True) == [
+        "lm_head.weight", "model.layers.N.mlp.down_proj.weight", "model.layers.N.mlp.experts.down_proj"]
 
 
 def test_update_keeps_fixture_pin_and_old_source(workspace, monkeypatch):
@@ -1691,10 +1693,10 @@ def test_create_rejects_plain_fences_and_float16_loads():
     commands.check_float16_load({"usage": large}, {"torch_dtype": "float16"}, 8_000_000_000)
     with pytest.raises(ValueError, match="dtype=torch.bfloat16"):  # Audio Flamingo 3: stored float32
         commands.check_float16_load({"usage": usage}, {"dtype": "float32"}, 8_000_000_000)
-    # A fixtures-only contract loads only its slim fixture.
+    # A fixtures-only contract loads only its fixture.
     huge = {"parameters": 1_026_879_376_368, "fixtures_only": True}
     commands.check_float16_load({"usage": usage}, {"dtype": "bfloat16"}, commands.loaded_parameters(huge))
-    # Above GPU_PARAMETER_LIMIT only the slim fixture is measured, fixtures-only or not.
+    # Above GPU_PARAMETER_LIMIT only the fixture is measured, fixtures-only or not.
     assert commands.loaded_parameters({**huge, "fixtures_only": False}) is None
     assert commands.loaded_parameters({"parameters": 8_000_000_000, "fixtures_only": False}) == 8_000_000_000
 
@@ -1719,3 +1721,54 @@ def test_create_rejects_a_loss_built_only_from_no_grad_outputs():
     # A constant target computed under no_grad is fine.
     target = fresh.replace("loss = ce(logits, labels)", "loss = ce(logits, features)")
     commands.check_loss_has_gradients({"usage": target})
+
+
+def test_nearest_contract_prefers_shared_structure(monkeypatch, tmp_path):
+    from transformers_mic import examples
+
+    configs = {
+        "org/llama": {"architectures": ["LlamaForCausalLM"], "model_type": "llama"},
+        "org/mistral3": {"architectures": ["Mistral3ForConditionalGeneration"], "model_type": "mistral3",
+                         "vision_config": {"model_type": "pixtral"}, "text_config": {"model_type": "ministral3"}},
+        "org/bert": {"architectures": ["BertForMaskedLM"], "model_type": "bert"},
+    }
+
+    def download(repo, filename, revision=None):
+        path = tmp_path / repo.replace("/", "--") / filename
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if filename == "config.json":
+            path.write_text(json.dumps(configs[repo]))
+        elif filename == "integration.json":
+            path.write_text(json.dumps({"integrations": {"transformers": {"entry_point": "usage.md"}}}))
+        else:
+            path.write_text(f"usage of {repo}")
+        return str(path)
+
+    monkeypatch.setattr(examples, "hf_hub_download", download)
+    rows = [("prototypes", name, {"repo": f"{repo}-mic", "revision": "r"}, {repo: "r"})
+            for name, repo in (("Llama", "org/llama"), ("Mistral3", "org/mistral3"), ("BERT", "org/bert"))]
+    for repo in list(configs):
+        configs[f"{repo}-mic"] = configs[repo]
+    large4 = {"architectures": ["MistralLarge4ForConditionalGeneration"], "model_type": "mistral_large4",
+              "vision_config": {"model_type": "pixtral"}, "text_config": {"model_type": "mistral_large4_text"}}
+    plan, reason = examples.nearest_contract(large4, rows=rows)
+    assert plan["name"] == "Mistral3" and "pixtral" in reason
+    plan, reason = examples.nearest_contract({"architectures": ["LlamaForCausalLM"], "model_type": "llama"}, rows=rows)
+    assert plan["name"] == "Llama" and "same architecture" in reason
+    assert examples.nearest_contract({"architectures": ["WhisperModel"], "model_type": "whisper"}, rows=rows) is None
+    monkeypatch.setenv("TMIC_EXAMPLE_SKIP_SELF", "1")
+    # Without its own contract, nothing else here shares Llama's structure.
+    assert examples.nearest_contract(configs["org/llama"], rows=rows, model="org/llama") is None
+
+
+def test_encoder_decoder_calls_need_decoder_inputs():
+    whisper = {"is_encoder_decoder": True, "architectures": ["WhisperForConditionalGeneration"]}
+    usage = "```py runnable:t\nlogits = model(inputs.input_features).logits\n```\n"
+    with pytest.raises(ValueError, match="decoder_input_ids"):
+        commands.check_encoder_decoder_calls({"usage": usage}, whisper)
+    for ok in ("model(inputs.input_features, decoder_input_ids=ids)", "model(x, labels=labels)", "model(**inputs)"):
+        commands.check_encoder_decoder_calls({"usage": f"```py runnable:t\nout = {ok}\n```\n"}, whisper)
+    commands.check_encoder_decoder_calls({"usage": usage}, {"is_encoder_decoder": False})
+    # RT-DETR is an encoder-decoder over pixel_values that builds its own queries.
+    commands.check_encoder_decoder_calls({"usage": usage}, {"is_encoder_decoder": True, "architectures": ["RTDetrForObjectDetection"]})
+

@@ -5,7 +5,7 @@ and reviewed catalog. The `tmic` command creates a working directory for a model
 proposes additional usage paths when needed, and measures expectations there.
 It is an alpha implementation: generated plans still need code review and a
 working model-specific build recipe. New projects use one repository,
-`huggingface-mic/<name>-mic`, for slim weights, the contract, usage and reviewed
+`huggingface-mic/<name>-mic`, for fixture weights, the contract, usage and reviewed
 framework expectations. See [the Hub layout](hub-organization.md).
 
 ## Install
@@ -137,7 +137,7 @@ tmic run org/model --local-only --fixtures-only --no-history --bill-to ''
 and checks them, asking you to review each step. The flags:
 
 - `--local-only`: measure on this machine and stop before any Hub upload.
-- `--fixtures-only`: declare only the slim fixture as a target, so the full
+- `--fixtures-only`: declare only the fixture as a target, so the full
   checkpoint is never loaded.
 - `--no-history`: skip the GitHub history search, so `gh` is not needed.
 - `--bill-to ''`: a new model's draft comes from an LLM through Inference
@@ -375,7 +375,7 @@ available; `tmic auto` still checks factory mappings for a built fixture.
 
 **The order is: real checkpoint → contract → fixture.** You never write a fixture
 first. You start from a real checkpoint id. `create` writes the contract (the
-usage code and manifest), and `build` then derives the slim fixture from that
+usage code and manifest), and `build` then derives the fixture from that
 checkpoint. `build` needs the contract because it accepts weights only after
 the contract's inputs move the outputs (the sensitivity gate).
 
@@ -519,7 +519,7 @@ inventory of past failures, and do not count as regression detection.
 
 ## How was the fixture shrunk?
 
-`tmic shrink` shows whether a slim fixture keeps the spirit of its checkpoint. It
+`tmic shrink` shows whether a fixture keeps the spirit of its checkpoint. It
 builds the source checkpoint and the fixture on the meta device from their configs
 (no weights are downloaded), compares the modules Transformers builds, and writes
 `shrink-<fixture>.html`.
@@ -599,18 +599,40 @@ request names it (`bill_to`), since the Hub has no organization-wide default. Se
 `--bill-to ''` to use your own account's credits. If the organization refuses the
 charge, tmic stops and says so; it never falls back to personal billing.
 
-The planner receives checkpoint config, the manifest schema, and failure
-candidates. It proposes a manifest and runnable usage, stored in `.mic/plan.json`.
-Invalid drafts receive validation feedback for one repair attempt; persistent
-errors stop creation without executing the draft. It cannot generate expected
-numeric values, loosen tolerances, or choose overfit
-weights. Review generated `integration.json` and `usage.md` before running them:
-syntax/schema checks do not sandbox Python. `create` alone does not execute the
-proposed model code; `--build` and `--record` are explicit execution shortcuts.
+The planner receives checkpoint config, the manifest schema, failure candidates,
+one real parameter name per layer kind (layer indices written `N`, since the fixture
+and the checkpoint number layers differently), and an example: the **closest approved
+contract** in the control and prototype fleets. Closeness ranks the same architecture
+class, then the same `model_type`, then shared sub-config types (Mistral-Large-4's
+Pixtral tower → Mistral3), the model family (`deepseek_v32` → `deepseek_v3`), the
+input modality (`input_features`, `pixel_values`, `input_ids`) and the head; tmic
+prints the choice (`planner example: …`) and falls back to BERT when nothing matches
+or the fleet is unreachable. The first draft is greedy (temperature 0), so the same
+inputs give nearly the same draft; retries sample (0.7) so a rejected draft is not
+repeated. It proposes a manifest and runnable usage, stored in `.mic/plan.json`.
+Invalid drafts are returned with the validation error and the draft itself, up to
+three attempts; persistent errors stop creation without executing the draft. It cannot generate expected numeric values, loosen tolerances, or choose overfit weights. Review generated `integration.json` and `usage.md` before running them: syntax/schema checks do not sandbox Python. `create` alone does not execute the proposed model code; `--build` and `--record` are explicit execution shortcuts.
+
+Measure a planner or prompt change with the `planner-eval` workflow, never with a
+single run: it repeats `tmic run --llm` per model with no repairs and no history
+search, hides each model's own approved contract (`TMIC_EXAMPLE_SKIP_SELF=1`), and
+reports create and build pass rates:
+
+```sh
+gh workflow run planner-eval.yml --repo huggingface/transformers-mic --ref <branch> -f repeats=3
+```
+
+To reproduce someone's `tmic run <model>` on a clean cloud runner instead (local-only,
+nothing published; the workspace and the fixture's shrink page are uploaded):
+
+```sh
+gh workflow run tmic-run.yml --repo huggingface/transformers-mic -f model=<org/model>
+gh run download <id> --repo huggingface/transformers-mic -n tmic-shrink
+```
 
 ## Random or overfit?
 
-1. Reuse the existing pinned slim first. A new assertion does not automatically
+1. Reuse the existing pinned fixture first. A new assertion does not automatically
    need new weights: measure and replay it on that fixture.
 2. A fresh random fixture is sufficient if it passes the builder's sensitivity
    and finite-output gates for the proposed usage path.
@@ -675,7 +697,7 @@ by case.
 `export --fleet control` updates the `control/` tables in the shared dataset;
 `--fleet prototypes` updates `prototypes/`. The default is `control`. Each fleet
 is three CSV tables the dataset viewer shows: `contracts.csv` (one row per
-contract and slim model; the row with `contract_sha256` carries the contract and
+contract and fixture; the row with `contract_sha256` carries the contract and
 its checkpoints), `environment.csv` and `known_failures.csv`. tmic converts them
 to and from the JSON lock the runners read, and refuses a lock the tables cannot
 hold exactly. Revisions from before the tables are read from their JSON lock

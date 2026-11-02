@@ -86,7 +86,7 @@ BF16 coverage is developed.
 
 The expanded fleet is fixture-only, with immutable public Hub pins and no
 historical replay. Auto uses explicit Auto classes for BERT/T5/ViT. GPT-OSS's
-slim is dense and does not cover quantized kernels. Some GPU runs used documented
+the fixture is dense and does not cover quantized kernels. Some GPU runs used documented
 model-scoped patches; they do not establish unpatched upstream behavior.
 [Per-model scope, pins and rejections](../experiments/results/prototype-regeneration.json).
 

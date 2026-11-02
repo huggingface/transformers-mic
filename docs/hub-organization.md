@@ -22,16 +22,16 @@ qwen2_5_omni-mic/
 ```
 
 `tmic create` defaults to the `huggingface-mic` organization; `--namespace` overrides
-it. New generated usage and the slim model share a `<name>-mic` Hub identifier.
+it. New generated usage and the fixture share a `<name>-mic` Hub identifier.
 Catalog reuse creates the same layout, including offline creation from the
 bundled templates and reference files.
 
 Each framework's expectations sit beside its usage. `record` writes candidates
 there; `review` uses the same directory. Changed values still require manual review.
-`publish --execute` assembles usage, the selected slim model and reviewed references
+`publish --execute` assembles usage, the selected fixture and reviewed references
 into one Hub commit, then pins both roles. Candidates are excluded. `export` writes
 fleet pins; the reviewed reference files remain in the pinned Hub snapshot.
-A contract covering several slim models can keep separate fixture pins and publish
+A contract covering several fixtures can keep separate fixture pins and publish
 the selected model's umbrella snapshot.
 
 `.mic-repo.json` declares the contract file inventory. The runner verifies that

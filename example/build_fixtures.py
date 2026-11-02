@@ -1,4 +1,4 @@
-"""Build slim fixtures for the contracts in a fleet lock, with the same recipe for every model.
+"""Build fixtures for the contracts in a fleet lock, with the same recipe for every model.
 
     python example/build_fixtures.py                                   # every fixture with a build recipe
     python example/build_fixtures.py --fixture mic-whisper-tiny-slim
@@ -18,7 +18,7 @@ For each fixture in a contract's manifest that has a `build` recipe:
    so the fixture loads in the dtype users of the checkpoint get by default.
    A source of SMALL_SOURCE parameters or fewer is not shrunk: the fixture is
    the checkpoint itself, config and trained weights unchanged (`weights:
-   real`), since it costs no more than a slim fixture and tests trained behaviour.
+   real`), since it costs no more than a fixture and tests trained behaviour.
 3. Copy. Every non-weight file of the source checkpoint (tokenizer,
    processor, generation config) is copied unchanged. A recipe can explicitly
    include a processor asset with a weight-like extension and preserve selected
@@ -95,7 +95,7 @@ NOT_COPIED = {"config.json", "README.md", ".gitattributes"}
 # Config fields that name or date the source rather than describe the model.
 VOLATILE = {"_name_or_path", "transformers_version", "dtype", "torch_dtype", "_commit_hash"}
 GATE_FACTOR = 10
-# Sources at or under this size are kept whole with their trained weights (the median slim fixture is ~9M).
+# Sources at or under this size are kept whole with their trained weights (the median fixture is ~9M).
 SMALL_SOURCE = 20_000_000
 DTYPES = ("float32", "bfloat16", "float16")
 
@@ -716,7 +716,7 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
         model = cls.from_pretrained(run.checkpoint_path(source_repo, revisions[source_repo]), dtype=dtype).eval()
         frozen_hashes = None
     else:
-        report_phase("Initialize slim fixture")
+        report_phase("Initialize fixture")
         torch.manual_seed(recipe["seed"])
         # Initialized in float32 like every other fixture, then cast: the seed gives the same weights in any dtype.
         model = cls._from_config(shrunk_config(source, cls, recipe), dtype=torch.float32).eval().to(dtype)

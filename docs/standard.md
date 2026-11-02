@@ -20,7 +20,7 @@ slow tests stay ([CI integration](slim-models-in-transformers-ci.md)).
 
 ## The standard
 
-1. **One repository per slim model**, owned by Hugging Face, such as
+1. **One repository per fixture**, owned by Hugging Face, such as
    [`huggingface-mic/qwen2_5_omni-mic`](https://huggingface.co/huggingface-mic/qwen2_5_omni-mic).
    Creators' checkpoint repos stay unchanged; each framework reviews its own
    expectations and pins a reviewed snapshot.

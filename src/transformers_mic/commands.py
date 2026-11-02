@@ -268,6 +268,40 @@ def parameter_count(model, revision):
     return total
 
 
+def check_encoder_decoder_calls(plan, config):
+    """An encoder-decoder forward needs decoder inputs; the prompt says so and Whisper
+    drafts still called model(input_features), which raises inside the decoder."""
+    if not config.get("is_encoder_decoder"):
+        return
+    # Speech seq2seq only: Florence-2 and RT-DETR are encoder-decoders that build
+    # their own decoder inputs, and their approved contracts call model(pixel_values).
+    try:
+        import transformers
+
+        cls = getattr(transformers, (config.get("architectures") or [""])[0], None)
+    except Exception:
+        cls = None
+    if getattr(cls, "main_input_name", None) != "input_features":
+        return
+    import ast
+
+    code = "\n".join(re.findall(r"^```py runnable:[^\n]*\n(.*?)^```", plan["usage"], re.M | re.S))
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:  # the build reports real syntax errors
+        return
+    needed = {"decoder_input_ids", "decoder_inputs_embeds", "labels"}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "model":
+            names = {k.arg for k in node.keywords}
+            if None in names or names & needed:  # **inputs may carry them
+                continue
+            raise ValueError(
+                f"line {node.lineno}: model(...) of an encoder-decoder needs decoder inputs; pass "
+                "decoder_input_ids starting from config.decoder_start_token_id, or labels="
+            )
+
+
 def check_partial_training(plan, context):
     """Above ~3B parameters the real checkpoint's training step must freeze most of it."""
     count = loaded_parameters(context) or 0
@@ -531,13 +565,18 @@ def check_label_arguments(plan, config):
         )
 
 
-def names_per_layer_kind(real, limit=80):
+def names_per_layer_kind(real, limit=80, pattern=False):
     """One loaded parameter name per layer kind, not only block 0: Mistral-Large-4's
-    block 0 is its one dense layer, so a block-0 list hides every MoE expert parameter."""
+    block 0 is its one dense layer, so a block-0 list hides every MoE expert parameter.
+
+    pattern=True writes layer indices as N: the slim fixture keeps other indices than
+    the checkpoint (DeepSeek-V3.2's first MoE layer is 3 there and 1 in the fixture),
+    so a contract that copied a real index failed with a KeyError on the fixture.
+    """
     kinds = {}
     for n in sorted(real, key=lambda n: [int(t) if t.isdigit() else t for t in n.split(".")]):
         kinds.setdefault(re.sub(r"\.\d+\.", ".N.", n), n)
-    return sorted(kinds.values())[:limit]
+    return sorted(kinds if pattern else kinds.values())[:limit]
 
 
 def loaded_parameter_names(config):
@@ -717,6 +756,7 @@ def propose_valid(context, args, model, fixture, old=None):
                 model=args.llm_model,
                 provider=args.provider,
                 bill_to=args.bill_to,
+                temperature=0.0 if attempt == 0 else 0.7,
             )
             if isinstance(plan.get("name"), str):  # "Qwen3.5-0.8B" is a slug away from valid
                 plan["name"] = re.sub(r"[^A-Za-z0-9_-]", "-", plan["name"])
@@ -736,6 +776,7 @@ def propose_valid(context, args, model, fixture, old=None):
                 check_model_classes(plan, context["config"])
                 check_label_arguments(plan, context["config"])
                 check_parameter_names(plan, context["config"])
+                check_encoder_decoder_calls(plan, context["config"])
             check_partial_training(plan, context)
             return plan, llm
         except (ValueError, jsonschema.ValidationError) as exc:
@@ -891,7 +932,7 @@ def create(args):
         real = loaded_parameter_names(config)
         if real:
             # Drafts guessed dense names on MoE layers (Mistral-Large-4); give the real ones.
-            context["parameter_names"] = names_per_layer_kind(real)
+            context["parameter_names"] = names_per_layer_kind(real, pattern=True)
         sample = resources.catalog() / "hub/BERT-integration"
         context["example_plan"] = {
             "name": "BERT",
@@ -900,6 +941,17 @@ def create(args):
             "rationale": "Use the model's public API and measure expectations by execution.",
             "historical_candidates": [],
         }
+        context["example_reason"] = "generic example: no closer approved contract"
+        try:
+            from . import examples
+
+            nearest = examples.nearest_contract(config, model=args.model)
+        except Exception as error:  # an unreachable fleet keeps the generic example
+            print(f"tmic: closest-contract lookup failed ({error}); using the BERT example", file=sys.stderr)
+            nearest = None
+        if nearest:
+            context["example_plan"], context["example_reason"] = nearest
+            print(f"tmic: planner example: {context['example_reason']}", file=sys.stderr)
         plan, llm = propose_valid(context, args, args.model, fixture)
         manifest = plan["manifest"]
         if args.name:
@@ -909,12 +961,12 @@ def create(args):
         if args.fixtures_only:
             manifest["integrations"]["transformers"]["targets"] = ["fixtures"]
         if dropped := fixture_runs_anywhere(manifest):
-            print(f"tmic: the slim fixture runs anywhere: dropped its {', '.join(dropped)}", file=sys.stderr)
+            print(f"tmic: the fixture runs anywhere: dropped its {', '.join(dropped)}", file=sys.stderr)
         for repo in keep_large_checkpoints_off_cpu(
             manifest, {args.model: context["parameters"]}
         ):
             if (context["parameters"] or 0) > GPU_PARAMETER_LIMIT:
-                print(f"tmic: {repo} is above 10B parameters and does not fit the GPU: only the slim fixture is measured", file=sys.stderr)
+                print(f"tmic: {repo} is above 10B parameters and does not fit the GPU: only the fixture is measured", file=sys.stderr)
             else:
                 print(f"tmic: {repo} is above 1B parameters: measuring it on GPU, in bfloat16 only", file=sys.stderr)
         workspace.from_plan(
