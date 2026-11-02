@@ -592,6 +592,24 @@ def test_planner_repairs_invented_parameter_names(workspace, monkeypatch):
     assert "attention.self.query.weight" in error
 
 
+def test_parameter_names_accept_suffixes_and_hint_every_layer_kind():
+    pytest.importorskip("torch")
+    from transformers import DeepseekV3Config
+
+    # Block 0 dense, block 1 MoE: the shape of Mistral-Large-4.
+    config = DeepseekV3Config(
+        vocab_size=32, hidden_size=16, intermediate_size=16, moe_intermediate_size=8,
+        num_hidden_layers=2, num_attention_heads=2, num_key_value_heads=2,
+        n_routed_experts=2, num_experts_per_tok=1, first_k_dense_replace=1,
+        q_lora_rank=8, kv_lora_rank=8, qk_rope_head_dim=4, qk_nope_head_dim=4, v_head_dim=4,
+    ).to_dict()
+    plan = {"manifest": {"architecture": "DeepseekV3ForCausalLM"}}
+    commands.check_parameter_names({**plan, "usage": 'next(n for n in names if n.endswith("mlp.gate_proj.weight"))'}, config)
+    with pytest.raises(ValueError) as error:
+        commands.check_parameter_names({**plan, "usage": '"model.layers.1.mlp.down_proj.weight"'}, config)
+    assert "model.layers.1.mlp.experts." in str(error.value)
+
+
 def test_update_keeps_fixture_pin_and_old_source(workspace, monkeypatch):
     plan = {
         "name": "BERT",

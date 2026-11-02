@@ -546,7 +546,12 @@ def check_parameter_names(plan, config):
             }
     except Exception:  # inspection is advisory; the build still runs the contract
         return
-    missing = sorted(names - real)
+    # The prompt asks for suffix lookups (n.endswith("mlp.gate_proj.weight")): a
+    # dotted suffix of a real name is a real name. Mistral-Large-4's draft failed
+    # three times on this until 2026-11-02.
+    missing = sorted(
+        name for name in names - real if not any(r.endswith("." + name) for r in real)
+    )
     if missing:
         import difflib
 
@@ -558,10 +563,12 @@ def check_parameter_names(plan, config):
             return (difflib.get_close_matches(name, same, n=1, cutoff=0.0) or ["?"])[0]
 
         closest = {name: nearest(name) for name in missing}
-        # The first block and the non-repeated modules show the real naming scheme.
-        hints = sorted(n for n in real if ".0." in n or not re.search(r"\.\d+\.", n))[
-            :60
-        ]
+        # One name per layer kind, not only block 0: Mistral-Large-4's block 0 is its
+        # one dense layer, so a block-0 list hides every MoE expert parameter.
+        kinds = {}
+        for n in sorted(real, key=lambda n: [int(t) if t.isdigit() else t for t in n.split(".")]):
+            kinds.setdefault(re.sub(r"\.\d+\.", ".N.", n), n)
+        hints = sorted(kinds.values())[:80]
         raise ValueError(
             f"Usage names parameters {cls.__name__} does not have after loading "
             f"(checkpoint keys are remapped on load). Closest loaded names: {closest}; "
