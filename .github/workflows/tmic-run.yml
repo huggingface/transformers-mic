@@ -85,6 +85,21 @@ jobs:
           status=$(python -c "import json;print(json.load(open('result.json')).get('status'))")
           echo "### tmic run $MODEL: $status (exit $code)" >> "$GITHUB_STEP_SUMMARY"
           [ "$code" = 0 ]
+      - name: Fixture report
+        if: always()
+        run: |
+          python - <<'PY'
+          import glob, json
+          for build in glob.glob("work/run/.mic/artifacts/*/*/build.json"):
+              folder = build.rsplit("/", 1)[0]
+              b, c = json.load(open(build)), json.load(open(folder + "/config.json"))
+              text = c.get("text_config", c)
+              print("fixture", folder, "parameters", b["parameters"], "weights", b.get("weights"), "missing", b["missing_parameters"])
+              print("layers", text.get("num_hidden_layers"), {k: v for k, v in text.items() if isinstance(v, list) and len(v) == text.get("num_hidden_layers")})
+              print("scalars", {k: text.get(k) for k in ("first_k_dense_replace", "index_topk", "n_routed_experts", "num_experts_per_tok") if k in text})
+              print("gate", json.dumps(b.get("gate"))[:1500])
+              print("health", json.dumps(b.get("numeric_health")))
+          PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:

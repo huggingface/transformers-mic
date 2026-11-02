@@ -76,11 +76,35 @@ def derived_types(config):
             return list(types)
     return None
 
+# Per-layer lists whose values name another layer (Mistral-Large-4: layer 39 reads
+# layer 35's KV cache). A kept layer keeps its source, and the values are re-indexed.
+LAYER_REFERENCES = ("kv_source_layers",)
+
+
+def categorical_lists(config):
+    """Per-layer flags beyond layer_types: Mistral-Large-4 marks NoPE layers
+    (no_rope_layers 0/1), shared top-k indexers (indexer_types) and MLP kinds there.
+    Numeric lists (OpenELM's per-layer head counts) are widths, not kinds."""
+    lists = {}
+    for key, value in config.to_dict().items():
+        if key == "layer_types" or key in LAYER_REFERENCES:
+            continue
+        if isinstance(value, list) and len(value) == config.num_hidden_layers and all(
+            isinstance(v, (str, bool)) or v in (0, 1) for v in value
+        ):
+            lists[key] = value
+    return lists
+
+
 def layer_kind(config, i):
     types = getattr(config, "layer_types", None) or derived_types(config)
     shared = getattr(config, "num_kv_shared_layers", 0)
     kv_shared = i >= config.num_hidden_layers - shared if shared else False
-    return (types[i] if types else None, is_sparse(config, i), kv_shared)
+    flags = tuple((key, value[i]) for key, value in sorted(categorical_lists(config).items()))
+    references = tuple(
+        getattr(config, key)[i] != i for key in LAYER_REFERENCES if isinstance(getattr(config, key, None), list)
+    )
+    return (types[i] if types else None, is_sparse(config, i), kv_shared, flags, references)
 
 
 def pattern_indices(config):
@@ -90,7 +114,19 @@ def pattern_indices(config):
         if kind not in seen:
             seen.add(kind)
             kept.append(i)
+    for key in LAYER_REFERENCES:
+        sources = getattr(config, key, None)
+        if isinstance(sources, list) and len(sources) == config.num_hidden_layers:
+            kept = sorted(set(kept) | {sources[i] for i in kept})
     return kept
+
+
+def reindex_references(values, config, kept):
+    """Point layer-reference lists at the kept layers' new positions."""
+    for key in LAYER_REFERENCES:
+        sources = getattr(config, key, None)
+        if isinstance(sources, list) and len(sources) == config.num_hidden_layers:
+            values[key] = [kept.index(sources[i]) for i in kept]
 
 
 def shrink_by_pattern(config, overrides):
@@ -100,6 +136,7 @@ def shrink_by_pattern(config, overrides):
         # Per-layer lists follow the kept layers.
         if isinstance(value, list) and len(value) == config.num_hidden_layers:
             values[key] = [value[i] for i in kept]
+    reindex_references(values, config, kept)
     if getattr(config, "first_k_dense_replace", None) is not None:
         values["first_k_dense_replace"] = sum(
             i < config.first_k_dense_replace for i in kept
