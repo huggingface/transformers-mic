@@ -1218,6 +1218,24 @@ def test_transformers_weights_must_be_a_local_safetensors_name(tmp_path, name):
         inspection.explicit_weights(tmp_path)
 
 
+def test_checkpoint_keys_name_an_unknown_weight_layout(monkeypatch, tmp_path):
+    from transformers_mic import inspection
+
+    class Api:
+        def file_exists(self, repo, filename, revision=None):
+            return False
+
+        def get_repo_discussions(self, repo, **filters):
+            return []
+
+        def list_repo_files(self, repo, revision=None):
+            return ["config.json", "weights-00001.safetensors", "weights.index.json"]
+
+    monkeypatch.setattr(inspection, "HfApi", Api)
+    with pytest.raises(ValueError, match="weights-00001.safetensors"):
+        inspection.checkpoint_keys("org/model", "a" * 40, tmp_path)
+
+
 def test_visible_usage_never_shows_runner_plumbing():
     blocks = [
         "model = AutoModel.from_pretrained(model_id).to(device)\n"

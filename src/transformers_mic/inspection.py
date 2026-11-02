@@ -82,6 +82,18 @@ def checkpoint_keys(repo, revision, source):
         converted = conversion_pr_keys(api, repo)
         if converted:
             return converted
+        if not api.file_exists(repo, "pytorch_model.bin", revision=revision):
+            # Fail on the layout, not on a 404 for a guessed file name.
+            weights = sorted(
+                name
+                for name in api.list_repo_files(repo, revision=revision)
+                if name.endswith((".safetensors", ".bin", ".index.json"))
+            )
+            raise ValueError(
+                f"{repo}@{revision[:12]}: no model.safetensors(.index.json), "
+                "pytorch_model.bin(.index.json) or config.json transformers_weights; "
+                f"weight files: {weights[:8]}"
+            )
         return binary_keys(repo, revision)
     return set(
         api.parse_safetensors_file_metadata(
