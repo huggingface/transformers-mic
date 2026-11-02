@@ -119,6 +119,39 @@ There is no anonymous endpoint or production auth bypass. See
 
 ## Automated mode
 
+### Try it locally
+
+Everything runs on your machine and nothing is uploaded. Use your source
+checkpoint in place of `org/model`:
+
+```sh
+pip install "transformers-mic[runtime] @ git+https://github.com/huggingface/transformers-mic.git" \
+  "hf-doc-builder @ git+https://github.com/huggingface/doc-builder.git"
+hf auth login
+tmic run org/model --local-only --fixtures-only --no-history --bill-to ''
+```
+
+`tmic run` drafts the contract, builds the fixture, records candidate baselines
+and checks them, asking you to review each step. The flags:
+
+- `--local-only`: measure on this machine and stop before any Hub upload.
+- `--fixtures-only`: declare only the slim fixture as a target, so the full
+  checkpoint is never loaded.
+- `--no-history`: skip the GitHub history search, so `gh` is not needed.
+- `--bill-to ''`: a new model's draft comes from an LLM through Inference
+  Providers ([When the LLM is used](#when-the-llm-is-used)); this bills your own
+  account instead of the `huggingface` organization. A model in the bundled
+  catalog makes no LLM call.
+
+Repeat the same command to resume. The workspace is created in
+`work/mic/org--model` under the current directory; read `integration.json` and
+`integrations/transformers/usage.md` there, since the usage is executable Python
+that nothing sandboxes. Progress, prompts and repairs below work the same way
+locally. The cloud, dashboard and GitHub options in this document are for
+maintainers who publish to `huggingface-mic`.
+
+### Cloud baselines and publication (maintainers)
+
 ```sh
 tmic run org/model
 ```
