@@ -14,6 +14,10 @@ their CPU job on an AMD EPYC 7R13 without `avx512_bf16`/`amx_bf16`, so their
 bfloat16 cases were measured as `cpu-x86_64` and refused. tmic now moves such a
 collection aside (`<source>.wrong-hardware-N`), so answering *retry* dispatches
 a new run instead of re-reading the old one.
+The CPU job also checks `/proc/cpuinfo` before measuring: when a declared
+bfloat16 (or float16) variant needs flags the host lacks, it records `host_error`
+in its collection, fails, and cancels the run so the CUDA job stops too. A wrong
+host then costs the install and a minute, not a full CPU+G5 measurement.
 
 The [direct GitHub transport](cli.md#temporary-test-without-dashboard-oauth)
 uses the caller's existing GitHub CLI identity instead of dashboard authentication;

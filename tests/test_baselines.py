@@ -809,3 +809,35 @@ def test_worker_leaves_excluded_contracts_out_of_the_matrix(tmp_path, monkeypatc
     assert report["request"]["exclude"] == ["Broken"]
     assert report["expected_cases"] == ["control/Demo/demo-mic/default"]
     assert measured and not any("broken" in " ".join(map(str, c)) for c in measured)
+
+
+def test_cpu_host_without_native_bfloat16_is_refused_before_measuring(
+    tmp_path, monkeypatch
+):
+    monkeypatch.setattr(baseline_worker.platform, "machine", lambda: "x86_64")
+    ice_lake = tmp_path / "ice_lake"
+    ice_lake.write_text("flags : fpu avx2 avx512f avx512_vnni\n")
+    granite = tmp_path / "granite"
+    granite.write_text("flags : fpu avx2 avx512f avx512_bf16 amx_bf16 amx_tile\n")
+    error = baseline_worker.missing_native_support({"bfloat16"}, ice_lake)
+    assert "cpu-x86_64-bf16" in error and "retry" in error
+    assert baseline_worker.missing_native_support({"bfloat16"}, granite) is None
+    # float32-only collections run anywhere.
+    assert baseline_worker.missing_native_support(set(), ice_lake) is None
+    assert "cpu-x86_64-fp16" in baseline_worker.missing_native_support(
+        {"float16"}, granite
+    )
+    monkeypatch.setattr(baseline_worker.platform, "machine", lambda: "arm64")
+    assert baseline_worker.missing_native_support({"bfloat16"}, ice_lake) is None
+
+
+def test_failure_summary_reports_the_host_error(tmp_path):
+    from transformers_mic import github_baselines
+
+    write(
+        tmp_path / "artifacts/cpu/collection.json",
+        {"cases": [], "host_error": "This CPU runner cannot record bfloat16"},
+    )
+    assert "cpu: This CPU runner cannot record bfloat16" in (
+        github_baselines.failure_summary(tmp_path)
+    )
