@@ -33,7 +33,10 @@ jobs:
       - name: tmic run
         run: |
           set +e
-          tmic run mistralai/Mistral-Large-4-1T-A52B --mode agent --local-only \
+          # The CI read token cannot bill Inference Providers: plan offline.
+          tmic create mistralai/Mistral-Large-4-1T-A52B --out work/mistral --offline 2>&1 | tail -40
+          echo "create exit ${PIPESTATUS[0]}"
+          tmic run mistralai/Mistral-Large-4-1T-A52B --mode agent --local-only --bill-to '' \
             --baseline-execution local --out work/mistral \
             --transformers-checkout "$RUNNER_TEMP/transformers" > result.json
           code=$?
