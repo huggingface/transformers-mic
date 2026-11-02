@@ -33,14 +33,21 @@ jobs:
       - name: tmic run
         run: |
           set +e
-          # The CI read token cannot bill Inference Providers: plan offline.
-          tmic create mistralai/Mistral-Large-4-1T-A52B --out work/mistral --offline 2>&1 | tail -40
-          echo "create exit ${PIPESTATUS[0]}"
-          tmic run mistralai/Mistral-Large-4-1T-A52B --mode agent --local-only --bill-to '' \
-            --baseline-execution local --out work/mistral \
-            --transformers-checkout "$RUNNER_TEMP/transformers" > result.json
-          code=$?
-          echo "exit $code"; cat result.json
+          args="mistralai/Mistral-Large-4-1T-A52B --mode agent --local-only --bill-to '' --baseline-execution local --out work/mistral --transformers-checkout $RUNNER_TEMP/transformers"
+          tmic run $args > result.json; echo "exit $?"
+          for i in $(seq 12); do
+            cut -c1-1500 result.json; echo
+            python - <<'PY' || break
+          import json, sys
+          r = json.load(open("result.json"))
+          q = r.get("pending_question")
+          if not q or q["kind"] == "retry":
+              sys.exit(1)
+          json.dump({"question_id": q["question_id"], "answer": "approve", "reason": "cloud probe, local-only"}, open("answer.json", "w"))
+          PY
+            tmic run $args --answer answer.json > result.json; echo "exit $?"
+          done
+          cut -c1-3000 result.json; echo
           for f in $(find work/mistral -path '*logs*' -name '*.log'); do echo "== $f"; tail -80 "$f"; done
           find work/mistral -name build.json -exec sh -c 'echo "== $1"; python -c "import json,sys;d=json.load(open(sys.argv[1]));print(json.dumps({k:d.get(k) for k in (\"fixture\",\"serialization\",\"missing_parameters\",\"parameters\",\"sha256\")},indent=1))" "$1"' _ {} \;
           find work/mistral -name '*.index.json' -exec sh -c 'echo "== $1"; head -c 600 "$1"' _ {} \;
