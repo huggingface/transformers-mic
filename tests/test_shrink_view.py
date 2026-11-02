@@ -77,3 +77,31 @@ def test_a_barely_shrunk_fixture_and_a_test_checkpoint_source_are_findings():
     assert not any("keeps" in f for f in shrink_view.verdict(result | {"build_shrink": "none"}))
     result["source"] = "optimum-intel-internal-testing/tiny-random-demo@" + "c" * 40
     assert any("is a test checkpoint" in f for f in shrink_view.verdict(result))
+
+
+def test_model_tester_values_and_advisory_findings():
+    from transformers_mic import tester
+
+    code = """
+class FooModelTester(VLMModelTester):
+    def __init__(self, parent, batch_size=13, hidden_size=32, n_routed_experts=8, **kwargs):
+        kwargs.setdefault("index_topk", 4)
+        kwargs.setdefault("no_rope_layers", [1, 0, 1, 0])
+        kwargs.setdefault("num_hidden_layers", 4)
+        kwargs.setdefault("depths", [1, 2])
+        self.kv_lora_rank = 16
+        self.parent = parent
+"""
+    found = tester.values(code)
+    assert found["no_rope_layers"] == [1, 0, 1, 0] and found["kv_lora_rank"] == 16 and found["hidden_size"] == 32
+    original = {"text_config": {"kv_lora_rank": 512, "index_topk": 2048, "no_rope_layers": [1, 1, 1, 0]}}
+    shrunk = {"text_config": {"kv_lora_rank": 512, "index_topk": 2, "no_rope_layers": [1, 1], "hidden_size": 64, "depths": [1, 1]}}
+    notes = tester.compare(found, original, shrunk)
+    assert notes == [
+        "kv_lora_rank kept at the checkpoint's 512; the model tester uses 16",
+        "no_rope_layers: the model tester covers 0, the fixture has only 1",
+    ]
+    # A stage list is not a kind; a fixture kept whole has nothing to shrink.
+    assert tester.compare(found, original, shrunk, kept_whole=True) == [
+        "no_rope_layers: the model tester covers 0, the fixture has only 1"]
+
