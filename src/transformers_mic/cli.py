@@ -452,7 +452,7 @@ No Git commit or framework PR is created automatically.""",
     )
     shrink = sub.add_parser(
         "shrink",
-        help="Show how the slim fixture was shrunk from its source checkpoint (HTML)",
+        help="Show how the fixture was shrunk from its source checkpoint (HTML)",
     )
     shrink.add_argument(
         "fixture",

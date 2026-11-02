@@ -125,7 +125,8 @@ def failure_details(log, command=()):
 PRE_CONTRACT_PHASES = (
     "Inspect checkpoint",
     "Load the small source checkpoint unchanged",
-    "Initialize slim fixture",
+    "Initialize fixture",
+    "Initialize slim fixture",  # the phase name before 2026-11-02
 )
 
 

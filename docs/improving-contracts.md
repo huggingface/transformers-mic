@@ -83,7 +83,7 @@ On the post-round-one backfill (2026-10-08), `find_misses.py --ref origin/main` 
 | Covered | #47150, #46795 (July) | Whisper `generate(max_length=N)` miscounted the forced prefix; `max_length=1` raised | fixture and checkpoint |
 | Covered | #48000 (2026-08-17) | `WhisperForCausalLM` assistant raised `UnboundLocalError` | fixture and checkpoint |
 | Initially checkpoint only; fixture follow-up caught it | #48028 (2026-08-19) | Wrong positions for left-padded previous-segment prompts | both fixtures with controlled unequal first segments, added 2026-10-11 ([follow-up](evidence.md#whisper-left-padded-previous-segment-prompts)) |
-| Not visible in the contract | #48108 | Assisted decoding re-applies beginning-token suppression | real speech + encoder-decoder assistant catches it; neither slim fixture does ([follow-up](evidence.md#whisper-assisted-decoding-suppression)) |
+| Not visible in the contract | #48108 | Assisted decoding re-applies beginning-token suppression | real speech + encoder-decoder assistant catches it; neither fixture does ([follow-up](evidence.md#whisper-assisted-decoding-suppression)) |
 | Parked | #48238 | T5 `lm_head` tying without `shared.weight` (madlad400): needs such a target | — |
 | Out of path | #47682, #47684 (spelling), #45806 (decorator order), #47459, #47946 (GPT-2 modeling; SmolLM shares only the tokenizer), #49006 (MPS), #47921 (quantized CLIP), #47440 (multilingual `set_target_lang`) | — | — |
 

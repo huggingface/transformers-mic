@@ -1,6 +1,6 @@
 # MICs: evidence so far
 
-Results from local experiments, the regression replay, the shadow backfill over Transformers `main`, and the job in Transformers' PR CI. Fixture experiments: [Small fixtures](fixtures.md); mechanics: [technical design](design.md).
+Results from local experiments, the regression replay, the shadow backfill over Transformers `main`, and the job in Transformers' PR CI. Fixture experiments: [Fixtures](fixtures.md); mechanics: [technical design](design.md).
 
 Most of these numbers come from the first fleet of six to eight contracts, measured in October 2026, and each section gives its date and Transformers build. The fleet has grown since: on 2026-11-02 the [fleet dataset](https://huggingface.co/datasets/huggingface-mic/transformers-fleet) held 6 control contracts and 180 prototype contracts. Current coverage is in the [coverage space](https://huggingface.co/spaces/huggingface-mic/mic-coverage).
 
@@ -22,7 +22,7 @@ Fixture names such as `mic-umt5-small-slim` and `hf-internal-testing/...` reposi
 
 **Fixtures, baselines, cost**
 
-- **Fixtures:** synthetic-fault detection, weight choice, and the architecture sweep are in [Small fixtures](fixtures.md#tldr). Publish them, don't rebuild: x86 rebuilds differed from the M5 bytes.
+- **Fixtures:** synthetic-fault detection, weight choice, and the architecture sweep are in [Fixtures](fixtures.md#evidence-from-building-the-recipe). Publish them, don't rebuild: x86 rebuilds differed from the M5 bytes.
 - **Baselines are per platform and dtype; fixtures are shared** ([GPU](#on-gpu), [bfloat16](#bfloat16-on-cpu)). So split, 16 targets × 3 variants reproduced at `1e-4` on A10G ([numbers](../experiments/results/runner.json)); ten benign changes raised no false alarm.
 - **Batching is the cost lever:** eight fixture checks take 4.9 s in one process vs 27.4 s one per process (Mac); 13.1 s vs 81.1 s (GPU runner).
 
@@ -47,11 +47,11 @@ Two [walkthroughs](agent-walkthrough/README.md), same prompt, ARM Mac, no MIC: p
 
 ### On CPU
 
-**Dependency upgrades: 0 flags in 770 checks** ([stability.json](../experiments/results/stability.json)). Baselines were recorded with torch 2.11.0, tokenizers 0.23.1, numpy 1.26.4 and Pillow 12.2.0, then re-checked with one upgrade at a time (torch 2.12.1/2.13.0/2.14.1, tokenizers 0.23.2, numpy 2.2.6, Pillow 12.3.0), under eager and SDPA. The largest drift was 1.3e-5 on slim fixtures and 8.4e-5 on real checkpoints, so real checkpoints sit closer to the `1e-4` tolerance.
+**Dependency upgrades: 0 flags in 770 checks** ([stability.json](../experiments/results/stability.json)). Baselines were recorded with torch 2.11.0, tokenizers 0.23.1, numpy 1.26.4 and Pillow 12.2.0, then re-checked with one upgrade at a time (torch 2.12.1/2.13.0/2.14.1, tokenizers 0.23.2, numpy 2.2.6, Pillow 12.3.0), under eager and SDPA. The largest drift was 1.3e-5 on fixtures and 8.4e-5 on real checkpoints, so real checkpoints sit closer to the `1e-4` tolerance.
 
-**Cost per check:** experimental fixture builds, a fresh process per check, three runs, warm cache ([cost.json](../experiments/results/cost.json)). "Work" is input preparation, loading, first inference, comparison and, for slim fixtures, the training probe. Imports add about 2.4 s per process. These builds predate the published fixtures, whose sizes differ: the published Wav2Vec2 fixture has 4.3M parameters, about 17 MB.
+**Cost per check:** experimental fixture builds, a fresh process per check, three runs, warm cache ([cost.json](../experiments/results/cost.json)). "Work" is input preparation, loading, first inference, comparison and, for fixtures, the training probe. Imports add about 2.4 s per process. These builds predate the published fixtures, whose sizes differ: the published Wav2Vec2 fixture has 4.3M parameters, about 17 MB.
 
-| Family | Slim work | Real work | Slim weights | Real weights |
+| Family | Fixture work | Real work | Fixture weights | Real weights |
 | --- | ---: | ---: | ---: | ---: |
 | SmolLM | 0.27 s | 0.25 s | 13 MB¹ | 538 MB |
 | CLIP | 0.40 s | 0.41 s | 14 MB | 605 MB |
@@ -63,9 +63,9 @@ Two [walkthroughs](agent-walkthrough/README.md), same prompt, ARM Mac, no MIC: p
 
 ¹ float32 build; the bfloat16 fixture is 6.1 MB.
 
-- **Process start dominates**, so run many contracts per process. On small checkpoints that are already cached, a slim fixture saves little local time.
-- **The savings are in download and size:** slim weights are 10–1,300× smaller. The slow tests for these families load about 144 GB of weights, most of which can't run on CPU.
-- **Memory:** 0.5–1.3 GB peak RSS for slim fixtures (mostly the framework itself), 0.7–2 GB for real checkpoints.
+- **Process start dominates**, so run many contracts per process. On small checkpoints that are already cached, a fixture saves little local time.
+- **The savings are in download and size:** fixture weights are 10–1,300× smaller. The slow tests for these families load about 144 GB of weights, most of which can't run on CPU.
+- **Memory:** 0.5–1.3 GB peak RSS for fixtures (mostly the framework itself), 0.7–2 GB for real checkpoints.
 
 ### bfloat16 on CPU
 
@@ -167,13 +167,13 @@ One run on `aws-g5-4xlarge-cache` (A10G, torch 2.14.0+cu130), Transformers `8625
 | CPU or GPU, float32 | bfloat16, SDPA | 42 | 6 | 2.3 |
 | CPU or GPU, float32 | float16, SDPA | 42 | 1 | 0.30 |
 
-- **Fixtures run unchanged on GPU**; real checkpoints use most of the margin (6.6e-5), slim stays near 1e-5.
+- **Fixtures run unchanged on GPU**; real checkpoints use most of the margin (6.6e-5), the fixture stays near 1e-5.
 - **CPU baselines carry over only without convolutions:** SmolLM, BERT, T5 within 5e-5; CLIP, Whisper, Wav2Vec2 drift 1e-3–3e-2. The cause is cuDNN's default TF32 ([run](https://github.com/huggingface/transformers-mic/actions/runs/37512092438) with it off: 0 of 28 flagged). Users get TF32, so record GPU baselines.
 - **Lower precision needs its own baseline:** bfloat16 changed generated outputs for real SmolLM and five fixtures; float32 tokens and labels never changed.
 
 **GPU cost:** float32, SDPA, three fresh processes, weights cached.
 
-| Family | Slim work | Real work | Peak GPU memory, slim | Peak GPU memory, real (float32 / bfloat16) |
+| Family | Fixture work | Real work | Peak GPU memory, fixture | Peak GPU memory, real (float32 / bfloat16) |
 | --- | ---: | ---: | ---: | ---: |
 | SmolLM | 1.0 s | 1.5 s | 125 MB | 564 / 295 MB |
 | CLIP | 1.5 s | 2.0 s | 134 MB | 631 / 338 MB |
@@ -182,7 +182,7 @@ One run on `aws-g5-4xlarge-cache` (A10G, torch 2.14.0+cu130), Transformers `8625
 | Whisper | 1.4 s | 1.4 s | 193 MB | 302 / 168 MB |
 | Wav2Vec2 | 1.1 s | 1.5 s | 76 MB | 443 / 259 MB |
 
-Imports take ~4.9 s (2× the Mac), so batching matters more; slim fixtures need < 200 MB, so many share a GPU. This cost study excludes CPU-only CI runners, setup/downloads, cold cache, other GPUs, multi-GPU, and MusicGen Melody; the PR CI proof above measures setup separately.
+Imports take ~4.9 s (2× the Mac), so batching matters more; fixtures need < 200 MB, so many share a GPU. This cost study excludes CPU-only CI runners, setup/downloads, cold cache, other GPUs, multi-GPU, and MusicGen Melody; the PR CI proof above measures setup separately.
 
 ## Shadow backfill
 
@@ -292,7 +292,7 @@ lists the changed fields. The control workflow pins the old references at
 
 Regressions fixed since May 2026 ([freeze/check](../experiments/replay.py), [per-case driver](../experiments/replay_case.py), [usage repros](../experiments/usage_repros.py)): fixtures and real-checkpoint baselines frozen on a good build (`4d536e1f`), run unchanged on the bad build (the fix's parent) and the fixed one (caught = bad flagged, fixed clean); separately, the affected public call on both. Builds before 2026-08-17 need older `tokenizers` (before mid-June, also `kernels`): the fleet lock must pin dependencies, not just models.
 
-| Regression (fix PR) | Real checkpoint | Generic slim checks | Slim fixture, affected public call |
+| Regression (fix PR) | Real checkpoint | Generic fixture checks | Fixture, affected public call |
 | --- | --- | --- | --- |
 | CLIP processor drops `return_tensors` with `text_kwargs` ([#46195](https://github.com/huggingface/transformers/pull/46195)) | crash | missed | crash, caught |
 | Whisper batch `decode_with_timestamps` ([#47997](https://github.com/huggingface/transformers/pull/47997)) | crash | missed | crash, caught |
@@ -378,7 +378,7 @@ The controlled continuation is now in the [Whisper contract](../example/hub/Whis
 
 2026-10-11: replayed [#48108](https://github.com/huggingface/transformers/pull/48108), fix `b6688043ff` and parent `2b296305d7`. The earlier contract probe uses `WhisperForCausalLM`; the upstream test uses `WhisperForConditionalGeneration` as its assistant. The latter gives the assistant its own encoder, which also permits an assistant of a different hidden width.
 
-The [first A10G replay](https://github.com/huggingface/transformers-mic/actions/runs/38140685813) used the pinned real tiny checkpoint, published overfit fixture, and a random twin, with each main model's own weights as the assistant. Five inputs (tones, silence, two text-prompt controls, and speech) × greedy/causal-assistant/encoder-decoder-assistant × two builds × three weight kinds = **90 generation calls**, float32, eager, torch 2.11.0+cu128. Speech is the upstream test's first LibriSpeech dummy sample, `1272-128104-0000`, from dataset revision `5be91486e11a2d616f4ec5db8d3fd248585ac07a`; its original FLAC and [provenance](../experiments/audio/1272-128104-0000.json) are frozen separately from the synthetic contract inputs.
+The [first A10G replay](https://github.com/huggingface/transformers-mic/actions/runs/38140685813) used the pinned real `whisper-tiny` checkpoint, published overfit fixture, and a random twin, with each main model's own weights as the assistant. Five inputs (tones, silence, two text-prompt controls, and speech) × greedy/causal-assistant/encoder-decoder-assistant × two builds × three weight kinds = **90 generation calls**, float32, eager, torch 2.11.0+cu128. Speech is the upstream test's first LibriSpeech dummy sample, `1272-128104-0000`, from dataset revision `5be91486e11a2d616f4ec5db8d3fd248585ac07a`; its original FLAC and [provenance](../experiments/audio/1272-128104-0000.json) are frozen separately from the synthetic contract inputs.
 
 | Main / assistant | Bad versus fixed | Verdict |
 | --- | --- | --- |

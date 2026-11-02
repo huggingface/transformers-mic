@@ -961,12 +961,12 @@ def create(args):
         if args.fixtures_only:
             manifest["integrations"]["transformers"]["targets"] = ["fixtures"]
         if dropped := fixture_runs_anywhere(manifest):
-            print(f"tmic: the slim fixture runs anywhere: dropped its {', '.join(dropped)}", file=sys.stderr)
+            print(f"tmic: the fixture runs anywhere: dropped its {', '.join(dropped)}", file=sys.stderr)
         for repo in keep_large_checkpoints_off_cpu(
             manifest, {args.model: context["parameters"]}
         ):
             if (context["parameters"] or 0) > GPU_PARAMETER_LIMIT:
-                print(f"tmic: {repo} is above 10B parameters and does not fit the GPU: only the slim fixture is measured", file=sys.stderr)
+                print(f"tmic: {repo} is above 10B parameters and does not fit the GPU: only the fixture is measured", file=sys.stderr)
             else:
                 print(f"tmic: {repo} is above 1B parameters: measuring it on GPU, in bfloat16 only", file=sys.stderr)
         workspace.from_plan(

@@ -12,8 +12,21 @@ framework's CI. Each MIC has three parts:
   text or running a training step
 - **baselines**: the outputs that usage produced, reviewed by a human
 
+Words used throughout the docs:
+
+- **checkpoint**: the real Hub model a MIC covers (`mistralai/Mistral-Large-4-1T-A52B`).
+- **fixture**: the small model a MIC runs on CPU, built from one checkpoint by the
+  [recipe](docs/fixtures.md#recipe) and published as `huggingface-mic/<name>-mic`.
+  Older text, repository and file names say *slim fixture* or *slim model*: same thing.
+- **shrink**: the recipe step that turns the checkpoint's config into the fixture's
+  (the *shrunk config*); [`tmic shrink`](docs/cli.md#how-was-the-fixture-shrunk)
+  shows what it kept.
+- **tiny** is not a MIC term: Transformers' own `tiny-random-*` test models are never
+  fixtures or sources, and a checkpoint named *tiny* (`openai/whisper-tiny`) is a
+  real checkpoint like any other.
+
 Fixtures run on framework PRs (CPU, seconds); real checkpoints run after merge,
-nightly and before release. **A slim pass is a fast regression signal, not a pass
+nightly and before release. **A fixture pass is a fast regression signal, not a pass
 for the real model.**
 
 This repository holds the `tmic` CLI, the fixture builder and the runner. MICs are
@@ -23,7 +36,7 @@ coverage is in the [coverage space](https://huggingface.co/spaces/huggingface-mi
 In Transformers, the contracts job runs on PRs and reports failures without
 blocking ([status](docs/evidence.md#transformers-ci-proof)).
 
-![A proposed link lets agents discover a model's MIC on the Hub. Transformers checks slim fixtures on PRs and real checkpoints in run-slow or nightly jobs; Transformers.js has its own contract entry point and baseline, with CI triggers still to define.](https://raw.githubusercontent.com/huggingface/transformers-mic/main/docs/assets/mic-overview.svg)
+![A proposed link lets agents discover a model's MIC on the Hub. Transformers checks fixtures on PRs and real checkpoints in run-slow or nightly jobs; Transformers.js has its own contract entry point and baseline, with CI triggers still to define.](https://raw.githubusercontent.com/huggingface/transformers-mic/main/docs/assets/mic-overview.svg)
 
 ## Try it locally
 
@@ -48,12 +61,12 @@ Start with:
 
 - [CLI guide](docs/cli.md): `tmic`, from a checkpoint to a published MIC.
 - [The standard](docs/standard.md): why MICs, the repository layout, manifest, checks and pins.
-- [Small fixtures](docs/fixtures.md): the shrink recipe and the weight experiments.
+- [Fixtures](docs/fixtures.md): the shrink recipe and the weight experiments.
 - [Evidence](docs/evidence.md): replays, backfills, stability and cost.
 - [Pilot](docs/pilot.md): the proposed adoption pilot and the results so far.
 
 Details: [full example](example/README.md), [technical design](docs/design.md),
-[Hub layout](docs/hub-organization.md), [slim models in Transformers CI](docs/slim-models-in-transformers-ci.md),
+[Hub layout](docs/hub-organization.md), [fixtures in Transformers CI](docs/slim-models-in-transformers-ci.md),
 [Transformers CI proof](docs/transformers-ci-proof.md), [improving contracts](docs/improving-contracts.md),
 [smoke vs assertions](docs/smoke-vs-assertions.md), [problems and open questions](docs/problems-and-opened-questions.md),
 [cloud baselines](docs/cloud-baselines.md), [end-to-end tests](docs/end-to-end-tests.md),

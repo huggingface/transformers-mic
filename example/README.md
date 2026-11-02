@@ -97,7 +97,7 @@ Eight contracts through `run.py` on Apple M5, torch 2.11.0: the original six use
 | Whisper | English transcription with `generate` | **overfit**, 200 steps, 24 s: random weights moved logits 8.6e-5 on reversed audio | `openai/whisper-tiny` |
 | Wav2Vec2 | CTC transcription | random: weakest 0.60; amplitude blind spot accepted with a reason | `facebook/wav2vec2-base-960h`, with a local workaround (below) |
 | MusicgenMelody | text- and melody-conditioned generation with guidance | **overfit** by reviewed choice, 60 steps: random weights pass the gate (weakest 0.018) but generate the same codes for every prompt, melody or not; EnCodec widths set by `config_overrides` (59M → 3.5M parameters) | `facebook/musicgen-melody` |
-| WhisperSpeech | greedy speech transcription versus an encoder-decoder assistant | checkpoint-only: both slim weight kinds miss #48108 on this frozen LibriSpeech sample | `openai/whisper-tiny` |
+| WhisperSpeech | greedy speech transcription versus an encoder-decoder assistant | checkpoint-only: both fixture weight kinds miss #48108 on this frozen LibriSpeech sample | `openai/whisper-tiny` |
 
 `build_fixtures.py` applies one [recipe](../docs/fixtures.md#recipe), with reviewed `config_overrides` for missed fields. Contract calls feed the [`perturb.py`](perturb.py) gate and overfit step. MusicGen Melody has fixture/checkpoint baselines on `cpu-arm64` and `cuda` in three variants, `cpu-x86_64` in two. Float32 score-argmax codes agree across these three platform classes; only the real CUDA checkpoint changes codes in bfloat16. Score argmaxes include delay-mask positions and are not exactly the codes sent to EnCodec ([controls](../docs/evidence.md#musicgen-melody-conditioning-controls)).
 

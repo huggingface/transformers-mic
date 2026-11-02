@@ -1,6 +1,6 @@
 # End-to-end tests
 
-Every check in this repo, where it runs, and how to start it. Results: [evidence](evidence.md), [small fixtures](fixtures.md).
+Every check in this repo, where it runs, and how to start it. Results: [evidence](evidence.md), [fixtures](fixtures.md).
 
 | Test | Question | Runs on | Entry point |
 | --- | --- | --- | --- |
@@ -12,7 +12,7 @@ Every check in this repo, where it runs, and how to start it. Results: [evidence
 | [Historical regressions](#5-historical-regressions) | Would fixtures have caught shipped bugs? | Mac CPU | [`experiments/replay_case.py`](../experiments/replay_case.py), [`usage_repros.py`](../experiments/usage_repros.py), [`example/replay.py`](../example/replay.py) |
 | [Synthetic faults](#6-synthetic-faults) | Which weight scheme catches injected faults? | Mac CPU, A10G | [`experiments/experiment.py`](../experiments/experiment.py), [`fixture_init.py`](../experiments/fixture_init.py) |
 | [Stability](#7-stability) | Quiet on benign changes and upgrades? | Mac CPU, A10G | [`experiments/replay.py`](../experiments/replay.py) |
-| [Cost](#8-cost) | What does a check cost, slim vs real? | Mac CPU, A10G | [`experiments/cost.py`](../experiments/cost.py) |
+| [Cost](#8-cost) | What does a check cost, fixture vs checkpoint? | Mac CPU, A10G | [`experiments/cost.py`](../experiments/cost.py) |
 | [Architecture sweep](#9-architecture-sweep) | Does the shrink recipe run every architecture? | Mac CPU | [`experiments/sweep.py`](../experiments/sweep.py), [`layer_patterns.py`](../experiments/layer_patterns.py) |
 | [WebGPU golden](#10-webgpu-golden) | Can CPU outputs check WebGPU kernels? | Mac (Node, Chrome) | [`experiments/webgpu_golden.py`](../experiments/webgpu_golden.py), [`webgpu_browser/`](../experiments/webgpu_browser) |
 | [Agent walkthroughs](#11-agent-walkthroughs) | How do agents run a Hub model today? | Mac | [`agent-walkthrough/`](agent-walkthrough/README.md) |
@@ -147,7 +147,7 @@ Frozen fixtures and real baselines under benign changes and dependency upgrades 
 
 ## 8. Cost
 
-[`cost.py`](../experiments/cost.py) times each phase of a check, with memory and size, slim vs real: [Mac](../experiments/results/cost.json), [A10G](../experiments/results/gpu.json), [batched vs isolated](../experiments/results/runner.json).
+[`cost.py`](../experiments/cost.py) times each phase of a check, with memory and size, fixture vs checkpoint: [Mac](../experiments/results/cost.json), [A10G](../experiments/results/gpu.json), [batched vs isolated](../experiments/results/runner.json).
 
 ## 9. Architecture sweep
 

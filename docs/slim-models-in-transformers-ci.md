@@ -1,10 +1,10 @@
-# Slim models in Transformers development and CI
+# Fixtures in Transformers development and CI
 
-The proposal uses slim fixtures for fast PR checks and the same contracts on full checkpoints in `run-slow` and scheduled jobs. **A slim pass does not mean the full model passes.** Developers gain a reproducible failure report; maintainers pay for fixtures, baseline review, and cross-repo coordination. Today the [prototype](#current-prototype-and-rollout) runs here, plus a branch-only proof in Transformers CI; wider rollout is proposed.
+The proposal uses fixtures for fast PR checks and the same contracts on full checkpoints in `run-slow` and scheduled jobs. **A fixture pass does not mean the full model passes.** Developers gain a reproducible failure report; maintainers pay for fixtures, baseline review, and cross-repo coordination. Today the [prototype](#current-prototype-and-rollout) runs here, plus a branch-only proof in Transformers CI; wider rollout is proposed.
 
 ## What contracts replace in `run-slow`
 
-Model-specific integration tests (load a checkpoint, call a public path, check outputs) become contracts, run on the full checkpoint in `run-slow` and on a slim fixture in PR CI, each against its own baseline. The `run-slow` trigger and orchestration are unchanged; other slow tests (cache, compilation, batching, offloading, multi-GPU) stay. A test is removed only once its contract keeps its inputs, assertions, variants, hardware, and run frequency; a slim-only check never justifies removal.
+Model-specific integration tests (load a checkpoint, call a public path, check outputs) become contracts, run on the full checkpoint in `run-slow` and on a fixture in PR CI, each against its own baseline. The `run-slow` trigger and orchestration are unchanged; other slow tests (cache, compilation, batching, offloading, multi-GPU) stay. A test is removed only once its contract keeps its inputs, assertions, variants, hardware, and run frequency; a slim-only check never justifies removal.
 
 ## Impact on development work
 
@@ -22,7 +22,7 @@ Ownership is as in the [design](design.md#ownership); cross-repo changes need an
 
 1. Fast CI selects the relevant MICs, fetches each pinned fixture once, runs them on the PR build, and compares with committed baselines; it never rebuilds or trains fixtures.
 2. The report names contract, fixture, variant, failure, and repro command.
-3. For full-model validation, maintainers request `run-slow`: migrated tests run as contracts on real checkpoints, reported apart from slim results. A slim pass never satisfies a pending full-model requirement.
+3. For full-model validation, maintainers request `run-slow`: migrated tests run as contracts on real checkpoints, reported apart from slim results. A fixture pass never satisfies a pending full-model requirement.
 
 The prototype [selector](../example/select_contracts.py) maps model directories to contracts, sub-models included (a UMT5 change selects T5; an EnCodec change selects MusicGen Melody), and selects all for shared code or dependency changes. The shadow job runs everything and records the selection, to measure missed dependencies first.
 
@@ -63,7 +63,7 @@ PR summaries and Hub status keep these scopes separate: slim success cannot canc
 
 ## Current prototype and rollout
 
-In this repo: [shadow](../.github/workflows/shadow.yml) runs every fixture (`--fixtures-only --run-all`) daily on `main` or on a dispatched commit/PR, recording what selection would have chosen; [backfill](../.github/workflows/shadow-backfill.yml) does the same on each `main` commit of a past window ([results](evidence.md#shadow-backfill)); [nightly](../.github/workflows/nightly.yml) runs real checkpoints and fixtures on an A10G runner's CPU and GPU, standing in for full-checkpoint paths; [GPU checks](../.github/workflows/gpu-checks.yml) are one-off experiments. The checkpoint-only WhisperSpeech contract covers #48108 in nightly; fixture-only shadow runs report its explicit exclusion because both slim weight kinds miss the bug.
+In this repo: [shadow](../.github/workflows/shadow.yml) runs every fixture (`--fixtures-only --run-all`) daily on `main` or on a dispatched commit/PR, recording what selection would have chosen; [backfill](../.github/workflows/shadow-backfill.yml) does the same on each `main` commit of a past window ([results](evidence.md#shadow-backfill)); [nightly](../.github/workflows/nightly.yml) runs real checkpoints and fixtures on an A10G runner's CPU and GPU, standing in for full-checkpoint paths; [GPU checks](../.github/workflows/gpu-checks.yml) are one-off experiments. The checkpoint-only WhisperSpeech contract covers #48108 in nightly; fixture-only shadow runs report its explicit exclusion because both fixture weight kinds miss the bug.
 
 In `huggingface/transformers`, branch `contracts-proof`: [`contracts.yml`](https://github.com/huggingface/transformers/blob/contracts-proof/.github/workflows/contracts.yml) installs the branch, selects contracts from its changed files, and runs them on `aws-m8i-l-cache` in `transformers-torch-light`, with the runner vendored in `utils/contracts/` and the lock and baselines (x86, plus `cpu-arm64` for Mac repro) in `tests/contracts/`: six contracts, 8 fixtures in 17 s. All proof phases are done, including demos on `proof-*` branches and a maintainer write-up ([proof plan](transformers-ci-proof.md)).
 
