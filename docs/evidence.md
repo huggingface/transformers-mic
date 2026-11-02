@@ -2,6 +2,10 @@
 
 Results from local experiments, the regression replay, the shadow backfill over Transformers `main`, and the job in Transformers' PR CI. Fixture experiments: [Small fixtures](fixtures.md); mechanics: [technical design](design.md).
 
+Most of these numbers come from the first fleet of six to eight contracts, measured in October 2026, and each section gives its date and Transformers build. The fleet has grown since: on 2026-11-02 the [fleet dataset](https://huggingface.co/datasets/huggingface-mic/transformers-fleet) held 6 control contracts and 180 prototype contracts. Current coverage is in the [coverage space](https://huggingface.co/spaces/huggingface-mic/mic-coverage).
+
+Fixture names such as `mic-umt5-small-slim` and `hf-internal-testing/...` repositories are from that first fleet. New MICs live in one `huggingface-mic/<name>-mic` repository each ([Hub layout](hub-organization.md)).
+
 ## Summary
 
 **Detection**
@@ -22,7 +26,7 @@ Results from local experiments, the regression replay, the shadow backfill over 
 - **Baselines are per platform and dtype; fixtures are shared** ([GPU](#on-gpu), [bfloat16](#bfloat16-on-cpu)). So split, 16 targets × 3 variants reproduced at `1e-4` on A10G ([numbers](../experiments/results/runner.json)); ten benign changes raised no false alarm.
 - **Batching is the cost lever:** eight fixture checks take 4.9 s in one process vs 27.4 s one per process (Mac); 13.1 s vs 81.1 s (GPU runner).
 
-**Original study:** ten families, eleven candidate regressions (eight reproducible), ten benign changes, five months on six contracts; replay/backfill on CPU, one GPU for stability/cost ([cases.json](../experiments/cases.json)). The fleet now has eight contracts and nine fixtures. The five-month backfills and original cost tables predate MusicGen Melody; the weekly backfill and targeted GPU replays below include later coverage.
+**Original study:** ten families, eleven candidate regressions (eight reproducible), ten benign changes, five months on six contracts; replay/backfill on CPU, one GPU for stability/cost ([cases.json](../experiments/cases.json)). The five-month backfills and original cost tables predate MusicGen Melody; the weekly backfill and targeted GPU replays below include later coverage.
 
 ## How agents use the Hub today
 
@@ -43,9 +47,9 @@ Two [walkthroughs](agent-walkthrough/README.md), same prompt, ARM Mac, no MIC: p
 
 ### On CPU
 
-**Dependency upgrades: 0 flags in 770 checks** ([stability.json](../experiments/results/stability.json)). Frozen with torch 2.11.0, tokenizers 0.23.1, numpy 1.26.4, Pillow 12.2.0; re-checked one upgrade at a time (torch 2.12.1/2.13.0/2.14.1, tokenizers 0.23.2, numpy 2.2.6, Pillow 12.3.0), eager and SDPA. Max drift 1.3e-5 slim, 8.4e-5 real: real checkpoints sit closer to `1e-4`.
+**Dependency upgrades: 0 flags in 770 checks** ([stability.json](../experiments/results/stability.json)). Baselines were recorded with torch 2.11.0, tokenizers 0.23.1, numpy 1.26.4 and Pillow 12.2.0, then re-checked with one upgrade at a time (torch 2.12.1/2.13.0/2.14.1, tokenizers 0.23.2, numpy 2.2.6, Pillow 12.3.0), under eager and SDPA. The largest drift was 1.3e-5 on slim fixtures and 8.4e-5 on real checkpoints, so real checkpoints sit closer to the `1e-4` tolerance.
 
-**Cost per check:** experimental builds, fresh process, three runs, warm cache ([cost.json](../experiments/results/cost.json)). "Work" = input prep, load, first inference, comparison, (slim) training probe; imports add ~2.4 s per process. These are not current published-fixture sizes (e.g. published Wav2Vec2 is 4.3M parameters, about 17 MB).
+**Cost per check:** experimental fixture builds, a fresh process per check, three runs, warm cache ([cost.json](../experiments/results/cost.json)). "Work" is input preparation, loading, first inference, comparison and, for slim fixtures, the training probe. Imports add about 2.4 s per process. These builds predate the published fixtures, whose sizes differ: the published Wav2Vec2 fixture has 4.3M parameters, about 17 MB.
 
 | Family | Slim work | Real work | Slim weights | Real weights |
 | --- | ---: | ---: | ---: | ---: |
@@ -59,9 +63,9 @@ Two [walkthroughs](agent-walkthrough/README.md), same prompt, ARM Mac, no MIC: p
 
 ¹ float32 build; the bfloat16 fixture is 6.1 MB.
 
-- **Process start dominates**, so run many contracts per process; on small cached checkpoints, slim saves little local time.
-- **Savings are transfer and size:** slim weights are 10–1,300× smaller; slow tests for these families load ~144 GB, mostly not CPU-runnable.
-- **Memory:** 0.5–1.3 GB peak RSS slim (mostly framework), 0.7–2 GB real.
+- **Process start dominates**, so run many contracts per process. On small checkpoints that are already cached, a slim fixture saves little local time.
+- **The savings are in download and size:** slim weights are 10–1,300× smaller. The slow tests for these families load about 144 GB of weights, most of which can't run on CPU.
+- **Memory:** 0.5–1.3 GB peak RSS for slim fixtures (mostly the framework itself), 0.7–2 GB for real checkpoints.
 
 ### bfloat16 on CPU
 
@@ -99,12 +103,14 @@ Phase 1 of the [CI proof](transformers-ci-proof.md): the eight fixtures on `aws-
 
 ### Transformers CI proof
 
-The contracts job on the `contracts-proof` branch of `huggingface/transformers` ([plan](transformers-ci-proof.md)): the branch's own build, PR CI runner and image (`aws-m8i-l-cache`, `transformers-torch-light`), contracts selected from changed files, no `local_patches` (open bugs as narrowed `known_failures`). Demo changes pushed as `proof-*` branches, 2026-10-09:
+**Current status (2026-11-02):** the contracts job now runs on Transformers PRs, from transformers-ci's reusable `pr-ci_contracts.yml`. It runs the fixtures of both fleets (control in default and bfloat16, prototypes in bfloat16) and reports failures without blocking the PR (`continue-on-error`). It still resolves the fleet dataset's `main` at the start of each run and logs the revision it used (`MIC fleet: huggingface-mic/transformers-fleet@<sha>`); Transformers' own pin, `tests/contracts.lock` ([#49802](https://github.com/huggingface/transformers/pull/49802)), is not read by the job yet. Failures are on the [MIC failures dashboard](https://transformers-ci.huggingface.cool/d/mic-failures/mic-failures?from=now-4w&to=now&timezone=browser).
+
+The measurements below are from the proof that came before it, 2026-10-09. The contracts job ran on the `contracts-proof` branch of `huggingface/transformers` ([plan](transformers-ci-proof.md)): the branch's own build, PR CI runner and image (`aws-m8i-l-cache`, `transformers-torch-light`), contracts selected from changed files, no `local_patches` (open bugs as narrowed `known_failures`). Demo changes pushed as `proof-*` branches, 2026-10-09:
 
 | Change | Selected | Result | Runner time |
 | --- | --- | --- | ---: |
 | Docs page | none | green | 11.5 s |
-| No-op in `generation/utils.py` | all 6 (shared code) | 7 pass, Whisper `xfail` (#49456) | 17.8 s |
+| No-op in `generation/utils.py` | all 6 contracts, 8 fixtures (shared code) | 7 pass, Whisper `xfail` (#49456) | 17.8 s |
 | No-op in `models/clip/` | CLIP | pass | 11.5 s |
 | Revert of the UMT5 fix #49135 | T5 (`models/umt5`) | **red**: `mic-umt5-small-slim` `label_logprobs` off by 1.22, loss by 0.204; `mic-t5-small-slim` passes | 13.4 s |
 
@@ -116,7 +122,7 @@ The contracts job on the `contracts-proof` branch of `huggingface/transformers` 
 
 ### GPU dependency upgrades
 
-2026-10-11–12: the eight frozen contracts, known-good Transformers `8625785e`, A10G, existing CUDA baselines and tolerances. Each environment gets two fresh-process fleet passes in default, eager and bfloat16. [Initial matrix](https://github.com/huggingface/model-integration-contracts/actions/runs/38146798276); [harness](../experiments/dependency_study.py), [summary tool](../experiments/summarize_dependency_study.py). No artifacts, approved outputs or tolerances were changed.
+2026-10-11–12: the eight frozen contracts, known-good Transformers `8625785e`, A10G, existing CUDA baselines and tolerances. Each environment gets two fresh-process fleet passes in default, eager and bfloat16. [Initial matrix](https://github.com/huggingface/transformers-mic/actions/runs/38146798276); [harness](../experiments/dependency_study.py), [summary tool](../experiments/summarize_dependency_study.py). No artifacts, approved outputs or tolerances were changed.
 
 | Environment | Pass / fail / error | Repeated output pairs |
 | --- | --- | --- |
@@ -132,13 +138,13 @@ Each row also has 12 declared exclusions (UMT5 checkpoint and WhisperSpeech fixt
 
 An ARM preprocessing diagnostic holds raw tone bytes fixed: normalization inputs change by up to `1.19e-7`. The denominator changes from float64 to float32 under [NumPy 2 scalar promotion](https://numpy.org/doc/2.0/numpy_2_0_migration_guide.html#changes-to-numpy-data-type-promotion). An explicit scalar-precision control restores the NumPy 1 processor bytes exactly; the GPU full-call control below verifies its effect on the model. [Diagnostic](../experiments/numpy_wav2vec2_preprocessing.py). Keep the NumPy pin; investigate normalization arithmetic before widening tolerances or approving new expectations.
 
-The no-torchaudio control loses both MusicGen Melody targets, as expected from their processor dependency; these errors are not passes. The PyTorch/CUDA upgrade also needs a runtime preflight: CUDA 12 and 13 distributions can share library paths, so version metadata alone may describe libraries whose bytes were overwritten. The [completed retry](https://github.com/huggingface/model-integration-contracts/actions/runs/38212201139) restores the CUDA 13 wheel files and prioritizes their libraries. Its 18 numeric failures affect CLIP (fixture float32; checkpoint bfloat16) and both Wav2Vec2 targets in all three variants. Every produced output repeats exactly; the sampled inference IDs/text and other exact assertions still pass. This is a torch/torchvision/CUDA-library bundle comparison, not an isolated torch change.
+The no-torchaudio control loses both MusicGen Melody targets, as expected from their processor dependency; these errors are not passes. The PyTorch/CUDA upgrade also needs a runtime preflight: CUDA 12 and 13 distributions can share library paths, so version metadata alone may describe libraries whose bytes were overwritten. The [completed retry](https://github.com/huggingface/transformers-mic/actions/runs/38212201139) restores the CUDA 13 wheel files and prioritizes their libraries. Its 18 numeric failures affect CLIP (fixture float32; checkpoint bfloat16) and both Wav2Vec2 targets in all three variants. Every produced output repeats exactly; the sampled inference IDs/text and other exact assertions still pass. This is a torch/torchvision/CUDA-library bundle comparison, not an isolated torch change.
 
 **Total:** 798 target attempts: 732 pass, 42 numeric failures, 24 missing-torchaudio errors; another 84 declared exclusions. All 387 pairs with outputs repeat exactly; 12 MusicGen pairs are unavailable. Warm default fleet passes take about 54–56 s, eager 81–84 s and bfloat16 83–87 s in the processor profiles. First passes include cache effects; this does not measure cold/warm total cost. Keep the production pins and tolerances; the next investigation is explicit normalization arithmetic and the CUDA-bundle drift. [Full report, versions, hashes and per-target results](../experiments/results/gpu_dependency_stability.json).
 
 #### Wav2Vec2 normalization control
 
-2026-10-12: [A10G validation](https://github.com/huggingface/model-integration-contracts/actions/runs/38214412697), pinned Transformers `8625785e`, torch 2.11.0+cu128. Both published Wav2Vec2 targets ran their full inference and SGD training contract in default/eager/bfloat16, twice in fresh processes per condition: **36 target calls**.
+2026-10-12: [A10G validation](https://github.com/huggingface/transformers-mic/actions/runs/38214412697), pinned Transformers `8625785e`, torch 2.11.0+cu128. Both published Wav2Vec2 targets ran their full inference and SGD training contract in default/eager/bfloat16, twice in fresh processes per condition: **36 target calls**.
 
 | Condition | Existing baselines | Compared with NumPy 1 |
 | --- | --- | --- |
@@ -162,7 +168,7 @@ One run on `aws-g5-4xlarge-cache` (A10G, torch 2.14.0+cu130), Transformers `8625
 | CPU or GPU, float32 | float16, SDPA | 42 | 1 | 0.30 |
 
 - **Fixtures run unchanged on GPU**; real checkpoints use most of the margin (6.6e-5), slim stays near 1e-5.
-- **CPU baselines carry over only without convolutions:** SmolLM, BERT, T5 within 5e-5; CLIP, Whisper, Wav2Vec2 drift 1e-3–3e-2. The cause is cuDNN's default TF32 ([run](https://github.com/huggingface/model-integration-contracts/actions/runs/37512092438) with it off: 0 of 28 flagged). Users get TF32, so record GPU baselines.
+- **CPU baselines carry over only without convolutions:** SmolLM, BERT, T5 within 5e-5; CLIP, Whisper, Wav2Vec2 drift 1e-3–3e-2. The cause is cuDNN's default TF32 ([run](https://github.com/huggingface/transformers-mic/actions/runs/37512092438) with it off: 0 of 28 flagged). Users get TF32, so record GPU baselines.
 - **Lower precision needs its own baseline:** bfloat16 changed generated outputs for real SmolLM and five fixtures; float32 tokens and labels never changed.
 
 **GPU cost:** float32, SDPA, three fresh processes, weights cached.
@@ -180,9 +186,9 @@ Imports take ~4.9 s (2× the Mac), so batching matters more; slim fixtures need 
 
 ## Shadow backfill
 
-[`shadow-backfill.yml`](../.github/workflows/shadow-backfill.yml) ran the frozen fixture contracts on every first-parent `main` commit from 2026-05-02 to 2026-10-07: 1,468 × 8 = 11,744 results, no runner error, ~15 s per commit on GitHub x86 with `cpu-x86_64` baselines. Commits that reject a pin use their newest accepted version (`tokenizers` 0.22 before 2026-08-17; no effect). Results, with `selected_by`, are on `shadow-results` (`runs/backfill/`).
+[`shadow-backfill.yml`](../.github/workflows/shadow-backfill.yml) ran the frozen fixture contracts on every first-parent `main` commit from 2026-05-02 to 2026-10-07: 1,468 commits × 8 fixtures = 11,744 results, with no runner error, at about 15 s per commit on GitHub x86 with `cpu-x86_64` baselines. "Frozen" means the fixtures, contracts and baselines stayed fixed while only the Transformers commit changed. A commit that refuses a pinned dependency gets the newest version it accepts (`tokenizers` 0.22 before 2026-08-17; this changed no result). Results, with the files that selected each contract (`selected_by`), are on the `shadow-results` branch under `runs/backfill/`.
 
-Every change in outcome (all else passed on every commit):
+Every change in outcome; everything else passed on every commit:
 
 | Fixture | Commits | Differs from today's baseline | Starts | Ends | Verdict |
 | --- | --- | --- | --- | --- | --- |
@@ -190,15 +196,15 @@ Every change in outcome (all else passed on every commit):
 | `mic-umt5-small-slim` | 597 | `label_logprobs` off by 1.22, training loss by 0.20 | #47014 | [#49135](https://github.com/huggingface/transformers/pull/49135) (`d7ba937671`, 2026-09-28) | **Regression caught at its introducing commit** (UMT5 decoder not causal under SDPA) |
 | `mic-wav2vec2-base-960h-slim` | 513 | training loss off by 0.39 | window start | [#46259](https://github.com/huggingface/transformers/pull/46259) (`f196737b0c`, 2026-07-03) | **Benign change flagged:** load-time RNG stream shifted |
 
-- **Caught at introduction, two months before the fix:** #47014 touched shared code, so it selected every contract; its reviewer would have seen UMT5 move by 1.22 beside T5's intended runtime change.
-- **One false alarm:** the fixture omits `masked_spec_embed`, as the checkpoint does, to catch [#49385](https://github.com/huggingface/transformers/issues/49385), so its loss follows the RNG stream. Cost: one baseline update.
+- **Caught at introduction, two months before the fix:** #47014 touched shared code, so it selected every contract. Its reviewer would have seen UMT5 move by 1.22 next to T5's intended runtime change.
+- **One false alarm:** the Wav2Vec2 fixture leaves out `masked_spec_embed`, as the checkpoint does, so that it catches [#49385](https://github.com/huggingface/transformers/issues/49385). Its training loss therefore depends on load-time initialization, and moved when #46259 shifted the RNG stream. Cost: one baseline update.
 - **Four misses, one cause: no contract made the call.** CLIP `text_kwargs` ([#46195](https://github.com/huggingface/transformers/pull/46195)), processor config helpers ([#47628](https://github.com/huggingface/transformers/pull/47628)), Whisper timestamp batch decoding ([#47997](https://github.com/huggingface/transformers/pull/47997)), T5 batch decoding ([#47793](https://github.com/huggingface/transformers/pull/47793)).
 - **Selection missed nothing:** all three outcome-changing commits selected the affected contract. It selected none on 768 commits (52%), all on 679 (46%), some on 21.
 - **No other drift** across three CPUs (EPYC 7763, 9V45, 9V74) and two `tokenizers` versions.
 
 ### After adding the missed calls
 
-Calls added via the [improvement loop](improving-contracts.md#what-happened-the-first-time); no existing baseline moved on any platform (98 candidates). Re-backfilled over 1,470 commits (2026-05-01 to 2026-10-08, [run](https://github.com/huggingface/model-integration-contracts/actions/runs/37664740099)):
+Calls added via the [improvement loop](improving-contracts.md#what-happened-the-first-time); no existing baseline moved on any platform (98 candidates). Re-backfilled over 1,470 commits (2026-05-01 to 2026-10-08, [run](https://github.com/huggingface/transformers-mic/actions/runs/37664740099)):
 
 | Regression | Fixture result while present | Ends at (fix) |
 | --- | --- | --- |
@@ -212,7 +218,7 @@ Each fails exactly until its fix (four predate the window); no new false alarm, 
 
 ### Third round: second-round calls and bfloat16 SmolLM
 
-After the [second round](improving-contracts.md#the-second-round-triaging-the-model-tier-misses) added Whisper `max_length_tokens`, `assisted_tokens`, `longform_tokens`, and mic-SmolLM-slim moved to bfloat16 ([why](#bfloat16-on-cpu)). 1,480 commits, 2026-05-01 to 2026-10-08 ([run](https://github.com/huggingface/model-integration-contracts/actions/runs/37930845944)); every other segment as in the second round.
+After the [second round](improving-contracts.md#the-second-round-triaging-the-model-tier-misses) added Whisper `max_length_tokens`, `assisted_tokens`, `longform_tokens`, and mic-SmolLM-slim moved to bfloat16 ([why](#bfloat16-on-cpu)). 1,480 commits, 2026-05-01 to 2026-10-08 ([run](https://github.com/huggingface/transformers-mic/actions/runs/37930845944)); every other segment as in the second round.
 
 | Window | Commits | Fixture result | Verdict |
 | --- | ---: | --- | --- |
@@ -225,9 +231,9 @@ After the [second round](improving-contracts.md#the-second-round-triaging-the-mo
 
 ### Weekly check: 2026-10-11
 
-The scheduled [shadow](https://github.com/huggingface/model-integration-contracts/actions/runs/38109078172) passed 9/9; [nightly](https://github.com/huggingface/model-integration-contracts/actions/runs/38106887222) passed 90 checks with the same 5 declared `umt5-small` exclusions (`config.json` lacks `model_type`). Both tested Transformers `536ecc0073`, the same commit as 2026-10-10. Target sets and statuses matched the previous day, with no `environment_differs`: another repeatability sample, no new commit coverage.
+The scheduled [shadow](https://github.com/huggingface/transformers-mic/actions/runs/38109078172) passed 9/9; [nightly](https://github.com/huggingface/transformers-mic/actions/runs/38106887222) passed 90 checks with the same 5 declared `umt5-small` exclusions (`config.json` lacks `model_type`). Both tested Transformers `536ecc0073`, the same commit as 2026-10-10. Target sets and statuses matched the previous day, with no `environment_differs`: another repeatability sample, no new commit coverage.
 
-`find_misses.py` on the six shadow runs of 2026-10-08..11 found no candidates across five distinct commits, with or without `--shared`. The daily samples omit intervening commits, so the [weekly backfill](https://github.com/huggingface/model-integration-contracts/actions/runs/38134921721) checked every first-parent commit in `[2026-10-05, 2026-10-12)`: **75 commits × 9 fixtures = 675 passes**, no missing commits or runner errors, no dependency overrides or `environment_differs`. Result platforms: 636 `cpu-x86_64`, 39 `cpu-x86_64-bf16`. Records: `shadow-results:runs/backfill/2026-10-05_2026-10-12-38134921721.jsonl`.
+`find_misses.py` on the six shadow runs of 2026-10-08..11 found no candidates across five distinct commits, with or without `--shared`. The daily samples omit intervening commits, so the [weekly backfill](https://github.com/huggingface/transformers-mic/actions/runs/38134921721) checked every first-parent commit in `[2026-10-05, 2026-10-12)`: **75 commits × 9 fixtures = 675 passes**, no missing commits or runner errors, no dependency overrides or `environment_differs`. Result platforms: 636 `cpu-x86_64`, 39 `cpu-x86_64-bf16`. Records: `shadow-results:runs/backfill/2026-10-05_2026-10-12-38134921721.jsonl`.
 
 Miss triage: one model-tier candidate and 35 shared-tier rows (five fixes matched to all seven contracts). Read the diffs and the contracts' calls:
 
@@ -326,7 +332,7 @@ Does a real regression need an overfit fixture, or would random weights catch it
 
 ### MusicGen Melody conditioning controls
 
-2026-10-11: [A10G run](https://github.com/huggingface/model-integration-contracts/actions/runs/38136857327), float32, pinned torch 2.11.0+cu128. Replayed #48679 on fix `5bed62964c` and parent `93ebf6b111`, using the real checkpoint, published overfit fixture, and a random twin built on the pinned `8625785e` with seed 17. Six input cases × guidance 1 and 3 × two builds × three weight sets = 72 generation calls, plus two fresh-process fixture repeats. The four fixture runs were also checked on M5 CPU (48 calls). Random twins share the recipe and fixture key but differ in bytes across build platforms; each is reused unchanged within its bad/fix pair. [Raw records, comparisons, and build metadata](../experiments/results/melody_conditioning.json); [harness](../experiments/melody_conditioning.py).
+2026-10-11: [A10G run](https://github.com/huggingface/transformers-mic/actions/runs/38136857327), float32, pinned torch 2.11.0+cu128. Replayed #48679 on fix `5bed62964c` and parent `93ebf6b111`, using the real checkpoint, published overfit fixture, and a random twin built on the pinned `8625785e` with seed 17. Six input cases × guidance 1 and 3 × two builds × three weight sets = 72 generation calls, plus two fresh-process fixture repeats. The four fixture runs were also checked on M5 CPU (48 calls). Random twins share the recipe and fixture key but differ in bytes across build platforms; each is reused unchanged within its bad/fix pair. [Raw records, comparisons, and build metadata](../experiments/results/melody_conditioning.json); [harness](../experiments/melody_conditioning.py).
 
 The model-history and issue search found no known MusicGen Melody fix that swaps conditioning rows or drops only the melody. Those changes are **input-perturbation controls**, not historical bugs. Cases use the contract's two prompts and melodies, crossed text/melody pairs, or identical text in both rows. We observe both the contract's score argmaxes and the codes actually sent to EnCodec: generation removes some score positions with its delay mask.
 
@@ -347,7 +353,7 @@ To re-run, use the [harness](../experiments/melody_conditioning.py) on a GPU hos
 
 ### Whisper left-padded previous-segment prompts
 
-2026-10-11: [A10G run](https://github.com/huggingface/model-integration-contracts/actions/runs/38138130043), float32, eager attention, torch 2.11.0+cu128. Replayed [#48028](https://github.com/huggingface/transformers/pull/48028) on fix `e12c79c582` and parent `f9b76f2dfc`, with pinned `openai/whisper-tiny`, the published overfit fixture, and a seed-17 random twin built on the pinned `8625785e`. Four input cases × two builds × three weight sets = **24 generation calls**, plus **12 fixed-build calls in fresh processes**. Each weight file is reused unchanged across its pair and repeat. [Raw records and comparisons](../experiments/results/whisper_left_padding.json); [harness](../experiments/whisper_left_padding.py); [analysis](../experiments/summarize_whisper_left_padding.py).
+2026-10-11: [A10G run](https://github.com/huggingface/transformers-mic/actions/runs/38138130043), float32, eager attention, torch 2.11.0+cu128. Replayed [#48028](https://github.com/huggingface/transformers/pull/48028) on fix `e12c79c582` and parent `f9b76f2dfc`, with pinned `openai/whisper-tiny`, the published overfit fixture, and a seed-17 random twin built on the pinned `8625785e`. Four input cases × two builds × three weight sets = **24 generation calls**, plus **12 fixed-build calls in fresh processes**. Each weight file is reused unchanged across its pair and repeat. [Raw records and comparisons](../experiments/results/whisper_left_padding.json); [harness](../experiments/whisper_left_padding.py); [analysis](../experiments/summarize_whisper_left_padding.py).
 
 The controlled long-form case uses two 36-second tone inputs, `condition_on_prev_tokens=True`, and timestamps. A public `logits_processor` constrains only the first segment to `<|0.00|> red<|30.00|>` in one row and `<|0.00|> green blue yellow<|30.00|>` in the other. The second segment generates freely. These identical first-segment outputs create previous-token prompts of different lengths without requiring the weights to learn timestamp closure. Observers capture the actual decoder inputs, attention masks, position IDs, and a subset of raw prefill logits; they do not alter the model computation.
 
@@ -366,13 +372,13 @@ Both padded cases reach one left-padded decoder prefill per model on each build.
 
 To re-run, use the [harness](../experiments/whisper_left_padding.py) on a GPU host, then the [analysis](../experiments/summarize_whisper_left_padding.py) on its output; the GPU dispatch job is not part of `gpu-checks.yml`.
 
-The controlled continuation is now in the [Whisper contract](../example/hub/Whisper-integration/integrations/transformers/usage.md), as `continued_longform_tokens`. Published contract revision: `a4ed88605df499c8d655eff2838001279c3fe5e5`; fixture weights are unchanged. **14 baselines** (two targets × CPU ARM default/eager, CPU x86 default/eager, CUDA default/eager/bfloat16) preserve all old outputs and add the new one. Each recording includes a fresh-process stability check; additional isolated checks pass on ARM and the [A10G worker](https://github.com/huggingface/model-integration-contracts/actions/runs/38140685813). The contract itself, through `run.py`, passes on historical fix `e12c79c582` and fails only `continued_longform_tokens` on parent `f9b76f2dfc` with the published fixture. [Validation records](../experiments/results/whisper_contract_validation.json). Baselines honestly retain `contract_revision: local` where recorded before publication; the fleet pins the identical published source.
+The controlled continuation is now in the [Whisper contract](../example/hub/Whisper-integration/integrations/transformers/usage.md), as `continued_longform_tokens`. Published contract revision: `a4ed88605df499c8d655eff2838001279c3fe5e5`; fixture weights are unchanged. **14 baselines** (two targets × CPU ARM default/eager, CPU x86 default/eager, CUDA default/eager/bfloat16) preserve all old outputs and add the new one. Each recording includes a fresh-process stability check; additional isolated checks pass on ARM and the [A10G worker](https://github.com/huggingface/transformers-mic/actions/runs/38140685813). The contract itself, through `run.py`, passes on historical fix `e12c79c582` and fails only `continued_longform_tokens` on parent `f9b76f2dfc` with the published fixture. [Validation records](../experiments/results/whisper_contract_validation.json). Baselines honestly retain `contract_revision: local` where recorded before publication; the fleet pins the identical published source.
 
 ### Whisper assisted-decoding suppression
 
 2026-10-11: replayed [#48108](https://github.com/huggingface/transformers/pull/48108), fix `b6688043ff` and parent `2b296305d7`. The earlier contract probe uses `WhisperForCausalLM`; the upstream test uses `WhisperForConditionalGeneration` as its assistant. The latter gives the assistant its own encoder, which also permits an assistant of a different hidden width.
 
-The [first A10G replay](https://github.com/huggingface/model-integration-contracts/actions/runs/38140685813) used the pinned real tiny checkpoint, published overfit fixture, and a random twin, with each main model's own weights as the assistant. Five inputs (tones, silence, two text-prompt controls, and speech) × greedy/causal-assistant/encoder-decoder-assistant × two builds × three weight kinds = **90 generation calls**, float32, eager, torch 2.11.0+cu128. Speech is the upstream test's first LibriSpeech dummy sample, `1272-128104-0000`, from dataset revision `5be91486e11a2d616f4ec5db8d3fd248585ac07a`; its original FLAC and [provenance](../experiments/audio/1272-128104-0000.json) are frozen separately from the synthetic contract inputs.
+The [first A10G replay](https://github.com/huggingface/transformers-mic/actions/runs/38140685813) used the pinned real tiny checkpoint, published overfit fixture, and a random twin, with each main model's own weights as the assistant. Five inputs (tones, silence, two text-prompt controls, and speech) × greedy/causal-assistant/encoder-decoder-assistant × two builds × three weight kinds = **90 generation calls**, float32, eager, torch 2.11.0+cu128. Speech is the upstream test's first LibriSpeech dummy sample, `1272-128104-0000`, from dataset revision `5be91486e11a2d616f4ec5db8d3fd248585ac07a`; its original FLAC and [provenance](../experiments/audio/1272-128104-0000.json) are frozen separately from the synthetic contract inputs.
 
 | Main / assistant | Bad versus fixed | Verdict |
 | --- | --- | --- |
@@ -382,15 +388,15 @@ The [first A10G replay](https://github.com/huggingface/model-integration-contrac
 | Random / causal or encoder-decoder twin | All five inputs unchanged | Missed. |
 | Real large-v2 / encoder-decoder tiny, float16 | Four of five inputs change; speech again adds `Thank you.` only on the bad build | Reproduces the upstream model pairing and dtype. Fixed outputs match greedy on all five inputs. |
 
-The [large-v2 replay](https://github.com/huggingface/model-integration-contracts/actions/runs/38141596107) pins `openai/whisper-large-v2@ae4642769ce2ad8fc292556ccea8e901f1530655`, with the fleet's tiny checkpoint as assistant: five inputs × greedy/assisted × two builds = **20 more calls**. Greedy outputs are identical across both builds for every weight set and input. Each weight file is reused unchanged across its pair. Observers return the original logits processors unchanged; on the bad build, cleared suppression settings are restored and extra beginning-token suppression reaches assisted generation. These observations are diagnostic; the catch is the actual generated token/text difference. [Harness](../experiments/whisper_assisted_suppression.py); [raw records and comparisons](../experiments/results/whisper_assisted_suppression.json).
+The [large-v2 replay](https://github.com/huggingface/transformers-mic/actions/runs/38141596107) pins `openai/whisper-large-v2@ae4642769ce2ad8fc292556ccea8e901f1530655`, with the fleet's tiny checkpoint as assistant: five inputs × greedy/assisted × two builds = **20 more calls**. Greedy outputs are identical across both builds for every weight set and input. Each weight file is reused unchanged across its pair. Observers return the original logits processors unchanged; on the bad build, cleared suppression settings are restored and extra beginning-token suppression reaches assisted generation. These observations are diagnostic; the catch is the actual generated token/text difference. [Harness](../experiments/whisper_assisted_suppression.py); [raw records and comparisons](../experiments/results/whisper_assisted_suppression.json).
 
-The routine contract is published at `77fb2ffa32645b4e02243c7a149edf218602684b`, with **seven reviewed baselines**: ARM default/eager, x86 default/eager, CUDA default/eager/bfloat16. Every recording includes a fresh-process stability check. The [A10G worker](https://github.com/huggingface/model-integration-contracts/actions/runs/38145323837) passed all five supported worker variants and caught the bad/fix pair through `run.py` on CPU and CUDA eager; the published contract also caught it on ARM. Input bytes and provenance are part of the contract pin. Worker isolated checks took 15–16 s on CPU and 9–10 s on CUDA. Baselines retain their pre-publication `unpublished` provenance. [Validation records](../experiments/results/whisper_speech_contract_validation.json).
+The routine contract is published at `77fb2ffa32645b4e02243c7a149edf218602684b`, with **seven reviewed baselines**: ARM default/eager, x86 default/eager, CUDA default/eager/bfloat16. Every recording includes a fresh-process stability check. The [A10G worker](https://github.com/huggingface/transformers-mic/actions/runs/38145323837) passed all five supported worker variants and caught the bad/fix pair through `run.py` on CPU and CUDA eager; the published contract also caught it on ARM. Input bytes and provenance are part of the contract pin. Worker isolated checks took 15–16 s on CPU and 9–10 s on CUDA. Baselines retain their pre-publication `unpublished` provenance. [Validation records](../experiments/results/whisper_speech_contract_validation.json).
 
 **Limits and decision:** no overfit-only catch. The checkpoint-only [WhisperSpeech contract](../example/hub/WhisperSpeech-integration/integrations/transformers/usage.md) now adds frozen speech with an encoder-decoder assistant to routine nightly coverage. Readable short answers do not establish longer-speech or assisted EOS coverage. Cross-width causal assistants are unsupported, so large-v2 uses the upstream encoder-decoder pairing. Fixture-only runs explicitly exclude this path; no fixture was retrained. Stop broad weight-pair searches; reserve controls for specific detection/repair questions ([comparison](fixtures.md#overfit-versus-random-what-can-we-conclude)).
 
 Re-run the targeted GPU jobs:
 
 ```sh
-gh workflow run gpu-checks.yml --repo huggingface/model-integration-contracts -f matrix=whisper-contract
-gh workflow run gpu-checks.yml --repo huggingface/model-integration-contracts -f matrix=whisper-assist-large
+gh workflow run gpu-checks.yml --repo huggingface/transformers-mic -f matrix=whisper-contract
+gh workflow run gpu-checks.yml --repo huggingface/transformers-mic -f matrix=whisper-assist-large
 ```

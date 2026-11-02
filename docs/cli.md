@@ -507,9 +507,9 @@ model.audio_tower.conformer: 12 -> 12 layers (AudioConformerBlock 12->12)
 0 finding(s)
 ```
 
-A fixture that lost a layer kind: Llama 4 Scout's `moe_layers` is an index list
-as long as the depth, so the shrink rule used to slice it like a per-layer list
-and build a dense layer instead of MoE. Fixed since; rebuilt fixtures keep 4 layers.
+A fixture that lost a layer kind, from before the shrink rule was fixed: Llama 4
+Scout's `moe_layers` is an index list as long as the depth, so the rule sliced it
+like a per-layer list and built a dense layer instead of MoE.
 
 ```text
 huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic <- RedHatAI/Llama-4-Scout-17B-16E-Instruct@5996646… (Llama4ForConditionalGeneration)
@@ -520,6 +520,11 @@ language_model.model.layers: 48 -> 2 layers (Router, TextExperts, TextL2Norm …
   - language_model.model.layers: layer kind 'Router, TextExperts, TextMoe' is not in the fixture
   - language_model.model.layers: layer kind 'no Router' exists only in the fixture
 ```
+
+The rebuilt fixture keeps both kinds: 108.6B → 44.7M parameters, vision 34 → 2
+layers, language 48 → 4 layers, 0 findings
+([published report](https://huggingface-mic-mic-coverage.static.hf.space/shrink/Llama-4-Scout-17B-16E-Instruct-mic.html)).
+The screenshot below is the old fixture.
 
 ![tmic shrink page for Llama 4 Scout](assets/tmic-shrink.png)
 

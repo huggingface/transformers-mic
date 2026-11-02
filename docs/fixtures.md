@@ -13,11 +13,13 @@ PR checks need models that run on CPU in seconds and exercise real integration p
 1. Redirect tiny-model builds to this recipe; pause [#49103](https://github.com/huggingface/transformers/pull/49103)'s smoke-only tests ([why](#relation-to-todays-tiny-models)).
 2. Close [sweep](#does-it-scale-to-every-architecture) gaps (coupled fields, real processor inputs, multimodal image paths), then retire smoke-only tests.
 3. Keep a training check per trainable model family; inference-only usage paths can share that coverage.
-4. Verify `test-artifact` hides the nine published `hf-internal-testing/proto-*` fixtures from search.
+4. Decide whether fixtures should stay findable on the Hub. The `test-artifact` tag does not hide them: on 2026-11-02, Hub search for `smollm-mic` returned `huggingface-mic/smollm-mic`.
 5. Calibrate CPU-only CI and other-GPU tolerances.
 6. Measure pilot upkeep: shrink-rule fixes, overfit non-convergence, baseline reviews.
 
 ## Recipe
+
+In short: shrink the real config while keeping every layer kind (step 1), copy the preprocessing files unchanged (step 2), find weights the contract's inputs actually move and check them (steps 3–4), then freeze, publish and record baselines (steps 5–6). Step 0 picks the checkpoint to start from.
 
 0. **Pick a trained source checkpoint:** the model type's documented checkpoint, else its most downloaded ungated one. Never another project's test model (a `*-testing` org, a `tiny-random`/`dummy` name, [`is_test_checkpoint`](../src/transformers_mic/hub.py)): it is untrained and its config and processor files are not the ones users load. The sweep skips them and `tmic create` refuses them. A model type whose only checkpoints are test models is not Reachable.
 1. **Shrink the real config** ([`shrink()`](../experiments/sweep.py)), in every sub-config, innermost first. **A source of 20M parameters or fewer is not shrunk** ([`SMALL_SOURCE`](../example/build_fixtures.py)): the fixture is the checkpoint itself, config and trained weights unchanged, since it is no bigger than a slim fixture (median ~9M) and tests trained behaviour. Its `build.json` records `shrink: none`, `weights: real`.
@@ -47,10 +49,10 @@ PR checks need models that run on CPU in seconds and exercise real integration p
    - Fail: overfit the contract's training batch in float32 (AdamW, lr 5e-3, clipping, ≤ 500 steps, loss < 0.05 twice), cast to fixture dtype, pass the gate (Whisper); otherwise fail the build.
    - Recipes may require overfit with a reviewed reason and target loss: the gate reads teacher-forced logits, while random [SmolLM](evidence.md#bfloat16-on-cpu) and [MusicGen Melody](evidence.md#overfit-or-random-weights-on-real-regressions) generate one answer for every prompt.
 4. **Gate the build, then validate the saved fixture.**
-   - **Sensitivity:** perturb each named input (`input_ids`, `attention_mask`, `pixel_values`, `input_features`, …) by row swap, reversal, all-ones mask, channel swap, or halving. Threshold: 10× the recipe's `gate_tolerance`, else the largest manifest `atol` (currently 1e-3). Relative/platform tolerances and compared-output sensitivity remain [gaps](problems-and-opened-questions.md#3-the-sensitivity-gate-checks-the-wrong-thing).
+   - **Sensitivity:** perturb each named input (`input_ids`, `attention_mask`, `pixel_values`, `input_features`, …) by row swap, reversal, all-ones mask, channel swap, or halving. The outputs must move by more than 10× the recipe's `gate_tolerance`, or, without one, 10× the largest `allclose` `atol` in the manifest (1e-3 for the usual `1e-4`). Relative/platform tolerances and compared-output sensitivity remain [gaps](problems-and-opened-questions.md#3-the-sensitivity-gate-checks-the-wrong-thing).
    - **Accept blind spots with reasons** in the manifest: Wav2Vec2-base's bias-free first convolution feeds group norm, making the fixture amplitude-insensitive (5e-5; real checkpoint 3.9).
    - **Health:** the builder reloads saved weights and checks finite outputs, loss, and gradients in float32/bfloat16/float16 on its host. Contracts additionally verify SGD updates parameters on each used dtype/platform class. Gate failures block builds; contract checks validate published artifacts.
-5. **Freeze and publish** a pinned test artifact outside Hub search; hardware affects rebuilds.
+5. **Freeze and publish** the fixture to its `huggingface-mic/<name>-mic` repository, tagged `mic` and `test-artifact`, and pin the Hub commit. CI reuses that snapshot: rebuilding on other hardware gives different bytes.
 6. **Baseline a known-good build:** default runtime plus eager variant; discrete outputs, selected logits, loss, named-module gradients, and whether SGD updates parameters. See [platform rules](#hardware-and-dtype).
 
 ## What a fixture result tells an agent
@@ -59,7 +61,7 @@ A pass establishes reviewed behavior only on the exercised path and fixed inputs
 
 ## Choosing the weights
 
-Four weight methods; SmolLM, CLIP, BERT, T5, Whisper, Wav2Vec2; identical faults/tolerances, three dtypes, Mac CPU and A10G. Detection matched across hardware, with no false alarms ([script](../experiments/fixture_init.py), [CPU](../experiments/results/fixture_init.json), [GPU](../experiments/results/fixture_init_gpu.json)). These experimental builds differ from the published fleet; MusicGen Melody was added later.
+We compared four ways to get fixture weights on six families (SmolLM, CLIP, BERT, T5, Whisper, Wav2Vec2), with the same injected faults and tolerances, in three dtypes, on a Mac CPU and an A10G. Detection matched across hardware, with no false alarms ([script](../experiments/fixture_init.py), [CPU](../experiments/results/fixture_init.json), [GPU](../experiments/results/fixture_init_gpu.json)). The faults are synthetic (for example zeroed attention, a detached MLP, swapped inputs or shuffled labels), not real regressions. These experimental builds differ from the published fleet, and MusicGen Melody was added later.
 
 | | Random | Overfit | Pruned (2 real layers, full width) | Sliced (real tensors cut to width) |
 | --- | ---: | ---: | ---: | ---: |
@@ -78,7 +80,7 @@ Four weight methods; SmolLM, CLIP, BERT, T5, Whisper, Wav2Vec2; identical faults
 
 ### Overfit versus random: what can we conclude?
 
-Readable answers, sensitivity, and bug detection are separate benefits. No real overfit-only catch has been found; tested ties do not establish equal coverage. “Tied” below means both catch, both miss, or no demonstrated advantage.
+Readable answers, sensitivity, and bug detection are separate benefits. We have not found a real regression that only the overfit fixture catches. A tie on the bugs we tested doesn't mean the two cover the same ground. “Tied” below means both catch, both miss, or neither shows an advantage.
 
 | Criterion | Observed comparison and limits | Which one |
 | --- | --- | --- |
@@ -95,7 +97,7 @@ Readable answers, sensitivity, and bug detection are separate benefits. No real 
 
 Sources: [weight-initialization study](#choosing-the-weights), [Melody bad/fix pairs and conditioning controls](evidence.md#musicgen-melody-conditioning-controls), [Whisper left-padding replay](evidence.md#whisper-left-padded-previous-segment-prompts), and [assisted-decoding replay](evidence.md#whisper-assisted-decoding-suppression).
 
-**Decision:** prefer overfit for readable generation or a failed random sensitivity gate; retain random where it satisfies the contract. Run one reviewed, frozen weight set per fixture in CI. Stop broad paired-weight experiments; reserve twins for specific detection or repair questions. This does not establish overfit's superiority on real regressions or justify replacing every random fixture.
+**Decision:** use overfit weights when the contract needs readable generation or random weights fail the sensitivity gate; keep random weights when they satisfy the contract. CI runs one reviewed, frozen weight set per fixture. We stopped broad paired-weight experiments and build random/overfit twins only for a specific detection or repair question. None of this shows overfit weights catch more real regressions, or justifies replacing every random fixture.
 
 ## Shrinking depth by layer pattern
 
