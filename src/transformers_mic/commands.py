@@ -717,6 +717,7 @@ def propose_valid(context, args, model, fixture, old=None):
                 model=args.llm_model,
                 provider=args.provider,
                 bill_to=args.bill_to,
+                temperature=0.0 if attempt == 0 else 0.7,
             )
             if isinstance(plan.get("name"), str):  # "Qwen3.5-0.8B" is a slug away from valid
                 plan["name"] = re.sub(r"[^A-Za-z0-9_-]", "-", plan["name"])
@@ -900,6 +901,17 @@ def create(args):
             "rationale": "Use the model's public API and measure expectations by execution.",
             "historical_candidates": [],
         }
+        context["example_reason"] = "generic example: no closer approved contract"
+        try:
+            from . import examples
+
+            nearest = examples.nearest_contract(config, model=args.model)
+        except Exception as error:  # an unreachable fleet keeps the generic example
+            print(f"tmic: closest-contract lookup failed ({error}); using the BERT example", file=sys.stderr)
+            nearest = None
+        if nearest:
+            context["example_plan"], context["example_reason"] = nearest
+            print(f"tmic: planner example: {context['example_reason']}", file=sys.stderr)
         plan, llm = propose_valid(context, args, args.model, fixture)
         manifest = plan["manifest"]
         if args.name:

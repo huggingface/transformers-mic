@@ -1719,3 +1719,41 @@ def test_create_rejects_a_loss_built_only_from_no_grad_outputs():
     # A constant target computed under no_grad is fine.
     target = fresh.replace("loss = ce(logits, labels)", "loss = ce(logits, features)")
     commands.check_loss_has_gradients({"usage": target})
+
+
+def test_nearest_contract_prefers_shared_structure(monkeypatch, tmp_path):
+    from transformers_mic import examples
+
+    configs = {
+        "org/llama": {"architectures": ["LlamaForCausalLM"], "model_type": "llama"},
+        "org/mistral3": {"architectures": ["Mistral3ForConditionalGeneration"], "model_type": "mistral3",
+                         "vision_config": {"model_type": "pixtral"}, "text_config": {"model_type": "ministral3"}},
+        "org/bert": {"architectures": ["BertForMaskedLM"], "model_type": "bert"},
+    }
+
+    def download(repo, filename, revision=None):
+        path = tmp_path / repo.replace("/", "--") / filename
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if filename == "config.json":
+            path.write_text(json.dumps(configs[repo]))
+        elif filename == "integration.json":
+            path.write_text(json.dumps({"integrations": {"transformers": {"entry_point": "usage.md"}}}))
+        else:
+            path.write_text(f"usage of {repo}")
+        return str(path)
+
+    monkeypatch.setattr(examples, "hf_hub_download", download)
+    rows = [("prototypes", name, {"repo": f"{repo}-mic", "revision": "r"}, {repo: "r"})
+            for name, repo in (("Llama", "org/llama"), ("Mistral3", "org/mistral3"), ("BERT", "org/bert"))]
+    for repo in list(configs):
+        configs[f"{repo}-mic"] = configs[repo]
+    large4 = {"architectures": ["MistralLarge4ForConditionalGeneration"], "model_type": "mistral_large4",
+              "vision_config": {"model_type": "pixtral"}, "text_config": {"model_type": "mistral_large4_text"}}
+    plan, reason = examples.nearest_contract(large4, rows=rows)
+    assert plan["name"] == "Mistral3" and "pixtral" in reason
+    plan, reason = examples.nearest_contract({"architectures": ["LlamaForCausalLM"], "model_type": "llama"}, rows=rows)
+    assert plan["name"] == "Llama" and "same architecture" in reason
+    assert examples.nearest_contract({"architectures": ["WhisperModel"], "model_type": "whisper"}, rows=rows) is None
+    monkeypatch.setenv("TMIC_EXAMPLE_SKIP_SELF", "1")
+    # Without its own contract, nothing else here shares Llama's structure.
+    assert examples.nearest_contract(configs["org/llama"], rows=rows, model="org/llama") is None
