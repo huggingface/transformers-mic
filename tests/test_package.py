@@ -616,6 +616,12 @@ def test_compare_rule_spelling_slips_are_normalized():
     assert [r["compare"] for r in plan["manifest"]["outputs"].values()] == ["all_true", "allclose", "fuzzy"]
 
 
+def test_unknown_manifest_keys_are_dropped_from_drafts():
+    plan = {"manifest": {"mic": "0.3", "name": "M", "checkpoints_note": "placeholder"}}
+    assert commands.drop_unknown_manifest_keys(plan) == ["checkpoints_note"]
+    assert plan["manifest"] == {"mic": "0.3", "name": "M"}
+
+
 def test_update_keeps_fixture_pin_and_old_source(workspace, monkeypatch):
     plan = {
         "name": "BERT",

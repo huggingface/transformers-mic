@@ -663,6 +663,25 @@ def normalize_compare(plan):
             rule["compare"] = spelled.get(re.sub(r"[^a-z]", "", rule["compare"].lower()), rule["compare"])
 
 
+def drop_unknown_manifest_keys(plan):
+    """Remove top-level manifest keys the MIC schema does not define.
+
+    The schema is open at the top level, so a draft's invention survives into the
+    workspace; Mistral-Large-4's "checkpoints_note": "placeholder" then made every
+    repair fail "preserve the entire manifest" when the repair dropped it.
+    """
+    manifest = plan.get("manifest") if isinstance(plan, dict) else None
+    if not isinstance(manifest, dict):
+        return []
+    known = set(manifest_schema().get("properties", {}))
+    dropped = sorted(k for k in manifest if k not in known)
+    for key in dropped:
+        del manifest[key]
+    if dropped:
+        print(f"tmic: dropped manifest keys the MIC schema does not define: {dropped}", file=sys.stderr)
+    return dropped
+
+
 def propose_valid(context, args, model, fixture, old=None):
     # A provider can emit schema-valid JSON that violates runner conventions.
     # Return validation feedback for one repair; never execute an invalid draft.
@@ -678,6 +697,7 @@ def propose_valid(context, args, model, fixture, old=None):
             if isinstance(plan.get("name"), str):  # "Qwen3.5-0.8B" is a slug away from valid
                 plan["name"] = re.sub(r"[^A-Za-z0-9_-]", "-", plan["name"])
             normalize_compare(plan)
+            drop_unknown_manifest_keys(plan)
             validate_plan(plan, model, fixture, old)
             check_imports(plan)
             check_undefined_names(plan)
@@ -697,6 +717,7 @@ def propose_valid(context, args, model, fixture, old=None):
         except (ValueError, jsonschema.ValidationError) as exc:
             if attempt == 2:
                 raise
+            print(f"tmic: planner draft {attempt + 1}/3 rejected: {str(exc).splitlines()[0][:300]}", file=sys.stderr)
             plan = plan if plan is not None else getattr(exc, "plan", None)
             context = {
                 **context,
