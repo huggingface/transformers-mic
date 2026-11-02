@@ -186,6 +186,36 @@ def runtime(profile):
     }
 
 
+NATIVE_FLAGS = {
+    "bfloat16": ({"avx512_bf16", "amx_bf16"}, "cpu-x86_64-bf16"),
+    "float16": ({"avx512_fp16"}, "cpu-x86_64-fp16"),
+}
+
+
+def missing_native_support(dtypes, cpuinfo="/proc/cpuinfo"):
+    """Why this x86 host cannot record the declared low-precision CPU classes,
+    or None. Checked before measuring so a wrong host costs a minute, not a run."""
+    if platform.machine().lower() not in ("x86_64", "amd64"):
+        return None
+    try:
+        flags = set(Path(cpuinfo).read_text().split())
+    except OSError:
+        return None
+    missing = [
+        f"{dtype} needs {required} ({' or '.join(sorted(needed))})"
+        for dtype, (needed, required) in sorted(NATIVE_FLAGS.items())
+        if dtype in dtypes and not flags & needed
+    ]
+    if not missing:
+        return None
+    return (
+        "This CPU runner cannot record the declared variants: "
+        + "; ".join(missing)
+        + ". The runner pool handed out a host without native support; "
+        "retry to dispatch a new run."
+    )
+
+
 def execute(root, command, name):
     log = root / "logs" / (name + ".log")
     log.parent.mkdir(parents=True, exist_ok=True)
@@ -260,6 +290,7 @@ def measure(args):
         raise ValueError("Installed framework revision does not match the request")
     progress = Progress(args.job_id, args.profile)
     progress.emit("planning", 0, 0)
+    planned_dtypes = set()
     for fleet_name in request["fleets"]:
         if fleet_name not in fleet.FILES:
             raise ValueError("Unknown fleet")
@@ -298,14 +329,23 @@ def measure(args):
             planned_targets = expected_targets(contract, manifest, args.fixtures_only)
             if not planned_targets and not args.fixtures_only:
                 raise ValueError("Contract declares no targets present in this fleet")
-            for variant in planned_variants:
+            for variant, spec in planned_variants.items():
                 safe(variant)
+                if isinstance(spec, dict) and spec.get("dtype") in NATIVE_FLAGS:
+                    planned_dtypes.add(spec["dtype"])
                 report["expected_cases"].extend(
                     f"{fleet_name}/{name}/{target}/{variant}"
                     for target in planned_targets
                 )
     total = len(report["expected_cases"])
     completed = 0
+    if args.profile == "cpu" and (host_error := missing_native_support(planned_dtypes)):
+        report["host_error"] = host_error
+        write(root / "collection.json", report)
+        print(
+            f"{report['runtime'].get('cpu')}: {host_error}", file=sys.stderr, flush=True
+        )
+        return 1
     write(root / "collection.json", report)
     for fleet_name in request["fleets"]:
         if fleet_name not in fleet.FILES:

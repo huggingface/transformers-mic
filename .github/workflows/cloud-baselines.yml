@@ -119,6 +119,7 @@ jobs:
   measure:
     needs: validate
     permissions:
+      actions: write  # the CPU job cancels the run when it cannot measure
       contents: read
       id-token: write
     strategy:
@@ -189,6 +190,22 @@ jobs:
           include-hidden-files: true
           retention-days: 30
           if-no-files-found: warn
+      - name: Stop the CUDA job when the CPU job fails
+        # A collection needs both profiles, so a failed CPU job (often a pooled host
+        # without native bfloat16) would leave the GPU measuring for nothing.
+        if: failure() && matrix.profile == 'cpu'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.api_url }}/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/cancel
+        run: |
+          python3 - <<'PY'
+          import os, urllib.request
+          request = urllib.request.Request(os.environ["RUN_URL"], method="POST", headers={
+              "Authorization": "Bearer " + os.environ["GH_TOKEN"],
+              "Accept": "application/vnd.github+json",
+          })
+          print(urllib.request.urlopen(request).status)
+          PY
 
   publish:
     needs: measure
