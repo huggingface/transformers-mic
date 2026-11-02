@@ -260,7 +260,12 @@ def keep_large_checkpoints_off_cpu(manifest, parameters):
 
 def parameter_count(model, revision):
     info = HfApi().model_info(model, revision=revision, expand=["safetensors"])
-    return getattr(info.safetensors, "total", None)
+    total = getattr(info.safetensors, "total", None)
+    if total is None:
+        from . import inspection
+
+        total = inspection.explicit_parameter_count(model, revision)
+    return total
 
 
 def check_partial_training(plan, context):
@@ -541,7 +546,12 @@ def check_parameter_names(plan, config):
             }
     except Exception:  # inspection is advisory; the build still runs the contract
         return
-    missing = sorted(names - real)
+    # The prompt asks for suffix lookups (n.endswith("mlp.gate_proj.weight")): a
+    # dotted suffix of a real name is a real name. Mistral-Large-4's draft failed
+    # three times on this until 2026-11-02.
+    missing = sorted(
+        name for name in names - real if not any(r.endswith("." + name) for r in real)
+    )
     if missing:
         import difflib
 
@@ -553,10 +563,12 @@ def check_parameter_names(plan, config):
             return (difflib.get_close_matches(name, same, n=1, cutoff=0.0) or ["?"])[0]
 
         closest = {name: nearest(name) for name in missing}
-        # The first block and the non-repeated modules show the real naming scheme.
-        hints = sorted(n for n in real if ".0." in n or not re.search(r"\.\d+\.", n))[
-            :60
-        ]
+        # One name per layer kind, not only block 0: Mistral-Large-4's block 0 is its
+        # one dense layer, so a block-0 list hides every MoE expert parameter.
+        kinds = {}
+        for n in sorted(real, key=lambda n: [int(t) if t.isdigit() else t for t in n.split(".")]):
+            kinds.setdefault(re.sub(r"\.\d+\.", ".N.", n), n)
+        hints = sorted(kinds.values())[:80]
         raise ValueError(
             f"Usage names parameters {cls.__name__} does not have after loading "
             f"(checkpoint keys are remapped on load). Closest loaded names: {closest}; "
@@ -634,6 +646,42 @@ def sentencepiece_tokenizer(model_type):
     return False
 
 
+COMPARE_RULES = ("exact", "allclose", "all_true", "true")
+
+
+def normalize_compare(plan):
+    """Spelling slips in output rules ('alltrue', 'all-true'): never spend a retry on them.
+
+    Mistral-Large-4's draft failed create on 'alltrue' (2026-11-02).
+    """
+    outputs = (plan.get("manifest") or {}).get("outputs") if isinstance(plan, dict) else None
+    if not isinstance(outputs, dict):
+        return
+    spelled = {re.sub(r"[^a-z]", "", rule): rule for rule in COMPARE_RULES}
+    for rule in outputs.values():
+        if isinstance(rule, dict) and isinstance(rule.get("compare"), str):
+            rule["compare"] = spelled.get(re.sub(r"[^a-z]", "", rule["compare"].lower()), rule["compare"])
+
+
+def drop_unknown_manifest_keys(plan):
+    """Remove top-level manifest keys the MIC schema does not define.
+
+    The schema is open at the top level, so a draft's invention survives into the
+    workspace; Mistral-Large-4's "checkpoints_note": "placeholder" then made every
+    repair fail "preserve the entire manifest" when the repair dropped it.
+    """
+    manifest = plan.get("manifest") if isinstance(plan, dict) else None
+    if not isinstance(manifest, dict):
+        return []
+    known = set(manifest_schema().get("properties", {}))
+    dropped = sorted(k for k in manifest if k not in known)
+    for key in dropped:
+        del manifest[key]
+    if dropped:
+        print(f"tmic: dropped manifest keys the MIC schema does not define: {dropped}", file=sys.stderr)
+    return dropped
+
+
 def propose_valid(context, args, model, fixture, old=None):
     # A provider can emit schema-valid JSON that violates runner conventions.
     # Return validation feedback for one repair; never execute an invalid draft.
@@ -648,6 +696,8 @@ def propose_valid(context, args, model, fixture, old=None):
             )
             if isinstance(plan.get("name"), str):  # "Qwen3.5-0.8B" is a slug away from valid
                 plan["name"] = re.sub(r"[^A-Za-z0-9_-]", "-", plan["name"])
+            normalize_compare(plan)
+            drop_unknown_manifest_keys(plan)
             validate_plan(plan, model, fixture, old)
             check_imports(plan)
             check_undefined_names(plan)
@@ -667,6 +717,8 @@ def propose_valid(context, args, model, fixture, old=None):
         except (ValueError, jsonschema.ValidationError) as exc:
             if attempt == 2:
                 raise
+            print(f"tmic: planner draft {attempt + 1}/3 rejected: {str(exc).splitlines()[0][:300]}", file=sys.stderr)
+            plan = plan if plan is not None else getattr(exc, "plan", None)
             context = {
                 **context,
                 "previous_draft": plan,

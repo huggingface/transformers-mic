@@ -592,6 +592,36 @@ def test_planner_repairs_invented_parameter_names(workspace, monkeypatch):
     assert "attention.self.query.weight" in error
 
 
+def test_parameter_names_accept_suffixes_and_hint_every_layer_kind():
+    pytest.importorskip("torch")
+    from transformers import DeepseekV3Config
+
+    # Block 0 dense, block 1 MoE: the shape of Mistral-Large-4.
+    config = DeepseekV3Config(
+        vocab_size=32, hidden_size=16, intermediate_size=16, moe_intermediate_size=8,
+        num_hidden_layers=2, num_attention_heads=2, num_key_value_heads=2,
+        n_routed_experts=2, num_experts_per_tok=1, first_k_dense_replace=1,
+        q_lora_rank=8, kv_lora_rank=8, qk_rope_head_dim=4, qk_nope_head_dim=4, v_head_dim=4,
+    ).to_dict()
+    plan = {"manifest": {"architecture": "DeepseekV3ForCausalLM"}}
+    commands.check_parameter_names({**plan, "usage": 'next(n for n in names if n.endswith("mlp.gate_proj.weight"))'}, config)
+    with pytest.raises(ValueError) as error:
+        commands.check_parameter_names({**plan, "usage": '"model.layers.1.mlp.down_proj.weight"'}, config)
+    assert "model.layers.1.mlp.experts." in str(error.value)
+
+
+def test_compare_rule_spelling_slips_are_normalized():
+    plan = {"manifest": {"outputs": {"g": {"compare": "alltrue"}, "l": {"compare": "AllClose"}, "x": {"compare": "fuzzy"}}}}
+    commands.normalize_compare(plan)
+    assert [r["compare"] for r in plan["manifest"]["outputs"].values()] == ["all_true", "allclose", "fuzzy"]
+
+
+def test_unknown_manifest_keys_are_dropped_from_drafts():
+    plan = {"manifest": {"mic": "0.3", "name": "M", "checkpoints_note": "placeholder"}}
+    assert commands.drop_unknown_manifest_keys(plan) == ["checkpoints_note"]
+    assert plan["manifest"] == {"mic": "0.3", "name": "M"}
+
+
 def test_update_keeps_fixture_pin_and_old_source(workspace, monkeypatch):
     plan = {
         "name": "BERT",
@@ -1186,6 +1216,76 @@ def test_checkpoint_keys_read_shard_headers_over_a_stale_index(monkeypatch, tmp_
     assert inspection.checkpoint_keys("org/model", "a" * 40, tmp_path) == {"lm.weight", "audio.weight"}
 
 
+def test_checkpoint_keys_follow_transformers_weights(monkeypatch, tmp_path):
+    from types import SimpleNamespace
+
+    from transformers_mic import inspection
+
+    # Mistral names its shards consolidated-*; config.json points the loader at them.
+    name = "consolidated.safetensors.index.json"
+    (tmp_path / "config.json").write_text(json.dumps({"transformers_weights": name}))
+    (tmp_path / name).write_text(json.dumps({"weight_map": {"a.weight": "consolidated-1.safetensors", "b.weight": "consolidated-2.safetensors"}}))
+    headers = {"consolidated-1.safetensors": {"a.weight"}, "consolidated-2.safetensors": {"b.weight", "c.weight"}}
+
+    class Api:
+        def parse_safetensors_file_metadata(self, repo, filename, revision=None, timeout=None):
+            return SimpleNamespace(tensors=dict.fromkeys(headers[filename]))
+
+        def file_exists(self, *args, **kwargs):
+            raise AssertionError("must not look for model.safetensors or pytorch_model.bin")
+
+    monkeypatch.setattr(inspection, "HfApi", Api)
+    assert inspection.checkpoint_keys("org/model", "a" * 40, tmp_path) == {"a.weight", "b.weight", "c.weight"}
+    assert inspection.loads_binary("org/model", "a" * 40, tmp_path) is False
+
+
+@pytest.mark.parametrize("name", ["../x.safetensors", "pytorch_model.bin", 3])
+def test_transformers_weights_must_be_a_local_safetensors_name(tmp_path, name):
+    from transformers_mic import inspection
+
+    (tmp_path / "config.json").write_text(json.dumps({"transformers_weights": name}))
+    with pytest.raises(ValueError, match="transformers_weights"):
+        inspection.explicit_weights(tmp_path)
+
+
+def test_checkpoint_keys_name_an_unknown_weight_layout(monkeypatch, tmp_path):
+    from transformers_mic import inspection
+
+    class Api:
+        def file_exists(self, repo, filename, revision=None):
+            return False
+
+        def get_repo_discussions(self, repo, **filters):
+            return []
+
+        def list_repo_files(self, repo, revision=None):
+            return ["config.json", "weights-00001.safetensors", "weights.index.json"]
+
+    monkeypatch.setattr(inspection, "HfApi", Api)
+    with pytest.raises(ValueError, match="weights-00001.safetensors"):
+        inspection.checkpoint_keys("org/model", "a" * 40, tmp_path)
+
+
+def test_parameter_count_sums_explicit_shards_the_hub_does_not_count(monkeypatch, tmp_path):
+    from types import SimpleNamespace
+
+    import huggingface_hub
+
+    from transformers_mic import inspection
+
+    name = "consolidated.safetensors.index.json"
+    (tmp_path / "config.json").write_text(json.dumps({"transformers_weights": name}))
+    (tmp_path / name).write_text(json.dumps({"weight_map": {"a": "c-1.safetensors", "b": "c-2.safetensors", "c": "c-2.safetensors"}}))
+    monkeypatch.setattr(huggingface_hub, "hf_hub_download", lambda repo, f, revision=None: str(tmp_path / f))
+
+    class Api:
+        def parse_safetensors_file_metadata(self, repo, filename, revision=None, timeout=None):
+            return SimpleNamespace(parameter_count={"F8_E4M3": 100, "BF16": 5} if filename == "c-2.safetensors" else {"BF16": 7})
+
+    monkeypatch.setattr(inspection, "HfApi", Api)
+    assert inspection.explicit_parameter_count("org/model", "a" * 40) == 112
+
+
 def test_visible_usage_never_shows_runner_plumbing():
     blocks = [
         "model = AutoModel.from_pretrained(model_id).to(device)\n"
@@ -1521,6 +1621,28 @@ def test_planner_slugs_a_dotted_contract_name():
     )
     plan, _ = planner.parse(response, "m", "p", None)
     assert plan["name"] == "Kimi-K2-5"
+
+
+def test_planner_renames_a_historical_key_slip_and_keeps_invalid_drafts():
+    from types import SimpleNamespace
+
+    import jsonschema
+
+    from transformers_mic import planner
+
+    def parse(draft):
+        response = SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(content=json.dumps(draft)), finish_reason="stop")],
+            usage=None,
+        )
+        return planner.parse(response, "m", "p", None)
+
+    draft = {"name": "M", "manifest": {}, "usage": "x" * 100, "rationale": ""}
+    plan, _ = parse({**draft, "historical_issues": [{"url": "u"}]})
+    assert plan["historical_candidates"] == [{"url": "u"}] and "historical_issues" not in plan
+    with pytest.raises(jsonschema.ValidationError) as error:
+        parse({**draft, "historical_candidates": [], "usage": "short"})
+    assert error.value.plan["usage"] == "short"
 
 
 def test_create_rejects_labels_a_forward_does_not_take():

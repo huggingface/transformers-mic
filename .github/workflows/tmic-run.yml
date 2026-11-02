@@ -1,0 +1,109 @@
+name: tmic run
+
+# Reproduce `tmic run <model>` on a cloud runner instead of a laptop: no
+# checkpoint download on a slow link, and a clean environment. Local-only:
+# nothing is published. Gates (source review, baselines) are auto-approved,
+# so read the uploaded workspace before trusting any of it.
+#
+#   gh workflow run tmic-run.yml --repo huggingface/transformers-mic \
+#     -f model=mistralai/Mistral-Large-4-1T-A52B [--ref <tmic branch>]
+#   gh run download <id> --repo huggingface/transformers-mic -n tmic-workspace
+#
+# What it needs and why (each cost one failed attempt to find):
+#   GH_TOKEN   create queries GitHub history through gh
+#   --bill-to  HF_HUB_READ_TOKEN cannot bill the huggingface org for the planner,
+#              so the token owner's credits are used ('')
+#   doc-builder + [runtime]  the build stage runs the usage.md contract
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        required: true
+        type: string
+      revision:
+        required: false
+        type: string
+        default: ""
+      transformers_ref:
+        required: false
+        type: string
+        default: main
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      HF_TOKEN: ${{ secrets.HF_HUB_READ_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      PYTHONUNBUFFERED: "1"
+      MODEL: ${{ inputs.model }}
+      REVISION: ${{ inputs.revision }}
+      TRANSFORMERS_REF: ${{ inputs.transformers_ref }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.11"
+      - name: Free disk
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+      - name: Install
+        run: |
+          git clone --filter=blob:none https://github.com/huggingface/transformers.git "$RUNNER_TEMP/transformers"
+          git -C "$RUNNER_TEMP/transformers" checkout -q "$TRANSFORMERS_REF"
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          python -m pip install --quiet -e ".[runtime]" -e "$RUNNER_TEMP/transformers" jsonschema \
+            "git+https://github.com/huggingface/doc-builder@c69e96c087165ba49b1788e0c3464654dd60253c"
+      - name: tmic run
+        run: |
+          set +e
+          args=("$MODEL" --mode agent --local-only --bill-to "" --baseline-execution local
+                --out work/run --transformers-checkout "$RUNNER_TEMP/transformers")
+          [ -n "$REVISION" ] && args+=(--revision "$REVISION")
+          tmic run "${args[@]}" > result.json; code=$?
+          for i in $(seq 12); do
+            python - <<'PY' || break
+          import json, sys
+          q = json.load(open("result.json")).get("pending_question")
+          if not q or q["kind"] == "retry":
+              sys.exit(1)
+          print("approving", q["kind"], file=sys.stderr)
+          json.dump({"question_id": q["question_id"], "answer": "approve", "reason": "tmic-run workflow, local-only"}, open("answer.json", "w"))
+          PY
+            tmic run "${args[@]}" --answer answer.json > result.json; code=$?
+          done
+          for f in work/run/.mic/automation/logs/*.log; do echo "::group::$f"; tail -150 "$f"; echo "::endgroup::"; done
+          python -c "import json;r=json.load(open('result.json'));print(json.dumps({k:r.get(k) for k in ('status','stage','pending_question')},indent=1)[:4000])"
+          status=$(python -c "import json;print(json.load(open('result.json')).get('status'))")
+          echo "### tmic run $MODEL: $status (exit $code)" >> "$GITHUB_STEP_SUMMARY"
+          [ "$code" = 0 ]
+      - name: Fixture report
+        if: always()
+        run: |
+          python - <<'PY'
+          import glob, json
+          for build in glob.glob("work/run/.mic/artifacts/*/*/build.json"):
+              folder = build.rsplit("/", 1)[0]
+              b, c = json.load(open(build)), json.load(open(folder + "/config.json"))
+              text = c.get("text_config", c)
+              print("fixture", folder, "parameters", b["parameters"], "weights", b.get("weights"), "missing", b["missing_parameters"])
+              print("layers", text.get("num_hidden_layers"), {k: v for k, v in text.items() if isinstance(v, list) and len(v) == text.get("num_hidden_layers")})
+              print("scalars", {k: text.get(k) for k in ("first_k_dense_replace", "index_topk", "n_routed_experts", "num_experts_per_tok") if k in text})
+              print("gate", json.dumps(b.get("gate"))[:1500])
+              print("health", json.dumps(b.get("numeric_health")))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: tmic-workspace
+          path: |
+            result.json
+            work/run
+          include-hidden-files: true
+          retention-days: 7

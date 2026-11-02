@@ -186,3 +186,27 @@ def test_truncated_runtime_error_is_eligible_for_repair(setup):
         "RuntimeError: Input type FloatTensor and weight type BFloat16Type should be the same"
     )
     assert repair.eligible(setup.workspace, "auto", setup.log)
+
+
+def test_failure_before_the_contract_runs_is_not_repairable(setup):
+    # Mistral-Large-4: inspection looked for pytorch_model.bin; no usage edit can fix that.
+    setup.log.write_text(
+        'MIC_PROGRESS {"phase": "Inspect checkpoint", "detail": "org/m"}\n'
+        "Traceback (most recent call last):\n"
+        "huggingface_hub.errors.EntryNotFoundError: 404 pytorch_model.bin\n"
+    )
+    assert not repair.eligible(setup.workspace, "build", setup.log)
+    setup.log.write_text(
+        setup.log.read_text()
+        + 'MIC_PROGRESS {"phase": "Run contract and capture training inputs", "detail": ""}\n'
+        + "Traceback (most recent call last):\nRuntimeError: the contract fails\n"
+    )
+    assert repair.eligible(setup.workspace, "build", setup.log)
+
+
+def test_missing_backend_is_not_repairable(setup):
+    setup.log.write_text(
+        "the contract fails on the random fixture:\nTraceback (most recent call last):\n"
+        "ImportError:\nPixtralProcessor requires the Torchvision library but it was not found in your environment.\n"
+    )
+    assert not repair.eligible(setup.workspace, "build", setup.log)

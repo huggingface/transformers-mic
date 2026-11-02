@@ -115,7 +115,16 @@ def parse(response, model, provider, bill_to):
     if isinstance(plan, dict) and isinstance(plan.get("name"), str):
         # "Kimi-K2.5" is a slug away from valid: never spend a retry on it.
         plan["name"] = re.sub(r"[^A-Za-z0-9_-]", "-", plan["name"])
-    jsonschema.validate(plan, PLAN_SCHEMA)
+    if isinstance(plan, dict) and "historical_candidates" not in plan:
+        # DeepSeek wrote historical_issues for Mistral-Large-4: a key slip, not a draft error.
+        slips = [k for k in plan if k.startswith("historical") and isinstance(plan[k], list)]
+        if len(slips) == 1:
+            plan["historical_candidates"] = plan.pop(slips[0])
+    try:
+        jsonschema.validate(plan, PLAN_SCHEMA)
+    except jsonschema.ValidationError as error:
+        error.plan = plan  # the retry shows the model its own draft
+        raise
     return plan, {
         "model": model,
         "provider": provider,
@@ -166,7 +175,8 @@ acoustic decoder), a router whose routing can give zero (PhiMoE's sparsemixer), 
 a layer behind a zero-initialized one (RT-DETR's bbox_embed MLP zero-inits its
 output layer, so on the first step only that last linear gets a gradient).
 Find a layer of one kind by name, never by index: next(n for n in names if
-n.endswith("experts.gate_up_proj")), since the fixture's depth follows its layer kinds.
+n.endswith("experts.gate_up_proj")), since the fixture's depth follows its layer kinds
+and early layers may be dense before MoE ones (first_k_dense_replace).
 training.updated checks whether SGD actually changes weights; snapshot only
 trainable parameters, on the CPU, so the step fits a real checkpoint's
 accelerator memory. Use exactly these hidden lines around optimizer.step():
@@ -245,7 +255,9 @@ not memory:
   videos=, audio= (audios= raises). For a chat-template VLM, render the prompts
   with processor.apply_chat_template(messages, add_generation_prompt=True,
   tokenize=False), then call processor(text=texts, images=images, ...); passing
-  images= to apply_chat_template(tokenize=True) raises "multiple values".
+  images= to apply_chat_template(tokenize=True) raises "multiple values". Pass
+  exactly one image per image placeholder: an extra image for a text-only prompt
+  raises "Image features and image tokens do not match" (Mistral-Large-4).
 - Pass audio as a list of 1-D float NumPy arrays: some feature extractors (CLAP)
   read a list of torch tensors as one unbatched clip and allocate tens of GB. A
   fusion extractor (CLAP, enable_fusion) marks a random clip "longer" when none

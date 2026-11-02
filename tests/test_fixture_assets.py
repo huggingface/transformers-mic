@@ -1,6 +1,7 @@
 """Regression coverage for non-language-model fixture inputs."""
 
 import hashlib
+import json
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -780,3 +781,38 @@ def test_a_small_source_is_kept_whole_and_a_large_one_is_shrunk(tmp_path):
     config = build_fixtures.shrunk_config(tmp_path / "large", LlamaForCausalLM)
     assert config.num_hidden_layers < 8
     assert not build_fixtures.keeps_source(tmp_path / "large", LlamaForCausalLM, config)
+
+
+def test_pixtral_vision_is_inert_to_pixel_scale():
+    from transformers import Mistral3Config
+
+    config = Mistral3Config()
+    assert config.vision_config.model_type == "pixtral"
+    assert "pixel_values:halve" in build_fixtures.config_insensitive(config, {"pixel_values": None})
+    assert "pixel_values:halve" not in build_fixtures.config_insensitive(config, {"input_ids": None})
+
+
+
+def test_layer_pattern_keeps_every_flagged_layer_kind_and_its_kv_source():
+    from types import SimpleNamespace
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    import layer_patterns
+
+    # Mistral-Large-4 in 8 layers: dense 0, NoPE every 4th, a shared indexer from 5,
+    # and layer 7 reading layer 6's KV cache.
+    lists = {
+        "layer_types": ["indexed_attention"] * 8,
+        "mlp_layer_types": ["dense"] + ["sparse"] * 7,
+        "no_rope_layers": [1, 1, 1, 0, 1, 1, 1, 0],
+        "indexer_types": ["full"] * 5 + ["shared"] * 3,
+        "kv_source_layers": [0, 1, 2, 3, 4, 5, 6, 6],
+        "num_attention_heads_per_layer": [4, 4, 8, 8, 4, 4, 8, 8],  # a width, not a kind
+    }
+    config = SimpleNamespace(num_hidden_layers=8, first_k_dense_replace=1, **lists)
+    config.to_dict = lambda: dict(lists, num_hidden_layers=8)
+    kept = layer_patterns.pattern_indices(config)
+    assert kept == [0, 1, 3, 5, 6, 7]  # 6 is kept as layer 7's KV source
+    values = {}
+    layer_patterns.reindex_references(values, config, kept)
+    assert values["kv_source_layers"] == [0, 1, 2, 3, 4, 4]

@@ -32,6 +32,20 @@ STAGES = (
 )
 
 
+
+def pre_contract_note(stage, log):
+    """Why no repair was proposed: the build failed before the contract ran."""
+    if stage != "build" or not Path(log).is_file():
+        return ""
+    phase = contract_repair.failed_phase(Path(log).read_text(errors="replace"))
+    if phase not in contract_repair.PRE_CONTRACT_PHASES:
+        return ""
+    return (
+        f"The build failed in '{phase}', before the contract ran: this is a tmic or "
+        "checkpoint-layout problem, not a contract one, so no repair was proposed. "
+        "Report it with the log below. "
+    )
+
 def ask(args, question, details, **kwargs):
     interaction = getattr(args, "_interaction", None)
     if interaction is None:
@@ -831,7 +845,8 @@ def run_locked(args, root, answer):
                 ask(
                     args,
                     "Retry " + terminal.STAGE_NAMES.get(name, name).lower() + "?",
-                    (
+                    pre_contract_note(name, log)
+                    + (
                         "Repair limit reached. "
                         if name == "build"
                         and len(state.get("repairs", [])) >= args.max_contract_repairs
