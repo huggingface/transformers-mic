@@ -610,6 +610,12 @@ def test_parameter_names_accept_suffixes_and_hint_every_layer_kind():
     assert "model.layers.1.mlp.experts." in str(error.value)
 
 
+def test_compare_rule_spelling_slips_are_normalized():
+    plan = {"manifest": {"outputs": {"g": {"compare": "alltrue"}, "l": {"compare": "AllClose"}, "x": {"compare": "fuzzy"}}}}
+    commands.normalize_compare(plan)
+    assert [r["compare"] for r in plan["manifest"]["outputs"].values()] == ["all_true", "allclose", "fuzzy"]
+
+
 def test_update_keeps_fixture_pin_and_old_source(workspace, monkeypatch):
     plan = {
         "name": "BERT",

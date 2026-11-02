@@ -646,6 +646,23 @@ def sentencepiece_tokenizer(model_type):
     return False
 
 
+COMPARE_RULES = ("exact", "allclose", "all_true", "true")
+
+
+def normalize_compare(plan):
+    """Spelling slips in output rules ('alltrue', 'all-true'): never spend a retry on them.
+
+    Mistral-Large-4's draft failed create on 'alltrue' (2026-11-02).
+    """
+    outputs = (plan.get("manifest") or {}).get("outputs") if isinstance(plan, dict) else None
+    if not isinstance(outputs, dict):
+        return
+    spelled = {re.sub(r"[^a-z]", "", rule): rule for rule in COMPARE_RULES}
+    for rule in outputs.values():
+        if isinstance(rule, dict) and isinstance(rule.get("compare"), str):
+            rule["compare"] = spelled.get(re.sub(r"[^a-z]", "", rule["compare"].lower()), rule["compare"])
+
+
 def propose_valid(context, args, model, fixture, old=None):
     # A provider can emit schema-valid JSON that violates runner conventions.
     # Return validation feedback for one repair; never execute an invalid draft.
@@ -660,6 +677,7 @@ def propose_valid(context, args, model, fixture, old=None):
             )
             if isinstance(plan.get("name"), str):  # "Qwen3.5-0.8B" is a slug away from valid
                 plan["name"] = re.sub(r"[^A-Za-z0-9_-]", "-", plan["name"])
+            normalize_compare(plan)
             validate_plan(plan, model, fixture, old)
             check_imports(plan)
             check_undefined_names(plan)
