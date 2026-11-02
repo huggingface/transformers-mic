@@ -6,7 +6,6 @@ import pytest
 from transformers_mic import contract_repair as repair
 from transformers_mic.workspace import Workspace
 from transformers_mic.workspace import write
-from conftest import requires_runtime
 
 
 @pytest.fixture
@@ -58,7 +57,7 @@ def propose(s):
     )
 
 
-@requires_runtime
+@pytest.mark.requires_runtime
 def test_proposal_uses_inspection_and_log_without_mutating_contract(setup):
     s = setup
     original = s.workspace.contract_digest()
@@ -102,7 +101,7 @@ def test_repair_runs_the_draft_usage_checks(setup):
     assert s.workspace.contract_digest() == before
 
 
-@requires_runtime
+@pytest.mark.requires_runtime
 def test_repair_keeps_the_contract_name(setup):
     s = setup
     s.plan["name"] = "bert-base-uncased.v2"  # invalid slug, and a rename
@@ -112,7 +111,7 @@ def test_repair_keeps_the_contract_name(setup):
     assert s.workspace.state["contract"] == "BERT"
 
 
-@requires_runtime
+@pytest.mark.requires_runtime
 def test_changed_source_or_proposal_invalidates_approval(setup):
     s = setup
     attempt = propose(s)
@@ -153,7 +152,7 @@ def test_dependency_network_errors_do_not_trigger_contract_repair(setup):
     assert not repair.eligible(s.workspace, "build", s.log)
 
 
-@requires_runtime
+@pytest.mark.requires_runtime
 def test_cloud_failure_uses_downloaded_worker_traceback_and_binds_it_to_review(setup):
     s = setup
     s.log.write_text("Cloud job failed; available partial artifacts were downloaded")

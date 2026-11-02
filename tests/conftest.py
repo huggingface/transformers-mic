@@ -13,12 +13,27 @@ def catalog_environment(monkeypatch):
     )
 
 
-def _missing_runtime():
-    return [n for n in ("torch", "transformers") if importlib.util.find_spec(n) is None]
+
+# Tests that load or introspect real models need the `runtime` extra
+# (pip install -e ".[dev,runtime]"); without it, @pytest.mark.requires_runtime
+# tests are skipped with the missing packages named.
+MISSING_RUNTIME = [
+    name for name in ("torch", "transformers") if importlib.util.find_spec(name) is None
+]
 
 
-# Tests that load or introspect real models need the `runtime` extra.
-requires_runtime = pytest.mark.skipif(
-    bool(_missing_runtime()),
-    reason=f"needs the runtime extra (missing: {', '.join(_missing_runtime())})",
-)
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers", "requires_runtime: needs torch and transformers (the runtime extra)"
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    if not MISSING_RUNTIME:
+        return
+    skip = pytest.mark.skip(
+        reason=f"needs the runtime extra (missing: {', '.join(MISSING_RUNTIME)})"
+    )
+    for item in items:
+        if "requires_runtime" in item.keywords:
+            item.add_marker(skip)

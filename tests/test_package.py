@@ -8,7 +8,6 @@ import pytest
 from transformers_mic import commands, history, planner, policy, resources
 from transformers_mic.cli import main, parser
 from transformers_mic.workspace import Workspace, fleet_environment, read, write
-from conftest import requires_runtime
 
 
 @pytest.fixture
@@ -527,7 +526,7 @@ def test_backend_schemas_and_catalog_present():
     assert resources.catalog_lock().is_file()
 
 
-@requires_runtime
+@pytest.mark.requires_runtime
 def test_planner_repairs_invalid_draft(workspace, monkeypatch):
     plan = {
         "name": "BERT",
@@ -594,7 +593,7 @@ def test_planner_repairs_invented_parameter_names(workspace, monkeypatch):
     assert "attention.self.query.weight" in error
 
 
-@requires_runtime
+@pytest.mark.requires_runtime
 def test_update_keeps_fixture_pin_and_old_source(workspace, monkeypatch):
     plan = {
         "name": "BERT",
@@ -1155,7 +1154,7 @@ def test_binary_only_checkpoint_reads_names_from_conversion_pr(tmp_path, monkeyp
     }
 
 
-@requires_runtime
+@pytest.mark.requires_runtime
 @pytest.mark.parametrize("zipped", [True, False])
 def test_binary_keys_read_names_without_tensor_data(monkeypatch, tmp_path, zipped):
     import torch
@@ -1247,7 +1246,7 @@ def test_overrides_never_shrink_the_checkpoint_vocabulary():
     assert fields == {"hidden_size": 64, "text_config.vocab_size": 512}
 
 
-@requires_runtime
+@pytest.mark.requires_runtime
 def test_sentencepiece_tokenizers_add_their_backends_to_requires():
     plan = {"manifest": {"integrations": {"transformers": {"requires": ["torch"]}}}}
     commands.check_config_facts(plan, {"model_type": "siglip"})
@@ -1275,7 +1274,7 @@ def test_create_rejects_usage_reading_names_it_never_defines():
         )
 
 
-@requires_runtime
+@pytest.mark.requires_runtime
 def test_create_rejects_model_classes_that_cannot_load_the_type():
     def plan(model_class, auto):
         return {
@@ -1376,7 +1375,7 @@ def test_fp8_checkpoint_names_drop_their_scales():
         logical_checkpoint_keys(config, {"layer.w2.weight_scale_inv"})
 
 
-@requires_runtime
+@pytest.mark.requires_runtime
 def test_split_weights_are_expanded_after_renaming(tmp_path, monkeypatch):
     # nomic_bert stores a fused encoder.layers.N.attn.Wqkv; Transformers renames
     # encoder.layers -> layers and chunks it into q/k/v_proj.
@@ -1414,7 +1413,7 @@ def test_split_weights_are_expanded_after_renaming(tmp_path, monkeypatch):
     )
 
 
-@requires_runtime
+@pytest.mark.requires_runtime
 def test_scoped_split_weights_are_expanded(tmp_path, monkeypatch):
     # Unlimited-OCR's fused vision qkv_proj is split by a converter scoped to the
     # renamed sub-model (vision_model -> vision_tower.vision_encoder), which never
@@ -1465,7 +1464,7 @@ def test_planner_backs_off_on_rate_limits_then_gives_up(monkeypatch):
     assert len(calls) == 4 and waits == [7, 7, 7]
 
 
-@requires_runtime
+@pytest.mark.requires_runtime
 def test_planner_context_names_loaded_parameters_without_architectures():
     from transformers import BertConfig
 
@@ -1482,7 +1481,7 @@ def test_planner_context_names_loaded_parameters_without_architectures():
     assert not any(".1." in name for name in names)  # one block shows the scheme
 
 
-@requires_runtime
+@pytest.mark.requires_runtime
 def test_planner_context_replaces_a_config_class_transformers_lacks(monkeypatch):
     from transformers import BertConfig
 
@@ -1510,7 +1509,7 @@ def test_fixture_resources_drop_hardware_requirements():
     assert commands.fixture_runs_anywhere({"integrations": {"transformers": {}}}) == []
 
 
-@requires_runtime
+@pytest.mark.requires_runtime
 def test_create_rejects_imports_transformers_does_not_export():
     usage = "```py runnable:x\nfrom transformers import (\n    AutoModelForConditionalGeneration,\n    AutoProcessor,\n)\n```\n"
     with pytest.raises(ValueError, match="AutoModelForConditionalGeneration"):
@@ -1534,7 +1533,7 @@ def test_planner_slugs_a_dotted_contract_name():
     assert plan["name"] == "Kimi-K2-5"
 
 
-@requires_runtime
+@pytest.mark.requires_runtime
 def test_create_rejects_labels_a_forward_does_not_take():
     def plan(load, call):
         return {"usage": f"model = {load}.from_pretrained(model_id)\nloss = model(**inputs, {call}).loss\n"}

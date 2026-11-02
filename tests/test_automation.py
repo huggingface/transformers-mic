@@ -7,7 +7,6 @@ import pytest
 from transformers_mic import automation, batch
 from transformers_mic.cli import main
 from transformers_mic.workspace import Workspace, read
-from conftest import requires_runtime
 
 MODEL = "google-bert/bert-base-uncased"
 SHA = "b" * 40
@@ -381,7 +380,7 @@ def repair_workflow(workflow, monkeypatch):
     return workflow
 
 
-@requires_runtime
+@pytest.mark.requires_runtime
 def test_reviewed_repair_rebuilds_fixture_before_measurements(
     repair_workflow, monkeypatch
 ):
@@ -395,7 +394,7 @@ def test_reviewed_repair_rebuilds_fixture_before_measurements(
     assert "--max-contract-repairs 2" in state["resume"]
 
 
-@requires_runtime
+@pytest.mark.requires_runtime
 def test_agent_repair_waits_for_exact_approval_and_reuses_saved_proposal(
     repair_workflow, capsys
 ):
@@ -420,7 +419,7 @@ def test_agent_repair_waits_for_exact_approval_and_reuses_saved_proposal(
     assert len(read(workflow.root / ".mic/automation.json")["repairs"]) == 1
 
 
-@requires_runtime
+@pytest.mark.requires_runtime
 def test_agent_can_reject_a_repair_without_changing_source(repair_workflow, capsys):
     workflow = repair_workflow
     _, source, _ = agent_call(workflow, capsys, extra=["--local-only"])
