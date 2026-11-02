@@ -270,8 +270,8 @@ def parameter_count(model, revision):
 
 def check_partial_training(plan, context):
     """Above ~3B parameters the real checkpoint's training step must freeze most of it."""
-    count = context.get("parameters") or 0
-    if count > 3e9 and not context.get("fixtures_only") and "requires_grad_(" not in plan["usage"]:
+    count = loaded_parameters(context) or 0
+    if count > 3e9 and "requires_grad_(" not in plan["usage"]:
         raise ValueError(
             f"the checkpoint has {count / 1e9:.1f}B parameters: a full bfloat16 training step "
             "(weights plus gradients) does not fit the 22 GB GPU; freeze the model with "
@@ -463,8 +463,13 @@ def check_loss_has_gradients(plan):
 
 
 def loaded_parameters(context):
-    """The checkpoint size the contract loads: none for a fixtures-only contract (Kimi K2.5's 1T)."""
-    return None if context.get("fixtures_only") else context.get("parameters")
+    """The checkpoint size the contract loads: none for a fixtures-only contract (Kimi K2.5's 1T),
+    nor above GPU_PARAMETER_LIMIT, where tmic measures only the slim fixture (Mistral-Large-4's
+    1T draft was rejected for a bfloat16 load and a frozen training step it would never run)."""
+    count = context.get("parameters")
+    if context.get("fixtures_only") or (count or 0) > GPU_PARAMETER_LIMIT:
+        return None
+    return count
 
 
 def check_float16_load(plan, config, parameters=None):
@@ -526,6 +531,30 @@ def check_label_arguments(plan, config):
         )
 
 
+def names_per_layer_kind(real, limit=80):
+    """One loaded parameter name per layer kind, not only block 0: Mistral-Large-4's
+    block 0 is its one dense layer, so a block-0 list hides every MoE expert parameter."""
+    kinds = {}
+    for n in sorted(real, key=lambda n: [int(t) if t.isdigit() else t for t in n.split(".")]):
+        kinds.setdefault(re.sub(r"\.\d+\.", ".N.", n), n)
+    return sorted(kinds.values())[:limit]
+
+
+def loaded_parameter_names(config):
+    """Parameter names after loading, from the config's architecture on the meta device."""
+    import torch
+    import transformers
+
+    cls = getattr(transformers, (config.get("architectures") or [""])[0], None)
+    if not isinstance(cls, type) or not issubclass(cls, transformers.PreTrainedModel):
+        return None
+    try:
+        with torch.device("meta"):
+            return {n for n, _ in cls(cls.config_class.from_dict(config)).named_parameters()}
+    except Exception:  # advisory; the name check and the build still run
+        return None
+
+
 def check_parameter_names(plan, config):
     """Reject usage that names parameters the architecture does not have."""
     names = set(
@@ -563,12 +592,7 @@ def check_parameter_names(plan, config):
             return (difflib.get_close_matches(name, same, n=1, cutoff=0.0) or ["?"])[0]
 
         closest = {name: nearest(name) for name in missing}
-        # One name per layer kind, not only block 0: Mistral-Large-4's block 0 is its
-        # one dense layer, so a block-0 list hides every MoE expert parameter.
-        kinds = {}
-        for n in sorted(real, key=lambda n: [int(t) if t.isdigit() else t for t in n.split(".")]):
-            kinds.setdefault(re.sub(r"\.\d+\.", ".N.", n), n)
-        hints = sorted(kinds.values())[:80]
+        hints = names_per_layer_kind(real)
         raise ValueError(
             f"Usage names parameters {cls.__name__} does not have after loading "
             f"(checkpoint keys are remapped on load). Closest loaded names: {closest}; "
@@ -864,6 +888,10 @@ def create(args):
             "request": "Design a small useful integration path; include inference and a training step where supported.",
         }
         context.update(references.collect(args.model, revision, config))
+        real = loaded_parameter_names(config)
+        if real:
+            # Drafts guessed dense names on MoE layers (Mistral-Large-4); give the real ones.
+            context["parameter_names"] = names_per_layer_kind(real)
         sample = resources.catalog() / "hub/BERT-integration"
         context["example_plan"] = {
             "name": "BERT",
