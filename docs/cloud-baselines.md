@@ -9,6 +9,12 @@ ran in the approved CPU image on a Xeon 6975P-C reporting `amx_bf16` and
 dashboard CPU/CUDA collection on this runner remains unproven; earlier cloud runs
 measured CPU on G5, which does not supply the native bfloat16 class.
 
+The `aws-m8i-l-cache` pool is mixed: on 2026-11-02, 4 of 20 model collections ran
+their CPU job on an AMD EPYC 7R13 without `avx512_bf16`/`amx_bf16`, so their
+bfloat16 cases were measured as `cpu-x86_64` and refused. tmic now moves such a
+collection aside (`<source>.wrong-hardware-N`), so answering *retry* dispatches
+a new run instead of re-reading the old one.
+
 The [direct GitHub transport](cli.md#temporary-test-without-dashboard-oauth)
 uses the caller's existing GitHub CLI identity instead of dashboard authentication;
 it does not bypass runner-group access requirements.

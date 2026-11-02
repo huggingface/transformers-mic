@@ -216,3 +216,25 @@ def test_verification_rechecks_native_cpu_coverage(measured):
     ] = "bfloat16"
     with pytest.raises(ValueError, match="cpu-x86_64-bf16"):
         model_baselines.verify(workspace, root)
+    # The wrong-hardware run is set aside, so a retry dispatches a new one.
+    assert not root.exists()
+    assert root.with_name(f"{root.name}.wrong-hardware-1").is_dir()
+
+
+def test_wrong_hardware_collections_are_numbered(tmp_path):
+    manifest = {
+        "integrations": {"transformers": {"variants": {"v": {"dtype": "bfloat16"}}}}
+    }
+    case = {
+        "status": "validated",
+        "variant": "v",
+        "target": "f",
+        "platform": "cpu-x86_64",
+    }
+    reports = [(None, {"profile": "cpu", "cases": [case]})]
+    for n in (1, 2):
+        root = tmp_path / "cloud" / "source"
+        root.mkdir(parents=True)
+        with pytest.raises(ValueError, match="retrying dispatches a new run"):
+            model_baselines.require_coverage_or_set_aside(manifest, reports, root)
+        assert (tmp_path / "cloud" / f"source.wrong-hardware-{n}").is_dir()
