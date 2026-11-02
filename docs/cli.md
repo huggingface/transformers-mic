@@ -10,14 +10,17 @@ framework expectations. See [the Hub layout](hub-organization.md).
 
 ## Install
 
-From this repository (Python 3.11+):
+Python 3.11+:
 
 ```sh
-python -m pip install -e '.[runtime,dev]'
-python -m pip install 'hf-doc-builder @ git+https://github.com/huggingface/doc-builder.git'
+pip install "transformers-mic[runtime]" "hf-doc-builder @ git+https://github.com/huggingface/doc-builder.git"
 hf auth login        # publishing needs write access to the target namespace
 gh auth login        # history search; or pass --no-history to create
 ```
+
+doc-builder comes from Git because its PyPI release lacks the runnable-Markdown
+collector. To work on tmic itself, install a checkout instead:
+`pip install -e '.[runtime,dev]'`.
 
 ## Dashboard authentication
 
@@ -125,8 +128,7 @@ Everything runs on your machine and nothing is uploaded. Use your source
 checkpoint in place of `org/model`:
 
 ```sh
-pip install "transformers-mic[runtime] @ git+https://github.com/huggingface/transformers-mic.git" \
-  "hf-doc-builder @ git+https://github.com/huggingface/doc-builder.git"
+pip install "transformers-mic[runtime]" "hf-doc-builder @ git+https://github.com/huggingface/doc-builder.git"
 hf auth login
 tmic run org/model --local-only --fixtures-only --no-history --bill-to ''
 ```

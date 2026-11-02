@@ -28,8 +28,7 @@ blocking ([status](docs/evidence.md#transformers-ci-proof)).
 ## Try it locally
 
 ```sh
-pip install "transformers-mic[runtime] @ git+https://github.com/huggingface/transformers-mic.git" \
-  "hf-doc-builder @ git+https://github.com/huggingface/doc-builder.git"
+pip install "transformers-mic[runtime]" "hf-doc-builder @ git+https://github.com/huggingface/doc-builder.git"
 hf auth login
 tmic run org/model --local-only --fixtures-only --no-history --bill-to ''
 ```
