@@ -622,6 +622,17 @@ def sentencepiece_tokenizer(model_type):
     except ImportError:
         return False
     names = TOKENIZER_MAPPING_NAMES.get(model_type) or ()
+    if not names:
+        # Transformers maps SentencePiece-only tokenizers to None when
+        # sentencepiece is missing (the case this check exists for), so fall
+        # back to the conventional name: SiglipConfig -> SiglipTokenizer.
+        try:
+            from transformers.models.auto.configuration_auto import CONFIG_MAPPING_NAMES
+        except ImportError:
+            CONFIG_MAPPING_NAMES = {}
+        config_name = CONFIG_MAPPING_NAMES.get(model_type) or ""
+        if config_name.endswith("Config"):
+            names = (config_name[: -len("Config")] + "Tokenizer",)
     for name in names if isinstance(names, (tuple, list)) else (names,):
         cls = getattr(transformers, name, None) if name else None
         if cls is None:
