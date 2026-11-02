@@ -59,6 +59,37 @@ def explicit_keys(api, repo, revision, source, name):
         return set(weight_map)
 
 
+def explicit_parameter_count(repo, revision):
+    """Parameters of a checkpoint the Hub does not count.
+
+    The Hub's safetensors total only covers model*.safetensors: Mistral-Large-4's
+    consolidated-* shards report none, which disabled every size guard (a 1T
+    checkpoint was declared for one 22 GB GPU). Sums the explicit file's headers.
+    """
+    from huggingface_hub import hf_hub_download
+
+    source = Path(hf_hub_download(repo, "config.json", revision=revision)).parent
+    name = explicit_weights(source)
+    if name is None:
+        return None
+    api = HfApi()
+    if name.endswith(".index.json"):
+        index = json.loads(
+            Path(hf_hub_download(repo, name, revision=revision)).read_text()
+        )
+        files = sorted(set(index["weight_map"].values()))
+    else:
+        files = [name]
+    with ThreadPoolExecutor(8) as pool:
+        headers = pool.map(
+            lambda f: api.parse_safetensors_file_metadata(
+                repo, f, revision=revision, timeout=60
+            ),
+            files,
+        )
+        return sum(sum(h.parameter_count.values()) for h in headers)
+
+
 def checkpoint_keys(repo, revision, source):
     source = Path(source)
     explicit = explicit_weights(source)

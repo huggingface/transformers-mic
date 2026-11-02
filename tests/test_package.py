@@ -1236,6 +1236,26 @@ def test_checkpoint_keys_name_an_unknown_weight_layout(monkeypatch, tmp_path):
         inspection.checkpoint_keys("org/model", "a" * 40, tmp_path)
 
 
+def test_parameter_count_sums_explicit_shards_the_hub_does_not_count(monkeypatch, tmp_path):
+    from types import SimpleNamespace
+
+    import huggingface_hub
+
+    from transformers_mic import inspection
+
+    name = "consolidated.safetensors.index.json"
+    (tmp_path / "config.json").write_text(json.dumps({"transformers_weights": name}))
+    (tmp_path / name).write_text(json.dumps({"weight_map": {"a": "c-1.safetensors", "b": "c-2.safetensors", "c": "c-2.safetensors"}}))
+    monkeypatch.setattr(huggingface_hub, "hf_hub_download", lambda repo, f, revision=None: str(tmp_path / f))
+
+    class Api:
+        def parse_safetensors_file_metadata(self, repo, filename, revision=None, timeout=None):
+            return SimpleNamespace(parameter_count={"F8_E4M3": 100, "BF16": 5} if filename == "c-2.safetensors" else {"BF16": 7})
+
+    monkeypatch.setattr(inspection, "HfApi", Api)
+    assert inspection.explicit_parameter_count("org/model", "a" * 40) == 112
+
+
 def test_visible_usage_never_shows_runner_plumbing():
     blocks = [
         "model = AutoModel.from_pretrained(model_id).to(device)\n"

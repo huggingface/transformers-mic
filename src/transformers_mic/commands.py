@@ -260,7 +260,12 @@ def keep_large_checkpoints_off_cpu(manifest, parameters):
 
 def parameter_count(model, revision):
     info = HfApi().model_info(model, revision=revision, expand=["safetensors"])
-    return getattr(info.safetensors, "total", None)
+    total = getattr(info.safetensors, "total", None)
+    if total is None:
+        from . import inspection
+
+        total = inspection.explicit_parameter_count(model, revision)
+    return total
 
 
 def check_partial_training(plan, context):
