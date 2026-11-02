@@ -169,6 +169,23 @@ def require_cpu_coverage(manifest, reports):
                 )
 
 
+def require_coverage_or_set_aside(manifest, reports, root):
+    """A run on the wrong CPU class cannot be fixed by re-reading it: move the
+    collection aside so a retry dispatches a fresh run (the runner pool is mixed)."""
+    try:
+        require_cpu_coverage(manifest, reports)
+    except ValueError as error:
+        root = Path(root)
+        n = 1
+        while (aside := root.with_name(f"{root.name}.wrong-hardware-{n}")).exists():
+            n += 1
+        root.rename(aside)
+        raise ValueError(
+            f"{error} The run landed on a host without it; its results moved to "
+            f"{aside.name}, so retrying dispatches a new run."
+        ) from None
+
+
 def import_candidates(workspace, root):
     from .baselines import collection
 
@@ -176,7 +193,7 @@ def import_candidates(workspace, root):
     if read(root / "model-input.json")["source"] != source:
         raise ValueError("Model changed while measuring cloud baselines")
     state, reports = collection(root)
-    require_cpu_coverage(workspace.manifest, reports)
+    require_coverage_or_set_aside(workspace.manifest, reports, root)
     if state["job"].get("workspace") != read(root / "model-input.json")["workspace"]:
         raise ValueError("Cloud job measured a different model snapshot")
     candidates = {}
@@ -205,7 +222,7 @@ def verify(workspace, root, *, save=True):
     from .baselines import collection
 
     state, reports = collection(root)
-    require_cpu_coverage(workspace.manifest, reports)
+    require_coverage_or_set_aside(workspace.manifest, reports, root)
     metadata = read(root / "model-input.json")
     if (
         state["request"]["profiles"] != ["cpu", "cuda"]
