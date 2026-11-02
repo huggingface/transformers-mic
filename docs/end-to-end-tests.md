@@ -81,9 +81,9 @@ python example/publish_fixtures.py                                  # upload fix
 [`shadow.yml`](../.github/workflows/shadow.yml) installs a Transformers ref with the lock's pins, runs every fixture on GitHub x86, records selection, and appends `runs/<date>/<run id>-<attempt>.jsonl` to `shadow-results`: daily on `main`, or dispatched on a sha, branch, or `pr/<n>` (`pip_overrides` for old builds). [`shadow-backfill.yml`](../.github/workflows/shadow-backfill.yml) checks every first-parent commit in a window, in 20 parallel chunks, with dependency overrides ([results](evidence.md#shadow-backfill)).
 
 ```sh
-gh workflow run shadow.yml --repo huggingface/model-integration-contracts -f transformers_ref=pr/49386
-gh workflow run shadow-backfill.yml --repo huggingface/model-integration-contracts -f since=2026-08-17 -f until=2026-09-07
-gh workflow run shadow.yml --repo huggingface/model-integration-contracts -f transformers_ref=560f36cc56 -f pip_overrides=tokenizers==0.22.2
+gh workflow run shadow.yml --repo huggingface/transformers-mic -f transformers_ref=pr/49386
+gh workflow run shadow-backfill.yml --repo huggingface/transformers-mic -f since=2026-08-17 -f until=2026-09-07
+gh workflow run shadow.yml --repo huggingface/transformers-mic -f transformers_ref=560f36cc56 -f pip_overrides=tokenizers==0.22.2
 ```
 
 ## 4. GPU checks
@@ -100,7 +100,7 @@ On the Transformers ARC group `aws-g5-4xlarge-cache` (one A10G), except `cpu-bas
 **Dependency stability:** `gpu-checks.yml matrix=dependency-stability` keeps the known-good Transformers build, artifacts, baselines and tolerances fixed. It checks tokenizers 0.23.2, NumPy 2.2.6 and Pillow 12.3.0 individually and together, then a no-torchaudio control and torch 2.14.1 / torchvision 0.29.1 with CUDA 13. Each environment gets two fresh-process fleet passes per default/eager/bfloat16 variant. `dependency_profiles=torch-cu130` retries that environment alone; the job restores its CUDA wheel libraries before the runtime preflight. The observer saves actual outputs and numeric drift; `summarize_dependency_study.py` compares repeats. MusicGen Melody requires torchaudio, so its absence is a coverage limit, not a successful check.
 
 ```sh
-gh workflow run gpu-checks.yml --repo huggingface/model-integration-contracts -f matrix=dependency-stability
+gh workflow run gpu-checks.yml --repo huggingface/transformers-mic -f matrix=dependency-stability
 python experiments/summarize_dependency_study.py /path/to/artifact/dependency-stability --output /tmp/dependency-summary.json
 ```
 
@@ -108,7 +108,7 @@ python experiments/summarize_dependency_study.py /path/to/artifact/dependency-st
 
 **Whisper speech:** `gpu-checks.yml matrix=whisper-speech` records and checks its five worker baselines, then asserts that #48108 fails on its parent and passes on its fix, through the contract runner on CPU and CUDA.
 
-**Nightly:** lock environment with CUDA torch (2.11.0+cu128); runner CPU with CUDA hidden (`cpu-x86_64`: default, eager) and GPU (`cuda`: default, eager, bfloat16); appends to `runs/nightly/`, or writes `cuda` candidates with `mode=record`. First run: 80/80 ([run](https://github.com/huggingface/model-integration-contracts/actions/runs/37645864098)).
+**Nightly:** lock environment with CUDA torch (2.11.0+cu128); runner CPU with CUDA hidden (`cpu-x86_64`: default, eager) and GPU (`cuda`: default, eager, bfloat16); appends to `runs/nightly/`, or writes `cuda` candidates with `mode=record`. First run: 80/80 ([run](https://github.com/huggingface/transformers-mic/actions/runs/37645864098)).
 
 `gpu-checks.yml` matrices:
 
@@ -120,8 +120,8 @@ python experiments/summarize_dependency_study.py /path/to/artifact/dependency-st
 | `contracts` | Runner on CUDA: record three variants, rerun against them, CPU and float32 goldens, batched vs isolated, informational fixture rebuild |
 
 ```sh
-gh workflow run gpu-checks.yml --repo huggingface/model-integration-contracts -f matrix=contracts
-gh run download <run-id> --repo huggingface/model-integration-contracts -n gpu-checks
+gh workflow run gpu-checks.yml --repo huggingface/transformers-mic -f matrix=contracts
+gh run download <run-id> --repo huggingface/transformers-mic -n gpu-checks
 ```
 
 ## 5. Historical regressions

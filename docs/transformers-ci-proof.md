@@ -1,5 +1,9 @@
 # Transformers CI proof
 
+**Superseded (2026-11-02):** the contracts job now runs, non-blocking, on
+Transformers PRs; see [the current status](evidence.md#transformers-ci-proof).
+This page records the proof that led there.
+
 Status: 2026-10-13. The expanded proof runs on `contracts-proof`; it is not
 adopted for unrelated Transformers PRs. The package work was squashed and pushed
 to transformers-mic `main` as `03500b0`.
