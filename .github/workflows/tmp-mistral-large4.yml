@@ -33,8 +33,8 @@ jobs:
       - name: tmic run
         run: |
           set +e
-          args="mistralai/Mistral-Large-4-1T-A52B --mode agent --local-only --bill-to '' --baseline-execution local --out work/mistral --transformers-checkout $RUNNER_TEMP/transformers"
-          tmic run $args > result.json; echo "exit $?"
+          args=(mistralai/Mistral-Large-4-1T-A52B --mode agent --local-only --bill-to "" --baseline-execution local --out work/mistral --transformers-checkout "$RUNNER_TEMP/transformers")
+          tmic run "${args[@]}" > result.json; echo "exit $?"
           for i in $(seq 12); do
             cut -c1-1500 result.json; echo
             python - <<'PY' || break
@@ -45,7 +45,7 @@ jobs:
               sys.exit(1)
           json.dump({"question_id": q["question_id"], "answer": "approve", "reason": "cloud probe, local-only"}, open("answer.json", "w"))
           PY
-            tmic run $args --answer answer.json > result.json; echo "exit $?"
+            tmic run "${args[@]}" --answer answer.json > result.json; echo "exit $?"
           done
           cut -c1-3000 result.json; echo
           for f in $(find work/mistral -path '*logs*' -name '*.log'); do echo "== $f"; tail -80 "$f"; done
