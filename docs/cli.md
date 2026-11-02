@@ -572,6 +572,10 @@ The page shows:
 - **Preserved properties:** attention style (MHA/GQA/MQA), MoE routing, vocabulary,
   tied embeddings, activation, RoPE.
 - **Module classes**, and **config changes** field by field.
+- **Model tester (advisory):** the model's own small test config in Transformers
+  (`ModelTester.__init__`), compared with the fixture: per-layer kinds the tester
+  covers that the fixture lacks, and sizes it shrinks that the fixture keeps.
+  Testers are usually representative but not always, so these are notes for review.
 
 The findings list what the original has and the fixture lost, plus two source
 checks: a fixture that keeps half or more of its source's parameters (the rule did
