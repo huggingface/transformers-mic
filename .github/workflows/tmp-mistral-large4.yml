@@ -29,7 +29,7 @@ jobs:
           git clone --depth 1 https://github.com/huggingface/transformers.git "$RUNNER_TEMP/transformers"
           python -m pip install --quiet --upgrade pip
           python -m pip install --quiet --index-url https://download.pytorch.org/whl/cpu torch
-          python -m pip install --quiet -e . -e "$RUNNER_TEMP/transformers"
+          python -m pip install --quiet -e ".[runtime]" -e "$RUNNER_TEMP/transformers" jsonschema "git+https://github.com/huggingface/doc-builder@c69e96c087165ba49b1788e0c3464654dd60253c"
       - name: tmic run
         run: |
           set +e
