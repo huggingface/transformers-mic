@@ -6,7 +6,7 @@ name: tmic run
 # so read the uploaded workspace before trusting any of it.
 #
 #   gh workflow run tmic-run.yml --repo huggingface/transformers-mic \
-#     -f model=mistralai/Mistral-Large-4-1T-A52B [-f ref=<tmic branch>]
+#     -f model=mistralai/Mistral-Large-4-1T-A52B [--ref <tmic branch>]
 #   gh run download <id> --repo huggingface/transformers-mic -n tmic-workspace
 #
 # What it needs and why (each cost one failed attempt to find):
@@ -29,8 +29,6 @@ on:
         required: false
         type: string
         default: main
-  push:
-    branches: [fix/transformers-weights-index]  # TODO: drop before merging
 
 permissions:
   contents: read
@@ -44,9 +42,9 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       HF_HUB_DISABLE_PROGRESS_BARS: "1"
       PYTHONUNBUFFERED: "1"
-      MODEL: ${{ inputs.model || 'mistralai/Mistral-Large-4-1T-A52B' }}
+      MODEL: ${{ inputs.model }}
       REVISION: ${{ inputs.revision }}
-      TRANSFORMERS_REF: ${{ inputs.transformers_ref || 'main' }}
+      TRANSFORMERS_REF: ${{ inputs.transformers_ref }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
