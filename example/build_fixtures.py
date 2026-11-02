@@ -297,15 +297,20 @@ def restore_frozen(model, source, repo, revision, recipe):
     for prefix in prefixes:
         if not any(name.startswith(prefix) for name in selected):
             raise ValueError(f"No frozen parameters or persistent buffers match {prefix!r}")
-    index = source / "model.safetensors.index.json"
-    weight_map = json.loads(index.read_text())["weight_map"] if index.exists() else {}
-    files = {weight_map.get(name, "model.safetensors") for name in selected}
+    from transformers_mic.inspection import explicit_weights
+
+    explicit = explicit_weights(source)
+    sharded = explicit is None or explicit.endswith(".index.json")
+    single = "model.safetensors" if sharded else explicit
+    index = source / (explicit if explicit and sharded else "model.safetensors.index.json")
+    weight_map = json.loads(index.read_text())["weight_map"] if sharded and index.exists() else {}
+    files = {weight_map.get(name, single) for name in selected}
     hashes = {}
     for filename in sorted(files):
         path = hf_hub_download(repo, filename, revision=revision)
         with safe_open(path, framework="pt", device="cpu") as checkpoint, torch.no_grad():
             for name, parameter in selected.items():
-                if weight_map.get(name, "model.safetensors") != filename:
+                if weight_map.get(name, single) != filename:
                     continue
                 if name not in checkpoint.keys():
                     raise ValueError(f"Pinned checkpoint lacks fixed tensor {name}")
@@ -371,10 +376,30 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
         torch.save(tensors, out / "pytorch_model.bin")
     else:
         save_file(tensors, weights, metadata={"format": "pt"})
+        mirror_explicit_weights(out, tensors)
     copied = copied_files(source, recipe)
     for name in copied:
         shutil.copyfile(source / name, out / name)  # overwrites the generation config save_pretrained wrote
     return copied
+
+
+def mirror_explicit_weights(out, tensors):
+    """Keep the checkpoint's `transformers_weights` file name in the fixture.
+
+    The fixture's config keeps the key (Mistral: consolidated.safetensors.index.json),
+    and from_pretrained then loads that file and nothing else, so the fixture must
+    have it: an index over its one shard, or the single file renamed.
+    """
+    from transformers_mic.inspection import explicit_weights
+
+    name = explicit_weights(out)
+    if name is None:
+        return
+    if name.endswith(".index.json"):
+        index = {"metadata": {}, "weight_map": {key: "model.safetensors" for key in sorted(tensors)}}
+        (out / name).write_text(json.dumps(index, indent=2) + "\n")
+    else:
+        (out / "model.safetensors").rename(out / name)
 
 
 @contextlib.contextmanager

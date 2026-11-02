@@ -1,0 +1,42 @@
+name: tmp Mistral Large 4 build probe
+
+# Throwaway: reproduces `tmic run mistralai/Mistral-Large-4-1T-A52B` on a cloud
+# runner for the transformers_weights fix. Delete before merging.
+
+on:
+  push:
+    branches: [fix/transformers-weights-index]
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      HF_TOKEN: ${{ secrets.HF_HUB_READ_TOKEN }}
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: |
+          git clone --depth 1 https://github.com/huggingface/transformers.git "$RUNNER_TEMP/transformers"
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet --index-url https://download.pytorch.org/whl/cpu torch
+          python -m pip install --quiet -e . -e "$RUNNER_TEMP/transformers"
+      - name: tmic run
+        run: |
+          set +e
+          tmic run mistralai/Mistral-Large-4-1T-A52B --mode agent --local-only \
+            --baseline-execution local --out work/mistral \
+            --transformers-checkout "$RUNNER_TEMP/transformers" > result.json
+          code=$?
+          echo "exit $code"; cat result.json
+          for f in $(find work/mistral -path '*logs*' -name '*.log'); do echo "== $f"; tail -80 "$f"; done
+          find work/mistral -name build.json -exec sh -c 'echo "== $1"; python -c "import json,sys;d=json.load(open(sys.argv[1]));print(json.dumps({k:d.get(k) for k in (\"fixture\",\"serialization\",\"missing_parameters\",\"parameters\",\"sha256\")},indent=1))" "$1"' _ {} \;
+          find work/mistral -name '*.index.json' -exec sh -c 'echo "== $1"; head -c 600 "$1"' _ {} \;

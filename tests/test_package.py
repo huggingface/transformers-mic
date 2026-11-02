@@ -1186,6 +1186,38 @@ def test_checkpoint_keys_read_shard_headers_over_a_stale_index(monkeypatch, tmp_
     assert inspection.checkpoint_keys("org/model", "a" * 40, tmp_path) == {"lm.weight", "audio.weight"}
 
 
+def test_checkpoint_keys_follow_transformers_weights(monkeypatch, tmp_path):
+    from types import SimpleNamespace
+
+    from transformers_mic import inspection
+
+    # Mistral names its shards consolidated-*; config.json points the loader at them.
+    name = "consolidated.safetensors.index.json"
+    (tmp_path / "config.json").write_text(json.dumps({"transformers_weights": name}))
+    (tmp_path / name).write_text(json.dumps({"weight_map": {"a.weight": "consolidated-1.safetensors", "b.weight": "consolidated-2.safetensors"}}))
+    headers = {"consolidated-1.safetensors": {"a.weight"}, "consolidated-2.safetensors": {"b.weight", "c.weight"}}
+
+    class Api:
+        def parse_safetensors_file_metadata(self, repo, filename, revision=None, timeout=None):
+            return SimpleNamespace(tensors=dict.fromkeys(headers[filename]))
+
+        def file_exists(self, *args, **kwargs):
+            raise AssertionError("must not look for model.safetensors or pytorch_model.bin")
+
+    monkeypatch.setattr(inspection, "HfApi", Api)
+    assert inspection.checkpoint_keys("org/model", "a" * 40, tmp_path) == {"a.weight", "b.weight", "c.weight"}
+    assert inspection.loads_binary("org/model", "a" * 40, tmp_path) is False
+
+
+@pytest.mark.parametrize("name", ["../x.safetensors", "pytorch_model.bin", 3])
+def test_transformers_weights_must_be_a_local_safetensors_name(tmp_path, name):
+    from transformers_mic import inspection
+
+    (tmp_path / "config.json").write_text(json.dumps({"transformers_weights": name}))
+    with pytest.raises(ValueError, match="transformers_weights"):
+        inspection.explicit_weights(tmp_path)
+
+
 def test_visible_usage_never_shows_runner_plumbing():
     blocks = [
         "model = AutoModel.from_pretrained(model_id).to(device)\n"
