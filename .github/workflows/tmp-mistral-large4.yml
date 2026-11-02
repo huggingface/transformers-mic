@@ -16,6 +16,7 @@ jobs:
     timeout-minutes: 90
     env:
       HF_TOKEN: ${{ secrets.HF_HUB_READ_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
       HF_HUB_DISABLE_PROGRESS_BARS: "1"
       PYTHONUNBUFFERED: "1"
     steps:
