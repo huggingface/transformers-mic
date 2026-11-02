@@ -1573,6 +1573,28 @@ def test_planner_slugs_a_dotted_contract_name():
     assert plan["name"] == "Kimi-K2-5"
 
 
+def test_planner_renames_a_historical_key_slip_and_keeps_invalid_drafts():
+    from types import SimpleNamespace
+
+    import jsonschema
+
+    from transformers_mic import planner
+
+    def parse(draft):
+        response = SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(content=json.dumps(draft)), finish_reason="stop")],
+            usage=None,
+        )
+        return planner.parse(response, "m", "p", None)
+
+    draft = {"name": "M", "manifest": {}, "usage": "x" * 100, "rationale": ""}
+    plan, _ = parse({**draft, "historical_issues": [{"url": "u"}]})
+    assert plan["historical_candidates"] == [{"url": "u"}] and "historical_issues" not in plan
+    with pytest.raises(jsonschema.ValidationError) as error:
+        parse({**draft, "historical_candidates": [], "usage": "short"})
+    assert error.value.plan["usage"] == "short"
+
+
 def test_create_rejects_labels_a_forward_does_not_take():
     def plan(load, call):
         return {"usage": f"model = {load}.from_pretrained(model_id)\nloss = model(**inputs, {call}).loss\n"}

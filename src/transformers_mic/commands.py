@@ -667,6 +667,7 @@ def propose_valid(context, args, model, fixture, old=None):
         except (ValueError, jsonschema.ValidationError) as exc:
             if attempt == 2:
                 raise
+            plan = plan if plan is not None else getattr(exc, "plan", None)
             context = {
                 **context,
                 "previous_draft": plan,
