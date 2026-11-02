@@ -816,3 +816,24 @@ def test_layer_pattern_keeps_every_flagged_layer_kind_and_its_kv_source():
     values = {}
     layer_patterns.reindex_references(values, config, kept)
     assert values["kv_source_layers"] == [0, 1, 2, 3, 4, 4]
+
+
+def test_shrink_adopts_tester_sizes_the_rule_misses(monkeypatch):
+    from transformers import Qwen3NextConfig, Qwen3NextForCausalLM
+
+    from transformers_mic import tester
+
+    original = Qwen3NextConfig(num_hidden_layers=4, vocab_size=128)
+    shrunk = Qwen3NextConfig(**{**original.to_dict(), "hidden_size": 64, "intermediate_size": 128,
+                                "num_attention_heads": 4, "num_key_value_heads": 2, "head_dim": 16,
+                                "num_experts": 4, "moe_intermediate_size": 32, "shared_expert_intermediate_size": 128})
+    monkeypatch.setattr(tester, "tester_values", lambda model_type, ref="main": (
+        "tests/models/qwen3_next", {"linear_key_head_dim": 16, "linear_value_head_dim": 16, "vocab_size": 99}))
+    adopted = build_fixtures.adopt_tester_sizes(Qwen3NextForCausalLM, original.to_dict(), shrunk)
+    assert adopted.linear_key_head_dim == 16 and adopted.linear_value_head_dim == 16
+    assert adopted.vocab_size == 128  # preserved: the fixture loads the real tokenizer
+    assert adopted._mic_tester_sizes["fields"] == {"linear_key_head_dim": 16, "linear_value_head_dim": 16}
+    # A tester size that does not build is dropped, keeping the rule's config.
+    monkeypatch.setattr(tester, "tester_values", lambda model_type, ref="main": ("t", {"linear_key_head_dim": 3}))
+    monkeypatch.setattr(Qwen3NextForCausalLM, "_from_config", classmethod(lambda cls, c: (_ for _ in ()).throw(ValueError("bad"))))
+    assert build_fixtures.adopt_tester_sizes(Qwen3NextForCausalLM, original.to_dict(), shrunk) is shrunk

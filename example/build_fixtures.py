@@ -202,7 +202,9 @@ def shrunk_config(source, cls, recipe=None):
         return cls.config_class.from_dict(recorded)
     config = cls.config_class.from_pretrained(source)
     if parameter_count(cls, config) > SMALL_SOURCE:
+        original = config.to_dict()
         config = shrink(config)
+        config = adopt_tester_sizes(cls, original, config)
     overrides = (recipe or {}).get("config_overrides", {}).get("fields", {})
     if not overrides:
         return config
@@ -218,6 +220,38 @@ def shrunk_config(source, cls, recipe=None):
             raise SystemExit(f"config_overrides: the shrunk config has no field {dotted}")
         target[field] = value
     return type(config).from_dict(values)
+
+
+def adopt_tester_sizes(cls, original, config):
+    """Shrink the widths the generic rule does not know by name, as the model's tester does.
+
+    The tester in tests/models/<model>/test_modeling_<model>.py names the size fields
+    that matter for its model (DeepSeek-V4-Flash's index_head_dim, o_lora_rank;
+    Qwen3-Next's linear_key_head_dim). Only fields the rule left at the checkpoint's value
+    are taken, layer kinds stay with the rule, and the result must still build, else the
+    rule's config is kept. Reviewed config_overrides apply afterwards and win.
+    """
+    from transformers_mic import tester
+
+    url, found = tester.tester_values(original.get("model_type"))
+    adopted = tester.unshrunk_sizes(found, original, config.to_dict()) if found else {}
+    if not adopted:
+        return config
+    values = config.to_dict()
+    for path, value in adopted.items():
+        node = values
+        for part in path[:-1]:
+            node = node[part]
+        node[path[-1]] = value
+    try:
+        candidate = type(config).from_dict(values)
+        with torch.device("meta"):
+            cls._from_config(candidate)
+    except Exception as error:
+        print(f"tmic: model-tester sizes {sorted('.'.join(p) for p in adopted)} do not build ({type(error).__name__}); keeping the rule's", flush=True)
+        return config
+    candidate._mic_tester_sizes = {"source": url, "fields": {".".join(p): v for p, v in adopted.items()}}
+    return candidate
 
 
 def missing_parameters(cls, path):
@@ -678,6 +712,9 @@ def environment():
 
 def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, keep_random=False, inspect_checkpoint=None, contract_repo=None, reshrink=False):
     recorded = None if reshrink else recorded_config(out, fixture)
+    previous_tester = None  # save() clears `out`, so read the old record now
+    if recorded is not None and (Path(out) / "build.json").exists():
+        previous_tester = json.loads((Path(out) / "build.json").read_text()).get("tester_sizes")
     recipe = {**fixture["build"], "recorded_config": recorded} if recorded is not None else fixture["build"]
     keys, missing = {}, {}
     for repo in fixture["covers"]:
@@ -759,6 +796,8 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
     unhealthy = recipe.get("accept_unhealthy", {})
     if not all(row["finite"] for dtype, row in health.items() if dtype not in unhealthy):
         raise SystemExit(f"{name}: numeric health check failed: {health}")
+    # Widths taken from the model's tester; a rebuild from the recorded config keeps the record.
+    tester_sizes = getattr(shrunk_config(source, cls, recipe), "_mic_tester_sizes", None) or previous_tester
     build = {
         "fixture": name,
         "key": key,
@@ -782,6 +821,7 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
             ],
         },
         **({"preserved_frozen_sha256": frozen_hashes} if frozen_hashes is not None else {}),
+        **({"tester_sizes": tester_sizes} if tester_sizes else {}),
         "checkpoint_inspection": "parameter headers/indexes; bounded binary fallback" if inspect_checkpoint else "full checkpoint load",
         "numeric_health_scope": "CPU float32/bfloat16/float16; autocast for low-precision losses",
         "captured": captured,
