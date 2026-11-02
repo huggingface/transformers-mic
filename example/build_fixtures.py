@@ -196,6 +196,12 @@ def keeps_source(source, cls, config):
     return parameter_count(cls, full) <= SMALL_SOURCE and parameter_count(cls, config) == parameter_count(cls, full)
 
 
+# Widths taken from the model's tester, by source; and the sources whose build failed
+# with them (a meta-device build does not run a forward: RT-DETR's tester
+# encoder_hidden_dim built, then broke a convolution expecting 256 channels).
+TESTER_SIZES, TESTER_OFF = {}, {}
+
+
 def shrunk_config(source, cls, recipe=None):
     recorded = (recipe or {}).get("recorded_config")
     if recorded is not None:  # a rebuild reproduces the published config, not today's rule
@@ -204,7 +210,12 @@ def shrunk_config(source, cls, recipe=None):
     if parameter_count(cls, config) > SMALL_SOURCE:
         original = config.to_dict()
         config = shrink(config)
-        config = adopt_tester_sizes(cls, original, config)
+        if str(source) not in TESTER_OFF:
+            config = adopt_tester_sizes(cls, original, config)
+            # Provenance goes to build.json, never into the fixture's config.json.
+            sizes = config.__dict__.pop("_mic_tester_sizes", None)
+            if sizes:
+                TESTER_SIZES[str(source)] = sizes
     overrides = (recipe or {}).get("config_overrides", {}).get("fields", {})
     if not overrides:
         return config
@@ -710,7 +721,22 @@ def environment():
     }
 
 
-def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, keep_random=False, inspect_checkpoint=None, contract_repo=None, reshrink=False):
+def build_fixture(*args, **kwargs):
+    """Build; if it fails with model-tester sizes, rebuild once with the shrink rule's."""
+    try:
+        return _build_fixture(*args, **kwargs)
+    except (SystemExit, Exception) as error:
+        adopted = [source for source in TESTER_SIZES if source not in TESTER_OFF]
+        if not adopted:
+            raise
+        reason = (str(error).strip().splitlines() or [type(error).__name__])[-1][:300]
+        print(f"tmic: the build failed with model-tester sizes ({reason}); rebuilding with the shrink rule's", flush=True)
+        for source in adopted:
+            TESTER_OFF[source] = {"fields": TESTER_SIZES.pop(source)["fields"], "build_failed": reason}
+        return _build_fixture(*args, **kwargs)
+
+
+def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out, keep_random=False, inspect_checkpoint=None, contract_repo=None, reshrink=False):
     recorded = None if reshrink else recorded_config(out, fixture)
     previous_tester = None  # save() clears `out`, so read the old record now
     if recorded is not None and (Path(out) / "build.json").exists():
@@ -797,7 +823,10 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
     if not all(row["finite"] for dtype, row in health.items() if dtype not in unhealthy):
         raise SystemExit(f"{name}: numeric health check failed: {health}")
     # Widths taken from the model's tester; a rebuild from the recorded config keeps the record.
-    tester_sizes = getattr(shrunk_config(source, cls, recipe), "_mic_tester_sizes", None) or previous_tester
+    shrunk_config(source, cls, recipe)  # records TESTER_SIZES for this source
+    tester_sizes = (TESTER_SIZES.get(str(source))
+                    or ({"rejected": TESTER_OFF[str(source)]} if str(source) in TESTER_OFF else None)
+                    or previous_tester)
     build = {
         "fixture": name,
         "key": key,

@@ -837,3 +837,27 @@ def test_shrink_adopts_tester_sizes_the_rule_misses(monkeypatch):
     monkeypatch.setattr(tester, "tester_values", lambda model_type, ref="main": ("t", {"linear_key_head_dim": 3}))
     monkeypatch.setattr(Qwen3NextForCausalLM, "_from_config", classmethod(lambda cls, c: (_ for _ in ()).throw(ValueError("bad"))))
     assert build_fixtures.adopt_tester_sizes(Qwen3NextForCausalLM, original.to_dict(), shrunk) is shrunk
+
+
+def test_tester_sizes_stay_out_of_the_config_and_fall_back_on_a_failed_build(monkeypatch):
+    sizes = {"source": "t", "fields": {"encoder_hidden_dim": 32}}
+    monkeypatch.setattr(build_fixtures, "TESTER_SIZES", {"src": dict(sizes)})
+    monkeypatch.setattr(build_fixtures, "TESTER_OFF", {})
+    calls = []
+
+    def build(*args, **kwargs):
+        calls.append(dict(build_fixtures.TESTER_OFF))
+        if len(calls) == 1:
+            raise SystemExit("the contract fails on the random fixture:\nRuntimeError: expected 256 channels, got 32")
+        return {"ok": True}
+
+    monkeypatch.setattr(build_fixtures, "_build_fixture", build)
+    assert build_fixtures.build_fixture() == {"ok": True}
+    assert calls[1]["src"]["fields"] == {"encoder_hidden_dim": 32}
+    assert "256 channels" in calls[1]["src"]["build_failed"]
+    # Without adopted sizes a failure is not retried.
+    monkeypatch.setattr(build_fixtures, "TESTER_SIZES", {})
+    monkeypatch.setattr(build_fixtures, "_build_fixture", lambda *a, **k: (_ for _ in ()).throw(SystemExit("boom")))
+    with pytest.raises(SystemExit):
+        build_fixtures.build_fixture()
+
