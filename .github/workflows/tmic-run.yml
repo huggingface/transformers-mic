@@ -10,6 +10,7 @@ run-name: tmic run ${{ inputs.model }}
 #            candidates, publish huggingface-mic/<name>-mic and add it to the prototypes
 #            fleet. Runs no model code itself. New contracts only: a model already in a
 #            fleet or on the Hub is refused (reviewed update flow).
+# After an export it dispatches coverage-space.yml, which refreshes the MIC coverage Space.
 # mic-impact.yml dispatches it for suggested contracts (matched by run name) and
 # refreshes its page when a run finishes.
 #
@@ -210,6 +211,11 @@ jobs:
           fi
           [ "$OVERWRITE" = true ] && args+=(--overwrite-unexported)
           python .github/scripts/auto_mic.py publish "${args[@]}"
+      - name: Refresh the coverage Space
+        # Queued behind any refresh in progress (coverage-space.yml's concurrency group).
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run coverage-space.yml --repo "$GITHUB_REPOSITORY" --ref main
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
