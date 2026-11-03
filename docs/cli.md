@@ -799,12 +799,19 @@ reports create and build pass rates:
 gh workflow run planner-eval.yml --repo huggingface/transformers-mic --ref <branch> -f repeats=3
 ```
 
-To reproduce someone's `tmic run <model>` on a clean cloud runner instead (local-only,
-nothing published; the workspace and the fixture's shrink page are uploaded):
+To run `tmic run <model>` on a clean cloud runner instead, use `tmic-run.yml`. It
+drafts the contract with a read-only token and uploads the workspace and the fixture's
+shrink page. If every CPU case passes, or only cases needing missing hardware are left
+out, it measures every declared case on cloud CPU and CUDA. A new contract that passes
+is then published and added to the prototypes fleet. It refuses models already in a
+fleet or on the Hub, and never approves a changed baseline. Publishing runs in the
+`mic-publish` environment, which only `main` can use.
 
 ```sh
-gh workflow run tmic-run.yml --repo huggingface/transformers-mic -f model=<org/model>
-gh run download <id> --repo huggingface/transformers-mic -n tmic-shrink
+gh workflow run tmic-run.yml --repo huggingface/transformers-mic -f model=<org/model>                   # draft + publish
+gh workflow run tmic-run.yml --repo huggingface/transformers-mic -f model=<org/model> -f publish=false   # draft only
+gh workflow run tmic-run.yml --repo huggingface/transformers-mic -f model=<org/model> -f source_run_id=<id>  # publish an earlier draft
+gh run download <id> --repo huggingface/transformers-mic -n tmic-shrink        # or tmic-workspace, tmic-publication
 ```
 
 ## Random or overfit?

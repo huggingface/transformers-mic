@@ -591,7 +591,8 @@ def collect(results, days, today_day, download):
     write(results / "candidates.json", candidates)
     write(results / "gpu-ci.json", gpu_ci)
     sweep = json.loads(SWEEP.read_text())["rows"] if SWEEP.exists() else {}
-    write(results / "suggestions.json", build_suggestions(gpu_ci, sweep, {}))
+    covered_now = {norm(t) for t in fixture_model_types(results, download).values() if t}
+    write(results / "suggestions.json", build_suggestions(gpu_ci, sweep, {}, covered_now))
 
     # Baseline review work: fleet updates since the window opened, each counted once.
     seen = {r["fleet_commit"] for r in read_jsonl(results / "baselines.jsonl")}
@@ -674,8 +675,12 @@ def test_checkpoints(nodeids, files):
     return [c for c, _ in found.most_common()]
 
 
-def build_suggestions(gpu_ci, sweep, files):
-    """New contracts for models with real-checkpoint regressions and no contract; extensions for the rest."""
+def build_suggestions(gpu_ci, sweep, files, covered=frozenset()):
+    """New contracts for models with real-checkpoint regressions and no contract; extensions for the rest.
+
+    covered: model types the fleet covers now. A regression recorded "not-covered" before its model
+    got a contract is not a suggestion any more.
+    """
     new = defaultdict(lambda: {"integration": 0, "other": 0, "tests": [], "keys": []})
     extend = defaultdict(list)
     for key, item in gpu_ci.items():
@@ -683,6 +688,8 @@ def build_suggestions(gpu_ci, sweep, files):
         if model in NOT_MODELS:
             continue
         if item.get("mic") == "not-covered":
+            if norm(model or "") in covered:
+                continue
             entry = new[model]
             entry["integration" if item.get("integration") else "other"] += 1
             entry["tests"] += [t for t in item["tests"] if t not in entry["tests"]]
@@ -786,7 +793,7 @@ def fetch_shrink_pages(drafts, folder):
 
 
 def dispatch_drafts(suggestions, drafts, limit, now):
-    """Dispatch tmic-run.yml (local-only: nothing is published) for the top suggestions not drafted yet."""
+    """Dispatch tmic-run.yml (draft, cloud CPU/CUDA, publish if it passes) for the top suggestions not drafted yet."""
     sent = 0
     for s in suggestions["new"]:
         if sent >= limit:
@@ -804,9 +811,9 @@ def draft_lines(suggestions, drafts):
         "## 6. Contracts to add next",
         "",
         "Models with real-checkpoint regressions in the daily GPU CI and no contract, shrinkable models first. "
-        f"Each day the top {DRAFTS_PER_DAY} without a draft are drafted by `{TMIC_RUN}` (`tmic run --local-only`: "
-        "contract, fixture and baselines built on a runner, nothing published). Publishing stays a review: read the "
-        "workspace's `usage.md` and manifest, then `tmic run <checkpoint> --out <workspace>`.",
+        f"Each day the top {DRAFTS_PER_DAY} without a draft go to `{TMIC_RUN}`: it drafts the contract and fixture "
+        "on a runner, measures them on cloud CPU and CUDA, and publishes a new contract into the prototypes fleet "
+        "only if every case passes. Read a published draft's `usage.md` like any other contract.",
         "",
     ]
     if not suggestions["new"]:
