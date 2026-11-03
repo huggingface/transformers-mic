@@ -380,6 +380,7 @@ def repair_workflow(workflow, monkeypatch):
     return workflow
 
 
+@pytest.mark.requires_runtime
 def test_reviewed_repair_rebuilds_fixture_before_measurements(
     repair_workflow, monkeypatch
 ):
@@ -393,6 +394,7 @@ def test_reviewed_repair_rebuilds_fixture_before_measurements(
     assert "--max-contract-repairs 2" in state["resume"]
 
 
+@pytest.mark.requires_runtime
 def test_agent_repair_waits_for_exact_approval_and_reuses_saved_proposal(
     repair_workflow, capsys
 ):
@@ -417,6 +419,7 @@ def test_agent_repair_waits_for_exact_approval_and_reuses_saved_proposal(
     assert len(read(workflow.root / ".mic/automation.json")["repairs"]) == 1
 
 
+@pytest.mark.requires_runtime
 def test_agent_can_reject_a_repair_without_changing_source(repair_workflow, capsys):
     workflow = repair_workflow
     _, source, _ = agent_call(workflow, capsys, extra=["--local-only"])

@@ -526,6 +526,7 @@ def test_backend_schemas_and_catalog_present():
     assert resources.catalog_lock().is_file()
 
 
+@pytest.mark.requires_runtime
 def test_planner_repairs_invalid_draft(workspace, monkeypatch):
     plan = {
         "name": "BERT",
@@ -639,6 +640,7 @@ def test_planner_context_names_one_parameter_per_layer_kind():
         "lm_head.weight", "model.layers.N.mlp.down_proj.weight", "model.layers.N.mlp.experts.down_proj"]
 
 
+@pytest.mark.requires_runtime
 def test_update_keeps_fixture_pin_and_old_source(workspace, monkeypatch):
     plan = {
         "name": "BERT",
@@ -1199,6 +1201,7 @@ def test_binary_only_checkpoint_reads_names_from_conversion_pr(tmp_path, monkeyp
     }
 
 
+@pytest.mark.requires_runtime
 @pytest.mark.parametrize("zipped", [True, False])
 def test_binary_keys_read_names_without_tensor_data(monkeypatch, tmp_path, zipped):
     import torch
@@ -1360,6 +1363,7 @@ def test_overrides_never_shrink_the_checkpoint_vocabulary():
     assert fields == {"hidden_size": 64, "text_config.vocab_size": 512}
 
 
+@pytest.mark.requires_runtime
 def test_sentencepiece_tokenizers_add_their_backends_to_requires():
     plan = {"manifest": {"integrations": {"transformers": {"requires": ["torch"]}}}}
     commands.check_config_facts(plan, {"model_type": "siglip"})
@@ -1387,6 +1391,7 @@ def test_create_rejects_usage_reading_names_it_never_defines():
         )
 
 
+@pytest.mark.requires_runtime
 def test_create_rejects_model_classes_that_cannot_load_the_type():
     def plan(model_class, auto):
         return {
@@ -1487,6 +1492,7 @@ def test_fp8_checkpoint_names_drop_their_scales():
         logical_checkpoint_keys(config, {"layer.w2.weight_scale_inv"})
 
 
+@pytest.mark.requires_runtime
 def test_split_weights_are_expanded_after_renaming(tmp_path, monkeypatch):
     # nomic_bert stores a fused encoder.layers.N.attn.Wqkv; Transformers renames
     # encoder.layers -> layers and chunks it into q/k/v_proj.
@@ -1524,6 +1530,7 @@ def test_split_weights_are_expanded_after_renaming(tmp_path, monkeypatch):
     )
 
 
+@pytest.mark.requires_runtime
 def test_scoped_split_weights_are_expanded(tmp_path, monkeypatch):
     # Unlimited-OCR's fused vision qkv_proj is split by a converter scoped to the
     # renamed sub-model (vision_model -> vision_tower.vision_encoder), which never
@@ -1574,6 +1581,7 @@ def test_planner_backs_off_on_rate_limits_then_gives_up(monkeypatch):
     assert len(calls) == 4 and waits == [7, 7, 7]
 
 
+@pytest.mark.requires_runtime
 def test_planner_context_names_loaded_parameters_without_architectures():
     from transformers import BertConfig
 
@@ -1590,6 +1598,7 @@ def test_planner_context_names_loaded_parameters_without_architectures():
     assert not any(".1." in name for name in names)  # one block shows the scheme
 
 
+@pytest.mark.requires_runtime
 def test_planner_context_replaces_a_config_class_transformers_lacks(monkeypatch):
     from transformers import BertConfig
 
@@ -1617,6 +1626,7 @@ def test_fixture_resources_drop_hardware_requirements():
     assert commands.fixture_runs_anywhere({"integrations": {"transformers": {}}}) == []
 
 
+@pytest.mark.requires_runtime
 def test_create_rejects_imports_transformers_does_not_export():
     usage = "```py runnable:x\nfrom transformers import (\n    AutoModelForConditionalGeneration,\n    AutoProcessor,\n)\n```\n"
     with pytest.raises(ValueError, match="AutoModelForConditionalGeneration"):
@@ -1662,6 +1672,7 @@ def test_planner_renames_a_historical_key_slip_and_keeps_invalid_drafts():
     assert error.value.plan["usage"] == "short"
 
 
+@pytest.mark.requires_runtime
 def test_create_rejects_labels_a_forward_does_not_take():
     def plan(load, call):
         return {"usage": f"model = {load}.from_pretrained(model_id)\nloss = model(**inputs, {call}).loss\n"}
@@ -1761,6 +1772,7 @@ def test_nearest_contract_prefers_shared_structure(monkeypatch, tmp_path):
     assert examples.nearest_contract(configs["org/llama"], rows=rows, model="org/llama") is None
 
 
+@pytest.mark.requires_runtime
 def test_encoder_decoder_calls_need_decoder_inputs():
     whisper = {"is_encoder_decoder": True, "architectures": ["WhisperForConditionalGeneration"]}
     usage = "```py runnable:t\nlogits = model(inputs.input_features).logits\n```\n"

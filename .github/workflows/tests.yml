@@ -1,0 +1,51 @@
+name: tests
+
+# Two installs, because many checks quietly do nothing without transformers:
+# - dev: the `dev` extra only. Proves every test that needs torch/transformers
+#   carries @pytest.mark.requires_runtime; an untagged one fails here.
+# - full: `dev` + `runtime` with CPU torch, as release.yml installs it. Runs
+#   every test, including the runtime ones the dev job skips.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dev:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m pytest tests/ -q
+
+  full:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu -e ".[runtime,dev]"
+      - run: python -m pytest tests/ -q
