@@ -32,8 +32,8 @@ Proposed bar for rule B (constants `DECISION` in `experiments/impact.py`):
 
 ## 2. False alarms
 
-- PR failure groups: 361 — infra 138 (38%), pre-existing 146 (40%), systemic (same case on ≥3 PRs that day) 11 (3%), PR-only 66 (18%).
-- PRs that saw a MIC failure: 85; of those, only failures they did not cause: **71 (84%)**.
+- PR failure groups: 368 — infra 138 (38%), pre-existing 153 (42%), systemic (same case on ≥3 PRs that day) 11 (3%), PR-only 66 (18%).
+- PRs that saw a MIC failure: 86; of those, only failures they did not cause: **72 (84%)**.
 - PR-only cases that recovered with no push (flaky/environment): 0; merged and main stayed green for 3 days: 0; labelled `false-alarm`/`flake`: 0.
 
 ## 3. Baseline review work
@@ -57,13 +57,43 @@ Latest re-baselines (model commit title):
 - 2026-11-03 Granite: Publish MIC usage, slim fixture and reviewed Transformers expectations
 - 2026-11-03 Muse-Glimmer: Publish MIC usage, slim fixture and reviewed Transformers expectations
 
-## 4. Bugs only real weights show
+## 4. Real-checkpoint regressions: did MIC flag them first?
 
-From the nightly real-checkpoint runs (`nightly.yml`, A10G, shadow-results `runs/nightly/`): a checkpoint case that failed on a night when every fixture of the same contract and variant passed.
+From Transformers' daily GPU CI (`hf-internal-testing/transformers_daily_ci`): each new failure upstream bisected to a culprit PR, one entry per (PR, model), flaky ones skipped. `*IntegrationTest` failures load real checkpoints. For each, what MIC did on the culprit PR:
 
-- Started failing after a passing night: **0**.
-- Already failing on the first night observed (not counted as catches): 0.
-- Coverage: 28 nights; the last one ran 50 checkpoint cases from 8 contracts. Contracts without a nightly checkpoint run cannot answer this question.
+| MIC on the culprit PR | integration (real checkpoints) | other GPU tests |
+|---|---|---|
+| caught-on-pr: red on the PR: would have blocked a day earlier | 0 | 0 |
+| missed: selected, ran, green | 1 | 0 |
+| not-selected: ran, model not selected by the PR's files | 0 | 0 |
+| not-run: MIC never ran on the PR | 3 | 0 |
+| not-covered: no contract for the model | 7 | 12 |
+
+Sticky GPU failures that started in the window ([Fix failures](https://transformers-ci.huggingface.cool/d/pytest-test-health/fix-failures): GPU, failures, sticky), bisected or not, one entry per (model, first failing day): was MIC red on main for that model within a day?
+
+| MIC on main | integration (real checkpoints) | other GPU tests |
+|---|---|---|
+| red-on-main | 1 | 0 |
+| green-on-main | 14 | 30 |
+| not-covered | 8 | 51 |
+
+Real-checkpoint failures MIC stayed green on, waiting for a verdict. A miss is not proof that real weights were needed: often the contract does not make the call that broke. Label each with `{"key": "gpu#<key>", "verdict": "call-not-covered|needs-real-weights"}`.
+
+- `gpu#49811#gemma2`: 2026-10-22, 3 test(s), e.g. `tests/models/gemma2/test_modeling_gemma2.py::Gemma2IntegrationTest::test_export_static_cache` ([PR #49811](https://github.com/huggingface/transformers/pull/49811))
+- `gpu#sticky#cohere#2026-10-17`: 2026-10-17, 1 test(s), e.g. `tests/models/cohere/test_modeling_cohere.py::CohereIntegrationTest::test_batched_4bit`
+- `gpu#sticky#deepseek_v3#2026-10-16`: 2026-10-16, 1 test(s), e.g. `tests/models/deepseek_v3/test_modeling_deepseek_v3.py::DeepseekV3IntegrationTest::test_compile_static_cache`
+- `gpu#sticky#gemma2#2026-10-22`: 2026-10-22, 1 test(s), e.g. `tests/models/gemma2/test_modeling_gemma2.py::Gemma2IntegrationTest::test_export_static_cache`
+- `gpu#sticky#gemma3#2026-11-02`: 2026-11-02, 1 test(s), e.g. `tests/models/gemma3/test_modeling_gemma3.py::Gemma3IntegrationTest::test_model_4b_multiimage`
+- `gpu#sticky#gemma3n#2026-11-02`: 2026-11-02, 5 test(s), e.g. `tests/models/gemma3n/test_modeling_gemma3n.py::Gemma3nIntegrationTest::test_generation_beyond_sliding_window`
+- `gpu#sticky#gemma4#2026-10-10`: 2026-10-10, 1 test(s), e.g. `tests/models/gemma4/test_modeling_gemma4.py::Gemma4IntegrationTest::test_generation_beyond_sliding_window_0_sdpa`
+- `gpu#sticky#grounding_dino#2026-10-13`: 2026-10-13, 4 test(s), e.g. `tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_cross_attention_mask`
+- `gpu#sticky#internvl#2026-11-02`: 2026-11-02, 2 test(s), e.g. `tests/models/internvl/test_modeling_internvl.py::InternVLLlamaIntegrationTest::test_llama_small_model_integration_forward`
+- `gpu#sticky#llama#2026-11-01`: 2026-11-01, 1 test(s), e.g. `tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_flash_with_static_cache`
+- `gpu#sticky#llama#2026-11-02`: 2026-11-02, 1 test(s), e.g. `tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_llama_3_1_hard`
+- `gpu#sticky#m2m_100#2026-10-12`: 2026-10-12, 1 test(s), e.g. `tests/models/m2m_100/test_modeling_m2m_100.py::M2M100ModelIntegrationTests::test_seq_to_seq_generation`
+- `gpu#sticky#mistral3#2026-10-19`: 2026-10-19, 2 test(s), e.g. `tests/models/mistral3/test_modeling_mistral3.py::Mistral3IntegrationTest::test_mistral3_integration_batched_generate_multi_image`
+- `gpu#sticky#mm_grounding_dino#2026-10-17`: 2026-10-17, 3 test(s), e.g. `tests/models/mm_grounding_dino/test_modeling_mm_grounding_dino.py::MMGroundingDinoModelIntegrationTests::test_inference_object_detection_head`
+- `gpu#sticky#swinv2#2026-10-23`: 2026-10-23, 1 test(s), e.g. `tests/models/swinv2/test_modeling_swinv2.py::Swinv2ModelIntegrationTest::test_inference_fp16`
 
 ## 5. Overfit vs random fixtures
 
@@ -72,6 +102,69 @@ From the nightly real-checkpoint runs (`nightly.yml`, A10G, shadow-results `runs
 | overfit | 8 | 0 | 0 | 0 |
 | random | 47 | 6 | 0 | 0 |
 | unknown | 5 | 0 | 0 | 0 |
+
+## 6. Contracts to add next
+
+Models with real-checkpoint regressions in the daily GPU CI and no contract, shrinkable models first. Each day the top 2 without a draft are drafted by `tmic-run.yml` (`tmic run --local-only`: contract, fixture and baselines built on a runner, nothing published). Publishing stays a review: read the workspace's `usage.md` and manifest, then `tmic run <checkpoint> --out <workspace>`.
+
+| model | real-ckpt regressions | other | checkpoint | shrinkable | draft |
+|---|---|---|---|---|---|
+| flint | 1 | 0 | [RecursiveSI/flint](https://huggingface.co/RecursiveSI/flint) | yes | queued |
+| minicpm_ocr | 1 | 0 | [openbmb/MiniCPM-OCR-1.0](https://huggingface.co/openbmb/MiniCPM-OCR-1.0) | yes | queued |
+| qwen3_5 | 1 | 0 | [Qwen/Qwen3.5-0.8B](https://huggingface.co/Qwen/Qwen3.5-0.8B) | yes | — |
+| vaultgemma | 1 | 0 | [google/vaultgemma-1b](https://huggingface.co/google/vaultgemma-1b) | yes | — |
+| beam | 0 | 2 | [reflection/Beam-1.0-501B-A23B](https://huggingface.co/reflection/Beam-1.0-501B-A23B) | yes | — |
+| colpali | 0 | 2 | [vidore/colpali-v1.3-hf](https://huggingface.co/vidore/colpali-v1.3-hf) | yes | — |
+| ernie | 0 | 2 | [nghuyong/ernie-3.0-base-zh](https://huggingface.co/nghuyong/ernie-3.0-base-zh) | yes | — |
+| kolibri1 | 0 | 2 | [Aleph-Alpha/Kolibri-1](https://huggingface.co/Aleph-Alpha/Kolibri-1) | yes | — |
+| poolformer | 0 | 2 | [sail/poolformer_s12](https://huggingface.co/sail/poolformer_s12) | yes | — |
+| axk1 | 0 | 1 | [skt/A.X-K1](https://huggingface.co/skt/A.X-K1) | yes | — |
+| bigbird_pegasus | 0 | 1 | [google/bigbird-pegasus-large-arxiv](https://huggingface.co/google/bigbird-pegasus-large-arxiv) | yes | — |
+| bridgetower | 0 | 1 | [regisss/bridgetower-newyorker-a100-8x](https://huggingface.co/regisss/bridgetower-newyorker-a100-8x) | yes | — |
+| cosmos3_edge | 0 | 1 | [nvidia/Cosmos3-Edge](https://huggingface.co/nvidia/Cosmos3-Edge) | yes | — |
+| flex_olmo | 0 | 1 | [allenai/FlexOlmo-7x7B-1T](https://huggingface.co/allenai/FlexOlmo-7x7B-1T) | yes | — |
+| fsmt | 0 | 1 | [facebook/wmt19-en-ru](https://huggingface.co/facebook/wmt19-en-ru) | yes | — |
+| moshi | 0 | 1 | [kmhf/hf-moshiko](https://huggingface.co/kmhf/hf-moshiko) | yes | — |
+| muse_spark | 0 | 1 | ? | yes | not draftable |
+| mvp | 0 | 1 | [RUCAIBox/mvp](https://huggingface.co/RUCAIBox/mvp) | yes | — |
+| nemotron | 0 | 1 | [thhaus/nemotron3-8b](https://huggingface.co/thhaus/nemotron3-8b) | yes | — |
+| pegasus_x | 0 | 1 | [google/pegasus-x-large](https://huggingface.co/google/pegasus-x-large) | yes | — |
+| plbart | 0 | 1 | [uclanlp/plbart-base](https://huggingface.co/uclanlp/plbart-base) | yes | — |
+| prophetnet | 0 | 1 | [microsoft/prophetnet-large-uncased](https://huggingface.co/microsoft/prophetnet-large-uncased) | yes | — |
+| seamless_m4t | 0 | 1 | [facebook/hf-seamless-m4t-medium](https://huggingface.co/facebook/hf-seamless-m4t-medium) | yes | — |
+| shieldgemma2 | 0 | 1 | [google/shieldgemma-2-4b-it](https://huggingface.co/google/shieldgemma-2-4b-it) | yes | — |
+| switch_transformers | 0 | 1 | [google/switch-base-8](https://huggingface.co/google/switch-base-8) | yes | — |
+
+### Calls to add to existing contracts
+
+GPU CI regressions on models whose contract stayed green; **bold** models have a real-checkpoint (`*IntegrationTest`) one. GPU-only tests (flash-attention, quantization, compile, fp16) are listed apart: a CPU fixture contract does not run them.
+
+- shared: `test_torch_export_generate_dynamic` failed on 14 models (bart, blenderbot, florence2, longt5, m2m_100, marian, …) — one regression in shared code; one call in one contract covers it
+- shared: `test_torch_export_generate_static` failed on 14 models (bart, blenderbot, florence2, longt5, m2m_100, marian, …) — one regression in shared code; one call in one contract covers it
+- shared: `test_torch_export_generate_dynamic_static_cache` failed on 12 models (bart, blenderbot, florence2, m2m_100, marian, mbart, …) — one regression in shared code; one call in one contract covers it
+- shared: `test_torch_export_generate_static_static_cache` failed on 12 models (bart, blenderbot, florence2, m2m_100, marian, mbart, …) — one regression in shared code; one call in one contract covers it
+- shared: `test_flash_attn_2_equivalence` failed on 3 models (glm4, granitemoe, mixtral) — one regression in shared code; one call in one contract covers it
+- shared: `test_flash_attn_2_inference_equivalence_right_padding` failed on 3 models (albert, bert, electra) — one regression in shared code; one call in one contract covers it
+- shared: `test_sdpa_padding_matches_padding_free_with_position_ids` failed on 3 models (glm4_moe_lite, minicpm3, minimax_m2) — one regression in shared code; one call in one contract covers it
+- albert (GPU-only): `test_flash_attn_2_inference_equivalence`
+- cohere (GPU-only): `test_batched_4bit`
+- deepseek_v3 (GPU-only): `test_compile_static_cache`
+- **gemma2**: `Gemma2IntegrationTest::test_export_static_cache`, `Gemma2IntegrationTest::test_generation_beyond_sliding_window_1_sdpa`, `Gemma2IntegrationTest::test_generation_beyond_sliding_window_dynamic_1_sdpa` — `tmic update '<the call these tests make>'`
+- **gemma3**: `Gemma3IntegrationTest::test_model_4b_multiimage` — `tmic update '<the call these tests make>'`
+- **gemma3n**: `Gemma3nIntegrationTest::test_generation_beyond_sliding_window_with_generation_config`, `Gemma3nIntegrationTest::test_generation_beyond_sliding_window`, `Gemma3nIntegrationTest::test_model_4b_bf16`, `Gemma3nIntegrationTest::test_model_4b_image` — `tmic update '<the call these tests make>'`
+- **gemma4**: `Gemma4IntegrationTest::test_generation_beyond_sliding_window_0_sdpa` — `tmic update '<the call these tests make>'`
+- glm_moe_dsa: `GlmMoeDsaModelTest::test_sdpa_can_dispatch_on_flash` — `tmic update '<the call these tests make>'`
+- got_ocr2: `GotOcr2ProcessingTest::test_backends_equivalence_batched_crop_to_patches` — `tmic update '<the call these tests make>'`
+- **grounding_dino**: `GroundingDinoModelIntegrationTests::test_cross_attention_mask`, `GroundingDinoModelIntegrationTests::test_grounding_dino_loss`, `GroundingDinoModelIntegrationTests::test_inference_object_detection_head_equivalence_cpu_accelerator`, `GroundingDinoModelIntegrationTests::test_inference_object_detection_head` — `tmic update '<the call these tests make>'`
+- **internvl**: `InternVLLlamaIntegrationTest::test_llama_small_model_integration_forward`, `InternVLLlamaIntegrationTest::test_llama_small_model_integration_generate_text_only` — `tmic update '<the call these tests make>'`
+- **llama**: `LlamaIntegrationTest::test_flash_with_static_cache`, `LlamaIntegrationTest::test_llama_3_1_hard` — `tmic update '<the call these tests make>'`
+- **m2m_100**: `M2M100ModelIntegrationTests::test_seq_to_seq_generation` — `tmic update '<the call these tests make>'`
+- minicpm3: `MiniCPM3ModelTest::test_eager_padding_matches_padding_free_with_position_ids` — `tmic update '<the call these tests make>'`
+- minicpm3 (GPU-only): `test_flash_attention_2_padding_matches_padding_free_with_position_ids`, `test_flash_attention_2_padding_matches_padding_free_with_position_ids_and_fa_kwargs`
+- **mistral3**: `Mistral3IntegrationTest::test_mistral3_integration_batched_generate_multi_image`, `Mistral3IntegrationTest::test_mistral3_integration_generate` — `tmic update '<the call these tests make>'`
+- **mm_grounding_dino**: `MMGroundingDinoModelIntegrationTests::test_inference_object_detection_head_equivalence_cpu_gpu`, `MMGroundingDinoModelIntegrationTests::test_inference_object_detection_head`, `MMGroundingDinoModelIntegrationTests::test_mm_grounding_dino_loss` — `tmic update '<the call these tests make>'`
+- qwen3_asr: `Qwen3ASRFeatureExtractionTest::test_mel_padding_aligns_to_chunk` — `tmic update '<the call these tests make>'`
+- swinv2 (GPU-only): `test_inference_fp16`
 
 ## Waiting for a verdict (9)
 

@@ -1,0 +1,1576 @@
+{
+ "43451#molmo2": {
+  "bad_commit": "f27b9b1456273cbe7c3abe9fb4830e425d4b2119",
+  "date": "2026-10-10",
+  "integration": false,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/38018121662/job/114233330190",
+  "mic": "not-covered",
+  "model": "molmo2",
+  "pr": "43451",
+  "tests": [
+   "tests/models/molmo2/test_modeling_molmo2.py::Molmo2ModelTest::test_flex_attention_with_grads"
+  ]
+ },
+ "47290#shared": {
+  "bad_commit": "cc1451df3b5b218295bc16803569256c53c9d6e2",
+  "date": "2026-11-03",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/41565925981/job/125689153132",
+  "mic": "not-covered",
+  "model": null,
+  "pr": "47290",
+  "tests": [
+   "tests/utils/test_cache_utils.py::CacheHardIntegrationTest::test_chunked_prefill_static_cache_per_layer_head_shapes"
+  ]
+ },
+ "47747#kolibri1": {
+  "bad_commit": "d15ebba04d3a02f6a975dc70e1244a44fba28f80",
+  "date": "2026-10-15",
+  "integration": false,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/38671843837/job/116221192777",
+  "mic": "not-covered",
+  "model": "kolibri1",
+  "pr": "47747",
+  "tests": [
+   "tests/models/kolibri1/test_modeling_kolibri1.py::Kolibri1ModelTest::test_onnx_export_dynamic",
+   "tests/models/kolibri1/test_modeling_kolibri1.py::Kolibri1ModelTest::test_onnx_export_generate_dynamic",
+   "tests/models/kolibri1/test_modeling_kolibri1.py::Kolibri1ModelTest::test_onnx_export_generate_dynamic_static_cache",
+   "tests/models/kolibri1/test_modeling_kolibri1.py::Kolibri1ModelTest::test_onnx_export_generate_static",
+   "tests/models/kolibri1/test_modeling_kolibri1.py::Kolibri1ModelTest::test_onnx_export_generate_static_static_cache",
+   "tests/models/kolibri1/test_modeling_kolibri1.py::Kolibri1ModelTest::test_onnx_export_static"
+  ]
+ },
+ "48282#colpali": {
+  "bad_commit": "d4f69a869d66eeba7af0cc19a585552b14ddd6f2",
+  "date": "2026-10-09",
+  "integration": false,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/37876159550/job/113648940047",
+  "mic": "not-covered",
+  "model": "colpali",
+  "pr": "48282",
+  "tests": [
+   "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_flex_attention_with_grads"
+  ]
+ },
+ "48282#shared": {
+  "bad_commit": "d4f69a869d66eeba7af0cc19a585552b14ddd6f2",
+  "date": "2026-10-09",
+  "integration": false,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/37876159550/job/113648956246",
+  "mic": "not-covered",
+  "model": null,
+  "pr": "48282",
+  "tests": [
+   "tests/cli/test_serve.py::TestTranscription::test_transcription_openai_client",
+   "tests/cli/test_serve.py::TestTranscription::test_transcription_returns_text",
+   "tests/cli/test_serve.py::TestTranscription::test_transcription_streaming"
+  ]
+ },
+ "48282#whisper": {
+  "bad_commit": "d4f69a869d66eeba7af0cc19a585552b14ddd6f2",
+  "date": "2026-10-09",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/37876159550/job/113648952724",
+  "mic": "not-run",
+  "model": "whisper",
+  "pr": "48282",
+  "tests": [
+   "tests/models/whisper/test_modeling_whisper.py::WhisperModelIntegrationTests::test_default_multilingual_transcription_long_form",
+   "tests/models/whisper/test_modeling_whisper.py::WhisperModelIntegrationTests::test_default_multilingual_transcription_short_form"
+  ]
+ },
+ "48317#auto": {
+  "bad_commit": "70b9938d904e74e4237ecb7a49fe707d9876c03c",
+  "date": "2026-10-29",
+  "integration": false,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/40806473980/job/123251675938",
+  "mic": "not-covered",
+  "model": "auto",
+  "pr": "48317",
+  "tests": [
+   "tests/models/auto/test_tokenization_auto.py::AutoTokenizerTest::test_deepseek_r1_distill_qwen_uses_qwen2_tokenizer"
+  ]
+ },
+ "48992#shared": {
+  "bad_commit": "23292ca5b82012ee1a1fd620069fd5e659ecf1be",
+  "date": "2026-10-17",
+  "integration": false,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/38995454912/job/117291886765",
+  "mic": "not-covered",
+  "model": null,
+  "pr": "48992",
+  "tests": [
+   "tests/repo_utils/test_tests_fetcher.py::TestFetcherTester::test_multimodal_in_create_reverse_dependency_map"
+  ]
+ },
+ "49138#udop": {
+  "bad_commit": "4e3fc5e8eaa33851211b4c9a79564009da1d896a",
+  "date": "2026-10-16",
+  "integration": false,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/38841204412/job/116791140126",
+  "mic": "not-covered",
+  "model": "udop",
+  "pr": "49138",
+  "tests": [
+   "tests/models/udop/test_modeling_udop.py::UdopModelTest::test_flex_attention_with_grads",
+   "tests/models/udop/test_modeling_udop.py::UdopEncoderOnlyModelTest::test_flex_attention_with_grads"
+  ]
+ },
+ "49206#muse_spark": {
+  "bad_commit": "8498ed425fa01bbee7d086efdf1a6634c2962aed",
+  "date": "2026-10-17",
+  "integration": false,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/38995454912/job/117291879029",
+  "mic": "not-covered",
+  "model": "muse_spark",
+  "pr": "49206",
+  "tests": [
+   "tests/models/muse_spark/test_modeling_muse_spark.py::MuseSparkVision2TextModelTest::test_moe_parallel_plans_shard_experts"
+  ]
+ },
+ "49364#embedding_gemma2": {
+  "bad_commit": "92cd495f2720c064bc78eb2d93e28704c5bce51f",
+  "date": "2026-10-07",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/37563588666/job/112608047988",
+  "mic": "not-run",
+  "model": "embedding_gemma2",
+  "pr": "49364",
+  "tests": [
+   "tests/models/embedding_gemma2/test_modeling_embedding_gemma2.py::EmbeddingGemma2TextModelTest::test_sdpa_can_dispatch_on_flash",
+   "tests/models/embedding_gemma2/test_modeling_embedding_gemma2.py::EmbeddingGemma2ModelTest::test_sdpa_can_dispatch_on_flash",
+   "tests/models/embedding_gemma2/test_modeling_embedding_gemma2.py::EmbeddingGemma2IntegrationTest::test_model_manual_placeholders",
+   "tests/models/embedding_gemma2/test_modeling_embedding_gemma2.py::EmbeddingGemma2IntegrationTest::test_model_mixed_modality_batch",
+   "tests/models/embedding_gemma2/test_modeling_embedding_gemma2.py::EmbeddingGemma2IntegrationTest::test_model_multiple_modalities",
+   "tests/models/embedding_gemma2/test_modeling_embedding_gemma2.py::EmbeddingGemma2IntegrationTest::test_model_single_modality",
+   "tests/models/embedding_gemma2/test_modeling_embedding_gemma2.py::EmbeddingGemma2IntegrationTest::test_model_text_query_document"
+  ]
+ },
+ "49404#gemma4": {
+  "bad_commit": "c48824e840247c860e394bcc58aa35dfffa9e67f",
+  "date": "2026-10-10",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/38018121662/job/114233333289",
+  "mic": "not-run",
+  "model": "gemma4",
+  "pr": "49404",
+  "tests": [
+   "tests/models/gemma4/test_modeling_gemma4.py::Gemma4IntegrationTest::test_generation_beyond_sliding_window_0_sdpa"
+  ]
+ },
+ "49421#shared": {
+  "bad_commit": "0814cc791d61147a3e947b2479c9ca3727a5c6b6",
+  "date": "2026-10-15",
+  "integration": false,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/38671843837/job/116221214834",
+  "mic": "not-covered",
+  "model": null,
+  "pr": "49421",
+  "tests": [
+   "tests/tensor_parallel/test_tensor_parallel.py::TestTensorParallelLayer::test_dispatch_hands_experts_the_received_rows"
+  ]
+ },
+ "49589#pocket_tts": {
+  "bad_commit": "36e30f0bc587e68e7521e8779db44bddcb7ad92c",
+  "date": "2026-10-21",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/39534034205/job/119017709732",
+  "mic": "not-covered",
+  "model": "pocket_tts",
+  "pr": "49589",
+  "tests": [
+   "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_onnx_export_generate_dynamic",
+   "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_onnx_export_generate_dynamic_static_cache",
+   "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_torch_export_generate_dynamic",
+   "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSIntegrationTest::test_drifting",
+   "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSIntegrationTest::test_training",
+   "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSIntegrationTest::test_voice_cloning",
+   "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSIntegrationTest::test_voice_cloning_batch",
+   "tests/models/pocket_tts/test_processing_pocket_tts.py::PocketTTSProcessingIntegrationTest::test_apply_chat_template_text",
+   "tests/models/pocket_tts/test_processing_pocket_tts.py::PocketTTSProcessingIntegrationTest::test_apply_chat_template_voice_audio",
+   "tests/models/pocket_tts/test_processing_pocket_tts.py::PocketTTSProcessingIntegrationTest::test_apply_chat_template_voice_audio_batch",
+   "tests/models/pocket_tts/test_processing_pocket_tts.py::PocketTTSProcessingIntegrationTest::test_split_text"
+  ]
+ },
+ "49664#beam": {
+  "bad_commit": "966f59c897c15db8a5e14882d086beba8d6d0b9f",
+  "date": "2026-10-17",
+  "integration": false,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/38995454912/job/117291865423",
+  "mic": "not-covered",
+  "model": "beam",
+  "pr": "49664",
+  "tests": [
+   "tests/models/beam/test_modeling_beam.py::BeamModelTest::test_cpu_offload"
+  ]
+ },
+ "49725#colmodernvbert": {
+  "bad_commit": "5b20befc1c565c1f46ba9659993b352d42ef146e",
+  "date": "2026-10-20",
+  "integration": false,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/39359759693/job/118428338797",
+  "mic": "not-covered",
+  "model": "colmodernvbert",
+  "pr": "49725",
+  "tests": [
+   "tests/models/colmodernvbert/test_modeling_colmodernvbert.py::ColModernVBertForRetrievalModelTest::test_resize_tokens_embeddings"
+  ]
+ },
+ "49791#gradium_phonon_tts": {
+  "bad_commit": "c5c92c8b8a8b7e532936afa466b0ccb7a1637048",
+  "date": "2026-10-21",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/39534034205/job/119017710506",
+  "mic": "not-covered",
+  "model": "gradium_phonon_tts",
+  "pr": "49791",
+  "tests": [
+   "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_onnx_export_generate_dynamic",
+   "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_onnx_export_generate_dynamic_static_cache",
+   "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_torch_export_generate_dynamic",
+   "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSIntegrationTest::test_batch",
+   "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSIntegrationTest::test_single"
+  ]
+ },
+ "49811#gemma2": {
+  "bad_commit": "7d3ae42ee810431d4df15dcbf3bc5bce70221cc5",
+  "date": "2026-10-22",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/39712427605/job/119609253029",
+  "mic": "missed",
+  "model": "gemma2",
+  "pr": "49811",
+  "tests": [
+   "tests/models/gemma2/test_modeling_gemma2.py::Gemma2IntegrationTest::test_export_static_cache",
+   "tests/models/gemma2/test_modeling_gemma2.py::Gemma2IntegrationTest::test_generation_beyond_sliding_window_1_sdpa",
+   "tests/models/gemma2/test_modeling_gemma2.py::Gemma2IntegrationTest::test_generation_beyond_sliding_window_dynamic_1_sdpa"
+  ]
+ },
+ "49811#vaultgemma": {
+  "bad_commit": "7d3ae42ee810431d4df15dcbf3bc5bce70221cc5",
+  "date": "2026-10-22",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/39712427605/job/119609248616",
+  "mic": "not-covered",
+  "model": "vaultgemma",
+  "pr": "49811",
+  "tests": [
+   "tests/models/vaultgemma/test_modeling_vaultgemma.py::VaultGemmaIntegrationTest::test_export_static_cache",
+   "tests/models/vaultgemma/test_modeling_vaultgemma.py::VaultGemmaIntegrationTest::test_generation_beyond_sliding_window_1_sdpa",
+   "tests/models/vaultgemma/test_modeling_vaultgemma.py::VaultGemmaIntegrationTest::test_generation_beyond_sliding_window_dynamic_1_sdpa",
+   "tests/models/vaultgemma/test_modeling_vaultgemma.py::VaultGemmaIntegrationTest::test_model_pipeline_bf16"
+  ]
+ },
+ "49832#eomt": {
+  "bad_commit": "0b6c4d4ca11851f810385960f7f15a25aba4e91b",
+  "date": "2026-10-28",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/40621028147/job/122596387123",
+  "mic": "not-covered",
+  "model": "eomt",
+  "pr": "49832",
+  "tests": [
+   "tests/models/eomt/test_modeling_eomt.py::EomtForUniversalSegmentationIntegrationTest::test_segmentation_pipeline"
+  ]
+ },
+ "49832#eomt_dinov3": {
+  "bad_commit": "0b6c4d4ca11851f810385960f7f15a25aba4e91b",
+  "date": "2026-10-28",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/40621028147/job/122596387470",
+  "mic": "not-covered",
+  "model": "eomt_dinov3",
+  "pr": "49832",
+  "tests": [
+   "tests/models/eomt_dinov3/test_modeling_eomt_dinov3.py::EomtDinov3ForUniversalSegmentationIntegrationTest::test_segmentation_pipeline"
+  ]
+ },
+ "49920#minicpm_ocr": {
+  "bad_commit": "77cfe2724ec16c67778693c0da0f3425aa0afd1d",
+  "date": "2026-10-26",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/40260447300/job/121371676229",
+  "mic": "not-covered",
+  "model": "minicpm_ocr",
+  "pr": "49920",
+  "tests": [
+   "tests/models/minicpm_ocr/test_modeling_minicpm_ocr.py::MiniCPMOcrIntegrationTest::test_small_model_logits",
+   "tests/models/minicpm_ocr/test_modeling_minicpm_ocr.py::MiniCPMOcrIntegrationTest::test_small_model_vision_generation",
+   "tests/models/minicpm_ocr/test_modeling_minicpm_ocr.py::MiniCPMOcrIntegrationTest::test_small_model_vision_generation_batch"
+  ]
+ },
+ "50084#nemotron3_5_transcribe": {
+  "bad_commit": "1b754e9a4636191852a1618fc588ad5c863ab4d5",
+  "date": "2026-10-29",
+  "integration": false,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/40806473980/job/123251696747",
+  "mic": "not-covered",
+  "model": "nemotron3_5_transcribe",
+  "pr": "50084",
+  "tests": [
+   "tests/models/nemotron3_5_transcribe/test_modeling_nemotron3_5_transcribe.py::Nemotron3_5TranscribeForConditionalGenerationModelTest::test_sdpa_can_dispatch_on_flash"
+  ]
+ },
+ "sticky#albert#2026-10-06": {
+  "date": "2026-10-06",
+  "day": 20732,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "albert",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/albert/test_modeling_albert.py::AlbertModelTest::test_flash_attn_2_inference_equivalence"
+  ]
+ },
+ "sticky#albert#2026-10-08": {
+  "date": "2026-10-08",
+  "day": 20734,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "albert",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/albert/test_modeling_albert.py::AlbertModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
+ "sticky#axk1#2026-10-06": {
+  "date": "2026-10-06",
+  "day": 20732,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "axk1",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/axk1/test_modeling_axk1.py::AXK1ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#bart#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "bart",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/bart/test_modeling_bart.py::BartModelTest::test_torch_export_generate_dynamic",
+   "tests/models/bart/test_modeling_bart.py::BartModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/bart/test_modeling_bart.py::BartModelTest::test_torch_export_generate_static",
+   "tests/models/bart/test_modeling_bart.py::BartModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#beam#2026-10-17": {
+  "date": "2026-10-17",
+  "day": 20743,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "beam",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/beam/test_modeling_beam.py::BeamModelTest::test_cpu_offload",
+   "tests/models/beam/test_modeling_beam.py::BeamModelTest::test_model_parallelism",
+   "tests/models/beam/test_modeling_beam.py::BeamModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#bert#2026-10-19": {
+  "date": "2026-10-19",
+  "day": 20745,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "bert",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/bert/test_modeling_bert.py::BertModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
+ "sticky#bigbird_pegasus#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "bigbird_pegasus",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/bigbird_pegasus/test_modeling_bigbird_pegasus.py::BigBirdPegasusModelTest::test_torch_export_generate_dynamic",
+   "tests/models/bigbird_pegasus/test_modeling_bigbird_pegasus.py::BigBirdPegasusModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/bigbird_pegasus/test_modeling_bigbird_pegasus.py::BigBirdPegasusModelTest::test_torch_export_generate_static",
+   "tests/models/bigbird_pegasus/test_modeling_bigbird_pegasus.py::BigBirdPegasusModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#blenderbot#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "blenderbot",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/blenderbot/test_modeling_blenderbot.py::BlenderbotModelTest::test_torch_export_generate_dynamic",
+   "tests/models/blenderbot/test_modeling_blenderbot.py::BlenderbotModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/blenderbot/test_modeling_blenderbot.py::BlenderbotModelTest::test_torch_export_generate_static",
+   "tests/models/blenderbot/test_modeling_blenderbot.py::BlenderbotModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#blenderbot_small#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "blenderbot_small",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/blenderbot_small/test_modeling_blenderbot_small.py::BlenderbotSmallModelTest::test_torch_export_generate_dynamic",
+   "tests/models/blenderbot_small/test_modeling_blenderbot_small.py::BlenderbotSmallModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/blenderbot_small/test_modeling_blenderbot_small.py::BlenderbotSmallModelTest::test_torch_export_generate_static",
+   "tests/models/blenderbot_small/test_modeling_blenderbot_small.py::BlenderbotSmallModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#blt#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "blt",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/blt/test_modeling_blt.py::BltModelTest::test_torch_export_generate_dynamic",
+   "tests/models/blt/test_modeling_blt.py::BltModelTest::test_torch_export_generate_static"
+  ]
+ },
+ "sticky#bridgetower#2026-10-17": {
+  "date": "2026-10-17",
+  "day": 20743,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "bridgetower",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/bridgetower/test_image_processing_bridgetower.py::BridgeTowerImageProcessingTest::test_backends_equivalence_batched"
+  ]
+ },
+ "sticky#canary#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "canary",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/canary/test_modeling_canary.py::CanaryModelTest::test_torch_export_generate_dynamic",
+   "tests/models/canary/test_modeling_canary.py::CanaryModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/canary/test_modeling_canary.py::CanaryModelTest::test_torch_export_generate_static",
+   "tests/models/canary/test_modeling_canary.py::CanaryModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#cohere#2026-10-17": {
+  "date": "2026-10-17",
+  "day": 20743,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "cohere",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/cohere/test_modeling_cohere.py::CohereIntegrationTest::test_batched_4bit"
+  ]
+ },
+ "sticky#cohere_asr#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "cohere_asr",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_dynamic",
+   "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_static",
+   "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#colpali#2026-10-10": {
+  "date": "2026-10-10",
+  "day": 20736,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "colpali",
+  "signal": "ValueError",
+  "tests": [
+   "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_flash_attn_2_inference_equivalence",
+   "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
+ "sticky#cosmos3_edge#2026-10-17": {
+  "date": "2026-10-17",
+  "day": 20743,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "cosmos3_edge",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/cosmos3_edge/test_image_processing_cosmos3_edge.py::Cosmos3EdgeImageProcessingTest::test_backends_equivalence_batched"
+  ]
+ },
+ "sticky#cwm#2026-10-09": {
+  "date": "2026-10-09",
+  "day": 20735,
+  "integration": true,
+  "mic": "not-covered",
+  "model": "cwm",
+  "signal": "torch.OutOfMemoryError",
+  "tests": [
+   "tests/models/cwm/test_modeling_cwm.py::CwmIntegrationTest::test_cwm_generation_20_tokens",
+   "tests/models/cwm/test_modeling_cwm.py::CwmIntegrationTest::test_cwm_sliding_window_long_sequence"
+  ]
+ },
+ "sticky#data2vec#2026-10-06": {
+  "date": "2026-10-06",
+  "day": 20732,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "data2vec",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_flash_attn_2_inference_equivalence"
+  ]
+ },
+ "sticky#data2vec#2026-10-10": {
+  "date": "2026-10-10",
+  "day": 20736,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "data2vec",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
+ "sticky#deepseek_ocr2#2026-10-24": {
+  "date": "2026-10-24",
+  "day": 20750,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "deepseek_ocr2",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/deepseek_ocr2/test_image_processing_deepseek_ocr2.py::DeepseekOcr2ImageProcessingTest::test_backends_equivalence_batched"
+  ]
+ },
+ "sticky#deepseek_v3#2026-10-16": {
+  "date": "2026-10-16",
+  "day": 20742,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "deepseek_v3",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/deepseek_v3/test_modeling_deepseek_v3.py::DeepseekV3IntegrationTest::test_compile_static_cache"
+  ]
+ },
+ "sticky#dia#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "dia",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/dia/test_modeling_dia.py::DiaModelTest::test_torch_export_generate_dynamic",
+   "tests/models/dia/test_modeling_dia.py::DiaModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/dia/test_modeling_dia.py::DiaModelTest::test_torch_export_generate_static",
+   "tests/models/dia/test_modeling_dia.py::DiaModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#electra#2026-10-09": {
+  "date": "2026-10-09",
+  "day": 20735,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "electra",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/electra/test_modeling_electra.py::ElectraModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
+ "sticky#ernie#2026-10-06": {
+  "date": "2026-10-06",
+  "day": 20732,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "ernie",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/ernie/test_modeling_ernie.py::ErnieModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
+ "sticky#ernie#2026-10-12": {
+  "date": "2026-10-12",
+  "day": 20738,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "ernie",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/ernie/test_modeling_ernie.py::ErnieModelTest::test_flash_attn_2_inference_equivalence"
+  ]
+ },
+ "sticky#ernie4_5_moe#2026-10-10": {
+  "date": "2026-10-10",
+  "day": 20736,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "ernie4_5_moe",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/ernie4_5_moe/test_modeling_ernie4_5_moe.py::Ernie4_5_MoeModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#flex_olmo#2026-10-24": {
+  "date": "2026-10-24",
+  "day": 20750,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "flex_olmo",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/flex_olmo/test_modeling_flex_olmo.py::FlexOlmoModelTest::test_sdpa_padding_matches_padding_free_with_position_ids"
+  ]
+ },
+ "sticky#flint#2026-10-22": {
+  "date": "2026-10-22",
+  "day": 20748,
+  "integration": true,
+  "mic": "not-covered",
+  "model": "flint",
+  "signal": "RuntimeError",
+  "tests": [
+   "tests/models/flint/test_modeling_flint.py::FlintIntegrationTest::test_greedy_chat"
+  ]
+ },
+ "sticky#florence2#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "florence2",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/florence2/test_modeling_florence2.py::Florence2ForConditionalGenerationModelTest::test_torch_export_generate_dynamic",
+   "tests/models/florence2/test_modeling_florence2.py::Florence2ForConditionalGenerationModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/florence2/test_modeling_florence2.py::Florence2ForConditionalGenerationModelTest::test_torch_export_generate_static",
+   "tests/models/florence2/test_modeling_florence2.py::Florence2ForConditionalGenerationModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#fsmt#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "fsmt",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/fsmt/test_modeling_fsmt.py::FSMTModelTest::test_torch_export_generate_dynamic",
+   "tests/models/fsmt/test_modeling_fsmt.py::FSMTModelTest::test_torch_export_generate_static"
+  ]
+ },
+ "sticky#gemma2#2026-10-22": {
+  "date": "2026-10-22",
+  "day": 20748,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "gemma2",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/gemma2/test_modeling_gemma2.py::Gemma2IntegrationTest::test_export_static_cache"
+  ]
+ },
+ "sticky#gemma3#2026-11-02": {
+  "date": "2026-11-02",
+  "day": 20759,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "gemma3",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/gemma3/test_modeling_gemma3.py::Gemma3IntegrationTest::test_model_4b_multiimage"
+  ]
+ },
+ "sticky#gemma3n#2026-10-09": {
+  "date": "2026-10-09",
+  "day": 20735,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "gemma3n",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/gemma3n/test_modeling_gemma3n.py::Gemma3nTextModelTest::test_generate_with_static_cache"
+  ]
+ },
+ "sticky#gemma3n#2026-11-02": {
+  "date": "2026-11-02",
+  "day": 20759,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "gemma3n",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/gemma3n/test_modeling_gemma3n.py::Gemma3nIntegrationTest::test_generation_beyond_sliding_window",
+   "tests/models/gemma3n/test_modeling_gemma3n.py::Gemma3nIntegrationTest::test_generation_beyond_sliding_window_with_generation_config",
+   "tests/models/gemma3n/test_modeling_gemma3n.py::Gemma3nIntegrationTest::test_model_4b_bf16",
+   "tests/models/gemma3n/test_modeling_gemma3n.py::Gemma3nIntegrationTest::test_model_4b_image",
+   "tests/models/gemma3n/test_modeling_gemma3n.py::Gemma3nIntegrationTest::test_model_4b_multiimage"
+  ]
+ },
+ "sticky#gemma4#2026-10-10": {
+  "date": "2026-10-10",
+  "day": 20736,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "gemma4",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/gemma4/test_modeling_gemma4.py::Gemma4IntegrationTest::test_generation_beyond_sliding_window_0_sdpa"
+  ]
+ },
+ "sticky#glm4#2026-10-07": {
+  "date": "2026-10-07",
+  "day": 20733,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "glm4",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/glm4/test_modeling_glm4.py::Glm4ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#glm4_moe_lite#2026-10-06": {
+  "date": "2026-10-06",
+  "day": 20732,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "glm4_moe_lite",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/glm4_moe_lite/test_modeling_glm4_moe_lite.py::Glm4MoeModelTest::test_sdpa_padding_matches_padding_free_with_position_ids"
+  ]
+ },
+ "sticky#glm_moe_dsa#2026-10-19": {
+  "date": "2026-10-19",
+  "day": 20745,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "glm_moe_dsa",
+  "signal": "RuntimeError",
+  "tests": [
+   "tests/models/glm_moe_dsa/test_modeling_glm_moe_dsa.py::GlmMoeDsaModelTest::test_sdpa_can_dispatch_on_flash"
+  ]
+ },
+ "sticky#got_ocr2#2026-10-20": {
+  "date": "2026-10-20",
+  "day": 20746,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "got_ocr2",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/got_ocr2/test_image_processing_got_ocr2.py::GotOcr2ProcessingTest::test_backends_equivalence_batched_crop_to_patches"
+  ]
+ },
+ "sticky#gradium_phonon_tts#2026-10-21": {
+  "date": "2026-10-21",
+  "day": 20747,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "gradium_phonon_tts",
+  "signal": "ValueError",
+  "tests": [
+   "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_onnx_export_generate_dynamic",
+   "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_onnx_export_generate_dynamic_static_cache",
+   "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_torch_export_generate_dynamic",
+   "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_flash_attention_2_continue_generate_with_position_ids",
+   "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_flash_attn_2_inference_equivalence",
+   "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
+ "sticky#granite_speech5#2026-10-22": {
+  "date": "2026-10-22",
+  "day": 20748,
+  "integration": true,
+  "mic": "not-covered",
+  "model": "granite_speech5",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/granite_speech5/test_modeling_granite_speech5.py::GraniteSpeech5ForCTCIntegrationTest::test_model_integration_batch",
+   "tests/models/granite_speech5/test_modeling_granite_speech5.py::GraniteSpeech5ForCTCIntegrationTest::test_model_integration_single"
+  ]
+ },
+ "sticky#granite_speech_plus#2026-10-22": {
+  "date": "2026-10-22",
+  "day": 20748,
+  "integration": true,
+  "mic": "not-covered",
+  "model": "granite_speech_plus",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/granite_speech_plus/test_modeling_granite_speech_plus.py::GraniteSpeechPlusForConditionalGenerationIntegrationTest::test_small_model_integration_test_batch",
+   "tests/models/granite_speech_plus/test_modeling_granite_speech_plus.py::GraniteSpeechPlusForConditionalGenerationIntegrationTest::test_small_model_integration_test_single"
+  ]
+ },
+ "sticky#granitemoe#2026-10-19": {
+  "date": "2026-10-19",
+  "day": 20745,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "granitemoe",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/granitemoe/test_modeling_granitemoe.py::GraniteMoeModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#grounding_dino#2026-10-13": {
+  "date": "2026-10-13",
+  "day": 20739,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "grounding_dino",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_cross_attention_mask",
+   "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_grounding_dino_loss",
+   "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_inference_object_detection_head",
+   "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_inference_object_detection_head_equivalence_cpu_accelerator"
+  ]
+ },
+ "sticky#hunyuan_v1_moe#2026-10-10": {
+  "date": "2026-10-10",
+  "day": 20736,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "hunyuan_v1_moe",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/hunyuan_v1_moe/test_modeling_hunyuan_v1_moe.py::HunYuanMoEV1ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#idefics#2026-10-07": {
+  "date": "2026-10-07",
+  "day": 20733,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "idefics",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/idefics/test_modeling_idefics.py::IdeficsForVisionText2TextTest::test_generate_continue_from_inputs_embeds"
+  ]
+ },
+ "sticky#internvl#2026-11-02": {
+  "date": "2026-11-02",
+  "day": 20759,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "internvl",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/internvl/test_modeling_internvl.py::InternVLLlamaIntegrationTest::test_llama_small_model_integration_forward",
+   "tests/models/internvl/test_modeling_internvl.py::InternVLLlamaIntegrationTest::test_llama_small_model_integration_generate_text_only"
+  ]
+ },
+ "sticky#kolibri1#2026-10-14": {
+  "date": "2026-10-14",
+  "day": 20740,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "kolibri1",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/kolibri1/test_modeling_kolibri1.py::Kolibri1ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#llama#2026-11-01": {
+  "date": "2026-11-01",
+  "day": 20758,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "llama",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_flash_with_static_cache"
+  ]
+ },
+ "sticky#llama#2026-11-02": {
+  "date": "2026-11-02",
+  "day": 20759,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "llama",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_llama_3_1_hard"
+  ]
+ },
+ "sticky#llava#2026-11-02": {
+  "date": "2026-11-02",
+  "day": 20759,
+  "integration": true,
+  "mic": "red-on-main",
+  "model": "llava",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/llava/test_modeling_llava.py::LlavaForConditionalGenerationIntegrationTest::test_small_model_integration_test_llama_single"
+  ]
+ },
+ "sticky#longt5#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "longt5",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/longt5/test_modeling_longt5.py::LongT5ModelTest::test_torch_export_generate_dynamic",
+   "tests/models/longt5/test_modeling_longt5.py::LongT5ModelTest::test_torch_export_generate_static",
+   "tests/models/longt5/test_modeling_longt5.py::LongT5TGlobalModelTest::test_torch_export_generate_dynamic",
+   "tests/models/longt5/test_modeling_longt5.py::LongT5TGlobalModelTest::test_torch_export_generate_static"
+  ]
+ },
+ "sticky#m2m_100#2026-10-12": {
+  "date": "2026-10-12",
+  "day": 20738,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "m2m_100",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/m2m_100/test_modeling_m2m_100.py::M2M100ModelIntegrationTests::test_seq_to_seq_generation"
+  ]
+ },
+ "sticky#m2m_100#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "m2m_100",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/m2m_100/test_modeling_m2m_100.py::M2M100ModelTest::test_torch_export_generate_dynamic",
+   "tests/models/m2m_100/test_modeling_m2m_100.py::M2M100ModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/m2m_100/test_modeling_m2m_100.py::M2M100ModelTest::test_torch_export_generate_static",
+   "tests/models/m2m_100/test_modeling_m2m_100.py::M2M100ModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#mamba2#2026-10-06": {
+  "date": "2026-10-06",
+  "day": 20732,
+  "integration": true,
+  "mic": "not-covered",
+  "model": "mamba2",
+  "signal": "torch.OutOfMemoryError",
+  "tests": [
+   "tests/models/mamba2/test_modeling_mamba2.py::Mamba2IntegrationTest::test_mamba2_mixer_train_vs_eval_equivalence"
+  ]
+ },
+ "sticky#marian#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "marian",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/marian/test_modeling_marian.py::MarianModelTest::test_torch_export_generate_dynamic",
+   "tests/models/marian/test_modeling_marian.py::MarianModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/marian/test_modeling_marian.py::MarianModelTest::test_torch_export_generate_static",
+   "tests/models/marian/test_modeling_marian.py::MarianModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#mbart#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "mbart",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/mbart/test_modeling_mbart.py::MBartModelTest::test_torch_export_generate_dynamic",
+   "tests/models/mbart/test_modeling_mbart.py::MBartModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/mbart/test_modeling_mbart.py::MBartModelTest::test_torch_export_generate_static",
+   "tests/models/mbart/test_modeling_mbart.py::MBartModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#minicpm3#2026-10-06": {
+  "date": "2026-10-06",
+  "day": 20732,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "minicpm3",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_eager_padding_matches_padding_free_with_position_ids"
+  ]
+ },
+ "sticky#minicpm3#2026-10-08": {
+  "date": "2026-10-08",
+  "day": 20734,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "minicpm3",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids",
+   "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids_and_fa_kwargs"
+  ]
+ },
+ "sticky#minicpm3#2026-10-10": {
+  "date": "2026-10-10",
+  "day": 20736,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "minicpm3",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_sdpa_padding_matches_padding_free_with_position_ids"
+  ]
+ },
+ "sticky#minimax_m2#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "minimax_m2",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/minimax_m2/test_modeling_minimax_m2.py::MiniMaxM2ModelTest::test_sdpa_padding_matches_padding_free_with_position_ids"
+  ]
+ },
+ "sticky#mistral3#2026-10-19": {
+  "date": "2026-10-19",
+  "day": 20745,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "mistral3",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/mistral3/test_modeling_mistral3.py::Mistral3IntegrationTest::test_mistral3_integration_batched_generate_multi_image",
+   "tests/models/mistral3/test_modeling_mistral3.py::Mistral3IntegrationTest::test_mistral3_integration_generate"
+  ]
+ },
+ "sticky#mixtral#2026-10-07": {
+  "date": "2026-10-07",
+  "day": 20733,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "mixtral",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/mixtral/test_modeling_mixtral.py::MixtralModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#mm_grounding_dino#2026-10-17": {
+  "date": "2026-10-17",
+  "day": 20743,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "mm_grounding_dino",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/mm_grounding_dino/test_modeling_mm_grounding_dino.py::MMGroundingDinoModelIntegrationTests::test_inference_object_detection_head",
+   "tests/models/mm_grounding_dino/test_modeling_mm_grounding_dino.py::MMGroundingDinoModelIntegrationTests::test_inference_object_detection_head_equivalence_cpu_gpu",
+   "tests/models/mm_grounding_dino/test_modeling_mm_grounding_dino.py::MMGroundingDinoModelIntegrationTests::test_mm_grounding_dino_loss"
+  ]
+ },
+ "sticky#moshi#2026-10-06": {
+  "date": "2026-10-06",
+  "day": 20732,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "moshi",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/moshi/test_modeling_moshi.py::MoshiDecoderTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids"
+  ]
+ },
+ "sticky#mt5#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "mt5",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/mt5/test_modeling_mt5.py::MT5ModelTest::test_torch_export_generate_dynamic",
+   "tests/models/mt5/test_modeling_mt5.py::MT5ModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/mt5/test_modeling_mt5.py::MT5ModelTest::test_torch_export_generate_static",
+   "tests/models/mt5/test_modeling_mt5.py::MT5ModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#mvp#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "mvp",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/mvp/test_modeling_mvp.py::MvpModelTest::test_torch_export_generate_dynamic",
+   "tests/models/mvp/test_modeling_mvp.py::MvpModelTest::test_torch_export_generate_static"
+  ]
+ },
+ "sticky#nemotron#2026-10-27": {
+  "date": "2026-10-27",
+  "day": 20753,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "nemotron",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/nemotron/test_modeling_nemotron.py::NemotronModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#nemotron3_5_transcribe#2026-10-29": {
+  "date": "2026-10-29",
+  "day": 20755,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "nemotron3_5_transcribe",
+  "signal": "RuntimeError",
+  "tests": [
+   "tests/models/nemotron3_5_transcribe/test_modeling_nemotron3_5_transcribe.py::Nemotron3_5TranscribeForConditionalGenerationModelTest::test_eager_matches_fa2_generate",
+   "tests/models/nemotron3_5_transcribe/test_modeling_nemotron3_5_transcribe.py::Nemotron3_5TranscribeForConditionalGenerationModelTest::test_flash_attn_2_inference_equivalence",
+   "tests/models/nemotron3_5_transcribe/test_modeling_nemotron3_5_transcribe.py::Nemotron3_5TranscribeForConditionalGenerationModelTest::test_flash_attn_2_inference_equivalence_right_padding",
+   "tests/models/nemotron3_5_transcribe/test_modeling_nemotron3_5_transcribe.py::Nemotron3_5TranscribeForConditionalGenerationModelTest::test_sdpa_can_dispatch_on_flash"
+  ]
+ },
+ "sticky#nemotron_h#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "nemotron_h",
+  "signal": "RuntimeError",
+  "tests": [
+   "tests/models/nemotron_h/test_modeling_nemotron_h.py::NemotronHModelTest::test_torch_export_generate_dynamic",
+   "tests/models/nemotron_h/test_modeling_nemotron_h.py::NemotronHModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/nemotron_h/test_modeling_nemotron_h.py::NemotronHModelTest::test_torch_export_generate_static",
+   "tests/models/nemotron_h/test_modeling_nemotron_h.py::NemotronHModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#omdet_turbo#2026-10-25": {
+  "date": "2026-10-25",
+  "day": 20751,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "omdet_turbo",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/omdet_turbo/test_modeling_omdet_turbo.py::OmDetTurboModelTest::test_batching_equivalence"
+  ]
+ },
+ "sticky#oneformer#2026-10-18": {
+  "date": "2026-10-18",
+  "day": 20744,
+  "integration": true,
+  "mic": "not-covered",
+  "model": "oneformer",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_no_head",
+   "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_universal_segmentation_head"
+  ]
+ },
+ "sticky#pegasus#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "pegasus",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/pegasus/test_modeling_pegasus.py::PegasusModelTest::test_torch_export_generate_dynamic",
+   "tests/models/pegasus/test_modeling_pegasus.py::PegasusModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/pegasus/test_modeling_pegasus.py::PegasusModelTest::test_torch_export_generate_static",
+   "tests/models/pegasus/test_modeling_pegasus.py::PegasusModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#pegasus_x#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "pegasus_x",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/pegasus_x/test_modeling_pegasus_x.py::PegasusXModelTest::test_torch_export_generate_dynamic",
+   "tests/models/pegasus_x/test_modeling_pegasus_x.py::PegasusXModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/pegasus_x/test_modeling_pegasus_x.py::PegasusXModelTest::test_torch_export_generate_static",
+   "tests/models/pegasus_x/test_modeling_pegasus_x.py::PegasusXModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#plbart#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "plbart",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/plbart/test_modeling_plbart.py::PLBartModelTest::test_torch_export_generate_dynamic",
+   "tests/models/plbart/test_modeling_plbart.py::PLBartModelTest::test_torch_export_generate_static"
+  ]
+ },
+ "sticky#pocket_tts#2026-10-21": {
+  "date": "2026-10-21",
+  "day": 20747,
+  "integration": true,
+  "mic": "not-covered",
+  "model": "pocket_tts",
+  "signal": "OSError",
+  "tests": [
+   "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSIntegrationTest::test_drifting",
+   "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSIntegrationTest::test_training",
+   "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSIntegrationTest::test_voice_cloning",
+   "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSIntegrationTest::test_voice_cloning_batch",
+   "tests/models/pocket_tts/test_processing_pocket_tts.py::PocketTTSProcessingIntegrationTest::test_apply_chat_template_text",
+   "tests/models/pocket_tts/test_processing_pocket_tts.py::PocketTTSProcessingIntegrationTest::test_apply_chat_template_voice_audio",
+   "tests/models/pocket_tts/test_processing_pocket_tts.py::PocketTTSProcessingIntegrationTest::test_apply_chat_template_voice_audio_batch",
+   "tests/models/pocket_tts/test_processing_pocket_tts.py::PocketTTSProcessingIntegrationTest::test_split_text",
+   "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_onnx_export_generate_dynamic",
+   "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_onnx_export_generate_dynamic_static_cache",
+   "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_torch_export_generate_dynamic",
+   "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_flash_attention_2_continue_generate_with_position_ids",
+   "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_flash_attn_2_inference_equivalence",
+   "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
+ "sticky#poolformer#2026-10-19": {
+  "date": "2026-10-19",
+  "day": 20745,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "poolformer",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/poolformer/test_image_processing_poolformer.py::PoolFormerImageProcessingTest::test_backends_equivalence_batched"
+  ]
+ },
+ "sticky#poolformer#2026-10-23": {
+  "date": "2026-10-23",
+  "day": 20749,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "poolformer",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/poolformer/test_image_processing_poolformer.py::PoolFormerImageProcessingNoCropPctTest::test_backends_equivalence_batched"
+  ]
+ },
+ "sticky#pp_formulanet#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "pp_formulanet",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/pp_formulanet/test_modeling_pp_formulanet.py::PPFormulaNetModelTest::test_torch_export_generate_dynamic",
+   "tests/models/pp_formulanet/test_modeling_pp_formulanet.py::PPFormulaNetModelTest::test_torch_export_generate_static"
+  ]
+ },
+ "sticky#prophetnet#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "prophetnet",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/prophetnet/test_modeling_prophetnet.py::ProphetNetModelTest::test_torch_export_generate_dynamic",
+   "tests/models/prophetnet/test_modeling_prophetnet.py::ProphetNetModelTest::test_torch_export_generate_static"
+  ]
+ },
+ "sticky#qwen3_5#2026-10-12": {
+  "date": "2026-10-12",
+  "day": 20738,
+  "integration": true,
+  "mic": "not-covered",
+  "model": "qwen3_5",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/qwen3_5/test_modeling_qwen3_5.py::Qwen3_5IntegrationTest::test_model_video_generation",
+   "tests/models/qwen3_5/test_modeling_qwen3_5.py::Qwen3_5IntegrationTest::test_model_video_generation_batch"
+  ]
+ },
+ "sticky#qwen3_asr#2026-10-15": {
+  "date": "2026-10-15",
+  "day": 20741,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "qwen3_asr",
+  "signal": "TypeError",
+  "tests": [
+   "tests/models/qwen3_asr/test_feature_extraction_qwen3_asr.py::Qwen3ASRFeatureExtractionTest::test_mel_padding_aligns_to_chunk"
+  ]
+ },
+ "sticky#reformer#2026-10-07": {
+  "date": "2026-10-07",
+  "day": 20733,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "reformer",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/reformer/test_modeling_reformer.py::ReformerLocalAttnModelTest::test_resize_tokens_embeddings"
+  ]
+ },
+ "sticky#roberta_prelayernorm#2026-10-07": {
+  "date": "2026-10-07",
+  "day": 20733,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "roberta_prelayernorm",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/roberta_prelayernorm/test_modeling_roberta_prelayernorm.py::RobertaPreLayerNormModelTest::test_flash_attn_2_inference_equivalence"
+  ]
+ },
+ "sticky#roberta_prelayernorm#2026-10-10": {
+  "date": "2026-10-10",
+  "day": 20736,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "roberta_prelayernorm",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/roberta_prelayernorm/test_modeling_roberta_prelayernorm.py::RobertaPreLayerNormModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
+ "sticky#seamless_m4t#2026-10-12": {
+  "date": "2026-10-12",
+  "day": 20738,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "seamless_m4t",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/seamless_m4t/test_modeling_seamless_m4t.py::SeamlessM4TModelWithSpeechInputTest::test_model_parallelism"
+  ]
+ },
+ "sticky#shieldgemma2#2026-10-07": {
+  "date": "2026-10-07",
+  "day": 20733,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "shieldgemma2",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/shieldgemma2/test_modeling_shieldgemma2.py::ShieldGemma2ModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
+ "sticky#speech_to_text#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "speech_to_text",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/speech_to_text/test_modeling_speech_to_text.py::Speech2TextModelTest::test_torch_export_generate_dynamic",
+   "tests/models/speech_to_text/test_modeling_speech_to_text.py::Speech2TextModelTest::test_torch_export_generate_static"
+  ]
+ },
+ "sticky#speecht5#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "speecht5",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/speecht5/test_modeling_speecht5.py::SpeechT5ForSpeechToTextTest::test_torch_export_generate_dynamic",
+   "tests/models/speecht5/test_modeling_speecht5.py::SpeechT5ForSpeechToTextTest::test_torch_export_generate_static"
+  ]
+ },
+ "sticky#swinv2#2026-10-23": {
+  "date": "2026-10-23",
+  "day": 20749,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "swinv2",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/swinv2/test_modeling_swinv2.py::Swinv2ModelIntegrationTest::test_inference_fp16"
+  ]
+ },
+ "sticky#switch_transformers#2026-10-06": {
+  "date": "2026-10-06",
+  "day": 20732,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "switch_transformers",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/switch_transformers/test_modeling_switch_transformers.py::SwitchTransformersModelTest::test_generate_with_past_key_values"
+  ]
+ },
+ "sticky#t5#2026-10-29": {
+  "date": "2026-10-29",
+  "day": 20755,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "t5",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/t5/test_modeling_t5.py::T5ModelTest::test_torch_export_generate_dynamic",
+   "tests/models/t5/test_modeling_t5.py::T5ModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/t5/test_modeling_t5.py::T5ModelTest::test_torch_export_generate_static",
+   "tests/models/t5/test_modeling_t5.py::T5ModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#t5gemma#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "t5gemma",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/t5gemma/test_modeling_t5gemma.py::T5GemmaModelTest::test_torch_export_generate_dynamic",
+   "tests/models/t5gemma/test_modeling_t5gemma.py::T5GemmaModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/t5gemma/test_modeling_t5gemma.py::T5GemmaModelTest::test_torch_export_generate_static",
+   "tests/models/t5gemma/test_modeling_t5gemma.py::T5GemmaModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#t5gemma2#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "t5gemma2",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/t5gemma2/test_modeling_t5gemma2.py::T5Gemma2ModelTest::test_torch_export_generate_dynamic",
+   "tests/models/t5gemma2/test_modeling_t5gemma2.py::T5Gemma2ModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/t5gemma2/test_modeling_t5gemma2.py::T5Gemma2ModelTest::test_torch_export_generate_static",
+   "tests/models/t5gemma2/test_modeling_t5gemma2.py::T5Gemma2ModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#udop#2026-10-16": {
+  "date": "2026-10-16",
+  "day": 20742,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "udop",
+  "signal": "torch._inductor.exc.InductorError",
+  "tests": [
+   "tests/models/udop/test_modeling_udop.py::UdopEncoderOnlyModelTest::test_flex_attention_with_grads",
+   "tests/models/udop/test_modeling_udop.py::UdopModelTest::test_flex_attention_with_grads"
+  ]
+ },
+ "sticky#umt5#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "umt5",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/umt5/test_modeling_umt5.py::UMT5ModelTest::test_torch_export_generate_dynamic",
+   "tests/models/umt5/test_modeling_umt5.py::UMT5ModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/umt5/test_modeling_umt5.py::UMT5ModelTest::test_torch_export_generate_static",
+   "tests/models/umt5/test_modeling_umt5.py::UMT5ModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#utils#2026-10-14": {
+  "date": "2026-10-14",
+  "day": 20740,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "utils",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/utils/test_modeling_utils.py::GradientCheckpointingOffloadTest::test_frees_exactly_the_saved_activations"
+  ]
+ },
+ "sticky#utils#2026-10-17": {
+  "date": "2026-10-17",
+  "day": 20743,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "utils",
+  "signal": "httpx2.ReadTimeout",
+  "tests": [
+   "tests/utils/test_image_utils.py::LoadImageTester::test_load_img_url_timeout"
+  ]
+ },
+ "sticky#wav2vec2_bert#2026-10-07": {
+  "date": "2026-10-07",
+  "day": 20733,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "wav2vec2_bert",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/wav2vec2_bert/test_modeling_wav2vec2_bert.py::Wav2Vec2BertModelTest::test_disk_offload_safetensors"
+  ]
+ },
+ "sticky#wav2vec2_bert#2026-10-20": {
+  "date": "2026-10-20",
+  "day": 20746,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "wav2vec2_bert",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/wav2vec2_bert/test_modeling_wav2vec2_bert.py::Wav2Vec2BertModelTest::test_disk_offload_bin"
+  ]
+ },
+ "sticky#wav2vec2_conformer#2026-10-16": {
+  "date": "2026-10-16",
+  "day": 20742,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "wav2vec2_conformer",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/wav2vec2_conformer/test_modeling_wav2vec2_conformer.py::Wav2Vec2ConformerModelTest::test_onnx_export_dynamic"
+  ]
+ },
+ "sticky#wav2vec2_conformer#2026-10-18": {
+  "date": "2026-10-18",
+  "day": 20744,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "wav2vec2_conformer",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/wav2vec2_conformer/test_modeling_wav2vec2_conformer.py::Wav2Vec2ConformerModelTest::test_onnx_export_static"
+  ]
+ },
+ "sticky#whisper#2026-10-29": {
+  "date": "2026-10-29",
+  "day": 20755,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "whisper",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/whisper/test_modeling_whisper.py::WhisperModelTest::test_torch_export_generate_dynamic",
+   "tests/models/whisper/test_modeling_whisper.py::WhisperModelTest::test_torch_export_generate_dynamic_static_cache",
+   "tests/models/whisper/test_modeling_whisper.py::WhisperModelTest::test_torch_export_generate_static",
+   "tests/models/whisper/test_modeling_whisper.py::WhisperModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#xmod#2026-10-07": {
+  "date": "2026-10-07",
+  "day": 20733,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "xmod",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/xmod/test_modeling_xmod.py::XmodModelTest::test_flash_attn_2_inference_equivalence",
+   "tests/models/xmod/test_modeling_xmod.py::XmodModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ }
+}

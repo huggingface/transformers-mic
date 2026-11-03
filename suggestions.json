@@ -1,0 +1,1053 @@
+{
+ "extend": {
+  "albert": [
+   {
+    "date": "2026-10-06",
+    "gpu_only": true,
+    "integration": false,
+    "test": "tests/models/albert/test_modeling_albert.py::AlbertModelTest::test_flash_attn_2_inference_equivalence"
+   }
+  ],
+  "cohere": [
+   {
+    "date": "2026-10-17",
+    "gpu_only": true,
+    "integration": true,
+    "test": "tests/models/cohere/test_modeling_cohere.py::CohereIntegrationTest::test_batched_4bit"
+   }
+  ],
+  "deepseek_v3": [
+   {
+    "date": "2026-10-16",
+    "gpu_only": true,
+    "integration": true,
+    "test": "tests/models/deepseek_v3/test_modeling_deepseek_v3.py::DeepseekV3IntegrationTest::test_compile_static_cache"
+   }
+  ],
+  "gemma2": [
+   {
+    "date": "2026-10-22",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/gemma2/test_modeling_gemma2.py::Gemma2IntegrationTest::test_export_static_cache"
+   },
+   {
+    "date": "2026-10-22",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/gemma2/test_modeling_gemma2.py::Gemma2IntegrationTest::test_export_static_cache"
+   },
+   {
+    "date": "2026-10-22",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/gemma2/test_modeling_gemma2.py::Gemma2IntegrationTest::test_generation_beyond_sliding_window_1_sdpa"
+   },
+   {
+    "date": "2026-10-22",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/gemma2/test_modeling_gemma2.py::Gemma2IntegrationTest::test_generation_beyond_sliding_window_dynamic_1_sdpa"
+   }
+  ],
+  "gemma3": [
+   {
+    "date": "2026-11-02",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/gemma3/test_modeling_gemma3.py::Gemma3IntegrationTest::test_model_4b_multiimage"
+   }
+  ],
+  "gemma3n": [
+   {
+    "date": "2026-11-02",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/gemma3n/test_modeling_gemma3n.py::Gemma3nIntegrationTest::test_generation_beyond_sliding_window"
+   },
+   {
+    "date": "2026-11-02",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/gemma3n/test_modeling_gemma3n.py::Gemma3nIntegrationTest::test_generation_beyond_sliding_window_with_generation_config"
+   },
+   {
+    "date": "2026-11-02",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/gemma3n/test_modeling_gemma3n.py::Gemma3nIntegrationTest::test_model_4b_bf16"
+   },
+   {
+    "date": "2026-11-02",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/gemma3n/test_modeling_gemma3n.py::Gemma3nIntegrationTest::test_model_4b_image"
+   },
+   {
+    "date": "2026-11-02",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/gemma3n/test_modeling_gemma3n.py::Gemma3nIntegrationTest::test_model_4b_multiimage"
+   },
+   {
+    "date": "2026-10-09",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/gemma3n/test_modeling_gemma3n.py::Gemma3nTextModelTest::test_generate_with_static_cache"
+   }
+  ],
+  "gemma4": [
+   {
+    "date": "2026-10-10",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/gemma4/test_modeling_gemma4.py::Gemma4IntegrationTest::test_generation_beyond_sliding_window_0_sdpa"
+   }
+  ],
+  "glm_moe_dsa": [
+   {
+    "date": "2026-10-19",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/glm_moe_dsa/test_modeling_glm_moe_dsa.py::GlmMoeDsaModelTest::test_sdpa_can_dispatch_on_flash"
+   }
+  ],
+  "got_ocr2": [
+   {
+    "date": "2026-10-20",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/got_ocr2/test_image_processing_got_ocr2.py::GotOcr2ProcessingTest::test_backends_equivalence_batched_crop_to_patches"
+   }
+  ],
+  "grounding_dino": [
+   {
+    "date": "2026-10-13",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_cross_attention_mask"
+   },
+   {
+    "date": "2026-10-13",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_grounding_dino_loss"
+   },
+   {
+    "date": "2026-10-13",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_inference_object_detection_head"
+   },
+   {
+    "date": "2026-10-13",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_inference_object_detection_head_equivalence_cpu_accelerator"
+   }
+  ],
+  "internvl": [
+   {
+    "date": "2026-11-02",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/internvl/test_modeling_internvl.py::InternVLLlamaIntegrationTest::test_llama_small_model_integration_forward"
+   },
+   {
+    "date": "2026-11-02",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/internvl/test_modeling_internvl.py::InternVLLlamaIntegrationTest::test_llama_small_model_integration_generate_text_only"
+   }
+  ],
+  "llama": [
+   {
+    "date": "2026-11-01",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_flash_with_static_cache"
+   },
+   {
+    "date": "2026-11-02",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_llama_3_1_hard"
+   }
+  ],
+  "m2m_100": [
+   {
+    "date": "2026-10-12",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/m2m_100/test_modeling_m2m_100.py::M2M100ModelIntegrationTests::test_seq_to_seq_generation"
+   }
+  ],
+  "minicpm3": [
+   {
+    "date": "2026-10-06",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_eager_padding_matches_padding_free_with_position_ids"
+   },
+   {
+    "date": "2026-10-08",
+    "gpu_only": true,
+    "integration": false,
+    "test": "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids"
+   },
+   {
+    "date": "2026-10-08",
+    "gpu_only": true,
+    "integration": false,
+    "test": "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids_and_fa_kwargs"
+   }
+  ],
+  "mistral3": [
+   {
+    "date": "2026-10-19",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/mistral3/test_modeling_mistral3.py::Mistral3IntegrationTest::test_mistral3_integration_batched_generate_multi_image"
+   },
+   {
+    "date": "2026-10-19",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/mistral3/test_modeling_mistral3.py::Mistral3IntegrationTest::test_mistral3_integration_generate"
+   }
+  ],
+  "mm_grounding_dino": [
+   {
+    "date": "2026-10-17",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/mm_grounding_dino/test_modeling_mm_grounding_dino.py::MMGroundingDinoModelIntegrationTests::test_inference_object_detection_head"
+   },
+   {
+    "date": "2026-10-17",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/mm_grounding_dino/test_modeling_mm_grounding_dino.py::MMGroundingDinoModelIntegrationTests::test_inference_object_detection_head_equivalence_cpu_gpu"
+   },
+   {
+    "date": "2026-10-17",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/mm_grounding_dino/test_modeling_mm_grounding_dino.py::MMGroundingDinoModelIntegrationTests::test_mm_grounding_dino_loss"
+   }
+  ],
+  "qwen3_asr": [
+   {
+    "date": "2026-10-15",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/qwen3_asr/test_feature_extraction_qwen3_asr.py::Qwen3ASRFeatureExtractionTest::test_mel_padding_aligns_to_chunk"
+   }
+  ],
+  "swinv2": [
+   {
+    "date": "2026-10-23",
+    "gpu_only": true,
+    "integration": true,
+    "test": "tests/models/swinv2/test_modeling_swinv2.py::Swinv2ModelIntegrationTest::test_inference_fp16"
+   }
+  ]
+ },
+ "new": [
+  {
+   "checkpoint": "RecursiveSI/flint",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "flint",
+   "other": 0,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/flint/test_modeling_flint.py::FlintIntegrationTest::test_greedy_chat"
+   ]
+  },
+  {
+   "checkpoint": "openbmb/MiniCPM-OCR-1.0",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "minicpm_ocr",
+   "other": 0,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/minicpm_ocr/test_modeling_minicpm_ocr.py::MiniCPMOcrIntegrationTest::test_small_model_logits",
+    "tests/models/minicpm_ocr/test_modeling_minicpm_ocr.py::MiniCPMOcrIntegrationTest::test_small_model_vision_generation",
+    "tests/models/minicpm_ocr/test_modeling_minicpm_ocr.py::MiniCPMOcrIntegrationTest::test_small_model_vision_generation_batch"
+   ]
+  },
+  {
+   "checkpoint": "Qwen/Qwen3.5-0.8B",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "qwen3_5",
+   "other": 0,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/qwen3_5/test_modeling_qwen3_5.py::Qwen3_5IntegrationTest::test_model_video_generation",
+    "tests/models/qwen3_5/test_modeling_qwen3_5.py::Qwen3_5IntegrationTest::test_model_video_generation_batch"
+   ]
+  },
+  {
+   "checkpoint": "google/vaultgemma-1b",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "vaultgemma",
+   "other": 0,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/vaultgemma/test_modeling_vaultgemma.py::VaultGemmaIntegrationTest::test_export_static_cache",
+    "tests/models/vaultgemma/test_modeling_vaultgemma.py::VaultGemmaIntegrationTest::test_generation_beyond_sliding_window_1_sdpa",
+    "tests/models/vaultgemma/test_modeling_vaultgemma.py::VaultGemmaIntegrationTest::test_generation_beyond_sliding_window_dynamic_1_sdpa",
+    "tests/models/vaultgemma/test_modeling_vaultgemma.py::VaultGemmaIntegrationTest::test_model_pipeline_bf16"
+   ]
+  },
+  {
+   "checkpoint": "reflection/Beam-1.0-501B-A23B",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "beam",
+   "other": 2,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/beam/test_modeling_beam.py::BeamModelTest::test_cpu_offload",
+    "tests/models/beam/test_modeling_beam.py::BeamModelTest::test_model_parallelism",
+    "tests/models/beam/test_modeling_beam.py::BeamModelTest::test_flash_attn_2_equivalence"
+   ]
+  },
+  {
+   "checkpoint": "vidore/colpali-v1.3-hf",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "colpali",
+   "other": 2,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_flex_attention_with_grads",
+    "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_flash_attn_2_inference_equivalence",
+    "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+   ]
+  },
+  {
+   "checkpoint": "nghuyong/ernie-3.0-base-zh",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "ernie",
+   "other": 2,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/ernie/test_modeling_ernie.py::ErnieModelTest::test_flash_attn_2_inference_equivalence",
+    "tests/models/ernie/test_modeling_ernie.py::ErnieModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+   ]
+  },
+  {
+   "checkpoint": "Aleph-Alpha/Kolibri-1",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "kolibri1",
+   "other": 2,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/kolibri1/test_modeling_kolibri1.py::Kolibri1ModelTest::test_onnx_export_dynamic",
+    "tests/models/kolibri1/test_modeling_kolibri1.py::Kolibri1ModelTest::test_onnx_export_generate_dynamic",
+    "tests/models/kolibri1/test_modeling_kolibri1.py::Kolibri1ModelTest::test_onnx_export_generate_dynamic_static_cache",
+    "tests/models/kolibri1/test_modeling_kolibri1.py::Kolibri1ModelTest::test_onnx_export_generate_static",
+    "tests/models/kolibri1/test_modeling_kolibri1.py::Kolibri1ModelTest::test_onnx_export_generate_static_static_cache"
+   ]
+  },
+  {
+   "checkpoint": "sail/poolformer_s12",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "poolformer",
+   "other": 2,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/poolformer/test_image_processing_poolformer.py::PoolFormerImageProcessingTest::test_backends_equivalence_batched",
+    "tests/models/poolformer/test_image_processing_poolformer.py::PoolFormerImageProcessingNoCropPctTest::test_backends_equivalence_batched"
+   ]
+  },
+  {
+   "checkpoint": "skt/A.X-K1",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "axk1",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/axk1/test_modeling_axk1.py::AXK1ModelTest::test_flash_attn_2_equivalence"
+   ]
+  },
+  {
+   "checkpoint": "google/bigbird-pegasus-large-arxiv",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "bigbird_pegasus",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/bigbird_pegasus/test_modeling_bigbird_pegasus.py::BigBirdPegasusModelTest::test_torch_export_generate_dynamic",
+    "tests/models/bigbird_pegasus/test_modeling_bigbird_pegasus.py::BigBirdPegasusModelTest::test_torch_export_generate_dynamic_static_cache",
+    "tests/models/bigbird_pegasus/test_modeling_bigbird_pegasus.py::BigBirdPegasusModelTest::test_torch_export_generate_static",
+    "tests/models/bigbird_pegasus/test_modeling_bigbird_pegasus.py::BigBirdPegasusModelTest::test_torch_export_generate_static_static_cache"
+   ]
+  },
+  {
+   "checkpoint": "regisss/bridgetower-newyorker-a100-8x",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "bridgetower",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/bridgetower/test_image_processing_bridgetower.py::BridgeTowerImageProcessingTest::test_backends_equivalence_batched"
+   ]
+  },
+  {
+   "checkpoint": "nvidia/Cosmos3-Edge",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "cosmos3_edge",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/cosmos3_edge/test_image_processing_cosmos3_edge.py::Cosmos3EdgeImageProcessingTest::test_backends_equivalence_batched"
+   ]
+  },
+  {
+   "checkpoint": "allenai/FlexOlmo-7x7B-1T",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "flex_olmo",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/flex_olmo/test_modeling_flex_olmo.py::FlexOlmoModelTest::test_sdpa_padding_matches_padding_free_with_position_ids"
+   ]
+  },
+  {
+   "checkpoint": "facebook/wmt19-en-ru",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "fsmt",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/fsmt/test_modeling_fsmt.py::FSMTModelTest::test_torch_export_generate_dynamic",
+    "tests/models/fsmt/test_modeling_fsmt.py::FSMTModelTest::test_torch_export_generate_static"
+   ]
+  },
+  {
+   "checkpoint": "kmhf/hf-moshiko",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "moshi",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/moshi/test_modeling_moshi.py::MoshiDecoderTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids"
+   ]
+  },
+  {
+   "checkpoint": null,
+   "checkpoint_source": null,
+   "integration": 0,
+   "model": "muse_spark",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/muse_spark/test_modeling_muse_spark.py::MuseSparkVision2TextModelTest::test_moe_parallel_plans_shard_experts"
+   ]
+  },
+  {
+   "checkpoint": "RUCAIBox/mvp",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "mvp",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/mvp/test_modeling_mvp.py::MvpModelTest::test_torch_export_generate_dynamic",
+    "tests/models/mvp/test_modeling_mvp.py::MvpModelTest::test_torch_export_generate_static"
+   ]
+  },
+  {
+   "checkpoint": "thhaus/nemotron3-8b",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "nemotron",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/nemotron/test_modeling_nemotron.py::NemotronModelTest::test_flash_attn_2_equivalence"
+   ]
+  },
+  {
+   "checkpoint": "google/pegasus-x-large",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "pegasus_x",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/pegasus_x/test_modeling_pegasus_x.py::PegasusXModelTest::test_torch_export_generate_dynamic",
+    "tests/models/pegasus_x/test_modeling_pegasus_x.py::PegasusXModelTest::test_torch_export_generate_dynamic_static_cache",
+    "tests/models/pegasus_x/test_modeling_pegasus_x.py::PegasusXModelTest::test_torch_export_generate_static",
+    "tests/models/pegasus_x/test_modeling_pegasus_x.py::PegasusXModelTest::test_torch_export_generate_static_static_cache"
+   ]
+  },
+  {
+   "checkpoint": "uclanlp/plbart-base",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "plbart",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/plbart/test_modeling_plbart.py::PLBartModelTest::test_torch_export_generate_dynamic",
+    "tests/models/plbart/test_modeling_plbart.py::PLBartModelTest::test_torch_export_generate_static"
+   ]
+  },
+  {
+   "checkpoint": "microsoft/prophetnet-large-uncased",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "prophetnet",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/prophetnet/test_modeling_prophetnet.py::ProphetNetModelTest::test_torch_export_generate_dynamic",
+    "tests/models/prophetnet/test_modeling_prophetnet.py::ProphetNetModelTest::test_torch_export_generate_static"
+   ]
+  },
+  {
+   "checkpoint": "facebook/hf-seamless-m4t-medium",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "seamless_m4t",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/seamless_m4t/test_modeling_seamless_m4t.py::SeamlessM4TModelWithSpeechInputTest::test_model_parallelism"
+   ]
+  },
+  {
+   "checkpoint": "google/shieldgemma-2-4b-it",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "shieldgemma2",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/shieldgemma2/test_modeling_shieldgemma2.py::ShieldGemma2ModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+   ]
+  },
+  {
+   "checkpoint": "google/switch-base-8",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "switch_transformers",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/switch_transformers/test_modeling_switch_transformers.py::SwitchTransformersModelTest::test_generate_with_past_key_values"
+   ]
+  },
+  {
+   "checkpoint": "eustlb/pocket-tts",
+   "checkpoint_source": "failing test",
+   "integration": 2,
+   "model": "pocket_tts",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_onnx_export_generate_dynamic",
+    "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_onnx_export_generate_dynamic_static_cache",
+    "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_torch_export_generate_dynamic",
+    "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_torch_export_generate_dynamic_static_cache",
+    "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSIntegrationTest::test_drifting"
+   ]
+  },
+  {
+   "checkpoint": "gradium/phonon-voices",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "gradium_phonon_tts",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_onnx_export_generate_dynamic",
+    "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_onnx_export_generate_dynamic_static_cache",
+    "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_torch_export_generate_dynamic",
+    "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_torch_export_generate_dynamic_static_cache",
+    "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSIntegrationTest::test_batch"
+   ]
+  },
+  {
+   "checkpoint": "facebook/cwm",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "cwm",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/cwm/test_modeling_cwm.py::CwmIntegrationTest::test_cwm_generation_20_tokens",
+    "tests/models/cwm/test_modeling_cwm.py::CwmIntegrationTest::test_cwm_sliding_window_long_sequence"
+   ]
+  },
+  {
+   "checkpoint": "tue-mps/coco_panoptic_eomt_large_640",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "eomt",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/eomt/test_modeling_eomt.py::EomtForUniversalSegmentationIntegrationTest::test_segmentation_pipeline"
+   ]
+  },
+  {
+   "checkpoint": "tue-mps/eomt-dinov3-coco-panoptic-large-640",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "eomt_dinov3",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/eomt_dinov3/test_modeling_eomt_dinov3.py::EomtDinov3ForUniversalSegmentationIntegrationTest::test_segmentation_pipeline"
+   ]
+  },
+  {
+   "checkpoint": "ibm-granite/granite-speech-5.0-470m-turboctc",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "granite_speech5",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/granite_speech5/test_modeling_granite_speech5.py::GraniteSpeech5ForCTCIntegrationTest::test_model_integration_batch",
+    "tests/models/granite_speech5/test_modeling_granite_speech5.py::GraniteSpeech5ForCTCIntegrationTest::test_model_integration_single"
+   ]
+  },
+  {
+   "checkpoint": "ibm-granite/granite-speech-4.1-2b-plus",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "granite_speech_plus",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/granite_speech_plus/test_modeling_granite_speech_plus.py::GraniteSpeechPlusForConditionalGenerationIntegrationTest::test_small_model_integration_test_batch",
+    "tests/models/granite_speech_plus/test_modeling_granite_speech_plus.py::GraniteSpeechPlusForConditionalGenerationIntegrationTest::test_small_model_integration_test_single"
+   ]
+  },
+  {
+   "checkpoint": "mistralai/Mamba-Codestral-7B-v0.1",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "mamba2",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/mamba2/test_modeling_mamba2.py::Mamba2IntegrationTest::test_mamba2_mixer_train_vs_eval_equivalence"
+   ]
+  },
+  {
+   "checkpoint": "shi-labs/oneformer_ade20k_swin_tiny",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "oneformer",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_no_head",
+    "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_universal_segmentation_head"
+   ]
+  },
+  {
+   "checkpoint": null,
+   "checkpoint_source": null,
+   "integration": 0,
+   "model": "data2vec",
+   "other": 2,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_flash_attn_2_inference_equivalence",
+    "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+   ]
+  },
+  {
+   "checkpoint": null,
+   "checkpoint_source": null,
+   "integration": 0,
+   "model": "nemotron3_5_transcribe",
+   "other": 2,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/nemotron3_5_transcribe/test_modeling_nemotron3_5_transcribe.py::Nemotron3_5TranscribeForConditionalGenerationModelTest::test_sdpa_can_dispatch_on_flash",
+    "tests/models/nemotron3_5_transcribe/test_modeling_nemotron3_5_transcribe.py::Nemotron3_5TranscribeForConditionalGenerationModelTest::test_eager_matches_fa2_generate",
+    "tests/models/nemotron3_5_transcribe/test_modeling_nemotron3_5_transcribe.py::Nemotron3_5TranscribeForConditionalGenerationModelTest::test_flash_attn_2_inference_equivalence",
+    "tests/models/nemotron3_5_transcribe/test_modeling_nemotron3_5_transcribe.py::Nemotron3_5TranscribeForConditionalGenerationModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+   ]
+  },
+  {
+   "checkpoint": null,
+   "checkpoint_source": null,
+   "integration": 0,
+   "model": "roberta_prelayernorm",
+   "other": 2,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/roberta_prelayernorm/test_modeling_roberta_prelayernorm.py::RobertaPreLayerNormModelTest::test_flash_attn_2_inference_equivalence",
+    "tests/models/roberta_prelayernorm/test_modeling_roberta_prelayernorm.py::RobertaPreLayerNormModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+   ]
+  },
+  {
+   "checkpoint": "microsoft/udop-large",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "udop",
+   "other": 2,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/udop/test_modeling_udop.py::UdopModelTest::test_flex_attention_with_grads",
+    "tests/models/udop/test_modeling_udop.py::UdopEncoderOnlyModelTest::test_flex_attention_with_grads"
+   ]
+  },
+  {
+   "checkpoint": null,
+   "checkpoint_source": null,
+   "integration": 0,
+   "model": "utils",
+   "other": 2,
+   "shrinkable": false,
+   "tests": [
+    "tests/utils/test_modeling_utils.py::GradientCheckpointingOffloadTest::test_frees_exactly_the_saved_activations",
+    "tests/utils/test_image_utils.py::LoadImageTester::test_load_img_url_timeout"
+   ]
+  },
+  {
+   "checkpoint": null,
+   "checkpoint_source": null,
+   "integration": 0,
+   "model": "wav2vec2_bert",
+   "other": 2,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/wav2vec2_bert/test_modeling_wav2vec2_bert.py::Wav2Vec2BertModelTest::test_disk_offload_bin",
+    "tests/models/wav2vec2_bert/test_modeling_wav2vec2_bert.py::Wav2Vec2BertModelTest::test_disk_offload_safetensors"
+   ]
+  },
+  {
+   "checkpoint": null,
+   "checkpoint_source": null,
+   "integration": 0,
+   "model": "wav2vec2_conformer",
+   "other": 2,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/wav2vec2_conformer/test_modeling_wav2vec2_conformer.py::Wav2Vec2ConformerModelTest::test_onnx_export_dynamic",
+    "tests/models/wav2vec2_conformer/test_modeling_wav2vec2_conformer.py::Wav2Vec2ConformerModelTest::test_onnx_export_static"
+   ]
+  },
+  {
+   "checkpoint": null,
+   "checkpoint_source": null,
+   "integration": 0,
+   "model": "blenderbot_small",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/blenderbot_small/test_modeling_blenderbot_small.py::BlenderbotSmallModelTest::test_torch_export_generate_dynamic",
+    "tests/models/blenderbot_small/test_modeling_blenderbot_small.py::BlenderbotSmallModelTest::test_torch_export_generate_dynamic_static_cache",
+    "tests/models/blenderbot_small/test_modeling_blenderbot_small.py::BlenderbotSmallModelTest::test_torch_export_generate_static",
+    "tests/models/blenderbot_small/test_modeling_blenderbot_small.py::BlenderbotSmallModelTest::test_torch_export_generate_static_static_cache"
+   ]
+  },
+  {
+   "checkpoint": "itazap/blt-1b-hf",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "blt",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/blt/test_modeling_blt.py::BltModelTest::test_torch_export_generate_dynamic",
+    "tests/models/blt/test_modeling_blt.py::BltModelTest::test_torch_export_generate_static"
+   ]
+  },
+  {
+   "checkpoint": "nvidia/canary-1b-v2",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "canary",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/canary/test_modeling_canary.py::CanaryModelTest::test_torch_export_generate_dynamic",
+    "tests/models/canary/test_modeling_canary.py::CanaryModelTest::test_torch_export_generate_dynamic_static_cache",
+    "tests/models/canary/test_modeling_canary.py::CanaryModelTest::test_torch_export_generate_static",
+    "tests/models/canary/test_modeling_canary.py::CanaryModelTest::test_torch_export_generate_static_static_cache"
+   ]
+  },
+  {
+   "checkpoint": "syvai/hviske-v5.3",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "cohere_asr",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_dynamic",
+    "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_dynamic_static_cache",
+    "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_static",
+    "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_static_static_cache"
+   ]
+  },
+  {
+   "checkpoint": null,
+   "checkpoint_source": null,
+   "integration": 0,
+   "model": "colmodernvbert",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/colmodernvbert/test_modeling_colmodernvbert.py::ColModernVBertForRetrievalModelTest::test_resize_tokens_embeddings"
+   ]
+  },
+  {
+   "checkpoint": "deepseek-community/DeepSeek-OCR-2",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "deepseek_ocr2",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/deepseek_ocr2/test_image_processing_deepseek_ocr2.py::DeepseekOcr2ImageProcessingTest::test_backends_equivalence_batched"
+   ]
+  },
+  {
+   "checkpoint": null,
+   "checkpoint_source": null,
+   "integration": 0,
+   "model": "dia",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/dia/test_modeling_dia.py::DiaModelTest::test_torch_export_generate_dynamic",
+    "tests/models/dia/test_modeling_dia.py::DiaModelTest::test_torch_export_generate_dynamic_static_cache",
+    "tests/models/dia/test_modeling_dia.py::DiaModelTest::test_torch_export_generate_static",
+    "tests/models/dia/test_modeling_dia.py::DiaModelTest::test_torch_export_generate_static_static_cache"
+   ]
+  },
+  {
+   "checkpoint": "baidu/ERNIE-4.5-21B-A3B-PT",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "ernie4_5_moe",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/ernie4_5_moe/test_modeling_ernie4_5_moe.py::Ernie4_5_MoeModelTest::test_flash_attn_2_equivalence"
+   ]
+  },
+  {
+   "checkpoint": "tencent/Hunyuan-A13B-Instruct",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "hunyuan_v1_moe",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/hunyuan_v1_moe/test_modeling_hunyuan_v1_moe.py::HunYuanMoEV1ModelTest::test_flash_attn_2_equivalence"
+   ]
+  },
+  {
+   "checkpoint": "HuggingFaceM4/idefics-9b",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "idefics",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/idefics/test_modeling_idefics.py::IdeficsForVisionText2TextTest::test_generate_continue_from_inputs_embeds"
+   ]
+  },
+  {
+   "checkpoint": "allenai/Molmo2-8B",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "molmo2",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/molmo2/test_modeling_molmo2.py::Molmo2ModelTest::test_flex_attention_with_grads"
+   ]
+  },
+  {
+   "checkpoint": null,
+   "checkpoint_source": null,
+   "integration": 0,
+   "model": "omdet_turbo",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/omdet_turbo/test_modeling_omdet_turbo.py::OmDetTurboModelTest::test_batching_equivalence"
+   ]
+  },
+  {
+   "checkpoint": "PaddlePaddle/PP-FormulaNet_plus-L_safetensors",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "pp_formulanet",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/pp_formulanet/test_modeling_pp_formulanet.py::PPFormulaNetModelTest::test_torch_export_generate_dynamic",
+    "tests/models/pp_formulanet/test_modeling_pp_formulanet.py::PPFormulaNetModelTest::test_torch_export_generate_static"
+   ]
+  },
+  {
+   "checkpoint": "google/reformer-crime-and-punishment",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "reformer",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/reformer/test_modeling_reformer.py::ReformerLocalAttnModelTest::test_resize_tokens_embeddings"
+   ]
+  },
+  {
+   "checkpoint": "facebook/s2t-small-librispeech-asr",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "speech_to_text",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/speech_to_text/test_modeling_speech_to_text.py::Speech2TextModelTest::test_torch_export_generate_dynamic",
+    "tests/models/speech_to_text/test_modeling_speech_to_text.py::Speech2TextModelTest::test_torch_export_generate_static"
+   ]
+  },
+  {
+   "checkpoint": null,
+   "checkpoint_source": null,
+   "integration": 0,
+   "model": "t5gemma",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/t5gemma/test_modeling_t5gemma.py::T5GemmaModelTest::test_torch_export_generate_dynamic",
+    "tests/models/t5gemma/test_modeling_t5gemma.py::T5GemmaModelTest::test_torch_export_generate_dynamic_static_cache",
+    "tests/models/t5gemma/test_modeling_t5gemma.py::T5GemmaModelTest::test_torch_export_generate_static",
+    "tests/models/t5gemma/test_modeling_t5gemma.py::T5GemmaModelTest::test_torch_export_generate_static_static_cache"
+   ]
+  },
+  {
+   "checkpoint": "google/t5gemma-2-270m-270m",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "t5gemma2",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/t5gemma2/test_modeling_t5gemma2.py::T5Gemma2ModelTest::test_torch_export_generate_dynamic",
+    "tests/models/t5gemma2/test_modeling_t5gemma2.py::T5Gemma2ModelTest::test_torch_export_generate_dynamic_static_cache",
+    "tests/models/t5gemma2/test_modeling_t5gemma2.py::T5Gemma2ModelTest::test_torch_export_generate_static",
+    "tests/models/t5gemma2/test_modeling_t5gemma2.py::T5Gemma2ModelTest::test_torch_export_generate_static_static_cache"
+   ]
+  },
+  {
+   "checkpoint": "facebook/xmod-base",
+   "checkpoint_source": "shrink sweep",
+   "integration": 0,
+   "model": "xmod",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/xmod/test_modeling_xmod.py::XmodModelTest::test_flash_attn_2_inference_equivalence",
+    "tests/models/xmod/test_modeling_xmod.py::XmodModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+   ]
+  }
+ ],
+ "shared": {
+  "test_flash_attn_2_equivalence": [
+   "glm4",
+   "granitemoe",
+   "mixtral"
+  ],
+  "test_flash_attn_2_inference_equivalence_right_padding": [
+   "albert",
+   "bert",
+   "electra"
+  ],
+  "test_sdpa_padding_matches_padding_free_with_position_ids": [
+   "glm4_moe_lite",
+   "minicpm3",
+   "minimax_m2"
+  ],
+  "test_torch_export_generate_dynamic": [
+   "bart",
+   "blenderbot",
+   "florence2",
+   "longt5",
+   "m2m_100",
+   "marian",
+   "mbart",
+   "mt5",
+   "nemotron_h",
+   "pegasus",
+   "speecht5",
+   "t5",
+   "umt5",
+   "whisper"
+  ],
+  "test_torch_export_generate_dynamic_static_cache": [
+   "bart",
+   "blenderbot",
+   "florence2",
+   "m2m_100",
+   "marian",
+   "mbart",
+   "mt5",
+   "nemotron_h",
+   "pegasus",
+   "t5",
+   "umt5",
+   "whisper"
+  ],
+  "test_torch_export_generate_static": [
+   "bart",
+   "blenderbot",
+   "florence2",
+   "longt5",
+   "m2m_100",
+   "marian",
+   "mbart",
+   "mt5",
+   "nemotron_h",
+   "pegasus",
+   "speecht5",
+   "t5",
+   "umt5",
+   "whisper"
+  ],
+  "test_torch_export_generate_static_static_cache": [
+   "bart",
+   "blenderbot",
+   "florence2",
+   "m2m_100",
+   "marian",
+   "mbart",
+   "mt5",
+   "nemotron_h",
+   "pegasus",
+   "t5",
+   "umt5",
+   "whisper"
+  ]
+ }
+}
