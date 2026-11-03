@@ -32,15 +32,8 @@ def dispatch(tool, workspace, args):
     runner.HERE = workspace / "example"
     runner.SCHEMAS = source / "schemas"
     runner.schema.cache_clear()
-
-    # Fresh-process recording and isolated runs need the bundled patch module,
-    # while HERE points at the workspace's mutable contract data.
-    def patch_prelude(names):
-        if not names:
-            return ""
-        return f"import sys\nsys.path.insert(0, {str(source)!r})\nimport patches\npatches.apply({sorted(names)!r})\n\n"
-
-    runner.patch_prelude = patch_prelude
+    # HERE now points at the workspace's contract data; the prelude of isolated and
+    # fresh-process runs still imports patches.py and template_date.py from runner.CODE.
     if tool == "auto-stage":
         import json
         from transformers import AutoConfig

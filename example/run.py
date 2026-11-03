@@ -64,7 +64,9 @@ skip_outputs, those outputs are left out of the comparison and recorded as
 skipped_outputs, and the others are checked as usual. A contract that raises
 stops there, so a matched error still hides the checks after it. local_patches in the fleet lock name
 workarounds from patches.py, applied before every contract (in this process and
-in isolated ones) and recorded in each result's environment.
+in isolated ones) and recorded in each result's environment. Chat templates see
+a fixed date (template_date.py), not today's, so a prompt that carries the date
+is the same every day; --record stores that date with the baseline.
 --record never touches an approved baseline; it writes <name>.candidate.json
 next to it, and a reviewer renames it. --golden <platform> checks a run against
 another platform's reviewed baseline: discrete outputs must match exactly;
@@ -103,6 +105,7 @@ from functools import cache
 from pathlib import Path
 
 HERE = Path(__file__).parent
+CODE = HERE  # this file's folder, with template_date.py and patches.py; tmic re-points HERE, not CODE
 SCHEMAS = HERE / "schemas"
 _DECORATOR = re.compile(r"^\s*#\s*pytest-decorator:.*$", re.MULTILINE)
 WEIGHT_PATTERNS = ["*.msgpack", "*.h5", "*.ot", "*.onnx", "onnx/*", "*.tflite", "flax_model*", "tf_model*", "rust_model*"]
@@ -313,10 +316,13 @@ def execute_inline(code, filename, env):
 
 
 def patch_prelude(names):
-    """Code that applies the fleet lock's local patches in a contract's own process."""
-    if not names:
-        return ""
-    return f"import sys  # mic: local patches\nsys.path.insert(0, {str(HERE)!r})\nimport patches\npatches.apply({sorted(names)!r})\n\n"
+    """Code run first in a contract's own process: freeze the chat-template date
+    (MIC_TEMPLATE_DATE) and apply the fleet lock's local patches."""
+    code = f"import os, sys  # mic: template date and local patches\nsys.path.insert(0, {str(CODE)!r})\n"
+    code += "import template_date\ntemplate_date.freeze(os.environ.get('MIC_TEMPLATE_DATE'))\n"
+    if names:
+        code += f"import patches\npatches.apply({sorted(names)!r})\n"
+    return code + "\n"
 
 
 class Executor:
@@ -642,6 +648,10 @@ def main():
         selected_by = select_contracts.select([line.strip() for line in lines.splitlines() if line.strip()], dirs)
         print(json.dumps({"selection": selected_by, "code_dirs": dirs}), file=sys.stderr, flush=True)
     known = lock.get("known_failures", {})
+    import template_date
+
+    if args.framework == "transformers":
+        template_date.freeze(template_date.TEMPLATE_DATE)
     local_patches = sorted(lock.get("local_patches", {}))
     if local_patches and args.framework == "transformers":
         import patches
@@ -729,6 +739,7 @@ def main():
                     "MIC_MODEL": model,
                     "MIC_MODEL_REVISION": "" if os.path.isdir(model) else revision,
                     "MIC_MODEL_KWARGS": json.dumps(variant),
+                    "MIC_TEMPLATE_DATE": template_date.TEMPLATE_DATE,
                 }
                 ok, stdout, stderr = executor.run(env)
                 environment = {**env_info, "local_patches": local_patches} if local_patches else env_info
@@ -783,6 +794,8 @@ def main():
                     candidate = baseline.with_name(f"{target}{suffix}.candidate.json")
                     candidate.parent.mkdir(parents=True, exist_ok=True)
                     recorded = {k: v for k, v in record.items() if k != "baseline"}
+                    if args.framework == "transformers":
+                        recorded["template_date"] = template_date.TEMPLATE_DATE
                     candidate.write_text(json.dumps(validate({"recorded_with": recorded, "outputs": actual}, "baseline", candidate), indent=1) + "\n")
                     emit({**record, "status": "recorded", "baseline": shown(candidate)})
                     continue
@@ -795,6 +808,11 @@ def main():
                     reviewed = load(baseline, "baseline")
                     identity = reviewed["recorded_with"]
                     mismatch = [k for k in ("target", "variant", "framework") if identity.get(k) != record[k]]
+                    # Baselines recorded before the freeze carry no date and are compared as
+                    # usual: only one whose template put the date into a checked output fails,
+                    # and it failed every day but its recording day anyway. Re-record it.
+                    if identity.get("template_date", template_date.TEMPLATE_DATE) != template_date.TEMPLATE_DATE:
+                        mismatch.append("template_date")
                     if identity.get("platform", platform) != platform:
                         mismatch.append("platform")
                     failures = [f"baseline identity differs: {mismatch}"] if mismatch else []
