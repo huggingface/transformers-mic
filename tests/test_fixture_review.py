@@ -75,6 +75,7 @@ def fake_backend(monkeypatch):
 
     def invoke(tool, root, options=(), **kwargs):
         assert tool == "fixture-stage"
+        assert kwargs.get("stdout") is not None  # keeps --json stdout clean
         calls.append(list(options))
         _, _, out, result, *_ = options
         workspace = Workspace(root)

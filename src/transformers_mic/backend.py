@@ -9,7 +9,7 @@ import sys
 from . import resources
 
 
-def invoke(tool, workspace, args=(), *, capture=False, env=None):
+def invoke(tool, workspace, args=(), *, capture=False, env=None, stdout=None):
     command = [
         sys.executable,
         "-m",
@@ -18,7 +18,9 @@ def invoke(tool, workspace, args=(), *, capture=False, env=None):
         str(Path(workspace).resolve()),
         *map(str, args),
     ]
-    return subprocess.run(command, text=True, capture_output=capture, env=env)
+    if capture:
+        return subprocess.run(command, text=True, capture_output=True, env=env)
+    return subprocess.run(command, text=True, env=env, stdout=stdout)
 
 
 def dispatch(tool, workspace, args):

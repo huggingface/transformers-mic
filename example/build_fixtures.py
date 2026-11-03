@@ -426,6 +426,13 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
             and not any(k.startswith(prefix) for k in tensors)):
         # A base model loaded from a head checkpoint (Jina's roberta.*): the loader strips the prefix.
         tensors = {prefix + k: v for k, v in tensors.items()}
+    tied = getattr(model, "all_tied_weights_keys", None) or {}
+    if checkpoint and checkpoint["keys"] and isinstance(tied, dict):
+        for alias, kept in tied.items():
+            # A tied pair is serialized once; keep the name the source uses
+            # (OPT's .bin stores lm_head.weight, save_pretrained keeps embed_tokens).
+            if kept in tensors and kept not in checkpoint["keys"] and alias in checkpoint["keys"] and alias not in tensors:
+                tensors[alias] = tensors.pop(kept)
     save_file(tensors, weights, metadata={"format": "pt"})
     copied = copied_files(source, recipe)
     for name in copied:

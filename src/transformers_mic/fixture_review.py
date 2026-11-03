@@ -12,6 +12,7 @@ import hashlib
 import json
 import re
 import shutil
+import sys
 import tempfile
 from collections import Counter
 from pathlib import Path
@@ -186,7 +187,8 @@ def refresh(workspace, force=False):
         ]
         if built:
             options.append(str(built))
-        process = backend.invoke("fixture-stage", root, options)
+        # Progress goes to stderr: stdout carries only this command's own output (--json).
+        process = backend.invoke("fixture-stage", root, options, stdout=sys.stderr)
         if process.returncode:
             raise SystemExit(process.returncode)
         data = read(result)
