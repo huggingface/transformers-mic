@@ -331,7 +331,8 @@ def test_fixture_keeps_the_checkpoint_legacy_names_and_reloads_exactly(tmp_path)
     assert all(torch.equal(v, back.state_dict()[k]) for k, v in model.state_dict().items())
 
 
-def test_fixture_keeps_a_head_checkpoint_prefix_and_binary_format(tmp_path):
+def test_fixture_keeps_a_head_checkpoint_prefix_and_writes_safetensors_for_a_bin_source(tmp_path):
+    from safetensors import safe_open
     from transformers import BertConfig, BertModel
 
     torch.manual_seed(0)
@@ -339,8 +340,10 @@ def test_fixture_keeps_a_head_checkpoint_prefix_and_binary_format(tmp_path):
     keys = {f"bert.{k}" for k in model.state_dict()}
     (tmp_path / "source").mkdir()
     build_fixtures.save(model, tmp_path / "out", tmp_path / "source", [], checkpoint={"keys": keys, "binary": True})
-    assert not (tmp_path / "out" / "model.safetensors").exists()
-    saved = torch.load(tmp_path / "out" / "pytorch_model.bin", weights_only=True)
+    # A pytorch_model.bin source still gets a safetensors fixture, with the source's names.
+    assert not (tmp_path / "out" / "pytorch_model.bin").exists()
+    with safe_open(tmp_path / "out" / "model.safetensors", "pt") as f:
+        saved = set(f.keys())
     assert saved and all(k.startswith("bert.") for k in saved)
     back = BertModel.from_pretrained(tmp_path / "out")
     assert all(torch.equal(v, back.state_dict()[k]) for k, v in model.state_dict().items())

@@ -379,3 +379,29 @@ def test_question_id_does_not_depend_on_the_working_directory(
     code, result = agent(workflow, capsys, "--answer", str(answer(tmp_path, first)))
     assert code == 3 and "answer_error" not in result
     assert result["pending_question"]["kind"] == "source-review"
+
+
+def test_experts_layout_is_named_for_both_sides():
+    per_expert = [f"layers.0.experts.{e}.w1.weight" for e in range(4)] + [
+        "layers.0.shared_experts.w1.weight"
+    ]
+    fused = [
+        "model.layers.0.mlp.experts.gate_up_proj",
+        "model.layers.0.mlp.experts.down_proj",
+    ]
+    assert fixture_review.experts(per_expert) == {"layout": "per-expert", "experts": 4}
+    assert fixture_review.experts(fused) == {"layout": "fused", "experts": None}
+    assert fixture_review.experts(["layers.0.shared_experts.w1.weight"]) is None
+    names = fixture_review.weight_names(
+        {"source_keys": per_expert, "fixture_keys": fused, "missing_parameters": []}
+    )
+    assert "DIFFERENT LAYOUT" in fixture_review.experts_line(names)
+    same = fixture_review.weight_names(
+        {
+            "source_keys": per_expert,
+            "fixture_keys": per_expert[:2],
+            "missing_parameters": [],
+        }
+    )
+    line = fixture_review.experts_line(same)
+    assert "DIFFERENT" not in line and "2 experts" in line and "4 experts" in line

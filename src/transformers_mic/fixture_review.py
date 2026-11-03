@@ -213,6 +213,28 @@ def patterns(keys):
     return Counter(NUMBER.sub("{n}", key) for key in keys)
 
 
+PER_EXPERT = re.compile(r"(?:^|\.)experts\.(\d+)\.")
+FUSED = re.compile(r"(?:^|\.)experts\.[A-Za-z_]")
+
+
+def experts(keys):
+    """How routed experts are serialized: one tensor set per expert, or fused stacks."""
+    indices = {int(m.group(1)) for key in keys if (m := PER_EXPERT.search(key))}
+    if indices:
+        return {"layout": "per-expert", "experts": len(indices)}
+    if any(FUSED.search(key) for key in keys):
+        return {"layout": "fused", "experts": None}
+    return None
+
+
+def describe_experts(layout):
+    if not layout:
+        return "none"
+    if layout["layout"] == "per-expert":
+        return f"per-expert tensors ({layout['experts']} experts)"
+    return "fused (all experts in one tensor per projection)"
+
+
 def weight_names(data):
     source, fixture = patterns(data["source_keys"]), patterns(data["fixture_keys"])
     # The fixture omits what the real checkpoint lacks (tied aliases): not a difference.
@@ -225,7 +247,23 @@ def weight_names(data):
             "source": len(data["source_keys"]),
             "fixture": len(data["fixture_keys"]),
         },
+        "experts": {
+            "source": experts(data["source_keys"]),
+            "fixture": experts(data["fixture_keys"]),
+        },
     }
+
+
+def experts_line(names):
+    source, fixture = names["experts"]["source"], names["experts"]["fixture"]
+    if not source and not fixture:
+        return None
+    same = (source or {}).get("layout") == (fixture or {}).get("layout")
+    return (
+        f"Experts: {describe_experts(fixture)} in the tiny model, "
+        f"{describe_experts(source)} in the source"
+        + ("" if same else "  ← DIFFERENT LAYOUT")
+    )
 
 
 def human(n):
@@ -272,6 +310,7 @@ def headline(data):
         f"Config: {len(changes)} values differ from the source"
         + (f" ({shown}{more})" if changes else ""),
         weights,
+        *([line] if (line := experts_line(names)) else []),
         "Findings: " + ("; ".join(findings) if findings else "none"),
     ]
 
@@ -288,7 +327,17 @@ def details(data, page=None):
     ]
     if p.get("original"):
         lines.append(f"Parameters: {human(p['original'])} → {human(p['fixture'])}")
-    lines.append(f"Weights: {data['weights']} · file {data['weights_file']}")
+    lines.append(
+        f"Weights: {data['weights']} · file {data['weights_file']}"
+        + (
+            f" (the source has {data['source_weights_file']}; the tensor names are what loading reads)"
+            if data.get("source_weights_file")
+            and data["source_weights_file"] != data["weights_file"]
+            else ""
+        )
+    )
+    if line := experts_line(names):
+        lines.append(line)
     lines += [
         "",
         f"Config: {len(data['config_changes'])} values differ from the source ({data['config_unchanged']} unchanged)",
@@ -343,6 +392,8 @@ def summary(data):
         "weights_file": data["weights_file"],
         "parameters": data.get("parameters"),
         "config_changes": len(data["config_changes"]),
+        "source_weights_file": data.get("source_weights_file"),
+        "experts": names["experts"],
         "weight_names": {
             "matching": len(names["matching"]),
             "only_source": names["only_source"],

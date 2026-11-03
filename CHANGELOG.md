@@ -7,6 +7,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- Fixtures are always written as `model.safetensors`, also for `pytorch_model.bin` sources. They keep the
+  source's tensor names, prefix and expert layout; `build.json` records the source file in
+  `serialization.source_file`. Published `.bin` fixtures are unchanged until they are rebuilt.
+- The tiny-model review names the expert layout on both sides (per-expert with count, or fused) and the
+  source's weights file.
+
 ### Added
 
 - `tmic run` asks about the tiny model first: it shrinks the config and writes `fixture/` in the workspace
