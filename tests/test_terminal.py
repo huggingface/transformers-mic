@@ -1,7 +1,7 @@
-from transformers_mic.terminal import failure
 import subprocess
 
 from transformers_mic import terminal
+from transformers_mic.terminal import failure
 
 
 def test_gate_failure_shows_cause_threshold_and_log_instead_of_large_dictionaries():
