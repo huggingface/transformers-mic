@@ -1,0 +1,62 @@
+{
+ "date": "2026-10-29",
+ "rows": [
+  {
+   "class": "pr-only",
+   "commit_sha": "532e97e0853826850a7138f4fe0dace347e86953",
+   "contract": "huggingface-mic/Janus-Pro-1B-mic",
+   "failure": "wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py\", line 1794, in _call_impl\n    return forward_call(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/_",
+   "failure_kind": "Runtime traceback",
+   "kind": "fixture",
+   "known_failure": "",
+   "latest": "error",
+   "platform": "",
+   "pr": "50053",
+   "pr_title": "Keep every FSDP2 group dtype-uniform",
+   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=40827256982%3A1&var-pr=50053&var-gh_run_id=40827256982",
+   "selected_by": "shared code (src/transformers/distributed/mixin.py)",
+   "target": "Janus-Pro-1B-mic",
+   "trace_url": "/d/pytest-test/test?var-trace_id=fac48a1dfce803b3607ec02810055da5&var-test_nodeid=tests%2Fcontracts%3A%3AJanus-Pro-1B%3A%3AJanus-Pro-1B-mic%5Bbfloat16%5D&var-run_id=40827256982%3A1&var-pr=50053&var-gh_run_id=40827256982&from=now-30d&to=now",
+   "variant": "bfloat16",
+   "weights": "random"
+  },
+  {
+   "class": "pr-only",
+   "commit_sha": "f97f46f4699203601048aab97bd75597eb866626",
+   "contract": "huggingface-mic/Janus-Pro-1B-mic",
+   "failure": "wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py\", line 1794, in _call_impl\n    return forward_call(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/_",
+   "failure_kind": "Runtime traceback",
+   "kind": "fixture",
+   "known_failure": "",
+   "latest": "error",
+   "platform": "",
+   "pr": "50115",
+   "pr_title": "[Yue2] Main model addition",
+   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=40852430155%3A1&var-pr=50115&var-gh_run_id=40852430155",
+   "selected_by": "shared code (src/transformers/conversion_mapping.py)",
+   "target": "Janus-Pro-1B-mic",
+   "trace_url": "/d/pytest-test/test?var-trace_id=3613fe86852dfbd0bed530171c45a4fd&var-test_nodeid=tests%2Fcontracts%3A%3AJanus-Pro-1B%3A%3AJanus-Pro-1B-mic%5Bbfloat16%5D&var-run_id=40852430155%3A1&var-pr=50115&var-gh_run_id=40852430155&from=now-30d&to=now",
+   "variant": "bfloat16",
+   "weights": "random"
+  },
+  {
+   "class": "pre-existing",
+   "commit_sha": "646a4a0c3ea119efe9c7bb853feab155cb3e1887",
+   "contract": "huggingface-mic/qwen2_5_omni-mic",
+   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--qwen2_5_omni-mic/snapshots/66f539068368f45077761173e",
+   "failure_kind": "Runtime traceback",
+   "kind": "fixture",
+   "known_failure": "",
+   "latest": "error",
+   "platform": "",
+   "pr": "50132",
+   "pr_title": "v1/audio/transcription refresh ",
+   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=40918381337%3A1&var-pr=50132&var-gh_run_id=40918381337",
+   "selected_by": "shared code (src/transformers/cli/serving/transcription.py)",
+   "target": "mic-qwen2_5_omni-slim",
+   "trace_url": "/d/pytest-test/test?var-trace_id=378f7ba0d729cef2794486fcb47a6d4d&var-test_nodeid=tests%2Fcontracts%3A%3Amic-qwen2_5_omni%3A%3Amic-qwen2_5_omni-slim%5Bbfloat16%5D&var-run_id=40918381337%3A1&var-pr=50132&var-gh_run_id=40918381337&from=now-30d&to=now",
+   "variant": "bfloat16",
+   "weights": "random"
+  }
+ ]
+}

@@ -1,0 +1,24 @@
+{
+ "date": "2026-11-01",
+ "rows": [
+  {
+   "class": "pre-existing",
+   "commit_sha": "a30d70cbdc1929e99d43bc296a91aa1c37a1920f",
+   "contract": "huggingface-mic/tiny-random-muse-glimmer-mic",
+   "failure": "answer_logits: max delta 0.00977 over tolerance\ntraining.loss: max delta 0.00276 over tolerance",
+   "failure_kind": "Baseline assertion",
+   "kind": "fixture",
+   "known_failure": "",
+   "latest": "fail",
+   "platform": "cpu-x86_64-bf16",
+   "pr": "50210",
+   "pr_title": "fix(pipelines): preserve batched generation metadata",
+   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41281430408%3A2&var-pr=50210&var-gh_run_id=41281430408",
+   "selected_by": "shared code (src/transformers/pipelines/text_generation.py)",
+   "target": "tiny-random-muse-glimmer-mic",
+   "trace_url": "/d/pytest-test/test?var-trace_id=ef9813a59d4922aa30c3f374dfff4cb2&var-test_nodeid=tests%2Fcontracts%3A%3AMuseGlimmer%3A%3Atiny-random-muse-glimmer-mic%5Bbfloat16%5D&var-run_id=41281430408%3A2&var-pr=50210&var-gh_run_id=41281430408&from=now-30d&to=now",
+   "variant": "bfloat16",
+   "weights": "random"
+  }
+ ]
+}
