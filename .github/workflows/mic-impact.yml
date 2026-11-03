@@ -15,7 +15,7 @@ name: MIC impact
 
 on:
   schedule:
-    - cron: "23 6 * * *" # after nightly (02:41) and shadow (03:17)
+    - cron: "0 9 * * *" # 10:00 CET (11:00 CEST); after nightly (02:41) and shadow (03:17)
   workflow_dispatch:
     inputs:
       days:
