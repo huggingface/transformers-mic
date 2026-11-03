@@ -591,7 +591,8 @@ def collect(results, days, today_day, download):
     write(results / "candidates.json", candidates)
     write(results / "gpu-ci.json", gpu_ci)
     sweep = json.loads(SWEEP.read_text())["rows"] if SWEEP.exists() else {}
-    write(results / "suggestions.json", build_suggestions(gpu_ci, sweep, {}))
+    covered_now = {norm(t) for t in fixture_model_types(results, download).values() if t}
+    write(results / "suggestions.json", build_suggestions(gpu_ci, sweep, {}, covered_now))
 
     # Baseline review work: fleet updates since the window opened, each counted once.
     seen = {r["fleet_commit"] for r in read_jsonl(results / "baselines.jsonl")}
@@ -674,8 +675,12 @@ def test_checkpoints(nodeids, files):
     return [c for c, _ in found.most_common()]
 
 
-def build_suggestions(gpu_ci, sweep, files):
-    """New contracts for models with real-checkpoint regressions and no contract; extensions for the rest."""
+def build_suggestions(gpu_ci, sweep, files, covered=frozenset()):
+    """New contracts for models with real-checkpoint regressions and no contract; extensions for the rest.
+
+    covered: model types the fleet covers now. A regression recorded "not-covered" before its model
+    got a contract is not a suggestion any more.
+    """
     new = defaultdict(lambda: {"integration": 0, "other": 0, "tests": [], "keys": []})
     extend = defaultdict(list)
     for key, item in gpu_ci.items():
@@ -683,6 +688,8 @@ def build_suggestions(gpu_ci, sweep, files):
         if model in NOT_MODELS:
             continue
         if item.get("mic") == "not-covered":
+            if norm(model or "") in covered:
+                continue
             entry = new[model]
             entry["integration" if item.get("integration") else "other"] += 1
             entry["tests"] += [t for t in item["tests"] if t not in entry["tests"]]

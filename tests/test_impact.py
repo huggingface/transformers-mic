@@ -365,3 +365,10 @@ def test_space_gets_overview_report_and_new_shrink_pages(monkeypatch, tmp_path):
     monkeypatch.setattr(huggingface_hub, "HfApi", Api)
     impact.publish_space(results, "o/space", shrink)
     assert uploaded["files"] == ["README.md", "index.html", "overview.json", "report.html", "shrink/9/p.html", "summary.md", "updated.txt"]
+
+
+def test_a_model_that_got_a_contract_is_no_longer_suggested():
+    gpu_ci = {"1#flint": {"model": "flint", "mic": "not-covered", "integration": True, "date": "d",
+                          "tests": ["tests/models/flint/test_modeling_flint.py::FlintIntegrationTest::test_x"]}}
+    assert [s["model"] for s in impact.build_suggestions(gpu_ci, {}, {})["new"]] == ["flint"]
+    assert impact.build_suggestions(gpu_ci, {}, {}, {"flint"})["new"] == []
