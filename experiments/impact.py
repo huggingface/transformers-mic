@@ -5,7 +5,7 @@ Whether MIC should block a PR depends on things replays cannot measure:
 1. How many real bugs does it catch on PRs?
 2. How often does it send people chasing false alarms?
 3. How much work do baseline reviews take?
-4. How many bugs only show with real weights?
+4. Of the real-checkpoint regressions Transformers' daily GPU CI finds, how many did MIC flag first?
 5. Do overfit fixtures catch bugs that random ones miss?
 
 Every day this reads the dashboard's MIC failures (the data behind
@@ -21,7 +21,8 @@ the cases still waiting for a human verdict in labels.jsonl.
 Results layout (the impact-results branch):
     days/<date>.json     the day's PR failures, each with its class
     candidates.json      PR-only failures, followed until they resolve
-    real-weights.json    checkpoint failures on main whose fixture passed
+    gpu-ci.json          the daily GPU CI's bisected regressions, each with what MIC did on the culprit PR
+    model-types.json     cache: fixture repo -> model_type
     baselines.jsonl      one line per fleet update: baselines changed/added/removed
     labels.jsonl         human verdicts: {"key", "verdict", "note", "by"}
     summary.md           the five questions, answered with the numbers so far
@@ -31,9 +32,10 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import http.client
 import json
 import os
-import subprocess
+import sys
 import time
 import urllib.error
 import urllib.parse
@@ -60,7 +62,9 @@ INFRA = {"Setup error", "Wrong hardware", "Missing baseline"}
 # The same case failing on this many PRs in one day is shared breakage (a template date,
 # a runner, a stale baseline), not the PRs' code, even when main did not run that case.
 SYSTEMIC_PRS = 3
-VERDICTS = {"real-bug", "intended", "false-alarm", "flake"}
+VERDICTS = {"real-bug", "intended", "false-alarm", "flake", "call-not-covered", "needs-real-weights"}
+DAILY_CI = "hf-internal-testing/transformers_daily_ci"
+MIC_JOB = "pr-ci / fast-integration / run"
 # How long a merged PR's case is watched on main before it counts as "main ok".
 MAIN_WATCH_DAYS = 3
 # Proposed bar for "block merges when MIC is red" after a month of data (rule B below).
@@ -89,7 +93,8 @@ def get_json(url, headers=None, attempts=4):
         except urllib.error.HTTPError as error:
             if error.code in (404, 422) or attempt == attempts - 1:
                 raise
-        except (urllib.error.URLError, TimeoutError):
+        except (urllib.error.URLError, TimeoutError, http.client.IncompleteRead, json.JSONDecodeError):
+            # A body cut off mid-transfer (GitHub's job lists are large) is retried like a timeout.
             if attempt == attempts - 1:
                 raise
         time.sleep(5 * (attempt + 1))
@@ -317,54 +322,159 @@ def write(path, data):
     path.write_text(json.dumps(data, indent=1, sort_keys=True) + "\n")
 
 
-def nightly_runs(ref):
-    """{date: [records]} from runs/nightly/ on the shadow-results branch (a git ref)."""
-    names = subprocess.run(["git", "ls-tree", "-r", "--name-only", ref, "runs/nightly/"], capture_output=True, text=True, check=True).stdout.split()
-    runs = defaultdict(list)
-    for name in names:
-        text = subprocess.run(["git", "show", f"{ref}:{name}"], capture_output=True, text=True, check=True).stdout
-        runs[name.split("/")[2]] += [json.loads(line) for line in text.splitlines() if line.strip()]
-    return dict(runs)
+def gpu_ci_regressions(date):
+    """The daily GPU CI's bisected new failures on `date`, one entry per (culprit PR, model).
 
-
-def real_weights_only(runs):
-    """Checkpoint cases that started failing on a night when their contract's fixtures all passed.
-
-    Keyed by case; a case that was already failing on its first observed night is not a
-    transition and is reported as `since_first_night` rather than counted as a new catch.
+    Upstream bisects every new failure of the scheduled GPU run (all @slow tests; the
+    *IntegrationTest classes load real checkpoints) to a bad commit and its PR. Flaky ones
+    and those without a PR are skipped.
     """
-    found, previous = {}, {}
-    for night in sorted(runs):
-        records = runs[night]
-        fixtures = defaultdict(list)
-        for r in records:
-            if r.get("kind") == "fixture" and r.get("status") in ("pass", "fail", "error"):
-                fixtures[r["contract"], r["variant"]].append(r["status"])
-        status = {}
-        for r in records:
-            if r.get("kind") != "checkpoint" or r.get("status") not in ("pass", "fail", "error"):
+    url = f"{HUB}/datasets/{DAILY_CI}/resolve/main/{date}/ci_results_run_models_gpu/new_failures_with_bad_commit.json"
+    try:
+        data = get_json(url)
+    except urllib.error.HTTPError as error:
+        if error.code == 404:
+            return {}
+        raise
+    found = {}
+    for entries in (e for by_gpu in data.values() for e in by_gpu.values()):
+        for entry in entries:
+            if not entry.get("pr_number") or str(entry.get("status", "")).startswith("flaky"):
                 continue
-            key = "|".join(str(r.get(k, "")) for k in ("contract", "target", "variant", "platform"))
-            status[key] = r["status"]
-            fixtures_pass = fixtures.get((r["contract"], r["variant"])) and all(s == "pass" for s in fixtures[r["contract"], r["variant"]])
-            if r["status"] == "pass" or key in found or not fixtures_pass:
-                continue
-            found[key] = {
-                "first_fail": night,
-                "after_pass": previous.get(key) == "pass",
-                "since_first_night": key not in previous,
-                "failure": "; ".join(r.get("failures") or [])[:300],
-                "contract": r["contract"],
-            }
-        for key, item in found.items():
-            if key in status:
-                item["latest"] = status[key]
-                item["last_night"] = night
-        previous.update(status)
+            test = entry.get("test", "")
+            parts = test.split("/")
+            model = parts[2] if test.startswith("tests/models/") and len(parts) > 3 else None
+            key = f"{entry['pr_number']}#{model or 'shared'}"
+            item = found.setdefault(
+                key,
+                {
+                    "pr": str(entry["pr_number"]),
+                    "model": model,
+                    "date": date,
+                    "bad_commit": entry.get("bad_commit"),
+                    "tests": [],
+                    "integration": False,
+                    "job_link": entry.get("job_link"),
+                },
+            )
+            if test not in item["tests"]:
+                item["tests"].append(test)
+            item["integration"] = item["integration"] or "IntegrationTest" in test
     return found
 
 
-def collect(results, days, today_day, download, shadow_ref=None):
+def norm(model_type):
+    return (model_type or "").replace("-", "_")
+
+
+def fixture_model_types(results, download):
+    """fixture repo -> model_type for every fixture in both fleets (cached: a repo's type does not change)."""
+    cache = load(results / "model-types.json", {})
+    for name in ("control", "prototypes"):
+        lock = json.loads(Path(download(name, "main")[0]).read_text())
+        for contract in lock["contracts"].values():
+            for repo in contract.get("fixtures", {}):
+                if repo not in cache:
+                    try:
+                        cache[repo] = get_json(f"{HUB}/{repo}/resolve/main/config.json").get("model_type")
+                    except urllib.error.HTTPError:
+                        cache[repo] = None
+    write(results / "model-types.json", cache)
+    return cache
+
+
+def selects(files, model):
+    """Whether MIC's changed-file selection runs a model's contracts (example/select_contracts.py rules).
+
+    Approximate: a contract can also depend on another model's directory (its tokenizer's),
+    which this treats as not selected.
+    """
+    for path in files:
+        if path.startswith(f"src/transformers/models/{model}/") or path in ("setup.py", "pyproject.toml"):
+            return True
+        if path.startswith("src/transformers/models/auto/"):
+            return True
+        if path.startswith("src/transformers/") and not path.startswith("src/transformers/models/"):
+            return True
+    return False
+
+
+def mic_job(head_sha):
+    """Conclusion of MIC's PR CI job on a commit (success, failure, ...), or None if it never ran."""
+    runs = github(f"/repos/{TRANSFORMERS}/actions/runs?head_sha={head_sha}&per_page=30")["workflow_runs"]
+    for run in (r for r in runs if r.get("name") == "PR CI"):
+        jobs = github(f"/repos/{TRANSFORMERS}/actions/runs/{run['id']}/jobs?per_page=100")["jobs"]
+        for job in jobs:
+            if job["name"] == MIC_JOB and job.get("conclusion") not in (None, "skipped", "cancelled"):
+                return job["conclusion"]
+    return None
+
+
+def sticky_gpu_onsets(health, first_day_number):
+    """Sticky GPU failures (the Fix failures page: GPU, failures, sticky) that started inside the
+    window, one entry per (model, onset day). A failure already failing on the window's first day
+    has no observed onset and is left out.
+    """
+    found = {}
+    for row in health.get("rows", []):
+        if row.get("job") != "run_models_gpu" or row.get("category") != "failure" or not row.get("sticky"):
+            continue
+        days = row.get("days") or []
+        # The strip counts failures per day; 0 is a day without one.
+        onset = next((i for i in range(1, len(days)) if days[i] > 0 and days[i - 1] == 0), None)
+        if onset is None or not row.get("model"):
+            continue
+        day = first_day_number + onset
+        key = f"sticky#{row['model']}#{iso_day(day)}"
+        item = found.setdefault(key, {"model": row["model"], "date": iso_day(day), "day": day, "tests": [], "integration": False, "signal": row.get("signal")})
+        item["tests"].append(row["nodeid"])
+        item["integration"] = item["integration"] or "IntegrationTest" in row["nodeid"]
+    return found
+
+
+def mic_on_main_near(item, main_rows, first_day_main, types, covered):
+    """Was MIC red on main for the model within a day of a GPU failure's onset?"""
+    model = item["model"]
+    if model not in covered:
+        return "not-covered"
+    for row in main_rows:
+        if row.get("failure_kind") in INFRA or norm(types.get(row.get("fixture_repo"))) != model:
+            continue
+        if any(abs(day - item["day"]) <= 1 for day in failing_days(row, first_day_main)):
+            return "red-on-main"
+    return "green-on-main"
+
+
+def mic_on_culprit(item, pr_rows, types, covered, pr_files, head_sha):
+    """What MIC did on a GPU CI regression's culprit PR.
+
+    not-covered     no contract for the model
+    caught-on-pr    a contract of that model failed (not infra) on the PR
+    not-run         MIC's job never ran on the PR's head
+    not-selected    it ran, but the PR's files do not select the model's contracts
+    missed          selected and ran, and no contract of that model failed
+    """
+    model = item["model"]
+    if not model or model not in covered:
+        return "not-covered"
+    red = [
+        r
+        for r in pr_rows
+        if str(r.get("pr")) == item["pr"]
+        and r.get("failure_kind") not in INFRA
+        and norm(types.get(r.get("fixture_repo"))) == model
+    ]
+    if red:
+        item["mic_failures"] = sorted({(r.get("failure") or "").splitlines()[0][:120] for r in red})[:5]
+        return "caught-on-pr"
+    if mic_job(head_sha) is None:
+        return "not-run"
+    if not selects(pr_files, model):
+        return "not-selected"
+    return "missed"
+
+
+def collect(results, days, today_day, download):
     results = Path(results)
     pr_rows, pr_summary, pr_truncated = mic_rows("prs", days, "pr")
     main_rows, main_summary, main_truncated = mic_rows("main", max(days, 7), "model")
@@ -372,7 +482,7 @@ def collect(results, days, today_day, download, shadow_ref=None):
     first_day_main = today_day - max(days, 7) + 1
 
     candidates = load(results / "candidates.json", {})
-    real_weights = load(results / "real-weights.json", {})
+    gpu_ci = load(results / "gpu-ci.json", {})
     cache = {}
 
     # Classify every PR failure on the day it first failed, against main on that day.
@@ -439,16 +549,37 @@ def collect(results, days, today_day, download, shadow_ref=None):
             time.sleep(2.5)  # search API: 30 requests a minute
     write(results / "merged.json", merged)
 
-    # Real weights only: from the nightly real-checkpoint runs (shadow-results branch).
-    if shadow_ref:
-        runs = nightly_runs(shadow_ref)
-        real_weights = real_weights_only(runs)
-        last = runs[max(runs)] if runs else []
-        real_weights["_coverage"] = {
-            "nights": len(runs),
-            "checkpoint_cases_last_night": sum(1 for r in last if r.get("kind") == "checkpoint" and r.get("status") != "unsupported"),
-            "contracts_last_night": len({r["contract"] for r in last if r.get("kind") == "checkpoint"}),
-        }
+    # Real-checkpoint regressions from the daily GPU CI: did MIC flag them on the culprit PR?
+    new = {}
+    for day in range(first_day_prs - 1, today_day + 1):
+        new |= {k: v for k, v in gpu_ci_regressions(iso_day(day)).items() if k not in gpu_ci}
+    if new:
+        types = fixture_model_types(results, download)
+        covered = {norm(t) for t in types.values() if t}
+        culprit_rows = pr_rows if days == 30 else mic_rows("prs", 30, "pr")[0]
+
+        for key, item in new.items():
+            try:
+                info = pr_info(item["pr"], cache)
+                files = [f["filename"] for f in github(f"/repos/{TRANSFORMERS}/pulls/{item['pr']}/files?per_page=100")]
+                item["mic"] = mic_on_culprit(item, culprit_rows, types, covered, files, info["head"])
+            except (urllib.error.URLError, http.client.IncompleteRead, json.JSONDecodeError) as error:
+                # Left out of gpu_ci so the next run retries it.
+                print(f"MIC lookup failed for {key}: {error}", file=sys.stderr)
+                continue
+            gpu_ci[key] = item
+
+    # Sticky GPU failures that started in the window (the Fix failures page), bisected or not:
+    # was MIC red on main for that model when they started?
+    health = get_json(f"{DASHBOARD}/project-health/rows?days=30")
+    onsets = {k: v for k, v in sticky_gpu_onsets(health, int(health["first_day"] // 86400)).items() if k not in gpu_ci}
+    if onsets:
+        types = fixture_model_types(results, download)
+        covered = {norm(t) for t in types.values() if t}
+        main_30 = main_rows if max(days, 7) == 30 else mic_rows("main", 30, "model")[0]
+        for key, item in onsets.items():
+            item["mic"] = mic_on_main_near(item, main_30, today_day - 30 + 1, types, covered)
+            gpu_ci[key] = item
 
     for day, rows in by_day.items():
         path = results / "days" / f"{iso_day(day)}.json"
@@ -456,7 +587,7 @@ def collect(results, days, today_day, download, shadow_ref=None):
         merged = {(r["pr"], r["contract"], r["target"], r["variant"], r["platform"]): r for r in existing["rows"] + rows}
         write(path, {"date": iso_day(day), "rows": sorted(merged.values(), key=lambda r: (str(r["pr"]), r["contract"]))})
     write(results / "candidates.json", candidates)
-    write(results / "real-weights.json", real_weights)
+    write(results / "gpu-ci.json", gpu_ci)
 
     # Baseline review work: fleet updates since the window opened, each counted once.
     seen = {r["fleet_commit"] for r in read_jsonl(results / "baselines.jsonl")}
@@ -505,7 +636,7 @@ def summarize(results):
             labels[label["key"]] = label
     day_rows = [r for path in sorted((results / "days").glob("*.json")) for r in load(path, {"rows": []})["rows"]]
     baselines = [r for r in read_jsonl(results / "baselines.jsonl") if r.get("contract")]
-    real_weights = load(results / "real-weights.json", {})
+    gpu_ci = load(results / "gpu-ci.json", {})
     runs = sorted((results / "runs").glob("*.json"))
     first = day_rows and min(path.stem for path in (results / "days").glob("*.json"))
     last = day_rows and max(path.stem for path in (results / "days").glob("*.json"))
@@ -585,21 +716,65 @@ def summarize(results):
             lines += [f"- {r['date']} {r['contract']}: {r.get('model_commit_title') or '(no title)'}" for r in reasons]
     else:
         lines.append("- No fleet updates observed yet.")
-    coverage = real_weights.pop("_coverage", {})
-    transitions = {k: v for k, v in real_weights.items() if v.get("after_pass")}
-    standing = {k: v for k, v in real_weights.items() if v.get("since_first_night")}
     lines += [
         "",
-        "## 4. Bugs only real weights show",
+        "## 4. Real-checkpoint regressions: did MIC flag them first?",
         "",
-        "From the nightly real-checkpoint runs (`nightly.yml`, A10G, shadow-results `runs/nightly/`): a checkpoint "
-        "case that failed on a night when every fixture of the same contract and variant passed.",
+        "From Transformers' daily GPU CI (`hf-internal-testing/transformers_daily_ci`): each new failure upstream "
+        "bisected to a culprit PR, one entry per (PR, model), flaky ones skipped. `*IntegrationTest` failures load "
+        "real checkpoints. For each, what MIC did on the culprit PR:",
         "",
-        f"- Started failing after a passing night: **{len(transitions)}**"
-        + (": " + "; ".join(f"{k.split('|')[1]} {k.split('|')[2]} ({v['first_fail']}, now {v.get('latest')})" for k, v in sorted(transitions.items())[:10]) if transitions else "."),
-        f"- Already failing on the first night observed (not counted as catches): {len(standing)}.",
-        f"- Coverage: {coverage.get('nights', 0)} nights; the last one ran {coverage.get('checkpoint_cases_last_night', 0)} checkpoint cases "
-        f"from {coverage.get('contracts_last_night', 0)} contracts. Contracts without a nightly checkpoint run cannot answer this question.",
+        "| MIC on the culprit PR | integration (real checkpoints) | other GPU tests |",
+        "|---|---|---|",
+    ]
+    bisected = {k: v for k, v in gpu_ci.items() if not k.startswith("sticky#")}
+    sticky = {k: v for k, v in gpu_ci.items() if k.startswith("sticky#")}
+    for outcome_name, meaning in (
+        ("caught-on-pr", "red on the PR: would have blocked a day earlier"),
+        ("missed", "selected, ran, green"),
+        ("not-selected", "ran, model not selected by the PR's files"),
+        ("not-run", "MIC never ran on the PR"),
+        ("not-covered", "no contract for the model"),
+    ):
+        integ = sum(1 for v in bisected.values() if v.get("mic") == outcome_name and v.get("integration"))
+        other = sum(1 for v in bisected.values() if v.get("mic") == outcome_name and not v.get("integration"))
+        lines.append(f"| {outcome_name}: {meaning} | {integ} | {other} |")
+    lines += [
+        "",
+        f"Sticky GPU failures that started in the window ([Fix failures]({DASHBOARD}/d/pytest-test-health/fix-failures): "
+        "GPU, failures, sticky), bisected or not, one entry per (model, first failing day): was MIC red on main for "
+        "that model within a day?",
+        "",
+        "| MIC on main | integration (real checkpoints) | other GPU tests |",
+        "|---|---|---|",
+    ]
+    for outcome_name in ("red-on-main", "green-on-main", "not-covered"):
+        integ = sum(1 for v in sticky.values() if v.get("mic") == outcome_name and v.get("integration"))
+        other = sum(1 for v in sticky.values() if v.get("mic") == outcome_name and not v.get("integration"))
+        lines.append(f"| {outcome_name} | {integ} | {other} |")
+    missed = [
+        (k, v) for k, v in sorted(gpu_ci.items())
+        if v.get("mic") in ("missed", "green-on-main") and v.get("integration") and f"gpu#{k}" not in labels
+    ]
+    lines += [
+        "",
+        "Real-checkpoint failures MIC stayed green on, waiting for a verdict. A miss is not proof that real weights "
+        "were needed: often the contract does not make the call that broke. "
+        'Label each with `{"key": "gpu#<key>", "verdict": "call-not-covered|needs-real-weights"}`.',
+        "",
+    ]
+    for key, v in missed[:20]:
+        lines.append(
+            f"- `gpu#{key}`: {v['date']}, {len(v['tests'])} test(s), e.g. `{v['tests'][0]}`"
+            + (f" ([PR #{v['pr']}](https://github.com/{TRANSFORMERS}/pull/{v['pr']}))" if v.get("pr") else "")
+        )
+    verdicts_gpu = Counter(labels[f"gpu#{k}"]["verdict"] for k in gpu_ci if f"gpu#{k}" in labels)
+    if verdicts_gpu:
+        lines.append(
+            f"- Labelled: needs-real-weights {verdicts_gpu['needs-real-weights']}, "
+            f"call-not-covered {verdicts_gpu['call-not-covered']}."
+        )
+    lines += [
         "",
         "## 5. Overfit vs random fixtures",
         "",
@@ -722,21 +897,48 @@ def replay_blocking(results, day_rows, candidates, labels, baselines, first, las
     return lines
 
 
+def publish_space(results, space):
+    """Upload summary.md and the static page to a Hugging Face Space (HF_TOKEN must write to it)."""
+    import shutil
+    import tempfile
+
+    from huggingface_hub import HfApi
+
+    page = Path(__file__).parent / "impact_space" / "index.html"
+    with tempfile.TemporaryDirectory() as folder:
+        folder = Path(folder)
+        shutil.copy(page, folder / "index.html")
+        shutil.copy(Path(results) / "summary.md", folder / "summary.md")
+        (folder / "updated.txt").write_text(dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC") + "\n")
+        (folder / "README.md").write_text(
+            "---\ntitle: MIC impact\nemoji: 📊\ncolorFrom: blue\ncolorTo: gray\nsdk: static\npinned: false\n---\n\n"
+            "Daily evidence for whether a red model integration contract should block a Transformers merge. "
+            "Generated by [mic-impact.yml](https://github.com/huggingface/transformers-mic/blob/main/.github/workflows/mic-impact.yml); "
+            "data on the [impact-results branch](https://github.com/huggingface/transformers-mic/tree/impact-results).\n"
+        )
+        HfApi().upload_folder(
+            repo_id=space, repo_type="space", folder_path=str(folder),
+            commit_message=f"MIC impact {dt.date.today().isoformat()}",
+        )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--results", required=True, type=Path, help="checkout of the impact-results branch")
     parser.add_argument("--days", type=int, default=1, choices=(1, 7, 14, 30), help="window ending today; 30 to seed")
     parser.add_argument("--summary-only", action="store_true")
-    parser.add_argument("--shadow-ref", default="origin/shadow-results", help="git ref of the shadow-results branch (nightly real-checkpoint runs)")
+    parser.add_argument("--publish-space", metavar="REPO", help="also upload the summary page to this Hugging Face Space")
     args = parser.parse_args()
     args.results.mkdir(parents=True, exist_ok=True)
     if not args.summary_only:
         from transformers_mic import fleet
 
         today_day = int(time.time() // 86400)
-        collect(args.results, args.days, today_day, fleet.download, args.shadow_ref)
+        collect(args.results, args.days, today_day, fleet.download)
     summarize(args.results)
     print((args.results / "summary.md").read_text())
+    if args.publish_space:
+        publish_space(args.results, args.publish_space)
 
 
 if __name__ == "__main__":

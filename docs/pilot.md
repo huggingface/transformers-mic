@@ -13,10 +13,13 @@ without blocking ([status](evidence.md#transformers-ci-proof)).
 
 Whether a red contract should block a merge is measured daily by
 [`mic-impact.yml`](../.github/workflows/mic-impact.yml): `summary.md` on the
-`impact-results` branch replays blocking on every merged PR and tracks real
-catches, false alarms, baseline review work, real-weights-only failures and
-overfit versus random fixtures, against a proposed bar for a decision after a
-month. Verdicts on PR-only failures go in that branch's `labels.jsonl`.
+`impact-results` branch (rendered on the
+[`huggingface-mic/mic-impact`](https://huggingface.co/spaces/huggingface-mic/mic-impact)
+Space) replays blocking on every merged PR and tracks real catches, false
+alarms, baseline review work, whether MIC flagged the real-checkpoint
+regressions Transformers' daily GPU CI finds, and overfit versus random
+fixtures, against a proposed bar for a decision after a month. Verdicts go in
+that branch's `labels.jsonl`.
 
 ## Results so far
 
