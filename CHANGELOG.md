@@ -7,6 +7,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- Fixtures are always written as `model.safetensors`, also for `pytorch_model.bin` sources. They keep the
+  source's tensor names, prefix and expert layout; `build.json` records the source file in
+  `serialization.source_file`. Published `.bin` fixtures are unchanged until they are rebuilt.
+- The tiny-model review names the expert layout on both sides (per-expert with count, or fused) and the
+  source's weights file.
+- A tied tensor is serialized under the name the source uses (OPT-125m's `.bin` stores `lm_head.weight`,
+  not `model.decoder.embed_tokens.weight`), so loading the fixture takes the source's path.
+- `tmic fixture --json` keeps stdout to the JSON; the shrink's progress goes to stderr.
+
+### Fixed
+
+- The shrink keeps `word_embed_proj_dim` and `embedding_size` equal to `hidden_size` when the checkpoint has
+  them equal (as it already did for `projection_size`). Shrinking only `hidden_size` gave OPT-125m fixtures
+  `project_in`/`project_out` layers and ELECTRA-base fixtures an `embeddings_project` the checkpoints do not
+  have. Existing fixtures keep their recorded config until rebuilt with `--reshrink`.
+
 ### Added
 
 - `tmic run` asks about the tiny model first: it shrinks the config and writes `fixture/` in the workspace

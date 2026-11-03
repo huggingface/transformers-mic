@@ -331,7 +331,8 @@ def test_fixture_keeps_the_checkpoint_legacy_names_and_reloads_exactly(tmp_path)
     assert all(torch.equal(v, back.state_dict()[k]) for k, v in model.state_dict().items())
 
 
-def test_fixture_keeps_a_head_checkpoint_prefix_and_binary_format(tmp_path):
+def test_fixture_keeps_a_head_checkpoint_prefix_and_writes_safetensors_for_a_bin_source(tmp_path):
+    from safetensors import safe_open
     from transformers import BertConfig, BertModel
 
     torch.manual_seed(0)
@@ -339,8 +340,10 @@ def test_fixture_keeps_a_head_checkpoint_prefix_and_binary_format(tmp_path):
     keys = {f"bert.{k}" for k in model.state_dict()}
     (tmp_path / "source").mkdir()
     build_fixtures.save(model, tmp_path / "out", tmp_path / "source", [], checkpoint={"keys": keys, "binary": True})
-    assert not (tmp_path / "out" / "model.safetensors").exists()
-    saved = torch.load(tmp_path / "out" / "pytorch_model.bin", weights_only=True)
+    # A pytorch_model.bin source still gets a safetensors fixture, with the source's names.
+    assert not (tmp_path / "out" / "pytorch_model.bin").exists()
+    with safe_open(tmp_path / "out" / "model.safetensors", "pt") as f:
+        saved = set(f.keys())
     assert saved and all(k.startswith("bert.") for k in saved)
     back = BertModel.from_pretrained(tmp_path / "out")
     assert all(torch.equal(v, back.state_dict()[k]) for k, v in model.state_dict().items())
@@ -861,3 +864,40 @@ def test_tester_sizes_stay_out_of_the_config_and_fall_back_on_a_failed_build(mon
     with pytest.raises(SystemExit):
         build_fixtures.build_fixture()
 
+
+
+def test_shrink_keeps_widths_that_equal_hidden_size_equal():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import ElectraConfig, OPTConfig, OPTForCausalLM
+
+    # OPT-125m: word_embed_proj_dim == hidden_size means no project_in/out layers.
+    opt = shrink(OPTConfig(hidden_size=768, word_embed_proj_dim=768, ffn_dim=3072, num_attention_heads=12))
+    assert opt.word_embed_proj_dim == opt.hidden_size == 64
+    with torch.device("meta"):
+        names = set(OPTForCausalLM(opt).state_dict())
+    assert not any("project_in" in n or "project_out" in n for n in names)
+    # OPT-350m projects (512 vs 1024): the projection layers must survive the shrink.
+    projected = shrink(OPTConfig(hidden_size=1024, word_embed_proj_dim=512, ffn_dim=4096, num_attention_heads=16))
+    assert projected.word_embed_proj_dim != projected.hidden_size
+    # ELECTRA-base: embedding_size == hidden_size means no embeddings_project.
+    electra = shrink(ElectraConfig(hidden_size=768, embedding_size=768, intermediate_size=3072, num_attention_heads=12))
+    assert electra.embedding_size == electra.hidden_size
+
+
+def test_tied_tensor_keeps_the_name_the_source_serializes(tmp_path):
+    from safetensors import safe_open
+    from transformers import OPTConfig, OPTForCausalLM
+
+    torch.manual_seed(0)
+    model = OPTForCausalLM(OPTConfig(hidden_size=16, word_embed_proj_dim=16, ffn_dim=32, num_attention_heads=2, num_hidden_layers=1, vocab_size=64)).eval()
+    # OPT-125m's pytorch_model.bin stores the tied embedding as lm_head.weight only.
+    keys = {k for k in model.state_dict() if k != "model.decoder.embed_tokens.weight"}
+    (tmp_path / "source").mkdir()
+    build_fixtures.save(model, tmp_path / "out", tmp_path / "source", [], checkpoint={"keys": keys, "binary": True})
+    with safe_open(tmp_path / "out" / "model.safetensors", "pt") as f:
+        saved = set(f.keys())
+    assert "lm_head.weight" in saved and "model.decoder.embed_tokens.weight" not in saved
+    back, info = OPTForCausalLM.from_pretrained(tmp_path / "out", output_loading_info=True)
+    assert not info["missing_keys"] and not info["unexpected_keys"]
+    assert all(torch.equal(v, back.state_dict()[k]) for k, v in model.state_dict().items())

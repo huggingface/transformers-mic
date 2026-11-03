@@ -51,6 +51,8 @@ WIDTHS = {
     "n_embd": 64, "n_inner": 128, "n_head": 4, "emb_dim": 64, "dim": 64, "hidden_dim": 128,
     "n_heads": 4,
 }
+# Fields that, when equal to hidden_size in the checkpoint, must stay equal to it.
+LINKED_TO_HIDDEN = ("projection_size", "word_embed_proj_dim", "embedding_size")
 # The longest layer prefix a fixture keeps to build every layer kind.
 MAX_PREFIX = 8
 EXPERTS = ("num_experts", "num_local_experts", "n_routed_experts", "moe_num_experts")
@@ -204,10 +206,14 @@ def shrink(config):
         # K2.5) set it to qk_rope_head_dim; keep them equal after shrinking.
         if cfg.to_dict().get("head_dim") and cfg.to_dict().get("head_dim") == cfg.to_dict().get("qk_rope_head_dim"):
             values["head_dim"] = values["qk_rope_head_dim"]
-        # SigLIP's text tower projects to projection_size == hidden_size, which
-        # must meet the vision tower's width; keep them equal after shrinking.
-        if cfg.to_dict().get("projection_size") and cfg.to_dict().get("projection_size") == cfg.to_dict().get("hidden_size"):
-            values["projection_size"] = values["hidden_size"]
+        # Widths that equal hidden_size by design: equal means "no projection"
+        # (OPT's project_in/out, ELECTRA's embeddings_project) or must meet another
+        # tower (SigLIP's projection_size). Shrinking only hidden_size would add layers
+        # the checkpoint does not have, so keep them equal.
+        original = cfg.to_dict()
+        for key in LINKED_TO_HIDDEN:
+            if original.get(key) and original.get(key) == original.get("hidden_size"):
+                values[key] = values["hidden_size"]
         # A top-k sparse attention (Mistral-Large-4's indexer, 2048) at least as long as
         # the contract's sequences selects every token. Contract prompts can be 5 tokens
         # (DeepSeek-V3.2: top-k 8 left every output unchanged), so keep 2.

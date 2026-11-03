@@ -400,7 +400,9 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
     checkpoint lacks, every processor file copied unchanged.
 
     `checkpoint` ({"keys", "binary"}) is the real checkpoint's serialization: the
-    fixture keeps its tensor names, base-model prefix and file format.
+    fixture keeps its tensor names, base-model prefix and expert layout. The file is
+    always model.safetensors, even for a pytorch_model.bin source: the names are what
+    the loader's conversions read, and a .bin container tests nothing more.
     """
     from safetensors.torch import load_file, save_file
 
@@ -424,11 +426,14 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
             and not any(k.startswith(prefix) for k in tensors)):
         # A base model loaded from a head checkpoint (Jina's roberta.*): the loader strips the prefix.
         tensors = {prefix + k: v for k, v in tensors.items()}
-    if checkpoint and checkpoint["binary"]:
-        weights.unlink()
-        torch.save(tensors, out / "pytorch_model.bin")
-    else:
-        save_file(tensors, weights, metadata={"format": "pt"})
+    tied = getattr(model, "all_tied_weights_keys", None) or {}
+    if checkpoint and checkpoint["keys"] and isinstance(tied, dict):
+        for alias, kept in tied.items():
+            # A tied pair is serialized once; keep the name the source uses
+            # (OPT's .bin stores lm_head.weight, save_pretrained keeps embed_tokens).
+            if kept in tensors and kept not in checkpoint["keys"] and alias in checkpoint["keys"] and alias not in tensors:
+                tensors[alias] = tensors.pop(kept)
+    save_file(tensors, weights, metadata={"format": "pt"})
     copied = copied_files(source, recipe)
     for name in copied:
         shutil.copyfile(source / name, out / name)  # overwrites the generation config save_pretrained wrote
@@ -736,6 +741,19 @@ def build_fixture(*args, **kwargs):
         return _build_fixture(*args, **kwargs)
 
 
+def source_weights_file(source, binary):
+    """The weights file (or index) the source checkpoint loads from."""
+    from transformers_mic.inspection import explicit_weights
+
+    explicit = explicit_weights(source)
+    if explicit:
+        return explicit
+    for name in ("model.safetensors.index.json", "pytorch_model.bin.index.json"):
+        if (Path(source) / name).exists():
+            return name
+    return "pytorch_model.bin" if binary else "model.safetensors"
+
+
 def saved_keys(folder):
     """Tensor names as the fixture serializes them (the file a loader reads)."""
     folder = Path(folder)
@@ -770,6 +788,7 @@ def review_fixture(name, fixture, revisions, out, artifact=None, inspect_checkpo
         lacks = (inspect_checkpoint(cls, source, source_repo, revision) if inspect_checkpoint
                  else missing_parameters(cls, run.checkpoint_path(source_repo, revision)))
         checkpoint = {"keys": set(source_keys), "binary": inspection.loads_binary(source_repo, revision, source)}
+        source_file = source_weights_file(source, checkpoint["binary"])
         dtype = getattr(torch, source_dtype(source))
         real = keeps_source(source, cls, shrunk_config(source, cls, recipe))
         if real:
@@ -787,6 +806,9 @@ def review_fixture(name, fixture, revisions, out, artifact=None, inspect_checkpo
     else:
         build = json.loads((Path(artifact) / "build.json").read_text())
         lacks = build.get("missing_parameters", [])
+        source_file = (build.get("serialization") or {}).get("source_file") or source_weights_file(
+            source, inspection.loads_binary(source_repo, revision, source)
+        )
         weights = build.get("weights")
     report_phase("Compare with the source checkpoint")
     from transformers_mic import shrink_view
@@ -805,6 +827,7 @@ def review_fixture(name, fixture, revisions, out, artifact=None, inspect_checkpo
         "model_class": cls.__name__,
         "weights": weights,
         "weights_file": weights_file,
+        "source_weights_file": source_file,
         "files": sorted(f.name for f in Path(out).iterdir() if f.is_file()),
         "config": json.loads((Path(out) / "config.json").read_text()),
         "source_keys": source_keys,
@@ -926,7 +949,8 @@ def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out,
         "parameters": sum(p.numel() for p in model.parameters()),
         "missing_parameters": lacks,
         "serialization": {
-            "file": "pytorch_model.bin" if checkpoint["binary"] else "model.safetensors",
+            "file": "model.safetensors",
+            "source_file": source_weights_file(source, checkpoint["binary"]),
             "reverted_conversions": [
                 f"{type(t).__name__}: {t.source_patterns} -> {t.target_patterns}"
                 for t in getattr(model, "_weight_conversions", None) or []

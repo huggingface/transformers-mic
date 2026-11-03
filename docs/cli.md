@@ -671,9 +671,11 @@ files. It prints the config values that differ from the source, the weight names
 with layer and expert numbers collapsed to `{n}`, sorted into names that match the
 source, names only in the source (heads the model class does not have, or a
 quantized source's scales: the tiny model is dense), and names only in the tiny
-model, plus the `tmic shrink` findings. The weight names and file format follow
-the source checkpoint and cannot be edited; a mismatch points at the checkpoint
-conversion, not the config.
+model, plus the `tmic shrink` findings. An `Experts:` line says how routed experts
+are serialized on each side: per-expert tensors (with the count) or fused stacks.
+The weight names and expert layout follow the source checkpoint and cannot be
+edited; a mismatch points at the checkpoint conversion, not the config. The file
+is always `model.safetensors`, even when the source ships `pytorch_model.bin`.
 
 Edit `fixture/config.json` and rerun to change the shrink: changed or added values
 become the recipe's `config_overrides` in `integration.json` (dotted paths for
