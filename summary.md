@@ -25,15 +25,15 @@ Proposed bar for rule B (constants `DECISION` in `experiments/impact.py`):
 
 ## 1. Real bugs caught on PRs
 
-- PR-only failures: **60** across 14 PRs.
+- PR-only failures: **63** across 15 PRs.
 - Fixed by a push, then passed: **6** — the strongest catch signal.
 - Merged red, then the same case failed on main: **0** — a change that landed (a bug, or an intended change needing a re-baseline).
 - Labelled `real-bug`: **0**; `intended`: 0.
 
 ## 2. False alarms
 
-- PR failure groups: 368 — infra 138 (38%), pre-existing 153 (42%), systemic (same case on ≥3 PRs that day) 11 (3%), PR-only 66 (18%).
-- PRs that saw a MIC failure: 86; of those, only failures they did not cause: **72 (84%)**.
+- PR failure groups: 389 — infra 138 (35%), pre-existing 171 (44%), systemic (same case on ≥3 PRs that day) 11 (3%), PR-only 69 (18%).
+- PRs that saw a MIC failure: 95; of those, only failures they did not cause: **80 (84%)**.
 - PR-only cases that recovered with no push (flaky/environment): 0; merged and main stayed green for 3 days: 0; labelled `false-alarm`/`flake`: 0.
 
 ## 3. Baseline review work
@@ -100,7 +100,7 @@ Real-checkpoint failures MIC stayed green on, waiting for a verdict. A miss is n
 | weights | PR-only | fixed by push | merged→main failed | labelled real-bug |
 |---|---|---|---|---|
 | overfit | 8 | 0 | 0 | 0 |
-| random | 47 | 6 | 0 | 0 |
+| random | 50 | 6 | 0 | 0 |
 | unknown | 5 | 0 | 0 | 0 |
 
 ## 6. Contracts to add next
@@ -109,18 +109,18 @@ Models with real-checkpoint regressions in the daily GPU CI and no contract, shr
 
 | model | real-ckpt regressions | other | checkpoint | shrinkable | draft |
 |---|---|---|---|---|---|
-| flint | 1 | 0 | [RecursiveSI/flint](https://huggingface.co/RecursiveSI/flint) | yes | queued |
-| minicpm_ocr | 1 | 0 | [openbmb/MiniCPM-OCR-1.0](https://huggingface.co/openbmb/MiniCPM-OCR-1.0) | yes | queued |
-| qwen3_5 | 1 | 0 | [Qwen/Qwen3.5-0.8B](https://huggingface.co/Qwen/Qwen3.5-0.8B) | yes | — |
-| vaultgemma | 1 | 0 | [google/vaultgemma-1b](https://huggingface.co/google/vaultgemma-1b) | yes | — |
-| beam | 0 | 2 | [reflection/Beam-1.0-501B-A23B](https://huggingface.co/reflection/Beam-1.0-501B-A23B) | yes | — |
-| colpali | 0 | 2 | [vidore/colpali-v1.3-hf](https://huggingface.co/vidore/colpali-v1.3-hf) | yes | — |
-| ernie | 0 | 2 | [nghuyong/ernie-3.0-base-zh](https://huggingface.co/nghuyong/ernie-3.0-base-zh) | yes | — |
-| kolibri1 | 0 | 2 | [Aleph-Alpha/Kolibri-1](https://huggingface.co/Aleph-Alpha/Kolibri-1) | yes | — |
-| poolformer | 0 | 2 | [sail/poolformer_s12](https://huggingface.co/sail/poolformer_s12) | yes | — |
-| axk1 | 0 | 1 | [skt/A.X-K1](https://huggingface.co/skt/A.X-K1) | yes | — |
-| bigbird_pegasus | 0 | 1 | [google/bigbird-pegasus-large-arxiv](https://huggingface.co/google/bigbird-pegasus-large-arxiv) | yes | — |
-| bridgetower | 0 | 1 | [regisss/bridgetower-newyorker-a100-8x](https://huggingface.co/regisss/bridgetower-newyorker-a100-8x) | yes | — |
+| flint | 1 | 0 | [RecursiveSI/flint](https://huggingface.co/RecursiveSI/flint) | yes | [success](https://github.com/huggingface/transformers-mic/actions/runs/41615947562) |
+| minicpm_ocr | 1 | 0 | [openbmb/MiniCPM-OCR-1.0](https://huggingface.co/openbmb/MiniCPM-OCR-1.0) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41615951103) |
+| qwen3_5 | 1 | 0 | [Qwen/Qwen3.5-0.8B](https://huggingface.co/Qwen/Qwen3.5-0.8B) | yes | queued |
+| vaultgemma | 1 | 0 | [google/vaultgemma-1b](https://huggingface.co/google/vaultgemma-1b) | yes | queued |
+| beam | 0 | 2 | [reflection/Beam-1.0-501B-A23B](https://huggingface.co/reflection/Beam-1.0-501B-A23B) | yes | queued |
+| colpali | 0 | 2 | [vidore/colpali-v1.3-hf](https://huggingface.co/vidore/colpali-v1.3-hf) | yes | queued |
+| ernie | 0 | 2 | [nghuyong/ernie-3.0-base-zh](https://huggingface.co/nghuyong/ernie-3.0-base-zh) | yes | queued |
+| kolibri1 | 0 | 2 | [Aleph-Alpha/Kolibri-1](https://huggingface.co/Aleph-Alpha/Kolibri-1) | yes | queued |
+| poolformer | 0 | 2 | [sail/poolformer_s12](https://huggingface.co/sail/poolformer_s12) | yes | queued |
+| axk1 | 0 | 1 | [skt/A.X-K1](https://huggingface.co/skt/A.X-K1) | yes | queued |
+| bigbird_pegasus | 0 | 1 | [google/bigbird-pegasus-large-arxiv](https://huggingface.co/google/bigbird-pegasus-large-arxiv) | yes | queued |
+| bridgetower | 0 | 1 | [regisss/bridgetower-newyorker-a100-8x](https://huggingface.co/regisss/bridgetower-newyorker-a100-8x) | yes | queued |
 | cosmos3_edge | 0 | 1 | [nvidia/Cosmos3-Edge](https://huggingface.co/nvidia/Cosmos3-Edge) | yes | — |
 | flex_olmo | 0 | 1 | [allenai/FlexOlmo-7x7B-1T](https://huggingface.co/allenai/FlexOlmo-7x7B-1T) | yes | — |
 | fsmt | 0 | 1 | [facebook/wmt19-en-ru](https://huggingface.co/facebook/wmt19-en-ru) | yes | — |

@@ -639,6 +639,66 @@
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=40317822697%3A1&var-pr=47773&var-gh_run_id=40317822697",
   "weights": "overfit"
  },
+ "49012#huggingface-mic/Janus-Pro-1B-mic|Janus-Pro-1B-mic|bfloat16|": {
+  "case": "huggingface-mic/Janus-Pro-1B-mic|Janus-Pro-1B-mic|bfloat16|",
+  "commits": [
+   "f044594d612024af759a43a5225147e4b5e01c6c"
+  ],
+  "failure": "wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py\", line 1794, in _call_impl\n    return forward_call(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/_",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1793700016.949514,
+  "first_seen": "2026-11-03",
+  "key": "49012#huggingface-mic/Janus-Pro-1B-mic|Janus-Pro-1B-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20760,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "49012",
+  "pr_state": "open",
+  "pr_title": "Granite for Docling",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=40514579952%3A2&var-pr=49012&var-gh_run_id=40514579952",
+  "weights": "random"
+ },
+ "49012#huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "f044594d612024af759a43a5225147e4b5e01c6c"
+  ],
+  "failure": "training.loss: non-finite values\ntraining.gradients: ['wav2vec2.feature_extractor.conv_layers.0.conv.weight', 'lm_head.weight'] false",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1793700016.949514,
+  "first_seen": "2026-11-03",
+  "key": "49012#huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20760,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "49012",
+  "pr_state": "open",
+  "pr_title": "Granite for Docling",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=40514579952%3A2&var-pr=49012&var-gh_run_id=40514579952",
+  "weights": "random"
+ },
+ "49012#huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|default|cpu-x86_64": {
+  "case": "huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|default|cpu-x86_64",
+  "commits": [
+   "f044594d612024af759a43a5225147e4b5e01c6c"
+  ],
+  "failure": "training.loss: non-finite values\ntraining.gradients: ['wav2vec2.feature_extractor.conv_layers.0.conv.weight', 'lm_head.weight'] false",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1793700016.949514,
+  "first_seen": "2026-11-03",
+  "key": "49012#huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|default|cpu-x86_64",
+  "kind": "fixture",
+  "last_seen": 20760,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "49012",
+  "pr_state": "open",
+  "pr_title": "Granite for Docling",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=40514579952%3A2&var-pr=49012&var-gh_run_id=40514579952",
+  "weights": "random"
+ },
  "49775#mic-mistral3|mic-mistral3-slim|bfloat16|": {
   "case": "mic-mistral3|mic-mistral3-slim|bfloat16|",
   "commits": [],

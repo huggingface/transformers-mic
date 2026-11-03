@@ -338,8 +338,8 @@
    "other": 2,
    "shrinkable": true,
    "tests": [
-    "tests/models/ernie/test_modeling_ernie.py::ErnieModelTest::test_flash_attn_2_inference_equivalence",
-    "tests/models/ernie/test_modeling_ernie.py::ErnieModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+    "tests/models/ernie/test_modeling_ernie.py::ErnieModelTest::test_flash_attn_2_inference_equivalence_right_padding",
+    "tests/models/ernie/test_modeling_ernie.py::ErnieModelTest::test_flash_attn_2_inference_equivalence"
    ]
   },
   {
@@ -736,8 +736,8 @@
    "other": 2,
    "shrinkable": false,
    "tests": [
-    "tests/models/wav2vec2_bert/test_modeling_wav2vec2_bert.py::Wav2Vec2BertModelTest::test_disk_offload_bin",
-    "tests/models/wav2vec2_bert/test_modeling_wav2vec2_bert.py::Wav2Vec2BertModelTest::test_disk_offload_safetensors"
+    "tests/models/wav2vec2_bert/test_modeling_wav2vec2_bert.py::Wav2Vec2BertModelTest::test_disk_offload_safetensors",
+    "tests/models/wav2vec2_bert/test_modeling_wav2vec2_bert.py::Wav2Vec2BertModelTest::test_disk_offload_bin"
    ]
   },
   {

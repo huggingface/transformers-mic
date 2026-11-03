@@ -1,14 +1,78 @@
 {
+ "axk1": {
+  "checkpoint": "skt/A.X-K1",
+  "conclusion": null,
+  "dispatched_at": "2026-11-03T11:19:55Z",
+  "status": "queued"
+ },
+ "beam": {
+  "checkpoint": "reflection/Beam-1.0-501B-A23B",
+  "conclusion": null,
+  "dispatched_at": "2026-11-03T11:19:55Z",
+  "status": "queued"
+ },
+ "bigbird_pegasus": {
+  "checkpoint": "google/bigbird-pegasus-large-arxiv",
+  "conclusion": null,
+  "dispatched_at": "2026-11-03T11:19:55Z",
+  "status": "queued"
+ },
+ "bridgetower": {
+  "checkpoint": "regisss/bridgetower-newyorker-a100-8x",
+  "conclusion": null,
+  "dispatched_at": "2026-11-03T11:19:55Z",
+  "status": "queued"
+ },
+ "colpali": {
+  "checkpoint": "vidore/colpali-v1.3-hf",
+  "conclusion": null,
+  "dispatched_at": "2026-11-03T11:19:55Z",
+  "status": "queued"
+ },
+ "ernie": {
+  "checkpoint": "nghuyong/ernie-3.0-base-zh",
+  "conclusion": null,
+  "dispatched_at": "2026-11-03T11:19:55Z",
+  "status": "queued"
+ },
  "flint": {
   "checkpoint": "RecursiveSI/flint",
-  "conclusion": null,
+  "conclusion": "success",
   "dispatched_at": "2026-11-03T10:02:45Z",
+  "run_id": 41615947562,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41615947562"
+ },
+ "kolibri1": {
+  "checkpoint": "Aleph-Alpha/Kolibri-1",
+  "conclusion": null,
+  "dispatched_at": "2026-11-03T11:19:55Z",
   "status": "queued"
  },
  "minicpm_ocr": {
   "checkpoint": "openbmb/MiniCPM-OCR-1.0",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-03T10:02:45Z",
+  "run_id": 41615951103,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41615951103"
+ },
+ "poolformer": {
+  "checkpoint": "sail/poolformer_s12",
+  "conclusion": null,
+  "dispatched_at": "2026-11-03T11:19:55Z",
+  "status": "queued"
+ },
+ "qwen3_5": {
+  "checkpoint": "Qwen/Qwen3.5-0.8B",
+  "conclusion": null,
+  "dispatched_at": "2026-11-03T11:19:55Z",
+  "status": "queued"
+ },
+ "vaultgemma": {
+  "checkpoint": "google/vaultgemma-1b",
+  "conclusion": null,
+  "dispatched_at": "2026-11-03T11:19:55Z",
   "status": "queued"
  }
 }
