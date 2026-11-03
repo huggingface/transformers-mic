@@ -35,6 +35,7 @@ import datetime as dt
 import http.client
 import json
 import os
+import re
 import sys
 import time
 import urllib.error
@@ -588,6 +589,8 @@ def collect(results, days, today_day, download):
         write(path, {"date": iso_day(day), "rows": sorted(merged.values(), key=lambda r: (str(r["pr"]), r["contract"]))})
     write(results / "candidates.json", candidates)
     write(results / "gpu-ci.json", gpu_ci)
+    sweep = json.loads(SWEEP.read_text())["rows"] if SWEEP.exists() else {}
+    write(results / "suggestions.json", build_suggestions(gpu_ci, sweep, {}))
 
     # Baseline review work: fleet updates since the window opened, each counted once.
     seen = {r["fleet_commit"] for r in read_jsonl(results / "baselines.jsonl")}
@@ -625,6 +628,193 @@ def merged_count(day):
 
 
 # ---------------------------------------------------------------- summary
+
+
+# ---------------------------------------------------------------- suggestions and drafts
+
+SWEEP = Path(__file__).parent / "results" / "sweep.json"
+TMIC_RUN = "tmic-run.yml"
+MIC_REPO = "huggingface/transformers-mic"
+DRAFTS_PER_DAY = 2
+# Test names that exercise hardware or optional backends a CPU fixture contract does not run.
+GPU_ONLY = ("flash_attn", "flash_attention", "fa2", "4bit", "8bit", "bnb", "bitsandbytes", "compile", "fp16", "cuda", "multi_gpu", "tensor_parallel")
+NOT_MODELS = {"auto", "shared", None}
+CHECKPOINT_RE = re.compile(r"""["']([A-Za-z0-9][\w.-]*/[\w.-]+)["']""")
+FILE_RE = re.compile(r"\.(json|png|jpe?g|wav|mp3|flac|txt|py|safetensors|bin|pt|gguf|mp4|npy|md)$")
+
+
+def get_text(url):
+    request = urllib.request.Request(url, headers={"User-Agent": "mic-impact"})
+    with urllib.request.urlopen(request, timeout=60) as response:
+        return response.read().decode()
+
+
+def test_checkpoints(nodeids, files):
+    """Hub checkpoints the failing test classes load (from_pretrained("org/name"), model_id = ...), most used first."""
+    found = Counter()
+    for nodeid in nodeids:
+        path, _, rest = nodeid.partition("::")
+        class_name = rest.split("::")[0]
+        if path not in files:
+            try:
+                files[path] = get_text(f"https://raw.githubusercontent.com/{TRANSFORMERS}/main/{path}")
+            except (urllib.error.URLError, http.client.IncompleteRead):
+                files[path] = ""
+        text = files[path]
+        start = text.find(f"class {class_name}")
+        if start < 0:
+            continue
+        end = text.find("\nclass ", start + 1)
+        for checkpoint in CHECKPOINT_RE.findall(text[start : end if end > 0 else None]):
+            if checkpoint.startswith(("hf-internal-testing/", "http")) or FILE_RE.search(checkpoint):
+                continue  # tiny test repos, URLs, file paths
+            found[checkpoint] += 1
+    return [c for c, _ in found.most_common()]
+
+
+def build_suggestions(gpu_ci, sweep, files):
+    """New contracts for models with real-checkpoint regressions and no contract; extensions for the rest."""
+    new = defaultdict(lambda: {"integration": 0, "other": 0, "tests": [], "keys": []})
+    extend = defaultdict(list)
+    for key, item in gpu_ci.items():
+        model = item.get("model")
+        if model in NOT_MODELS:
+            continue
+        if item.get("mic") == "not-covered":
+            entry = new[model]
+            entry["integration" if item.get("integration") else "other"] += 1
+            entry["tests"] += [t for t in item["tests"] if t not in entry["tests"]]
+            entry["keys"].append(key)
+        elif item.get("mic") in ("missed", "green-on-main"):
+            for test in item["tests"]:
+                gpu_only = any(word in test.lower() for word in GPU_ONLY)
+                extend[model].append({"test": test, "gpu_only": gpu_only, "integration": "IntegrationTest" in test, "date": item["date"]})
+    suggestions = []
+    for model, entry in new.items():
+        row = sweep.get(model) or {}
+        integration_tests = [t for t in entry["tests"] if "IntegrationTest" in t]
+        from_tests = test_checkpoints(integration_tests or entry["tests"], files)
+        sweep_repo = row.get("repo") if not str(row.get("repo", "")).startswith("hf-internal-testing/") else None
+        checkpoint = (from_tests or [None])[0] or sweep_repo
+        suggestions.append(
+            {
+                "model": model,
+                "integration": entry["integration"],
+                "other": entry["other"],
+                "checkpoint": checkpoint,
+                "checkpoint_source": "failing test" if from_tests else ("shrink sweep" if sweep_repo else None),
+                "shrinkable": row.get("stage") == "ok" and bool(row.get("finite")),
+                "tests": entry["tests"][:5],
+            }
+        )
+    suggestions.sort(key=lambda s: (-s["shrinkable"], -s["integration"], -s["other"], s["model"]))
+    # A test that failed on SYSTEMIC_PRS or more models is one shared regression (torch.export, a
+    # cache class), not a call for each contract: listed once.
+    method_models = defaultdict(set)
+    for model, tests in extend.items():
+        for t in tests:
+            method_models[test_method(t["test"])].add(model)
+    shared = {m: sorted(models) for m, models in method_models.items() if len(models) >= SYSTEMIC_PRS}
+    extensions = {}
+    for model, tests in sorted(extend.items()):
+        own = [t for t in tests if test_method(t["test"]) not in shared]
+        if own:
+            extensions[model] = sorted(own, key=lambda t: (t["gpu_only"], not t["integration"], t["test"]))
+    return {"new": suggestions, "extend": extensions, "shared": shared}
+
+
+def test_method(nodeid):
+    """test_torch_export_generate_static from tests/...::Class::test_torch_export_generate_static[...]"""
+    return nodeid.split("::")[-1].split("[")[0]
+
+
+def github_post(path, body):
+    token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    request = urllib.request.Request(
+        f"{GITHUB}{path}",
+        data=json.dumps(body).encode(),
+        method="POST",
+        headers={"User-Agent": "mic-impact", "Accept": "application/vnd.github+json", "Authorization": f"Bearer {token}"},
+    )
+    with urllib.request.urlopen(request, timeout=60) as response:
+        return response.status
+
+
+def refresh_drafts(drafts):
+    """Attach each dispatched draft's tmic-run.yml run (matched by its run name) and its state."""
+    if not any(d.get("conclusion") is None for d in drafts.values()):
+        return
+    runs = github(f"/repos/{MIC_REPO}/actions/workflows/{TMIC_RUN}/runs?per_page=100")["workflow_runs"]
+    for draft in drafts.values():
+        if draft.get("conclusion") is not None:
+            continue
+        for run in runs:
+            if run.get("display_title") == f"tmic run {draft['checkpoint']}" and run["created_at"] >= draft["dispatched_at"][:19]:
+                draft.update(run_id=run["id"], url=run["html_url"], status=run["status"], conclusion=run.get("conclusion"))
+                break
+
+
+def dispatch_drafts(suggestions, drafts, limit, now):
+    """Dispatch tmic-run.yml (local-only: nothing is published) for the top suggestions not drafted yet."""
+    sent = 0
+    for s in suggestions["new"]:
+        if sent >= limit:
+            break
+        if s["model"] in drafts or not s["checkpoint"] or not s["shrinkable"]:
+            continue
+        github_post(f"/repos/{MIC_REPO}/actions/workflows/{TMIC_RUN}/dispatches", {"ref": "main", "inputs": {"model": s["checkpoint"]}})
+        drafts[s["model"]] = {"checkpoint": s["checkpoint"], "dispatched_at": now, "status": "queued", "conclusion": None}
+        sent += 1
+    return sent
+
+
+def draft_lines(suggestions, drafts):
+    lines = [
+        "## 6. Contracts to add next",
+        "",
+        "Models with real-checkpoint regressions in the daily GPU CI and no contract, shrinkable models first. "
+        f"Each day the top {DRAFTS_PER_DAY} without a draft are drafted by `{TMIC_RUN}` (`tmic run --local-only`: "
+        "contract, fixture and baselines built on a runner, nothing published). Publishing stays a review: read the "
+        "workspace's `usage.md` and manifest, then `tmic run <checkpoint> --out <workspace>`.",
+        "",
+    ]
+    if not suggestions["new"]:
+        return lines + ["- None yet.", ""]
+    lines += ["| model | real-ckpt regressions | other | checkpoint | shrinkable | draft |", "|---|---|---|---|---|---|"]
+    for s in suggestions["new"][:25]:
+        draft = drafts.get(s["model"])
+        if draft:
+            state = draft.get("conclusion") or draft.get("status") or "queued"
+            draft_cell = f"[{state}]({draft['url']})" if draft.get("url") else state
+        else:
+            draft_cell = "—" if s["shrinkable"] and s["checkpoint"] else "not draftable"
+        checkpoint = f"[{s['checkpoint']}]({HUB}/{s['checkpoint']})" if s["checkpoint"] else "?"
+        lines.append(f"| {s['model']} | {s['integration']} | {s['other']} | {checkpoint} | {'yes' if s['shrinkable'] else 'no'} | {draft_cell} |")
+    lines += [
+        "",
+        "### Calls to add to existing contracts",
+        "",
+        "GPU CI regressions on models whose contract stayed green; **bold** models have a real-checkpoint "
+        "(`*IntegrationTest`) one. GPU-only tests (flash-attention, quantization, compile, fp16) are listed apart: "
+        "a CPU fixture contract does not run them.",
+        "",
+    ]
+    for method, models in sorted(suggestions.get("shared", {}).items(), key=lambda kv: -len(kv[1])):
+        lines.append(
+            f"- shared: `{method}` failed on {len(models)} models ({', '.join(models[:6])}{', …' if len(models) > 6 else ''}) — "
+            "one regression in shared code; one call in one contract covers it"
+        )
+    for model, tests in suggestions["extend"].items():
+        callable_tests = [t for t in tests if not t["gpu_only"]]
+        gpu_tests = [t for t in tests if t["gpu_only"]]
+        if callable_tests:
+            names = ", ".join(sorted({f"`{t['test'].split('::', 1)[-1]}`" for t in callable_tests})[:4])
+            label = f"**{model}**" if any(t["integration"] for t in callable_tests) else model
+            lines.append(f"- {label}: {names} — `tmic update '<the call these tests make>'`")
+        if gpu_tests:
+            names = ", ".join(f"`{t['test'].split('::')[-1]}`" for t in gpu_tests[:3])
+            lines.append(f"- {model} (GPU-only): {names}")
+    return lines + [""]
 
 
 def summarize(results):
@@ -789,7 +979,8 @@ def summarize(results):
         lines.append(
             f"| {weights} | {sum(v for k, v in c.items() if not k.startswith('label:'))} | {c['fixed-by-push']} | {c['merged-then-main-failed']} | {c['label:real-bug']} |"
         )
-    lines += ["", f"## Waiting for a verdict ({len(pending)})", ""]
+    lines += [""] + draft_lines(load(results / "suggestions.json", {"new": [], "extend": {}}), load(results / "drafts.json", {}))
+    lines += [f"## Waiting for a verdict ({len(pending)})", ""]
     if pending:
         lines.append("Add a line to `labels.jsonl`: `{\"key\": \"<key>\", \"verdict\": \"real-bug|intended|false-alarm|flake\", \"note\": \"...\", \"by\": \"<login>\"}`.")
         lines.append("")
@@ -928,6 +1119,7 @@ def main():
     parser.add_argument("--days", type=int, default=1, choices=(1, 7, 14, 30), help="window ending today; 30 to seed")
     parser.add_argument("--summary-only", action="store_true")
     parser.add_argument("--publish-space", metavar="REPO", help="also upload the summary page to this Hugging Face Space")
+    parser.add_argument("--draft", type=int, default=0, metavar="N", help=f"dispatch {TMIC_RUN} for the top N suggested contracts not drafted yet")
     args = parser.parse_args()
     args.results.mkdir(parents=True, exist_ok=True)
     if not args.summary_only:
@@ -935,6 +1127,12 @@ def main():
 
         today_day = int(time.time() // 86400)
         collect(args.results, args.days, today_day, fleet.download)
+        drafts = load(args.results / "drafts.json", {})
+        refresh_drafts(drafts)
+        if args.draft:
+            now = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            dispatch_drafts(load(args.results / "suggestions.json", {"new": []}), drafts, args.draft, now)
+        write(args.results / "drafts.json", drafts)
     summarize(args.results)
     print((args.results / "summary.md").read_text())
     if args.publish_space:

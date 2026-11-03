@@ -214,3 +214,85 @@ def test_sticky_onsets_need_a_passing_day_before():
     assert impact.mic_on_main_near(item, main, DAY, {"m/llama-mic": "llama"}, {"llama"}) == "red-on-main"
     assert impact.mic_on_main_near(item, [], DAY, {}, {"llama"}) == "green-on-main"
     assert impact.mic_on_main_near({**item, "model": "bert"}, main, DAY, {}, {"llama"}) == "not-covered"
+
+
+TEST_FILE = '''
+class EomtModelTest(unittest.TestCase):
+    def test_tiny(self):
+        AutoModel.from_pretrained("hf-internal-testing/tiny-eomt")
+
+class EomtIntegrationTest(unittest.TestCase):
+    model_id = "tue-mps/eomt-large"
+    def test_a(self):
+        Model.from_pretrained("tue-mps/eomt-large")
+        load_image("org/images/cat.png")
+        Model.from_pretrained("tue-mps/eomt-small")
+'''
+
+
+def test_checkpoints_come_from_the_failing_class():
+    files = {"tests/models/eomt/test_modeling_eomt.py": TEST_FILE}
+    found = impact.test_checkpoints(["tests/models/eomt/test_modeling_eomt.py::EomtIntegrationTest::test_a"], files)
+    assert found == ["tue-mps/eomt-large", "tue-mps/eomt-small"]
+
+
+def test_suggestions_rank_shrinkable_and_real_checkpoint_models_first():
+    files = {"tests/models/eomt/test_modeling_eomt.py": TEST_FILE}
+    gpu_ci = {
+        "1#eomt": {"model": "eomt", "mic": "not-covered", "integration": True, "date": "d",
+                   "tests": ["tests/models/eomt/test_modeling_eomt.py::EomtIntegrationTest::test_a"]},
+        "2#nope": {"model": "nope", "mic": "not-covered", "integration": True, "date": "d",
+                   "tests": ["tests/models/nope/test_modeling_nope.py::NopeIntegrationTest::test_b"]},
+        "3#auto": {"model": "auto", "mic": "not-covered", "integration": False, "date": "d", "tests": ["t"]},
+        "sticky#llama#d": {"model": "llama", "mic": "green-on-main", "integration": True, "date": "d",
+                           "tests": ["tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_flash_attn_x",
+                                     "tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_export"]},
+    }
+    files["tests/models/nope/test_modeling_nope.py"] = ""
+    sweep = {"eomt": {"stage": "ok", "finite": True, "repo": "sweep/eomt"}, "nope": {"stage": "error", "repo": "sweep/nope"}}
+    s = impact.build_suggestions(gpu_ci, sweep, files)
+    assert [x["model"] for x in s["new"]] == ["eomt", "nope"]  # shrinkable first; auto is not a model
+    assert s["new"][0]["checkpoint"] == "tue-mps/eomt-large" and s["new"][0]["checkpoint_source"] == "failing test"
+    assert s["new"][1]["checkpoint"] == "sweep/nope" and s["new"][1]["shrinkable"] is False
+    assert [t["gpu_only"] for t in s["extend"]["llama"]] == [False, True]
+
+
+def test_drafts_are_capped_skip_drafted_and_unshrinkable(monkeypatch):
+    sent = []
+    monkeypatch.setattr(impact, "github_post", lambda path, body: sent.append(body["inputs"]["model"]) or 204)
+    suggestions = {"new": [
+        {"model": "a", "checkpoint": "o/a", "shrinkable": True},
+        {"model": "b", "checkpoint": "o/b", "shrinkable": False},
+        {"model": "c", "checkpoint": "o/c", "shrinkable": True},
+        {"model": "d", "checkpoint": "o/d", "shrinkable": True},
+        {"model": "e", "checkpoint": "o/e", "shrinkable": True},
+    ]}
+    drafts = {"c": {"checkpoint": "o/c", "conclusion": "success"}}
+    assert impact.dispatch_drafts(suggestions, drafts, 2, "2026-11-03T10:00:00Z") == 2
+    assert sent == ["o/a", "o/d"]
+
+
+def test_drafts_find_their_run_by_name(monkeypatch):
+    runs = {"workflow_runs": [
+        {"id": 9, "display_title": "tmic run o/a", "created_at": "2026-11-03T10:00:05Z", "status": "completed", "conclusion": "failure", "html_url": "u9"},
+        {"id": 8, "display_title": "tmic run o/a", "created_at": "2026-11-01T10:00:05Z", "status": "completed", "conclusion": "success", "html_url": "u8"},
+    ]}
+    monkeypatch.setattr(impact, "github", lambda path: runs)
+    drafts = {"a": {"checkpoint": "o/a", "dispatched_at": "2026-11-03T10:00:00Z", "conclusion": None}}
+    impact.refresh_drafts(drafts)
+    assert drafts["a"]["run_id"] == 9 and drafts["a"]["conclusion"] == "failure"
+    lines = "\n".join(impact.draft_lines({"new": [{"model": "a", "integration": 1, "other": 0, "checkpoint": "o/a", "shrinkable": True}], "extend": {}}, drafts))
+    assert "[failure](u9)" in lines
+
+
+def test_a_test_failing_on_many_models_is_one_shared_suggestion():
+    gpu_ci = {
+        f"sticky#{m}#d": {"model": m, "mic": "green-on-main", "integration": False, "date": "d",
+                          "tests": [f"tests/models/{m}/test_modeling_{m}.py::{m}ModelTest::test_torch_export_generate_static"]}
+        for m in ("bart", "t5", "marian")
+    }
+    gpu_ci["sticky#gemma2#d"] = {"model": "gemma2", "mic": "green-on-main", "integration": True, "date": "d",
+                                 "tests": ["tests/models/gemma2/test_modeling_gemma2.py::Gemma2IntegrationTest::test_export_static_cache"]}
+    s = impact.build_suggestions(gpu_ci, {}, {})
+    assert s["shared"] == {"test_torch_export_generate_static": ["bart", "marian", "t5"]}
+    assert list(s["extend"]) == ["gemma2"]
