@@ -500,6 +500,10 @@ def test_worker_records_verifies_and_accounts_for_the_whole_matrix(
     monkeypatch.setattr(
         baseline_worker, "runtime", lambda profile: {"profile": profile}
     )
+    # The host check reads this machine's /proc/cpuinfo, and GitHub's hosted x86
+    # runners lack native bf16; its own test covers it:
+    # test_cpu_host_without_native_bfloat16_is_refused_before_measuring.
+    monkeypatch.setattr(baseline_worker, "missing_native_support", lambda dtypes: None)
     monkeypatch.setattr(
         baseline_worker.subprocess,
         "check_output",
