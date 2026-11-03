@@ -161,7 +161,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.mic_sha }}
           persist-credentials: false
@@ -180,7 +180,7 @@ jobs:
             --job-id "$JOB_ID" --fleet-revision "$FLEET_REVISION" \
             --transformers-sha "$TRANSFORMERS_SHA" --mic-sha "$MIC_SHA" \
             --fleets "$FLEETS" --exclude "$EXCLUDE" --profile "$PROFILE" --out "$GITHUB_WORKSPACE/out" "${options[@]}"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: mic-baselines-${{ matrix.profile }}
@@ -216,7 +216,7 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.mic_sha }}
           persist-credentials: false
@@ -229,14 +229,14 @@ jobs:
         run: |
           test "$HAS_WRITE_TOKEN" = true || { echo "Configure MIC_BASELINE_WRITE_TOKEN in the mic-publish environment"; exit 1; }
           git merge-base --is-ancestor "$MIC_SHA" origin/main || { echo "$MIC_SHA is not on main; refusing to publish"; exit 1; }
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.11"
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: mic-baselines-cpu
           path: publication/artifacts/cpu
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: mic-baselines-cuda
           path: publication/artifacts/cuda
@@ -260,7 +260,7 @@ jobs:
           UPLOAD_NAMESPACES: ${{ vars.MIC_BASELINE_UPLOAD_NAMESPACES || 'huggingface-mic' }}
           MIC_PROGRESS_URL: ${{ vars.MIC_PROGRESS_URL || 'https://serge.huggingface.tech/dashboard/mic-progress' }}
         run: python .github/scripts/publish_baseline_collection.py publication
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: mic-baselines-publication
           path: publication/publication.json
