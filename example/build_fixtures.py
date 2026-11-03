@@ -460,11 +460,14 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
 
 
 @contextlib.contextmanager
-def captured_calls():
-    """Record the keyword arguments of every top-level model call made inside."""
-    calls, depth = [], [0]
-    call = torch.nn.Module.__call__
+def captured_calls(model_class=PreTrainedModel, method="__call__"):
+    """Capture calls to the selected model class method."""
+    from functools import wraps
 
+    calls, depth = [], [0]
+    call = getattr(model_class, method)
+
+    @wraps(call)
     def recording(self, *args, **kwargs):
         if depth[0] == 0:
             named = dict(kwargs)
@@ -481,7 +484,7 @@ def captured_calls():
                 {
                     "training": self.training,
                     "class": type(self).__name__,
-                    "kwargs": {k: v.detach().clone() if isinstance(v, torch.Tensor) else v for k, v in named.items()},
+                    "kwargs": tensor_tree(named, lambda value: value.detach().clone()),
                 }
             )
         depth[0] += 1
@@ -490,22 +493,22 @@ def captured_calls():
         finally:
             depth[0] -= 1
 
-    with patch.object(PreTrainedModel, "__call__", recording):
+    with patch.object(model_class, method, recording):
         yield calls
 
 
-def contract_batch(entry, fixture_dir):
+def contract_batch(entry, fixture_dir, *, model_class=PreTrainedModel, method="__call__"):
     """Run the contract on the fixture; return the training step's model inputs by name."""
     code = run.contract_code(entry)
     env = {"MIC_RUNNER": "1", "MIC_MODEL": str(fixture_dir), "MIC_MODEL_REVISION": "", "MIC_MODEL_KWARGS": "{}"}
-    with captured_calls() as calls, run.chdir(entry.parent):
+    with captured_calls(model_class, method) as calls, run.chdir(entry.parent):
         ok, _, stderr = run.execute_inline(code, str(entry), env)
     if not ok:
         raise SystemExit(f"the contract fails on the random fixture:\n{stderr[-1500:]}")
     training = [c for c in calls if c["training"]]
     chosen = training[0] if training else calls[0]
     # Fixtures are built on the CPU; the contract may have put its inputs on a GPU.
-    batch = {k: tensor_tree(v, lambda tensor: tensor.detach().cpu()) for k, v in chosen["kwargs"].items()
+    batch = {k: tensor_tree(v, lambda tensor: tensor.detach().cpu().clone()) for k, v in chosen["kwargs"].items()
              if isinstance(v, (torch.Tensor, bool, list, tuple, dict))}
     return batch, {"call": "training step" if training else "first inference call", "inputs": sorted(batch), "class": chosen["class"]}
 
@@ -862,6 +865,13 @@ def review_fixture(name, fixture, revisions, out, artifact=None, inspect_checkpo
 
 
 def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out, keep_random=False, inspect_checkpoint=None, contract_repo=None, reshrink=False):
+    if fixture["build"].get("sentence_transformers_class"):
+        from transformers_mic import sentence_transformers
+
+        return sentence_transformers.build(
+            sys.modules[__name__], name, fixture, contract_name, manifest, root, revisions, out,
+            keep_random=keep_random,
+        )
     recorded = None if reshrink else recorded_config(out, fixture)
     previous_tester = None  # save() clears `out`, so read the old record now
     if recorded is not None and (Path(out) / "build.json").exists():

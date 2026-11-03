@@ -145,6 +145,8 @@ def run(args):
                 "--bill-to",
                 args.bill_to,
             ]
+            if item.get("sentence_transformers_class"):
+                command += ["--sentence-transformers", item["sentence_transformers_class"]]
             if spec.get("scope") == "fixtures":
                 command.append("--fixtures-only")
             if args.no_history:

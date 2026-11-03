@@ -624,6 +624,25 @@ the contract's inputs move the outputs (the sensitivity gate).
    written into Transformers. Expectations stay beside usage in the pinned model.
    Review and commit the pin change in your framework PR.
 
+### Sentence Transformers
+
+Install the optional ST dependency with `pip install -e '.[runtime,sentence-transformers]'`.
+Add `--sentence-transformers` to `create` or `run` to use ST's public inference APIs:
+
+```sh
+tmic run sentence-transformers/all-MiniLM-L6-v2 \
+  --sentence-transformers --namespace my-namespace \
+  --local-only --fixtures-only --no-history
+```
+
+The flag accepts `SentenceTransformer`, `CrossEncoder`, `SparseEncoder`, or
+`MultiVectorEncoder`. Without a value, the CLI infers the class from saved model
+metadata. These contracts generate encoding and scoring examples without a
+planner call. Fixture creation requires the Transformers config at the repository
+root.
+
+For batch creation, set `sentence_transformers_class` on each model entry.
+
 ## Several models at once
 
 List the models in a JSON file shaped like `experiments/proto-models.json`, with

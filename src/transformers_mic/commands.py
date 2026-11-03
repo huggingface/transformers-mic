@@ -818,6 +818,10 @@ def model_context(model, revision=None):
 
 
 def create(args):
+    if args.sentence_transformers:
+        from . import sentence_transformers
+
+        return sentence_transformers.create(args)
     workspace = Workspace(args.out)
     workspace.ensure_new()
     catalog = read(resources.catalog_lock())
@@ -1009,6 +1013,10 @@ def create(args):
             }
         )
     )
+    return finish_create(args, workspace)
+
+
+def finish_create(args, workspace):
     if args.build or args.record:
         args.workspace = str(workspace.root)
         args.rebuild = False

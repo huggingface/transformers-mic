@@ -181,6 +181,7 @@ if __name__ == "__main__":
     try:
         raise SystemExit(dispatch(sys.argv[1], Path(sys.argv[2]), sys.argv[3:]))
     except ModuleNotFoundError as exc:
+        extra = "runtime,sentence-transformers" if (exc.name or "").startswith("sentence_transformers") else "runtime"
         raise SystemExit(
-            f"Missing runtime dependency: {exc}. Install transformers-mic[runtime] and doc-builder from its Git repository."
+            f"Missing runtime dependency: {exc}. Install transformers-mic[{extra}] and doc-builder from its Git repository."
         ) from None

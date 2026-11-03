@@ -249,6 +249,7 @@ No Git commit or framework PR is created automatically.""",
         help="Workspace override (otherwise resume a matching workspace under work/ or create work/mic/ORG--MODEL)",
     )
     run.add_argument("--namespace", default="huggingface-mic")
+    run.add_argument("--sentence-transformers", nargs="?", const="auto", choices=("auto", "SentenceTransformer", "CrossEncoder", "SparseEncoder", "MultiVectorEncoder"), help="Create an ST inference contract with a complete ST fixture")
     run.add_argument("--fleet", choices=tuple(fleet.FILES), default="prototypes")
     run.add_argument("--contract-name")
     run.add_argument("--transformers-checkout")
@@ -296,6 +297,7 @@ No Git commit or framework PR is created automatically.""",
     create.add_argument("model")
     create.add_argument("--out", required=True)
     create.add_argument("--contract", help="Choose a catalog usage path")
+    create.add_argument("--sentence-transformers", nargs="?", const="auto", choices=("auto", "SentenceTransformer", "CrossEncoder", "SparseEncoder", "MultiVectorEncoder"), help="Create an ST inference contract with a complete ST fixture")
     create.add_argument(
         "--namespace",
         default="huggingface-mic",

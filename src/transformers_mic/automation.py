@@ -570,6 +570,8 @@ def run_locked(args, root, answer):
                 "--bill-to",
                 args.bill_to,
             ]
+            if args.sentence_transformers:
+                options += ["--sentence-transformers", args.sentence_transformers]
             for name in ("revision", "name", "contract"):
                 if value := getattr(args, name):
                     options += ["--" + name, value]
@@ -996,7 +998,10 @@ def run_locked(args, root, answer):
 
 
 def resume_options(args):
-    options = [
+    options = []
+    if args.sentence_transformers:
+        options += ["--sentence-transformers", args.sentence_transformers]
+    options += [
         "--max-contract-repairs",
         str(args.max_contract_repairs),
         "--baseline-transport",

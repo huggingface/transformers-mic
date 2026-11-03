@@ -89,6 +89,9 @@
        "model_class": {
         "type": "string"
        },
+       "sentence_transformers_class": {
+        "enum": ["SentenceTransformer", "CrossEncoder", "SparseEncoder", "MultiVectorEncoder"]
+       },
        "copy_assets": {
         "type": "array",
         "uniqueItems": true,
