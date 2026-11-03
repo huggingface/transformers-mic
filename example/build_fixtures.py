@@ -1,4 +1,4 @@
-"""Build slim fixtures for the contracts in a fleet lock, with the same recipe for every model.
+"""Build fixtures for the contracts in a fleet lock, with the same recipe for every model.
 
     python example/build_fixtures.py                                   # every fixture with a build recipe
     python example/build_fixtures.py --fixture mic-whisper-tiny-slim
@@ -18,7 +18,7 @@ For each fixture in a contract's manifest that has a `build` recipe:
    so the fixture loads in the dtype users of the checkpoint get by default.
    A source of SMALL_SOURCE parameters or fewer is not shrunk: the fixture is
    the checkpoint itself, config and trained weights unchanged (`weights:
-   real`), since it costs no more than a slim fixture and tests trained behaviour.
+   real`), since it costs no more than a fixture and tests trained behaviour.
 3. Copy. Every non-weight file of the source checkpoint (tokenizer,
    processor, generation config) is copied unchanged. A recipe can explicitly
    include a processor asset with a weight-like extension and preserve selected
@@ -95,7 +95,7 @@ NOT_COPIED = {"config.json", "README.md", ".gitattributes"}
 # Config fields that name or date the source rather than describe the model.
 VOLATILE = {"_name_or_path", "transformers_version", "dtype", "torch_dtype", "_commit_hash"}
 GATE_FACTOR = 10
-# Sources at or under this size are kept whole with their trained weights (the median slim fixture is ~9M).
+# Sources at or under this size are kept whole with their trained weights (the median fixture is ~9M).
 SMALL_SOURCE = 20_000_000
 DTYPES = ("float32", "bfloat16", "float16")
 
@@ -106,9 +106,17 @@ def config_insensitive(config, batch):
     A config without token types (DeBERTa-v3: type_vocab_size 0) has no embedding
     for them, so a tokenizer's token_type_ids cannot move the logits.
     """
+    inert = {}
     if "token_type_ids" in batch and getattr(config.get_text_config(), "type_vocab_size", None) == 0:
-        return {"token_type_ids:all_ones": "type_vocab_size is 0: the model has no token type embedding"}
-    return {}
+        inert["token_type_ids:all_ones"] = "type_vocab_size is 0: the model has no token type embedding"
+    vision = getattr(config, "vision_config", None) or config
+    if "pixel_values" in batch and getattr(vision, "model_type", None) == "pixtral":
+        # Mistral-Large-4: delta 0.0 random and trained. Same shape as Wav2Vec2's input_values:halve.
+        inert["pixel_values:halve"] = (
+            "Pixtral's bias-free patch convolution feeds an RMSNorm (ln_pre), so scaling the pixel "
+            "values cannot move the output"
+        )
+    return inert
 
 def report_phase(phase, detail=""):
     print("MIC_PROGRESS " + json.dumps({"phase": phase, "detail": detail}), flush=True)
@@ -188,13 +196,26 @@ def keeps_source(source, cls, config):
     return parameter_count(cls, full) <= SMALL_SOURCE and parameter_count(cls, config) == parameter_count(cls, full)
 
 
+# Widths taken from the model's tester, by source; and the sources whose build failed
+# with them (a meta-device build does not run a forward: RT-DETR's tester
+# encoder_hidden_dim built, then broke a convolution expecting 256 channels).
+TESTER_SIZES, TESTER_OFF = {}, {}
+
+
 def shrunk_config(source, cls, recipe=None):
     recorded = (recipe or {}).get("recorded_config")
     if recorded is not None:  # a rebuild reproduces the published config, not today's rule
         return cls.config_class.from_dict(recorded)
     config = cls.config_class.from_pretrained(source)
     if parameter_count(cls, config) > SMALL_SOURCE:
+        original = config.to_dict()
         config = shrink(config)
+        if str(source) not in TESTER_OFF:
+            config = adopt_tester_sizes(cls, original, config)
+            # Provenance goes to build.json, never into the fixture's config.json.
+            sizes = config.__dict__.pop("_mic_tester_sizes", None)
+            if sizes:
+                TESTER_SIZES[str(source)] = sizes
     overrides = (recipe or {}).get("config_overrides", {}).get("fields", {})
     if not overrides:
         return config
@@ -210,6 +231,38 @@ def shrunk_config(source, cls, recipe=None):
             raise SystemExit(f"config_overrides: the shrunk config has no field {dotted}")
         target[field] = value
     return type(config).from_dict(values)
+
+
+def adopt_tester_sizes(cls, original, config):
+    """Shrink the widths the generic rule does not know by name, as the model's tester does.
+
+    The tester in tests/models/<model>/test_modeling_<model>.py names the size fields
+    that matter for its model (DeepSeek-V4-Flash's index_head_dim, o_lora_rank;
+    Qwen3-Next's linear_key_head_dim). Only fields the rule left at the checkpoint's value
+    are taken, layer kinds stay with the rule, and the result must still build, else the
+    rule's config is kept. Reviewed config_overrides apply afterwards and win.
+    """
+    from transformers_mic import tester
+
+    url, found = tester.tester_values(original.get("model_type"))
+    adopted = tester.unshrunk_sizes(found, original, config.to_dict()) if found else {}
+    if not adopted:
+        return config
+    values = config.to_dict()
+    for path, value in adopted.items():
+        node = values
+        for part in path[:-1]:
+            node = node[part]
+        node[path[-1]] = value
+    try:
+        candidate = type(config).from_dict(values)
+        with torch.device("meta"):
+            cls._from_config(candidate)
+    except Exception as error:
+        print(f"tmic: model-tester sizes {sorted('.'.join(p) for p in adopted)} do not build ({type(error).__name__}); keeping the rule's", flush=True)
+        return config
+    candidate._mic_tester_sizes = {"source": url, "fields": {".".join(p): v for p, v in adopted.items()}}
+    return candidate
 
 
 def missing_parameters(cls, path):
@@ -297,15 +350,20 @@ def restore_frozen(model, source, repo, revision, recipe):
     for prefix in prefixes:
         if not any(name.startswith(prefix) for name in selected):
             raise ValueError(f"No frozen parameters or persistent buffers match {prefix!r}")
-    index = source / "model.safetensors.index.json"
-    weight_map = json.loads(index.read_text())["weight_map"] if index.exists() else {}
-    files = {weight_map.get(name, "model.safetensors") for name in selected}
+    from transformers_mic.inspection import explicit_weights
+
+    explicit = explicit_weights(source)
+    sharded = explicit is None or explicit.endswith(".index.json")
+    single = "model.safetensors" if sharded else explicit
+    index = source / (explicit if explicit and sharded else "model.safetensors.index.json")
+    weight_map = json.loads(index.read_text())["weight_map"] if sharded and index.exists() else {}
+    files = {weight_map.get(name, single) for name in selected}
     hashes = {}
     for filename in sorted(files):
         path = hf_hub_download(repo, filename, revision=revision)
         with safe_open(path, framework="pt", device="cpu") as checkpoint, torch.no_grad():
             for name, parameter in selected.items():
-                if weight_map.get(name, "model.safetensors") != filename:
+                if weight_map.get(name, single) != filename:
                     continue
                 if name not in checkpoint.keys():
                     raise ValueError(f"Pinned checkpoint lacks fixed tensor {name}")
@@ -663,8 +721,26 @@ def environment():
     }
 
 
-def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, keep_random=False, inspect_checkpoint=None, contract_repo=None, reshrink=False):
+def build_fixture(*args, **kwargs):
+    """Build; if it fails with model-tester sizes, rebuild once with the shrink rule's."""
+    try:
+        return _build_fixture(*args, **kwargs)
+    except (SystemExit, Exception) as error:
+        adopted = [source for source in TESTER_SIZES if source not in TESTER_OFF]
+        if not adopted:
+            raise
+        reason = (str(error).strip().splitlines() or [type(error).__name__])[-1][:300]
+        print(f"tmic: the build failed with model-tester sizes ({reason}); rebuilding with the shrink rule's", flush=True)
+        for source in adopted:
+            TESTER_OFF[source] = {"fields": TESTER_SIZES.pop(source)["fields"], "build_failed": reason}
+        return _build_fixture(*args, **kwargs)
+
+
+def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out, keep_random=False, inspect_checkpoint=None, contract_repo=None, reshrink=False):
     recorded = None if reshrink else recorded_config(out, fixture)
+    previous_tester = None  # save() clears `out`, so read the old record now
+    if recorded is not None and (Path(out) / "build.json").exists():
+        previous_tester = json.loads((Path(out) / "build.json").read_text()).get("tester_sizes")
     recipe = {**fixture["build"], "recorded_config": recorded} if recorded is not None else fixture["build"]
     keys, missing = {}, {}
     for repo in fixture["covers"]:
@@ -703,7 +779,7 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
         model = cls.from_pretrained(run.checkpoint_path(source_repo, revisions[source_repo]), dtype=dtype).eval()
         frozen_hashes = None
     else:
-        report_phase("Initialize slim fixture")
+        report_phase("Initialize fixture")
         torch.manual_seed(recipe["seed"])
         # Initialized in float32 like every other fixture, then cast: the seed gives the same weights in any dtype.
         model = cls._from_config(shrunk_config(source, cls, recipe), dtype=torch.float32).eval().to(dtype)
@@ -746,6 +822,11 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
     unhealthy = recipe.get("accept_unhealthy", {})
     if not all(row["finite"] for dtype, row in health.items() if dtype not in unhealthy):
         raise SystemExit(f"{name}: numeric health check failed: {health}")
+    # Widths taken from the model's tester; a rebuild from the recorded config keeps the record.
+    shrunk_config(source, cls, recipe)  # records TESTER_SIZES for this source
+    tester_sizes = (TESTER_SIZES.get(str(source))
+                    or ({"rejected": TESTER_OFF[str(source)]} if str(source) in TESTER_OFF else None)
+                    or previous_tester)
     build = {
         "fixture": name,
         "key": key,
@@ -769,6 +850,7 @@ def build_fixture(name, fixture, contract_name, manifest, root, revisions, out, 
             ],
         },
         **({"preserved_frozen_sha256": frozen_hashes} if frozen_hashes is not None else {}),
+        **({"tester_sizes": tester_sizes} if tester_sizes else {}),
         "checkpoint_inspection": "parameter headers/indexes; bounded binary fallback" if inspect_checkpoint else "full checkpoint load",
         "numeric_health_scope": "CPU float32/bfloat16/float16; autocast for low-precision losses",
         "captured": captured,

@@ -37,7 +37,7 @@ def lock(workspace):
         raise ValueError("Cloud model input requires one unpatched contract")
     contract = next(iter(result["contracts"].values()))
     if set(contract.get("fixtures", {})) != {workspace["repo"]}:
-        raise ValueError("Model snapshot must contain its single slim fixture")
+        raise ValueError("Model snapshot must contain its single fixture")
     for pin in [contract["integration"], *contract["fixtures"].values()]:
         if pin.get("repo", workspace["repo"]) != workspace["repo"] or not re.fullmatch(
             r"[a-f0-9]{64}", pin.get("files_sha256", "")

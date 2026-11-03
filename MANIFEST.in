@@ -9,3 +9,4 @@ include experiments/sweep.py experiments/layer_patterns.py
 include docs/cli.md
 prune example/hub/SmolLM-integration/integrations/transformers.js/node_modules
 global-exclude *.candidate.json *.pyc
+include CHANGELOG.md

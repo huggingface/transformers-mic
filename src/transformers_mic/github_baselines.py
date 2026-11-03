@@ -31,6 +31,8 @@ def failure_summary(root):
         path = root / "artifacts" / profile / "collection.json"
         if not path.is_file():
             continue
+        if host_error := read(path).get("host_error"):
+            details.append(f"{profile}: {host_error}")
         for case in read(path).get("cases", []):
             if case.get("status") != "failed":
                 continue

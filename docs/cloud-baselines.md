@@ -9,6 +9,16 @@ ran in the approved CPU image on a Xeon 6975P-C reporting `amx_bf16` and
 dashboard CPU/CUDA collection on this runner remains unproven; earlier cloud runs
 measured CPU on G5, which does not supply the native bfloat16 class.
 
+The `aws-m8i-l-cache` pool is mixed: on 2026-11-02, 4 of 20 model collections ran
+their CPU job on an AMD EPYC 7R13 without `avx512_bf16`/`amx_bf16`, so their
+bfloat16 cases were measured as `cpu-x86_64` and refused. tmic now moves such a
+collection aside (`<source>.wrong-hardware-N`), so answering *retry* dispatches
+a new run instead of re-reading the old one.
+The CPU job also checks `/proc/cpuinfo` before measuring: when a declared
+bfloat16 (or float16) variant needs flags the host lacks, it records `host_error`
+in its collection, fails, and cancels the run so the CUDA job stops too. A wrong
+host then costs the install and a minute, not a full CPU+G5 measurement.
+
 The [direct GitHub transport](cli.md#temporary-test-without-dashboard-oauth)
 uses the caller's existing GitHub CLI identity instead of dashboard authentication;
 it does not bypass runner-group access requirements.
@@ -62,7 +72,7 @@ as unsupported on that profile; insufficient memory on an otherwise supported
 profile remains a failure.
 
 This refreshes baselines for the fleet's **existing immutable MIC fixtures**.
-The returned model files are those pinned slim snapshots, not newly generated
+The returned model files are those pinned fixture snapshots, not newly generated
 weights. New contracts and rebuilt fixtures still follow the existing
 `tmic create/build/run` source-review flow before entering the shared fleet.
 For model-scoped runs, the user reviews the executable contract first, then
@@ -205,7 +215,7 @@ migrated to the single `<name>-mic` layout before this publication path.
    rotate. `cloud-baselines.yml` and `nightly.yml` pass it as `HF_TOKEN`. Without
    it the runner logs "You are sending unauthenticated requests to the HF Hub" and
    every gated checkpoint (Gemma, Llama) fails with `401 GatedRepoError`, on CPU
-   and CUDA alike; slim fixtures are public and unaffected. `tmic create` warns
+   and CUDA alike; fixtures are public and unaffected. `tmic create` warns
    when a checkpoint is gated. The token's account must have accepted each gated
    model's license. For direct
    upload, configure `MIC_BASELINE_WRITE_TOKEN`, restricted to the intended Hub
@@ -242,7 +252,7 @@ a bounded collection run with CPU measured on `aws-m8i-l-cache`.
 
 ## BatchNorm fixtures
 
-After overfitting a slim fixture with BatchNorm, the builder recalibrates running
+After overfitting a fixture with BatchNorm, the builder recalibrates running
 statistics on the captured training batch with dropout disabled. This changes
 BatchNorm buffers only and records the layer/batch count in `build.json` training
 evidence. The same input-sensitivity thresholds and dtype health checks must

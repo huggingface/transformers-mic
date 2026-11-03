@@ -593,6 +593,53 @@ def test_planner_repairs_invented_parameter_names(workspace, monkeypatch):
     assert "attention.self.query.weight" in error
 
 
+def test_parameter_names_accept_suffixes_and_hint_every_layer_kind():
+    pytest.importorskip("torch")
+    from transformers import DeepseekV3Config
+
+    # Block 0 dense, block 1 MoE: the shape of Mistral-Large-4.
+    config = DeepseekV3Config(
+        vocab_size=32, hidden_size=16, intermediate_size=16, moe_intermediate_size=8,
+        num_hidden_layers=2, num_attention_heads=2, num_key_value_heads=2,
+        n_routed_experts=2, num_experts_per_tok=1, first_k_dense_replace=1,
+        q_lora_rank=8, kv_lora_rank=8, qk_rope_head_dim=4, qk_nope_head_dim=4, v_head_dim=4,
+    ).to_dict()
+    plan = {"manifest": {"architecture": "DeepseekV3ForCausalLM"}}
+    commands.check_parameter_names({**plan, "usage": 'next(n for n in names if n.endswith("mlp.gate_proj.weight"))'}, config)
+    with pytest.raises(ValueError) as error:
+        commands.check_parameter_names({**plan, "usage": '"model.layers.1.mlp.down_proj.weight"'}, config)
+    assert "model.layers.1.mlp.experts." in str(error.value)
+
+
+def test_compare_rule_spelling_slips_are_normalized():
+    plan = {"manifest": {"outputs": {"g": {"compare": "alltrue"}, "l": {"compare": "AllClose"}, "x": {"compare": "fuzzy"}}}}
+    commands.normalize_compare(plan)
+    assert [r["compare"] for r in plan["manifest"]["outputs"].values()] == ["all_true", "allclose", "fuzzy"]
+
+
+def test_unknown_manifest_keys_are_dropped_from_drafts():
+    plan = {"manifest": {"mic": "0.3", "name": "M", "checkpoints_note": "placeholder"}}
+    assert commands.drop_unknown_manifest_keys(plan) == ["checkpoints_note"]
+    assert plan["manifest"] == {"mic": "0.3", "name": "M"}
+
+
+def test_checkpoints_above_the_gpu_limit_are_not_loaded():
+    context = {"parameters": 1_053_000_000_000}
+    assert commands.loaded_parameters(context) is None
+    commands.check_partial_training({"usage": "model(**inputs).loss.backward()"}, context)
+    with pytest.raises(ValueError, match="requires_grad_"):
+        commands.check_partial_training({"usage": "model(**inputs).loss.backward()"}, {"parameters": 8e9})
+
+
+def test_planner_context_names_one_parameter_per_layer_kind():
+    names = {"model.layers.0.mlp.down_proj.weight", "model.layers.1.mlp.experts.down_proj",
+             "model.layers.2.mlp.experts.down_proj", "lm_head.weight"}
+    assert commands.names_per_layer_kind(names) == [
+        "lm_head.weight", "model.layers.0.mlp.down_proj.weight", "model.layers.1.mlp.experts.down_proj"]
+    assert commands.names_per_layer_kind(names, pattern=True) == [
+        "lm_head.weight", "model.layers.N.mlp.down_proj.weight", "model.layers.N.mlp.experts.down_proj"]
+
+
 @pytest.mark.requires_runtime
 def test_update_keeps_fixture_pin_and_old_source(workspace, monkeypatch):
     plan = {
@@ -1189,6 +1236,76 @@ def test_checkpoint_keys_read_shard_headers_over_a_stale_index(monkeypatch, tmp_
     assert inspection.checkpoint_keys("org/model", "a" * 40, tmp_path) == {"lm.weight", "audio.weight"}
 
 
+def test_checkpoint_keys_follow_transformers_weights(monkeypatch, tmp_path):
+    from types import SimpleNamespace
+
+    from transformers_mic import inspection
+
+    # Mistral names its shards consolidated-*; config.json points the loader at them.
+    name = "consolidated.safetensors.index.json"
+    (tmp_path / "config.json").write_text(json.dumps({"transformers_weights": name}))
+    (tmp_path / name).write_text(json.dumps({"weight_map": {"a.weight": "consolidated-1.safetensors", "b.weight": "consolidated-2.safetensors"}}))
+    headers = {"consolidated-1.safetensors": {"a.weight"}, "consolidated-2.safetensors": {"b.weight", "c.weight"}}
+
+    class Api:
+        def parse_safetensors_file_metadata(self, repo, filename, revision=None, timeout=None):
+            return SimpleNamespace(tensors=dict.fromkeys(headers[filename]))
+
+        def file_exists(self, *args, **kwargs):
+            raise AssertionError("must not look for model.safetensors or pytorch_model.bin")
+
+    monkeypatch.setattr(inspection, "HfApi", Api)
+    assert inspection.checkpoint_keys("org/model", "a" * 40, tmp_path) == {"a.weight", "b.weight", "c.weight"}
+    assert inspection.loads_binary("org/model", "a" * 40, tmp_path) is False
+
+
+@pytest.mark.parametrize("name", ["../x.safetensors", "pytorch_model.bin", 3])
+def test_transformers_weights_must_be_a_local_safetensors_name(tmp_path, name):
+    from transformers_mic import inspection
+
+    (tmp_path / "config.json").write_text(json.dumps({"transformers_weights": name}))
+    with pytest.raises(ValueError, match="transformers_weights"):
+        inspection.explicit_weights(tmp_path)
+
+
+def test_checkpoint_keys_name_an_unknown_weight_layout(monkeypatch, tmp_path):
+    from transformers_mic import inspection
+
+    class Api:
+        def file_exists(self, repo, filename, revision=None):
+            return False
+
+        def get_repo_discussions(self, repo, **filters):
+            return []
+
+        def list_repo_files(self, repo, revision=None):
+            return ["config.json", "weights-00001.safetensors", "weights.index.json"]
+
+    monkeypatch.setattr(inspection, "HfApi", Api)
+    with pytest.raises(ValueError, match="weights-00001.safetensors"):
+        inspection.checkpoint_keys("org/model", "a" * 40, tmp_path)
+
+
+def test_parameter_count_sums_explicit_shards_the_hub_does_not_count(monkeypatch, tmp_path):
+    from types import SimpleNamespace
+
+    import huggingface_hub
+
+    from transformers_mic import inspection
+
+    name = "consolidated.safetensors.index.json"
+    (tmp_path / "config.json").write_text(json.dumps({"transformers_weights": name}))
+    (tmp_path / name).write_text(json.dumps({"weight_map": {"a": "c-1.safetensors", "b": "c-2.safetensors", "c": "c-2.safetensors"}}))
+    monkeypatch.setattr(huggingface_hub, "hf_hub_download", lambda repo, f, revision=None: str(tmp_path / f))
+
+    class Api:
+        def parse_safetensors_file_metadata(self, repo, filename, revision=None, timeout=None):
+            return SimpleNamespace(parameter_count={"F8_E4M3": 100, "BF16": 5} if filename == "c-2.safetensors" else {"BF16": 7})
+
+    monkeypatch.setattr(inspection, "HfApi", Api)
+    assert inspection.explicit_parameter_count("org/model", "a" * 40) == 112
+
+
 def test_visible_usage_never_shows_runner_plumbing():
     blocks = [
         "model = AutoModel.from_pretrained(model_id).to(device)\n"
@@ -1533,6 +1650,28 @@ def test_planner_slugs_a_dotted_contract_name():
     assert plan["name"] == "Kimi-K2-5"
 
 
+def test_planner_renames_a_historical_key_slip_and_keeps_invalid_drafts():
+    from types import SimpleNamespace
+
+    import jsonschema
+
+    from transformers_mic import planner
+
+    def parse(draft):
+        response = SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(content=json.dumps(draft)), finish_reason="stop")],
+            usage=None,
+        )
+        return planner.parse(response, "m", "p", None)
+
+    draft = {"name": "M", "manifest": {}, "usage": "x" * 100, "rationale": ""}
+    plan, _ = parse({**draft, "historical_issues": [{"url": "u"}]})
+    assert plan["historical_candidates"] == [{"url": "u"}] and "historical_issues" not in plan
+    with pytest.raises(jsonschema.ValidationError) as error:
+        parse({**draft, "historical_candidates": [], "usage": "short"})
+    assert error.value.plan["usage"] == "short"
+
+
 @pytest.mark.requires_runtime
 def test_create_rejects_labels_a_forward_does_not_take():
     def plan(load, call):
@@ -1565,10 +1704,12 @@ def test_create_rejects_plain_fences_and_float16_loads():
     commands.check_float16_load({"usage": large}, {"torch_dtype": "float16"}, 8_000_000_000)
     with pytest.raises(ValueError, match="dtype=torch.bfloat16"):  # Audio Flamingo 3: stored float32
         commands.check_float16_load({"usage": usage}, {"dtype": "float32"}, 8_000_000_000)
-    # A fixtures-only contract loads only its slim fixture.
+    # A fixtures-only contract loads only its fixture.
     huge = {"parameters": 1_026_879_376_368, "fixtures_only": True}
     commands.check_float16_load({"usage": usage}, {"dtype": "bfloat16"}, commands.loaded_parameters(huge))
-    assert commands.loaded_parameters({**huge, "fixtures_only": False}) == huge["parameters"]
+    # Above GPU_PARAMETER_LIMIT only the fixture is measured, fixtures-only or not.
+    assert commands.loaded_parameters({**huge, "fixtures_only": False}) is None
+    assert commands.loaded_parameters({"parameters": 8_000_000_000, "fixtures_only": False}) == 8_000_000_000
 
 
 def test_create_rejects_the_broadcast_image_idiom():
@@ -1591,3 +1732,54 @@ def test_create_rejects_a_loss_built_only_from_no_grad_outputs():
     # A constant target computed under no_grad is fine.
     target = fresh.replace("loss = ce(logits, labels)", "loss = ce(logits, features)")
     commands.check_loss_has_gradients({"usage": target})
+
+
+def test_nearest_contract_prefers_shared_structure(monkeypatch, tmp_path):
+    from transformers_mic import examples
+
+    configs = {
+        "org/llama": {"architectures": ["LlamaForCausalLM"], "model_type": "llama"},
+        "org/mistral3": {"architectures": ["Mistral3ForConditionalGeneration"], "model_type": "mistral3",
+                         "vision_config": {"model_type": "pixtral"}, "text_config": {"model_type": "ministral3"}},
+        "org/bert": {"architectures": ["BertForMaskedLM"], "model_type": "bert"},
+    }
+
+    def download(repo, filename, revision=None):
+        path = tmp_path / repo.replace("/", "--") / filename
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if filename == "config.json":
+            path.write_text(json.dumps(configs[repo]))
+        elif filename == "integration.json":
+            path.write_text(json.dumps({"integrations": {"transformers": {"entry_point": "usage.md"}}}))
+        else:
+            path.write_text(f"usage of {repo}")
+        return str(path)
+
+    monkeypatch.setattr(examples, "hf_hub_download", download)
+    rows = [("prototypes", name, {"repo": f"{repo}-mic", "revision": "r"}, {repo: "r"})
+            for name, repo in (("Llama", "org/llama"), ("Mistral3", "org/mistral3"), ("BERT", "org/bert"))]
+    for repo in list(configs):
+        configs[f"{repo}-mic"] = configs[repo]
+    large4 = {"architectures": ["MistralLarge4ForConditionalGeneration"], "model_type": "mistral_large4",
+              "vision_config": {"model_type": "pixtral"}, "text_config": {"model_type": "mistral_large4_text"}}
+    plan, reason = examples.nearest_contract(large4, rows=rows)
+    assert plan["name"] == "Mistral3" and "pixtral" in reason
+    plan, reason = examples.nearest_contract({"architectures": ["LlamaForCausalLM"], "model_type": "llama"}, rows=rows)
+    assert plan["name"] == "Llama" and "same architecture" in reason
+    assert examples.nearest_contract({"architectures": ["WhisperModel"], "model_type": "whisper"}, rows=rows) is None
+    monkeypatch.setenv("TMIC_EXAMPLE_SKIP_SELF", "1")
+    # Without its own contract, nothing else here shares Llama's structure.
+    assert examples.nearest_contract(configs["org/llama"], rows=rows, model="org/llama") is None
+
+
+def test_encoder_decoder_calls_need_decoder_inputs():
+    whisper = {"is_encoder_decoder": True, "architectures": ["WhisperForConditionalGeneration"]}
+    usage = "```py runnable:t\nlogits = model(inputs.input_features).logits\n```\n"
+    with pytest.raises(ValueError, match="decoder_input_ids"):
+        commands.check_encoder_decoder_calls({"usage": usage}, whisper)
+    for ok in ("model(inputs.input_features, decoder_input_ids=ids)", "model(x, labels=labels)", "model(**inputs)"):
+        commands.check_encoder_decoder_calls({"usage": f"```py runnable:t\nout = {ok}\n```\n"}, whisper)
+    commands.check_encoder_decoder_calls({"usage": usage}, {"is_encoder_decoder": False})
+    # RT-DETR is an encoder-decoder over pixel_values that builds its own queries.
+    commands.check_encoder_decoder_calls({"usage": usage}, {"is_encoder_decoder": True, "architectures": ["RTDetrForObjectDetection"]})
+

@@ -391,6 +391,10 @@ def analyze(data):
         data["original"], data["shrunk"]
     )
     report["properties"] = properties(data["original"], data["shrunk"])
+    from . import tester
+
+    # The model's own test config: advisory, since a tester can be unrepresentative.
+    report["tester"] = tester.check(data["original"], data["shrunk"], kept_whole=build.get("shrink") == "none")
     try:
         original = build_meta(data["original"], class_name)
         shrunk = build_meta(data["shrunk"], class_name)
@@ -524,6 +528,11 @@ def text(report):
     lines.append(
         f"{len(findings)} finding(s)" + "".join(f"\n  - {f}" for f in findings)
     )
+    advice = (report.get("tester") or {}).get("findings") or []
+    if advice:
+        lines.append(
+            f"{len(advice)} model-tester note(s), advisory" + "".join(f"\n  - {f}" for f in advice)
+        )
     return "\n".join(lines)
 
 
@@ -562,6 +571,19 @@ def render(report):
     if report.get("modules_error"):
         out.append(
             f'<section class="findings warn"><h2>⚠ Modules not compared</h2><p>{e(report["modules_error"])}</p></section>'
+        )
+    check = report.get("tester") or {}
+    if check.get("url"):
+        notes = check["findings"]
+        out.append(
+            '<section class="findings"><h2>Model tester (advisory)</h2><p class="note">'
+            f'The model\'s own small test config in <a href="{e(check["url"])}">its ModelTester</a> '
+            f"({check['values']} literal values, {check.get('own_values', check['values'])} set by the model's own tester, "
+            "the rest generic base-tester defaults). Testers are usually representative but not always, "
+            "so these notes are for review, not rules.</p>"
+            + ("<ul>" + "".join(f"<li>{e(n)}</li>" for n in notes) + "</ul>" if notes
+               else "<p>The fixture covers every per-layer kind the tester sets, and shrinks every size it does.</p>")
+            + "</section>"
         )
 
     if report.get("stacks"):

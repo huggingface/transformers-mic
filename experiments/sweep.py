@@ -208,6 +208,11 @@ def shrink(config):
         # must meet the vision tower's width; keep them equal after shrinking.
         if cfg.to_dict().get("projection_size") and cfg.to_dict().get("projection_size") == cfg.to_dict().get("hidden_size"):
             values["projection_size"] = values["hidden_size"]
+        # A top-k sparse attention (Mistral-Large-4's indexer, 2048) at least as long as
+        # the contract's sequences selects every token. Contract prompts can be 5 tokens
+        # (DeepSeek-V3.2: top-k 8 left every output unchanged), so keep 2.
+        if isinstance(values.get("index_topk"), int):
+            values["index_topk"] = min(values["index_topk"], 2)
         if values.get("q_lora_rank"):
             values["q_lora_rank"] = 16
         for key in EXPERTS:
@@ -280,6 +285,9 @@ def shrink(config):
             for key, value in cfg.to_dict().items():
                 if isinstance(value, list) and len(value) == values["num_hidden_layers"]:
                     values[key] = [value[i] for i in kept if i < len(value)]
+            from layer_patterns import reindex_references
+
+            reindex_references(values, cfg, kept)  # sources precede their layer, so a prefix holds them
             if getattr(cfg, "num_kv_shared_layers", None) is not None:
                 values["num_kv_shared_layers"] = sum(i >= cfg.num_hidden_layers - cfg.num_kv_shared_layers for i in kept)
             # Leading dense layers: keep at least one MoE layer, or the fixture has no

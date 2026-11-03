@@ -1,6 +1,6 @@
 # Problems and opened questions
 
-The experiments support a CI pilot; removing tests or requiring contracts needs more evidence. A slim pass never means the full model passes ([CI integration](slim-models-in-transformers-ci.md)). Six problems stand in between:
+The experiments support a CI pilot; removing tests or requiring contracts needs more evidence. A fixture pass never means the full model passes ([CI integration](slim-models-in-transformers-ci.md)). Six problems stand in between:
 
 | # | Problem | Kind |
 | --- | --- | --- |
@@ -80,7 +80,7 @@ The experiments support a CI pilot; removing tests or requiring contracts needs 
 
 The [GPU upgrade matrix](evidence.md#gpu-dependency-upgrades) repeats exactly within environments but flags NumPy-driven Wav2Vec2 preprocessing changes and CLIP/Wav2Vec2 drift under a newer CUDA bundle. The [full GPU normalization control](evidence.md#wav2vec2-normalization-control) restores all Wav2Vec2 NumPy outputs exactly; an upstream normalization fix and CUDA-bundle investigation remain. Repeatability alone does not justify new baselines or wider tolerances.
 
-**Next.** Define environment classes, calibrate on representative runners, track churn and review time, budget the slim PR matrix apart from the full-model one. Each baseline update needs evidence beyond repeatability ([review process](design.md#revisions-and-baselines)).
+**Next.** Define environment classes, calibrate on representative runners, track churn and review time, budget the fixture PR matrix apart from the full-model one. Each baseline update needs evidence beyond repeatability ([review process](design.md#revisions-and-baselines)).
 
 **Open questions.**
 

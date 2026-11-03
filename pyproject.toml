@@ -1,22 +1,43 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "transformers-mic"
-version = "0.1.0"
+version = "0.1.1"
 description = "Build and validate model integration contracts and slim fixtures for Transformers"
 readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 requires-python = ">=3.11"
+authors = [
+    { name = "The Hugging Face Team", email = "transformers@huggingface.co" },
+]
+keywords = ["transformers", "huggingface", "testing", "ci", "model-integration"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Testing",
+]
 dependencies = ["huggingface-hub>=1.32", "jsonschema>=4.23", "filelock>=3"]
 
 [project.optional-dependencies]
 runtime = ["transformers>=5", "torch>=2.11", "numpy", "pillow", "soundfile", "librosa", "scipy", "safetensors"]
-dev = ["pytest>=8", "build"]
+dev = ["pytest>=8", "build", "twine", "sentencepiece"]
 
 [project.scripts]
 tmic = "transformers_mic.cli:main"
 transformers-mic = "transformers_mic.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/huggingface/transformers-mic"
+Repository = "https://github.com/huggingface/transformers-mic"
+Changelog = "https://github.com/huggingface/transformers-mic/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]

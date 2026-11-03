@@ -1,6 +1,7 @@
 """Inspect parameter names from headers/indexes, or a binary checkpoint's pickle."""
 
 import collections
+from concurrent.futures import ThreadPoolExecutor
 import json
 from pathlib import Path
 import pickle
@@ -10,8 +11,90 @@ import zipfile
 from huggingface_hub import HfApi, HfFileSystem
 
 
+def explicit_weights(source):
+    """The weights file config.json names in `transformers_weights`, if any.
+
+    from_pretrained loads it instead of model.safetensors: Mistral ships its
+    shards as consolidated-*.safetensors behind consolidated.safetensors.index.json.
+    """
+    path = Path(source) / "config.json"
+    if not path.exists():
+        return None
+    name = json.loads(path.read_text()).get("transformers_weights")
+    if name is None:
+        return None
+    if (
+        not isinstance(name, str)
+        or Path(name).name != name
+        or not name.endswith((".safetensors", ".safetensors.index.json"))
+    ):
+        raise ValueError(f"Unsupported transformers_weights: {name!r}")
+    return name
+
+
+def explicit_keys(api, repo, revision, source, name):
+    if not name.endswith(".index.json"):
+        return set(
+            api.parse_safetensors_file_metadata(
+                repo, name, revision=revision, timeout=60
+            ).tensors
+        )
+    index = Path(source) / name
+    if not index.exists():
+        from huggingface_hub import hf_hub_download
+
+        index = Path(hf_hub_download(repo, name, revision=revision))
+    weight_map = json.loads(index.read_text())["weight_map"]
+    # The shard headers, as for model.safetensors.index.json below.
+    try:
+        with ThreadPoolExecutor(8) as pool:
+            headers = pool.map(
+                lambda shard: api.parse_safetensors_file_metadata(
+                    repo, shard, revision=revision, timeout=60
+                ),
+                sorted(set(weight_map.values())),
+            )
+            return {key for header in headers for key in header.tensors}
+    except Exception:
+        return set(weight_map)
+
+
+def explicit_parameter_count(repo, revision):
+    """Parameters of a checkpoint the Hub does not count.
+
+    The Hub's safetensors total only covers model*.safetensors: Mistral-Large-4's
+    consolidated-* shards report none, which disabled every size guard (a 1T
+    checkpoint was declared for one 22 GB GPU). Sums the explicit file's headers.
+    """
+    from huggingface_hub import hf_hub_download
+
+    source = Path(hf_hub_download(repo, "config.json", revision=revision)).parent
+    name = explicit_weights(source)
+    if name is None:
+        return None
+    api = HfApi()
+    if name.endswith(".index.json"):
+        index = json.loads(
+            Path(hf_hub_download(repo, name, revision=revision)).read_text()
+        )
+        files = sorted(set(index["weight_map"].values()))
+    else:
+        files = [name]
+    with ThreadPoolExecutor(8) as pool:
+        headers = pool.map(
+            lambda f: api.parse_safetensors_file_metadata(
+                repo, f, revision=revision, timeout=60
+            ),
+            files,
+        )
+        return sum(sum(h.parameter_count.values()) for h in headers)
+
+
 def checkpoint_keys(repo, revision, source):
     source = Path(source)
+    explicit = explicit_weights(source)
+    if explicit:
+        return explicit_keys(HfApi(), repo, revision, source, explicit)
     index = source / "model.safetensors.index.json"
     if index.exists():
         # The shard headers, not the index: an index can be stale (MOSS-Transcribe-
@@ -30,6 +113,18 @@ def checkpoint_keys(repo, revision, source):
         converted = conversion_pr_keys(api, repo)
         if converted:
             return converted
+        if not api.file_exists(repo, "pytorch_model.bin", revision=revision):
+            # Fail on the layout, not on a 404 for a guessed file name.
+            weights = sorted(
+                name
+                for name in api.list_repo_files(repo, revision=revision)
+                if name.endswith((".safetensors", ".bin", ".index.json"))
+            )
+            raise ValueError(
+                f"{repo}@{revision[:12]}: no model.safetensors(.index.json), "
+                "pytorch_model.bin(.index.json) or config.json transformers_weights; "
+                f"weight files: {weights[:8]}"
+            )
         return binary_keys(repo, revision)
     return set(
         api.parse_safetensors_file_metadata(
@@ -73,6 +168,8 @@ def loads_binary(repo, revision, source):
     It falls back to .bin when the revision has no safetensors file; the bot's
     conversion PR is only used for use_safetensors=True at revision main.
     """
+    if explicit_weights(source):
+        return False
     if (Path(source) / "model.safetensors.index.json").exists():
         return False
     return not HfApi().file_exists(repo, "model.safetensors", revision=revision)

@@ -1,6 +1,7 @@
 """Regression coverage for non-language-model fixture inputs."""
 
 import hashlib
+import json
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -780,3 +781,83 @@ def test_a_small_source_is_kept_whole_and_a_large_one_is_shrunk(tmp_path):
     config = build_fixtures.shrunk_config(tmp_path / "large", LlamaForCausalLM)
     assert config.num_hidden_layers < 8
     assert not build_fixtures.keeps_source(tmp_path / "large", LlamaForCausalLM, config)
+
+
+def test_pixtral_vision_is_inert_to_pixel_scale():
+    from transformers import Mistral3Config
+
+    config = Mistral3Config()
+    assert config.vision_config.model_type == "pixtral"
+    assert "pixel_values:halve" in build_fixtures.config_insensitive(config, {"pixel_values": None})
+    assert "pixel_values:halve" not in build_fixtures.config_insensitive(config, {"input_ids": None})
+
+
+
+def test_layer_pattern_keeps_every_flagged_layer_kind_and_its_kv_source():
+    from types import SimpleNamespace
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    import layer_patterns
+
+    # Mistral-Large-4 in 8 layers: dense 0, NoPE every 4th, a shared indexer from 5,
+    # and layer 7 reading layer 6's KV cache.
+    lists = {
+        "layer_types": ["indexed_attention"] * 8,
+        "mlp_layer_types": ["dense"] + ["sparse"] * 7,
+        "no_rope_layers": [1, 1, 1, 0, 1, 1, 1, 0],
+        "indexer_types": ["full"] * 5 + ["shared"] * 3,
+        "kv_source_layers": [0, 1, 2, 3, 4, 5, 6, 6],
+        "num_attention_heads_per_layer": [4, 4, 8, 8, 4, 4, 8, 8],  # a width, not a kind
+    }
+    config = SimpleNamespace(num_hidden_layers=8, first_k_dense_replace=1, **lists)
+    config.to_dict = lambda: dict(lists, num_hidden_layers=8)
+    kept = layer_patterns.pattern_indices(config)
+    assert kept == [0, 1, 3, 5, 6, 7]  # 6 is kept as layer 7's KV source
+    values = {}
+    layer_patterns.reindex_references(values, config, kept)
+    assert values["kv_source_layers"] == [0, 1, 2, 3, 4, 4]
+
+
+def test_shrink_adopts_tester_sizes_the_rule_misses(monkeypatch):
+    from transformers import Qwen3NextConfig, Qwen3NextForCausalLM
+
+    from transformers_mic import tester
+
+    original = Qwen3NextConfig(num_hidden_layers=4, vocab_size=128)
+    shrunk = Qwen3NextConfig(**{**original.to_dict(), "hidden_size": 64, "intermediate_size": 128,
+                                "num_attention_heads": 4, "num_key_value_heads": 2, "head_dim": 16,
+                                "num_experts": 4, "moe_intermediate_size": 32, "shared_expert_intermediate_size": 128})
+    monkeypatch.setattr(tester, "tester_values", lambda model_type, ref="main": (
+        "tests/models/qwen3_next", {"linear_key_head_dim": 16, "linear_value_head_dim": 16, "vocab_size": 99}))
+    adopted = build_fixtures.adopt_tester_sizes(Qwen3NextForCausalLM, original.to_dict(), shrunk)
+    assert adopted.linear_key_head_dim == 16 and adopted.linear_value_head_dim == 16
+    assert adopted.vocab_size == 128  # preserved: the fixture loads the real tokenizer
+    assert adopted._mic_tester_sizes["fields"] == {"linear_key_head_dim": 16, "linear_value_head_dim": 16}
+    # A tester size that does not build is dropped, keeping the rule's config.
+    monkeypatch.setattr(tester, "tester_values", lambda model_type, ref="main": ("t", {"linear_key_head_dim": 3}))
+    monkeypatch.setattr(Qwen3NextForCausalLM, "_from_config", classmethod(lambda cls, c: (_ for _ in ()).throw(ValueError("bad"))))
+    assert build_fixtures.adopt_tester_sizes(Qwen3NextForCausalLM, original.to_dict(), shrunk) is shrunk
+
+
+def test_tester_sizes_stay_out_of_the_config_and_fall_back_on_a_failed_build(monkeypatch):
+    sizes = {"source": "t", "fields": {"encoder_hidden_dim": 32}}
+    monkeypatch.setattr(build_fixtures, "TESTER_SIZES", {"src": dict(sizes)})
+    monkeypatch.setattr(build_fixtures, "TESTER_OFF", {})
+    calls = []
+
+    def build(*args, **kwargs):
+        calls.append(dict(build_fixtures.TESTER_OFF))
+        if len(calls) == 1:
+            raise SystemExit("the contract fails on the random fixture:\nRuntimeError: expected 256 channels, got 32")
+        return {"ok": True}
+
+    monkeypatch.setattr(build_fixtures, "_build_fixture", build)
+    assert build_fixtures.build_fixture() == {"ok": True}
+    assert calls[1]["src"]["fields"] == {"encoder_hidden_dim": 32}
+    assert "256 channels" in calls[1]["src"]["build_failed"]
+    # Without adopted sizes a failure is not retried.
+    monkeypatch.setattr(build_fixtures, "TESTER_SIZES", {})
+    monkeypatch.setattr(build_fixtures, "_build_fixture", lambda *a, **k: (_ for _ in ()).throw(SystemExit("boom")))
+    with pytest.raises(SystemExit):
+        build_fixtures.build_fixture()
+

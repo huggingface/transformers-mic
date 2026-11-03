@@ -1,0 +1,173 @@
+name: planner eval
+
+# How often does the planner's draft build? Runs `tmic run --llm` for each model,
+# `repeats` times, with no contract repairs and no history search, and reports
+# create and build pass rates. Use it before and after a prompt or planner change:
+# one lucky or unlucky run says nothing.
+#
+#   gh workflow run planner-eval.yml --repo huggingface/transformers-mic [--ref <branch>] \
+#     -f models="mistralai/Mistral-Large-4-1T-A52B deepseek-ai/DeepSeek-V3.2" -f repeats=5
+#
+# skip_self (default) hides a model's own approved contract from the example
+# lookup, so a fleet model measures a new model's draft, not a copy.
+# Planner calls bill the HF_HUB_READ_TOKEN owner's credits (--bill-to '').
+
+on:
+  workflow_dispatch:
+    inputs:
+      models:
+        type: string
+        default: >-
+          mistralai/Mistral-Large-4-1T-A52B deepseek-ai/DeepSeek-V3.2
+          HuggingFaceTB/SmolVLM-256M-Instruct openai/whisper-tiny
+      repeats:
+        type: string
+        default: "3"
+      skip_self:
+        type: boolean
+        default: true
+      llm_model:
+        type: string
+        default: ""
+      transformers_ref:
+        type: string
+        default: main
+
+permissions:
+  contents: read
+
+jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      cases: ${{ steps.cases.outputs.cases }}
+    steps:
+      - id: cases
+        env:
+          MODELS: ${{ inputs.models }}
+          REPEATS: ${{ inputs.repeats }}
+        run: |
+          python3 -c "
+          import json, os
+          cases = [{'model': m, 'repeat': r} for m in os.environ['MODELS'].split() for r in range(1, int(os.environ['REPEATS']) + 1)]
+          print('cases=' + json.dumps(cases))" >> "$GITHUB_OUTPUT"
+
+  draft:
+    needs: matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        case: ${{ fromJSON(needs.matrix.outputs.cases) }}
+    env:
+      HF_TOKEN: ${{ secrets.HF_HUB_READ_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      PYTHONUNBUFFERED: "1"
+      MODEL: ${{ matrix.case.model }}
+      REPEAT: ${{ matrix.case.repeat }}
+      TMIC_EXAMPLE_SKIP_SELF: ${{ inputs.skip_self && '1' || '' }}
+      LLM_MODEL: ${{ inputs.llm_model }}
+      TRANSFORMERS_REF: ${{ inputs.transformers_ref }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: |
+          git clone --filter=blob:none https://github.com/huggingface/transformers.git "$RUNNER_TEMP/transformers"
+          git -C "$RUNNER_TEMP/transformers" checkout -q "$TRANSFORMERS_REF"
+          python -m pip install --quiet --upgrade pip
+          python -m pip install --quiet --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          python -m pip install --quiet -e ".[runtime]" -e "$RUNNER_TEMP/transformers" jsonschema \
+            "git+https://github.com/huggingface/doc-builder@c69e96c087165ba49b1788e0c3464654dd60253c"
+      - name: Draft and build
+        run: |
+          set +e
+          args=("$MODEL" --mode agent --local-only --llm --no-history --max-contract-repairs 0
+                --bill-to "" --baseline-execution local --out work/eval
+                --transformers-checkout "$RUNNER_TEMP/transformers")
+          [ -n "$LLM_MODEL" ] && args+=(--llm-model "$LLM_MODEL")
+          start=$(date +%s)
+          tmic run "${args[@]}" > result.json
+          # Approve the source review only; stop at the first failure or once the build ran.
+          for i in 1 2 3; do
+            python - <<'PY' || break
+          import json, sys
+          q = json.load(open("result.json")).get("pending_question")
+          if not q or q["kind"] != "source-review":
+              sys.exit(1)
+          json.dump({"question_id": q["question_id"], "answer": "approve", "reason": "planner eval"}, open("answer.json", "w"))
+          PY
+            tmic run "${args[@]}" --answer answer.json > result.json
+          done
+          SECONDS_TAKEN=$(( $(date +%s) - start )) python - <<'PY'
+          import glob, json, os, re
+          logs = "work/eval/.mic/automation/logs"
+          read = lambda name: open(f"{logs}/{name}").read() if os.path.exists(f"{logs}/{name}") else ""
+          create, build = read("create.log"), read("build.log")
+          stages = {}
+          if os.path.exists("work/eval/.mic/automation.json"):
+              stages = json.load(open("work/eval/.mic/automation.json")).get("stages", {})
+          code = lambda s: stages.get(s, {}).get("exit_code")
+          example = re.findall(r"planner example: (.*)", create)
+          failure = [l for l in (build or create).splitlines() if re.match(r"(\w+Error|tmic: |the contract fails)", l)]
+          row = {
+              "model": os.environ["MODEL"], "repeat": int(os.environ["REPEAT"]),
+              "create_ok": code("create") == 0, "build_ok": code("build") == 0,
+              "rejected_drafts": len(re.findall(r"planner draft \d/3 rejected", create)),
+              "example": example[-1] if example else None,
+              "failure": failure[-1][:300] if failure and code("build") != 0 else None,
+              "seconds": int(os.environ["SECONDS_TAKEN"]),
+          }
+          print(json.dumps(row, indent=1))
+          json.dump(row, open("row.json", "w"))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: eval-${{ strategy.job-index }}
+          path: |
+            row.json
+            work/eval/.mic/automation/logs
+            work/eval/example/hub/*/integrations/transformers/usage.md
+          include-hidden-files: true
+          retention-days: 14
+
+  report:
+    needs: draft
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: eval-*
+          path: rows
+      - name: Pass rates
+        run: |
+          python3 - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
+          import glob, json, collections
+          rows = [json.load(open(p)) for p in glob.glob("rows/*/row.json")]
+          by = collections.defaultdict(list)
+          for r in rows:
+              by[r["model"]].append(r)
+          print("| model | runs | create ok | build ok | rejected drafts / run | example |")
+          print("|---|---|---|---|---|---|")
+          for model, rs in sorted(by.items()):
+              n = len(rs)
+              examples = {r["example"] or "BERT (generic)" for r in rs}
+              print(f"| {model} | {n} | {sum(r['create_ok'] for r in rs)}/{n} | {sum(r['build_ok'] for r in rs)}/{n} "
+                    f"| {sum(r['rejected_drafts'] for r in rs) / n:.1f} | {'; '.join(sorted(examples))[:120]} |")
+          total = len(rows)
+          print(f"\n**build pass@1: {sum(r['build_ok'] for r in rows)}/{total}**\n")
+          for r in sorted(rows, key=lambda r: (r["model"], r["repeat"])):
+              if r["failure"]:
+                  print(f"- {r['model']} #{r['repeat']}: `{r['failure'][:200]}`")
+          json.dump(rows, open("eval.json", "w"), indent=1)
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: planner-eval
+          path: eval.json

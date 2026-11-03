@@ -1,120 +1,73 @@
 # transformers-mic
 
-![logo](/docs/mic-logo.png)
+![logo](https://raw.githubusercontent.com/huggingface/transformers-mic/main/docs/mic-logo.png)
 
-New MIC artifacts use the [`huggingface-mic`](https://huggingface.co/huggingface-mic) Hub organization.
-See [Hub layout](docs/hub-organization.md).
+A **Model Integration Contract (MIC)** is a proposed standard: next to a Hub
+model, an executable check that it works in a framework, run by that
+framework's CI. Each MIC has three parts:
 
-Python package and CLI for model integration contracts, slim fixtures, and measured
-expectations. See the [CLI guide](docs/cli.md) for installation, HF Inference
-Providers (default `deepseek-ai/DeepSeek-V4.1-Flash-1017` on Together), and the create/update/publish workflow.
+- a **fixture**: a shrunk model built from the real checkpoint's config, with its
+  tokenizer and processor files copied unchanged
+- a **usage path**: runnable Markdown that does what users do, such as generating
+  text or running a training step
+- **baselines**: the outputs that usage produced, reviewed by a human
+
+Words used throughout the docs:
+
+- **checkpoint**: the real Hub model a MIC covers (`mistralai/Mistral-Large-4-1T-A52B`).
+- **fixture**: the small model a MIC runs on CPU, built from one checkpoint by the
+  [recipe](docs/fixtures.md#recipe) and published as `huggingface-mic/<name>-mic`.
+  Older text, repository and file names say *slim fixture* or *slim model*: same thing.
+- **shrink**: the recipe step that turns the checkpoint's config into the fixture's
+  (the *shrunk config*); [`tmic shrink`](docs/cli.md#how-was-the-fixture-shrunk)
+  shows what it kept.
+- **tiny** is not a MIC term: Transformers' own `tiny-random-*` test models are never
+  fixtures or sources, and a checkpoint named *tiny* (`openai/whisper-tiny`) is a
+  real checkpoint like any other.
+
+Fixtures run on framework PRs (CPU, seconds); real checkpoints run after merge,
+nightly and before release. **A fixture pass is a fast regression signal, not a pass
+for the real model.**
+
+This repository holds the `tmic` CLI, the fixture builder and the runner. MICs are
+published in [`huggingface-mic`](https://huggingface.co/huggingface-mic) and pinned
+by the [fleet dataset](https://huggingface.co/datasets/huggingface-mic/transformers-fleet);
+coverage is in the [coverage space](https://huggingface.co/spaces/huggingface-mic/mic-coverage).
+In Transformers, the contracts job runs on PRs and reports failures without
+blocking ([status](docs/evidence.md#transformers-ci-proof)).
+
+![A proposed link lets agents discover a model's MIC on the Hub. Transformers checks fixtures on PRs and real checkpoints in run-slow or nightly jobs; Transformers.js has its own contract entry point and baseline, with CI triggers still to define.](https://raw.githubusercontent.com/huggingface/transformers-mic/main/docs/assets/mic-overview.svg)
+
+## Try it locally
 
 ```sh
-tmic run org/model --mode human
-tmic run org/model --mode agent
+pip install "transformers-mic[runtime]" "hf-doc-builder @ git+https://github.com/huggingface/doc-builder.git"
+hf auth login
+tmic run org/model --local-only --fixtures-only --no-history --bill-to ''
 ```
 
-Runs the measured workflow through publication and the shared fleet update,
-asking for source review, changed baseline decisions, and upload confirmation.
-Repeat the command to resume; use `--local-only` to stop after validation. Agent
-mode emits JSON questions and accepts one-use `--answer` files. Run `tmic --help`
-or `tmic run --help` to discover both modes and the answer protocol.
-See [automated mode](docs/cli.md#automated-mode).
+This drafts a contract for `org/model`, builds its fixture and records baselines
+on your machine, asks you to review each step, and uploads nothing. See
+[Try it locally](docs/cli.md#try-it-locally) for the flags. `tmic run --mode agent`
+gives agents a JSON protocol for the same questions.
 
-Cloud baseline collections through the dashboard/Serge ARC runners are described
-in [cloud baselines](docs/cloud-baselines.md), including remote progress, model
-artifact retrieval, direct workflow-to-Hub upload and review before promotion.
-Activation is still pending; the guide records the operator prerequisites.
-
-## Model Integration Contract
-
-**A proposed standard**: next to any Hub model, an executable check that it works in a given framework, run by that framework's CI.
-
-## Summary
-
-For each usage path (an architecture and a task, across the checkpoints that share it), publish a small integration contract on the Hub and run it from framework CI.
-
-A contract is ordinary user code: load the model, call the public API, report the result. The proposal runs small fixtures on framework PRs (CPU, seconds) and real checkpoints after merge, nightly, and before release. The prototype runs here, with a branch-only proof in Transformers CI. Transformers.js can use the same contracts.
-
-**A slim pass is a fast regression signal, not a pass for the real model.** Run on full checkpoints, contracts can replace model-specific integration tests in `run-slow`; other slow tests stay ([CI integration](docs/slim-models-in-transformers-ci.md)).
-
-![A proposed link lets agents discover a model's MIC on the Hub. Transformers checks slim fixtures on PRs and real checkpoints in run-slow or nightly jobs; Transformers.js has its own contract entry point and baseline, with CI triggers still to define.](docs/assets/mic-overview.svg)
-
-**[Full example](example/README.md):** a runnable MIC for SmolLM text generation in Transformers and Transformers.js, plus seven more usage paths (CLIP, BERT, T5/UMT5, Whisper, Wav2Vec2, MusicGen Melody, checkpoint-only Whisper speech) on the same runner.
-
-The first goal is CI, not a Hub feature. The same contracts could later back compatibility status, tested snippets, Colabs, or agent usage.
-
-## Problem
-
-- **Compatibility is expensive to verify.** Integration tests need real checkpoints, large downloads, and GPUs, so each PR runs only a small part of the fleet. Regressions surface late: nightly, at release, or from users.
-- **Copies drift.** Test code, documented usage, and Hub snippets diverge.
-- **Agents guess.** In two [recorded runs](docs/agent-walkthrough/README.md) on Florence-2, both agents reconstructed a working path and neither could check output against a reviewed baseline. This shows friction, not a measured MIC gain ([assessment](docs/evidence.md#how-agents-use-the-hub-today)).
-
-## The proposed standard
-
-A MIC covers one usage path and every checkpoint on it. Each part links to the [full example](example/README.md).
-
-1. **One MIC repository per slim model.** Creators' checkpoint repos stay unchanged. Hugging Face owns a model repo such as [`huggingface-mic/qwen2_5_omni-mic`](https://huggingface.co/huggingface-mic/qwen2_5_omni-mic), containing its slim weights, contract, usage and reviewed expectations. Frameworks own the review of their expectations; `tests/contracts.lock` pins a snapshot of the shared [fleet dataset](https://huggingface.co/datasets/huggingface-mic/transformers-fleet).
-2. **Fixed layout:**
-
-   ```text
-   huggingface-mic/qwen2_5_omni-mic/
-     config.json
-     model.safetensors
-     build.json
-     integration.json
-     .mic-repo.json                            # separates contract files from weights
-     integrations/transformers/
-       usage.md
-       expectations/cpu-x86_64-bf16/
-         mic-qwen2_5_omni-slim.bfloat16.json
-     integrations/transformers.js/             # when this framework is supported
-       integration.js
-       expectations/<platform>/<target>.<variant>.json
-   transformers/tests/contracts.lock           # shared fleet dataset commit SHA
-   ```
-
-   The fixture pin's `target` identifies its expectation file. See [Hub layout](docs/hub-organization.md).
-
-3. **A static manifest.** [`integration.json`](example/hub/SmolLM-integration/integration.json) declares checkpoints, each one's fixture, and per framework: entry point, variants, unsupported targets, resources, and a comparison rule per output.
-4. **User code as the contract**: the public API with default settings, printing one JSON line. As [doc-builder runnable markdown](example/hub/SmolLM-integration/integrations/transformers/usage.md), it is both documentation and test.
-5. **Checks beyond "it ran"**: generated outputs, logits within tolerance, and where training applies, finite loss and gradients and a parameter update.
-6. **Reviewed baselines** under `integrations/<framework>/expectations/<platform>/`, per target and variant. A behavior-changing PR measures candidates, has them reviewed, then publishes a new snapshot and updates its lock. Nothing updates approved values automatically.
-7. **Shared [fixtures](example/hub/mic-SmolLM-slim).** Processor files copied byte for byte; weights and config shrink. Checkpoints share a fixture only with identical processors, retained config fields, and default dtype.
-8. **Everything pinned** in the shared [fleet dataset](https://huggingface.co/datasets/huggingface-mic/transformers-fleet): contract, fixture, checkpoint, and dependency revisions. Transformers keeps only the dataset commit SHA in `tests/contracts.lock`.
-
-[`run.py`](example/run.py) implements the runner prototype and validates its schemas. Remaining pilot work: [technical design](docs/design.md#pilot).
-
-## Why on the Hub, owned by Hugging Face
-
-Hugging Face maintains contracts and fixtures without requiring creator changes. Framework maintainers review expected results in behavior-changing PRs. They live with their framework usage in the same versioned Hub model repository, and each framework pins the reviewed snapshot.
-
-## Pilot run
-
-Proposed adoption pilot: 3–5 usage paths alongside existing tests, measuring regressions, fleet cost, and maintenance. The prototype already exercises eight contracts.
-
-Early results on 1,468 Transformers `main` commits over five months ([shadow backfill](docs/evidence.md#shadow-backfill)):
-
-- Frozen contracts caught the UMT5 regression ([#49135](https://github.com/huggingface/transformers/pull/49135)) at its introducing commit, flagged one benign change, and missed four regressions whose calls they didn't make.
-- With those calls added ([how](docs/improving-contracts.md)), all five are caught, no new false alarm, ~13 s per commit on CPU. The new Whisper call found a live bug ([#49403](https://github.com/huggingface/transformers/issues/49403)).
-- Scheduled runs on `main` caught a Whisper regression the night it merged, after its PR's CI had passed ([#49456](https://github.com/huggingface/transformers/issues/49456)).
-- A call added for one bug caught another nobody targeted: Whisper's assisted `generate` broken by [#48981](https://github.com/huggingface/transformers/pull/48981) for 41 commits, from its introducing commit ([third round](docs/evidence.md#third-round-second-round-calls-and-bfloat16-smollm)).
-- A proof job runs in Transformers' own PR CI runner and image, on a branch of `huggingface/transformers`: 8 fixtures in 17 s, selected from changed files, open bugs as narrowed known failures. A reverted UMT5 fix fails it with the backfill's exact deltas, and the repro command in the job summary gives the same failure on a Mac ([proof](docs/transformers-ci-proof.md)).
-- No real regression has needed an overfit fixture yet: random twins also caught MusicGen Melody's dropped conditioning (#48679) and Whisper's left-padding bug (#48028) once controlled first segments reached its trigger. Whisper assisted decoding #48108 still eludes both ([replays](docs/evidence.md#overfit-or-random-weights-on-real-regressions)).
-
-Agent reuse is measured separately ([recipe](docs/agent-walkthrough/README.md#controlled-comparison-with-and-without-a-mic)). Remote-code models are out of initial scope.
+Cloud baselines and publication are for maintainers: [CLI guide](docs/cli.md),
+[cloud baselines](docs/cloud-baselines.md) (dashboard activation is still pending).
 
 ## Documents
 
-- [MIC for Transformers maintainers](docs/slides/index.html): async HTML slides on creating small models, CI usage, and investigating dashboard failures.
-- [Full example](example/README.md): runnable SmolLM MIC, every part of the standard; the runner on eight contracts.
-- [Evidence](docs/evidence.md): experiments, regression replay, shadow backfill, overfit vs random.
-- [Smoke vs assertions](docs/smoke-vs-assertions.md): which caught regressions raised, and which only a value check sees.
-- [Problems and opened questions](docs/problems-and-opened-questions.md): what the pilot must settle.
-- [Slim models in Transformers CI](docs/slim-models-in-transformers-ci.md): PR and `run-slow` flows.
-- [Transformers CI proof](docs/transformers-ci-proof.md): the fleet in Transformers PR CI, with a one-page write-up for maintainers.
-- [Technical design](docs/design.md): layout, CI, checks, baselines, runner.
-- [Improving contracts](docs/improving-contracts.md): finding and closing coverage gaps.
-- [End-to-end tests](docs/end-to-end-tests.md): every check in this repo, with commands.
-- [Small fixtures](docs/fixtures.md): the fixture recipe and its experiments.
-- [Agent walkthroughs](docs/agent-walkthrough/README.md): recorded Claude and Codex runs.
+Start with:
+
+- [CLI guide](docs/cli.md): `tmic`, from a checkpoint to a published MIC.
+- [The standard](docs/standard.md): why MICs, the repository layout, manifest, checks and pins.
+- [Fixtures](docs/fixtures.md): the shrink recipe and the weight experiments.
+- [Evidence](docs/evidence.md): replays, backfills, stability and cost.
+- [Pilot](docs/pilot.md): the proposed adoption pilot and the results so far.
+
+Details: [full example](example/README.md), [technical design](docs/design.md),
+[Hub layout](docs/hub-organization.md), [fixtures in Transformers CI](docs/slim-models-in-transformers-ci.md),
+[Transformers CI proof](docs/transformers-ci-proof.md), [improving contracts](docs/improving-contracts.md),
+[smoke vs assertions](docs/smoke-vs-assertions.md), [problems and open questions](docs/problems-and-opened-questions.md),
+[cloud baselines](docs/cloud-baselines.md), [end-to-end tests](docs/end-to-end-tests.md),
+[agent walkthroughs](docs/agent-walkthrough/README.md), [maintainer slides](docs/slides/index.html),
+[changelog](CHANGELOG.md), [releasing](docs/release.md).

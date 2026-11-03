@@ -118,6 +118,24 @@ def failure_details(log, command=()):
     return text[-24000:], evidence
 
 
+# Build phases that run before the contract does (example/build_fixtures.py
+# report_phase): a failure there is a tooling or checkpoint problem, and no
+# edit to usage.md or integration.json can fix it. Mistral-Large-4 spent its
+# whole repair budget on a 404 for pytorch_model.bin raised in the first one.
+PRE_CONTRACT_PHASES = (
+    "Inspect checkpoint",
+    "Load the small source checkpoint unchanged",
+    "Initialize fixture",
+    "Initialize slim fixture",  # the phase name before 2026-11-02
+)
+
+
+def failed_phase(text):
+    """The last build phase the log reports, or None."""
+    phases = re.findall(r'^MIC_PROGRESS \{"phase": "([^"]+)"', text, re.MULTILINE)
+    return phases[-1] if phases else None
+
+
 def eligible(workspace, stage, log, command=()):
     generated = (
         workspace.state.get("origin") == "llm"
@@ -131,6 +149,8 @@ def eligible(workspace, stage, log, command=()):
     ):
         return False
     text, _ = failure_details(log, command)
+    if stage == "build" and failed_phase(text) in PRE_CONTRACT_PHASES:
+        return False
     return any(
         marker in text
         for marker in (
@@ -148,6 +168,9 @@ def eligible(workspace, stage, log, command=()):
             "OfflineModeIsEnabled",
             "401 Client Error",
             "403 Client Error",
+            # A missing package is the environment's problem, not the contract's.
+            "library but it was not found in your environment",
+            "Missing runtime dependency",
         )
     )
 
@@ -194,6 +217,8 @@ def propose(args, workspace, stage, log, folder, state, save, command=()):
             model=args.llm_model,
             provider=args.provider,
             bill_to=args.bill_to,
+            # Greedy first (this attempt is already recorded); a second repair samples.
+            temperature=0.0 if len(state.get("repairs", [])) <= 1 else 0.7,
         )
         # A repair cannot rename the contract; the model often re-derives the
         # name from the checkpoint id (Qwen3-0.6B), which the plan schema rejects.

@@ -260,13 +260,52 @@ def keep_large_checkpoints_off_cpu(manifest, parameters):
 
 def parameter_count(model, revision):
     info = HfApi().model_info(model, revision=revision, expand=["safetensors"])
-    return getattr(info.safetensors, "total", None)
+    total = getattr(info.safetensors, "total", None)
+    if total is None:
+        from . import inspection
+
+        total = inspection.explicit_parameter_count(model, revision)
+    return total
+
+
+def check_encoder_decoder_calls(plan, config):
+    """An encoder-decoder forward needs decoder inputs; the prompt says so and Whisper
+    drafts still called model(input_features), which raises inside the decoder."""
+    if not config.get("is_encoder_decoder"):
+        return
+    # Speech seq2seq only: Florence-2 and RT-DETR are encoder-decoders that build
+    # their own decoder inputs, and their approved contracts call model(pixel_values).
+    try:
+        import transformers
+
+        cls = getattr(transformers, (config.get("architectures") or [""])[0], None)
+    except Exception:
+        cls = None
+    if getattr(cls, "main_input_name", None) != "input_features":
+        return
+    import ast
+
+    code = "\n".join(re.findall(r"^```py runnable:[^\n]*\n(.*?)^```", plan["usage"], re.M | re.S))
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:  # the build reports real syntax errors
+        return
+    needed = {"decoder_input_ids", "decoder_inputs_embeds", "labels"}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "model":
+            names = {k.arg for k in node.keywords}
+            if None in names or names & needed:  # **inputs may carry them
+                continue
+            raise ValueError(
+                f"line {node.lineno}: model(...) of an encoder-decoder needs decoder inputs; pass "
+                "decoder_input_ids starting from config.decoder_start_token_id, or labels="
+            )
 
 
 def check_partial_training(plan, context):
     """Above ~3B parameters the real checkpoint's training step must freeze most of it."""
-    count = context.get("parameters") or 0
-    if count > 3e9 and not context.get("fixtures_only") and "requires_grad_(" not in plan["usage"]:
+    count = loaded_parameters(context) or 0
+    if count > 3e9 and "requires_grad_(" not in plan["usage"]:
         raise ValueError(
             f"the checkpoint has {count / 1e9:.1f}B parameters: a full bfloat16 training step "
             "(weights plus gradients) does not fit the 22 GB GPU; freeze the model with "
@@ -458,8 +497,13 @@ def check_loss_has_gradients(plan):
 
 
 def loaded_parameters(context):
-    """The checkpoint size the contract loads: none for a fixtures-only contract (Kimi K2.5's 1T)."""
-    return None if context.get("fixtures_only") else context.get("parameters")
+    """The checkpoint size the contract loads: none for a fixtures-only contract (Kimi K2.5's 1T),
+    nor above GPU_PARAMETER_LIMIT, where tmic measures only the slim fixture (Mistral-Large-4's
+    1T draft was rejected for a bfloat16 load and a frozen training step it would never run)."""
+    count = context.get("parameters")
+    if context.get("fixtures_only") or (count or 0) > GPU_PARAMETER_LIMIT:
+        return None
+    return count
 
 
 def check_float16_load(plan, config, parameters=None):
@@ -521,6 +565,35 @@ def check_label_arguments(plan, config):
         )
 
 
+def names_per_layer_kind(real, limit=80, pattern=False):
+    """One loaded parameter name per layer kind, not only block 0: Mistral-Large-4's
+    block 0 is its one dense layer, so a block-0 list hides every MoE expert parameter.
+
+    pattern=True writes layer indices as N: the slim fixture keeps other indices than
+    the checkpoint (DeepSeek-V3.2's first MoE layer is 3 there and 1 in the fixture),
+    so a contract that copied a real index failed with a KeyError on the fixture.
+    """
+    kinds = {}
+    for n in sorted(real, key=lambda n: [int(t) if t.isdigit() else t for t in n.split(".")]):
+        kinds.setdefault(re.sub(r"\.\d+\.", ".N.", n), n)
+    return sorted(kinds if pattern else kinds.values())[:limit]
+
+
+def loaded_parameter_names(config):
+    """Parameter names after loading, from the config's architecture on the meta device."""
+    import torch
+    import transformers
+
+    cls = getattr(transformers, (config.get("architectures") or [""])[0], None)
+    if not isinstance(cls, type) or not issubclass(cls, transformers.PreTrainedModel):
+        return None
+    try:
+        with torch.device("meta"):
+            return {n for n, _ in cls(cls.config_class.from_dict(config)).named_parameters()}
+    except Exception:  # advisory; the name check and the build still run
+        return None
+
+
 def check_parameter_names(plan, config):
     """Reject usage that names parameters the architecture does not have."""
     names = set(
@@ -541,7 +614,12 @@ def check_parameter_names(plan, config):
             }
     except Exception:  # inspection is advisory; the build still runs the contract
         return
-    missing = sorted(names - real)
+    # The prompt asks for suffix lookups (n.endswith("mlp.gate_proj.weight")): a
+    # dotted suffix of a real name is a real name. Mistral-Large-4's draft failed
+    # three times on this until 2026-11-02.
+    missing = sorted(
+        name for name in names - real if not any(r.endswith("." + name) for r in real)
+    )
     if missing:
         import difflib
 
@@ -553,10 +631,7 @@ def check_parameter_names(plan, config):
             return (difflib.get_close_matches(name, same, n=1, cutoff=0.0) or ["?"])[0]
 
         closest = {name: nearest(name) for name in missing}
-        # The first block and the non-repeated modules show the real naming scheme.
-        hints = sorted(n for n in real if ".0." in n or not re.search(r"\.\d+\.", n))[
-            :60
-        ]
+        hints = names_per_layer_kind(real)
         raise ValueError(
             f"Usage names parameters {cls.__name__} does not have after loading "
             f"(checkpoint keys are remapped on load). Closest loaded names: {closest}; "
@@ -645,6 +720,42 @@ def sentencepiece_tokenizer(model_type):
     return False
 
 
+COMPARE_RULES = ("exact", "allclose", "all_true", "true")
+
+
+def normalize_compare(plan):
+    """Spelling slips in output rules ('alltrue', 'all-true'): never spend a retry on them.
+
+    Mistral-Large-4's draft failed create on 'alltrue' (2026-11-02).
+    """
+    outputs = (plan.get("manifest") or {}).get("outputs") if isinstance(plan, dict) else None
+    if not isinstance(outputs, dict):
+        return
+    spelled = {re.sub(r"[^a-z]", "", rule): rule for rule in COMPARE_RULES}
+    for rule in outputs.values():
+        if isinstance(rule, dict) and isinstance(rule.get("compare"), str):
+            rule["compare"] = spelled.get(re.sub(r"[^a-z]", "", rule["compare"].lower()), rule["compare"])
+
+
+def drop_unknown_manifest_keys(plan):
+    """Remove top-level manifest keys the MIC schema does not define.
+
+    The schema is open at the top level, so a draft's invention survives into the
+    workspace; Mistral-Large-4's "checkpoints_note": "placeholder" then made every
+    repair fail "preserve the entire manifest" when the repair dropped it.
+    """
+    manifest = plan.get("manifest") if isinstance(plan, dict) else None
+    if not isinstance(manifest, dict):
+        return []
+    known = set(manifest_schema().get("properties", {}))
+    dropped = sorted(k for k in manifest if k not in known)
+    for key in dropped:
+        del manifest[key]
+    if dropped:
+        print(f"tmic: dropped manifest keys the MIC schema does not define: {dropped}", file=sys.stderr)
+    return dropped
+
+
 def propose_valid(context, args, model, fixture, old=None):
     # A provider can emit schema-valid JSON that violates runner conventions.
     # Return validation feedback for one repair; never execute an invalid draft.
@@ -656,9 +767,12 @@ def propose_valid(context, args, model, fixture, old=None):
                 model=args.llm_model,
                 provider=args.provider,
                 bill_to=args.bill_to,
+                temperature=0.0 if attempt == 0 else 0.7,
             )
             if isinstance(plan.get("name"), str):  # "Qwen3.5-0.8B" is a slug away from valid
                 plan["name"] = re.sub(r"[^A-Za-z0-9_-]", "-", plan["name"])
+            normalize_compare(plan)
+            drop_unknown_manifest_keys(plan)
             validate_plan(plan, model, fixture, old)
             check_imports(plan)
             check_undefined_names(plan)
@@ -673,11 +787,14 @@ def propose_valid(context, args, model, fixture, old=None):
                 check_model_classes(plan, context["config"])
                 check_label_arguments(plan, context["config"])
                 check_parameter_names(plan, context["config"])
+                check_encoder_decoder_calls(plan, context["config"])
             check_partial_training(plan, context)
             return plan, llm
         except (ValueError, jsonschema.ValidationError) as exc:
             if attempt == 2:
                 raise
+            print(f"tmic: planner draft {attempt + 1}/3 rejected: {str(exc).splitlines()[0][:300]}", file=sys.stderr)
+            plan = plan if plan is not None else getattr(exc, "plan", None)
             context = {
                 **context,
                 "previous_draft": plan,
@@ -823,6 +940,10 @@ def create(args):
             "request": "Design a small useful integration path; include inference and a training step where supported.",
         }
         context.update(references.collect(args.model, revision, config))
+        real = loaded_parameter_names(config)
+        if real:
+            # Drafts guessed dense names on MoE layers (Mistral-Large-4); give the real ones.
+            context["parameter_names"] = names_per_layer_kind(real, pattern=True)
         sample = resources.catalog() / "hub/BERT-integration"
         context["example_plan"] = {
             "name": "BERT",
@@ -831,6 +952,17 @@ def create(args):
             "rationale": "Use the model's public API and measure expectations by execution.",
             "historical_candidates": [],
         }
+        context["example_reason"] = "generic example: no closer approved contract"
+        try:
+            from . import examples
+
+            nearest = examples.nearest_contract(config, model=args.model)
+        except Exception as error:  # an unreachable fleet keeps the generic example
+            print(f"tmic: closest-contract lookup failed ({error}); using the BERT example", file=sys.stderr)
+            nearest = None
+        if nearest:
+            context["example_plan"], context["example_reason"] = nearest
+            print(f"tmic: planner example: {context['example_reason']}", file=sys.stderr)
         plan, llm = propose_valid(context, args, args.model, fixture)
         manifest = plan["manifest"]
         if args.name:
@@ -840,12 +972,12 @@ def create(args):
         if args.fixtures_only:
             manifest["integrations"]["transformers"]["targets"] = ["fixtures"]
         if dropped := fixture_runs_anywhere(manifest):
-            print(f"tmic: the slim fixture runs anywhere: dropped its {', '.join(dropped)}", file=sys.stderr)
+            print(f"tmic: the fixture runs anywhere: dropped its {', '.join(dropped)}", file=sys.stderr)
         for repo in keep_large_checkpoints_off_cpu(
             manifest, {args.model: context["parameters"]}
         ):
             if (context["parameters"] or 0) > GPU_PARAMETER_LIMIT:
-                print(f"tmic: {repo} is above 10B parameters and does not fit the GPU: only the slim fixture is measured", file=sys.stderr)
+                print(f"tmic: {repo} is above 10B parameters and does not fit the GPU: only the fixture is measured", file=sys.stderr)
             else:
                 print(f"tmic: {repo} is above 1B parameters: measuring it on GPU, in bfloat16 only", file=sys.stderr)
         workspace.from_plan(
