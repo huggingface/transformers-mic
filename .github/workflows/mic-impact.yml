@@ -86,6 +86,7 @@ jobs:
 
       - name: Observe
         run: |
+          set -o pipefail  # a crashed collection must not be published and pushed
           if [ "$GITHUB_EVENT_NAME" = workflow_run ]; then mode=(--refresh); else mode=(--days "$DAYS" --draft "$DRAFTS"); fi
           python experiments/impact.py --results "$RESULTS" "${mode[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
 

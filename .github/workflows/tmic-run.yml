@@ -114,7 +114,10 @@ jobs:
           status=$(python -c "import json;print(json.load(open('result.json')).get('status'))")
           echo "### tmic run $MODEL: $status (exit $code)" >> "$GITHUB_STEP_SUMMARY"
       - name: Ready for cloud measurement?
-        run: python .github/scripts/auto_mic.py ready --model "$MODEL" | tee -a "$GITHUB_STEP_SUMMARY"
+        # pipefail: without it tee's success would hide a failed gate, and publish would run.
+        run: |
+          set -o pipefail
+          python .github/scripts/auto_mic.py ready --model "$MODEL" | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Fixture report
         if: always()
         run: |
