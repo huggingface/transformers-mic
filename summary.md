@@ -32,7 +32,7 @@ Proposed bar for rule B (constants `DECISION` in `experiments/impact.py`):
 
 ## 2. False alarms
 
-- PR failure groups: 317 — infra 104 (33%), pre-existing 142 (45%), systemic (same case on ≥3 PRs that day) 11 (3%), PR-only 60 (19%).
+- PR failure groups: 361 — infra 138 (38%), pre-existing 146 (40%), systemic (same case on ≥3 PRs that day) 11 (3%), PR-only 66 (18%).
 - PRs that saw a MIC failure: 85; of those, only failures they did not cause: **71 (84%)**.
 - PR-only cases that recovered with no push (flaky/environment): 0; merged and main stayed green for 3 days: 0; labelled `false-alarm`/`flake`: 0.
 

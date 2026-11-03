@@ -1,28 +1,28 @@
 {
  "date": "2026-11-03",
  "main": {
-  "failed": 269,
+  "failed": 122,
   "now": {
    "cases": 240,
    "failing": 21,
    "rate": 8.75
   },
-  "rate": 2.102876797998749,
-  "total": 12792
+  "rate": 1.2360688956433636,
+  "total": 9870
  },
  "prs": {
-  "failed": 2450,
+  "failed": 1246,
   "now": {
-   "cases": 27962,
-   "failing": 1159,
-   "rate": 4.144910950575781
+   "cases": 6749,
+   "failing": 669,
+   "rate": 9.91257964142836
   },
-  "rate": 4.623426619614651,
-  "total": 52991
+  "rate": 9.915645392328505,
+  "total": 12566
  },
  "truncated": {
   "main": [],
   "prs": []
  },
- "window_days": 30
+ "window_days": 1
 }
