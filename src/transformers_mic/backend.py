@@ -74,6 +74,37 @@ def dispatch(tool, workspace, args):
         write(workspace / ".mic/auto.json", result)
         print(json.dumps(result))
         return 0
+    if tool == "fixture-stage":
+        import json
+
+        builder = importlib.import_module("build_fixtures")
+        builder.HERE = runner.HERE
+        name, fixture, out, result, *artifact = args
+        lock = runner.load(
+            runner.HERE / "transformers/tests/contracts/fleet.lock", "fleet-lock"
+        )
+        if lock.get("local_patches"):
+            importlib.import_module("patches").apply(sorted(lock["local_patches"]))
+        entry = lock["contracts"][name]
+        root = (
+            runner.HERE / "transformers/tests/contracts" / entry["integration"]["path"]
+        ).resolve()
+        manifest = runner.load(root / "integration.json", "integration")
+        import torch
+
+        torch.set_num_threads(2)
+        review = builder.review_fixture(
+            fixture,
+            manifest["fixtures"][fixture],
+            entry["checkpoints"],
+            Path(out),
+            artifact=Path(artifact[0]) if artifact else None,
+            inspect_checkpoint=importlib.import_module(
+                "transformers_mic.inspection"
+            ).inspect_checkpoint,
+        )
+        Path(result).write_text(json.dumps(review, indent=1, default=str) + "\n")
+        return 0
     if tool == "build-stage":
         builder = importlib.import_module("build_fixtures")
         builder.HERE = runner.HERE

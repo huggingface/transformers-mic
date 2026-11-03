@@ -11,12 +11,14 @@ import time
 from filelock import FileLock, Timeout
 from huggingface_hub.utils import validate_repo_id
 
-from . import batch, fleet, model_baselines, contract_repair, terminal
+from . import batch, fleet, fixture_review, model_baselines, contract_repair, terminal
 from .interaction import Interaction, Pending, PROTOCOL_VERSION, load_answer
 from .workspace import Workspace, read, write
 
 NEEDS_INPUT = 3
 STAGES = (
+    "shrink",
+    "fixture-review",
     "source",
     "build",
     "auto",
@@ -233,7 +235,7 @@ def run_locked(args, root, answer):
         else {
             "model": args.model,
             "config": config,
-            "next_stage": "source",
+            "next_stage": STAGES[0],
             "stages": {},
         }
     )
@@ -263,7 +265,7 @@ def run_locked(args, root, answer):
         )
         != execution
     ):
-        state["next_stage"] = "source"
+        state["next_stage"] = STAGES[0]
         state.pop("dataset_revision", None)
     state["execution"] = execution
     resume = shlex.join(
@@ -349,7 +351,23 @@ def run_locked(args, root, answer):
             not in workspace.manifest["integrations"]["transformers"]["targets"]
         ):
             steps = [step for step in steps if step != "auto"]
+        if workspace.state_path.exists() and not fixture_review.needed(workspace):
+            steps = [s for s in steps if s not in ("shrink", "fixture-review")]
         return steps
+
+    def first_unreviewed():
+        """The earliest review whose subject changed since it was approved."""
+        if fixture_review.needed(workspace):
+            if fixture_review.stale(workspace):
+                return "shrink"
+            if (
+                state.get("reviewed_fixture_sha256")
+                != fixture_review.record(workspace)["review_sha256"]
+            ):
+                return "fixture-review"
+        if state.get("reviewed_source_sha256") != workspace.contract_digest():
+            return "source"
+        return None
 
     def step_prefix(name):
         nonlocal display_plan
@@ -431,10 +449,34 @@ def run_locked(args, root, answer):
             )
         return result["exit_code"], log
 
+    def review_source():
+        manifest = workspace.manifest
+        integration = manifest["integrations"]["transformers"]
+        usage = workspace.contract_root / integration["entry_point"]
+        variants = list(integration.get("variants", {"default": {}}))
+        ask(
+            args,
+            "Review the contract code before it runs.",
+            f"Usage: {usage}\n"
+            f"Manifest: {workspace.contract_root / 'integration.json'}\n"
+            f"Targets: {', '.join(integration['targets'])} · Variants: {', '.join(variants)}\n"
+            "The checks execute the Python in usage.md, unsandboxed, for every target and variant.\n\n"
+            + usage.read_text(),
+            kind="source-review",
+            context={
+                "files": [
+                    file_snapshot(workspace.contract_root / "integration.json"),
+                    file_snapshot(usage),
+                ],
+                "targets": integration["targets"],
+                "variants": variants,
+            },
+        )
+
     def review_repair(attempt):
         if not contract_repair.current(workspace, attempt):
             attempt["status"] = "stale"
-            state["next_stage"] = "source"
+            state["next_stage"] = STAGES[0]
             save()
             return False
         proposal = read(attempt["proposal"]["path"])
@@ -466,7 +508,7 @@ def run_locked(args, root, answer):
             return False
         if not contract_repair.current(workspace, attempt):
             attempt["status"] = "stale"
-            state["next_stage"] = "source"
+            state["next_stage"] = STAGES[0]
             save()
             return False
         contract_repair.apply(workspace, attempt)
@@ -558,7 +600,7 @@ def run_locked(args, root, answer):
                 raise ValueError("Created workspace does not match the requested model")
         if state.get("fingerprint") != fingerprint():
             # Manual source/reference/lock edits invalidate previous checks and decisions.
-            state["next_stage"] = "source"
+            state["next_stage"] = STAGES[0]
             state.pop("dataset_revision", None)
         destination = {"fleet": args.fleet, "contract_name": args.contract_name}
         if state.get("destination", destination) != destination:
@@ -578,11 +620,9 @@ def run_locked(args, root, answer):
         save()
         display_plan = visible_steps(state["next_stage"])
         while state["next_stage"] != "done":
-            if (
-                state["next_stage"] != "source"
-                and state.get("reviewed_source_sha256") != workspace.contract_digest()
-            ):
-                state["next_stage"] = "source"
+            gate = first_unreviewed()
+            if gate and STAGES.index(state["next_stage"]) > STAGES.index(gate):
+                state["next_stage"] = gate
                 save()
             name = state["next_stage"]
             if args.local_only and STAGES.index(name) >= STAGES.index(
@@ -601,41 +641,64 @@ def run_locked(args, root, answer):
                 return 0
             before = fingerprint()
             code, log = 0, None
-            if name == "source":
-                if args.mode == "human":
-                    print(
-                        "\n"
-                        + terminal.color(step_prefix(name), "title")
-                        + " Review contract",
-                        flush=True,
-                    )
-                manifest = workspace.manifest
-                usage = (
-                    workspace.contract_root
-                    / manifest["integrations"]["transformers"]["entry_point"]
-                )
-                ask(
-                    args,
-                    "Review the executable contract before running it.",
-                    f"Manifest: {workspace.contract_root / 'integration.json'}\nUsage: {usage}\n"
-                    f"Targets: {manifest['integrations']['transformers']['targets']}\n"
-                    f"Variants: {list(manifest['integrations']['transformers']['variants'])}\n"
-                    "All declared targets and variants will be checked.",
-                    kind="source-review",
-                    context={
-                        "files": [
-                            file_snapshot(workspace.contract_root / "integration.json"),
-                            file_snapshot(usage),
-                        ],
-                        "targets": manifest["integrations"]["transformers"]["targets"],
-                        "variants": list(
-                            manifest["integrations"]["transformers"]["variants"]
-                        ),
-                    },
-                )
-                if before != fingerprint():
-                    continue
-                state["reviewed_source_sha256"] = workspace.contract_digest()
+            if name == "shrink":
+                stale = fixture_review.needed(workspace) and fixture_review.stale(workspace)
+                code, log = stage(name, ["fixture"]) if stale else (0, None)
+            elif name == "fixture-review":
+                if fixture_review.needed(workspace):
+                    data = fixture_review.record(workspace)
+                    if state.get("reviewed_fixture_sha256") != data["review_sha256"]:
+                        if args.mode == "human":
+                            print(
+                                "\n"
+                                + terminal.color(step_prefix(name), "title")
+                                + " Review tiny model",
+                                flush=True,
+                            )
+                        note = (
+                            "The build produced a different tiny model than the preview "
+                            "you approved; review it again.\n"
+                            if state.get("reviewed_fixture_sha256") and data.get("artifact")
+                            else ""
+                        )
+                        page = workspace.root / fixture_review.PAGE
+                        answer = ask(
+                            args,
+                            "Check the tiny model's config and serialized weight names.",
+                            note + fixture_review.details(data, page),
+                            kind="fixture-review",
+                            context={
+                                "fixture": fixture_review.summary(data),
+                                "config": file_snapshot(
+                                    fixture_review.folder(workspace) / "config.json"
+                                ),
+                                "review": file_snapshot(
+                                    workspace.root / fixture_review.RECORD
+                                ),
+                                "page": str(page),
+                                "headline": fixture_review.headline(data),
+                            },
+                        )
+                        if (
+                            answer == "edit"
+                            or before != fingerprint()
+                            or fixture_review.stale(workspace)
+                        ):
+                            continue
+                        state["reviewed_fixture_sha256"] = data["review_sha256"]
+            elif name == "source":
+                if state.get("reviewed_source_sha256") != workspace.contract_digest():
+                    if args.mode == "human":
+                        print(
+                            "\n"
+                            + terminal.color(step_prefix(name), "title")
+                            + " Review contract",
+                            flush=True,
+                        )
+                    review_source()
+                    if before != fingerprint():
+                        continue
+                    state["reviewed_source_sha256"] = workspace.contract_digest()
             elif name == "build":
                 code, log = stage(
                     name,
@@ -645,6 +708,10 @@ def run_locked(args, root, answer):
                 )
                 if not code:
                     state.pop("rebuild_after_repair", None)
+                    if fixture_review.needed(workspace):
+                        # fixture/ becomes the built model; a build that had to
+                        # change the reviewed config sends the review back.
+                        code, log = stage(name, ["fixture"])
             elif name == "auto":
                 if (
                     "fixtures"
@@ -693,7 +760,7 @@ def run_locked(args, root, answer):
                             },
                         )
                         if before != fingerprint():
-                            state["next_stage"] = "source"
+                            state["next_stage"] = STAGES[0]
                             save()
                             continue
                         options += [
@@ -730,7 +797,7 @@ def run_locked(args, root, answer):
                     },
                 )
                 if before != fingerprint():
-                    state["next_stage"] = "source"
+                    state["next_stage"] = STAGES[0]
                     save()
                     continue
                 code, log = stage(name, ["publish", "--execute"])
@@ -763,7 +830,7 @@ def run_locked(args, root, answer):
                     },
                 )
                 if before != fingerprint():
-                    state["next_stage"] = "source"
+                    state["next_stage"] = STAGES[0]
                     save()
                     continue
                 options = [
@@ -863,7 +930,7 @@ def run_locked(args, root, answer):
                     },
                 )
                 if failed_fingerprint != fingerprint():
-                    state["next_stage"] = "source"
+                    state["next_stage"] = STAGES[0]
                 save()
                 continue
             index = STAGES.index(name) + 1

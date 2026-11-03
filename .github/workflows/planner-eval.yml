@@ -92,12 +92,12 @@ jobs:
           [ -n "$LLM_MODEL" ] && args+=(--llm-model "$LLM_MODEL")
           start=$(date +%s)
           tmic run "${args[@]}" > result.json
-          # Approve the source review only; stop at the first failure or once the build ran.
-          for i in 1 2 3; do
+          # Approve the tiny-model and source reviews only; stop at the first failure or once the build ran.
+          for i in 1 2 3 4; do
             python - <<'PY' || break
           import json, sys
           q = json.load(open("result.json")).get("pending_question")
-          if not q or q["kind"] != "source-review":
+          if not q or q["kind"] not in ("fixture-review", "source-review"):
               sys.exit(1)
           json.dump({"question_id": q["question_id"], "answer": "approve", "reason": "planner eval"}, open("answer.json", "w"))
           PY
@@ -107,13 +107,13 @@ jobs:
           import glob, json, os, re
           logs = "work/eval/.mic/automation/logs"
           read = lambda name: open(f"{logs}/{name}").read() if os.path.exists(f"{logs}/{name}") else ""
-          create, build = read("create.log"), read("build.log")
+          create, shrink, build = read("create.log"), read("shrink.log"), read("build.log")
           stages = {}
           if os.path.exists("work/eval/.mic/automation.json"):
               stages = json.load(open("work/eval/.mic/automation.json")).get("stages", {})
           code = lambda s: stages.get(s, {}).get("exit_code")
           example = re.findall(r"planner example: (.*)", create)
-          failure = [l for l in (build or create).splitlines() if re.match(r"(\w+Error|tmic: |the contract fails)", l)]
+          failure = [l for l in (build or shrink or create).splitlines() if re.match(r"(\w+Error|tmic: |the contract fails)", l)]
           row = {
               "model": os.environ["MODEL"], "repeat": int(os.environ["REPEAT"]),
               "create_ok": code("create") == 0, "build_ok": code("build") == 0,

@@ -736,6 +736,89 @@ def build_fixture(*args, **kwargs):
         return _build_fixture(*args, **kwargs)
 
 
+def saved_keys(folder):
+    """Tensor names as the fixture serializes them (the file a loader reads)."""
+    folder = Path(folder)
+    if (folder / "model.safetensors").exists():
+        from safetensors import safe_open
+
+        with safe_open(folder / "model.safetensors", framework="pt") as weights:
+            return sorted(weights.keys()), "model.safetensors"
+    state = torch.load(folder / "pytorch_model.bin", map_location="meta", weights_only=True)
+    return sorted(state), "pytorch_model.bin"
+
+
+def review_fixture(name, fixture, revisions, out, artifact=None, inspect_checkpoint=None):
+    """Write the shrunk config and seeded random weights for review, running no contract code.
+
+    The contract (usage.md) has not been reviewed yet, so this stops where the
+    build starts running it: the config, tensor names and file format are final
+    here; only the weight values change once the build gates them. With
+    `artifact`, describe that already-built fixture instead of shrinking again.
+    Returns what a reviewer compares against the source checkpoint.
+    """
+    recipe = fixture["build"]
+    source_repo = fixture["built_from"]
+    revision = revisions[source_repo]
+    report_phase("Inspect checkpoint", source_repo)
+    source = source_snapshot(source_repo, revision, recipe)
+    cls = model_class(source, recipe)
+    from transformers_mic import inspection
+
+    source_keys = sorted(inspection.checkpoint_keys(source_repo, revision, source))
+    if artifact is None:
+        lacks = (inspect_checkpoint(cls, source, source_repo, revision) if inspect_checkpoint
+                 else missing_parameters(cls, run.checkpoint_path(source_repo, revision)))
+        checkpoint = {"keys": set(source_keys), "binary": inspection.loads_binary(source_repo, revision, source)}
+        dtype = getattr(torch, source_dtype(source))
+        real = keeps_source(source, cls, shrunk_config(source, cls, recipe))
+        if real:
+            report_phase("Load the small source checkpoint unchanged")
+            model = cls.from_pretrained(run.checkpoint_path(source_repo, revision), dtype=dtype).eval()
+        else:
+            report_phase("Initialize fixture")
+            torch.manual_seed(recipe["seed"])
+            model = cls._from_config(shrunk_config(source, cls, recipe), dtype=torch.float32).eval().to(dtype)
+            restore_frozen(model, source, source_repo, revision, recipe)
+        save(model, out, source, lacks, recipe, checkpoint)
+        del model
+        weights = "real" if real else "random (seeded; the build checks and may fit them)"
+        build = {"model_class": cls.__name__, "shrink": "none" if real else "rule", "recipe": recipe}
+    else:
+        build = json.loads((Path(artifact) / "build.json").read_text())
+        lacks = build.get("missing_parameters", [])
+        weights = build.get("weights")
+    report_phase("Compare with the source checkpoint")
+    from transformers_mic import shrink_view
+
+    report = shrink_view.analyze({
+        "fixture": name,
+        "source": f"{source_repo}@{revision}",
+        "build": build,
+        "original": shrink_view.config_dict(source),
+        "shrunk": shrink_view.config_dict(out, cls.config_class.model_type),
+    })
+    keys, weights_file = saved_keys(out)
+    return {
+        "fixture": name,
+        "source": {"repo": source_repo, "revision": revision},
+        "model_class": cls.__name__,
+        "weights": weights,
+        "weights_file": weights_file,
+        "files": sorted(f.name for f in Path(out).iterdir() if f.is_file()),
+        "config": json.loads((Path(out) / "config.json").read_text()),
+        "source_keys": source_keys,
+        "fixture_keys": keys,
+        "missing_parameters": lacks,
+        "parameters": report.get("parameters"),
+        "config_changes": report["config_changes"],
+        "config_unchanged": report["config_unchanged"],
+        "findings": shrink_view.verdict(report),
+        "tester_notes": (report.get("tester") or {}).get("findings") or [],
+        "page": shrink_view.render(report),
+    }
+
+
 def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out, keep_random=False, inspect_checkpoint=None, contract_repo=None, reshrink=False):
     recorded = None if reshrink else recorded_config(out, fixture)
     previous_tester = None  # save() clears `out`, so read the old record now

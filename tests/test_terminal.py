@@ -1,5 +1,7 @@
-from transformers_mic.terminal import failure
+import subprocess
+
 from transformers_mic import terminal
+from transformers_mic.terminal import failure
 
 
 def test_gate_failure_shows_cause_threshold_and_log_instead_of_large_dictionaries():
@@ -41,4 +43,39 @@ def test_prompt_collapses_long_details_and_indents_question(capsys):
     )
     output = capsys.readouterr().out
     assert "  ? Long question" in output and "    detail 0" in output
-    assert "detail 19" not in output and "D: full details" in output
+    assert "detail 19" not in output
+    assert "D=details" in terminal.choices("confirmation")
+
+
+def test_choices_name_each_kind_s_extra_keys():
+    assert "E=edit config" in terminal.choices("fixture-review")
+    assert "D=show code" in terminal.choices("source-review")
+    assert "R=reject" in terminal.choices("contract-repair")
+
+
+def test_short_details_print_inline_instead_of_paging(monkeypatch, capsys):
+    monkeypatch.setattr(terminal, "interactive", lambda stream=None: True)
+    monkeypatch.setattr("sys.stdin.isatty", lambda: True)
+    terminal.details("line one\nline two")
+    assert "    line two" in capsys.readouterr().out
+
+
+def test_editor_falls_back_like_git(monkeypatch):
+    monkeypatch.delenv("VISUAL", raising=False)
+    monkeypatch.setenv("EDITOR", "code --wait")
+    assert terminal.editor_command() == ["code", "--wait"]
+    monkeypatch.setenv("EDITOR", "true")  # what non-interactive tools export
+    # No git core.editor configured.
+    monkeypatch.setattr(
+        subprocess, "run", lambda *a, **k: type("R", (), {"stdout": ""})()
+    )
+    monkeypatch.setattr(terminal.shutil, "which", lambda name: "/usr/bin/" + name if name == "vim" else None)
+    assert terminal.editor_command() == ["vim"]
+
+
+def test_edit_waits_for_enter_when_the_editor_fails(monkeypatch, tmp_path):
+    monkeypatch.setattr(terminal, "editor_command", lambda: ["missing-editor-binary"])
+    waited = []
+    monkeypatch.setattr("builtins.input", waited.append)
+    terminal.edit(tmp_path / "config.json")
+    assert waited and "press Enter" in waited[0]
