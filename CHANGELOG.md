@@ -7,6 +7,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `tmic run` asks about the tiny model first: it shrinks the config and writes `fixture/` in the workspace
+  (config.json and the weights in the source's serialized format) without running contract code, and shows the
+  config values that differ from the source and the serialized weight names compared with the source checkpoint.
+  Edit `fixture/config.json` (or press `E`) to change it; the edits become the recipe's `config_overrides`.
+  New question kind `fixture-review` in agent mode.
+- `tmic fixture` does the same on its own (`--json`, `--open`, `--force`).
+
+### Changed
+
+- The contract review comes after the tiny-model review and shows `usage.md` itself (`D`), not only its path.
+- `D` prints details inline instead of opening a pager, then asks again without repeating the question.
+- After the build, `fixture/` holds the built fixture; a reviewed question is not asked again while its subject
+  is unchanged.
+
 ## [0.1.1] - 2026-11-03
 
 ### Added

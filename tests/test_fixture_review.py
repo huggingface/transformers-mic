@@ -344,3 +344,25 @@ def test_edit_is_not_a_decision(monkeypatch, tmp_path):
     )
     assert edited == [config["path"]]
     assert not state.get("decisions") and "pending_question" not in state
+
+
+def test_an_overfit_build_still_counts_as_the_current_fixture(tmp_path, fake_backend):
+    root = tmp_path / "project"
+    Workspace(root).from_catalog(MODEL, "BERT", "auto", False)
+    unpublish(root)
+    workspace = Workspace(root)
+    built = root / ".mic/artifacts/bert/abc"
+    built.mkdir(parents=True)
+    recipe = workspace.manifest["fixtures"][workspace.fixture]["build"]
+    write(
+        built / "build.json",
+        {"recipe": {**recipe, "overfit": "requested"}, "built_from": {"repo": MODEL}},
+    )
+    lock = workspace.lock
+    pin = lock["contracts"][workspace.state["contract"]]["fixtures"][workspace.fixture]
+    pin.update(path="../../../../.mic/artifacts/bert/abc", files_sha256="abc")
+    write(workspace.lock_path, lock)
+    assert fixture_review.artifact(workspace) == built.resolve()
+    data, _ = fixture_review.refresh(workspace)
+    assert fake_backend[-1][-1] == str(built.resolve())  # described, not shrunk again
+    assert data["artifact"] == str(built.resolve())

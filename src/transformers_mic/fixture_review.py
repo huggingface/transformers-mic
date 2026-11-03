@@ -146,9 +146,15 @@ def artifact(workspace):
         return None
     built = read(path / "build.json")
     fixture = workspace.manifest["fixtures"][workspace.fixture]
-    if built.get("recipe") != fixture.get("build") or built.get("built_from", {}).get(
-        "repo"
-    ) != fixture.get("built_from"):
+
+    def shape(recipe):
+        # `tmic build --weights overfit` adds "overfit" to the recipe it records;
+        # it changes the weight values, never the config or the names.
+        return {k: v for k, v in (recipe or {}).items() if k != "overfit"}
+
+    if shape(built.get("recipe")) != shape(fixture.get("build")) or built.get(
+        "built_from", {}
+    ).get("repo") != fixture.get("built_from"):
         return None
     return path
 
