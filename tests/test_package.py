@@ -1772,6 +1772,7 @@ def test_nearest_contract_prefers_shared_structure(monkeypatch, tmp_path):
     assert examples.nearest_contract(configs["org/llama"], rows=rows, model="org/llama") is None
 
 
+@pytest.mark.requires_runtime
 def test_encoder_decoder_calls_need_decoder_inputs():
     whisper = {"is_encoder_decoder": True, "architectures": ["WhisperForConditionalGeneration"]}
     usage = "```py runnable:t\nlogits = model(inputs.input_features).logits\n```\n"
