@@ -367,9 +367,11 @@ Human mode shows short failure explanations. Complete tracebacks and worker outp
 log files. Pausing prints a resume command; agent mode keeps its JSON protocol.
 
 `D` prints the full details inline (for the contract review: the code itself), then
-asks again. At the tiny-model review, `E` opens `fixture/config.json` in `$VISUAL`
-or `$EDITOR` (or waits while you edit it elsewhere), then shrinks again with your
-values and asks about the result.
+asks again. At the tiny-model review, `E` opens `fixture/config.json` in the editor
+git would use: `$VISUAL`, `$EDITOR`, git's `core.editor`, then the first of `nano`,
+`vim` or `vi`. Use a waiting command for a GUI editor (`EDITOR="code --wait"`). When
+you save and quit, tmic shrinks again with your values and asks about the result.
+If no editor starts, it waits while you edit the file elsewhere and press Enter.
 
 At `Continue? [y/N/A=always/D=details]`, choose `A` (or `a`/`always`) to approve this and
 later questions in the current process. This includes source/repair reviews,
@@ -442,6 +444,36 @@ stderr. A pending question exits **3** and includes `protocol_version: 1`,
   "context_sha256": "<hash>"
 }
 ```
+
+The first question of a new model is `fixture-review`. Its `context.fixture` is the
+comparison in structured form, and `details` is the same text a human sees:
+
+```json
+{
+  "kind": "fixture-review",
+  "choices": ["approve", "defer"],
+  "context": {
+    "fixture": {
+      "folder": "/abs/work/mic/org--model/fixture",
+      "model_class": "MistralForCausalLM",
+      "weights_file": "model.safetensors",
+      "parameters": {"original": 7241732096, "fixture": 2104320},
+      "config_changes": 6,
+      "weight_names": {"matching": 12, "only_source": [], "only_fixture": []},
+      "findings": []
+    },
+    "config": {"path": "/abs/.../fixture/config.json", "sha256": "<hash>"},
+    "review": {"path": "/abs/.../.mic/fixture-review.json", "sha256": "<hash>"}
+  }
+}
+```
+
+To change the tiny model, edit `context.config.path` and run the `resume` command
+**without** `--answer`. tmic applies the edit, shrinks again and returns a new
+`fixture-review` question with a new `question_id`. An answer to the old id comes
+back with `answer_error` and the new question attached. `.mic/fixture-review.json`
+holds the full lists (`source_keys`, `fixture_keys`, `config_changes`) when an
+agent needs more than the summary.
 
 Inspect the context and referenced files or diffs. Obtain the operator's decision
 when needed, then write a JSON answer file:
@@ -637,14 +669,24 @@ running any contract code: `config.json`, the weights in the source checkpoint's
 serialized format (same tensor names, prefix and file type), and the processor
 files. It prints the config values that differ from the source, the weight names
 with layer and expert numbers collapsed to `{n}`, sorted into names that match the
-source, names only in the source (weights the model class does not have, ignored
-on load), and names only in the tiny model, plus the `tmic shrink` findings.
+source, names only in the source (heads the model class does not have, or a
+quantized source's scales: the tiny model is dense), and names only in the tiny
+model, plus the `tmic shrink` findings. The weight names and file format follow
+the source checkpoint and cannot be edited; a mismatch points at the checkpoint
+conversion, not the config.
 
 Edit `fixture/config.json` and rerun to change the shrink: changed or added values
 become the recipe's `config_overrides` in `integration.json` (dotted paths for
 sub-configs such as `text_config.hidden_size`). `tmic run` does the same when it
 resumes. After the build, `fixture/` holds the built fixture; editing it then sends
 the run back to this review.
+
+- Only changed or added values are kept. Deleting a field does nothing; to drop
+  one, set it to `null` under `config_overrides.fields` in `integration.json`.
+- A field must exist in the model's config class, or the shrink fails with
+  `the shrunk config has no field X` and the run offers a retry.
+- Some values are derived from others; check the new comparison to see what took
+  effect.
 
 ## How was the fixture shrunk?
 
