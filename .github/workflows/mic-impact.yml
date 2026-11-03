@@ -1,0 +1,87 @@
+name: MIC impact
+
+# Daily evidence for "should a red MIC block a Transformers merge?": reads the
+# dashboard's MIC failures (/d/mic-failures), classifies each PR failure (infra,
+# failing on main too, or PR-only), follows PR-only cases to an outcome, counts
+# baseline changes published to the fleet, replays blocking on every merged PR,
+# and rewrites summary.md on the impact-results branch. Observational: it never
+# comments on a PR and never fails because of what it finds.
+#
+#   gh workflow run mic-impact.yml --repo huggingface/transformers-mic             # yesterday
+#   gh workflow run mic-impact.yml --repo huggingface/transformers-mic -f days=30  # re-seed a month
+#
+# Verdicts (real-bug / intended / false-alarm / flake) are added by hand to
+# labels.jsonl on the impact-results branch; the next run picks them up.
+
+on:
+  schedule:
+    - cron: "0 9 * * *" # 10:00 CET (11:00 CEST); after nightly (02:41) and shadow (03:17)
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "Window ending today: 1 daily, 30 to seed from the dashboard's history"
+        required: false
+        type: choice
+        options: ["1", "7", "14", "30"]
+        default: "1"
+
+permissions: {}
+
+concurrency:
+  group: mic-impact
+  cancel-in-progress: false
+
+jobs:
+  observe:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ github.token }}
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      PYTHONUNBUFFERED: "1"
+      DAYS: ${{ inputs.days || '1' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.11"
+
+      - run: python -m pip install .
+
+      - name: Results branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          dir="$RUNNER_TEMP/impact-results"
+          if git fetch --quiet origin impact-results:refs/remotes/origin/impact-results; then
+            git worktree add --quiet -B impact-results "$dir" origin/impact-results
+          else
+            git worktree add --quiet --orphan -b impact-results "$dir"
+            # The first run seeds from the dashboard's 30 days of history.
+            echo "DAYS=30" >> "$GITHUB_ENV"
+          fi
+          echo "RESULTS=$dir" >> "$GITHUB_ENV"
+
+      - name: Observe
+        run: |
+          # Nightly real-checkpoint runs (question 4) are on the shadow-results branch.
+          git fetch --quiet origin shadow-results:refs/remotes/origin/shadow-results
+          python experiments/impact.py --results "$RESULTS" --days "$DAYS" --shadow-ref origin/shadow-results | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Push
+        run: |
+          cd "$RESULTS"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit --quiet -m "MIC impact $(date -u +%F) (window ${DAYS}d)"
+          for i in 1 2 3; do
+            git push --quiet origin impact-results && exit 0
+            # A hand-added label landed meanwhile: keep it, redo the summary on top.
+            git pull --quiet --rebase -X theirs origin impact-results || true
+            python "$GITHUB_WORKSPACE/experiments/impact.py" --results "$RESULTS" --summary-only > /dev/null
+            git add -A && git commit --quiet -m "MIC impact summary" || true
+          done
+          exit 1

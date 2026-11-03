@@ -11,6 +11,13 @@ Remote-code models are out of initial scope.
 As of 2026-11-02 the contracts job runs on Transformers PRs and reports failures
 without blocking ([status](evidence.md#transformers-ci-proof)).
 
+Whether a red contract should block a merge is measured daily by
+[`mic-impact.yml`](../.github/workflows/mic-impact.yml): `summary.md` on the
+`impact-results` branch replays blocking on every merged PR and tracks real
+catches, false alarms, baseline review work, real-weights-only failures and
+overfit versus random fixtures, against a proposed bar for a decision after a
+month. Verdicts on PR-only failures go in that branch's `labels.jsonl`.
+
 ## Results so far
 
 From replaying the first fleet's frozen contracts over 1,468 Transformers `main`
