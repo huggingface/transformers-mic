@@ -1,78 +1,106 @@
 {
  "axk1": {
   "checkpoint": "skt/A.X-K1",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-03T11:19:55Z",
-  "status": "queued"
+  "run_id": 41626667719,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41626667719"
  },
  "beam": {
   "checkpoint": "reflection/Beam-1.0-501B-A23B",
-  "conclusion": null,
+  "conclusion": "success",
   "dispatched_at": "2026-11-03T11:19:55Z",
-  "status": "queued"
+  "run_id": 41626649509,
+  "shrink": "shrink/41626649509/shrink-Beam-1.0-501B-A23B-mic.html",
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41626649509"
  },
  "bigbird_pegasus": {
   "checkpoint": "google/bigbird-pegasus-large-arxiv",
-  "conclusion": null,
+  "conclusion": "success",
   "dispatched_at": "2026-11-03T11:19:55Z",
-  "status": "queued"
+  "run_id": 41626671572,
+  "shrink": "shrink/41626671572/shrink-bigbird-pegasus-large-arxiv-mic.html",
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41626671572"
  },
  "bridgetower": {
   "checkpoint": "regisss/bridgetower-newyorker-a100-8x",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-03T11:19:55Z",
-  "status": "queued"
+  "run_id": 41626675456,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41626675456"
  },
  "colpali": {
   "checkpoint": "vidore/colpali-v1.3-hf",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-03T11:19:55Z",
-  "status": "queued"
+  "run_id": 41626652876,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41626652876"
  },
  "ernie": {
   "checkpoint": "nghuyong/ernie-3.0-base-zh",
-  "conclusion": null,
+  "conclusion": "success",
   "dispatched_at": "2026-11-03T11:19:55Z",
-  "status": "queued"
+  "run_id": 41626657364,
+  "shrink": "shrink/41626657364/shrink-ernie-3.0-base-zh-mic.html",
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41626657364"
  },
  "flint": {
   "checkpoint": "RecursiveSI/flint",
   "conclusion": "success",
   "dispatched_at": "2026-11-03T10:02:45Z",
   "run_id": 41615947562,
+  "shrink": "shrink/41615947562/shrink-flint-mic.html",
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/41615947562"
  },
  "kolibri1": {
   "checkpoint": "Aleph-Alpha/Kolibri-1",
-  "conclusion": null,
+  "conclusion": "success",
   "dispatched_at": "2026-11-03T11:19:55Z",
-  "status": "queued"
+  "run_id": 41626661233,
+  "shrink": "shrink/41626661233/shrink-Kolibri-1-mic.html",
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41626661233"
  },
  "minicpm_ocr": {
   "checkpoint": "openbmb/MiniCPM-OCR-1.0",
   "conclusion": "failure",
   "dispatched_at": "2026-11-03T10:02:45Z",
   "run_id": 41615951103,
+  "shrink": "shrink/41615951103/shrink-MiniCPM-OCR-1.0-mic.html",
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/41615951103"
  },
  "poolformer": {
   "checkpoint": "sail/poolformer_s12",
-  "conclusion": null,
+  "conclusion": "success",
   "dispatched_at": "2026-11-03T11:19:55Z",
-  "status": "queued"
+  "run_id": 41626664595,
+  "shrink": "shrink/41626664595/shrink-poolformer_s12-mic.html",
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41626664595"
  },
  "qwen3_5": {
   "checkpoint": "Qwen/Qwen3.5-0.8B",
-  "conclusion": null,
+  "conclusion": "success",
   "dispatched_at": "2026-11-03T11:19:55Z",
-  "status": "queued"
+  "run_id": 41626641849,
+  "shrink": "shrink/41626641849/shrink-Qwen3.5-0.8B-mic.html",
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41626641849"
  },
  "vaultgemma": {
   "checkpoint": "google/vaultgemma-1b",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-03T11:19:55Z",
-  "status": "queued"
+  "run_id": 41626645840,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41626645840"
  }
 }
