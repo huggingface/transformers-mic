@@ -786,7 +786,7 @@ def fetch_shrink_pages(drafts, folder):
 
 
 def dispatch_drafts(suggestions, drafts, limit, now):
-    """Dispatch tmic-run.yml (local-only: nothing is published) for the top suggestions not drafted yet."""
+    """Dispatch tmic-run.yml (draft, cloud CPU/CUDA, publish if it passes) for the top suggestions not drafted yet."""
     sent = 0
     for s in suggestions["new"]:
         if sent >= limit:
@@ -804,9 +804,9 @@ def draft_lines(suggestions, drafts):
         "## 6. Contracts to add next",
         "",
         "Models with real-checkpoint regressions in the daily GPU CI and no contract, shrinkable models first. "
-        f"Each day the top {DRAFTS_PER_DAY} without a draft are drafted by `{TMIC_RUN}` (`tmic run --local-only`: "
-        "contract, fixture and baselines built on a runner, nothing published). Publishing stays a review: read the "
-        "workspace's `usage.md` and manifest, then `tmic run <checkpoint> --out <workspace>`.",
+        f"Each day the top {DRAFTS_PER_DAY} without a draft go to `{TMIC_RUN}`: it drafts the contract and fixture "
+        "on a runner, measures them on cloud CPU and CUDA, and publishes a new contract into the prototypes fleet "
+        "only if every case passes. Read a published draft's `usage.md` like any other contract.",
         "",
     ]
     if not suggestions["new"]:

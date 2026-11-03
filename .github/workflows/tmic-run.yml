@@ -1,17 +1,23 @@
 name: tmic run
 run-name: tmic run ${{ inputs.model }}
 
-# Reproduce `tmic run <model>` on a cloud runner instead of a laptop: no
-# checkpoint download on a slow link, and a clean environment. mic-impact.yml
-# also dispatches it to draft suggested contracts (matched by run name). Local-only:
-# nothing is published. Gates (source review, baselines) are auto-approved,
-# so read the uploaded workspace before trusting any of it.
+# Create a MIC for one checkpoint, end to end:
+#   run      tmic run --mode agent --local-only with a read-only token: plan, fixture,
+#            build, Auto check and a CPU recording; gates are auto-approved. Then
+#            auto_mic.py ready: validated, or only missing hardware this runner lacks.
+#   publish  (publish: true, the default) in the mic-publish environment, which only main
+#            can use: measure every declared case on cloud CPU and CUDA, approve NEW
+#            candidates, publish huggingface-mic/<name>-mic and add it to the prototypes
+#            fleet. Runs no model code itself. New contracts only: a model already in a
+#            fleet or on the Hub is refused (reviewed update flow).
+# mic-impact.yml dispatches it for suggested contracts (matched by run name) and
+# refreshes its page when a run finishes.
 #
-#   gh workflow run tmic-run.yml --repo huggingface/transformers-mic \
-#     -f model=mistralai/Mistral-Large-4-1T-A52B [--ref <tmic branch>]
-#   gh run download <id> --repo huggingface/transformers-mic -n tmic-workspace   # or -n tmic-shrink: the shrink page only
+#   gh workflow run tmic-run.yml --repo huggingface/transformers-mic -f model=org/name [-f publish=false]
+#   gh workflow run tmic-run.yml --repo huggingface/transformers-mic -f model=org/name -f source_run_id=<id>   # publish an earlier draft
+#   gh run download <id> --repo huggingface/transformers-mic -n tmic-workspace   # or -n tmic-shrink / tmic-publication
 #
-# What it needs and why (each cost one failed attempt to find):
+# What the run job needs and why (each cost one failed attempt to find):
 #   GH_TOKEN   create queries GitHub history through gh
 #   --bill-to  HF_HUB_READ_TOKEN cannot bill the huggingface org for the planner,
 #              so the token owner's credits are used ('')
@@ -23,6 +29,15 @@ on:
       model:
         required: true
         type: string
+      source_run_id:
+        description: "Reuse a built workspace from an earlier tmic run (optional)"
+        required: false
+        type: string
+        default: ""
+      publish:
+        description: "Measure CPU/CUDA and publish a new MIC into the prototypes fleet"
+        type: boolean
+        default: true
       revision:
         required: false
         type: string
@@ -40,6 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:
+      SOURCE_RUN_ID: ${{ inputs.source_run_id }}
       HF_TOKEN: ${{ secrets.HF_HUB_READ_TOKEN }}
       GH_TOKEN: ${{ github.token }}
       HF_HUB_DISABLE_PROGRESS_BARS: "1"
@@ -62,14 +78,27 @@ jobs:
           python -m pip install --quiet --index-url https://download.pytorch.org/whl/cpu torch torchvision
           python -m pip install --quiet -e ".[runtime]" -e "$RUNNER_TEMP/transformers" jsonschema \
             "git+https://github.com/huggingface/doc-builder@c69e96c087165ba49b1788e0c3464654dd60253c"
+      - name: Reuse a built workspace
+        if: inputs.source_run_id != ''
+        run: |
+          python - <<'PYCODE'
+          import json, os, subprocess
+          run_id = os.environ["SOURCE_RUN_ID"]
+          assert run_id.isdecimal(), "source_run_id must be numeric"
+          info = json.loads(subprocess.check_output(["gh", "api", f"repos/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{run_id}"]))
+          assert info["path"] == ".github/workflows/tmic-run.yml" and info["head_branch"] == "main"
+          assert info["event"] == "workflow_dispatch" and info["status"] == "completed"
+          subprocess.run(["gh", "run", "download", run_id, "--repo", os.environ["GITHUB_REPOSITORY"], "-n", "tmic-workspace", "-D", "."], check=True)
+          PYCODE
       - name: tmic run
+        if: inputs.source_run_id == ''
         run: |
           set +e
           args=("$MODEL" --mode agent --local-only --bill-to "" --baseline-execution local
                 --out work/run --transformers-checkout "$RUNNER_TEMP/transformers")
           [ -n "$REVISION" ] && args+=(--revision "$REVISION")
           tmic run "${args[@]}" > result.json; code=$?
-          for i in $(seq 12); do
+          for _ in $(seq 12); do
             python - <<'PY' || break
           import json, sys
           q = json.load(open("result.json")).get("pending_question")
@@ -84,7 +113,8 @@ jobs:
           python -c "import json;r=json.load(open('result.json'));print(json.dumps({k:r.get(k) for k in ('status','stage','pending_question')},indent=1)[:4000])"
           status=$(python -c "import json;print(json.load(open('result.json')).get('status'))")
           echo "### tmic run $MODEL: $status (exit $code)" >> "$GITHUB_STEP_SUMMARY"
-          [ "$code" = 0 ]
+      - name: Ready for cloud measurement?
+        run: python .github/scripts/auto_mic.py ready --model "$MODEL" | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Fixture report
         if: always()
         run: |
@@ -123,6 +153,52 @@ jobs:
           name: tmic-workspace
           path: |
             result.json
+            ready-result.json
             work/run
+          include-hidden-files: true
+          retention-days: 7
+
+  publish:
+    needs: run
+    if: inputs.publish
+    # The write token is an environment secret; the environment only admits main.
+    environment: mic-publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 420
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.11"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: tmic-workspace
+      - run: python -m pip install .
+      - name: Measure CPU and CUDA, validate, publish and add to fleet
+        env:
+          HF_TOKEN: ${{ secrets.MIC_BASELINE_WRITE_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          MODEL: ${{ inputs.model }}
+          TRANSFORMERS_REF: ${{ inputs.transformers_ref }}
+          HF_HUB_DISABLE_PROGRESS_BARS: "1"
+          PYTHONUNBUFFERED: "1"
+        run: |
+          test -n "$HF_TOKEN" || { echo "Configure MIC_BASELINE_WRITE_TOKEN in the mic-publish environment"; exit 1; }
+          python .github/scripts/auto_mic.py publish --model "$MODEL" --transformers-ref "$TRANSFORMERS_REF"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: tmic-publication
+          path: publish-result.json
+          if-no-files-found: ignore
+          retention-days: 30
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: tmic-cloud-workspace
+          path: work
           include-hidden-files: true
           retention-days: 7
