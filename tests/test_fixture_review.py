@@ -366,3 +366,16 @@ def test_an_overfit_build_still_counts_as_the_current_fixture(tmp_path, fake_bac
     data, _ = fixture_review.refresh(workspace)
     assert fake_backend[-1][-1] == str(built.resolve())  # described, not shrunk again
     assert data["artifact"] == str(built.resolve())
+
+
+def test_question_id_does_not_depend_on_the_working_directory(
+    workflow, capsys, monkeypatch, tmp_path
+):
+    monkeypatch.chdir(tmp_path)  # the folder reads as project/fixture from here
+    _, first = agent(workflow, capsys)
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    monkeypatch.chdir(elsewhere)
+    code, result = agent(workflow, capsys, "--answer", str(answer(tmp_path, first)))
+    assert code == 3 and "answer_error" not in result
+    assert result["pending_question"]["kind"] == "source-review"

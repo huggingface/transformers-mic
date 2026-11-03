@@ -264,10 +264,10 @@ def headline(data):
             f"Weight names: all {len(names['matching'])} patterns match the source"
         )
     findings = data["findings"]
-    from .terminal import short_path
-
+    # Absolute: this is part of the question's context, which must not depend on
+    # the directory a run resumes from. The terminal shortens it for display.
     return [
-        f"Folder: {short_path(data['folder'])}  (config.json, {data['weights_file']})",
+        f"Folder: {data['folder']}  (config.json, {data['weights_file']})",
         " · ".join(x for x in (data["model_class"], size) if x),
         f"Config: {len(changes)} values differ from the source"
         + (f" ({shown}{more})" if changes else ""),

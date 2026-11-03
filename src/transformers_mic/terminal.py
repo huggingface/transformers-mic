@@ -88,7 +88,11 @@ def prompt(question, details, kind, context):
     width = max(40, min(shutil.get_terminal_size().columns - 6, 100))
     print("\n  " + color("? " + question_text(question, kind), "question"), flush=True)
     if kind == "fixture-review" and context.get("headline"):
-        lines = context["headline"]
+        folder = context.get("fixture", {}).get("folder")
+        lines = [
+            line.replace(folder, short_path(folder), 1) if folder else line
+            for line in context["headline"]
+        ]
     elif kind == "source-review" and context.get("files"):
         lines = [
             "Code: " + short_path(context["files"][-1]["path"]),
