@@ -105,46 +105,81 @@ def ready(args):
     return {"status": "ready", "reason": reason}
 
 
-def require_new(workspace):
-    """Refuse a contract that is in a fleet, or a Hub repo that already has content."""
+def require_new(workspace, contract_name=None, overwrite_unexported=False):
+    """Refuse a contract that is in a fleet, or a Hub repo that already has content.
+
+    contract_name: the fleet name to export under (default: the workspace's contract).
+    overwrite_unexported: accept a Hub repo with content that no fleet references (published once,
+    never exported). Returns True when that repo will be overwritten.
+    """
     from huggingface_hub import HfApi
     from huggingface_hub.errors import RepositoryNotFoundError
 
     from transformers_mic import fleet
     from transformers_mic.workspace import read
 
-    for name in ("control", "prototypes"):
-        path, _ = fleet.download(name)
+    name = contract_name or workspace.state["contract"]
+    for fleet_name in ("control", "prototypes"):
+        path, _ = fleet.download(fleet_name)
         for key, entry in read(path)["contracts"].items():
             if (
-                key.casefold() == workspace.state["contract"].casefold()
+                key.casefold() == name.casefold()
                 or entry["integration"]["repo"] == workspace.fixture
             ):
                 raise ValueError(
-                    f"Already in the {name} fleet as {key}; use the reviewed update flow"
+                    f"Already in the {fleet_name} fleet as {key} ({entry['integration']['repo']}); "
+                    "pick another contract_name or use the reviewed update flow"
                 )
     try:
         files = HfApi().list_repo_files(workspace.fixture, revision="main")
     except RepositoryNotFoundError:
         files = []
     if any(f not in ("README.md", ".gitattributes") for f in files):
+        if overwrite_unexported:
+            return True
         raise ValueError(
-            f"{workspace.fixture} already has published content. If an earlier run of this workflow "
-            "published it and then failed to export, download its tmic-cloud-workspace artifact and run "
-            "`tmic --workspace work/run export --fleet prototypes --execute` from it; otherwise use the "
-            "reviewed update flow."
+            f"{workspace.fixture} already has published content that no fleet references. If an earlier "
+            "run of this workflow published it and then failed to export, download its "
+            "tmic-cloud-workspace artifact and run `tmic --workspace work/run export --fleet prototypes "
+            "--execute` from it; to replace it, dispatch again with overwrite_unexported."
         )
+    return False
 
 
-def export_new(workspace, attempts=8):
+def clear_expectations(repo):
+    """Delete an unexported repo's old expectations before overwriting it.
+
+    publish removes only the contract and fixture files it owned; a baseline the new measurement
+    does not produce would otherwise stay in the snapshot, and the runner reads every one.
+    """
+    from huggingface_hub import HfApi
+
+    api = HfApi()
+    folders = sorted(
+        {
+            f.split("/expectations/")[0] + "/expectations"
+            for f in api.list_repo_files(repo)
+            if "/expectations/" in f
+        }
+    )
+    for folder in folders:
+        api.delete_folder(
+            folder,
+            repo_id=repo,
+            commit_message=f"Clear {folder} before republishing (never exported)",
+        )
+    return folders
+
+
+def export_new(workspace, contract_name=None, attempts=8):
     """Add the contract to prototypes; retry only when another export landed first (409 / changed)."""
     from huggingface_hub.errors import HfHubHTTPError
 
     from transformers_mic import commands, fleet
     from transformers_mic.workspace import read
 
-    name = workspace.state["contract"]
-    pin = workspace.lock["contracts"][name]["integration"]
+    pin = workspace.lock["contracts"][workspace.state["contract"]]["integration"]
+    name = contract_name or workspace.state["contract"]
     for attempt in range(attempts):
         path, revision = fleet.download("prototypes")
         existing = read(path)["contracts"].get(name)
@@ -160,7 +195,7 @@ def export_new(workspace, attempts=8):
         options = SimpleNamespace(
             workspace=str(workspace.root),
             fleet="prototypes",
-            contract_name=None,
+            contract_name=contract_name,
             expected_revision=revision,
             execute=True,
             transformers_checkout=None,
@@ -190,7 +225,7 @@ def publish(args):
     from transformers_mic.workspace import Workspace
 
     workspace = Workspace(args.workspace)
-    require_new(workspace)
+    overwrite = require_new(workspace, args.contract_name, args.overwrite_unexported)
     # The draft recorded on a laptop-like CPU runner; the fleet's references come from the CI
     # images. Keep the draft's candidates for inspection, measure afresh.
     if workspace.expectations.exists():
@@ -220,7 +255,10 @@ def publish(args):
         "--out",
         args.collection,
     )
-    require_new(workspace)  # again: the collection can take hours
+    # Again: the collection can take hours.
+    overwrite = require_new(workspace, args.contract_name, args.overwrite_unexported)
+    if overwrite:
+        clear_expectations(workspace.fixture)
     tmic("--workspace", args.workspace, "publish", "--execute")
     tmic(
         "baselines",
@@ -231,7 +269,7 @@ def publish(args):
         args.collection,
     )
     workspace = Workspace(args.workspace)  # publish rewrote the lock
-    revision = export_new(workspace)
+    revision = export_new(workspace, args.contract_name)
     pin = workspace.lock["contracts"][workspace.state["contract"]]["integration"]
     return {
         "status": "published",
@@ -251,6 +289,14 @@ def main():
     )
     parser.add_argument("--collection", default="work/cloud")
     parser.add_argument("--transformers-ref", default="main")
+    parser.add_argument(
+        "--contract-name", default=None, help="fleet name to export under (publish)"
+    )
+    parser.add_argument(
+        "--overwrite-unexported",
+        action="store_true",
+        help="overwrite a published repo that no fleet references (publish)",
+    )
     args = parser.parse_args()
     outcome = {
         "status": "failed",

@@ -177,3 +177,67 @@ def test_publication_refuses_a_contract_already_in_a_fleet_or_on_the_hub(
     fleet.contracts["a"] = {"integration": {"repo": "huggingface-mic/other-mic"}}
     with pytest.raises(ValueError, match="Already in the prototypes fleet"):
         auto_mic.require_new(workspace())
+
+
+def test_a_taken_name_can_be_published_under_another_contract_name(fleet, monkeypatch):
+    import huggingface_hub
+
+    monkeypatch.setattr(
+        huggingface_hub,
+        "HfApi",
+        lambda: SimpleNamespace(list_repo_files=lambda repo, revision: []),
+    )
+    fleet.contracts["A"] = {"integration": {"repo": "huggingface-mic/a-text-only-mic"}}
+    with pytest.raises(ValueError, match="pick another contract_name"):
+        auto_mic.require_new(workspace())
+    assert auto_mic.require_new(workspace(), contract_name="A_VL") is False
+    exported = []
+    from transformers_mic import commands
+
+    monkeypatch.setattr(
+        commands, "export", lambda options: exported.append(options.contract_name)
+    )
+    auto_mic.export_new(workspace(), "A_VL")
+    assert exported == ["A_VL"]
+
+
+def test_an_unexported_repo_is_overwritten_only_on_request(fleet, monkeypatch):
+    import huggingface_hub
+
+    files = [
+        "README.md",
+        ".mic-repo.json",
+        "integrations/transformers/expectations/cuda/a-mic.json",
+    ]
+    monkeypatch.setattr(
+        huggingface_hub,
+        "HfApi",
+        lambda: SimpleNamespace(list_repo_files=lambda repo, revision="main": files),
+    )
+    with pytest.raises(ValueError, match="overwrite_unexported"):
+        auto_mic.require_new(workspace())
+    assert auto_mic.require_new(workspace(), overwrite_unexported=True) is True
+    # ... but never one a fleet references.
+    fleet.contracts["Other"] = {"integration": {"repo": "huggingface-mic/a-mic"}}
+    with pytest.raises(ValueError, match="Already in the prototypes fleet"):
+        auto_mic.require_new(workspace(), overwrite_unexported=True)
+
+
+def test_overwriting_clears_every_old_expectations_folder(monkeypatch):
+    import huggingface_hub
+
+    deleted = []
+    api = SimpleNamespace(
+        list_repo_files=lambda repo: [
+            "integration.json",
+            "integrations/transformers/expectations/cuda/a.json",
+            "integrations/transformers/expectations/cpu-x86_64/a.json",
+            "integrations/transformers/usage.md",
+        ],
+        delete_folder=lambda folder, **kwargs: deleted.append(folder),
+    )
+    monkeypatch.setattr(huggingface_hub, "HfApi", lambda: api)
+    assert auto_mic.clear_expectations("o/a-mic") == [
+        "integrations/transformers/expectations"
+    ]
+    assert deleted == ["integrations/transformers/expectations"]

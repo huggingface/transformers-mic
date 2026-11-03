@@ -15,6 +15,8 @@ run-name: tmic run ${{ inputs.model }}
 #
 #   gh workflow run tmic-run.yml --repo huggingface/transformers-mic -f model=org/name [-f publish=false]
 #   gh workflow run tmic-run.yml --repo huggingface/transformers-mic -f model=org/name -f source_run_id=<id>   # publish an earlier draft
+#     [-f contract_name=<Name>]  when the contract's name is taken in a fleet by another checkpoint
+#     [-f overwrite_unexported=true]  replace a huggingface-mic repo published earlier but in no fleet
 #   gh run download <id> --repo huggingface/transformers-mic -n tmic-workspace   # or -n tmic-shrink / tmic-publication
 #
 # What the run job needs and why (each cost one failed attempt to find):
@@ -46,6 +48,15 @@ on:
         required: false
         type: string
         default: main
+      contract_name:
+        description: "Fleet name to publish under, when the default collides (e.g. Qwen3_5_VL)"
+        required: false
+        type: string
+        default: ""
+      overwrite_unexported:
+        description: "Overwrite a published huggingface-mic repo that no fleet references"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -186,11 +197,19 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           MODEL: ${{ inputs.model }}
           TRANSFORMERS_REF: ${{ inputs.transformers_ref }}
+          CONTRACT_NAME: ${{ inputs.contract_name }}
+          OVERWRITE: ${{ inputs.overwrite_unexported }}
           HF_HUB_DISABLE_PROGRESS_BARS: "1"
           PYTHONUNBUFFERED: "1"
         run: |
           test -n "$HF_TOKEN" || { echo "Configure MIC_BASELINE_WRITE_TOKEN in the mic-publish environment"; exit 1; }
-          python .github/scripts/auto_mic.py publish --model "$MODEL" --transformers-ref "$TRANSFORMERS_REF"
+          args=(--model "$MODEL" --transformers-ref "$TRANSFORMERS_REF")
+          if [ -n "$CONTRACT_NAME" ]; then
+            [[ "$CONTRACT_NAME" =~ ^[A-Za-z][A-Za-z0-9_.-]{0,63}$ ]] || { echo "invalid contract_name"; exit 1; }
+            args+=(--contract-name "$CONTRACT_NAME")
+          fi
+          [ "$OVERWRITE" = true ] && args+=(--overwrite-unexported)
+          python .github/scripts/auto_mic.py publish "${args[@]}"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
