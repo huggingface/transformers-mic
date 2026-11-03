@@ -8,6 +8,89 @@ working model-specific build recipe. New projects use one repository,
 `huggingface-mic/<name>-mic`, for fixture weights, the contract, usage and reviewed
 framework expectations. See [the Hub layout](hub-organization.md).
 
+## For coding agents
+
+Paste this into a coding agent with the model id filled in. It runs everything
+locally and uploads nothing:
+
+```text
+Create a model integration contract (MIC) for the Hub model <MODEL_ID> with tmic,
+locally, uploading nothing. Read the "For coding agents" section of
+https://github.com/huggingface/transformers-mic/blob/main/docs/cli.md first,
+then `tmic run --help`.
+
+1. In a Python 3.11+ venv:
+   pip install "transformers-mic[runtime]" "hf-doc-builder @ git+https://github.com/huggingface/doc-builder.git"
+   Check `hf auth whoami`; if it fails, ask me to run `hf auth login`.
+   Check that <MODEL_ID> exists on the Hub. Fix a wrong id, don't guess one.
+2. Run: tmic run <MODEL_ID> --mode agent --local-only --fixtures-only --no-history --bill-to ''
+   Then loop until exit 0: read the JSON on stdout, answer the pending question
+   per the rules in that section, and run the `resume` command it gives with
+   --answer <file>.
+3. Ask me before approving source-review, contract-repair or baseline-change.
+   Never edit a tolerance, an expectation or a gate to make a step pass.
+4. When it exits 0, report: the workspace path, what the contract calls,
+   the weights choice (random or overfit) and why, the platform the
+   baselines were recorded on, and the `tmic shrink` findings for the fixture.
+```
+
+Everything below is the reference that prompt points to.
+
+**Interface.** `tmic run --mode agent` drives the whole pipeline without reading
+stdin: it drafts the contract, builds the fixture, records and reviews baselines,
+and checks them. stdout carries one JSON result; progress goes to stderr, and
+each stage's full log is in `.mic/automation/logs/`. The same command resumes
+from where it stopped.
+
+| Exit | Meaning | Do |
+|---|---|---|
+| 0 | `status: "validated"` (local-only) or `"complete"` (published) | Report. |
+| 3 | `status: "needs-input"`: answer `pending_question`. With `answer_error`, the answer was stale or reused and the current question is attached. | Answer it, then run the `resume` command. |
+| 2 | Invalid invocation, state or answer file | Fix the command or file. |
+| 130 | Interrupted; progress saved | Rerun the same command. |
+
+**Answering.** Write
+`{"question_id": "<id>", "answer": "<choice>", "reason": "<why>"}` to a file and
+run the emitted `resume` command with `--answer <file>`. Use the emitted command,
+because it keeps `--local-only` and the other options. An answer is consumed once.
+`defer` always leaves the question pending.
+
+| `kind` | What it asks | Who decides |
+|---|---|---|
+| `source-review` | Run the drafted contract? | **Operator.** Read `integration.json` and `integrations/transformers/usage.md` in the workspace's model directory first. They are executable Python that nothing sandboxes. Summarize what they load and call. |
+| `retry` | A stage failed | You. Read the log in `context.log` and fix the cause first. Retrying unchanged inputs pauses after two attempts. Missing dependencies and model-specific build errors are yours to fix. |
+| `contract-repair` | Apply an LLM-proposed usage diff? | **Operator.** Show the rationale and diff. `reject` still uses one of the two repairs. |
+| `baseline-change` | Accept changed expected values? | **Operator only.** `reason` is required. Never approve a change only to make a check pass. |
+| `cloud-baselines`, `model-publication`, `fleet-update` | Upload to the Hub | **Operator only.** These never appear with `--local-only`. Uploads are public and pinned. |
+
+New and unchanged baselines are approved automatically, so no question appears
+for them.
+
+**Workspace.** Without `--out`, the run uses `work/mic/<org>--<model>`. Inside it:
+
+- `example/hub/<name>-mic/integration.json` and `.../integrations/transformers/usage.md`:
+  the contract.
+- `example/hub/<name>-mic/integrations/transformers/expectations/<platform>/`:
+  the baselines, for example `cpu-x86_64`, `cpu-x86_64-bf16` or `cuda`.
+- `.mic/project.json`: the weights choice and why.
+- `.mic/automation.json`: every decision.
+- `tmic shrink --open` (from the workspace) shows what the fixture kept from the
+  checkpoint ([details](#how-was-the-fixture-shrunk)).
+
+**Limits worth knowing before you start:**
+
+- A model in the bundled catalog makes no LLM call. Otherwise the draft comes from
+  Inference Providers, and `--bill-to ''` bills the user's own HF account
+  ([When the LLM is used](#when-the-llm-is-used)).
+- `--fixtures-only` never loads the real checkpoint. Drop it only when the
+  operator wants real-checkpoint targets and the machine fits the model.
+- Local baselines cover only the platform they ran on. Baselines from a Mac do
+  not help Transformers PR CI, which reads `cpu-x86_64` and `cpu-x86_64-bf16`.
+  Maintainers produce those with cloud runs ([Cloud baselines and publication](#cloud-baselines-and-publication-maintainers)).
+- A green check proves the contract reproduces its own baselines. It does not
+  prove the baselines are right: read the candidate values. Batch rows should
+  differ, variants should agree, and losses and gradients should be finite.
+
 ## Install
 
 Python 3.11+:
