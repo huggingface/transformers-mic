@@ -89,7 +89,6 @@ jobs:
           GPU_IMAGE: ${{ steps.images.outputs.gpu_image }}
           UPLOAD_REPO: ${{ inputs.upload_repo }}
           UPLOAD_NAMESPACES: ${{ vars.MIC_BASELINE_UPLOAD_NAMESPACES || 'huggingface-mic' }}
-          HAS_WRITE_TOKEN: ${{ secrets.MIC_BASELINE_WRITE_TOKEN != '' }}
         run: |
           python - <<'PY'
           import os, re
@@ -111,7 +110,6 @@ jobs:
           if destination:
               assert re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*", destination)
               assert destination.split('/')[0] in os.environ["UPLOAD_NAMESPACES"].split(',')
-              assert os.environ["HAS_WRITE_TOKEN"] == 'true', 'Configure MIC_BASELINE_WRITE_TOKEN before remote publication'
           for key in ("CPU_IMAGE", "GPU_IMAGE"):
               assert re.fullmatch(r"[a-zA-Z0-9./:_-]+@sha256:[a-f0-9]{64}", os.environ[key]), f"{key} did not resolve to an image digest"
           PY
@@ -210,6 +208,8 @@ jobs:
   publish:
     needs: measure
     if: ${{ inputs.upload_repo != '' }}
+    # The write token is an environment secret; the environment only admits main.
+    environment: mic-publish
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -220,6 +220,15 @@ jobs:
         with:
           ref: ${{ inputs.mic_sha }}
           persist-credentials: false
+          fetch-depth: 0
+      - name: Publish only code that is on main
+        # mic_sha is a dispatch input; without this, any pushed commit would run with the write token.
+        env:
+          MIC_SHA: ${{ inputs.mic_sha }}
+          HAS_WRITE_TOKEN: ${{ secrets.MIC_BASELINE_WRITE_TOKEN != '' }}
+        run: |
+          test "$HAS_WRITE_TOKEN" = true || { echo "Configure MIC_BASELINE_WRITE_TOKEN in the mic-publish environment"; exit 1; }
+          git merge-base --is-ancestor "$MIC_SHA" origin/main || { echo "$MIC_SHA is not on main; refusing to publish"; exit 1; }
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.11"
