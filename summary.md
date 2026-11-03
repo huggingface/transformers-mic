@@ -106,7 +106,7 @@ Real-checkpoint failures MIC stayed green on, waiting for a verdict. A miss is n
 
 ## 6. Contracts to add next
 
-Models with real-checkpoint regressions in the daily GPU CI and no contract, shrinkable models first. Each day the top 2 without a draft are drafted by `tmic-run.yml` (`tmic run --local-only`: contract, fixture and baselines built on a runner, nothing published). Publishing stays a review: read the workspace's `usage.md` and manifest, then `tmic run <checkpoint> --out <workspace>`.
+Models with real-checkpoint regressions in the daily GPU CI and no contract, shrinkable models first. Each day the top 2 without a draft go to `tmic-run.yml`: it drafts the contract and fixture on a runner, measures them on cloud CPU and CUDA, and publishes a new contract into the prototypes fleet only if every case passes. Read a published draft's `usage.md` like any other contract.
 
 | model | real-ckpt regressions | other | checkpoint | shrinkable | draft |
 |---|---|---|---|---|---|
