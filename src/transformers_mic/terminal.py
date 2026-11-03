@@ -124,16 +124,44 @@ def details(text):
     print("\n" + textwrap.indent(text, "    ") + "\n", flush=True)
 
 
+def editor_command():
+    """The editor git would use: $VISUAL, $EDITOR, core.editor, then nano/vim/vi."""
+    import shlex
+    import subprocess
+
+    for command in (os.environ.get("VISUAL"), os.environ.get("EDITOR")):
+        if command and command.strip() not in ("true", ":"):
+            return shlex.split(command)
+    try:
+        configured = subprocess.run(
+            ["git", "config", "--get", "core.editor"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        ).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        configured = ""
+    if configured and configured not in ("true", ":"):
+        return shlex.split(configured)
+    for name in ("nano", "vim", "vi"):
+        if shutil.which(name):
+            return [name]
+    return None
+
+
 def edit(path):
     """Open a file in the operator's editor, or wait while they edit it elsewhere."""
-    command = os.environ.get("VISUAL") or os.environ.get("EDITOR")
-    if command:
-        import shlex
-        import subprocess
+    import subprocess
 
-        subprocess.call([*shlex.split(command), str(path)])
-    else:
-        input(f"    Edit {short_path(path)}, save it, then press Enter… ")
+    command = editor_command()
+    if command:
+        print(f"    Opening {short_path(path)} with {command[0]}…", flush=True)
+        try:
+            if subprocess.call([*command, str(path)]) == 0:
+                return
+        except OSError:
+            pass
+    input(f"    Edit {short_path(path)}, save it, then press Enter… ")
 
 
 class Activity:

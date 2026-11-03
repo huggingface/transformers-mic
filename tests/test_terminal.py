@@ -1,4 +1,6 @@
 from transformers_mic.terminal import failure
+import subprocess
+
 from transformers_mic import terminal
 
 
@@ -56,3 +58,24 @@ def test_short_details_print_inline_instead_of_paging(monkeypatch, capsys):
     monkeypatch.setattr("sys.stdin.isatty", lambda: True)
     terminal.details("line one\nline two")
     assert "    line two" in capsys.readouterr().out
+
+
+def test_editor_falls_back_like_git(monkeypatch):
+    monkeypatch.delenv("VISUAL", raising=False)
+    monkeypatch.setenv("EDITOR", "code --wait")
+    assert terminal.editor_command() == ["code", "--wait"]
+    monkeypatch.setenv("EDITOR", "true")  # what non-interactive tools export
+    # No git core.editor configured.
+    monkeypatch.setattr(
+        subprocess, "run", lambda *a, **k: type("R", (), {"stdout": ""})()
+    )
+    monkeypatch.setattr(terminal.shutil, "which", lambda name: "/usr/bin/" + name if name == "vim" else None)
+    assert terminal.editor_command() == ["vim"]
+
+
+def test_edit_waits_for_enter_when_the_editor_fails(monkeypatch, tmp_path):
+    monkeypatch.setattr(terminal, "editor_command", lambda: ["missing-editor-binary"])
+    waited = []
+    monkeypatch.setattr("builtins.input", waited.append)
+    terminal.edit(tmp_path / "config.json")
+    assert waited and "press Enter" in waited[0]
