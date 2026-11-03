@@ -129,9 +129,7 @@ class Interaction:
                         choice = (
                             input(
                                 terminal.color(
-                                    "    Continue? [y/N/A=always/D=details"
-                                    + ("/R=reject" if kind == "contract-repair" else "")
-                                    + "] ",
+                                    f"    Continue? [{terminal.choices(kind)}] ",
                                     "question",
                                 )
                             )
@@ -141,7 +139,12 @@ class Interaction:
                         if choice not in ("d", "details"):
                             break
                         terminal.details(details)
-                        terminal.prompt(question, details, kind, record["context"])
+                if kind == "fixture-review" and choice in ("e", "edit"):
+                    # Not a decision: the caller shrinks again and asks about the result.
+                    terminal.edit(record["context"]["config"]["path"])
+                    self.state.pop("pending_question", None)
+                    self.save()
+                    return "edit"
                 rejected = kind == "contract-repair" and choice in ("r", "reject")
                 if choice not in ("y", "yes", "a", "always") and not rejected:
                     raise Pending(question, details, record=record)

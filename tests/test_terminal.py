@@ -41,4 +41,18 @@ def test_prompt_collapses_long_details_and_indents_question(capsys):
     )
     output = capsys.readouterr().out
     assert "  ? Long question" in output and "    detail 0" in output
-    assert "detail 19" not in output and "D: full details" in output
+    assert "detail 19" not in output
+    assert "D=details" in terminal.choices("confirmation")
+
+
+def test_choices_name_each_kind_s_extra_keys():
+    assert "E=edit config" in terminal.choices("fixture-review")
+    assert "D=show code" in terminal.choices("source-review")
+    assert "R=reject" in terminal.choices("contract-repair")
+
+
+def test_short_details_print_inline_instead_of_paging(monkeypatch, capsys):
+    monkeypatch.setattr(terminal, "interactive", lambda stream=None: True)
+    monkeypatch.setattr("sys.stdin.isatty", lambda: True)
+    terminal.details("line one\nline two")
+    assert "    line two" in capsys.readouterr().out

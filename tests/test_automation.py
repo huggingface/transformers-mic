@@ -109,7 +109,7 @@ def test_noninteractive_stops_at_source_and_records_resumable_question(
     assert main([*workflow.argv, "--non-interactive"]) == 3
     state = read(workflow.root / ".mic/automation.json")
     assert state["next_stage"] == "source" and state["status"] == "needs-input"
-    assert "Review the executable" in state["question"]
+    assert "contract code" in state["question"]
     assert "tmic run" in state["resume"]
     assert [name for name, _ in workflow.calls] == ["create"]
     assert (

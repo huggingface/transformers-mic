@@ -3,7 +3,6 @@
 import ast
 import json
 import os
-import pydoc
 import re
 import shutil
 import sys
@@ -13,6 +12,8 @@ import time
 
 STAGE_NAMES = {
     "create": "Prepare workspace",
+    "shrink": "Shrink config into a tiny model",
+    "fixture-review": "Review tiny model",
     "source": "Review contract",
     "build": "Build fixture",
     "auto": "Check model factories",
@@ -62,7 +63,8 @@ def bar(done, total, width=14):
 
 def question_text(question, kind):
     labels = {
-        "source-review": "Review this contract?",
+        "fixture-review": "Is the tiny model's config and weight format right?",
+        "source-review": "Run this contract code?",
         "cloud-baselines": "Run CPU + CUDA baselines in the cloud?",
         "contract-repair": "Apply the proposed repair and retry?",
         "model-publication": "Publish this model to the Hub?",
@@ -71,10 +73,32 @@ def question_text(question, kind):
     return labels.get(kind, question)
 
 
+def choices(kind):
+    """The keys the Continue? prompt accepts for this kind of question."""
+    keys = ["y", "N", "A=always"]
+    if kind == "fixture-review":
+        keys.append("E=edit config")
+    if kind == "contract-repair":
+        keys.append("R=reject")
+    keys.append("D=show code" if kind == "source-review" else "D=details")
+    return "/".join(keys)
+
+
 def prompt(question, details, kind, context):
     width = max(40, min(shutil.get_terminal_size().columns - 6, 100))
     print("\n  " + color("? " + question_text(question, kind), "question"), flush=True)
-    if kind == "contract-repair" and context.get("diff"):
+    if kind == "fixture-review" and context.get("headline"):
+        lines = context["headline"]
+    elif kind == "source-review" and context.get("files"):
+        lines = [
+            "Code: " + short_path(context["files"][-1]["path"]),
+            "Targets: "
+            + ", ".join(context.get("targets", []))
+            + " · Variants: "
+            + ", ".join(context.get("variants", [])),
+            "The checks execute this Python unsandboxed. D shows it; edit the file to change it.",
+        ]
+    elif kind == "contract-repair" and context.get("diff"):
         lines = [
             details.splitlines()[0],
             "Diff: " + short_path(context["diff"]["path"]),
@@ -89,15 +113,23 @@ def prompt(question, details, kind, context):
     for line in lines:
         for wrapped in textwrap.wrap(line, width=width)[:3] or [""]:
             print("    " + color(wrapped), flush=True)
-    if len(details.splitlines()) > 3 or kind in ("contract-repair", "cloud-baselines"):
-        print("    " + color("D: full details"), flush=True)
 
 
 def details(text):
-    if interactive() and sys.stdin.isatty():
-        pydoc.pager(text)
+    """Print everything inline: it stays in scrollback and the prompt follows it."""
+    print("\n" + textwrap.indent(text, "    ") + "\n", flush=True)
+
+
+def edit(path):
+    """Open a file in the operator's editor, or wait while they edit it elsewhere."""
+    command = os.environ.get("VISUAL") or os.environ.get("EDITOR")
+    if command:
+        import shlex
+        import subprocess
+
+        subprocess.call([*shlex.split(command), str(path)])
     else:
-        print(text, flush=True)
+        input(f"    Edit {short_path(path)}, save it, then press Enter… ")
 
 
 class Activity:

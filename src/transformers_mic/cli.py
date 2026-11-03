@@ -201,6 +201,11 @@ Agent protocol:
   4. Run the emitted resume command with --answer answer.json.
      The answer is consumed once; the next question needs a separate answer.
 
+The first question (fixture-review) shows the tiny model in <workspace>/fixture
+before any contract code runs: config changes and serialized weight names
+against the source. To change it, edit fixture/config.json and resume without
+--answer; tmic shrinks again with those values and asks about the result.
+
 Workspace changes invalidate approvals. Stale or reused answers return exit 3
 with answer_error and the current pending_question. Malformed answer files exit 2. No approval
 is transferred to a new snapshot. Human and agent modes share resumable state.
@@ -320,6 +325,22 @@ No Git commit or framework PR is created automatically.""",
     )
     research.add_argument("--model-type")
     history_options(research)
+    fixture = sub.add_parser(
+        "fixture",
+        help="Write the tiny model (shrunk config + weights) to <workspace>/fixture for review; runs no contract code",
+        description="Writes fixture/config.json and the weights in the source checkpoint's "
+        "serialized format, then compares both with the source. Edit fixture/config.json "
+        "and rerun to shrink again with your values (they become the recipe's config_overrides).",
+    )
+    fixture.add_argument(
+        "--force", action="store_true", help="Shrink again even if nothing changed"
+    )
+    fixture.add_argument(
+        "--json", action="store_true", help="Print a machine-readable summary"
+    )
+    fixture.add_argument(
+        "--open", action="store_true", help="Open the layer-by-layer comparison page"
+    )
     build = sub.add_parser(
         "build", help="Reuse or build a fixture using measured weight-selection gates"
     )
@@ -618,6 +639,10 @@ def main(argv=None):
         if args.command == "auto":
             project = Workspace(args.workspace)
             return backend.invoke("auto-stage", project.root).returncode
+        if args.command == "fixture":
+            from .fixture_review import run
+
+            return run(args)
         if args.command == "shrink":
             from .shrink_view import run
 

@@ -27,7 +27,10 @@ then `tmic run --help`.
    Then loop until exit 0: read the JSON on stdout, answer the pending question
    per the rules in that section, and run the `resume` command it gives with
    --answer <file>.
-3. Ask me before approving source-review, contract-repair or baseline-change.
+3. Ask me before approving fixture-review, source-review, contract-repair or
+   baseline-change. For fixture-review, show me its `details` (config changes and
+   serialized weight names); to change the config, edit `fixture/config.json` in
+   the workspace and resume.
    Never edit a tolerance, an expectation or a gate to make a step pass.
 4. When it exits 0, report: the workspace path, what the contract calls,
    the weights choice (random or overfit) and why, the platform the
@@ -57,7 +60,8 @@ because it keeps `--local-only` and the other options. An answer is consumed onc
 
 | `kind` | What it asks | Who decides |
 |---|---|---|
-| `source-review` | Run the drafted contract? | **Operator.** Read `integration.json` and `integrations/transformers/usage.md` in the workspace's model directory first. They are executable Python that nothing sandboxes. Summarize what they load and call. |
+| `fixture-review` | Is the tiny model's config and weight format right? Asked before any contract code runs. | **Operator.** Show `details`: the config values that differ from the source, the serialized weight names (layer numbers collapsed to `{n}`) compared with the source checkpoint, and findings. `context.fixture` has the same as counts and lists. To change the config, edit `fixture/config.json` and resume without `--answer`: tmic stores your values as the recipe's `config_overrides`, shrinks again and asks about the result. |
+| `source-review` | Run the drafted contract? | **Operator.** `details` holds `usage.md` itself. It is executable Python that nothing sandboxes. Summarize what it loads and calls. |
 | `retry` | A stage failed | You. Read the log in `context.log` and fix the cause first. Retrying unchanged inputs pauses after two attempts. Missing dependencies and model-specific build errors are yours to fix. |
 | `contract-repair` | Apply an LLM-proposed usage diff? | **Operator.** Show the rationale and diff. `reject` still uses one of the two repairs. |
 | `baseline-change` | Accept changed expected values? | **Operator only.** `reason` is required. Never approve a change only to make a check pass. |
@@ -68,6 +72,10 @@ for them.
 
 **Workspace.** Without `--out`, the run uses `work/mic/<org>--<model>`. Inside it:
 
+- `fixture/`: the tiny model, loadable with `from_pretrained`: `config.json`, the
+  weights in the source's serialized format, and the processor files. Before the
+  build it holds seeded random weights; after it, the built fixture. Edit
+  `config.json` here to change the shrink.
 - `example/hub/<name>-mic/integration.json` and `.../integrations/transformers/usage.md`:
   the contract.
 - `example/hub/<name>-mic/integrations/transformers/expectations/<platform>/`:
@@ -216,8 +224,19 @@ hf auth login
 tmic run org/model --local-only --fixtures-only --no-history --bill-to ''
 ```
 
-`tmic run` drafts the contract, builds the fixture, records candidate baselines
-and checks them, asking you to review each step. The flags:
+`tmic run` drafts the contract, then asks you two things before it runs anything:
+
+1. **Review tiny model.** It shrinks the checkpoint's config and writes the tiny
+   model to `work/mic/org--model/fixture/`: `config.json` and the weights in the
+   checkpoint's own serialized format (seeded random values; no contract code has
+   run). The prompt lists the config values that differ from the source and
+   compares the serialized weight names with the source checkpoint's. `D` shows
+   all of it. To change something, edit `fixture/config.json` (or press `E`):
+   tmic shrinks again with your values and asks again.
+2. **Review contract.** `D` shows `usage.md`, the Python the checks execute.
+
+Then it builds the fixture (checking the weights move the contract's outputs),
+records baselines and checks them. New baselines need no review. The flags:
 
 - `--local-only`: measure on this machine and stop before any Hub upload.
 - `--fixtures-only`: declare only the fixture as a target, so the full
@@ -229,9 +248,9 @@ and checks them, asking you to review each step. The flags:
   catalog makes no LLM call.
 
 Repeat the same command to resume. The workspace is created in
-`work/mic/org--model` under the current directory; read `integration.json` and
-`integrations/transformers/usage.md` there, since the usage is executable Python
-that nothing sandboxes. Progress, prompts and repairs below work the same way
+`work/mic/org--model` under the current directory. The contract is in
+`example/hub/<name>-mic/` there (`integration.json` and
+`integrations/transformers/usage.md`); the tiny model is in `fixture/`. Progress, prompts and repairs below work the same way
 locally. The cloud, dashboard and GitHub options in this document are for
 maintainers who publish to `huggingface-mic`.
 
@@ -347,6 +366,11 @@ confirms cancellation, the next run archives the old collection and starts fresh
 Human mode shows short failure explanations. Complete tracebacks and worker output remain in the shown
 log files. Pausing prints a resume command; agent mode keeps its JSON protocol.
 
+`D` prints the full details inline (for the contract review: the code itself), then
+asks again. At the tiny-model review, `E` opens `fixture/config.json` in `$VISUAL`
+or `$EDITOR` (or waits while you edit it elsewhere), then shrinks again with your
+values and asks about the result.
+
 At `Continue? [y/N/A=always/D=details]`, choose `A` (or `a`/`always`) to approve this and
 later questions in the current process. This includes source/repair reviews,
 baseline decisions, model publication and fleet updates. Every decision remains
@@ -410,7 +434,7 @@ stderr. A pending question exits **3** and includes `protocol_version: 1`,
 {
   "question_id": "<opaque ID>",
   "kind": "source-review",
-  "question": "Review the executable contract before running it.",
+  "question": "Review the contract code before it runs.",
   "details": "Paths and review details...",
   "choices": ["approve", "defer"],
   "requires_reason": false,
@@ -599,6 +623,28 @@ Otherwise, `gh` must be installed and authenticated for GitHub history searches.
 list from relore or another source. A failure object can contain `url`, `title`,
 `body`, and revision information. Searches are bounded candidates, not a complete
 inventory of past failures, and do not count as regression detection.
+
+## Check the tiny model before building it
+
+```sh
+tmic fixture            # write fixture/ and compare it with the source
+tmic fixture --open     # also open the layer-by-layer comparison page
+tmic fixture --json     # counts and lists, for scripts and agents
+```
+
+`tmic fixture` shrinks the config and writes `fixture/` in the workspace without
+running any contract code: `config.json`, the weights in the source checkpoint's
+serialized format (same tensor names, prefix and file type), and the processor
+files. It prints the config values that differ from the source, the weight names
+with layer and expert numbers collapsed to `{n}`, sorted into names that match the
+source, names only in the source (weights the model class does not have, ignored
+on load), and names only in the tiny model, plus the `tmic shrink` findings.
+
+Edit `fixture/config.json` and rerun to change the shrink: changed or added values
+become the recipe's `config_overrides` in `integration.json` (dotted paths for
+sub-configs such as `text_config.hidden_size`). `tmic run` does the same when it
+resumes. After the build, `fixture/` holds the built fixture; editing it then sends
+the run back to this review.
 
 ## How was the fixture shrunk?
 
