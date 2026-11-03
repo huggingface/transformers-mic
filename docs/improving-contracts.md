@@ -24,7 +24,7 @@ A candidate is a question, not a verdict.
 ## Adding a check
 
 1. **Reproduce on the real checkpoint first**, through the public call, on bad and fixed builds ([replay](evidence.md#historical-regression-replay)). No checkpoint failure → stop.
-2. **Write it as user code:** documented API, default settings, short, deterministic, in its own `usage.md` section.
+2. **Write it as user code:** documented API, default settings, short, deterministic, in its own `usage.md` section. Print the rendered chat prompt once: a template that calls `strftime_now` (Granite, Mistral3, Muse, Llama 3.2 Vision and others) puts today's date into the prompt, so a baseline only matches the day it was recorded.
 3. **Don't move existing outputs.** Place it before training if it draws no random numbers (tokenization, decoding, config reads, greedy generation); otherwise after the outputs it could affect, and re-review them.
 4. **Declare its output** in the manifest: `exact` for tokens, text, labels, keys; `allclose` only for floats.
 5. **Prove it on the bug** with [`replay.py`](../example/replay.py): fixture fails on bad, passes on fixed. If only the checkpoint differs, keep it as full-model coverage (nightly, `run-slow`), not PR coverage.
