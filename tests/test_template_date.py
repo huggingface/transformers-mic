@@ -47,9 +47,11 @@ def freeze_then(value, before=""):
     )
 
 
+# requires_runtime, not importorskip: example/transformers/ (the fleet lock folder) makes
+# a bare `import transformers` succeed as a namespace package once example/ is on sys.path.
+@pytest.mark.requires_runtime
 @pytest.mark.parametrize("imported_first", [False, True])
 def test_templates_see_the_frozen_date_whenever_transformers_is_imported(imported_first):
-    pytest.importorskip("transformers")
     before = "import transformers.utils.chat_template_utils\n" if imported_first else ""
     rendered, year = run(freeze_then("2026-01-01", before))
     assert rendered == "2026-01-01"
@@ -77,8 +79,8 @@ def test_a_malformed_date_is_refused():
         sys.path.remove(str(BACKEND))
 
 
+@pytest.mark.requires_runtime
 def test_isolated_contract_processes_freeze_the_date(tmp_path, monkeypatch):
-    pytest.importorskip("transformers")
     module = runner()
     # tmic points HERE at a workspace; the prelude must still find the runner's code.
     monkeypatch.setattr(module, "HERE", tmp_path / "workspace")
