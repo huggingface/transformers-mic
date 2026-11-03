@@ -169,7 +169,9 @@ assets are already provided. Use at least two distinct input examples so batch
 perturbation is meaningful, and padding where supported. Keep sequences short:
 turn off image splitting/tiling (Idefics3 makes 17 crops of a 512 px image, and an
 eager training step then runs out of GPU memory). Report compact numeric
-probes (a few selected logits), never entire vocabulary logits or parameter arrays. Prefer named top-level model kwargs so the builder
+probes (a few selected logits), never entire vocabulary logits or parameter arrays.
+Probe every batch row (e.g. logits[:, -1, :8] for a causal LM, not logits[0, ...]): random fixtures often
+generate the same text for every row, so a row-0 probe cannot see a batch mix-up. Prefer named top-level model kwargs so the builder
 can capture the training inputs. Print a final JSON object only when MIC_RUNNER
 is set, plain JSON only (device as model.device.type, never a torch.device).
 Include runtime device/dtype/attn_implementation and meaningful outputs.
