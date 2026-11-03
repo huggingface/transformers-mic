@@ -1,7 +1,9 @@
 name: tmic run
+run-name: tmic run ${{ inputs.model }}
 
 # Reproduce `tmic run <model>` on a cloud runner instead of a laptop: no
-# checkpoint download on a slow link, and a clean environment. Local-only:
+# checkpoint download on a slow link, and a clean environment. mic-impact.yml
+# also dispatches it to draft suggested contracts (matched by run name). Local-only:
 # nothing is published. Gates (source review, baselines) are auto-approved,
 # so read the uploaded workspace before trusting any of it.
 #
