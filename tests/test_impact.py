@@ -149,20 +149,68 @@ def test_rule_b_counts_a_systemic_block_as_wrong(tmp_path):
     assert "| B: red, not infra, not failing on main | 3 | 1 | 2 | 0 |" in (results / "summary.md").read_text()
 
 
-def nightly(contract, target, kind, status):
-    return {"contract": contract, "target": target, "kind": kind, "status": status, "variant": "bfloat16", "platform": "cuda", "failures": ["x"] if status == "fail" else []}
+def test_gpu_ci_regressions_group_by_pr_and_model_and_skip_flaky(monkeypatch):
+    def entry(test, pr=50001, status="git bisect found the bad commit."):
+        return {"test": test, "pr_number": pr, "status": status, "bad_commit": "b", "job_link": "j"}
 
-
-def test_real_weights_only_needs_a_passing_night_and_passing_fixtures():
-    runs = {
-        "2026-10-01": [nightly("c/a", "a", "checkpoint", "pass"), nightly("c/a", "a-mic", "fixture", "pass"),
-                       nightly("c/b", "b", "checkpoint", "fail"), nightly("c/b", "b-mic", "fixture", "pass"),
-                       nightly("c/d", "d", "checkpoint", "pass"), nightly("c/d", "d-mic", "fixture", "pass")],
-        "2026-10-02": [nightly("c/a", "a", "checkpoint", "fail"), nightly("c/a", "a-mic", "fixture", "pass"),
-                       nightly("c/b", "b", "checkpoint", "fail"), nightly("c/b", "b-mic", "fixture", "pass"),
-                       nightly("c/d", "d", "checkpoint", "fail"), nightly("c/d", "d-mic", "fixture", "fail")],
+    data = {
+        "llama": {"single-gpu": [
+            entry("tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_a"),
+            entry("tests/models/llama/test_modeling_llama.py::LlamaModelTest::test_b"),
+            entry("tests/models/llama/test_modeling_llama.py::LlamaModelTest::test_c", status="flaky: passed on retry"),
+            entry("tests/models/llama/test_modeling_llama.py::LlamaModelTest::test_d", pr=None),
+        ]},
+        "bert": {"multi-gpu": [entry("tests/models/bert/test_modeling_bert.py::BertModelTest::test_e", pr=50002)]},
     }
-    found = impact.real_weights_only(runs)
-    assert found["c/a|a|bfloat16|cuda"]["after_pass"] is True  # only real weights saw it
-    assert found["c/b|b|bfloat16|cuda"]["since_first_night"] is True  # standing failure, not a catch
-    assert "c/d|d|bfloat16|cuda" not in found  # the fixture failed too
+    monkeypatch.setattr(impact, "get_json", lambda url: data)
+    found = impact.gpu_ci_regressions("2026-11-02")
+    assert sorted(found) == ["50001#llama", "50002#bert"]
+    assert found["50001#llama"]["integration"] is True and len(found["50001#llama"]["tests"]) == 2
+    assert found["50002#bert"]["integration"] is False
+
+
+@pytest.mark.parametrize(
+    "files, selected",
+    [
+        (["src/transformers/models/llama/modeling_llama.py"], True),
+        (["src/transformers/cache_utils.py"], True),
+        (["src/transformers/models/auto/modeling_auto.py"], True),
+        (["src/transformers/models/bert/modeling_bert.py"], False),
+        (["tests/models/llama/test_modeling_llama.py", "docs/source/en/x.md"], False),
+    ],
+)
+def test_selection_follows_select_contracts_rules(files, selected):
+    assert impact.selects(files, "llama") is selected
+
+
+@pytest.mark.parametrize(
+    "rows, job, files, expected",
+    [
+        ([{"pr": "7", "failure_kind": "Baseline assertion", "fixture_repo": "m/llama-mic", "failure": "x"}], "failure", [], "caught-on-pr"),
+        ([{"pr": "7", "failure_kind": "Setup error", "fixture_repo": "m/llama-mic"}], None, [], "not-run"),
+        ([], "success", ["src/transformers/models/bert/x.py"], "not-selected"),
+        ([], "success", ["src/transformers/models/llama/x.py"], "missed"),
+    ],
+)
+def test_mic_on_culprit(monkeypatch, rows, job, files, expected):
+    monkeypatch.setattr(impact, "mic_job", lambda sha: job)
+    item = {"pr": "7", "model": "llama"}
+    types = {"m/llama-mic": "llama"}
+    assert impact.mic_on_culprit(item, rows, types, {"llama"}, files, "h") == expected
+    assert impact.mic_on_culprit({"pr": "7", "model": "gpt2"}, rows, types, {"llama"}, files, "h") == "not-covered"
+
+
+def test_sticky_onsets_need_a_passing_day_before():
+    health = {"rows": [
+        {"job": "run_models_gpu", "category": "failure", "sticky": True, "model": "llama", "nodeid": "t/LlamaIntegrationTest::a", "days": [0, 0, 3, 1]},
+        {"job": "run_models_gpu", "category": "failure", "sticky": True, "model": "bert", "nodeid": "t/BertModelTest::b", "days": [1, 1, 1, 1]},
+        {"job": "tests_torch", "category": "failure", "sticky": True, "model": "gpt2", "nodeid": "t/x", "days": [0, 1, 1, 1]},
+    ]}
+    found = impact.sticky_gpu_onsets(health, DAY)
+    assert list(found) == [f"sticky#llama#{impact.iso_day(DAY + 2)}"]
+    item = found[f"sticky#llama#{impact.iso_day(DAY + 2)}"]
+    assert item["integration"] is True
+    main = [{"failure_kind": "Baseline assertion", "fixture_repo": "m/llama-mic", "daily": [{"fail": 0}, {"fail": 0}, {"fail": 0}, {"fail": 1}]}]
+    assert impact.mic_on_main_near(item, main, DAY, {"m/llama-mic": "llama"}, {"llama"}) == "red-on-main"
+    assert impact.mic_on_main_near(item, [], DAY, {}, {"llama"}) == "green-on-main"
+    assert impact.mic_on_main_near({**item, "model": "bert"}, main, DAY, {}, {"llama"}) == "not-covered"

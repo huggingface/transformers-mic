@@ -4,7 +4,8 @@ name: MIC impact
 # dashboard's MIC failures (/d/mic-failures), classifies each PR failure (infra,
 # failing on main too, or PR-only), follows PR-only cases to an outcome, counts
 # baseline changes published to the fleet, replays blocking on every merged PR,
-# and rewrites summary.md on the impact-results branch. Observational: it never
+# rewrites summary.md on the impact-results branch, and publishes it to the
+# huggingface-mic/mic-impact Space. Observational: it never
 # comments on a PR and never fails because of what it finds.
 #
 #   gh workflow run mic-impact.yml --repo huggingface/transformers-mic             # yesterday
@@ -15,7 +16,7 @@ name: MIC impact
 
 on:
   schedule:
-    - cron: "0 9 * * *" # 10:00 CET (11:00 CEST); after nightly (02:41) and shadow (03:17)
+    - cron: "0 9 * * *" # 10:00 CET (11:00 CEST), after the daily GPU CI has been bisected
   workflow_dispatch:
     inputs:
       days:
@@ -42,6 +43,7 @@ jobs:
       HF_HUB_DISABLE_PROGRESS_BARS: "1"
       PYTHONUNBUFFERED: "1"
       DAYS: ${{ inputs.days || '1' }}
+      HAS_SPACE_TOKEN: ${{ secrets.MIC_IMPACT_SPACE_TOKEN != '' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
@@ -66,10 +68,14 @@ jobs:
           echo "RESULTS=$dir" >> "$GITHUB_ENV"
 
       - name: Observe
-        run: |
-          # Nightly real-checkpoint runs (question 4) are on the shadow-results branch.
-          git fetch --quiet origin shadow-results:refs/remotes/origin/shadow-results
-          python experiments/impact.py --results "$RESULTS" --days "$DAYS" --shadow-ref origin/shadow-results | tee -a "$GITHUB_STEP_SUMMARY"
+        run: python experiments/impact.py --results "$RESULTS" --days "$DAYS" | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish the page
+        # The Space renders summary.md; the branch above stays the record.
+        if: ${{ env.HAS_SPACE_TOKEN == 'true' }}
+        env:
+          HF_TOKEN: ${{ secrets.MIC_IMPACT_SPACE_TOKEN }}
+        run: python experiments/impact.py --results "$RESULTS" --summary-only --publish-space huggingface-mic/mic-impact > /dev/null
 
       - name: Push
         run: |
