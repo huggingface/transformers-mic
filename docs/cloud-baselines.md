@@ -218,8 +218,11 @@ migrated to the single `<name>-mic` layout before this publication path.
    and CUDA alike; fixtures are public and unaffected. `tmic create` warns
    when a checkpoint is gated. The token's account must have accepted each gated
    model's license. For direct
-   upload, configure `MIC_BASELINE_WRITE_TOKEN`, restricted to the intended Hub
-   namespace. Set `MIC_BASELINE_UPLOAD_NAMESPACES` (CSV; default `huggingface-mic`)
+   upload and automatic publication, configure `MIC_BASELINE_WRITE_TOKEN` as a
+   secret of the `mic-publish` environment, which admits only `main`. Use a
+   fine-grained Hub token with repository write access to the intended
+   namespace only. The publisher also refuses a `mic_sha` that is not on
+   `main`, so a pushed branch cannot run its own code with the token. Set `MIC_BASELINE_UPLOAD_NAMESPACES` (CSV; default `huggingface-mic`)
    and matching dashboard `traceExporter.micJobs.uploadNamespaces` if needed.
    No upload is attempted when `--upload-repo` is absent.
 7. For live case progress set Serge's `DASHBOARD_MIC_PROGRESS_URL` to

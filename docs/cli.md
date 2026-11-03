@@ -198,7 +198,7 @@ fleet contract out of the collection, for example while an open upstream bug mak
 its fixture unmeasurable. Its published baselines are not touched, and the
 exclusion is recorded in the collection's provenance.
 Repository image variables must be configured first; direct upload also needs
-`MIC_BASELINE_WRITE_TOKEN`. This tests GitHub Actions/ARC and artifact retrieval;
+`MIC_BASELINE_WRITE_TOKEN` in the `mic-publish` environment. This tests GitHub Actions/ARC and artifact retrieval;
 it does not test dashboard/Serge authorization or the live case-progress relay.
 There is no anonymous endpoint or production auth bypass. See
 [operator setup](cloud-baselines.md#operator-setup) for the full service path.
