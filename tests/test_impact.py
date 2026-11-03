@@ -296,3 +296,72 @@ def test_a_test_failing_on_many_models_is_one_shared_suggestion():
     s = impact.build_suggestions(gpu_ci, {}, {})
     assert s["shared"] == {"test_torch_export_generate_static": ["bart", "marian", "t5"]}
     assert list(s["extend"]) == ["gemma2"]
+
+
+def test_overview_has_the_headline_numbers_and_next_targets(tmp_path):
+    results = results_dir(tmp_path)
+    write(results / "gpu-ci.json", {
+        "1#a": {"mic": "caught-on-pr", "integration": True},
+        "2#b": {"mic": "missed", "integration": True, "date": "d", "tests": ["t"]},
+        "sticky#c#d": {"mic": "not-covered", "integration": True},
+        "sticky#e#d": {"mic": "green-on-main", "integration": False},
+    })
+    write(results / "suggestions.json", {"new": [
+        {"model": f"m{i}", "checkpoint": f"o/m{i}", "integration": 1, "other": 2, "shrinkable": True} for i in range(7)
+    ], "extend": {}})
+    write(results / "drafts.json", {"m0": {"checkpoint": "o/m0", "status": "completed", "conclusion": "success",
+                                           "url": "https://github.com/x/runs/9", "shrink": "shrink/9/shrink-m0.html"}})
+    impact.summarize(results)
+    o = json.loads((results / "overview.json").read_text())
+    assert o["window"] == ["2026-10-01", "2026-10-01"]
+    assert o["caught"]["real_checkpoint"] == 1 and o["missed"] == {"real_checkpoint": 1, "not_covered": 1, "awaiting_verdict": 1}
+    assert o["false_alarms"] == {"prs_with_failure": 4, "prs_not_their_fault": 1}
+    assert o["block_merges"]["ready"] is False and any("days observed" in u for u in o["block_merges"]["unmet"])
+    assert len(o["next"]) == impact.NEXT_TARGETS
+    assert o["next"][0] == {"model": "m0", "checkpoint": "o/m0", "regressions": 3, "real_checkpoint": 1, "draft": "success",
+                            "run": "https://github.com/x/runs/9", "shrink": "shrink/9/shrink-m0.html"}
+    assert o["next"][1]["draft"] == "" and o["next"][1]["shrink"] == ""
+
+
+def test_shrink_pages_are_fetched_once_per_finished_draft(monkeypatch, tmp_path):
+    calls = []
+
+    def fake_run(cmd, **kwargs):
+        calls.append(cmd[3])
+        out = Path(cmd[cmd.index("-D") + 1])
+        if cmd[3] == "9":
+            (out / "shrink-a.html").write_text("<html>")
+        return type("Done", (), {"returncode": 0 if cmd[3] == "9" else 1})()
+
+    import subprocess
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    drafts = {
+        "a": {"run_id": 9, "status": "completed"},
+        "b": {"run_id": 8, "status": "completed"},  # artifact expired or never uploaded
+        "c": {"run_id": 7, "status": "in_progress"},
+        "d": {"run_id": 6, "status": "completed", "shrink": "shrink/6/x.html"},
+    }
+    assert impact.fetch_shrink_pages(drafts, tmp_path) == [9]
+    assert calls == ["9", "8"]
+    assert drafts["a"]["shrink"] == "shrink/9/shrink-a.html" and (tmp_path / "shrink/9/shrink-a.html").exists()
+    assert "shrink" not in drafts["b"]
+
+
+def test_space_gets_overview_report_and_new_shrink_pages(monkeypatch, tmp_path):
+    results = results_dir(tmp_path / "r")
+    impact.summarize(results)
+    shrink = tmp_path / "s"
+    (shrink / "shrink" / "9").mkdir(parents=True)
+    (shrink / "shrink" / "9" / "p.html").write_text("<html>")
+    uploaded = {}
+
+    class Api:
+        def upload_folder(self, folder_path, **kwargs):
+            uploaded["files"] = sorted(str(p.relative_to(folder_path)) for p in Path(folder_path).rglob("*") if p.is_file())
+
+    import huggingface_hub
+
+    monkeypatch.setattr(huggingface_hub, "HfApi", Api)
+    impact.publish_space(results, "o/space", shrink)
+    assert uploaded["files"] == ["README.md", "index.html", "overview.json", "report.html", "shrink/9/p.html", "summary.md", "updated.txt"]

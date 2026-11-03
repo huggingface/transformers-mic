@@ -7,74 +7,155 @@
 <style>
   :root {
     --bg: #ffffff; --fg: #1f2328; --muted: #59636e; --border: #d1d9e0;
-    --accent: #0969da; --row: #f6f8fa; --code: #eff1f3;
+    --accent: #0969da; --tile: #f6f8fa; --good: #1a7f37; --bad: #cf222e;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --border: #3d444d;
-      --accent: #4493f8; --row: #151b23; --code: #262c36;
+      --accent: #4493f8; --tile: #151b23; --good: #3fb950; --bad: #f85149;
     }
   }
   :root[data-theme="dark"] {
     --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --border: #3d444d;
-    --accent: #4493f8; --row: #151b23; --code: #262c36;
+    --accent: #4493f8; --tile: #151b23; --good: #3fb950; --bad: #f85149;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0; background: var(--bg); color: var(--fg);
-    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   }
-  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 64px; }
-  header { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 48px; }
   a { color: var(--accent); }
-  h1 { font-size: 28px; margin: 8px 0 4px; }
-  h2 { font-size: 20px; margin-top: 32px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
-  code { background: var(--code); padding: 1px 5px; border-radius: 4px; font-size: 13px; word-break: break-word; }
+  h1 { font-size: 26px; margin: 0; }
+  h2 { font-size: 17px; margin: 28px 0 8px; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 12px; margin-top: 20px; }
+  .tile { background: var(--tile); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+  .tile .label { font-size: 13px; color: var(--muted); }
+  .tile .value { font-size: 32px; font-weight: 600; line-height: 1.2; margin: 2px 0; font-variant-numeric: tabular-nums; }
+  .tile .note { font-size: 13px; color: var(--muted); }
+  .decision { margin-top: 20px; padding: 10px 14px; border-left: 3px solid var(--border); }
+  .decision strong.no { color: var(--bad); }
+  .decision strong.yes { color: var(--good); }
   .table-wrap { overflow-x: auto; }
-  table { border-collapse: collapse; margin: 12px 0; min-width: 100%; font-size: 14px; }
-  th, td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
-  th { background: var(--row); }
-  tr:nth-child(even) td { background: var(--row); }
-  li { margin: 3px 0; }
-  #error { color: #cf222e; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { border-bottom: 1px solid var(--border); padding: 7px 8px; text-align: left; white-space: nowrap; }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  footer { margin-top: 28px; }
+  #error { color: var(--bad); }
 </style>
 </head>
 <body>
 <main>
-  <header>
-    Updated daily by
-    <a href="https://github.com/huggingface/transformers-mic/blob/main/.github/workflows/mic-impact.yml">mic-impact.yml</a>
-    · raw data and verdicts on the
-    <a href="https://github.com/huggingface/transformers-mic/tree/impact-results">impact-results branch</a>
+  <h1>MIC impact</h1>
+  <div class="muted" id="window">Loading…</div>
+
+  <div class="tiles">
+    <div class="tile">
+      <div class="label">Caught</div>
+      <div class="value" id="caught">–</div>
+      <div class="note" id="caught-note"></div>
+    </div>
+    <div class="tile">
+      <div class="label">Missed</div>
+      <div class="value" id="missed">–</div>
+      <div class="note" id="missed-note"></div>
+    </div>
+    <div class="tile">
+      <div class="label">False alarms</div>
+      <div class="value" id="false">–</div>
+      <div class="note" id="false-note"></div>
+    </div>
+  </div>
+
+  <div class="decision" id="decision"></div>
+
+  <h2>Contracts to add next</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Model</th><th>Checkpoint</th><th class="num">GPU CI regressions</th><th>Draft</th><th>Shrink</th></tr></thead>
+      <tbody id="next"></tbody>
+    </table>
+  </div>
+
+  <footer class="muted">
+    <a href="report.html">Full report</a>: how each number is counted, every failure and what is waiting for a verdict.
+    · Data on the <a href="https://github.com/huggingface/transformers-mic/tree/impact-results" target="_blank" rel="noopener">impact-results branch</a>
     · <span id="updated"></span>
-  </header>
-  <article id="content">Loading…</article>
+  </footer>
   <p id="error"></p>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 <script>
-  // The summary quotes PR titles and failure messages: sanitize before rendering.
-  fetch("summary.md", { cache: "no-store" })
-    .then((r) => { if (!r.ok) throw new Error("summary.md: HTTP " + r.status); return r.text(); })
-    .then((text) => {
-      const html = DOMPurify.sanitize(marked.parse(text));
-      const content = document.getElementById("content");
-      content.innerHTML = html;
-      content.querySelectorAll("table").forEach((table) => {
-        const wrap = document.createElement("div");
-        wrap.className = "table-wrap";
-        table.replaceWith(wrap);
-        wrap.appendChild(table);
-      });
-      content.querySelectorAll("a[href^='http']").forEach((a) => { a.target = "_blank"; a.rel = "noopener"; });
-    })
-    .catch((e) => {
-      document.getElementById("content").textContent = "";
-      document.getElementById("error").textContent = "Could not load the summary: " + e.message;
-    });
+  // overview.json quotes model and checkpoint names: build the page with textContent only.
+  const HUB = "https://huggingface.co/";
+  const $ = (id) => document.getElementById(id);
+  const set = (id, text) => { $(id).textContent = text; };
+  const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+  function link(text, href) {
+    const a = document.createElement("a");
+    a.textContent = text;
+    a.href = href;
+    if (/^https:/.test(href)) { a.target = "_blank"; a.rel = "noopener"; }
+    return a;
+  }
+
+  function cell(row, content, cls) {
+    const td = document.createElement("td");
+    if (cls) td.className = cls;
+    if (content instanceof Node) td.appendChild(content); else td.textContent = content;
+    row.appendChild(td);
+  }
+
+  function render(o) {
+    const [first, last] = o.window || [];
+    set("window", first ? `Transformers PRs and daily GPU CI, ${first} → ${last}` : "No data yet");
+
+    const c = o.caught;
+    set("caught", c.fixed_by_push);
+    set("caught-note", `PR failures the author fixed before merging · ${plural(c.real_checkpoint, "real-checkpoint regression")} flagged · ${c.labelled_real_bug} labelled real bugs`);
+
+    const m = o.missed;
+    set("missed", m.real_checkpoint);
+    set("missed-note", `real-checkpoint regressions MIC stayed green on · ${m.not_covered} more on models with no contract`);
+
+    const f = o.false_alarms;
+    const share = f.prs_with_failure ? Math.round((100 * f.prs_not_their_fault) / f.prs_with_failure) : 0;
+    set("false", f.prs_with_failure ? `${share}%` : "–");
+    set("false-note", `of ${plural(f.prs_with_failure, "PR")} with a red MIC saw only failures they did not cause`);
+
+    const d = $("decision");
+    const verdict = document.createElement("strong");
+    verdict.className = o.block_merges.ready ? "yes" : "no";
+    verdict.textContent = o.block_merges.ready ? "Ready" : "Not yet";
+    d.append("Block merges when MIC is red? ", verdict);
+    if (o.block_merges.unmet.length) d.append(` · unmet: ${o.block_merges.unmet.join("; ")}`);
+
+    const body = $("next");
+    for (const t of o.next) {
+      const row = document.createElement("tr");
+      cell(row, t.model);
+      cell(row, /^[\w.-]+\/[\w.-]+$/.test(t.checkpoint || "") ? link(t.checkpoint, HUB + t.checkpoint) : "?");
+      cell(row, t.real_checkpoint ? `${t.regressions} (${t.real_checkpoint} real)` : String(t.regressions), "num");
+      const state = t.draft || "not drafted";
+      cell(row, /^https:\/\/github\.com\//.test(t.run || "") ? link(state, t.run) : state);
+      cell(row, /^shrink\/\d+\/[\w.-]+\.html$/.test(t.shrink || "") ? link("page", t.shrink) : "–");
+      body.appendChild(row);
+    }
+    if (!o.next.length) {
+      const row = document.createElement("tr");
+      cell(row, "None: every regressed model has a contract.");
+      body.appendChild(row);
+    }
+  }
+
+  fetch("overview.json", { cache: "no-store" })
+    .then((r) => { if (!r.ok) throw new Error("overview.json: HTTP " + r.status); return r.json(); })
+    .then(render)
+    .catch((e) => { set("window", ""); set("error", "Could not load the overview: " + e.message); });
   fetch("updated.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((t) => {
-    if (t) document.getElementById("updated").textContent = "last run " + t.trim();
+    if (t) set("updated", "last run " + t.trim());
   });
 </script>
 </body>

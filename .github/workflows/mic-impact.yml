@@ -13,10 +13,17 @@ name: MIC impact
 #   gh workflow run mic-impact.yml --repo huggingface/transformers-mic             # yesterday
 #   gh workflow run mic-impact.yml --repo huggingface/transformers-mic -f days=30  # re-seed a month
 #
+# When a tmic-run.yml run finishes, it only refreshes the drafts' state and shrink
+# pages (--refresh): no collection, no new drafts. The Space's front page is
+# overview.json; the full report is report.html (summary.md).
+#
 # Verdicts (real-bug / intended / false-alarm / flake) are added by hand to
 # labels.jsonl on the impact-results branch; the next run picks them up.
 
 on:
+  workflow_run:
+    workflows: ["tmic run"]
+    types: [completed]
   schedule:
     - cron: "0 9 * * *" # 10:00 CET (11:00 CEST), after the daily GPU CI has been bisected
   workflow_dispatch:
@@ -77,10 +84,13 @@ jobs:
           echo "RESULTS=$dir" >> "$GITHUB_ENV"
 
       - name: Observe
-        run: python experiments/impact.py --results "$RESULTS" --days "$DAYS" --draft "$DRAFTS" | tee -a "$GITHUB_STEP_SUMMARY"
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = workflow_run ]; then mode=(--refresh); else mode=(--days "$DAYS" --draft "$DRAFTS"); fi
+          python experiments/impact.py --results "$RESULTS" "${mode[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Publish the page
-        # The Space renders summary.md; the branch above stays the record.
+        # The Space renders overview.json and summary.md, and hosts the drafts' shrink pages;
+        # the branch above stays the record.
         if: ${{ env.HAS_SPACE_TOKEN == 'true' }}
         env:
           HF_TOKEN: ${{ secrets.MIC_IMPACT_SPACE_TOKEN }}
@@ -91,7 +101,8 @@ jobs:
           cd "$RESULTS"
           git add -A
           git diff --cached --quiet && exit 0
-          git commit --quiet -m "MIC impact $(date -u +%F) (window ${DAYS}d)"
+          if [ "$GITHUB_EVENT_NAME" = workflow_run ]; then title="MIC impact drafts refresh"; else title="MIC impact $(date -u +%F) (window ${DAYS}d)"; fi
+          git commit --quiet -m "$title"
           for i in 1 2 3; do
             git push --quiet origin impact-results && exit 0
             # A hand-added label landed meanwhile: keep it, redo the summary on top.

@@ -37,6 +37,7 @@ import json
 import os
 import re
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.parse
@@ -636,6 +637,7 @@ SWEEP = Path(__file__).parent / "results" / "sweep.json"
 TMIC_RUN = "tmic-run.yml"
 MIC_REPO = "huggingface/transformers-mic"
 DRAFTS_PER_DAY = 2
+NEXT_TARGETS = 5  # rows in the overview's "contracts to add next"
 # Test names that exercise hardware or optional backends a CPU fixture contract does not run.
 GPU_ONLY = ("flash_attn", "flash_attention", "fa2", "4bit", "8bit", "bnb", "bitsandbytes", "compile", "fp16", "cuda", "multi_gpu", "tensor_parallel")
 NOT_MODELS = {"auto", "shared", None}
@@ -754,6 +756,35 @@ def refresh_drafts(drafts):
                 break
 
 
+def fetch_shrink_pages(drafts, folder):
+    """Download each finished draft's tmic-shrink artifact once, into folder/shrink/<run id>/.
+
+    The Space then links the page directly: no artifact download, and the page outlives the
+    artifact's 7-day retention. Records the page's Space path in the draft; returns the run ids fetched.
+    """
+    import subprocess
+
+    fetched = []
+    for draft in drafts.values():
+        if draft.get("shrink") or draft.get("status") != "completed" or not draft.get("run_id"):
+            continue
+        with tempfile.TemporaryDirectory() as tmp:
+            done = subprocess.run(
+                ["gh", "run", "download", str(draft["run_id"]), "--repo", MIC_REPO, "-n", "tmic-shrink", "-D", tmp],
+                check=False, capture_output=True, text=True,
+            )
+            pages = sorted(Path(tmp).glob("*.html")) if done.returncode == 0 else []
+            if not pages:
+                continue  # no shrink page (the build failed first) or the artifact expired
+            target = folder / "shrink" / str(draft["run_id"])
+            target.mkdir(parents=True, exist_ok=True)
+            for page in pages:
+                (target / page.name).write_bytes(page.read_bytes())
+            draft["shrink"] = f"shrink/{draft['run_id']}/{pages[0].name}"
+            fetched.append(draft["run_id"])
+    return fetched
+
+
 def dispatch_drafts(suggestions, drafts, limit, now):
     """Dispatch tmic-run.yml (local-only: nothing is published) for the top suggestions not drafted yet."""
     sent = 0
@@ -843,7 +874,7 @@ def summarize(results):
     def pct(n, d):
         return f"{n} ({100 * n / d:.0f}%)" if d else str(n)
 
-    decision = replay_blocking(results, day_rows, candidates, labels, baselines, first, last)
+    decision, checks = replay_blocking(results, day_rows, candidates, labels, baselines, first, last)
     lines = [
         "# MIC impact on Transformers PRs",
         "",
@@ -979,7 +1010,9 @@ def summarize(results):
         lines.append(
             f"| {weights} | {sum(v for k, v in c.items() if not k.startswith('label:'))} | {c['fixed-by-push']} | {c['merged-then-main-failed']} | {c['label:real-bug']} |"
         )
-    lines += [""] + draft_lines(load(results / "suggestions.json", {"new": [], "extend": {}}), load(results / "drafts.json", {}))
+    suggestions = load(results / "suggestions.json", {"new": [], "extend": {}})
+    drafts = load(results / "drafts.json", {})
+    lines += [""] + draft_lines(suggestions, drafts)
     lines += [f"## Waiting for a verdict ({len(pending)})", ""]
     if pending:
         lines.append("Add a line to `labels.jsonl`: `{\"key\": \"<key>\", \"verdict\": \"real-bug|intended|false-alarm|flake\", \"note\": \"...\", \"by\": \"<login>\"}`.")
@@ -993,6 +1026,42 @@ def summarize(results):
     else:
         lines.append("- None.")
     (results / "summary.md").write_text("\n".join(lines) + "\n")
+
+    def gpu(kinds):
+        return sum(1 for v in gpu_ci.values() if v.get("mic") in kinds and v.get("integration"))
+
+    write(results / "overview.json", {
+        "window": [first or None, last or None],
+        "caught": {
+            "fixed_by_push": outcomes["fixed-by-push"],
+            "merged_then_main_failed": outcomes["merged-then-main-failed"],
+            "real_checkpoint": gpu(("caught-on-pr", "red-on-main")),
+            "labelled_real_bug": verdicts["real-bug"],
+        },
+        "missed": {
+            "real_checkpoint": gpu(("missed", "green-on-main")),
+            "not_covered": gpu(("not-covered",)),
+            "awaiting_verdict": len(missed),
+        },
+        "false_alarms": {"prs_with_failure": len(prs_failing), "prs_not_their_fault": len(prs_noise_only)},
+        "block_merges": {"ready": all(ok for _, ok in checks), "unmet": [text for text, ok in checks if not ok]},
+        "next": [next_target(s, drafts.get(s["model"])) for s in suggestions["new"][:NEXT_TARGETS]],
+        "awaiting_verdict": len(pending),
+    })
+
+
+def next_target(suggestion, draft):
+    """One row of the overview's "contracts to add next": the model, why, and its draft's state and pages."""
+    draft = draft or {}
+    return {
+        "model": suggestion["model"],
+        "checkpoint": suggestion["checkpoint"],
+        "regressions": suggestion["integration"] + suggestion["other"],
+        "real_checkpoint": suggestion["integration"],
+        "draft": draft.get("conclusion") or draft.get("status") or ("" if suggestion["shrinkable"] and suggestion["checkpoint"] else "not draftable"),
+        "run": draft.get("url", ""),
+        "shrink": draft.get("shrink", ""),
+    }
 
 
 def replay_blocking(results, day_rows, candidates, labels, baselines, first, last):
@@ -1085,21 +1154,28 @@ def replay_blocking(results, day_rows, candidates, labels, baselines, first, las
         "unresolved blocks shrink as cases get an outcome or a verdict in `labels.jsonl`.",
         "",
     ]
-    return lines
+    return lines, checks
 
 
-def publish_space(results, space):
-    """Upload summary.md and the static page to a Hugging Face Space (HF_TOKEN must write to it)."""
+def publish_space(results, space, shrink=None):
+    """Upload the overview, the full report and new shrink pages to a Hugging Face Space (HF_TOKEN must write to it).
+
+    index.html renders overview.json; report.html renders summary.md. shrink: a folder holding
+    shrink/<run id>/*.html pages to add (pages uploaded earlier stay on the Space).
+    """
     import shutil
-    import tempfile
 
     from huggingface_hub import HfApi
 
-    page = Path(__file__).parent / "impact_space" / "index.html"
+    pages = Path(__file__).parent / "impact_space"
     with tempfile.TemporaryDirectory() as folder:
         folder = Path(folder)
-        shutil.copy(page, folder / "index.html")
-        shutil.copy(Path(results) / "summary.md", folder / "summary.md")
+        for name in ("index.html", "report.html"):
+            shutil.copy(pages / name, folder / name)
+        for name in ("summary.md", "overview.json"):
+            shutil.copy(Path(results) / name, folder / name)
+        if shrink and (Path(shrink) / "shrink").is_dir():
+            shutil.copytree(Path(shrink) / "shrink", folder / "shrink")
         (folder / "updated.txt").write_text(dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC") + "\n")
         (folder / "README.md").write_text(
             "---\ntitle: MIC impact\nemoji: 📊\ncolorFrom: blue\ncolorTo: gray\nsdk: static\npinned: false\n---\n\n"
@@ -1118,25 +1194,32 @@ def main():
     parser.add_argument("--results", required=True, type=Path, help="checkout of the impact-results branch")
     parser.add_argument("--days", type=int, default=1, choices=(1, 7, 14, 30), help="window ending today; 30 to seed")
     parser.add_argument("--summary-only", action="store_true")
+    parser.add_argument("--refresh", action="store_true", help="only update the drafts' state and shrink pages, then rewrite the summary (a draft run finished)")
     parser.add_argument("--publish-space", metavar="REPO", help="also upload the summary page to this Hugging Face Space")
     parser.add_argument("--draft", type=int, default=0, metavar="N", help=f"dispatch {TMIC_RUN} for the top N suggested contracts not drafted yet")
     args = parser.parse_args()
     args.results.mkdir(parents=True, exist_ok=True)
     if not args.summary_only:
-        from transformers_mic import fleet
-
-        today_day = int(time.time() // 86400)
-        collect(args.results, args.days, today_day, fleet.download)
         drafts = load(args.results / "drafts.json", {})
         refresh_drafts(drafts)
-        if args.draft:
-            now = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-            dispatch_drafts(load(args.results / "suggestions.json", {"new": []}), drafts, args.draft, now)
+        if not args.refresh:
+            from transformers_mic import fleet
+
+            today_day = int(time.time() // 86400)
+            collect(args.results, args.days, today_day, fleet.download)
+            if args.draft:
+                now = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+                dispatch_drafts(load(args.results / "suggestions.json", {"new": []}), drafts, args.draft, now)
         write(args.results / "drafts.json", drafts)
-    summarize(args.results)
-    print((args.results / "summary.md").read_text())
-    if args.publish_space:
-        publish_space(args.results, args.publish_space)
+    with tempfile.TemporaryDirectory() as shrink:
+        if args.publish_space:
+            drafts = load(args.results / "drafts.json", {})
+            if fetch_shrink_pages(drafts, Path(shrink)):
+                write(args.results / "drafts.json", drafts)
+        summarize(args.results)
+        print((args.results / "summary.md").read_text())
+        if args.publish_space:
+            publish_space(args.results, args.publish_space, shrink)
 
 
 if __name__ == "__main__":
