@@ -30,6 +30,8 @@ The prototype [selector](../example/select_contracts.py) maps model directories 
 
 Reproduce on the reported target and baseline; a fixture failure can justify a full-model run. Fix unintended changes. For intended changes, `--record` creates a candidate reproduced in a fresh process; explain and review it in the PR. Fixture approval never approves a full-model answer. Artifact/baseline errors and hardware/variant exclusions are reported separately ([validation](problems-and-opened-questions.md#6-runner-validation-gaps)).
 
+A failure that starts at 00:00 UTC with no code, image or hardware change is usually a chat template calling `strftime_now`: the prompt carries today's date, so it no longer matches the recording day. Check the template before bisecting.
+
 ## Adding or changing a contract
 
 1. Write the usage example and manifest (checkpoints, variants, outputs, resources) in the integration repo.
