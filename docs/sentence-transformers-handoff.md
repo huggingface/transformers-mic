@@ -1,211 +1,101 @@
-# Sentence Transformers MIC handoff — 2026-11-04
+# Sentence Transformers MIC rollout — 2026-11-04
 
-## Current status
+## Merged and active
 
-Update: the artifacts from run 41797350961 were inspected and published to the Space.
-It now shows the real Linux candidate recording, including model pin and Actions link.
-Automatic publication exists in the nightly but requires main, as enforced by the
-existing mic-publish environment. Main rollout and an end-to-end automatic update
-are in progress. Historical handoff details below describe the earlier stopping point.
+- Code: PR [#193](https://github.com/huggingface/transformers-mic/pull/193), merged at `7035afb63fea1eac348b65a6d4f25af9ebcff18a`.
+- Model main: [`372872b46b401801f61265a4ae4aae437540af38`](https://huggingface.co/huggingface-mic/embeddinggemma-2-mic/commit/372872b46b401801f61265a4ae4aae437540af38).
+- [ST usage on model main](https://huggingface.co/huggingface-mic/embeddinggemma-2-mic/blob/main/integrations/sentence_transformers/usage.md).
+- Fleet: [`83b70d778c7d0a14661f058d43a3ce1c7bb39758`](https://huggingface.co/datasets/huggingface-mic/transformers-fleet/commit/83b70d778c7d0a14661f058d43a3ce1c7bb39758).
+- Prototypes fleet `EmbeddingGemma` now advertises `transformers; sentence_transformers` and pins the model-main revision above. Only `prototypes/contracts.csv` and `prototypes/integrations.csv` changed.
+- [Results Space](https://huggingface.co/spaces/huggingface-mic/sentence-transformers-ci).
+- Nightly: daily **04:23 UTC**, selecting ST MICs from both fleets. Its separate publisher runs after success or failure, using the main-only `mic-publish` environment and `MIC_BASELINE_WRITE_TOKEN`.
+- Notifications are not enabled; user said that is for later.
 
-The first Linux nightly **completed successfully**:
-https://github.com/huggingface/transformers-mic/actions/runs/41797350961
+## Latest fleet run: numerical mismatch, automatically published
 
-It ran in **record mode**, on the pinned preview MIC, generating Linux candidate
-baselines. This is a successful candidate recording, not yet a comparison against
-reviewed Linux baselines. Its artifacts have **not yet been downloaded or
-published to the Space**. The user's latest functional request was to run the
-nightly once so they could see the Space populated. Finish that next.
-
-The public Space is created and reachable (HTTP 200), but still has empty history:
-https://huggingface.co/spaces/huggingface-mic/sentence-transformers-ci
-
-Direct app: https://huggingface-mic-sentence-transformers-ci.static.hf.space/
-
-## Where the work is
-
-Use the isolated worktree:
+[Run 41810330232](https://github.com/huggingface/transformers-mic/actions/runs/41810330232)
+ran with no preview overrides and successfully discovered EmbeddingGemma from the
+shared fleet. It compared the expected four scores and reported:
 
 ```
-/Users/tarek/Dev/transformers-ci-playbooks/mic/worktrees/sentence-transformers-integration
+scores: max delta 0.00511 over tolerance
 ```
 
-Branch: `sentence-transformers-integration`, pushed to
-`huggingface/transformers-mic`. Latest commit: `c1bd13d`.
-No PR has been opened. Nothing has been merged to main.
+The fixture job failed; `publish-results` succeeded and published the failure to
+the Space. **Do not describe this run as passing.** No tolerance or baseline was
+changed to hide the mismatch.
 
-Commits:
+The run used newer upstream commits than the baseline recording:
 
-- `e9bde99`: integration, nightly, Space, tests and documentation.
-- `35daca0`: temporary branch-only push trigger to launch the first nightly.
-- `dfdd7cc`: removed that trigger; no more branch pushes trigger the nightly.
-- `c1bd13d`: report status must match check versus record mode.
+| Dependency | Baseline recording | Latest fleet run |
+| --- | --- | --- |
+| Sentence Transformers | `b26925868810d978e06d731f6b527c2c74579b1b` | `3eeec5b5a912809e1034847f9d6d3d4a2d0a5f62` |
+| Transformers | `f2754311602414ed561cdf8ed9d852390f514404` | `0c7f5ab8c579917b90bfa7502131e6420ec03978` |
 
-The shared `mic/checkout` was switched by another task to main during our work
-(reflog shows a separate `runtime-accelerate` task). We copied our changes into
-the isolated worktree. The shared checkout still has the earlier working-tree
-copies of our changes. **Do not reset/clean it indiscriminately**. The pre-existing
-untracked `docs/blog-post.md` is unrelated and must be preserved.
+Both recorded `torch==2.15.0+cpu`, `torchvision==0.29.2+cpu`, and `numpy==2.4.6`.
+The cause of the numerical difference has not been isolated. Investigate the
+upstream changes and runtime/hardware differences before proposing a baseline
+update. Existing baseline review rules still apply.
 
-Python environment:
+## Successful earlier evidence
 
-```
-/Users/tarek/Dev/transformers-ci-playbooks/mic/checkout/.venv/bin/python
-```
+- [Recording 41797350961](https://github.com/huggingface/transformers-mic/actions/runs/41797350961): generated a new Linux candidate after two fresh-process executions.
+- [Comparison 41807695456](https://github.com/huggingface/transformers-mic/actions/runs/41807695456): passed against that Linux baseline and was automatically published by Actions.
+- Local suite: 416 passed. GitHub full runtime and dev-only Python 3.11/3.13 jobs passed before merge. Workflow lint and browser rendering checked.
+- Before model-main publication, verified all existing Transformers usage and baseline files byte-for-byte unchanged, and every existing fixture file hash unchanged. Only the missing `1_Pooling/config.json` was added to the fixture. Weights are unchanged.
+- The model-main contract files and repaired fixture hashes were revalidated after publication.
 
-Its editable install points at `mic/checkout`, so use `PYTHONPATH=src` when running
-package tests/code from the isolated worktree. Sentence Transformers main was
-installed there: `6.3.0.dev0`, commit
-`b26925868810d978e06d731f6b527c2c74579b1b`. The editable MIC metadata was refreshed
-to 0.1.2 (it had stale 0.1.0 metadata).
+## Usage and implementation
 
-## Immediate next action: populate the Space
-
-Run from the isolated worktree:
+The identifier is `sentence_transformers` (the user's original `sentencepiece`
+was a typo). Generation currently supports `google/embeddinggemma-2`.
 
 ```sh
-gh run download 41797350961 --repo huggingface/transformers-mic \
-  --name sentence-transformers-results --dir work/nightly-41797350961
-
-# Inspect results and candidate files first.
-find work/nightly-41797350961 -type f
-
-PYTHONPATH=src ../../checkout/.venv/bin/python \
-  tools/update_sentence_transformers_space.py \
-  --results work/nightly-41797350961 \
-  --out work/space-41797350961 \
-  --run-id 41797350961 --attempt 1 \
-  --repository huggingface/transformers-mic \
-  --conclusion success --mode record --execute
+# On an existing built workspace:
+tmic integrations --integration transformers --integration sentence_transformers
+tmic record --integration sentence_transformers --all-variants
+tmic review --integration sentence_transformers
+tmic check --integration all --all-variants
 ```
 
-The user authorized trying this nightly and populating the Space. Hub credentials
-can create/upload the Space (already proven). The helper downloads current
-history, appends/deduplicates the real Actions run, and uploads the static assets
-and data. Use `mode=record` so the UI says **Candidates recorded**, not Passing.
+This is a staged command; automated `tmic run`/fixture building still use the
+Transformers path. The ST usage calls `encode_query`, `encode_document` on four
+passages, and `similarity`; it converts the result to a finite NumPy `(4,)` array.
+Each integration owns its assertions/baselines. ST does not inherit Transformers
+known failures or patches. Publication checks every declared integration/variant.
 
-Verify public `data.json` contains run id `41797350961` and the UI shows its
-results. Then give the user the Space and Actions links. Do not fabricate a
-passing baseline check or upload the local preview as an Actions result.
+Optional fleet integration metadata is bound to immutable model revisions.
+Existing CSV columns remain unchanged. Corrected fixtures with nested module
+assets require the updated runner's hashing support; existing Transformers
+checkout dataset pins were not modified by this rollout.
 
-GitHub CLI works outside the filesystem/network sandbox (`gh api` approved
-prefix). Network failures inside the sandbox can look like invalid auth; auth
-is actually valid and has repository admin/push permissions. `curl -sS` can read
-the public static Space.
+## Local work and provenance
 
-## What was implemented
+Worktree:
+`/Users/tarek/Dev/transformers-ci-playbooks/mic/worktrees/sentence-transformers-integration`
 
-- Integration identifier is **`sentence_transformers`**. User corrected their
-  original `sentencepiece` typo explicitly.
-- `tmic integrations --integration transformers --integration sentence_transformers`
-  generates/retains both integrations on an existing built MIC workspace.
-  A single `--integration sentence_transformers` keeps only ST on that fixture.
-- This is a **staged command**, not a new `tmic run` or `tmic create` integration
-  flag. Fixture creation/build gates and automated cloud orchestration still
-  use Transformers. Documented in `docs/cli.md`.
-- Initial generation supports only `google/embeddinggemma-2`.
-- Scenario calls `encode_query(query)`, `encode_document(passages)` and
-  `similarity`, converts to a finite NumPy `(4,)` array, records all four scores
-  with `atol=rtol=1e-4`. Fixed the user's undefined `document` variable.
-- Each integration may override its complete `outputs` map; existing TF
-  assertions remain unchanged.
-- `record`, `review`, `check`: `--integration transformers|sentence_transformers|all`.
-  Fleet checks require one integration per invocation.
-- Baselines and validation receipts are integration-specific. Publishing requires
-  all declared integrations/variants and copies all their reviewed baselines.
-- Optional `<fleet>/integrations.csv` advertises integration names, bound to
-  immutable contract revisions. Original three CSV tables retain their shape.
-  Older exporters' stale metadata is ignored if the revision differs.
-- Runner skips contracts without the selected integration. ST does not inherit
-  Transformers known failures or local patches. Empty ST selection fails.
-- `.github/workflows/sentence-transformers-nightly.yml`: daily 04:23 UTC Linux CPU;
-  ST main by default, latest release selectable manually; TF main; check/record
-  modes; immutable preview model input optional for bootstrap.
-- `.github/scripts/sentence_transformers_nightly.py`: fleet selection across both
-  fleets at one pinned revision, or verified preview MIC. Records provenance.
-- `spaces/sentence-transformers/`: static maintainer dashboard with latest check,
-  failure details, dependency/fleet/model pins, Actions links, up to 90 runs,
-  separate candidate-recording status, stale notice after 36 hours.
-- `tools/update_sentence_transformers_space.py`: builds/publishes dashboard data.
-  Empty/incomplete runs are errors, not green. No notifications implemented or sent.
-- Workflow `publish-results` is separate from execution, runs even on failures,
-  uses `mic-publish` environment's existing `MIC_BASELINE_WRITE_TOKEN`, and is
-  restricted to main. Hence the first branch run needs the local publish above.
+Branch: `sentence-transformers-integration` (feature merged via squash).
+Use `PYTHONPATH=src ../../checkout/.venv/bin/python` there: the shared editable
+venv otherwise points at `mic/checkout`.
 
-## First fixture discovery and staged repair
+Useful local artifacts under this worktree:
 
-The existing EmbeddingGemma fixture had `modules.json` referencing `1_Pooling`,
-but lacked `1_Pooling/config.json`. ST failed to load it. The builder only copied
-root-level assets, and fixture hashing also covered only root-level files.
+- `work/nightly-41797350961/`: recording results and Linux candidate.
+- `work/nightly-41810330232/`: failing fleet run results and exact dependencies.
+- `work/st-rollout/plan.json`, `result.json`, `*.before.json`, `*.after.json`: rollout snapshots and immutable commit references.
+- `work/st-rollout/prepare_rollout.py`, `publish_rollout.py`: audited promotion scripts. Do not rerun blindly; they enforce old parent revisions.
 
-Fixed copying/hashing for module subdirectories listed in `modules.json`, with
-path validation and existing file-size/weight exclusions. Publisher already
-creates parent directories for copied files.
-
-Prepared a separate local fixture adding the missing config unchanged from
-source checkpoint `google/embeddinggemma-2` at
-`f9972ac22e696a105c482202646979e33e4b5a1e`. Verified model weights remained
-byte-for-byte identical. Recorded repair provenance and updated hashes.
-
-Original workspace (preserved):
-`mic/checkout/work/mic/google--embeddinggemma-2`
+Original workspace preserved:
+`mic/checkout/work/mic/google--embeddinggemma-2`.
 
 Staged workspace:
-`mic/checkout/work/sentence-transformers/embeddinggemma-2`
+`mic/checkout/work/sentence-transformers/embeddinggemma-2`.
 
-Corrected local fixture:
-`mic/checkout/work/sentence-transformers/embeddinggemma-2/.mic/artifacts/embeddinggemma-2-st-assets`
+The shared `mic/checkout` was switched by another task while this work was in
+progress. It still contains earlier working-tree copies of these changes. Do not
+reset/clean it indiscriminately; unrelated `docs/blog-post.md` must be preserved.
 
-Hub preview branch: `huggingface-mic/embeddinggemma-2-mic`,
-`sentence-transformers-preview`.
-Immutable preview SHA: **`a0787fefb042bed5f323e35d5edeaf4e979ce4f8`**.
-
-https://huggingface.co/huggingface-mic/embeddinggemma-2-mic/commit/a0787fefb042bed5f323e35d5edeaf4e979ce4f8
-
-This branch was based on published MIC SHA
-`839a2b1f9c2b144e2203b2f4972ababfc888fd99`. Upload included the added ST usage,
-manifest/layout, missing pooling config, and repaired build provenance. Existing
-weights and TF usage/baselines stay inherited. **Model main and shared fleet pins
-have not changed.** Preview build key was changed to reflect the asset repair.
-
-Local macOS recording reproduced in two fresh processes, was approved as a new
-baseline, then passed a check. Scores:
-
-```
-[-0.0694104284, 0.4365914464, -0.1546532661, -0.0959652290]
-```
-
-Runtime CPU ARM64, bfloat16. This does not substitute for Linux baselines.
-
-## Validation and deployment evidence
-
-- Full suite: **415 passed** in isolated worktree with `PYTHONPATH=src`.
-- Additional report-only tests passed after the final one-line status fix.
-- `actionlint .github/workflows/sentence-transformers-nightly.yml` passed.
-- `git diff --check` passed.
-- JavaScript syntax checked with Node; dashboard rendered in headless Chrome.
-  Screenshot: `/private/tmp/mic-st-space.png` (local preview, never uploaded).
-- Live Space initial commit:
-  `26bd8a8861869632adcef86fed9e7265af85417a`.
-- Public app and empty `data.json` verified via curl.
-- Linux recording run **41797350961 succeeded**, exact job artifacts not yet inspected.
-
-## Remaining rollout after the immediate Space update
-
-1. Inspect/review Linux candidate scores from that run.
-2. Publish reviewed Linux baselines and corrected fixture through the normal MIC
-   publication process; preserve existing TF checks and validate all declared
-   integrations/variants before model main/fleet publication.
-3. Add the integration metadata to the shared fleet using the new exporter.
-4. Review/merge the branch (no PR yet), enabling the daily schedule and main-only
-   automatic Space publisher. Ensure `MIC_BASELINE_WRITE_TOKEN` can write the Space.
-5. Run a real baseline comparison and verify it reaches the Space.
-6. Later, choose maintainer/contact and notification policy. User said eventually
-   ping on failures; no current authorization or need to message anyone.
-
-Compatibility note: CSV metadata is backward-readable, but corrected fixtures
-with nested module assets require the updated runner's hashing support. Do not
-promise old runner code can validate these new fixture snapshots unchanged.
-
-No approvals should be inferred for changing tolerances or accepting changed
-existing baseline values merely to make checks pass.
+Preview branch retained for provenance: `sentence-transformers-preview` on the
+model repo. Preview revision with Linux baseline:
+`c91d7879a0d979efbcc6013b4c02df6c4f762b6a`. The main/fleet rollout no longer depends
+on selecting that branch explicitly.
