@@ -1,6 +1,8 @@
 name: Sentence Transformers nightly
 
 on:
+  push:
+    branches: [sentence-transformers-integration]
   schedule:
     - cron: "23 4 * * *"
   workflow_dispatch:
@@ -34,9 +36,9 @@ jobs:
     env:
       HF_TOKEN: ${{ secrets.HF_HUB_READ_TOKEN }}
       DEPENDENCY: ${{ inputs.dependency || 'main' }}
-      MODE: ${{ inputs.mode || 'check' }}
-      MODEL_REPO: ${{ inputs.model_repo }}
-      MODEL_REVISION: ${{ inputs.model_revision }}
+      MODE: ${{ inputs.mode || (github.event_name == 'push' && 'record') || 'check' }}
+      MODEL_REPO: ${{ inputs.model_repo || (github.event_name == 'push' && 'huggingface-mic/embeddinggemma-2-mic') || '' }}
+      MODEL_REVISION: ${{ inputs.model_revision || (github.event_name == 'push' && 'a0787fefb042bed5f323e35d5edeaf4e979ce4f8') || '' }}
       OMP_NUM_THREADS: "2"
       MKL_NUM_THREADS: "2"
     steps:
@@ -94,7 +96,7 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.MIC_BASELINE_WRITE_TOKEN }}
           CONCLUSION: ${{ needs.fixtures.result }}
-          MODE: ${{ inputs.mode || 'check' }}
+          MODE: ${{ inputs.mode || (github.event_name == 'push' && 'record') || 'check' }}
         run: |
           test -n "$HF_TOKEN" || { echo "Configure MIC_BASELINE_WRITE_TOKEN in mic-publish"; exit 1; }
           python -m pip install huggingface-hub
