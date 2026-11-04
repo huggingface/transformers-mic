@@ -592,7 +592,7 @@ def collect(results, days, today_day, download):
     write(results / "gpu-ci.json", gpu_ci)
     sweep = json.loads(SWEEP.read_text())["rows"] if SWEEP.exists() else {}
     covered_now = {norm(t) for t in fixture_model_types(results, download).values() if t}
-    write(results / "suggestions.json", build_suggestions(gpu_ci, sweep, {}, covered_now))
+    write(results / "suggestions.json", build_suggestions(gpu_ci, sweep, {}, covered_now, hub_has))
 
     # Baseline review work: fleet updates since the window opened, each counted once.
     seen = {r["fleet_commit"] for r in read_jsonl(results / "baselines.jsonl")}
@@ -675,11 +675,25 @@ def test_checkpoints(nodeids, files):
     return [c for c, _ in found.most_common()]
 
 
-def build_suggestions(gpu_ci, sweep, files, covered=frozenset()):
+def hub_has(repo, _seen={}):
+    """Does the Hub serve this model repo without a token? Gated repos do (200); private or deleted ones do not."""
+    if repo not in _seen:
+        try:
+            get_text(f"{HUB}/api/models/{repo}")
+            _seen[repo] = True
+        except urllib.error.HTTPError as e:
+            _seen[repo] = e.code not in (401, 403, 404)  # a 5xx says nothing about the repo
+        except (urllib.error.URLError, http.client.IncompleteRead):
+            _seen[repo] = True
+    return _seen[repo]
+
+
+def build_suggestions(gpu_ci, sweep, files, covered=frozenset(), exists=lambda repo: True):
     """New contracts for models with real-checkpoint regressions and no contract; extensions for the rest.
 
     covered: model types the fleet covers now. A regression recorded "not-covered" before its model
     got a contract is not a suggestion any more.
+    exists: whether the Hub serves a checkpoint; tests name private or deleted repos (kmhf/hf-moshiko).
     """
     new = defaultdict(lambda: {"integration": 0, "other": 0, "tests": [], "keys": []})
     extend = defaultdict(list)
@@ -702,8 +716,9 @@ def build_suggestions(gpu_ci, sweep, files, covered=frozenset()):
     for model, entry in new.items():
         row = sweep.get(model) or {}
         integration_tests = [t for t in entry["tests"] if "IntegrationTest" in t]
-        from_tests = test_checkpoints(integration_tests or entry["tests"], files)
+        from_tests = [c for c in test_checkpoints(integration_tests or entry["tests"], files) if exists(c)]
         sweep_repo = row.get("repo") if not str(row.get("repo", "")).startswith("hf-internal-testing/") else None
+        sweep_repo = sweep_repo if sweep_repo and exists(sweep_repo) else None
         checkpoint = (from_tests or [None])[0] or sweep_repo
         suggestions.append(
             {
@@ -802,9 +817,17 @@ def drop_covered(results, download):
     return len(suggestions["new"]) - len(kept)
 
 
+def live_draft(suggestion, drafts):
+    """The suggestion's draft, unless it failed on another checkpoint than the one suggested now (that one is retried)."""
+    draft = drafts.get(suggestion["model"])
+    if draft and draft.get("conclusion") == "failure" and draft.get("checkpoint") != suggestion["checkpoint"]:
+        return None
+    return draft
+
+
 def draftable(suggestions, drafts):
-    """Suggestions the daily run would draft, in order: no draft yet, a checkpoint, and a fixture that shrinks."""
-    return [s for s in suggestions["new"] if s["model"] not in drafts and s["checkpoint"] and s["shrinkable"]]
+    """Suggestions the daily run would draft, in order: no live draft, a checkpoint, and a fixture that shrinks."""
+    return [s for s in suggestions["new"] if live_draft(s, drafts) is None and s["checkpoint"] and s["shrinkable"]]
 
 
 def dispatch_drafts(suggestions, drafts, limit, now):
@@ -831,7 +854,7 @@ def draft_lines(suggestions, drafts):
         return lines + ["- None yet.", ""]
     lines += ["| model | real-ckpt regressions | other | checkpoint | shrinkable | draft |", "|---|---|---|---|---|---|"]
     for s in suggestions["new"][:NEXT_TARGETS]:
-        draft = drafts.get(s["model"])
+        draft = live_draft(s, drafts)
         if draft:
             state = draft.get("conclusion") or draft.get("status") or "queued"
             draft_cell = f"[{state}]({draft['url']})" if draft.get("url") else state
@@ -1064,7 +1087,7 @@ def summarize(results):
         },
         "false_alarms": {"prs_with_failure": len(prs_failing), "prs_not_their_fault": len(prs_noise_only)},
         "block_merges": {"ready": all(ok for _, ok in checks), "unmet": [text for text, ok in checks if not ok]},
-        "next": [next_target(s, drafts.get(s["model"]), s["model"] in batch) for s in suggestions["new"][:NEXT_TARGETS]],
+        "next": [next_target(s, live_draft(s, drafts), s["model"] in batch) for s in suggestions["new"][:NEXT_TARGETS]],
         "drafts_per_day": DRAFTS_PER_DAY,
         "awaiting_verdict": len(pending),
     })
