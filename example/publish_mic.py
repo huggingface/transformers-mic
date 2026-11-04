@@ -70,15 +70,15 @@ def main():
             ):
                 raise ValueError(f"Contract/fixture path collision: {path}")
             shutil.copy2(source, target)
-        expectations = root / "integrations/transformers/expectations"
-        if not expectations.exists():
-            raise ValueError("No reviewed expectations to publish")
-        shutil.copytree(
-            expectations,
-            staging / "integrations/transformers/expectations",
-            dirs_exist_ok=True,
-            ignore=shutil.ignore_patterns("*.candidate.json"),
-        )
+        manifest = run.load(root / "integration.json", "integration")
+        for framework in manifest["integrations"]:
+            expectations = root / "integrations" / framework / "expectations"
+            if not expectations.exists():
+                raise ValueError(f"No reviewed {framework} expectations to publish")
+            shutil.copytree(
+                expectations, staging / "integrations" / framework / "expectations",
+                dirs_exist_ok=True, ignore=shutil.ignore_patterns("*.candidate.json"),
+            )
         layout = {"format": "mic-umbrella-v1", "contract_files": sorted(files)}
         (staging / ".mic-repo.json").write_text(json.dumps(layout, indent=2) + "\n")
         integration_card = (

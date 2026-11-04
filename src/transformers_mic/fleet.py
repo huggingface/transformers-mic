@@ -32,6 +32,7 @@ COLUMNS = {
     "known_failures": ("contract", "target", "issue", "match", "skip_outputs"),
 }
 
+INTEGRATION_COLUMNS = ("contract", "revision", "integrations")
 
 def table_path(name, table):
     return f"{name}/{table}.csv"
@@ -39,7 +40,7 @@ def table_path(name, table):
 
 def _csv(table, rows):
     out = io.StringIO()
-    writer = csv.DictWriter(out, COLUMNS[table], lineterminator="\n")
+    writer = csv.DictWriter(out, INTEGRATION_COLUMNS if table == "integrations" else COLUMNS[table], lineterminator="\n")
     writer.writeheader()
     writer.writerows(rows)
     return out.getvalue()
@@ -64,7 +65,7 @@ def to_tables(lock):
         raise ValueError(f"The fleet dataset only holds {FRAMEWORK} locks")
     contracts = []
     for name, contract in lock["contracts"].items():
-        extra = set(contract) - {"integration", "fixtures", "checkpoints"}
+        extra = set(contract) - {"integration", "fixtures", "checkpoints", "integrations"}
         if extra:
             raise ValueError(
                 f"{name}: fleet tables cannot hold {', '.join(sorted(extra))}"
@@ -125,11 +126,20 @@ def to_tables(lock):
         {"package": package, "version": version}
         for package, version in lock["environment"].items()
     ]
-    return {
+    tables = {
         "contracts": _csv("contracts", contracts),
         "environment": _csv("environment", environment),
         "known_failures": _csv("known_failures", known),
     }
+
+    advertised = [
+        {"contract": name, "revision": contract["integration"]["revision"],
+         "integrations": "; ".join(contract["integrations"])}
+        for name, contract in lock["contracts"].items() if "integrations" in contract
+    ]
+    if advertised:
+        tables["integrations"] = _csv("integrations", advertised)
+    return tables
 
 
 def from_tables(tables):
@@ -166,6 +176,15 @@ def from_tables(tables):
             "fixtures": contract["fixtures"],
             "checkpoints": contract["checkpoints"],
         }
+    if "integrations" in tables:
+        reader = csv.DictReader(io.StringIO(tables["integrations"]))
+        if tuple(reader.fieldnames or ()) != INTEGRATION_COLUMNS:
+            raise ValueError("Invalid integrations.csv columns")
+        for row in reader:
+            contract = contracts.get(row["contract"])
+            # Older exporters do not update this optional table. Never trust stale metadata.
+            if contract and contract["integration"]["revision"] == row["revision"]:
+                contract["integrations"] = _split(row["integrations"])
     known = {}
     for row in _rows("known_failures", tables["known_failures"]):
         entry = {"issue": row["issue"]}
@@ -224,6 +243,10 @@ def download(name="control", revision="main"):
         }
     except EntryNotFoundError:  # a revision from before the tables
         return fetch(FILES[name]), revision
+    try:
+        tables["integrations"] = fetch(table_path(name, "integrations")).read_text()
+    except EntryNotFoundError:
+        pass
     lock = from_tables(tables)
     try:
         legacy = json.loads(fetch(FILES[name]).read_text())
