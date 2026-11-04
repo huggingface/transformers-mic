@@ -384,3 +384,31 @@ def test_a_refresh_drops_suggestions_the_fleet_now_covers(tmp_path, monkeypatch)
     assert impact.drop_covered(results, None) == 1
     s = json.loads((results / "suggestions.json").read_text())
     assert s == {"new": [{"model": "flex_olmo"}], "extend": {"x": []}}
+
+
+def test_a_checkpoint_the_hub_does_not_serve_is_skipped():
+    text = 'class MoshiTest:\n    a = "kmhf/hf-moshiko"\n    b = "kmhf/hf-moshiko"\n    c = "kmhf/hf-moshika"\n'
+    files = {"tests/models/moshi/test_modeling_moshi.py": text}
+    gpu_ci = {"1#moshi": {"model": "moshi", "mic": "not-covered", "integration": False, "date": "d",
+                          "tests": ["tests/models/moshi/test_modeling_moshi.py::MoshiTest::test_a"]}}
+    sweep = {"moshi": {"stage": "ok", "finite": True, "repo": "gone/sweep"}}
+    assert impact.build_suggestions(gpu_ci, sweep, files)["new"][0]["checkpoint"] == "kmhf/hf-moshiko"
+    live = {"kmhf/hf-moshika"}
+    [s] = impact.build_suggestions(gpu_ci, sweep, files, exists=live.__contains__)["new"]
+    assert s["checkpoint"] == "kmhf/hf-moshika" and s["checkpoint_source"] == "failing test"
+    [s] = impact.build_suggestions(gpu_ci, sweep, files, exists=lambda repo: False)["new"]
+    assert s["checkpoint"] is None and s["checkpoint_source"] is None
+
+
+def test_a_failed_draft_is_retried_only_on_a_new_checkpoint():
+    suggestions = {"new": [{"model": "moshi", "checkpoint": "kmhf/hf-moshika", "shrinkable": True, "integration": 0, "other": 1},
+                           {"model": "switch", "checkpoint": "google/switch-base-8", "shrinkable": True, "integration": 0, "other": 1},
+                           {"model": "olmo", "checkpoint": "o/olmo", "shrinkable": True, "integration": 0, "other": 1}]}
+    drafts = {"moshi": {"checkpoint": "kmhf/hf-moshiko", "conclusion": "failure"},
+              "switch": {"checkpoint": "google/switch-base-8", "conclusion": "failure"},
+              "olmo": {"checkpoint": "o/older", "conclusion": None, "status": "in_progress"}}
+    assert [s["model"] for s in impact.draftable(suggestions, drafts)] == ["moshi"]
+    assert impact.live_draft(suggestions["new"][0], drafts) is None
+    lines = "\n".join(impact.draft_lines({**suggestions, "extend": {}}, drafts))
+    assert "failure" in lines.split("| switch |")[1].split("\n")[0]
+    assert "failure" not in lines.split("| moshi |")[1].split("\n")[0]
