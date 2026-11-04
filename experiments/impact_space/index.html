@@ -42,6 +42,8 @@
   th, td { border-bottom: 1px solid var(--border); padding: 7px 8px; text-align: left; white-space: nowrap; }
   th { color: var(--muted); font-weight: 600; font-size: 13px; }
   td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  #next td:nth-child(2) { white-space: normal; overflow-wrap: anywhere; }
+  tr.next-batch td { background: var(--tile); font-weight: 600; }
   footer { margin-top: 28px; }
   #error { color: var(--bad); }
 </style>
@@ -72,9 +74,10 @@
   <div class="decision" id="decision"></div>
 
   <h2>Contracts to add next</h2>
+  <p class="muted" id="next-note"></p>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Model</th><th>Checkpoint</th><th class="num">GPU CI regressions</th><th>Draft</th><th>Shrink</th></tr></thead>
+      <thead><tr><th>Model</th><th>Checkpoint</th><th class="num" title="Regressions in *IntegrationTest (real checkpoint) tests">Real ckpt</th><th class="num" title="Other GPU CI regressions">Other</th><th title="The shrink sweep builds a fixture for it">Shrinks</th><th>Draft</th><th>Shrink</th></tr></thead>
       <tbody id="next"></tbody>
     </table>
   </div>
@@ -137,12 +140,16 @@
       const row = document.createElement("tr");
       cell(row, t.model);
       cell(row, /^[\w.-]+\/[\w.-]+$/.test(t.checkpoint || "") ? link(t.checkpoint, HUB + t.checkpoint) : "?");
-      cell(row, t.real_checkpoint ? `${t.regressions} (${t.real_checkpoint} real)` : String(t.regressions), "num");
-      const state = t.draft || "not drafted";
+      cell(row, String(t.real_checkpoint), "num");
+      cell(row, String(t.other ?? t.regressions - t.real_checkpoint), "num");
+      cell(row, t.shrinkable ? "yes" : "no");
+      const state = t.draft || (t.next_batch ? "next batch" : "not drafted");
       cell(row, /^https:\/\/github\.com\//.test(t.run || "") ? link(state, t.run) : state);
       cell(row, /^shrink\/\d+\/[\w.-]+\.html$/.test(t.shrink || "") ? link("page", t.shrink) : "–");
+      if (t.next_batch) row.className = "next-batch";
       body.appendChild(row);
     }
+    set("next-note", `Models with GPU CI regressions and no contract, shrinkable first. Each day the top ${o.drafts_per_day || 2} without a draft are drafted, measured on cloud CPU and CUDA, and published if every case passes; highlighted rows go next.`);
     if (!o.next.length) {
       const row = document.createElement("tr");
       cell(row, "None: every regressed model has a contract.");

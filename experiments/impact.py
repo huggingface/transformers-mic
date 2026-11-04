@@ -638,7 +638,7 @@ SWEEP = Path(__file__).parent / "results" / "sweep.json"
 TMIC_RUN = "tmic-run.yml"
 MIC_REPO = "huggingface/transformers-mic"
 DRAFTS_PER_DAY = 2
-NEXT_TARGETS = 5  # rows in the overview's "contracts to add next"
+NEXT_TARGETS = 25  # rows in "contracts to add next", on the overview and in the full report
 # Test names that exercise hardware or optional backends a CPU fixture contract does not run.
 GPU_ONLY = ("flash_attn", "flash_attention", "fa2", "4bit", "8bit", "bnb", "bitsandbytes", "compile", "fp16", "cuda", "multi_gpu", "tensor_parallel")
 NOT_MODELS = {"auto", "shared", None}
@@ -792,14 +792,25 @@ def fetch_shrink_pages(drafts, folder):
     return fetched
 
 
+def drop_covered(results, download):
+    """Drop suggestions for models the fleets now cover: a draft that just published leaves the list at once."""
+    covered = {norm(t) for t in fixture_model_types(results, download).values() if t}
+    suggestions = load(results / "suggestions.json", {"new": [], "extend": {}})
+    kept = [s for s in suggestions["new"] if norm(s["model"]) not in covered]
+    if len(kept) != len(suggestions["new"]):
+        write(results / "suggestions.json", {**suggestions, "new": kept})
+    return len(suggestions["new"]) - len(kept)
+
+
+def draftable(suggestions, drafts):
+    """Suggestions the daily run would draft, in order: no draft yet, a checkpoint, and a fixture that shrinks."""
+    return [s for s in suggestions["new"] if s["model"] not in drafts and s["checkpoint"] and s["shrinkable"]]
+
+
 def dispatch_drafts(suggestions, drafts, limit, now):
     """Dispatch tmic-run.yml (draft, cloud CPU/CUDA, publish if it passes) for the top suggestions not drafted yet."""
     sent = 0
-    for s in suggestions["new"]:
-        if sent >= limit:
-            break
-        if s["model"] in drafts or not s["checkpoint"] or not s["shrinkable"]:
-            continue
+    for s in draftable(suggestions, drafts)[:limit]:
         github_post(f"/repos/{MIC_REPO}/actions/workflows/{TMIC_RUN}/dispatches", {"ref": "main", "inputs": {"model": s["checkpoint"]}})
         drafts[s["model"]] = {"checkpoint": s["checkpoint"], "dispatched_at": now, "status": "queued", "conclusion": None}
         sent += 1
@@ -819,7 +830,7 @@ def draft_lines(suggestions, drafts):
     if not suggestions["new"]:
         return lines + ["- None yet.", ""]
     lines += ["| model | real-ckpt regressions | other | checkpoint | shrinkable | draft |", "|---|---|---|---|---|---|"]
-    for s in suggestions["new"][:25]:
+    for s in suggestions["new"][:NEXT_TARGETS]:
         draft = drafts.get(s["model"])
         if draft:
             state = draft.get("conclusion") or draft.get("status") or "queued"
@@ -1037,6 +1048,7 @@ def summarize(results):
     def gpu(kinds):
         return sum(1 for v in gpu_ci.values() if v.get("mic") in kinds and v.get("integration"))
 
+    batch = {s["model"] for s in draftable(suggestions, drafts)[:DRAFTS_PER_DAY]}
     write(results / "overview.json", {
         "window": [first or None, last or None],
         "caught": {
@@ -1052,19 +1064,26 @@ def summarize(results):
         },
         "false_alarms": {"prs_with_failure": len(prs_failing), "prs_not_their_fault": len(prs_noise_only)},
         "block_merges": {"ready": all(ok for _, ok in checks), "unmet": [text for text, ok in checks if not ok]},
-        "next": [next_target(s, drafts.get(s["model"])) for s in suggestions["new"][:NEXT_TARGETS]],
+        "next": [next_target(s, drafts.get(s["model"]), s["model"] in batch) for s in suggestions["new"][:NEXT_TARGETS]],
+        "drafts_per_day": DRAFTS_PER_DAY,
         "awaiting_verdict": len(pending),
     })
 
 
-def next_target(suggestion, draft):
-    """One row of the overview's "contracts to add next": the model, why, and its draft's state and pages."""
+def next_target(suggestion, draft, next_batch=False):
+    """One row of the overview's "contracts to add next": the model, why, and its draft's state and pages.
+
+    next_batch: the next daily run drafts this one.
+    """
     draft = draft or {}
     return {
         "model": suggestion["model"],
         "checkpoint": suggestion["checkpoint"],
         "regressions": suggestion["integration"] + suggestion["other"],
         "real_checkpoint": suggestion["integration"],
+        "other": suggestion["other"],
+        "shrinkable": bool(suggestion["shrinkable"]),
+        "next_batch": next_batch,
         "draft": draft.get("conclusion") or draft.get("status") or ("" if suggestion["shrinkable"] and suggestion["checkpoint"] else "not draftable"),
         "run": draft.get("url", ""),
         "shrink": draft.get("shrink", ""),
@@ -1209,9 +1228,11 @@ def main():
     if not args.summary_only:
         drafts = load(args.results / "drafts.json", {})
         refresh_drafts(drafts)
-        if not args.refresh:
-            from transformers_mic import fleet
+        from transformers_mic import fleet
 
+        if args.refresh:
+            drop_covered(args.results, fleet.download)
+        else:
             today_day = int(time.time() // 86400)
             collect(args.results, args.days, today_day, fleet.download)
             if args.draft:
