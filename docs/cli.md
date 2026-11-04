@@ -641,6 +641,17 @@ metadata. These contracts generate encoding and scoring examples without a
 planner call. Fixture creation requires the Transformers config at the repository
 root.
 
+The contract declares only the `sentence_transformers` integration
+(`integrations/sentence_transformers/usage.md`, baselines under
+`integrations/sentence_transformers/expectations/`). So Transformers lanes skip it,
+the Sentence Transformers nightly selects it once the fleet lists it, and
+Transformers known failures and local patches never apply. `tmic record`, `check` and
+`review` default to a contract's only integration, so no `--integration` is needed.
+The fixture is the complete ST pipeline: a shrunk random backbone with Pooling and
+Dense dimensions resized to match, gated by the same sensitivity, fitting and
+numeric-health checks as other fixtures. `tmic integrations` (above) is still the way
+to add the ST usage to an existing Transformers MIC.
+
 For batch creation, set `sentence_transformers_class` on each model entry.
 
 ## Several models at once

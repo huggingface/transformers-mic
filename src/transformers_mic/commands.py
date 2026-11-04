@@ -21,7 +21,14 @@ from .hub import (
     umbrella_references,
     upgrade_contract,
 )
-from .workspace import Workspace, catalog_patches, digest, read, write
+from .workspace import (
+    Workspace,
+    catalog_patches,
+    digest,
+    primary_integration,
+    read,
+    write,
+)
 
 
 def manifest_schema():
@@ -1059,7 +1066,7 @@ def build(args):
     pin = lock["contracts"][state["contract"]]["fixtures"][fixture]
     requested = args.weights if args.weights else state["weights"]
     readable = args.readable_output or state["readable_output"]
-    if "fixtures" not in manifest["integrations"]["transformers"]["targets"]:
+    if "fixtures" not in manifest["integrations"][primary_integration(manifest)]["targets"]:
         choice = {
             "weights": None,
             "accepted": True,
@@ -1153,7 +1160,7 @@ def build(args):
 
 def execute_one(args, record=False):
     workspace = Workspace(args.workspace)
-    framework = getattr(args, "integration", "transformers")
+    framework = getattr(args, "integration", None) or primary_integration(workspace.manifest)
     options = [
         "--framework",
         framework,
@@ -1228,7 +1235,7 @@ def execute_one(args, record=False):
 
 def execute(args, record=False):
     workspace = Workspace(args.workspace)
-    framework = getattr(args, "integration", "transformers")
+    framework = getattr(args, "integration", None) or primary_integration(workspace.manifest)
     if framework == "all":
         status = 0
         for name in workspace.manifest["integrations"]:
@@ -1256,7 +1263,7 @@ def execute(args, record=False):
 
 def review(args):
     workspace = Workspace(args.workspace)
-    framework = getattr(args, "integration", "transformers")
+    framework = getattr(args, "integration", None) or primary_integration(workspace.manifest)
     if framework == "all":
         status = 0
         for name in workspace.manifest["integrations"]:

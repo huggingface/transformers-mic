@@ -14,7 +14,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "example"))
 import build_fixtures
 import run
 
+from transformers_mic import commands as _commands
 from transformers_mic import sentence_transformers as support
+from transformers_mic.workspace import primary_integration
+
+real_execute = _commands.execute
 
 
 @pytest.mark.parametrize("kind", support.CLASSES)
@@ -111,15 +115,25 @@ def test_shrunk_st_pipeline_reloads_and_preserves_predictions(tmp_path, kind):
         assert changes
 
 
+def st_modules(folder, *paths):
+    entries = [{"idx": 0, "name": "0", "path": "", "type": "sentence_transformers.base.modules.Transformer"}]
+    entries += [
+        {"idx": i, "name": str(i), "path": path, "type": "sentence_transformers.sentence_transformer.modules.Pooling"}
+        for i, path in enumerate(paths, 1)
+    ]
+    (folder / "modules.json").write_text(json.dumps(entries))
+
+
 def test_nested_fixture_changes_invalidate_integrity(tmp_path):
     module = tmp_path / "1_Pooling"
     module.mkdir()
     config = module / "config.json"
     config.write_text('{"pooling_mode": "mean"}')
-    initial = run.file_hashes(tmp_path, recursive=True)
+    st_modules(tmp_path, "1_Pooling")
+    initial = run.file_hashes(tmp_path)
     assert "1_Pooling/config.json" in initial
     config.write_text('{"pooling_mode": "cls"}')
-    assert run.file_hashes(tmp_path, recursive=True) != initial
+    assert run.file_hashes(tmp_path) != initial
 
 
 def test_capture_supports_direct_forward_and_regular_calls():
@@ -216,10 +230,37 @@ def test_st_creation_preserves_explicit_namespace_and_inference_outputs(
         (tmp_path / "work/example/hub/st-model-mic/integration.json").read_text()
     )
     assert set(manifest["fixtures"]) == {"tomaarsen/st-model-mic"}
-    assert not manifest["integrations"]["transformers"]["training"]
+    # Only the ST integration: Transformers lanes skip it, the ST nightly selects it.
+    assert set(manifest["integrations"]) == {"sentence_transformers"}
+    integration = manifest["integrations"]["sentence_transformers"]
+    assert integration["entry_point"] == "integrations/sentence_transformers/usage.md"
+    assert not integration["training"]
     assert {"scores", "query_embeddings", "document_embeddings"} <= set(
-        manifest["outputs"]
+        integration["outputs"]
     )
+    root = tmp_path / "work/example/hub/st-model-mic"
+    assert (root / integration["entry_point"]).exists()
+    assert not (root / "integrations/transformers").exists()
+    lock = json.loads(
+        (tmp_path / "work/example/transformers/tests/contracts/fleet.lock").read_text()
+    )
+    assert lock["contracts"]["st-model"]["integrations"] == ["sentence_transformers"]
+    if not flags:
+        # record/check/review default to the contract's only integration.
+        invoked = []
+        monkeypatch.setattr(
+            commands.backend,
+            "invoke",
+            lambda command, cwd, options: invoked.append(options)
+            or SimpleNamespace(returncode=1),
+        )
+        check = parser().parse_args(["--workspace", str(tmp_path / "work"), "check"])
+        real_execute(check)
+        assert invoked[0][invoked[0].index("--framework") + 1] == "sentence_transformers"
+        review = parser().parse_args(["--workspace", str(tmp_path / "work"), "review"])
+        commands.review(review)
+        expectations = invoked[1][invoked[1].index("--expectations") + 1]
+        assert expectations.endswith("integrations/sentence_transformers/expectations")
 
 
 def test_resume_preserves_st_class_and_namespace():
@@ -247,8 +288,9 @@ def test_published_contract_and_baselines_are_separate_from_fixture_hashes(tmp_p
     module = tmp_path / "1_Pooling"
     module.mkdir()
     (module / "config.json").write_text("{}")
-    initial = run.file_hashes(tmp_path, recursive=True)
-    usage = tmp_path / "integrations/transformers/usage.md"
+    st_modules(tmp_path, "1_Pooling")
+    initial = run.file_hashes(tmp_path)
+    usage = tmp_path / "integrations/sentence_transformers/usage.md"
     usage.parent.mkdir(parents=True)
     usage.write_text("contract")
     (tmp_path / "integration.json").write_text("{}")
@@ -257,14 +299,24 @@ def test_published_contract_and_baselines_are_separate_from_fixture_hashes(tmp_p
             {
                 "contract_files": [
                     "integration.json",
-                    "integrations/transformers/usage.md",
+                    "integrations/sentence_transformers/usage.md",
                 ]
             }
         )
     )
-    baseline = tmp_path / "integrations/transformers/expectations/cpu-x86_64/model.json"
+    baseline = tmp_path / "integrations/sentence_transformers/expectations/cpu-x86_64/model.json"
     baseline.parent.mkdir(parents=True)
     baseline.write_text("{}")
-    assert run.file_hashes(tmp_path, recursive=True) == initial
+    assert run.file_hashes(tmp_path) == initial
     baseline.write_text('{"scores": [1.0]}')
-    assert run.file_hashes(tmp_path, recursive=True) == initial
+    assert run.file_hashes(tmp_path) == initial
+
+
+def test_primary_integration_prefers_transformers_then_the_only_one():
+    both = {"integrations": {"sentence_transformers": {}, "transformers": {}}}
+    assert primary_integration(both) == "transformers"
+    only = {"integrations": {"sentence_transformers": {}}}
+    assert primary_integration(only) == "sentence_transformers"
+    with pytest.raises(ValueError, match="--integration"):
+        primary_integration({"integrations": {"a": {}, "b": {}}})
+

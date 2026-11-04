@@ -11,6 +11,11 @@ from unittest.mock import patch
 from huggingface_hub import HfApi, snapshot_download
 
 CLASSES = ("SentenceTransformer", "CrossEncoder", "SparseEncoder", "MultiVectorEncoder")
+# The integration these contracts declare. Transformers lanes skip a MIC without a
+# `transformers` integration, the ST nightly selects it, and Transformers known
+# failures and local patches never apply to it.
+NAME = "sentence_transformers"
+ENTRY = f"integrations/{NAME}/usage.md"
 QUERIES = ["Which planet is known as the Red Planet?", "Where do penguins live?"]
 DOCUMENTS = [
     "Venus is often called Earth's twin.",
@@ -201,8 +206,38 @@ def usage(repo, kind, images=False, image_documents=False, left_padding=False):
     )
 
 
+def validate(plan, model, fixture):
+    """The checks validate_plan makes, for a contract whose only integration is ST."""
+    import ast
+
+    import jsonschema
+
+    from . import planner
+    from .commands import manifest_schema, visible_plumbing
+
+    jsonschema.validate(plan, planner.PLAN_SCHEMA)
+    manifest = plan["manifest"]
+    jsonschema.validate(manifest, manifest_schema())
+    if set(manifest["integrations"]) != {NAME}:
+        raise ValueError(f"ST contracts declare only the {NAME} integration")
+    integration = manifest["integrations"][NAME]
+    if integration["entry_point"] != ENTRY or integration["format"] != "runnable-markdown":
+        raise ValueError(f"ST entry point must be {ENTRY}, runnable-markdown")
+    if set(manifest["checkpoints"]) != {model} or set(manifest["fixtures"]) != {fixture}:
+        raise ValueError("ST plan must contain exactly the requested checkpoint and fixture")
+    if integration["variants"].get("bfloat16") != {"dtype": "bfloat16"}:
+        raise ValueError("Use bfloat16 variant kwargs {dtype: bfloat16}")
+    blocks = re.findall(r"```(?:py|python) runnable:[^\n]*\n(.*?)```", plan["usage"], re.S)
+    if not blocks:
+        raise ValueError("ST usage contains no runnable Python blocks")
+    ast.parse("\n".join(blocks))
+    if leaked := visible_plumbing(blocks):
+        raise ValueError(f"ST usage shows runner plumbing outside hidden lines: {leaked[:5]}")
+    return manifest
+
+
 def create(args):
-    from .commands import finish_create, validate_plan
+    from .commands import finish_create
     from .workspace import Workspace, write
 
     versions = environment()
@@ -243,8 +278,8 @@ def create(args):
             }
         },
         "integrations": {
-            "transformers": {
-                "entry_point": "integrations/transformers/usage.md",
+            NAME: {
+                "entry_point": ENTRY,
                 "format": "runnable-markdown",
                 "requires": [
                     "sentence-transformers>=6.2",
@@ -261,6 +296,7 @@ def create(args):
                     "bfloat16": {"dtype": "bfloat16"},
                 },
                 "training": False,
+                "outputs": outputs,
             }
         },
         "outputs": outputs,
@@ -272,7 +308,7 @@ def create(args):
         "rationale": "Use the saved ST pipeline and its public inference API.",
         "historical_candidates": [],
     }
-    validate_plan(plan, args.model, fixture)
+    validate(plan, args.model, fixture)
     workspace = Workspace(args.out)
     workspace.from_plan(
         args.model,
@@ -286,6 +322,7 @@ def create(args):
     )
     lock = workspace.lock
     lock["environment"] = versions
+    lock["contracts"][slug]["integrations"] = [NAME]
     write(workspace.lock_path, lock)
     workspace.save_state(origin="sentence-transformers")
     workspace.update_layout()
@@ -296,7 +333,12 @@ def create(args):
                 "workspace": str(workspace.root),
                 "class": kind,
                 "fixture": fixture,
-                "next": ["tmic build", "tmic record --all-variants"],
+                "next": [
+                    "tmic build",
+                    "tmic record --all-variants",
+                    "tmic review",
+                    "tmic check --integration all --all-variants",
+                ],
             }
         )
     )
@@ -424,7 +466,7 @@ def build(
         return copied
 
     copied = save()
-    entry = root / manifest["integrations"]["transformers"]["entry_point"]
+    entry = root / manifest["integrations"][NAME]["entry_point"]
     batch, captured = builder.contract_batch(
         entry, out, model_class=type(backbone), method="forward"
     )
@@ -506,7 +548,7 @@ def build(
         "copied_unchanged": copied,
         "captured": captured,
         "environment": environment(),
-        "sha256": builder.run.file_hashes(out, recursive=True),
+        "sha256": builder.run.file_hashes(out),
     }
     if training:
         record["training"] = training

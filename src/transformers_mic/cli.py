@@ -373,7 +373,7 @@ No Git commit or framework PR is created automatically.""",
         run.add_argument(
             "--integration",
             choices=("transformers", "sentence_transformers", "all"),
-            default="transformers",
+            help="Defaults to transformers, or the contract's only integration",
         )
         run.add_argument("--variant", default="default")
         run.add_argument("--all-variants", action="store_true")
@@ -414,7 +414,7 @@ No Git commit or framework PR is created automatically.""",
     review.add_argument(
         "--integration",
         choices=("transformers", "sentence_transformers", "all"),
-        default="transformers",
+        help="Defaults to transformers, or the contract's only integration",
     )
     review.add_argument("--platform")
     review.add_argument(
@@ -543,7 +543,8 @@ No Git commit or framework PR is created automatically.""",
 
 
 def external_check(args):
-    framework = getattr(args, "integration", "transformers")
+    # A fleet lock spans contracts, so there is no single "only" integration.
+    framework = getattr(args, "integration", None) or "transformers"
     if framework == "all":
         raise ValueError("Fleet checks require one --integration per invocation")
     options = [

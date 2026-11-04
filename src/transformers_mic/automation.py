@@ -13,7 +13,7 @@ from huggingface_hub.utils import validate_repo_id
 
 from . import batch, fleet, fixture_review, model_baselines, contract_repair, terminal
 from .interaction import Interaction, Pending, PROTOCOL_VERSION, load_answer
-from .workspace import Workspace, read, write
+from .workspace import Workspace, primary_integration, read, write
 
 NEEDS_INPUT = 3
 STAGES = (
@@ -348,7 +348,9 @@ def run_locked(args, root, answer):
         if (
             workspace.state_path.exists()
             and "fixtures"
-            not in workspace.manifest["integrations"]["transformers"]["targets"]
+            not in workspace.manifest["integrations"][
+                primary_integration(workspace.manifest)
+            ]["targets"]
         ):
             steps = [step for step in steps if step != "auto"]
         if workspace.state_path.exists() and not fixture_review.needed(workspace):
@@ -451,7 +453,7 @@ def run_locked(args, root, answer):
 
     def review_source():
         manifest = workspace.manifest
-        integration = manifest["integrations"]["transformers"]
+        integration = manifest["integrations"][primary_integration(manifest)]
         usage = workspace.contract_root / integration["entry_point"]
         variants = list(integration.get("variants", {"default": {}}))
         ask(
@@ -717,7 +719,9 @@ def run_locked(args, root, answer):
             elif name == "auto":
                 if (
                     "fixtures"
-                    in workspace.manifest["integrations"]["transformers"]["targets"]
+                    in workspace.manifest["integrations"][
+                        primary_integration(workspace.manifest)
+                    ]["targets"]
                 ):
                     code, log = stage(name, ["auto"])
                     if not code and args.baseline_execution == "cloud":
