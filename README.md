@@ -51,7 +51,8 @@ and compares both with the real checkpoint: config values that changed, tensor n
 matched against the source, and a layer-by-layer page. It runs no contract code and
 calls no LLM. Edit `fixture/config.json` and rerun to shrink with your values.
 
-Then build the whole contract around it:
+Then build the whole contract around it, from the same directory (it keeps the
+fixture's revision and your `config_overrides`):
 
 ```sh
 tmic run org/model --local-only --fixtures-only --no-history --bill-to ''

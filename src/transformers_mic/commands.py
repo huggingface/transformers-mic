@@ -825,6 +825,14 @@ def model_context(model, revision=None):
 
 
 def create(args):
+    reviewed = getattr(args, "fixture_recipe", None)
+    if reviewed:
+        from . import fixture_review
+
+        if args.sentence_transformers:
+            raise ValueError("--fixture-recipe does not apply to Sentence Transformers contracts")
+        # The contract pins the checkpoint revision the fixture was reviewed on.
+        args.revision = args.revision or read(fixture_review.recipe_path(reviewed))["revision"]
     if args.sentence_transformers:
         from . import sentence_transformers
 
@@ -1003,6 +1011,16 @@ def create(args):
         )
         write(workspace.root / ".mic/plan.json", {**plan, "llm": llm})
         write(workspace.root / ".mic/history.json", evidence)
+    if reviewed:
+        fields = fixture_review.adopt_recipe(workspace, reviewed, args.model)
+        pin = workspace.lock["contracts"][workspace.state["contract"]]["checkpoints"].get(args.model)
+        print(
+            f"tmic: using the reviewed fixture recipe {fixture_review.recipe_path(reviewed)}"
+            + (f" (config_overrides: {', '.join(fields)})" if fields else ""),
+            file=sys.stderr,
+        )
+        if pin != args.revision:
+            print(f"tmic: the catalog pins {args.model}@{pin}; the fixture was reviewed at {args.revision}", file=sys.stderr)
     workspace.update_layout()
     print(
         json.dumps(

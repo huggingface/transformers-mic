@@ -467,3 +467,30 @@ def test_fixture_is_the_first_command_in_help(capsys):
     assert "tmic fixture org/model" in out
     commands = out.split("positional arguments:")[1]
     assert commands.index("fixture") < commands.index("baselines")
+
+
+def test_create_keeps_the_reviewed_fixture_recipe(tmp_path, source_backend, capsys):
+    out = tmp_path / "preview"
+    assert main(["fixture", MODEL, "--out", str(out)]) == 0
+    config = json.loads((out / "fixture/config.json").read_text())
+    (out / "fixture/config.json").write_text(json.dumps({**config, "hidden_size": 16}))
+    assert main(["fixture", MODEL, "--out", str(out)]) == 0
+    capsys.readouterr()
+    root = tmp_path / "project"
+    assert main(["create", MODEL, "--out", str(root), "--offline", "--fixture-recipe", str(out)]) == 0
+    workspace = Workspace(root)
+    build = workspace.manifest["fixtures"][workspace.fixture]["build"]
+    assert build["config_overrides"]["fields"]["hidden_size"] == 16
+    assert "using the reviewed fixture recipe" in capsys.readouterr().err
+    with pytest.raises(ValueError, match="not other/model"):
+        fixture_review.adopt_recipe(workspace, out, "other/model")
+
+
+def test_run_finds_the_fixture_folder_next_to_it(tmp_path, workflow, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+    folder = tmp_path / "bert-base-uncased-fixture/.mic"
+    folder.mkdir(parents=True)
+    write(folder / "recipe.json", {"built_from": MODEL, "revision": "a" * 40, "build": {"seed": 17}})
+    main([*workflow.argv, "--mode", "agent"])
+    create = next(arguments for name, arguments in workflow.calls if name == "create")
+    assert create[create.index("--fixture-recipe") + 1] == str((folder / "recipe.json").resolve())

@@ -577,6 +577,10 @@ def run_locked(args, root, answer):
             for name in ("revision", "name", "contract"):
                 if value := getattr(args, name):
                     options += ["--" + name, value]
+            if getattr(args, "fixture_recipe", None) or (
+                recipe := (None if args.sentence_transformers else fixture_review.standalone_recipe(args.model))
+            ):
+                options += ["--fixture-recipe", str(Path(getattr(args, "fixture_recipe", None) or recipe).resolve())]
             for name in (
                 "regenerate",
                 "llm",
