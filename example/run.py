@@ -146,15 +146,32 @@ def digest(files):
     return hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest()
 
 
+def sentence_transformer_files(folder):
+    """Files in module subdirectories declared by Sentence Transformers."""
+    modules = folder / "modules.json"
+    if not modules.exists():
+        return []
+    files = []
+    for module in json.loads(modules.read_text()):
+        name = module.get("path", "")
+        if not name or name == ".":
+            continue
+        path = Path(name)
+        if path.is_absolute() or ".." in path.parts:
+            raise ValueError(f"Invalid Sentence Transformers module path: {name}")
+        files.extend(p for p in (folder / path).rglob("*") if p.is_file())
+    return files
+
+
 def file_hashes(folder):
     skip = {"README.md", "build.json", ".gitattributes", ".mic-repo.json"}
     layout = folder / ".mic-repo.json"
     if layout.exists():
         skip.update(json.loads(layout.read_text())["contract_files"])
     return {
-        f.name: hashlib.sha256(f.read_bytes()).hexdigest()
-        for f in sorted(folder.iterdir())
-        if f.is_file() and f.name not in skip
+        f.relative_to(folder).as_posix(): hashlib.sha256(f.read_bytes()).hexdigest()
+        for f in sorted(set(folder.iterdir()) | set(sentence_transformer_files(folder)))
+        if f.is_file() and f.relative_to(folder).as_posix() not in skip
     }
 
 
@@ -351,7 +368,7 @@ class Executor:
             node = subprocess.run(["node", "--version"], capture_output=True, text=True).stdout.strip()
             package = self.cwd / "node_modules/@huggingface/transformers/package.json"
             return {"node": node, "@huggingface/transformers": json.loads(package.read_text())["version"]}
-        names = ["transformers", *(n for n in self.pinned if n != "python")]
+        names = ["transformers", "sentence-transformers", *(n for n in self.pinned if n != "python")]
         probe = (
             "import importlib.metadata as md, json, platform\n"
             "versions = {'python': platform.python_version()}\n"
@@ -597,7 +614,7 @@ def rules_for(manifest, platform_dir):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--framework", choices=("transformers", "transformers.js"), required=True)
+    parser.add_argument("--framework", choices=("transformers", "transformers.js", "sentence_transformers"), required=True)
     parser.add_argument("--contract", action="append", help="run only this contract (repeatable)")
     parser.add_argument("--target", action="append", help="run only this target, fixture or checkpoint name (repeatable)")
     parser.add_argument("--fixtures-only", action="store_true", help="skip real checkpoints")
@@ -647,12 +664,12 @@ def main():
         }
         selected_by = select_contracts.select([line.strip() for line in lines.splitlines() if line.strip()], dirs)
         print(json.dumps({"selection": selected_by, "code_dirs": dirs}), file=sys.stderr, flush=True)
-    known = lock.get("known_failures", {})
+    known = {} if args.framework == "sentence_transformers" else lock.get("known_failures", {})
     import template_date
 
     if args.framework == "transformers":
         template_date.freeze(template_date.TEMPLATE_DATE)
-    local_patches = sorted(lock.get("local_patches", {}))
+    local_patches = [] if args.framework == "sentence_transformers" else sorted(lock.get("local_patches", {}))
     if local_patches and args.framework == "transformers":
         import patches
 
@@ -688,7 +705,11 @@ def main():
                 continue
             root, contract_revision = contract_folder(lock_dir, contract["integration"], args.local_contracts)
             manifest = load(root / "integration.json", "integration")
+            if args.framework not in manifest["integrations"]:
+                continue
             integration = manifest["integrations"][args.framework]
+            # Each integration may define its own complete assertion set.
+            manifest = {**manifest, "outputs": integration.get("outputs", manifest["outputs"])}
             if integration["format"] == "script" and contract_revision not in ("local", "unpublished"):
                 # Script contracts run where their packages are installed: the local folder, which must match the pin.
                 root, contract_revision = contract_folder(lock_dir, contract["integration"], True)
@@ -835,6 +856,9 @@ def main():
             status = 1
     summary = {"summary": counts, "seconds": round(time.perf_counter() - started, 1), "isolate": args.isolate}
     print(json.dumps(summary), file=sys.stderr)
+    if args.framework == "sentence_transformers" and not counts:
+        print("No Sentence Transformers cases selected", file=sys.stderr)
+        return 1
     return status
 
 

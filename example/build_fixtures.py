@@ -156,10 +156,10 @@ def source_snapshot(repo, revision, recipe=None):
 def copied_files(source, recipe=None):
     assets = set((recipe or {}).get("copy_assets", []))
     names = sorted(
-        f.name
-        for f in source.iterdir()
+        f.relative_to(source).as_posix()
+        for f in set(source.iterdir()) | set(run.sentence_transformer_files(source))
         if f.is_file()
-        and f.name not in NOT_COPIED
+        and f.relative_to(source).as_posix() not in NOT_COPIED
         and (not f.name.endswith(WEIGHTS) or f.name == "spk_dict.pt" or f.name in assets)
         and not f.name.endswith(".index.json")
     )
@@ -454,6 +454,7 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
     save_file(tensors, weights, metadata={"format": "pt"})
     copied = copied_files(source, recipe)
     for name in copied:
+        (out / name).parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source / name, out / name)  # overwrites the generation config save_pretrained wrote
     return copied
 

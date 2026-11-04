@@ -317,10 +317,8 @@ def exported(call, name):
     from transformers_mic import fleet
 
     files = {op.path_in_repo: op.path_or_fileobj.decode() for op in call["operations"]}
-    assert set(files) == {fleet.table_path(name, t) for t in fleet.COLUMNS}
-    return fleet.from_tables(
-        {t: files[fleet.table_path(name, t)] for t in fleet.COLUMNS}
-    )
+    assert {fleet.table_path(name, t) for t in fleet.COLUMNS} <= set(files)
+    return fleet.from_tables({Path(path).stem: value for path, value in files.items()})
 
 
 def test_export_publishes_dataset_and_writes_only_sha(workspace, dataset, tmp_path):
@@ -1075,6 +1073,9 @@ def test_dataset_pin_resolves_main_once_and_checks_both_fleets(monkeypatch, tmp_
         assert kwargs == {"repo_type": "dataset", "revision": "d" * 40}
         path = tmp_path / filename
         path.parent.mkdir(parents=True, exist_ok=True)
+        if Path(filename).stem == "integrations":
+            from huggingface_hub.errors import EntryNotFoundError
+            raise EntryNotFoundError(filename)
         path.write_text(tables.get(filename) or tables[Path(filename).stem])
         return str(path)
 

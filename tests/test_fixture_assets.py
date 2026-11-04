@@ -917,3 +917,26 @@ def test_a_missing_parameter_the_fixture_cannot_mirror_still_fails():
         build_fixtures.in_fixture(["model.layers.5.mlp.gate.e_score_correction_bias"], names)
     with pytest.raises(SystemExit, match="cannot mirror"):
         build_fixtures.in_fixture(["lm_head.bias"], names)
+
+
+def test_sentence_transformer_module_configs_are_copied_and_hashed(tmp_path):
+    (tmp_path / "modules.json").write_text(json.dumps([
+        {"path": ""}, {"path": "1_Pooling"}, {"path": "2_Normalize"}
+    ]))
+    pooling = tmp_path / "1_Pooling"
+    pooling.mkdir()
+    (pooling / "config.json").write_text('{"embedding_dimension": 768}')
+    (pooling / "model.safetensors").write_bytes(b"not a config")
+    names = build_fixtures.copied_files(tmp_path)
+    assert "1_Pooling/config.json" in names
+    assert "1_Pooling/model.safetensors" not in names
+    hashes = build_fixtures.run.file_hashes(tmp_path)
+    assert "1_Pooling/config.json" in hashes
+    (pooling / "config.json").write_text('{"embedding_dimension": 64}')
+    assert build_fixtures.run.file_hashes(tmp_path) != hashes
+
+
+def test_sentence_transformer_module_path_cannot_escape_source(tmp_path):
+    (tmp_path / "modules.json").write_text('[{"path": "../outside"}]')
+    with pytest.raises(ValueError, match="Invalid Sentence Transformers module path"):
+        build_fixtures.copied_files(tmp_path)
