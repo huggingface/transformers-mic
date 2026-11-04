@@ -335,11 +335,33 @@
    "tests/models/albert/test_modeling_albert.py::AlbertModelTest::test_flash_attn_2_inference_equivalence_right_padding"
   ]
  },
+ "sticky#albert#2026-10-24": {
+  "date": "2026-10-24",
+  "day": 20750,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "albert",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/albert/test_modeling_albert.py::AlbertModelTest::test_flash_attn_2_inference_equivalence"
+  ]
+ },
  "sticky#axk1#2026-10-06": {
   "date": "2026-10-06",
   "day": 20732,
   "integration": false,
   "mic": "not-covered",
+  "model": "axk1",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/axk1/test_modeling_axk1.py::AXK1ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#axk1#2026-10-18": {
+  "date": "2026-10-18",
+  "day": 20744,
+  "integration": false,
+  "mic": "green-on-main",
   "model": "axk1",
   "signal": "AssertionError",
   "tests": [
@@ -603,6 +625,17 @@
    "tests/models/ernie/test_modeling_ernie.py::ErnieModelTest::test_flash_attn_2_inference_equivalence_right_padding"
   ]
  },
+ "sticky#ernie#2026-10-08": {
+  "date": "2026-10-08",
+  "day": 20734,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "ernie",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/ernie/test_modeling_ernie.py::ErnieModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
  "sticky#ernie#2026-10-12": {
   "date": "2026-10-12",
   "day": 20738,
@@ -754,6 +787,17 @@
    "tests/models/glm4_moe_lite/test_modeling_glm4_moe_lite.py::Glm4MoeModelTest::test_sdpa_padding_matches_padding_free_with_position_ids"
   ]
  },
+ "sticky#glm4_moe_lite#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "glm4_moe_lite",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/glm4_moe_lite/test_modeling_glm4_moe_lite.py::Glm4MoeModelTest::test_sdpa_padding_matches_padding_free_with_position_ids"
+  ]
+ },
  "sticky#glm_moe_dsa#2026-10-19": {
   "date": "2026-10-19",
   "day": 20745,
@@ -876,6 +920,17 @@
    "tests/models/internvl/test_modeling_internvl.py::InternVLLlamaIntegrationTest::test_llama_small_model_integration_generate_text_only"
   ]
  },
+ "sticky#jetmoe#2026-10-10": {
+  "date": "2026-10-10",
+  "day": 20736,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "jetmoe",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/jetmoe/test_modeling_jetmoe.py::JetMoeModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
  "sticky#kolibri1#2026-10-14": {
   "date": "2026-10-14",
   "day": 20740,
@@ -885,6 +940,20 @@
   "signal": "AssertionError",
   "tests": [
    "tests/models/kolibri1/test_modeling_kolibri1.py::Kolibri1ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#kyutai_speech_to_text#2026-10-18": {
+  "date": "2026-10-18",
+  "day": 20744,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "kyutai_speech_to_text",
+  "signal": "RuntimeError",
+  "tests": [
+   "tests/models/kyutai_speech_to_text/test_modeling_kyutai_speech_to_text.py::KyutaiSpeechToTextModelTest::test_flash_attn_2_fp32_ln",
+   "tests/models/kyutai_speech_to_text/test_modeling_kyutai_speech_to_text.py::KyutaiSpeechToTextModelTest::test_flash_attn_2_from_config",
+   "tests/models/kyutai_speech_to_text/test_modeling_kyutai_speech_to_text.py::KyutaiSpeechToTextModelTest::test_flash_attn_2_inference_equivalence",
+   "tests/models/kyutai_speech_to_text/test_modeling_kyutai_speech_to_text.py::KyutaiSpeechToTextModelTest::test_flash_attn_2_inference_equivalence_right_padding"
   ]
  },
  "sticky#llama#2026-11-01": {
@@ -962,6 +1031,17 @@
  "sticky#mamba2#2026-10-06": {
   "date": "2026-10-06",
   "day": 20732,
+  "integration": true,
+  "mic": "not-covered",
+  "model": "mamba2",
+  "signal": "torch.OutOfMemoryError",
+  "tests": [
+   "tests/models/mamba2/test_modeling_mamba2.py::Mamba2IntegrationTest::test_mamba2_mixer_train_vs_eval_equivalence"
+  ]
+ },
+ "sticky#mamba2#2026-10-13": {
+  "date": "2026-10-13",
+  "day": 20739,
   "integration": true,
   "mic": "not-covered",
   "model": "mamba2",
@@ -1082,6 +1162,17 @@
  "sticky#moshi#2026-10-06": {
   "date": "2026-10-06",
   "day": 20732,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "moshi",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/moshi/test_modeling_moshi.py::MoshiDecoderTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids"
+  ]
+ },
+ "sticky#moshi#2026-10-08": {
+  "date": "2026-10-08",
+  "day": 20734,
   "integration": false,
   "mic": "not-covered",
   "model": "moshi",
@@ -1405,6 +1496,17 @@
  "sticky#switch_transformers#2026-10-06": {
   "date": "2026-10-06",
   "day": 20732,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "switch_transformers",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/switch_transformers/test_modeling_switch_transformers.py::SwitchTransformersModelTest::test_generate_with_past_key_values"
+  ]
+ },
+ "sticky#switch_transformers#2026-10-16": {
+  "date": "2026-10-16",
+  "day": 20742,
   "integration": false,
   "mic": "not-covered",
   "model": "switch_transformers",

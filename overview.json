@@ -15,63 +15,63 @@
   "real_checkpoint": 1
  },
  "false_alarms": {
-  "prs_not_their_fault": 80,
+  "prs_not_their_fault": 79,
   "prs_with_failure": 96
  },
  "missed": {
   "awaiting_verdict": 15,
-  "not_covered": 15,
+  "not_covered": 16,
   "real_checkpoint": 15
  },
  "next": [
   {
-   "checkpoint": "RecursiveSI/flint",
-   "draft": "success",
-   "model": "flint",
-   "real_checkpoint": 1,
-   "regressions": 1,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41615947562",
-   "shrink": "shrink/41615947562/shrink-flint-mic.html"
-  },
-  {
-   "checkpoint": "openbmb/MiniCPM-OCR-1.0",
+   "checkpoint": "vidore/colpali-v1.3-hf",
    "draft": "failure",
-   "model": "minicpm_ocr",
-   "real_checkpoint": 1,
-   "regressions": 1,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41615951103",
-   "shrink": "shrink/41615951103/shrink-MiniCPM-OCR-1.0-mic.html"
-  },
-  {
-   "checkpoint": "Qwen/Qwen3.5-0.8B",
-   "draft": "success",
-   "model": "qwen3_5",
-   "real_checkpoint": 1,
-   "regressions": 1,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41626641849",
-   "shrink": "shrink/41626641849/shrink-Qwen3.5-0.8B-mic.html"
-  },
-  {
-   "checkpoint": "google/vaultgemma-1b",
-   "draft": "failure",
-   "model": "vaultgemma",
-   "real_checkpoint": 1,
-   "regressions": 1,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41626645840",
+   "model": "colpali",
+   "real_checkpoint": 0,
+   "regressions": 2,
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41626652876",
    "shrink": ""
   },
   {
-   "checkpoint": "reflection/Beam-1.0-501B-A23B",
-   "draft": "success",
-   "model": "beam",
+   "checkpoint": "kmhf/hf-moshiko",
+   "draft": "queued",
+   "model": "moshi",
    "real_checkpoint": 0,
    "regressions": 2,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41626649509",
-   "shrink": "shrink/41626649509/shrink-Beam-1.0-501B-A23B-mic.html"
+   "run": "",
+   "shrink": ""
+  },
+  {
+   "checkpoint": "google/switch-base-8",
+   "draft": "queued",
+   "model": "switch_transformers",
+   "real_checkpoint": 0,
+   "regressions": 2,
+   "run": "",
+   "shrink": ""
+  },
+  {
+   "checkpoint": "regisss/bridgetower-newyorker-a100-8x",
+   "draft": "failure",
+   "model": "bridgetower",
+   "real_checkpoint": 0,
+   "regressions": 1,
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41626675456",
+   "shrink": ""
+  },
+  {
+   "checkpoint": "nvidia/Cosmos3-Edge",
+   "draft": "",
+   "model": "cosmos3_edge",
+   "real_checkpoint": 0,
+   "regressions": 1,
+   "run": "",
+   "shrink": ""
   }
  ],
  "window": [
   "2026-10-20",
-  "2026-11-03"
+  "2026-11-04"
  ]
 }

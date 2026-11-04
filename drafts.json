@@ -77,6 +77,12 @@
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/41615951103"
  },
+ "moshi": {
+  "checkpoint": "kmhf/hf-moshiko",
+  "conclusion": null,
+  "dispatched_at": "2026-11-04T09:03:50Z",
+  "status": "queued"
+ },
  "poolformer": {
   "checkpoint": "sail/poolformer_s12",
   "conclusion": "success",
@@ -94,6 +100,12 @@
   "shrink": "shrink/41626641849/shrink-Qwen3.5-0.8B-mic.html",
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/41626641849"
+ },
+ "switch_transformers": {
+  "checkpoint": "google/switch-base-8",
+  "conclusion": null,
+  "dispatched_at": "2026-11-04T09:03:50Z",
+  "status": "queued"
  },
  "vaultgemma": {
   "checkpoint": "google/vaultgemma-1b",
