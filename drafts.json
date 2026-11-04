@@ -79,9 +79,11 @@
  },
  "moshi": {
   "checkpoint": "kmhf/hf-moshiko",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-04T09:03:50Z",
-  "status": "queued"
+  "run_id": 41804365384,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41804365384"
  },
  "poolformer": {
   "checkpoint": "sail/poolformer_s12",
@@ -103,9 +105,11 @@
  },
  "switch_transformers": {
   "checkpoint": "google/switch-base-8",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-04T09:03:50Z",
-  "status": "queued"
+  "run_id": 41804368657,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41804368657"
  },
  "vaultgemma": {
   "checkpoint": "google/vaultgemma-1b",
