@@ -7,8 +7,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `tmic fixture org/model[@revision]` shrinks a Hub checkpoint with no workspace, contract or LLM into
+  `./<model>-fixture/` (`--out` to choose): the tiny config and weights, compared with the source. It is
+  the first command in `tmic --help`.
+
 ### Changed
 
+- The `runtime` extra installs `torchvision`: vision processors (PixtralProcessor for Mistral-Large-4)
+  need it, and every CI workflow already installed it by hand.
+- A build that fails on a missing package stops with `ImportError: <what is missing>` instead of
+  rebuilding with the shrink rule's sizes, which would fail the same way.
 - Fixtures are always written as `model.safetensors`, also for `pytorch_model.bin` sources. They keep the
   source's tensor names, prefix and expert layout; `build.json` records the source file in
   `serialization.source_file`. Published `.bin` fixtures are unchanged until they are rebuilt.
@@ -20,6 +30,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- A failed stage's summary no longer reads `Failed: ImportError:` with nothing after it when the
+  message starts on the next line (transformers' `requires_backends`).
 - The shrink keeps `word_embed_proj_dim` and `embedding_size` equal to `hidden_size` when the checkpoint has
   them equal (as it already did for `projection_size`). Shrinking only `hidden_size` gave OPT-125m fixtures
   `project_in`/`project_out` layers and ELECTRA-base fixtures an `embeddings_project` the checkpoints do not

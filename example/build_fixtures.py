@@ -748,12 +748,41 @@ def environment():
     }
 
 
+MISSING_PACKAGE = re.compile(
+    r"^(?:ModuleNotFoundError: .*|ImportError:.*)$|requires the \S+ library but it was not found", re.MULTILINE
+)
+
+
+def missing_package(error):
+    """The sentence naming a package this environment lacks, or None.
+
+    Contract failures arrive as SystemExit carrying the child's traceback text, so the
+    exception chain alone does not say it: read the text too.
+    """
+    seen = error
+    while seen is not None and not isinstance(seen, ImportError):
+        seen = seen.__cause__ or seen.__context__
+    text = str(seen if seen is not None else error)
+    found = re.search(r"\S[^\n]*requires the \S+ library but it was not found[^.\n]*\.?", text)
+    if found:
+        return found.group(0).strip()
+    if seen is None and not MISSING_PACKAGE.search(text):
+        return None
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    return next((line for line in reversed(lines) if "No module named" in line), lines[-1] if lines else type(error).__name__)
+
+
 def build_fixture(*args, **kwargs):
     """Build; if it fails with model-tester sizes, rebuild once with the shrink rule's."""
     try:
         return _build_fixture(*args, **kwargs)
     except (SystemExit, Exception) as error:
         adopted = [source for source in TESTER_SIZES if source not in TESTER_OFF]
+        missing = missing_package(error)
+        if missing:
+            # Other sizes would fail the same way: say what to install instead of retrying.
+            print(error, file=sys.stderr, flush=True)
+            raise SystemExit(f"ImportError: {missing} Install it and rerun; this is the environment, not the fixture.") from None
         if not adopted:
             raise
         reason = (str(error).strip().splitlines() or [type(error).__name__])[-1][:300]
