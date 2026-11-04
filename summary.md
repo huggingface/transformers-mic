@@ -44,7 +44,7 @@ Re-baselined = baselines changed with the same fixture weights (the review work 
 |---|---|---|---|---|---|---|
 | 2026-W43 | 21 | 0 | 0 | 0 | 0 | 150 |
 | 2026-W44 | 343 | 163 | 36 | 17 | 380 | 1592 |
-| 2026-W45 | 31 | 4 | 4 | 22 | 209 | 27 |
+| 2026-W45 | 32 | 4 | 4 | 22 | 209 | 28 |
 
 Latest re-baselines (model commit title):
 
@@ -111,7 +111,7 @@ Models with real-checkpoint regressions in the daily GPU CI and no contract, shr
 | model | real-ckpt regressions | other | checkpoint | shrinkable | draft |
 |---|---|---|---|---|---|
 | colpali | 0 | 2 | [vidore/colpali-v1.3-hf](https://huggingface.co/vidore/colpali-v1.3-hf) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41626652876) |
-| moshi | 0 | 2 | [kmhf/hf-moshiko](https://huggingface.co/kmhf/hf-moshiko) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41804365384) |
+| moshi | 0 | 2 | ? | yes | not draftable |
 | switch_transformers | 0 | 2 | [google/switch-base-8](https://huggingface.co/google/switch-base-8) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41804368657) |
 | bridgetower | 0 | 1 | [regisss/bridgetower-newyorker-a100-8x](https://huggingface.co/regisss/bridgetower-newyorker-a100-8x) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41626675456) |
 | cosmos3_edge | 0 | 1 | [nvidia/Cosmos3-Edge](https://huggingface.co/nvidia/Cosmos3-Edge) | yes | — |

@@ -274,8 +274,8 @@
    ]
   },
   {
-   "checkpoint": "kmhf/hf-moshiko",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint": null,
+   "checkpoint_source": null,
    "integration": 0,
    "model": "moshi",
    "other": 2,
