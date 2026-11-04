@@ -18,7 +18,7 @@ from collections import Counter
 from pathlib import Path
 
 from . import backend
-from .workspace import Workspace, digest, read, write
+from .workspace import Workspace, digest, primary_integration, read, write
 
 FOLDER = "fixture"
 RECORD = ".mic/fixture-review.json"
@@ -52,7 +52,7 @@ def recipe_key(workspace):
 def needed(workspace):
     """A fixture this run will build: declared, with a recipe, not already on the Hub."""
     manifest = workspace.manifest
-    if "fixtures" not in manifest["integrations"]["transformers"]["targets"]:
+    if "fixtures" not in manifest["integrations"][primary_integration(manifest)]["targets"]:
         return False
     if not (manifest["fixtures"].get(workspace.fixture) or {}).get("build"):
         return False

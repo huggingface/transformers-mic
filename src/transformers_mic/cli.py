@@ -249,6 +249,7 @@ No Git commit or framework PR is created automatically.""",
         help="Workspace override (otherwise resume a matching workspace under work/ or create work/mic/ORG--MODEL)",
     )
     run.add_argument("--namespace", default="huggingface-mic")
+    run.add_argument("--sentence-transformers", nargs="?", const="auto", choices=("auto", "SentenceTransformer", "CrossEncoder", "SparseEncoder", "MultiVectorEncoder"), help="Create an ST inference contract with a complete ST fixture")
     run.add_argument("--fleet", choices=tuple(fleet.FILES), default="prototypes")
     run.add_argument("--contract-name")
     run.add_argument("--transformers-checkout")
@@ -296,6 +297,7 @@ No Git commit or framework PR is created automatically.""",
     create.add_argument("model")
     create.add_argument("--out", required=True)
     create.add_argument("--contract", help="Choose a catalog usage path")
+    create.add_argument("--sentence-transformers", nargs="?", const="auto", choices=("auto", "SentenceTransformer", "CrossEncoder", "SparseEncoder", "MultiVectorEncoder"), help="Create an ST inference contract with a complete ST fixture")
     create.add_argument(
         "--namespace",
         default="huggingface-mic",
@@ -371,7 +373,7 @@ No Git commit or framework PR is created automatically.""",
         run.add_argument(
             "--integration",
             choices=("transformers", "sentence_transformers", "all"),
-            default="transformers",
+            help="Defaults to transformers, or the contract's only integration",
         )
         run.add_argument("--variant", default="default")
         run.add_argument("--all-variants", action="store_true")
@@ -412,7 +414,7 @@ No Git commit or framework PR is created automatically.""",
     review.add_argument(
         "--integration",
         choices=("transformers", "sentence_transformers", "all"),
-        default="transformers",
+        help="Defaults to transformers, or the contract's only integration",
     )
     review.add_argument("--platform")
     review.add_argument(
@@ -541,7 +543,8 @@ No Git commit or framework PR is created automatically.""",
 
 
 def external_check(args):
-    framework = getattr(args, "integration", "transformers")
+    # A fleet lock spans contracts, so there is no single "only" integration.
+    framework = getattr(args, "integration", None) or "transformers"
     if framework == "all":
         raise ValueError("Fleet checks require one --integration per invocation")
     options = [

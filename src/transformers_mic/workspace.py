@@ -34,6 +34,20 @@ def fleet_environment(catalog):
         return catalog["environment"]
 
 
+def primary_integration(manifest):
+    """The integration a build, record or check acts on by default.
+
+    Transformers when the contract has it; otherwise its only integration, so a
+    Sentence Transformers MIC (which Transformers lanes skip) still works.
+    """
+    names = list(manifest["integrations"])
+    if "transformers" in names:
+        return "transformers"
+    if len(names) != 1:
+        raise ValueError(f"Choose an integration with --integration: {names}")
+    return names[0]
+
+
 def digest(files):
     return hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest()
 
@@ -188,7 +202,7 @@ class Workspace:
         self.ensure_new()
         repo = next(iter(manifest["fixtures"]))
         root = self.root / "example/hub" / repo.split("/")[-1]
-        entry = manifest["integrations"]["transformers"]["entry_point"]
+        entry = manifest["integrations"][primary_integration(manifest)]["entry_point"]
         (root / entry).parent.mkdir(parents=True, exist_ok=True)
         (root / entry).write_text(usage)
         write(root / "integration.json", manifest)
