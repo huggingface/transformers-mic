@@ -901,3 +901,19 @@ def test_tied_tensor_keeps_the_name_the_source_serializes(tmp_path):
     back, info = OPTForCausalLM.from_pretrained(tmp_path / "out", output_loading_info=True)
     assert not info["missing_keys"] and not info["unexpected_keys"]
     assert all(torch.equal(v, back.state_dict()[k]) for k, v in model.state_dict().items())
+
+
+def test_missing_parameters_in_dropped_layers_are_left_out():
+    # A.X-K1: the real 61-layer checkpoint lacks every MoE layer's correction bias;
+    # the shrunk fixture has two layers, so only layer 1's exists to omit.
+    missing = [f"model.layers.{i}.mlp.gate.e_score_correction_bias" for i in range(1, 61)]
+    names = {"model.layers.0.mlp.up_proj.weight", "model.layers.1.mlp.gate.e_score_correction_bias"}
+    assert build_fixtures.in_fixture(missing, names) == ["model.layers.1.mlp.gate.e_score_correction_bias"]
+
+
+def test_a_missing_parameter_the_fixture_cannot_mirror_still_fails():
+    names = {"model.layers.0.mlp.gate.weight"}
+    with pytest.raises(SystemExit, match="cannot mirror"):
+        build_fixtures.in_fixture(["model.layers.5.mlp.gate.e_score_correction_bias"], names)
+    with pytest.raises(SystemExit, match="cannot mirror"):
+        build_fixtures.in_fixture(["lm_head.bias"], names)
