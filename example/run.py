@@ -351,7 +351,7 @@ class Executor:
             node = subprocess.run(["node", "--version"], capture_output=True, text=True).stdout.strip()
             package = self.cwd / "node_modules/@huggingface/transformers/package.json"
             return {"node": node, "@huggingface/transformers": json.loads(package.read_text())["version"]}
-        names = ["transformers", "sentence-transformers", *(n for n in self.pinned if n != "python")]
+        names = ["transformers", *(n for n in self.pinned if n != "python")]
         probe = (
             "import importlib.metadata as md, json, platform\n"
             "versions = {'python': platform.python_version()}\n"
@@ -597,7 +597,7 @@ def rules_for(manifest, platform_dir):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--framework", choices=("transformers", "transformers.js", "sentence_transformers"), required=True)
+    parser.add_argument("--framework", choices=("transformers", "transformers.js"), required=True)
     parser.add_argument("--contract", action="append", help="run only this contract (repeatable)")
     parser.add_argument("--target", action="append", help="run only this target, fixture or checkpoint name (repeatable)")
     parser.add_argument("--fixtures-only", action="store_true", help="skip real checkpoints")
@@ -688,11 +688,7 @@ def main():
                 continue
             root, contract_revision = contract_folder(lock_dir, contract["integration"], args.local_contracts)
             manifest = load(root / "integration.json", "integration")
-            if args.framework not in manifest["integrations"]:
-                continue
             integration = manifest["integrations"][args.framework]
-            # Each integration may define its own complete assertion set.
-            manifest = {**manifest, "outputs": integration.get("outputs", manifest["outputs"])}
             if integration["format"] == "script" and contract_revision not in ("local", "unpublished"):
                 # Script contracts run where their packages are installed: the local folder, which must match the pin.
                 root, contract_revision = contract_folder(lock_dir, contract["integration"], True)
@@ -839,9 +835,6 @@ def main():
             status = 1
     summary = {"summary": counts, "seconds": round(time.perf_counter() - started, 1), "isolate": args.isolate}
     print(json.dumps(summary), file=sys.stderr)
-    if args.framework == "sentence_transformers" and not counts:
-        print("No Sentence Transformers cases selected", file=sys.stderr)
-        return 1
     return status
 
 

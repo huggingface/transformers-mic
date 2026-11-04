@@ -46,7 +46,6 @@ def main():
             continue
         approved = candidate.with_name(candidate.name.replace(".candidate.json", ".json"))
         manifest = run.load(args.manifest or HERE / "hub" / f"{contract}-integration/integration.json", "integration")
-        manifest = {**manifest, "outputs": manifest["integrations"][args.framework].get("outputs", manifest["outputs"])}
         new = run.load(candidate, "baseline")["outputs"]
         if not approved.exists():
             verdict, detail = "new", sorted(k for k in manifest["outputs"] if run.lookup(new, k) is not None)

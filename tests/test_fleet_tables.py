@@ -150,7 +150,7 @@ def test_download_reads_tables_and_falls_back_to_json_for_old_revisions(
             if legacy[revision] is None:
                 raise EntryNotFoundError(filename)
             path.write_text(json.dumps({"comment": "ignored", **legacy[revision]}))
-        elif has_tables[revision] and filename.split("/")[1].removesuffix(".csv") in tables:
+        elif has_tables[revision]:
             path.write_text(tables[filename.split("/")[1].removesuffix(".csv")])
         else:
             raise EntryNotFoundError(filename)
