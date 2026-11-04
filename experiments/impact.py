@@ -662,7 +662,10 @@ def get_text(url):
 
 
 def test_checkpoints(nodeids, files):
-    """Hub checkpoints the failing test classes load (from_pretrained("org/name"), model_id = ...), most used first."""
+    """Hub checkpoints the failing test classes load (from_pretrained("org/name"), model_id = ...), most used first.
+
+    A failing class that loads none (MoshiDecoderTest) falls back to its file's *IntegrationTest* classes.
+    """
     found = Counter()
     for nodeid in nodeids:
         path, _, rest = nodeid.partition("::")
@@ -673,15 +676,25 @@ def test_checkpoints(nodeids, files):
             except (urllib.error.URLError, http.client.IncompleteRead):
                 files[path] = ""
         text = files[path]
+        own = class_checkpoints(text, [class_name])
+        found.update(own or class_checkpoints(text, re.findall(r"^class (\w*IntegrationTests?\w*)", text, re.M)))
+    return [c for c, _ in found.most_common()]
+
+
+def class_checkpoints(text, class_names):
+    """Hub checkpoints named in these classes of a test file: not tiny test repos, URLs or file paths."""
+    found = []
+    for class_name in class_names:
         start = text.find(f"class {class_name}")
         if start < 0:
             continue
         end = text.find("\nclass ", start + 1)
-        for checkpoint in CHECKPOINT_RE.findall(text[start : end if end > 0 else None]):
-            if checkpoint.startswith(("hf-internal-testing/", "http")) or FILE_RE.search(checkpoint):
-                continue  # tiny test repos, URLs, file paths
-            found[checkpoint] += 1
-    return [c for c, _ in found.most_common()]
+        found += [
+            c
+            for c in CHECKPOINT_RE.findall(text[start : end if end > 0 else None])
+            if not c.startswith(("hf-internal-testing/", "http")) and not FILE_RE.search(c)
+        ]
+    return found
 
 
 def hub_has(repo, _seen={}):
