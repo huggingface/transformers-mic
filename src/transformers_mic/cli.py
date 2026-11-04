@@ -163,6 +163,16 @@ See 'tmic run --help' for the protocol and exit codes.""",
                 action="store_true",
                 help="Return the Hub revision without downloading artifacts (requires --upload-repo)",
             )
+    integrations = sub.add_parser(
+        "integrations", help="Generate selected usage paths on an existing fixture"
+    )
+    integrations.add_argument(
+        "--integration",
+        action="append",
+        required=True,
+        choices=("transformers", "sentence_transformers"),
+        help="Integration to retain/generate (repeat for both)",
+    )
     auth = sub.add_parser(
         "auth", help="Sign in to the dashboard with your GitHub account"
     )
@@ -358,6 +368,11 @@ No Git commit or framework PR is created automatically.""",
             if name == "record"
             else "Check reviewed expectations",
         )
+        run.add_argument(
+            "--integration",
+            choices=("transformers", "sentence_transformers", "all"),
+            default="transformers",
+        )
         run.add_argument("--variant", default="default")
         run.add_argument("--all-variants", action="store_true")
         run.add_argument("--isolate", action="store_true")
@@ -393,6 +408,11 @@ No Git commit or framework PR is created automatically.""",
             )
     review = sub.add_parser(
         "review", help="Compare measured candidates with approved expectations"
+    )
+    review.add_argument(
+        "--integration",
+        choices=("transformers", "sentence_transformers", "all"),
+        default="transformers",
     )
     review.add_argument("--platform")
     review.add_argument(
@@ -444,12 +464,17 @@ No Git commit or framework PR is created automatically.""",
         "--execute", action="store_true", help="Upload the previewed fleet update"
     )
     retire = sub.add_parser(
-        "retire", help="Preview or remove one contract from a fleet (e.g. a replaced test-checkpoint source)"
+        "retire",
+        help="Preview or remove one contract from a fleet (e.g. a replaced test-checkpoint source)",
     )
     retire.add_argument("contract")
     retire.add_argument("--fleet", choices=tuple(fleet.FILES), required=True)
-    retire.add_argument("--reason", required=True, help="Recorded in the dataset commit message")
-    retire.add_argument("--execute", action="store_true", help="Upload the previewed removal")
+    retire.add_argument(
+        "--reason", required=True, help="Recorded in the dataset commit message"
+    )
+    retire.add_argument(
+        "--execute", action="store_true", help="Upload the previewed removal"
+    )
     pin = sub.add_parser(
         "pin", help="Pin a dataset revision in a Transformers checkout"
     )
@@ -516,9 +541,12 @@ No Git commit or framework PR is created automatically.""",
 
 
 def external_check(args):
+    framework = getattr(args, "integration", "transformers")
+    if framework == "all":
+        raise ValueError("Fleet checks require one --integration per invocation")
     options = [
         "--framework",
-        "transformers",
+        framework,
         "--lock",
         str(args.lock.resolve()),
         "--require-all",
@@ -561,7 +589,9 @@ def external_check(args):
                 revision=pin["revision"],
             )
         )
-        for variant in manifest["integrations"]["transformers"].get(
+        if framework not in manifest["integrations"]:
+            continue
+        for variant in manifest["integrations"][framework].get(
             "variants", {"default": {}}
         ):
             status = max(
@@ -578,6 +608,10 @@ def external_check(args):
 def main(argv=None):
     args = parser().parse_args(argv)
     try:
+        if args.command == "integrations":
+            from .integrations import generate
+
+            return generate(args)
         if args.command == "baselines":
             from .baselines import run
 

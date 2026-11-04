@@ -1145,9 +1145,12 @@ def build(args):
 
 def execute_one(args, record=False):
     workspace = Workspace(args.workspace)
+    framework = getattr(args, "integration", "transformers")
     options = [
         "--framework",
-        "transformers",
+        framework,
+        "--lock",
+        str(workspace.lock_path),
         "--contract",
         workspace.state["contract"],
         "--local-contracts",
@@ -1167,7 +1170,7 @@ def execute_one(args, record=False):
     output = (
         workspace.root
         / ".mic"
-        / f"{'record' if record else 'check'}.{args.variant}.jsonl"
+        / f"{'record' if record else 'check'}.{'' if framework == 'transformers' else framework + '.'}{args.variant}.jsonl"
     )
     output.unlink(missing_ok=True)
     options += ["--output", str(output)]
@@ -1180,6 +1183,7 @@ def execute_one(args, record=False):
             else []
         )
         evidence = {
+            "framework": framework,
             "variant": args.variant,
             "records": rows,
             "lock_sha256": hashlib.sha256(workspace.lock_path.read_bytes()).hexdigest(),
@@ -1189,11 +1193,15 @@ def execute_one(args, record=False):
             "usage_sha256": hashlib.sha256(
                 (
                     workspace.contract_root
-                    / workspace.manifest["integrations"]["transformers"]["entry_point"]
+                    / workspace.manifest["integrations"][framework]["entry_point"]
                 ).read_bytes()
             ).hexdigest(),
         }
-        key = args.variant
+        key = (
+            args.variant
+            if framework == "transformers"
+            else f"{framework}:{args.variant}"
+        )
         validations = workspace.state.get("validations", {})
         if not args.target and result.returncode == 0 and bool(rows):
             validations[key] = {
@@ -1212,9 +1220,19 @@ def execute_one(args, record=False):
 
 def execute(args, record=False):
     workspace = Workspace(args.workspace)
+    framework = getattr(args, "integration", "transformers")
+    if framework == "all":
+        status = 0
+        for name in workspace.manifest["integrations"]:
+            args.integration = name
+            status = max(status, execute(args, record))
+        args.integration = "all"
+        return status
+    if framework not in workspace.manifest["integrations"]:
+        raise ValueError(f"No {framework} integration in this workspace")
     variants = (
         list(
-            workspace.manifest["integrations"]["transformers"].get(
+            workspace.manifest["integrations"][framework].get(
                 "variants", {"default": {}}
             )
         )
@@ -1230,11 +1248,23 @@ def execute(args, record=False):
 
 def review(args):
     workspace = Workspace(args.workspace)
+    framework = getattr(args, "integration", "transformers")
+    if framework == "all":
+        status = 0
+        for name in workspace.manifest["integrations"]:
+            args.integration = name
+            status = max(status, review(args))
+        args.integration = "all"
+        return status
     options = [
         "--framework",
-        "transformers",
+        framework,
         "--expectations",
-        str(workspace.expectations),
+        str(
+            workspace.contract_root / "integrations" / framework / "expectations"
+            if framework != "transformers"
+            else workspace.expectations
+        ),
         "--manifest",
         str(workspace.contract_root / "integration.json"),
     ]
@@ -1329,6 +1359,10 @@ def replay(args):
 def publication_ready(workspace):
     state = workspace.state
     proof = state.get("validation") or {}
+    if not state.get("validated"):
+        raise ValueError(
+            "Run tmic check on all declared targets after reviewing candidates; source or lock changes invalidate validation"
+        )
     if proof.get("cloud_collection"):
         from .model_baselines import verify
 
@@ -1337,7 +1371,9 @@ def publication_ready(workspace):
         "lock_sha256": workspace.lock_path,
         "manifest_sha256": workspace.contract_root / "integration.json",
         "usage_sha256": workspace.contract_root
-        / workspace.manifest["integrations"]["transformers"]["entry_point"],
+        / workspace.manifest["integrations"][proof.get("framework", "transformers")][
+            "entry_point"
+        ],
     }
     if not state.get("validated") or any(
         proof.get(key) != hashlib.sha256(path.read_bytes()).hexdigest()
@@ -1351,16 +1387,22 @@ def publication_ready(workspace):
             "Unreviewed candidate baselines remain; run tmic review before publishing"
         )
     fingerprint = workspace.validation_fingerprint()
-    variants = workspace.manifest["integrations"]["transformers"].get(
-        "variants", {"default": {}}
-    )
-    if any(
-        state.get("validations", {}).get(v, {}).get("fingerprint") != fingerprint
-        for v in variants
-    ):
-        raise ValueError(
-            "Every declared variant needs a successful check on the current sources and approved expectations; use tmic check --all-variants"
-        )
+    for framework, integration in workspace.manifest["integrations"].items():
+        if list(
+            (
+                workspace.contract_root / "integrations" / framework / "expectations"
+            ).rglob("*.candidate.json")
+        ):
+            raise ValueError(f"Unreviewed {framework} candidate baselines remain")
+        for variant in integration.get("variants", {"default": {}}):
+            key = variant if framework == "transformers" else f"{framework}:{variant}"
+            if (
+                state.get("validations", {}).get(key, {}).get("fingerprint")
+                != fingerprint
+            ):
+                raise ValueError(
+                    "Every declared variant and integration needs a successful check; use tmic check --integration all --all-variants"
+                )
 
 
 def publish(args):
@@ -1478,6 +1520,7 @@ def export(args):
         )
     # Hub-only paths keep the exported lock independent of this workspace.
     clean = upgrade_contract(canonical_references(contract))
+    clean["integrations"] = list(workspace.manifest["integrations"])
     for pin in [clean["integration"], *clean.get("fixtures", {}).values()]:
         pin.pop("path", None)
     old["contracts"][destination_name] = clean

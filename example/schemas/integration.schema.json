@@ -166,6 +166,7 @@
      "training"
     ],
     "properties": {
+     "outputs": {"$ref": "#/properties/outputs"},
      "entry_point": {
       "type": "string"
      },
