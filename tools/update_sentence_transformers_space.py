@@ -54,7 +54,7 @@ def result_run(folder, *, run_id, attempt, conclusion, mode, repository, now=Non
     elif (
         conclusion != "success"
         or counts["error"]
-        or not (counts["pass"] + counts["recorded"])
+        or not counts["recorded" if mode == "record" else "pass"]
     ):
         status = "error"
     elif mode == "record":
