@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- `tmic run` and `tmic create` keep a reviewed `tmic fixture org/model` recipe: the contract pins its
+  revision and adds its `config_overrides`. `tmic run` finds `./<model>-fixture/` by itself;
+  `--fixture-recipe DIR` points elsewhere.
 - `tmic fixture org/model[@revision]` shrinks a Hub checkpoint with no workspace, contract or LLM into
   `./<model>-fixture/` (`--out` to choose): the tiny config and weights, compared with the source. It is
   the first command in `tmic --help`.
@@ -30,6 +33,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- `tmic fixture org/model` says to rerun it after editing `config.json`, not to continue a run.
 - A failed stage's summary no longer reads `Failed: ImportError:` with nothing after it when the
   message starts on the next line (transformers' `requires_backends`).
 - The shrink keeps `word_embed_proj_dim` and `embedding_size` equal to `hidden_size` when the checkpoint has

@@ -306,6 +306,12 @@ No Git commit or framework PR is created automatically.""",
         help="Cloud measurement timeout in seconds",
     )
     run.add_argument("--revision")
+    run.add_argument(
+        "--fixture-recipe",
+        type=Path,
+        help="A reviewed `tmic fixture org/model` folder: the contract keeps its revision and "
+        "config_overrides (default: ./<model>-fixture when it exists)",
+    )
     run.add_argument("--name")
     run.add_argument("--contract")
     run.add_argument("--regenerate", action="store_true")
@@ -340,6 +346,11 @@ No Git commit or framework PR is created automatically.""",
         help="Hub owner for new artifacts (default: huggingface-mic)",
     )
     create.add_argument("--revision")
+    create.add_argument(
+        "--fixture-recipe",
+        type=Path,
+        help="A reviewed `tmic fixture org/model` folder: the contract keeps its revision and config_overrides"
+    )
     create.add_argument(
         "--regenerate",
         action="store_true",

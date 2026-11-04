@@ -322,14 +322,14 @@ def headline(data):
     ]
 
 
-def details(data, page=None):
+def details(data, page=None, again="continue"):
     names = weight_names(data)
     source = f"{data['source']['repo']}@{data['source']['revision'][:12]}"
     p = data.get("parameters") or {}
     lines = [
         f"Tiny model folder: {data['folder']}",
         f"  {', '.join(data['files'])}",
-        "  To change the config, edit config.json there and continue: tmic shrinks again with your values.",
+        f"  To change the config, edit config.json there and {again}: tmic shrinks again with your values.",
         f"Source: {source} · {data['model_class']}",
     ]
     if p.get("original"):
@@ -441,7 +441,7 @@ def show(data, page, args):
             )
         )
     else:
-        print(details(data, page))
+        print(details(data, page, again="rerun tmic fixture"))
     if args.open:
         import webbrowser
 
@@ -507,6 +507,39 @@ def run_source(args):
         data["review_sha256"] = review_sha256(data)
         write(root / RECORD, data)
     return show(data, root / PAGE, args)
+
+
+def standalone_recipe(model, base=None):
+    """The recipe `tmic fixture <model>` left in ./<model>-fixture/, if there is one."""
+    path = Path(base or Path.cwd()) / f"{model.split('/')[-1]}-fixture" / RECIPE
+    return path.resolve() if path.exists() else None
+
+
+def recipe_path(path):
+    """Accept the fixture folder or its .mic/recipe.json."""
+    path = Path(path)
+    return (path / RECIPE if path.is_dir() else path).resolve()
+
+
+def adopt_recipe(workspace, path, model):
+    """Carry a reviewed `tmic fixture <model>` recipe into a new contract's fixture.
+
+    Its config_overrides join the fixture recipe, so the build shrinks with the values
+    the reviewer set. Returns the overridden fields.
+    """
+    recipe = read(recipe_path(path))
+    if recipe["built_from"] != model:
+        raise ValueError(f"{path} is the fixture recipe of {recipe['built_from']}, not {model}")
+    reviewed = recipe["build"].get("config_overrides") or {}
+    manifest = workspace.manifest
+    build = manifest["fixtures"][workspace.fixture].setdefault("build", {"seed": SEED})
+    fields = reviewed.get("fields") or {}
+    if fields:
+        overrides = build.setdefault("config_overrides", {"fields": {}, "reason": reviewed.get("reason", EDIT_REASON)})
+        overrides.setdefault("fields", {}).update(fields)
+        write(workspace.contract_root / "integration.json", manifest)
+        workspace.update_layout()
+    return sorted(fields)
 
 
 def shrink_source(root, recipe_path):

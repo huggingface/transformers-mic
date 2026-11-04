@@ -1,8 +1,16 @@
 # transformers-mic CLI
 
 `transformers-mic` packages the existing MIC runner, fixture builder, replay tools,
-and reviewed catalog. The `tmic` command creates a working directory for a model,
-proposes additional usage paths when needed, and measures expectations there.
+and reviewed catalog. Start with the fixture:
+
+```sh
+tmic fixture org/model --open
+```
+
+shrinks a Hub checkpoint to a tiny config and weights and compares both with the
+source, with no workspace, contract or LLM ([details](#check-the-tiny-model-before-building-it)).
+Then `tmic run org/model` creates a working directory around that fixture, drafts
+the usage path, and measures expectations there.
 It is an alpha implementation: generated plans still need code review and a
 working model-specific build recipe. New projects use one repository,
 `huggingface-mic/<name>-mic`, for fixture weights, the contract, usage and reviewed
@@ -221,8 +229,15 @@ checkpoint in place of `org/model`:
 ```sh
 pip install "transformers-mic[runtime]" "hf-doc-builder @ git+https://github.com/huggingface/doc-builder.git"
 hf auth login
-tmic run org/model --local-only --fixtures-only --no-history --bill-to ''
+tmic fixture org/model --open      # 1. the tiny config + weights, compared with the source
+tmic run org/model --local-only --fixtures-only --no-history --bill-to ''   # 2. the contract
 ```
+
+Step 1 writes `./model-fixture/` and needs no contract or LLM; edit
+`fixture/config.json` there and rerun until the tiny model looks right. Run step 2
+from the same directory: it keeps that fixture's revision and `config_overrides`
+(`tmic: using the reviewed fixture recipe …`). `--fixture-recipe DIR` points at a
+folder elsewhere.
 
 `tmic run` drafts the contract, then asks you two things before it runs anything:
 
@@ -512,11 +527,14 @@ available; `tmic auto` still checks factory mappings for a built fixture.
 
 ## Step by step: one model
 
-**The order is: real checkpoint → contract → fixture.** You never write a fixture
-first. You start from a real checkpoint id. `create` writes the contract (the
-usage code and manifest), and `build` then derives the fixture from that
-checkpoint. `build` needs the contract because it accepts weights only after
-the contract's inputs move the outputs (the sensitivity gate).
+**The order is: real checkpoint → fixture preview → contract → built fixture.**
+You start from a real checkpoint id. `tmic fixture org/model` previews the
+fixture: the shrunk config, tensor names and file format are final there, the
+weights are seeded random values. `create` writes the contract (the usage code
+and manifest), keeping the preview's revision and `config_overrides`
+(`--fixture-recipe`), and `build` then derives the fixture's weights. `build` needs
+the contract because it accepts weights only after the contract's inputs move the
+outputs (the sensitivity gate).
 
 1. **Create the workspace from the real checkpoint.**
 
@@ -699,8 +717,12 @@ With a Hub repo (`org/model[@revision]`, `--out DIR`), `tmic fixture` needs no
 workspace, contract or LLM: it pins the revision, shrinks with a fresh recipe and
 writes `fixture/`, `.mic/fixture-review.html` and `.mic/recipe.json` (source, pin,
 recipe) into the folder. Rerunning reuses the pin; edits to `fixture/config.json`
-become `config_overrides` in `recipe.json`. Without a repo it works on the current
-workspace's fixture, as below.
+become `config_overrides` in `recipe.json`. The weights are seeded random values: the
+build, which needs a contract, is what checks them. `tmic run org/model` (or
+`tmic create --fixture-recipe DIR`) carries the recipe into the contract: it pins the
+same revision and adds the `config_overrides`, so the build shrinks with your values.
+`tmic run` finds `./<model>-fixture/` by itself. Without a repo, `tmic fixture` works
+on the current workspace's fixture, as below.
 
 `tmic fixture` shrinks the config and writes `fixture/` in the workspace without
 running any contract code: `config.json`, the weights in the source checkpoint's
