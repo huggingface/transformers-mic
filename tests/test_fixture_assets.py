@@ -866,6 +866,33 @@ def test_tester_sizes_stay_out_of_the_config_and_fall_back_on_a_failed_build(mon
 
 
 
+def test_a_missing_package_is_reported_not_retried_at_other_sizes(monkeypatch, capsys):
+    # Mistral-Large-4: PixtralProcessor needs torchvision, which no fixture size provides.
+    monkeypatch.setattr(build_fixtures, "TESTER_SIZES", {"src": {"source": "t", "fields": {"hidden_size": 32}}})
+    monkeypatch.setattr(build_fixtures, "TESTER_OFF", {})
+    calls = []
+
+    def build(*args, **kwargs):
+        calls.append(1)
+        raise SystemExit(
+            "the contract fails on the random fixture:\nTraceback (most recent call last):\n"
+            "ImportError: \nPixtralProcessor requires the Torchvision library but it was not found in your environment. "
+            "Check out the instructions on the\ninstallation page: https://pytorch.org/get-started/locally/\n"
+            "Please note that you may need to restart your runtime after installation.\n"
+        )
+
+    monkeypatch.setattr(build_fixtures, "_build_fixture", build)
+    with pytest.raises(SystemExit) as raised:
+        build_fixtures.build_fixture()
+    assert calls == [1]  # no rebuild with the shrink rule's sizes
+    assert str(raised.value).startswith(
+        "ImportError: PixtralProcessor requires the Torchvision library but it was not found in your environment."
+    )
+    assert "Torchvision" in capsys.readouterr().err  # the full text stays in the log
+    assert build_fixtures.missing_package(SystemExit("RuntimeError: expected 256 channels")) is None
+    assert build_fixtures.missing_package(ModuleNotFoundError("No module named 'timm'")) == "No module named 'timm'"
+
+
 def test_shrink_keeps_widths_that_equal_hidden_size_equal():
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
     from sweep import shrink

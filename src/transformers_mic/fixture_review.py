@@ -23,6 +23,8 @@ from .workspace import Workspace, digest, primary_integration, read, write
 FOLDER = "fixture"
 RECORD = ".mic/fixture-review.json"
 PAGE = ".mic/fixture-review.html"
+RECIPE = ".mic/recipe.json"
+SEED = 17  # the catalog fixtures' seed
 # Fields that change with the environment or loader, never with the shrink.
 VOLATILE = {"transformers_version", "_name_or_path", "_commit_hash"}
 EDIT_REASON = "Set by the reviewer in fixture/config.json during tmic fixture review"
@@ -121,7 +123,13 @@ def edits(workspace):
 def apply_edits(workspace, changes):
     """Turn reviewer edits into the recipe's config_overrides; returns the fields set."""
     manifest = workspace.manifest
-    recipe = manifest["fixtures"][workspace.fixture]["build"]
+    merge_edits(manifest["fixtures"][workspace.fixture]["build"], changes)
+    write(workspace.contract_root / "integration.json", manifest)
+    workspace.update_layout()
+    return sorted(changes)
+
+
+def merge_edits(recipe, changes):
     overrides = recipe.setdefault(
         "config_overrides", {"fields": {}, "reason": EDIT_REASON}
     )
@@ -130,9 +138,6 @@ def apply_edits(workspace, changes):
         overrides["reason"] = (
             overrides.get("reason", "").rstrip(". ") + ". " + EDIT_REASON
         ).lstrip(". ")
-    write(workspace.contract_root / "integration.json", manifest)
-    workspace.update_layout()
-    return sorted(changes)
 
 
 def artifact(workspace):
@@ -406,6 +411,8 @@ def summary(data):
 
 
 def run(args):
+    if args.model:
+        return run_source(args)
     workspace = Workspace(args.workspace)
     if not (workspace.manifest["fixtures"].get(workspace.fixture) or {}).get("build"):
         raise ValueError(
@@ -418,7 +425,10 @@ def run(args):
             + ", ".join(apply_edits(workspace, changes))
         )
     data, _ = refresh(workspace, force=args.force)
-    page = Path(workspace.root) / PAGE
+    return show(data, Path(workspace.root) / PAGE, args)
+
+
+def show(data, page, args):
     if args.json:
         print(
             json.dumps(
@@ -437,6 +447,87 @@ def run(args):
 
         webbrowser.open(page.resolve().as_uri())
     return 0
+
+
+class Folder:
+    """A standalone fixture folder: what record(), folder() and edits() read of a workspace."""
+
+    def __init__(self, root):
+        self.root = Path(root)
+
+
+def pin(repo, revision):
+    from huggingface_hub import HfApi
+
+    from .hub import canonical_repo
+
+    return HfApi().model_info(canonical_repo(repo), revision=revision or None).sha
+
+
+def run_source(args):
+    """tmic fixture org/model: shrink a Hub checkpoint with no workspace, contract or LLM.
+
+    <out>/.mic/recipe.json holds the source, its pinned revision and the build
+    recipe; edits to <out>/fixture/config.json become its config_overrides.
+    """
+    repo, _, revision = args.model.partition("@")
+    root = Path(args.out or f"{repo.split('/')[-1]}-fixture").resolve()
+    space = Folder(root)
+    path = root / RECIPE
+    recipe = read(path) if path.exists() else None
+    if recipe and recipe["built_from"] != repo:
+        raise ValueError(
+            f"{root} holds the fixture of {recipe['built_from']}; choose another --out"
+        )
+    if recipe is None or revision:
+        sha = pin(repo, revision)
+        if recipe is None:
+            recipe = {"built_from": repo, "revision": sha, "build": {"seed": SEED}}
+        elif recipe["revision"] != sha:
+            recipe["revision"] = sha
+    changes = edits(space)
+    if changes:
+        merge_edits(recipe["build"], changes)
+        print(
+            "Applying your config.json edits as config_overrides: "
+            + ", ".join(sorted(changes))
+        )
+    (root / ".mic").mkdir(parents=True, exist_ok=True)
+    write(path, recipe)
+    key = digest(recipe)
+    data = record(space)
+    if (
+        args.force
+        or not data
+        or data.get("recipe_key") != key
+        or not (folder(space) / "config.json").exists()
+    ):
+        data = shrink_source(root, path)
+        data.update(recipe_key=key, artifact=None, folder=str(folder(space)))
+        data["review_sha256"] = review_sha256(data)
+        write(root / RECORD, data)
+    return show(data, root / PAGE, args)
+
+
+def shrink_source(root, recipe_path):
+    with tempfile.TemporaryDirectory(prefix="fixture-", dir=root / ".mic") as temp:
+        out = Path(temp) / FOLDER
+        result = Path(temp) / "review.json"
+        process = backend.invoke(
+            "fixture-source",
+            root,
+            [str(recipe_path.resolve()), str(out), str(result)],
+            stdout=sys.stderr,
+        )
+        if process.returncode:
+            raise SystemExit(process.returncode)
+        data = read(result)
+        target = root / FOLDER
+        if target.exists():
+            shutil.rmtree(target)
+        shutil.move(str(out), target)
+    (root / PAGE).write_text(data.pop("page"))
+    return data
 
 
 def snapshot(path):

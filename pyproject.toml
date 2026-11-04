@@ -27,7 +27,7 @@ classifiers = [
 dependencies = ["huggingface-hub>=1.32", "jsonschema>=4.23", "filelock>=3"]
 
 [project.optional-dependencies]
-runtime = ["transformers>=5", "torch>=2.11", "numpy", "pillow", "soundfile", "librosa", "scipy", "safetensors", "sentencepiece", "protobuf", "accelerate"]
+runtime = ["transformers>=5", "torch>=2.11", "torchvision", "numpy", "pillow", "soundfile", "librosa", "scipy", "safetensors", "sentencepiece", "protobuf", "accelerate"]
 dev = ["pytest>=8", "build", "twine", "sentencepiece"]
 sentence-transformers = ["sentence-transformers>=6.2"]
 

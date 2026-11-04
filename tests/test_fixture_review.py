@@ -406,3 +406,64 @@ def test_experts_layout_is_named_for_both_sides():
     )
     line = fixture_review.experts_line(same)
     assert "DIFFERENT" not in line and "2 experts" in line and "4 experts" in line
+
+
+@pytest.fixture
+def source_backend(monkeypatch):
+    """`tmic fixture org/model`: the fixture-source tool, with the revision pinned offline."""
+    calls = []
+
+    def invoke(tool, root, options=(), **kwargs):
+        assert tool == "fixture-source"
+        assert kwargs.get("stdout") is not None
+        recipe_path, out, result = options
+        recipe = read(Path(recipe_path))
+        calls.append(recipe)
+        hidden = recipe["build"].get("config_overrides", {}).get("fields", {}).get("hidden_size", 32)
+        workspace = SimpleNamespace(
+            fixture="mic-bert-base-uncased-slim",
+            manifest={"fixtures": {"mic-bert-base-uncased-slim": {"build": recipe["build"]}}},
+        )
+        data = review_data(workspace, Path(out))
+        assert data["config"]["hidden_size"] == hidden
+        Path(result).write_text(json.dumps(data))
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(backend, "invoke", invoke)
+    monkeypatch.setattr(fixture_review, "pin", lambda repo, revision: (revision or "b") * 40)
+    return calls
+
+
+def test_fixture_takes_a_hub_repo_without_a_workspace_or_contract(tmp_path, source_backend, capsys, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    assert main(["fixture", MODEL, "--json"]) == 0
+    summary = json.loads(capsys.readouterr().out)
+    root = tmp_path / "bert-base-uncased-fixture"
+    assert summary["page"] == str(root / fixture_review.PAGE)
+    assert (root / "fixture/config.json").exists() and (root / "fixture/model.safetensors").exists()
+    assert source_backend == [{"built_from": MODEL, "revision": "b" * 40, "build": {"seed": 17}}]
+    assert not (root / ".mic/project.json").exists()  # no workspace, no contract
+    assert main(["fixture", MODEL]) == 0
+    assert len(source_backend) == 1  # unchanged: reused
+
+
+def test_hub_repo_fixture_edits_become_overrides_and_the_pin_holds(tmp_path, source_backend, capsys):
+    out = tmp_path / "demo"
+    assert main(["fixture", f"{MODEL}@c", "--out", str(out)]) == 0
+    config = json.loads((out / "fixture/config.json").read_text())
+    (out / "fixture/config.json").write_text(json.dumps({**config, "hidden_size": 16}))
+    assert main(["fixture", MODEL, "--out", str(out)]) == 0
+    assert "config_overrides: hidden_size" in capsys.readouterr().out
+    assert source_backend[-1]["revision"] == "c" * 40  # no @rev on rerun keeps the pin
+    assert source_backend[-1]["build"]["config_overrides"]["fields"] == {"hidden_size": 16}
+    assert json.loads((out / "fixture/config.json").read_text())["hidden_size"] == 16
+    assert main(["fixture", "other/model", "--out", str(out)]) == 2  # refuses to mix sources
+
+
+def test_fixture_is_the_first_command_in_help(capsys):
+    with pytest.raises(SystemExit):
+        main(["--help"])
+    out = capsys.readouterr().out
+    assert "tmic fixture org/model" in out
+    commands = out.split("positional arguments:")[1]
+    assert commands.index("fixture") < commands.index("baselines")

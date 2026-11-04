@@ -43,6 +43,17 @@ blocking ([status](docs/evidence.md#transformers-ci-proof)).
 ```sh
 pip install "transformers-mic[runtime]" "hf-doc-builder @ git+https://github.com/huggingface/doc-builder.git"
 hf auth login
+tmic fixture org/model --open
+```
+
+This shrinks `org/model` to a tiny config and weights in `./model-fixture/fixture/`
+and compares both with the real checkpoint: config values that changed, tensor names
+matched against the source, and a layer-by-layer page. It runs no contract code and
+calls no LLM. Edit `fixture/config.json` and rerun to shrink with your values.
+
+Then build the whole contract around it:
+
+```sh
 tmic run org/model --local-only --fixtures-only --no-history --bill-to ''
 ```
 

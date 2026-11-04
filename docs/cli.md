@@ -689,10 +689,18 @@ inventory of past failures, and do not count as regression detection.
 ## Check the tiny model before building it
 
 ```sh
+tmic fixture org/model  # no workspace: shrink a Hub checkpoint into ./model-fixture/
 tmic fixture            # write fixture/ and compare it with the source
 tmic fixture --open     # also open the layer-by-layer comparison page
 tmic fixture --json     # counts and lists, for scripts and agents
 ```
+
+With a Hub repo (`org/model[@revision]`, `--out DIR`), `tmic fixture` needs no
+workspace, contract or LLM: it pins the revision, shrinks with a fresh recipe and
+writes `fixture/`, `.mic/fixture-review.html` and `.mic/recipe.json` (source, pin,
+recipe) into the folder. Rerunning reuses the pin; edits to `fixture/config.json`
+become `config_overrides` in `recipe.json`. Without a repo it works on the current
+workspace's fixture, as below.
 
 `tmic fixture` shrinks the config and writes `fixture/` in the workspace without
 running any contract code: `config.json`, the weights in the source checkpoint's

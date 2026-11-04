@@ -76,6 +76,33 @@ def dispatch(tool, workspace, args):
         write(workspace / ".mic/auto.json", result)
         print(json.dumps(result))
         return 0
+    if tool == "fixture-source":
+        # tmic fixture org/model: the recipe comes from <out>/.mic/recipe.json, not a contract.
+        import json
+
+        builder = importlib.import_module("build_fixtures")
+        recipe_path, out, result = args
+        spec = json.loads(Path(recipe_path).read_text())
+        lock_path = resources.catalog_lock()
+        if lock_path.exists():
+            lock = runner.load(lock_path, "fleet-lock")
+            if lock.get("local_patches"):
+                importlib.import_module("patches").apply(sorted(lock["local_patches"]))
+        import torch
+
+        torch.set_num_threads(2)
+        repo = spec["built_from"]
+        review = builder.review_fixture(
+            f"mic-{repo.split('/')[-1]}-slim",
+            {"built_from": repo, "build": spec["build"]},
+            {repo: spec["revision"]},
+            Path(out),
+            inspect_checkpoint=importlib.import_module(
+                "transformers_mic.inspection"
+            ).inspect_checkpoint,
+        )
+        Path(result).write_text(json.dumps(review, indent=1, default=str) + "\n")
+        return 0
     if tool == "fixture-stage":
         import json
 

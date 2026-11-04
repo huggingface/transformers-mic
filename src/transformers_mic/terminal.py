@@ -217,7 +217,8 @@ def failure(text):
         for line in text.splitlines()
         if line.strip() and not line.startswith("COMMAND ")
     ]
-    for line in reversed(lines):
+    for index in range(len(lines) - 1, -1, -1):
+        line = lines[index]
         if "random weights fail the gate" in line:
             summary = (
                 "Fixture outputs are not sensitive enough to changes in the inputs."
@@ -235,6 +236,9 @@ def failure(text):
                     pass
             return summary
         if re.match(r"(?:[\w.]+(?:Error|Exception)|SystemExit):", line):
+            if line.endswith(":") and index + 1 < len(lines):
+                # transformers' requires_backends() starts its message on the next line.
+                line += " " + " ".join(lines[index + 1 :])
             return textwrap.shorten(line, width=240, placeholder="…")
         if line.startswith("{"):
             try:

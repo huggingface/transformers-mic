@@ -79,3 +79,13 @@ def test_edit_waits_for_enter_when_the_editor_fails(monkeypatch, tmp_path):
     monkeypatch.setattr("builtins.input", waited.append)
     terminal.edit(tmp_path / "config.json")
     assert waited and "press Enter" in waited[0]
+
+
+def test_exception_whose_message_starts_on_the_next_line_is_not_empty():
+    # transformers' requires_backends(): "ImportError: \nPixtralProcessor requires ..."
+    text = (
+        "Traceback (most recent call last):\n  File \"usage.md\", line 12\n"
+        "ImportError: \nPixtralProcessor requires the Torchvision library but it was not found in your environment.\n"
+        "Please note that you may need to restart your runtime after installation.\n"
+    )
+    assert failure(text).startswith("ImportError: PixtralProcessor requires the Torchvision library")

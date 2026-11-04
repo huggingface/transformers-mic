@@ -53,7 +53,10 @@ def parser():
         prog="tmic",
         description="Build, measure and review Transformers model integration contracts.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""Automated modes:
+        epilog="""Start here:
+  tmic fixture org/model    tiny config + weights from a Hub checkpoint, compared with it
+
+Automated modes:
   Human: tmic run org/model --mode human
   Agent: tmic run org/model --mode agent
 
@@ -71,6 +74,39 @@ See 'tmic run --help' for the protocol and exit codes.""",
         help="Project directory (default: current directory)",
     )
     sub = root.add_subparsers(dest="command", required=True)
+    fixture = sub.add_parser(
+        "fixture",
+        help="Start here: shrink a Hub checkpoint to a tiny config + weights and compare them with the source",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description="""Writes fixture/config.json and the weights in the source checkpoint's
+serialized format, then compares both with the source. Runs no contract code.
+
+  tmic fixture org/model               shrink a Hub checkpoint into ./model-fixture/
+  tmic fixture org/model@<rev> --out d  pin a revision, choose the folder
+  tmic fixture                         the fixture of the current tmic workspace
+
+Edit fixture/config.json and rerun to shrink again with your values (they
+become the recipe's config_overrides).""",
+    )
+    fixture.add_argument(
+        "model",
+        nargs="?",
+        help="Hub repo[@revision] to shrink without a contract (default: the workspace's fixture)",
+    )
+    fixture.add_argument(
+        "--out",
+        type=Path,
+        help="With a Hub repo: output folder (default: ./<model>-fixture)",
+    )
+    fixture.add_argument(
+        "--force", action="store_true", help="Shrink again even if nothing changed"
+    )
+    fixture.add_argument(
+        "--json", action="store_true", help="Print a machine-readable summary"
+    )
+    fixture.add_argument(
+        "--open", action="store_true", help="Open the layer-by-layer comparison page"
+    )
     baselines = sub.add_parser(
         "baselines",
         help="Generate a complete baseline collection on the dashboard's ARC runners",
@@ -337,22 +373,6 @@ No Git commit or framework PR is created automatically.""",
     )
     research.add_argument("--model-type")
     history_options(research)
-    fixture = sub.add_parser(
-        "fixture",
-        help="Write the tiny model (shrunk config + weights) to <workspace>/fixture for review; runs no contract code",
-        description="Writes fixture/config.json and the weights in the source checkpoint's "
-        "serialized format, then compares both with the source. Edit fixture/config.json "
-        "and rerun to shrink again with your values (they become the recipe's config_overrides).",
-    )
-    fixture.add_argument(
-        "--force", action="store_true", help="Shrink again even if nothing changed"
-    )
-    fixture.add_argument(
-        "--json", action="store_true", help="Print a machine-readable summary"
-    )
-    fixture.add_argument(
-        "--open", action="store_true", help="Open the layer-by-layer comparison page"
-    )
     build = sub.add_parser(
         "build", help="Reuse or build a fixture using measured weight-selection gates"
     )
