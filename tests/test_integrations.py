@@ -139,6 +139,7 @@ def test_fleet_optional_metadata_keeps_legacy_tables_unchanged():
     assert fleet.from_tables(tables) == LOCK
 
 
+@pytest.mark.requires_runtime
 def test_runner_uses_only_selected_outputs_and_checks_numeric_shape(
     workspace, monkeypatch
 ):

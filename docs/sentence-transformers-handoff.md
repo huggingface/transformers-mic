@@ -2,6 +2,12 @@
 
 ## Current status
 
+Update: the artifacts from run 41797350961 were inspected and published to the Space.
+It now shows the real Linux candidate recording, including model pin and Actions link.
+Automatic publication exists in the nightly but requires main, as enforced by the
+existing mic-publish environment. Main rollout and an end-to-end automatic update
+are in progress. Historical handoff details below describe the earlier stopping point.
+
 The first Linux nightly **completed successfully**:
 https://github.com/huggingface/transformers-mic/actions/runs/41797350961
 

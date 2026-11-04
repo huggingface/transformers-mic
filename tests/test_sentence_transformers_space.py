@@ -31,6 +31,7 @@ def test_no_results_and_incomplete_runs_are_errors(tmp_path):
 
 
 def test_recording_is_not_a_passing_check(tmp_path):
+    assert report(tmp_path, [{"status": "recorded"}], mode="check")["status"] == "error"
     assert (
         report(tmp_path, [{"status": "recorded"}], mode="record")["status"]
         == "recorded"
