@@ -60,6 +60,7 @@ import inspect
 import json
 import os
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -395,6 +396,25 @@ def checkpoint_conversions(model, keys):
     return [t for t in mapping if t.was_used()]
 
 
+def in_fixture(missing, names):
+    """The real checkpoint's missing parameters that the shrunk fixture has.
+
+    A shrunk fixture keeps fewer layers: the real checkpoint's missing names in
+    the layers it dropped (A.X-K1's e_score_correction_bias in layers 2-60) are
+    left out, as long as the same name is missing in a layer the fixture keeps.
+    Any other absent name means the fixture cannot mirror the checkpoint.
+    """
+    def pattern(name):
+        return re.sub(r"\.\d+(?=\.)", ".*", name)
+
+    kept = [name for name in missing if name in names]
+    patterns = {pattern(name) for name in kept}
+    absent = [name for name in missing if name not in names and pattern(name) not in patterns]
+    if absent:
+        raise SystemExit(f"cannot mirror the real checkpoint: the fixture has no tensor named {absent}")
+    return kept
+
+
 def save(model, out, source, missing, recipe=None, checkpoint=None):
     """Write the fixture: new config and weights without the parameters the real
     checkpoint lacks, every processor file copied unchanged.
@@ -411,9 +431,7 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
         if file.is_file() and file.name != "README.md":
             file.unlink()
     state = model.state_dict()
-    absent = [name for name in missing if name not in state]
-    if absent:
-        raise SystemExit(f"cannot mirror the real checkpoint: the fixture has no tensor named {absent}")
+    missing = in_fixture(missing, state)
     if checkpoint:
         model._weight_conversions = checkpoint_conversions(model, checkpoint["keys"])
     # A tied alias (BERT-style cls.predictions.decoder.bias) is never serialized.
@@ -919,7 +937,7 @@ def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out,
         weights = "overfit"
         save(model, out, source, lacks, recipe, checkpoint)
     mirrored = missing_parameters(cls, out)
-    if mirrored != lacks:
+    if mirrored != in_fixture(lacks, model.state_dict()):
         raise SystemExit(f"{name}: fixture lacks {mirrored}, the real checkpoint lacks {lacks}")
     report_phase("Check float32, bfloat16 and float16 numeric health")
     health = numeric_health(cls, out, batch, captured)
