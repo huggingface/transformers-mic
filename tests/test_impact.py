@@ -317,10 +317,13 @@ def test_overview_has_the_headline_numbers_and_next_targets(tmp_path):
     assert o["caught"]["real_checkpoint"] == 1 and o["missed"] == {"real_checkpoint": 1, "not_covered": 1, "awaiting_verdict": 1}
     assert o["false_alarms"] == {"prs_with_failure": 4, "prs_not_their_fault": 1}
     assert o["block_merges"]["ready"] is False and any("days observed" in u for u in o["block_merges"]["unmet"])
-    assert len(o["next"]) == impact.NEXT_TARGETS
-    assert o["next"][0] == {"model": "m0", "checkpoint": "o/m0", "regressions": 3, "real_checkpoint": 1, "draft": "success",
+    assert len(o["next"]) == 7  # every suggestion, up to NEXT_TARGETS
+    assert o["next"][0] == {"model": "m0", "checkpoint": "o/m0", "regressions": 3, "real_checkpoint": 1, "other": 2,
+                            "shrinkable": True, "next_batch": False, "draft": "success",
                             "run": "https://github.com/x/runs/9", "shrink": "shrink/9/shrink-m0.html"}
     assert o["next"][1]["draft"] == "" and o["next"][1]["shrink"] == ""
+    # The next daily run drafts the top DRAFTS_PER_DAY suggestions without a draft.
+    assert [t["model"] for t in o["next"] if t["next_batch"]] == ["m1", "m2"]
 
 
 def test_shrink_pages_are_fetched_once_per_finished_draft(monkeypatch, tmp_path):
@@ -372,3 +375,12 @@ def test_a_model_that_got_a_contract_is_no_longer_suggested():
                           "tests": ["tests/models/flint/test_modeling_flint.py::FlintIntegrationTest::test_x"]}}
     assert [s["model"] for s in impact.build_suggestions(gpu_ci, {}, {})["new"]] == ["flint"]
     assert impact.build_suggestions(gpu_ci, {}, {}, {"flint"})["new"] == []
+
+
+def test_a_refresh_drops_suggestions_the_fleet_now_covers(tmp_path, monkeypatch):
+    results = results_dir(tmp_path)
+    write(results / "suggestions.json", {"new": [{"model": "flex_olmo"}, {"model": "vaultgemma"}], "extend": {"x": []}})
+    monkeypatch.setattr(impact, "fixture_model_types", lambda results, download: {"o/vaultgemma-1b-mic": "vaultgemma"})
+    assert impact.drop_covered(results, None) == 1
+    s = json.loads((results / "suggestions.json").read_text())
+    assert s == {"new": [{"model": "flex_olmo"}], "extend": {"x": []}}
