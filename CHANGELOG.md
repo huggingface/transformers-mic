@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- The default planner model is `deepseek-ai/DeepSeek-V4-Pro-0813` (was `deepseek-ai/DeepSeek-V4.1-Flash-1017`):
+  as many drafts build, more are accepted, and fewer planner calls are made.
+- The `runtime` extra installs `sacremoses`, which the FSMT and XLM tokenizers need.
+
 ### Added
 
 - `tmic run` and `tmic create` keep a reviewed `tmic fixture org/model` recipe: the contract pins its

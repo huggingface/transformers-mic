@@ -10,12 +10,16 @@ from huggingface_hub import InferenceClient
 from huggingface_hub.errors import HfHubHTTPError
 import jsonschema
 
-DEFAULT_MODEL = "deepseek-ai/DeepSeek-V4.1-Flash-1017"
+# planner-eval, 16 models x 3 (2026-11-05): V4-Pro builds as often as V4.1-Flash
+# (26/48 vs 27/48) with far more drafts accepted (45 vs 33), so fewer calls: on
+# together, which bills $0.01 a call, $0.70 against $1.10 per run.
+DEFAULT_MODEL = "deepseek-ai/DeepSeek-V4-Pro-0813"
 DEFAULT_PROVIDER = "together"
 # Planner drafts need no reasoning. Without these, a reasoning model can spend the
 # whole max_tokens budget thinking and return no content.
 NO_THINKING = {
     DEFAULT_MODEL: {"chat_template_kwargs": {"thinking": False}},
+    "deepseek-ai/DeepSeek-V4.1-Flash-1017": {"chat_template_kwargs": {"thinking": False}},
     "Qwen/Qwen3.8-27B": {"reasoning_effort": "low"},
 }
 # Requests name the paying organization explicitly; the Hub has no org default.
