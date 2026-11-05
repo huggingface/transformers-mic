@@ -88,6 +88,17 @@ for name, param in model.named_parameters():
     last = 'model.requires_grad_(False)\nlast = f"model.layers.{model.config.num_hidden_layers - 1}."\n'
     commands.check_trainable_selection({"usage": last}, {"tie_word_embeddings": True})
     commands.check_trainable_selection({"usage": 'name.startswith("model.layers.23.")'}, {})  # nothing frozen
+    # Run 42019643731: every layer's experts trained, CUDA out of memory on the real checkpoint.
+    every = """model.requires_grad_(False)
+for name, param in model.named_parameters():
+    if name.endswith("mlp.input_linear.weight"):
+        param.requires_grad_(True)
+"""
+    with pytest.raises(ValueError, match="every layer"):
+        commands.check_trainable_selection({"usage": every}, {}, 8.5e9)
+    commands.check_trainable_selection({"usage": every}, {}, 1e9)  # a full step fits
+    head = every.replace("mlp.input_linear.weight", "lm_head.weight")
+    commands.check_trainable_selection({"usage": head}, {}, 8.5e9)
 
 
 def test_legacy_fixture_can_only_be_reused():
