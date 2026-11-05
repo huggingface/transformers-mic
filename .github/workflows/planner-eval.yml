@@ -41,7 +41,18 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       cases: ${{ steps.cases.outputs.cases }}
+      since: ${{ steps.billing.outputs.since }}
+      billing: ${{ steps.billing.outputs.billing }}
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - id: billing
+        # Spend so far, so the report can subtract it: the run's actual cost.
+        env:
+          HF_TOKEN: ${{ secrets.HF_HUB_READ_TOKEN }}
+        run: |
+          since=$(( $(date +%s) - 86400 ))
+          echo "since=$since" >> "$GITHUB_OUTPUT"
+          echo "billing=$(python3 .github/scripts/billing_usage.py --since $since)" >> "$GITHUB_OUTPUT"
       - id: cases
         env:
           MODELS: ${{ inputs.models }}
@@ -113,6 +124,7 @@ jobs:
               stages = json.load(open("work/eval/.mic/automation.json")).get("stages", {})
           code = lambda s: stages.get(s, {}).get("exit_code")
           example = re.findall(r"planner example: (.*)", create)
+          calls = json.load(open("work/eval/.mic/planner-calls.json")) if os.path.exists("work/eval/.mic/planner-calls.json") else []
           failure = [l for l in (build or shrink or create).splitlines() if re.match(r"(\w+Error|tmic: |the contract fails)", l)]
           row = {
               "model": os.environ["MODEL"], "repeat": int(os.environ["REPEAT"]),
@@ -121,6 +133,14 @@ jobs:
               "example": example[-1] if example else None,
               "failure": failure[-1][:300] if failure and code("build") != 0 else None,
               "seconds": int(os.environ["SECONDS_TAKEN"]),
+              "llm": calls[0]["model"] if calls else None,
+              "provider": calls[0]["provider"] if calls else None,
+              "calls": len(calls),
+              "prompt_tokens": sum(c["prompt_tokens"] for c in calls),
+              "completion_tokens": sum(c["completion_tokens"] for c in calls),
+              "reasoning_tokens": sum(c.get("reasoning_tokens", 0) for c in calls),
+              "llm_seconds": round(sum(c["seconds"] for c in calls), 1),
+              "listed_usd": round(sum(c.get("listed_usd", 0) for c in calls), 4) if all("listed_usd" in c for c in calls) else None,
           }
           print(json.dumps(row, indent=1))
           json.dump(row, open("row.json", "w"))
@@ -137,15 +157,20 @@ jobs:
           retention-days: 14
 
   report:
-    needs: draft
+    needs: [matrix, draft]
     if: always()
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: eval-*
           path: rows
       - name: Pass rates
+        env:
+          HF_TOKEN: ${{ secrets.HF_HUB_READ_TOKEN }}
+          SINCE: ${{ needs.matrix.outputs.since }}
+          BILLING_BEFORE: ${{ needs.matrix.outputs.billing }}
         run: |
           python3 - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
           import glob, json, collections
@@ -162,6 +187,36 @@ jobs:
                     f"| {sum(r['rejected_drafts'] for r in rs) / n:.1f} | {'; '.join(sorted(examples))[:120]} |")
           total = len(rows)
           print(f"\n**build pass@1: {sum(r['build_ok'] for r in rows)}/{total}**\n")
+          # Cost: tokens per model, and what the account was actually billed for the run.
+          calls = sum(r.get("calls", 0) for r in rows)
+          print("| model | planner calls / run | prompt tokens / run | completion tokens / run | listed $ / run | LLM s / run |")
+          print("|---|---|---|---|---|---|")
+          for model, rs in sorted(by.items()):
+              n = len(rs)
+              listed = [r.get("listed_usd") for r in rs]
+              cost = f"{sum(listed) / n:.4f}" if all(x is not None for x in listed) else "not listed"
+              print(f"| {model} | {sum(r.get('calls', 0) for r in rs) / n:.1f} | {sum(r.get('prompt_tokens', 0) for r in rs) / n:,.0f} "
+                    f"| {sum(r.get('completion_tokens', 0) for r in rs) / n:,.0f} | {cost} | {sum(r.get('llm_seconds', 0) for r in rs) / n:.0f} |")
+          import os, subprocess, time
+          before = json.loads(os.environ.get("BILLING_BEFORE") or "{}")
+          billed = {}
+          for _ in range(20):  # usage lags the calls by a minute or two
+              after = json.loads(subprocess.run(["python3", ".github/scripts/billing_usage.py", "--since", os.environ["SINCE"]], capture_output=True, text=True).stdout or "{}")
+              if "error" in after or "error" in before:
+                  billed = {"error": after.get("error") or before.get("error")}
+                  break
+              billed = {p: {k: after[p][k] - before.get(p, {}).get(k, 0) for k in ("requests", "usd")} for p in after}
+              if sum(v["requests"] for v in billed.values()) >= calls:
+                  break
+              time.sleep(30)
+          if "error" in billed:
+              print(f"\nBilled cost unavailable: {billed['error']}")
+          else:
+              usd = sum(v["usd"] for v in billed.values())
+              print(f"\n**Billed for this run: ${usd:.2f}** for {sum(v['requests'] for v in billed.values())} requests "
+                    f"({calls} planner calls; other use of the account counts too): "
+                    + ", ".join(f"{p} ${v['usd']:.2f} / {v['requests']}" for p, v in billed.items() if v["requests"]))
+              json.dump(billed, open("billed.json", "w"), indent=1)
           for r in sorted(rows, key=lambda r: (r["model"], r["repeat"])):
               if r["failure"]:
                   print(f"- {r['model']} #{r['repeat']}: `{r['failure'][:200]}`")
@@ -170,4 +225,6 @@ jobs:
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: planner-eval
-          path: eval.json
+          path: |
+            eval.json
+            billed.json

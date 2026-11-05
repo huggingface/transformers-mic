@@ -1852,3 +1852,17 @@ def test_encoder_decoder_calls_need_decoder_inputs():
     # RT-DETR is an encoder-decoder over pixel_values that builds its own queries.
     commands.check_encoder_decoder_calls({"usage": usage}, {"is_encoder_decoder": True, "architectures": ["RTDetrForObjectDetection"]})
 
+
+
+def test_planner_records_every_call_with_its_listed_price(monkeypatch):
+    monkeypatch.setattr(planner, "CALLS", [])
+    monkeypatch.setattr(planner, "_prices", {("m", "p"): (0.3, 1.2)})
+    usage = SimpleNamespace(prompt_tokens=10_000, completion_tokens=2_000,
+                            prompt_tokens_details=SimpleNamespace(cached_tokens=4_000),
+                            completion_tokens_details=SimpleNamespace(reasoning_tokens=0))
+    planner.record_call(SimpleNamespace(usage=usage), "m", "p", 3.21)
+    planner.record_call(SimpleNamespace(usage=usage), "m", "unlisted", 1.0)
+    first, second = planner.CALLS
+    assert first == {"model": "m", "provider": "p", "prompt_tokens": 10_000, "cached_tokens": 4_000,
+                     "completion_tokens": 2_000, "reasoning_tokens": 0, "seconds": 3.2, "listed_usd": 0.0054}
+    assert "listed_usd" not in second

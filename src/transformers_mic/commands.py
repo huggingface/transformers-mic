@@ -1041,7 +1041,12 @@ def create(args):
         if nearest:
             context["example_plan"], context["example_reason"] = nearest
             print(f"tmic: planner example: {context['example_reason']}", file=sys.stderr)
-        plan, llm = propose_valid(context, args, args.model, fixture)
+        try:
+            plan, llm = propose_valid(context, args, args.model, fixture)
+        finally:
+            # Token use of every planner call, for comparing models' cost (planner-eval).
+            (workspace.root / ".mic").mkdir(parents=True, exist_ok=True)
+            write(workspace.root / ".mic/planner-calls.json", planner.CALLS)
         manifest = plan["manifest"]
         if args.name:
             if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]*", args.name):
