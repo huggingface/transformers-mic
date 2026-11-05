@@ -241,3 +241,33 @@ def test_overwriting_clears_every_old_expectations_folder(monkeypatch):
         "integrations/transformers/expectations"
     ]
     assert deleted == ["integrations/transformers/expectations"]
+
+
+def cloud_log(root, platform, *cases):
+    log = root / f"artifacts/{platform}/logs/prototypes-X-bfloat16-record.log"
+    log.parent.mkdir(parents=True, exist_ok=True)
+    log.write_text("\n".join([*map(json.dumps, cases), json.dumps({"summary": {}})]) + "\n")
+
+
+def test_only_a_checkpoint_failure_falls_back_to_the_fixtures(tmp_path):
+    # jetmoe-8b, run 42019643731: the fixture recorded, the checkpoint ran out of GPU memory.
+    oom = {"target": "jetmoe-8b", "kind": "checkpoint", "status": "error", "failures": ["CUDA out of memory"]}
+    cloud_log(tmp_path / "a", "cpu", RECORDED, NO_GPU)
+    cloud_log(tmp_path / "a", "cuda", RECORDED, oom)
+    assert auto_mic.checkpoint_only_failure(tmp_path / "a")
+    cloud_log(tmp_path / "b", "cuda", FAILED, oom)  # the fixture failed too
+    assert not auto_mic.checkpoint_only_failure(tmp_path / "b")
+    cloud_log(tmp_path / "c", "cuda", oom)  # nothing recorded for the fixture
+    assert not auto_mic.checkpoint_only_failure(tmp_path / "c")
+    cloud_log(tmp_path / "d", "cuda", RECORDED, NO_GPU)  # nothing failed
+    assert not auto_mic.checkpoint_only_failure(tmp_path / "d")
+
+
+def test_fixtures_only_keeps_the_rest_of_the_manifest(tmp_path):
+    (tmp_path / "integration.json").write_text(json.dumps(
+        {"checkpoints": {"o/m": {}}, "integrations": {"transformers": {"targets": ["fixtures", "checkpoints"], "variants": {"default": {}}}}}
+    ))
+    auto_mic.fixtures_only(SimpleNamespace(contract_root=tmp_path))
+    manifest = json.loads((tmp_path / "integration.json").read_text())
+    assert manifest["integrations"]["transformers"] == {"targets": ["fixtures"], "variants": {"default": {}}}
+    assert manifest["checkpoints"] == {"o/m": {}}
