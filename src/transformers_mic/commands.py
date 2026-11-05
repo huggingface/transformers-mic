@@ -320,12 +320,15 @@ def check_partial_training(plan, context):
         )
 
 
-def check_trainable_selection(plan, config):
-    """A frozen model's trainable subset, chosen by parameter name, must exist in the slim fixture too.
+def check_trainable_selection(plan, config, parameters=None):
+    """A frozen model's trainable subset, chosen by parameter name, must exist in the slim fixture too,
+    and stay small on the real checkpoint.
 
-    jetmoe/jetmoe-8b's draft (2026-11-05) trained names starting with "model.layers.23." or
-    "lm_head.": the fixture keeps about 2 layers, and a tied lm_head is listed by
-    named_parameters() once, as the input embeddings, so the optimizer got an empty parameter list.
+    jetmoe/jetmoe-8b's drafts (2026-11-05): names starting with "model.layers.23." or "lm_head."
+    trained nothing (the fixture keeps about 2 layers, and a tied lm_head is listed by
+    named_parameters() once, as the input embeddings: empty optimizer parameter list); then
+    name.endswith("mlp.input_linear.weight") trained that weight in all 24 layers, about 4B
+    parameters, and the backward ran out of the 22 GB GPU while the 2-layer fixture passed.
     """
     if "requires_grad_(False)" not in plan["usage"]:
         return
@@ -345,6 +348,15 @@ def check_trainable_selection(plan, config):
             "named_parameters() lists the tied weight once, as the input embeddings, so the name matches "
             "nothing; train the last decoder layer instead"
         )
+    if (parameters or 0) > 3e9:
+        for suffix in re.findall(r"\.endswith\(\s*[\"']([^\"'\n]+)[\"']", plan["usage"]):
+            if not suffix.startswith(("lm_head", "model.", "embed", "score", "classifier")):
+                raise ValueError(
+                    f"trainable parameters are chosen by name.endswith({suffix!r}), which matches that "
+                    "parameter in every layer: on the real checkpoint the gradients do not fit the 22 GB GPU, "
+                    "though the 2-layer fixture passes; train the last layer only, e.g. "
+                    "model.model.layers[-1].requires_grad_(True)"
+                )
 
 
 def check_undefined_names(plan):
@@ -859,7 +871,7 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
                 check_label_arguments(plan, context["config"])
                 check_parameter_names(plan, context["config"])
                 check_encoder_decoder_calls(plan, context["config"])
-                check_trainable_selection(plan, context["config"])
+                check_trainable_selection(plan, context["config"], loaded_parameters(context))
             check_partial_training(plan, context)
             return plan, llm
         except (ValueError, jsonschema.ValidationError) as exc:
