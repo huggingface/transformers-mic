@@ -4695,7 +4695,7 @@
   "kimi_k25": {
    "config_model_type": "kimi_k25",
    "finite": true,
-   "forward_seconds": 0.004892416996881366,
+   "forward_seconds": 0.015533083002083004,
    "head": "MODEL_FOR_IMAGE_TEXT_TO_TEXT_MAPPING_NAMES",
    "inputs": [
     "attention_mask",
@@ -4704,7 +4704,7 @@
    "layers": null,
    "main_input": "input_ids",
    "model_type": "kimi_k25",
-   "parameters": 21499392,
+   "parameters": 21497216,
    "repo": "moonshotai/Kimi-K2.6",
    "revision": "7eb5002f6aadc958aed6a9177b7ed26bb94011bb",
    "stage": "ok",
