@@ -86,6 +86,14 @@ def main():
             continue
         count += len(selected)
         lock["contracts"] = selected
+        # These projects are tested at freshly resolved upstream mains, never
+        # against the dependency versions recorded in a fleet baseline environment.
+        lock["environment"] = {
+            package: version
+            for package, version in lock.get("environment", {}).items()
+            if package.lower().replace("_", "-")
+            not in {"transformers", "sentence-transformers"}
+        }
         # Transformers known failures do not apply to this integration.
         lock.pop("known_failures", None)
         lock.pop("local_patches", None)

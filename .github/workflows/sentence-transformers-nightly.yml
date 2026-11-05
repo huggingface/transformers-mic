@@ -13,11 +13,6 @@ on:
         description: Immutable preview MIC commit SHA (requires model_repo)
         type: string
         default: ''
-      dependency:
-        description: Sentence Transformers source
-        type: choice
-        options: [main, release]
-        default: main
       mode:
         description: Check reviewed baselines or record candidates for review
         type: choice
@@ -39,7 +34,6 @@ jobs:
     timeout-minutes: 60
     env:
       HF_TOKEN: ${{ secrets.HF_HUB_READ_TOKEN }}
-      DEPENDENCY: ${{ inputs.dependency || 'main' }}
       MODE: ${{ inputs.mode || 'check' }}
       MODEL_REPO: ${{ inputs.model_repo }}
       MODEL_REVISION: ${{ inputs.model_revision }}
@@ -63,15 +57,9 @@ jobs:
         run: |
           # torch comes from the pinned image: the baselines are recorded against it.
           python -m pip install -e '.[runtime]' \
-            'transformers @ git+https://github.com/huggingface/transformers.git@main' \
             'hf-doc-builder @ git+https://github.com/huggingface/doc-builder.git@main'
-          if [ "$DEPENDENCY" = main ]; then
-            python -m pip install 'sentence-transformers @ git+https://github.com/huggingface/sentence-transformers.git@main'
-          else
-            python -m pip install --upgrade sentence-transformers
-          fi
-          mkdir -p out/sentence-transformers
-          python -m pip freeze > out/sentence-transformers/pip-freeze.txt
+      - name: Install and verify latest upstream mains
+        run: python .github/scripts/install_sentence_transformers_main.py
       - name: Check selected MICs
         run: python .github/scripts/sentence_transformers_nightly.py --mode "$MODE" --model-repo "$MODEL_REPO" --model-revision "$MODEL_REVISION"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

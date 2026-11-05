@@ -290,6 +290,12 @@ def test_nightly_selects_st_fleet_and_advertised_contracts(tmp_path, monkeypatch
                         "org/st-a-mic", "transformers", integrations.NAME
                     ),
                 },
+                "environment": {
+                    "transformers": "old",
+                    "sentence-transformers": "old",
+                    "sentence_transformers": "old",
+                    "torch": "2.14.0",
+                },
                 "known_failures": {"Selected/fixture": "TF failure"},
                 "local_patches": {"old-patch": {}},
             },
@@ -314,6 +320,12 @@ def test_nightly_selects_st_fleet_and_advertised_contracts(tmp_path, monkeypatch
     def invoke(tool, cwd, options):
         lock = json.loads(Path(options[options.index("--lock") + 1]).read_text())
         assert "known_failures" not in lock and "local_patches" not in lock
+        assert (
+            not {"transformers", "sentence-transformers", "sentence_transformers"}
+            & lock["environment"].keys()
+        )
+        if "Selected" in lock["contracts"]:
+            assert lock["environment"]["torch"] == "2.14.0"
         assert options[options.index("--framework") + 1] == integrations.NAME
         calls.append(options[options.index("--contract") + 1])
         return SimpleNamespace(returncode=1)
