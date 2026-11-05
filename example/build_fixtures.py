@@ -87,7 +87,7 @@ import run  # noqa: E402
 from perturb import logits_of, sensitivity  # noqa: E402
 from sweep import shrink  # noqa: E402
 
-WEIGHTS = (".safetensors", ".bin", ".pt", ".pth", ".msgpack", ".h5", ".ot", ".onnx", ".tflite", ".ckpt", ".gguf", ".npz", ".pdparams", ".pkl")
+WEIGHTS = (".safetensors", ".bin", ".pt", ".pth", ".msgpack", ".h5", ".ot", ".onnx", ".tflite", ".ckpt", ".gguf", ".npz", ".pdparams", ".pkl", ".nemo")  # .nemo: NVIDIA NeMo archives beside the HF weights (Parakeet)
 # Processor files are a few MB; anything this large is weights in a format WEIGHTS
 # misses (gemma-2b ships a 9.5 GB .gguf, pegasus-xsum a 2.3 GB .pkl, which inflated the fixture and every
 # CUDA baseline artifact carrying it).
@@ -401,14 +401,16 @@ def in_fixture(missing, names):
 
     A shrunk fixture keeps fewer layers: the real checkpoint's missing names in
     the layers it dropped (A.X-K1's e_score_correction_bias in layers 2-60) are
-    left out, as long as the same name is missing in a layer the fixture keeps.
-    Any other absent name means the fixture cannot mirror the checkpoint.
+    left out, as long as the same name is missing in a layer the fixture keeps, or
+    the fixture holds that tensor in its kept layers (Kimi K2.5's vision tower lacks
+    layer 2's fc2, which the two kept layers have). Any other absent name means the
+    fixture cannot mirror the checkpoint.
     """
     def pattern(name):
         return re.sub(r"\.\d+(?=\.)", ".*", name)
 
     kept = [name for name in missing if name in names]
-    patterns = {pattern(name) for name in kept}
+    patterns = {pattern(name) for name in kept} | {pattern(name) for name in names}
     absent = [name for name in missing if name not in names and pattern(name) not in patterns]
     if absent:
         raise SystemExit(f"cannot mirror the real checkpoint: the fixture has no tensor named {absent}")

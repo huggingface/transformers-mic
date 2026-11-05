@@ -938,6 +938,12 @@ def test_missing_parameters_in_dropped_layers_are_left_out():
     assert build_fixtures.in_fixture(missing, names) == ["model.layers.1.mlp.gate.e_score_correction_bias"]
 
 
+def test_a_tensor_missing_only_in_a_dropped_layer_is_left_out():
+    # Kimi K2.5: the real vision tower lacks layer 2's fc2; the fixture keeps layers 0 and 1, which have it.
+    names = {"model.vision_tower.layers.0.mlp.fc2.weight", "model.vision_tower.layers.1.mlp.fc2.weight"}
+    assert build_fixtures.in_fixture(["model.vision_tower.layers.2.mlp.fc2.weight"], names) == []
+
+
 def test_a_missing_parameter_the_fixture_cannot_mirror_still_fails():
     names = {"model.layers.0.mlp.gate.weight"}
     with pytest.raises(SystemExit, match="cannot mirror"):
