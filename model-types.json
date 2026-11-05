@@ -125,6 +125,7 @@
  "huggingface-mic/grounding-dino-tiny-mic": "grounding-dino",
  "huggingface-mic/hubert-large-ls960-ft-mic": "hubert",
  "huggingface-mic/internvl-mic": "internvl",
+ "huggingface-mic/jetmoe-8b-mic": "jetmoe",
  "huggingface-mic/jina-embeddings-v3-hf-mic": "jina_embeddings_v3",
  "huggingface-mic/language-perceiver-mic": "perceiver",
  "huggingface-mic/layoutlm-base-uncased-mic": "layoutlm",

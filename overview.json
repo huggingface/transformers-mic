@@ -87,18 +87,6 @@
    "shrinkable": true
   },
   {
-   "checkpoint": "jetmoe/jetmoe-8b",
-   "draft": "failure",
-   "model": "jetmoe",
-   "next_batch": false,
-   "other": 1,
-   "real_checkpoint": 0,
-   "regressions": 1,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42018880790",
-   "shrink": "",
-   "shrinkable": true
-  },
-  {
    "checkpoint": "meta-models/Muse-Spark-Open-816B-A42B",
    "draft": "failure",
    "model": "muse_spark",
@@ -318,6 +306,18 @@
    "checkpoint": "facebook/w2v-bert-2.0",
    "draft": "not draftable",
    "model": "wav2vec2_bert",
+   "next_batch": false,
+   "other": 3,
+   "real_checkpoint": 0,
+   "regressions": 3,
+   "run": "",
+   "shrink": "",
+   "shrinkable": false
+  },
+  {
+   "checkpoint": "facebook/xmod-base",
+   "draft": "not draftable",
+   "model": "xmod",
    "next_batch": false,
    "other": 3,
    "real_checkpoint": 0,

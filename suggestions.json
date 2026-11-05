@@ -347,17 +347,6 @@
    ]
   },
   {
-   "checkpoint": "jetmoe/jetmoe-8b",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "jetmoe",
-   "other": 1,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/jetmoe/test_modeling_jetmoe.py::JetMoeModelTest::test_flash_attn_2_equivalence"
-   ]
-  },
-  {
    "checkpoint": "meta-models/Muse-Spark-Open-816B-A42B",
    "checkpoint_source": "failing test",
    "integration": 0,
