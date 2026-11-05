@@ -305,7 +305,7 @@ Models with real-checkpoint regressions in the daily GPU CI and no contract, shr
 | cosmos3_edge | 0 | 1 | [nvidia/Cosmos3-Edge](https://huggingface.co/nvidia/Cosmos3-Edge) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41964667193) |
 | fsmt | 0 | 1 | [facebook/wmt19-en-ru](https://huggingface.co/facebook/wmt19-en-ru) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41999677156) |
 | jetmoe | 0 | 1 | [jetmoe/jetmoe-8b](https://huggingface.co/jetmoe/jetmoe-8b) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/42018880790) |
-| muse_spark | 0 | 1 | [meta-models/Muse-Spark-Open-816B-A42B](https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B) | yes | [in_progress](https://github.com/huggingface/transformers-mic/actions/runs/42019121893) |
+| muse_spark | 0 | 1 | [meta-models/Muse-Spark-Open-816B-A42B](https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/42019121893) |
 | mvp | 0 | 1 | [RUCAIBox/mvp](https://huggingface.co/RUCAIBox/mvp) | yes | — |
 | nemotron | 0 | 1 | [thhaus/nemotron3-8b](https://huggingface.co/thhaus/nemotron3-8b) | yes | — |
 | pegasus_x | 0 | 1 | [google/pegasus-x-base](https://huggingface.co/google/pegasus-x-base) | yes | — |

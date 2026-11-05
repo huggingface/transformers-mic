@@ -100,7 +100,7 @@
   },
   {
    "checkpoint": "meta-models/Muse-Spark-Open-816B-A42B",
-   "draft": "in_progress",
+   "draft": "failure",
    "model": "muse_spark",
    "next_batch": false,
    "other": 1,
