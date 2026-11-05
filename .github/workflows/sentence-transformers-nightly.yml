@@ -29,7 +29,13 @@ permissions:
 
 jobs:
   fixtures:
-    runs-on: ubuntu-latest
+    # The pool Transformers' contract checks use: native bfloat16 (AMX) on every
+    # host, so bfloat16 contracts always meet their cpu-x86_64-bf16 baselines.
+    # ubuntu-latest alternated between CPUs with and without it.
+    runs-on:
+      group: ${{ vars.MIC_CPU_BASELINE_RUNNER || 'aws-m8i-l-cache' }}
+    container:
+      image: ${{ vars.MIC_CPU_BASELINE_IMAGE || 'huggingface/transformers-torch-light' }}
     timeout-minutes: 60
     env:
       HF_TOKEN: ${{ secrets.HF_HUB_READ_TOKEN }}
@@ -39,19 +45,24 @@ jobs:
       MODEL_REVISION: ${{ inputs.model_revision }}
       OMP_NUM_THREADS: "2"
       MKL_NUM_THREADS: "2"
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
-        with:
-          python-version: "3.11"
+      - name: Native bfloat16 host
+        run: |
+          grep -m1 '^model name' /proc/cpuinfo
+          python --version
+          grep -qwE 'amx_bf16|avx512_bf16' /proc/cpuinfo || { echo "::error::wrong hardware: no native bfloat16 on this host"; exit 1; }
       - name: Start result collection
         run: |
           mkdir -p out/sentence-transformers
           date -u +%Y-%m-%dT%H:%M:%SZ > out/sentence-transformers/started-at.txt
       - name: Install
         run: |
-          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
-          python -m pip install -e '.[runtime]' torchvision \
+          # torch comes from the pinned image: the baselines are recorded against it.
+          python -m pip install -e '.[runtime]' \
             'transformers @ git+https://github.com/huggingface/transformers.git@main' \
             'hf-doc-builder @ git+https://github.com/huggingface/doc-builder.git@main'
           if [ "$DEPENDENCY" = main ]; then
