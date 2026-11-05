@@ -826,7 +826,7 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
                 # The planner wrote the model-specific code; the template writes the rest.
                 try:
                     plan = usage_template.expand(reply, model, fixture, bool(context.get("fixtures_only")))
-                except (KeyError, TypeError, AttributeError) as exc:
+                except (KeyError, TypeError, AttributeError, SyntaxError) as exc:
                     raise ValueError(f"slots: {type(exc).__name__}: {exc}") from None
             if isinstance(plan.get("name"), str):  # "Qwen3.5-0.8B" is a slug away from valid
                 plan["name"] = re.sub(r"[^A-Za-z0-9_-]", "-", plan["name"])

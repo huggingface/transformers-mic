@@ -95,6 +95,10 @@ def _mode(training):
     return optimizer if optimizer in OPTIMIZERS else "trainable" if "requires_grad" in optimizer else "all"
 
 
+def _is_expression(text):
+    return bool(re.search(r"[()\[\] ]", text)) and not re.fullmatch(r"[\w.]+", text)
+
+
 def _record(slots):
     training = slots.get("training")
     lines = [f"{RUNNER}{HIDE}"]
@@ -103,7 +107,8 @@ def _record(slots):
     if isinstance(checked, str):
         checked_line = f"    checked = {checked}"
     elif checked:
-        names = ", ".join(json.dumps(n) for n in checked)
+        # A suffix lookup in the list is code, not a parameter name.
+        names = ", ".join(n if _is_expression(n) else json.dumps(n) for n in checked)
         checked_line = f"    checked = ({names}{',' if len(checked) == 1 else ''})"
     else:  # the training code already defines checked (LFM2)
         checked_line = None
@@ -163,6 +168,25 @@ def _load(model_class, load_kwargs, variant):
     return f"model = {model_class}.from_pretrained({args}).to(device)"
 
 
+def _split_setup(setup):
+    """(before the load, after it): setup statements that read `model` need it loaded.
+
+    A draft put model.config reads in setup, which runs before the load (Mistral-Large-4).
+    """
+    setup = setup.strip("\n")
+    if not setup or not re.search(r"\bmodel\b", setup):
+        return setup, ""
+    try:
+        body = ast.parse(setup).body
+    except SyntaxError:
+        return setup, ""
+    uses = [any(isinstance(n, ast.Name) and n.id == "model" for n in ast.walk(s)) for s in body]
+    if not any(uses):
+        return setup, ""
+    first = uses.index(True)
+    return _join(setup, body[:first]), _join(setup, body[first:])
+
+
 def render(slots, checkpoint):
     """usage.md for the slots, with `checkpoint` as the documented model_id."""
     block, model_class = slots["block"], slots["model_class"]
@@ -178,8 +202,9 @@ def render(slots, checkpoint):
         SEED,
         "",
     ]
-    if slots.get("setup"):
-        first.append(slots["setup"].strip("\n"))
+    setup, after_load = _split_setup(slots.get("setup") or "")
+    if setup:
+        first.append(setup)
     first += [
         _load(model_class, slots.get("load_kwargs"), False),
         # Free the default model first: a real checkpoint does not fit the GPU twice.
@@ -187,11 +212,12 @@ def render(slots, checkpoint):
         f"    del model{HIDE}",
         "    " + _load(model_class, slots.get("load_kwargs"), True) + HIDE,
         "",
+        *([after_load, ""] if after_load else []),
         slots["inference"].strip("\n"),
     ]
     blocks = [[slots.get("heading") or "Run the model", slots.get("text", ""), "\n".join(first)]]
     for section in slots.get("sections") or []:
-        blocks.append([section["heading"], section.get("text", ""), section["code"].strip("\n")])
+        blocks.append([section.get("heading") or "Continue", section.get("text", ""), section["code"].strip("\n")])
     training = slots.get("training")
     if training:
         blocks.append(["One training step", training.get("text", ""), _training(training)])
@@ -462,7 +488,7 @@ SLOTS_SCHEMA = {
             "type": "array",
             "items": {
                 "type": "object",
-                "required": ["heading", "code"],
+                "required": ["code"],
                 "properties": {"heading": {"type": "string"}, "text": {"type": "string"}, "code": {"type": "string"}},
             },
         },
@@ -505,6 +531,20 @@ def partial_manifest(manifest, fixture):
     return partial
 
 
+def _build(build):
+    """Fixture build fields, with a one-letter key slip renamed (config_override)."""
+    import difflib
+
+    from .commands import manifest_schema
+
+    known = manifest_schema()["properties"]["fixtures"]["additionalProperties"]["properties"]["build"]["properties"]
+    fixed = {}
+    for key, value in build.items() if isinstance(build, dict) else ():
+        match = difflib.get_close_matches(key, list(known), n=1, cutoff=0.9)
+        fixed[key if key in known or not match else match[0]] = value
+    return fixed
+
+
 def assemble(partial, slots, model, fixture, fixtures_only=False):
     """The full MIC manifest from a slots reply's partial manifest."""
     rules = {"runtime": {"compare": "exact"}}
@@ -533,7 +573,7 @@ def assemble(partial, slots, model, fixture, fixtures_only=False):
         "name": partial.get("name") or slots["title"],
         "usage": partial.get("usage") or slots["title"],
         "checkpoints": {model: {"fixture": fixture}},
-        "fixtures": {fixture: {"built_from": model, "covers": [model], "build": {"seed": 17, **(partial.get("build") or {})}}},
+        "fixtures": {fixture: {"built_from": model, "covers": [model], "build": {"seed": 17, **_build(partial.get("build") or {})}}},
         "integrations": {"transformers": integration},
         "outputs": rules,
     }
@@ -567,6 +607,15 @@ def expand(reply, model, fixture, fixtures_only=False):
     # The record's runtime and training entries are the template's.
     reserved = ("runtime", "training", "loss", "gradients", "updated")
     outputs = {k: v for k, v in slots["outputs"].items() if k not in reserved and not k.startswith("training.")}
+    for name, expression in outputs.items():
+        # Each value lands inside the result dict: a statement there breaks the page (FlexOlmo).
+        try:
+            ast.parse(expression, mode="eval")
+        except SyntaxError:
+            raise ValueError(
+                f"slots.outputs[{name!r}] must be one Python expression, not a statement: "
+                f"{expression[:120]!r}; compute it in inference or record_setup"
+            ) from None
     slots = {"name": reply.get("name"), **slots, "outputs": outputs}
     if reply.get("manifest", {}).get("outputs"):
         reply = {**reply, "manifest": {**reply["manifest"], "outputs": {

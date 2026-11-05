@@ -654,13 +654,18 @@ def test_planner_logs_the_last_rejected_draft(monkeypatch, capsys):
 
 
 def test_parse_reports_a_missing_top_level_key_as_not_a_draft():
-    response = SimpleNamespace(
-        choices=[SimpleNamespace(message=SimpleNamespace(content=json.dumps(
-            {"name": "M", "manifest": {}, "usage": "x" * 100, "historical_candidates": []})), finish_reason="stop")],
-        usage=None,
-    )
-    with pytest.raises(planner.MalformedDraft, match="rationale"):
-        planner.parse(response, "m", "p", None)
+    def response(draft):
+        return SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(content=json.dumps(draft)), finish_reason="stop")],
+            usage=None,
+        )
+
+    # Neither a usage page nor slots: not a draft.
+    with pytest.raises(planner.MalformedDraft):
+        planner.parse(response({"name": "M", "manifest": {}, "historical_candidates": []}), "m", "p", None)
+    # A missing rationale is free text, not a reason to lose a draft.
+    plan, _ = planner.parse(response({"name": "M", "manifest": {}, "usage": "x" * 100, "historical_candidates": []}), "m", "p", None)
+    assert plan["rationale"] == ""
 
 
 def test_compare_rule_spelling_slips_are_normalized():

@@ -130,3 +130,29 @@ def test_a_runaway_nested_reply_is_not_a_draft():
     response = SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content="[" * 100000), finish_reason="length")], usage=None)
     with pytest.raises(planner.MalformedDraft, match="nests too deeply"):
         planner.parse(response, "m", "p", None)
+
+
+def test_slot_slips_from_planner_eval():
+    import copy
+
+    folder = next(f for f in CATALOG if f.name == "T5-integration")
+    manifest = json.loads((folder / "integration.json").read_text())
+    usage = (folder / "integrations/transformers/usage.md").read_text()
+    model = next(iter(manifest["checkpoints"]))
+    fixture = manifest["checkpoints"][model]["fixture"]
+    reply = usage_template.as_slots({"name": "T5", "manifest": manifest, "usage": usage, "rationale": "", "historical_candidates": []}, fixture)
+    # A suffix lookup inside the checked list is code (plbart, FlexOlmo).
+    lookup = 'next(n for n in names if n.endswith("SelfAttention.q.weight"))'
+    reply["slots"]["checked"] = [lookup, "lm_head.weight"]
+    # Setup that reads the model runs after the load (Mistral-Large-4).
+    reply["slots"]["setup"] += "\nvocab = model.config.vocab_size"
+    reply["manifest"]["build"] = {"config_override": {"d_model": 64}}
+    page = usage_template.expand(reply, model, fixture)
+    assert f'checked = ({lookup}, "lm_head.weight")' in page["usage"]
+    assert page["usage"].index("vocab = model.config") > page["usage"].index("model = AutoModelForSeq2SeqLM.from_pretrained(model_id)")
+    assert page["manifest"]["fixtures"][fixture]["build"]["config_overrides"] == {"d_model": 64}
+    # A statement in an output value is a draft error, not a crash.
+    broken = copy.deepcopy(reply)
+    broken["slots"]["outputs"]["logits"] = "x = 1"
+    with pytest.raises(ValueError, match="one Python expression"):
+        usage_template.expand(broken, model, fixture)

@@ -130,6 +130,9 @@ def parse(response, model, provider, bill_to):
     if isinstance(plan, dict) and isinstance(plan.get("name"), str):
         # "Kimi-K2.5" is a slug away from valid: never spend a retry on it.
         plan["name"] = re.sub(r"[^A-Za-z0-9_-]", "-", plan["name"])
+    if isinstance(plan, dict) and "manifest" in plan:
+        # Free text: a draft without its rationale is still a draft (whisper-tiny).
+        plan.setdefault("rationale", "")
     if isinstance(plan, dict) and "historical_candidates" not in plan:
         # DeepSeek wrote historical_issues for Mistral-Large-4: a key slip, not a draft error.
         slips = [k for k in plan if k.startswith("historical") and isinstance(plan[k], list)]
