@@ -902,7 +902,7 @@ def draft_lines(suggestions, drafts):
 
 REPLAYS_PER_RUN = 40  # regressions replayed per run; the rest wait for the next one
 REGRESSION_ROWS = 100  # newest regressions on the overview; the full report lists them all
-REPLAY_VERSION = 4  # bump when a rule below changes: every verdict is recomputed
+REPLAY_VERSION = 5  # bump when a rule below changes: every verdict is recomputed
 # Failures that say the replay could not measure anything: the fixture or its baselines, not the code.
 SETUP_ERRORS = (
     "no reviewed baseline", "no golden baseline", "fixture files differ", "wrong hardware", "not measured",
@@ -1093,7 +1093,9 @@ def replay_verdicts(records, replays, run_url=""):
             continue
         red = {side: [r for r in rs if r["status"] in RED] for side, rs in by_side.items()}
         if all(r["status"] == "absent" for r in by_side["parent"]):
-            entry["model_added"] = True
+            # No contract can exist before its model: PR CI would have run the one the PR added, not today's.
+            replays[key] = {**entry, "verdict": "model-added", "reason": "the bad commit added the model"}
+            continue
         if red["parent"] and red["bad"]:
             verdict = "already-red"
         elif red["parent"]:
@@ -1155,6 +1157,7 @@ REPLAY_VERDICTS = (
     ("already-red", "red on both: says nothing about this regression"),
     ("no-code-change", "the daily CI tested the same commit the day before: nothing for a contract to catch"),
     ("not-reproduced", "a failing run the daily CI did not repeat: transient, not a regression"),
+    ("model-added", "the bad commit added the model: no contract could have run before it"),
     ("duplicate", "the same regression as a bisected one, counted there"),
     ("broken", "the replay could not measure it (commit, install, fixture or baseline setup)"),
     ("out-of-scope", "no failing *IntegrationTest a CPU fixture contract mirrors: GPU-only, or a feature contracts do not call (export, offloading, parallelism, processors)"),
@@ -1200,8 +1203,6 @@ def replay_detail(replay):
     notes = []
     if replay.get("commits", 0) and replay["commits"] > 1:
         notes.append(f"{replay['commits']} commits in range")
-    if replay.get("model_added"):
-        notes.append("model added")
     if replay.get("reversed"):
         notes.append("red before, green after")
     return "; ".join(notes + (replay.get("failures") or [replay.get("reason", "")]))
