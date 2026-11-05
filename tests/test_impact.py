@@ -605,3 +605,13 @@ def test_a_culprit_that_does_not_touch_the_model_is_unrelated():
     plan = impact.replay_plan({"1#llama": regression(pr="1", bad_commit="c" * 40)}, {}, CONTRACTS, {}.get, failing_on=fails,
                               files_of=lambda sha: ["src/transformers/masking_utils.py"])
     assert {p["key"] for p in plan} == {"1#llama"}
+
+
+def test_a_class_without_checkpoints_falls_back_to_the_integration_tests():
+    text = (
+        "class MoshiDecoderTest:\n    pass\n"
+        'class MoshiIntegrationTests:\n    a = "kmhf/hf-moshika"\n    b = "kmhf/hf-moshika"\n    c = "kmhf/hf-moshiko"\n'
+    )
+    files = {"tests/models/moshi/test_modeling_moshi.py": text}
+    found = impact.test_checkpoints(["tests/models/moshi/test_modeling_moshi.py::MoshiDecoderTest::test_x"], files)
+    assert found == ["kmhf/hf-moshika", "kmhf/hf-moshiko"]
