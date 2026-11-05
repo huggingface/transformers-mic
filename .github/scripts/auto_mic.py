@@ -10,6 +10,8 @@
 
 Automatic publication is for new contracts only: a model already in a fleet, or a Hub repo that
 already has content, needs the reviewed update flow. Changed baselines are never approved here.
+When only the real checkpoint fails in the cloud (jetmoe-8b ran out of the 22 GB GPU in its
+training step) and every fixture case recorded, the contract is published for its fixtures only.
 Each phase writes <phase>-result.json, uploaded as an artifact.
 """
 
@@ -53,6 +55,49 @@ def hardware_gap_only(log):
     others = [r for r in cases if r["status"] != "recorded"]
     return bool(recorded) and all(
         r["status"] == "unsupported" and r.get("skip") in HARDWARE_SKIPS for r in others
+    )
+
+
+def checkpoint_only_failure(collection):
+    """True when a cloud collection failed only on real checkpoints, and some fixture case recorded."""
+    cases = [
+        r
+        for log in sorted(Path(collection).glob("artifacts/*/logs/*-record.log"))
+        for r in records(log)
+        if "status" in r and "summary" not in r
+    ]
+    failed = [r for r in cases if r["status"] not in ("recorded", "unsupported")]
+    return (
+        bool(failed)
+        and all(r.get("kind") == "checkpoint" for r in failed)
+        and any(r.get("kind") == "fixture" and r["status"] == "recorded" for r in cases)
+    )
+
+
+def fixtures_only(workspace):
+    """Declare the fixtures as the contract's only target, as tmic create --fixtures-only does."""
+    from transformers_mic.workspace import read, write
+
+    path = workspace.contract_root / "integration.json"
+    manifest = read(path)
+    manifest["integrations"]["transformers"]["targets"] = ["fixtures"]
+    write(path, manifest)
+
+
+def measure(args, collection):
+    tmic(
+        "baselines",
+        "run",
+        "--model-workspace",
+        args.workspace,
+        "--fleet",
+        "prototypes",
+        "--out",
+        collection,
+        "--transport",
+        "github",
+        "--transformers-ref",
+        args.transformers_ref,
     )
 
 
@@ -232,20 +277,16 @@ def publish(args):
         shutil.move(
             str(workspace.expectations), workspace.root / ".mic/draft-expectations"
         )
-    tmic(
-        "baselines",
-        "run",
-        "--model-workspace",
-        args.workspace,
-        "--fleet",
-        "prototypes",
-        "--out",
-        args.collection,
-        "--transport",
-        "github",
-        "--transformers-ref",
-        args.transformers_ref,
-    )
+    collection, scope = args.collection, "all"
+    try:
+        measure(args, collection)
+    except subprocess.CalledProcessError:
+        if not checkpoint_only_failure(collection):
+            raise
+        print("auto_mic: only the real checkpoint failed; publishing for the fixtures only", file=sys.stderr)
+        fixtures_only(workspace)
+        collection, scope = f"{args.collection}-fixtures", "fixtures"
+        measure(args, collection)
     tmic("--workspace", args.workspace, "review", "--approve")  # NEW and unchanged only
     tmic(
         "baselines",
@@ -253,7 +294,7 @@ def publish(args):
         "--model-workspace",
         args.workspace,
         "--out",
-        args.collection,
+        collection,
     )
     # Again: the collection can take hours.
     overwrite = require_new(workspace, args.contract_name, args.overwrite_unexported)
@@ -266,7 +307,7 @@ def publish(args):
         "--model-workspace",
         args.workspace,
         "--out",
-        args.collection,
+        collection,
     )
     workspace = Workspace(args.workspace)  # publish rewrote the lock
     revision = export_new(workspace, args.contract_name)
@@ -276,6 +317,7 @@ def publish(args):
         "repo": workspace.fixture,
         "revision": pin["revision"],
         "fleet_revision": revision,
+        "scope": scope,
     }
 
 
