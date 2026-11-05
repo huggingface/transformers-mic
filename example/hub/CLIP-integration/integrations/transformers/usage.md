@@ -5,6 +5,7 @@ This page is the Transformers contract of the CLIP MIC and also a usage example.
 ## Match images to captions
 
 ```py runnable:clip
+import numpy as np
 import torch
 from PIL import Image
 from transformers import CLIPModel, CLIPProcessor, set_seed
@@ -23,7 +24,15 @@ if variant:  # doc-builder: hide
     model = CLIPModel.from_pretrained(model_id, **variant).to(device)
 
 colors = {"red": (255, 0, 0), "green": (0, 255, 0), "blue": (0, 0, 255), "yellow": (255, 255, 0)}
-images = [Image.new("RGB", (256, 256), rgb) for rgb in colors.values()]
+def textured_image(height, width, colour, seed):
+    # The base colour plus a gradient and seeded noise: every patch differs, so patch order, crops and resizing all change the pixels.
+    rng = np.random.default_rng(seed)
+    y, x = np.mgrid[0:height, 0:width]
+    ramp = (48 * (x / width + y / height) - 48)[..., None]
+    pixels = np.asarray(colour, dtype=np.float64) + ramp + rng.normal(0, 24, (height, width, 3))
+    return Image.fromarray(np.clip(pixels, 0, 255).astype(np.uint8))
+
+images = [textured_image(256, 256, rgb, seed) for seed, rgb in enumerate(colors.values())]
 captions = [f"a photo of a {name} square" for name in colors]
 inputs = processor(text=captions, images=images, return_tensors="pt", padding=True).to(device, model.dtype)  # floating-point inputs follow the model's dtype
 
