@@ -16,8 +16,8 @@
  },
  "drafts_per_day": 2,
  "false_alarms": {
-  "prs_not_their_fault": 100,
-  "prs_with_failure": 120
+  "prs_not_their_fault": 101,
+  "prs_with_failure": 121
  },
  "missed": {
   "awaiting_verdict": 16,
@@ -27,33 +27,21 @@
  "next": [
   {
    "checkpoint": "vidore/colpali-v1.2-hf",
-   "draft": "queued",
+   "draft": "failure",
    "model": "colpali",
    "next_batch": false,
    "other": 3,
    "real_checkpoint": 0,
    "regressions": 3,
-   "run": "",
-   "shrink": "",
-   "shrinkable": true
-  },
-  {
-   "checkpoint": "shanearora/Flex-reddit-2x7B-1T",
-   "draft": "queued",
-   "model": "flex_olmo",
-   "next_batch": false,
-   "other": 2,
-   "real_checkpoint": 0,
-   "regressions": 2,
-   "run": "",
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41994158679",
    "shrink": "",
    "shrinkable": true
   },
   {
    "checkpoint": "kmhf/hf-moshika",
-   "draft": "",
+   "draft": "queued",
    "model": "moshi",
-   "next_batch": true,
+   "next_batch": false,
    "other": 2,
    "real_checkpoint": 0,
    "regressions": 2,
@@ -87,9 +75,9 @@
   },
   {
    "checkpoint": "facebook/wmt19-en-ru",
-   "draft": "",
+   "draft": "queued",
    "model": "fsmt",
-   "next_batch": true,
+   "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -101,7 +89,7 @@
    "checkpoint": "jetmoe/jetmoe-8b",
    "draft": "",
    "model": "jetmoe",
-   "next_batch": false,
+   "next_batch": true,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -113,7 +101,7 @@
    "checkpoint": "meta-models/Muse-Spark-Open-816B-A42B",
    "draft": "",
    "model": "muse_spark",
-   "next_batch": false,
+   "next_batch": true,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -321,6 +309,18 @@
    "other": 0,
    "real_checkpoint": 1,
    "regressions": 1,
+   "run": "",
+   "shrink": "",
+   "shrinkable": false
+  },
+  {
+   "checkpoint": "facebook/w2v-bert-2.0",
+   "draft": "not draftable",
+   "model": "wav2vec2_bert",
+   "next_batch": false,
+   "other": 3,
+   "real_checkpoint": 0,
+   "regressions": 3,
    "run": "",
    "shrink": "",
    "shrinkable": false

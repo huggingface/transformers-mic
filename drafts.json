@@ -35,9 +35,11 @@
  },
  "colpali": {
   "checkpoint": "vidore/colpali-v1.2-hf",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-05T08:24:02Z",
-  "status": "queued"
+  "run_id": 41994158679,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41994158679"
  },
  "cosmos3_edge": {
   "checkpoint": "nvidia/Cosmos3-Edge",
@@ -58,9 +60,11 @@
  },
  "flex_olmo": {
   "checkpoint": "shanearora/Flex-reddit-2x7B-1T",
-  "conclusion": null,
+  "conclusion": "success",
   "dispatched_at": "2026-11-05T08:24:02Z",
-  "status": "queued"
+  "run_id": 41994161784,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41994161784"
  },
  "flint": {
   "checkpoint": "RecursiveSI/flint",
@@ -70,6 +74,12 @@
   "shrink": "shrink/41615947562/shrink-flint-mic.html",
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/41615947562"
+ },
+ "fsmt": {
+  "checkpoint": "facebook/wmt19-en-ru",
+  "conclusion": null,
+  "dispatched_at": "2026-11-05T09:06:37Z",
+  "status": "queued"
  },
  "kolibri1": {
   "checkpoint": "Aleph-Alpha/Kolibri-1",
@@ -90,12 +100,10 @@
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/41615951103"
  },
  "moshi": {
-  "checkpoint": "kmhf/hf-moshiko",
-  "conclusion": "failure",
-  "dispatched_at": "2026-11-04T09:03:50Z",
-  "run_id": 41804365384,
-  "status": "completed",
-  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41804365384"
+  "checkpoint": "kmhf/hf-moshika",
+  "conclusion": null,
+  "dispatched_at": "2026-11-05T09:06:37Z",
+  "status": "queued"
  },
  "poolformer": {
   "checkpoint": "sail/poolformer_s12",

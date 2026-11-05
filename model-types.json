@@ -10,6 +10,7 @@
  "huggingface-mic/ESMC-300M-hf-mic": "esmc",
  "huggingface-mic/EuroBERT-210m-mic": "eurobert",
  "huggingface-mic/Falcon-H1-Tiny-90M-Instruct-mic": "falcon_h1",
+ "huggingface-mic/Flex-reddit-2x7B-1T-mic": "flex_olmo",
  "huggingface-mic/Florence-2-base-mic": "florence2",
  "huggingface-mic/GLM-4-9B-0414-mic": "glm4",
  "huggingface-mic/GLM-4.5-Air-mic": "glm4_moe",

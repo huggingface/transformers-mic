@@ -295,22 +295,10 @@
    "shrinkable": true,
    "tests": [
     "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_flex_attention_with_grads",
-    "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_flash_attn_2_inference_equivalence",
-    "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_flash_attn_2_inference_equivalence_right_padding",
     "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_cpu_offload",
-    "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_disk_offload_bin"
-   ]
-  },
-  {
-   "checkpoint": "shanearora/Flex-reddit-2x7B-1T",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "flex_olmo",
-   "other": 2,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/flex_olmo/test_modeling_flex_olmo.py::FlexOlmoModelTest::test_flash_attn_2_equivalence",
-    "tests/models/flex_olmo/test_modeling_flex_olmo.py::FlexOlmoModelTest::test_sdpa_padding_matches_padding_free_with_position_ids"
+    "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_disk_offload_bin",
+    "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_disk_offload_safetensors",
+    "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_flash_attn_2_inference_equivalence"
    ]
   },
   {

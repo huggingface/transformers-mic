@@ -220,8 +220,8 @@ Proposed bar for rule B (constants `DECISION` in `experiments/impact.py`):
 
 ## 2. False alarms
 
-- PR failure groups: 1128 — infra 138 (12%), pre-existing 314 (28%), systemic (same case on ≥3 PRs that day) 11 (1%), PR-only 665 (59%).
-- PRs that saw a MIC failure: 120; of those, only failures they did not cause: **100 (83%)**.
+- PR failure groups: 1132 — infra 138 (12%), pre-existing 318 (28%), systemic (same case on ≥3 PRs that day) 11 (1%), PR-only 665 (59%).
+- PRs that saw a MIC failure: 121; of those, only failures they did not cause: **101 (83%)**.
 - PR-only cases that recovered with no push (flaky/environment): 0; merged and main stayed green for 3 days: 0; labelled `false-alarm`/`flake`: 0.
 
 ## 3. Baseline review work
@@ -232,7 +232,7 @@ Re-baselined = baselines changed with the same fixture weights (the review work 
 |---|---|---|---|---|---|---|
 | 2026-W43 | 21 | 0 | 0 | 0 | 0 | 150 |
 | 2026-W44 | 343 | 163 | 36 | 17 | 380 | 1592 |
-| 2026-W45 | 63 | 5 | 27 | 26 | 444 | 66 |
+| 2026-W45 | 64 | 6 | 27 | 26 | 444 | 72 |
 
 Latest re-baselines (model commit title):
 
@@ -299,12 +299,11 @@ Models with real-checkpoint regressions in the daily GPU CI and no contract, shr
 
 | model | real-ckpt regressions | other | checkpoint | shrinkable | draft |
 |---|---|---|---|---|---|
-| colpali | 0 | 3 | [vidore/colpali-v1.2-hf](https://huggingface.co/vidore/colpali-v1.2-hf) | yes | queued |
-| flex_olmo | 0 | 2 | [shanearora/Flex-reddit-2x7B-1T](https://huggingface.co/shanearora/Flex-reddit-2x7B-1T) | yes | queued |
-| moshi | 0 | 2 | [kmhf/hf-moshika](https://huggingface.co/kmhf/hf-moshika) | yes | — |
+| colpali | 0 | 3 | [vidore/colpali-v1.2-hf](https://huggingface.co/vidore/colpali-v1.2-hf) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41994158679) |
+| moshi | 0 | 2 | [kmhf/hf-moshika](https://huggingface.co/kmhf/hf-moshika) | yes | queued |
 | bridgetower | 0 | 1 | [regisss/bridgetower-newyorker-a100-8x](https://huggingface.co/regisss/bridgetower-newyorker-a100-8x) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41626675456) |
 | cosmos3_edge | 0 | 1 | [nvidia/Cosmos3-Edge](https://huggingface.co/nvidia/Cosmos3-Edge) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41964667193) |
-| fsmt | 0 | 1 | [facebook/wmt19-en-ru](https://huggingface.co/facebook/wmt19-en-ru) | yes | — |
+| fsmt | 0 | 1 | [facebook/wmt19-en-ru](https://huggingface.co/facebook/wmt19-en-ru) | yes | queued |
 | jetmoe | 0 | 1 | [jetmoe/jetmoe-8b](https://huggingface.co/jetmoe/jetmoe-8b) | yes | — |
 | muse_spark | 0 | 1 | [meta-models/Muse-Spark-Open-816B-A42B](https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B) | yes | — |
 | mvp | 0 | 1 | [RUCAIBox/mvp](https://huggingface.co/RUCAIBox/mvp) | yes | — |
@@ -324,6 +323,7 @@ Models with real-checkpoint regressions in the daily GPU CI and no contract, shr
 | granite_speech5 | 1 | 0 | [ibm-granite/granite-speech-5.0-470m-turboctc](https://huggingface.co/ibm-granite/granite-speech-5.0-470m-turboctc) | no | not draftable |
 | granite_speech_plus | 1 | 0 | [ibm-granite/granite-speech-4.1-2b-plus](https://huggingface.co/ibm-granite/granite-speech-4.1-2b-plus) | no | not draftable |
 | oneformer | 1 | 0 | [shi-labs/oneformer_ade20k_swin_tiny](https://huggingface.co/shi-labs/oneformer_ade20k_swin_tiny) | no | not draftable |
+| wav2vec2_bert | 0 | 3 | [facebook/w2v-bert-2.0](https://huggingface.co/facebook/w2v-bert-2.0) | no | not draftable |
 
 ### Calls to add to existing contracts
 
