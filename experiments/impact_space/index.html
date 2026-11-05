@@ -34,15 +34,15 @@
   .tile .label { font-size: 13px; color: var(--muted); }
   .tile .value { font-size: 32px; font-weight: 600; line-height: 1.2; margin: 2px 0; font-variant-numeric: tabular-nums; }
   .tile .note { font-size: 13px; color: var(--muted); }
-  .decision { margin-top: 20px; padding: 10px 14px; border-left: 3px solid var(--border); }
-  .decision strong.no { color: var(--bad); }
-  .decision strong.yes { color: var(--good); }
+  .verdict-caught { color: var(--good); font-weight: 600; }
+  .verdict-missed { color: var(--bad); font-weight: 600; }
   .table-wrap { overflow-x: auto; }
   table { border-collapse: collapse; width: 100%; font-size: 14px; }
   th, td { border-bottom: 1px solid var(--border); padding: 7px 8px; text-align: left; white-space: nowrap; }
   th { color: var(--muted); font-weight: 600; font-size: 13px; }
   td.num { text-align: right; font-variant-numeric: tabular-nums; }
-  #next td:nth-child(2) { white-space: normal; overflow-wrap: anywhere; }
+  #next td:nth-child(2), #regressions td:last-child { white-space: normal; overflow-wrap: anywhere; }
+  #regressions td:last-child { min-width: 240px; font-size: 13px; color: var(--muted); }
   tr.next-batch td { background: var(--tile); font-weight: 600; }
   footer { margin-top: 28px; }
   #error { color: var(--bad); }
@@ -60,9 +60,9 @@
       <div class="note" id="caught-note"></div>
     </div>
     <div class="tile">
-      <div class="label">Missed</div>
-      <div class="value" id="missed">–</div>
-      <div class="note" id="missed-note"></div>
+      <div class="label">Not covered</div>
+      <div class="value" id="uncovered">–</div>
+      <div class="note" id="uncovered-note"></div>
     </div>
     <div class="tile">
       <div class="label">False alarms</div>
@@ -71,7 +71,14 @@
     </div>
   </div>
 
-  <div class="decision" id="decision"></div>
+  <h2>GPU CI regressions, replayed</h2>
+  <p class="muted">Each regression of Transformers' daily GPU CI (bisected to a commit, or a sticky failure's first day) on a model with a contract: the model's fixture contracts run on the commit before and on the commit that broke it. <b>caught</b>: green before, red after · <b>missed</b>: green on both · <b>already-red</b>: red before too · <b>out-of-scope</b>: GPU-only tests (flash-attention, quantization, compile, fp16).</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Date</th><th>Model</th><th>Regression</th><th class="num">Tests</th><th>Verdict</th><th>MIC at the bad commit</th></tr></thead>
+      <tbody id="regressions"></tbody>
+    </table>
+  </div>
 
   <h2>Contracts to add next</h2>
   <p class="muted" id="next-note"></p>
@@ -83,7 +90,8 @@
   </div>
 
   <footer class="muted">
-    <a href="report.html">Full report</a>: how each number is counted, every failure and what is waiting for a verdict.
+    ★ a real-checkpoint (*IntegrationTest) test failed.
+    · <a href="report.html">Full report</a>: PR failures and outcomes, baseline work, the blocking replay and what is waiting for a verdict.
     · Data on the <a href="https://github.com/huggingface/transformers-mic/tree/impact-results" target="_blank" rel="noopener">impact-results branch</a>
     · <span id="updated"></span>
   </footer>
@@ -115,25 +123,42 @@
     const [first, last] = o.window || [];
     set("window", first ? `Transformers PRs and daily GPU CI, ${first} → ${last}` : "No data yet");
 
-    const c = o.caught;
-    set("caught", c.fixed_by_push);
-    set("caught-note", `PR failures the author fixed before merging · ${plural(c.real_checkpoint, "real-checkpoint regression")} flagged · ${c.labelled_real_bug} labelled real bugs`);
+    const r = o.replay || {};
+    const decided = (r.caught || 0) + (r.missed || 0);
+    set("caught", decided ? `${r.caught} of ${decided}` : "–");
+    const other = [["already-red", "already red"], ["no-code-change", "with no code change"], ["broken", "could not replay"], ["pending", "pending"]]
+      .filter(([k]) => r[k]).map(([k, text]) => `${r[k]} ${text}`);
+    set("caught-note", `GPU CI regressions on covered models that the contracts turn red on${other.length ? " · " + other.join(" · ") : ""}`);
 
-    const m = o.missed;
-    set("missed", m.real_checkpoint);
-    set("missed-note", `real-checkpoint regressions MIC stayed green on · ${m.not_covered} more on models with no contract`);
+    set("uncovered", r["not-covered"] ?? "–");
+    set("uncovered-note", `regressions on models with no contract${r["out-of-scope"] ? ` · ${r["out-of-scope"]} more GPU-only` : ""}`);
 
     const f = o.false_alarms;
     const share = f.prs_with_failure ? Math.round((100 * f.prs_not_their_fault) / f.prs_with_failure) : 0;
     set("false", f.prs_with_failure ? `${share}%` : "–");
     set("false-note", `of ${plural(f.prs_with_failure, "PR")} with a red MIC saw only failures they did not cause`);
 
-    const d = $("decision");
-    const verdict = document.createElement("strong");
-    verdict.className = o.block_merges.ready ? "yes" : "no";
-    verdict.textContent = o.block_merges.ready ? "Ready" : "Not yet";
-    d.append("Block merges when MIC is red? ", verdict);
-    if (o.block_merges.unmet.length) d.append(` · unmet: ${o.block_merges.unmet.join("; ")}`);
+    const regressions = $("regressions");
+    for (const g of o.regressions || []) {
+      const row = document.createElement("tr");
+      cell(row, g.date);
+      cell(row, g.model || "?");
+      const what = g.pr ? `PR #${g.pr}` : "sticky onset";
+      cell(row, g.pr && /^\d+$/.test(g.pr) ? link(what, `https://github.com/huggingface/transformers/pull/${g.pr}`) : what);
+      cell(row, String(g.tests) + (g.integration ? " ★" : ""), "num");
+      const verdict = /^https:\/\/github\.com\//.test(g.run || "") ? link(g.verdict, g.run) : document.createTextNode(g.verdict);
+      const span = document.createElement("span");
+      span.className = `verdict-${g.verdict}`;
+      span.appendChild(verdict);
+      cell(row, span);
+      cell(row, g.detail || "");
+      regressions.appendChild(row);
+    }
+    if (!(o.regressions || []).length) {
+      const row = document.createElement("tr");
+      cell(row, "None replayed yet.");
+      regressions.appendChild(row);
+    }
 
     const body = $("next");
     for (const t of o.next) {

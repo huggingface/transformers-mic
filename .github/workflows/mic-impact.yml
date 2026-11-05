@@ -8,11 +8,15 @@ name: MIC impact
 # huggingface-mic/mic-impact Space. It also suggests contracts to add (models
 # with real-checkpoint regressions and no contract) and drafts the top two a day
 # with tmic-run.yml, which publishes a draft that passes on cloud CPU and CUDA into the
-# prototypes fleet (new contracts only). Observational: it never
-# comments on a PR and never fails because of what it finds.
+# prototypes fleet (new contracts only). Each GPU CI regression on a model with a
+# contract is then replayed: the model's fixture contracts run on the commit before
+# the regression and on the one that broke it (backfill.py --plan, in parallel jobs),
+# which says whether MIC catches it. Observational: it never comments on a PR and
+# never fails because of what it finds.
 #
 #   gh workflow run mic-impact.yml --repo huggingface/transformers-mic             # yesterday
 #   gh workflow run mic-impact.yml --repo huggingface/transformers-mic -f days=30  # re-seed a month
+#   gh workflow run mic-impact.yml --repo huggingface/transformers-mic --ref <branch> -f publish=false -f drafts=0  # try a branch
 #
 # When a tmic-run.yml run finishes, it only refreshes the drafts' state and shrink
 # pages (--refresh): no collection, no new drafts. The Space's front page is
@@ -40,6 +44,11 @@ on:
         required: false
         type: string
         default: "2"
+      publish:
+        description: "Push to impact-results and publish the Space (off: a dry run, results in the run summary)"
+        required: false
+        type: boolean
+        default: true
 
 permissions: {}
 
@@ -51,20 +60,22 @@ jobs:
   observe:
     permissions:
       contents: write
-      actions: write # dispatch tmic-run.yml drafts; read their shrink artifacts
+      actions: write # dispatch tmic-run.yml drafts
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    outputs:
+      chunks: ${{ steps.plan.outputs.chunks }}
     env:
       GH_TOKEN: ${{ github.token }}
       HF_HUB_DISABLE_PROGRESS_BARS: "1"
       PYTHONUNBUFFERED: "1"
       DAYS: ${{ inputs.days || '1' }}
       DRAFTS: ${{ inputs.drafts || '2' }}
-      HAS_SPACE_TOKEN: ${{ secrets.MIC_IMPACT_SPACE_TOKEN != '' }}
+      PUBLISH: ${{ github.event_name != 'workflow_dispatch' || inputs.publish }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: "3.11"
 
@@ -86,30 +97,158 @@ jobs:
 
       - name: Observe
         run: |
-          set -o pipefail  # a crashed collection must not be published and pushed
-          if [ "$GITHUB_EVENT_NAME" = workflow_run ]; then mode=(--refresh); else mode=(--days "$DAYS" --draft "$DRAFTS"); fi
+          set -o pipefail  # a crashed collection must not be pushed
+          if [ "$GITHUB_EVENT_NAME" = workflow_run ]; then mode=(--refresh); else mode=(--days "$DAYS" --draft "$DRAFTS" --replay-plan replay); fi
           python experiments/impact.py --results "$RESULTS" "${mode[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
 
-      - name: Publish the page
-        # The Space renders overview.json and summary.md, and hosts the drafts' shrink pages;
-        # the branch above stays the record.
-        if: ${{ env.HAS_SPACE_TOKEN == 'true' }}
-        env:
-          HF_TOKEN: ${{ secrets.MIC_IMPACT_SPACE_TOKEN }}
-        run: python experiments/impact.py --results "$RESULTS" --summary-only --publish-space huggingface-mic/mic-impact > /dev/null
+      - name: Replay plan
+        id: plan
+        run: |
+          n=$(python -c 'import json, pathlib; p = pathlib.Path("replay/plan.json"); print(len(json.loads(p.read_text())) if p.exists() else 0)')
+          echo "chunks=$(python -c "import json; print(json.dumps(list(range(min($n, 8)))))")" >> "$GITHUB_OUTPUT"
+          echo "$n replay entries"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: steps.plan.outputs.chunks != '[]'
+        with:
+          name: replay-plan
+          path: replay/
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        # A dry run pushes nothing: the publish job picks the collection up from here.
+        if: env.PUBLISH != 'true'
+        with:
+          name: impact-results
+          path: ${{ env.RESULTS }}/
+          include-hidden-files: false
 
       - name: Push
+        if: env.PUBLISH == 'true'
         run: |
-          cd "$RESULTS"
-          git add -A
-          git diff --cached --quiet && exit 0
           if [ "$GITHUB_EVENT_NAME" = workflow_run ]; then title="MIC impact drafts refresh"; else title="MIC impact $(date -u +%F) (window ${DAYS}d)"; fi
-          git commit --quiet -m "$title"
-          for i in 1 2 3; do
-            git push --quiet origin impact-results && exit 0
-            # A hand-added label landed meanwhile: keep it, redo the summary on top.
-            git pull --quiet --rebase -X theirs origin impact-results || true
-            python "$GITHUB_WORKSPACE/experiments/impact.py" --results "$RESULTS" --summary-only > /dev/null
-            git add -A && git commit --quiet -m "MIC impact summary" || true
-          done
-          exit 1
+          ./.github/scripts/push_impact_results.sh "$title"
+
+  replay:
+    # As Transformers PR CI runs MIC (transformers-ci .github/workflows/pr-ci_contracts.yml,
+    # called with the aws-m8i-l-cache runner and the transformers-torch-light image):
+    # same runner and image, same install, same runner command. Transformers is editable
+    # from a full blobless clone, so any parent can be checked out.
+    needs: observe
+    if: needs.observe.outputs.chunks != '[]'
+    permissions:
+      contents: read
+    runs-on:
+      group: ${{ vars.MIC_CPU_BASELINE_RUNNER || 'aws-m8i-l-cache' }}
+    container:
+      image: huggingface/transformers-torch-light
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        chunk: ${{ fromJSON(needs.observe.outputs.chunks) }}
+    env:
+      CHUNKS: ${{ strategy.job-total }}
+      # pr-ci_contracts.yml's doc-builder pin, threads and cache folder.
+      DOC_BUILDER_SHA: c69e96c087165ba49b1788e0c3464654dd60253c
+      OMP_NUM_THREADS: "4"
+      HF_HOME: /tmp/hf_home
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      # MIC repos built from gated checkpoints (Gemma) are gated like their sources.
+      HF_TOKEN: ${{ secrets.HF_HUB_READ_TOKEN }}
+      PYTHONUNBUFFERED: "1"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Native bfloat16 host
+        run: |
+          grep -m1 '^model name' /proc/cpuinfo
+          grep -qwE 'amx_bf16|avx512_bf16' /proc/cpuinfo || { echo "::error::wrong hardware: no native bfloat16 on this host"; exit 1; }
+      - name: Install
+        run: |
+          git config --global --add safe.directory '*'
+          git clone --quiet --filter=blob:none --single-branch -b main https://github.com/huggingface/transformers /tmp/transformers
+          python -m pip install --quiet -e /tmp/transformers
+          python -m pip install --quiet "transformers-ci[contracts] @ git+https://github.com/huggingface/transformers-ci@main"
+          python -m pip install --quiet timm jsonschema "git+https://github.com/huggingface/doc-builder@$DOC_BUILDER_SHA"
+          python -c "import torch, transformers; print('torch', torch.__version__, 'threads', torch.get_num_threads(), transformers.__file__)"
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: replay-plan
+          path: replay
+      - name: Replay
+        run: |
+          python .github/scripts/backfill.py --repo /tmp/transformers --plan replay/plan.json \
+            --chunk ${{ matrix.chunk }} --chunks "$CHUNKS" --output "out/replay-${{ matrix.chunk }}.jsonl"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: replay-${{ matrix.chunk }}
+          path: out/
+
+  publish:
+    # Folds the replays in, rewrites the summary and publishes the Space. Runs when
+    # replays were skipped or some chunks failed: those regressions are replayed next time.
+    needs: [observe, replay]
+    if: always() && needs.observe.result == 'success'
+    permissions:
+      contents: write
+      actions: read # the drafts' shrink artifacts
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      PYTHONUNBUFFERED: "1"
+      HAS_SPACE_TOKEN: ${{ secrets.MIC_IMPACT_SPACE_TOKEN != '' }}
+      PUBLISH: ${{ github.event_name != 'workflow_dispatch' || inputs.publish }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.11"
+
+      - run: python -m pip install .
+
+      - name: Results branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch --quiet origin impact-results:refs/remotes/origin/impact-results
+          git worktree add --quiet -B impact-results "$RUNNER_TEMP/impact-results" origin/impact-results
+          echo "RESULTS=$RUNNER_TEMP/impact-results" >> "$GITHUB_ENV"
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        if: env.PUBLISH != 'true'
+        with:
+          name: impact-results
+          path: ${{ env.RESULTS }}
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        if: needs.replay.result != 'skipped'
+        with:
+          pattern: replay-[0-9]*
+          path: replayed
+          merge-multiple: true
+
+      - name: Summarize and publish
+        env:
+          HF_TOKEN: ${{ secrets.MIC_IMPACT_SPACE_TOKEN }}
+        run: |
+          set -o pipefail
+          options=(--summary-only)
+          if ls replayed/*.jsonl > /dev/null 2>&1; then
+            cat replayed/*.jsonl > replayed.jsonl
+            options+=(--replay-results replayed.jsonl --replay-run "$RUN_URL")
+          fi
+          # The Space renders overview.json and summary.md, and hosts the drafts' shrink pages;
+          # the branch stays the record.
+          if [ "$HAS_SPACE_TOKEN" = true ] && [ "$PUBLISH" = true ]; then options+=(--publish-space huggingface-mic/mic-impact); fi
+          python experiments/impact.py --results "$RESULTS" "${options[@]}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Push
+        if: env.PUBLISH == 'true'
+        run: ./.github/scripts/push_impact_results.sh "MIC impact replays and summary"

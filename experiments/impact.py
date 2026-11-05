@@ -22,6 +22,7 @@ Results layout (the impact-results branch):
     days/<date>.json     the day's PR failures, each with its class
     candidates.json      PR-only failures, followed until they resolve
     gpu-ci.json          the daily GPU CI's bisected regressions, each with what MIC did on the culprit PR
+    replays.json         each regression replayed with the model's contracts: caught, missed, already-red, ...
     model-types.json     cache: fixture repo -> model_type
     baselines.jsonl      one line per fleet update: baselines changed/added/removed
     labels.jsonl         human verdicts: {"key", "verdict", "note", "by"}
@@ -889,6 +890,218 @@ def draft_lines(suggestions, drafts):
     return lines + [""]
 
 
+# ---------------------------------------------------------------- replays
+
+REPLAYS_PER_RUN = 40  # regressions replayed per run; the rest wait for the next one
+# What Transformers PR CI runs of each fleet (transformers-ci .github/workflows/pr-ci_contracts.yml).
+PR_CI_VARIANTS = {"control": ["default", "bfloat16"], "prototypes": ["bfloat16"]}
+REPLAY_CHUNKS = 8  # parallel replay jobs in mic-impact.yml
+RED = ("fail", "error")
+
+
+def daily_sha(date, back=3):
+    """Full sha of the main commit the daily GPU CI tested on `date`, or on the closest earlier day it ran.
+
+    Read from the collated report's name (collated_reports_single-gpu_<short sha>.json). None when no
+    day in reach ran, or GitHub does not know the commit (some daily shas are not on main).
+    """
+    day = dt.date.fromisoformat(date)
+    for offset in range(back + 1):
+        folder = f"{(day - dt.timedelta(days=offset)).isoformat()}/ci_results_run_models_gpu"
+        try:
+            tree = get_json(f"{HUB}/api/datasets/{DAILY_CI}/tree/main/{folder}")
+        except urllib.error.HTTPError as error:
+            if error.code == 404:
+                continue
+            raise
+        shas = [m.group(1) for f in tree if (m := re.search(r"collated_reports_single-gpu_([0-9a-f]+)\.json$", f["path"]))]
+        if shas:
+            try:
+                return github(f"/repos/{TRANSFORMERS}/commits/{shas[0]}")["sha"]
+            except urllib.error.HTTPError:
+                return None
+    return None
+
+
+def model_contracts(locks, types):
+    """model type -> [(fleet, contract)] for every contract whose fixtures are of that type."""
+    found = defaultdict(list)
+    for name, lock in locks.items():
+        for contract, entry in lock["contracts"].items():
+            for model in sorted({norm(types.get(repo)) for repo in entry.get("fixtures", {})} - {""}):
+                found[model].append((name, contract))
+    return found
+
+
+def replay_scope(item, contracts):
+    """not-covered | out-of-scope, or None when the regression is worth replaying."""
+    if item.get("model") in NOT_MODELS or norm(item.get("model")) not in contracts:
+        return "not-covered"
+    if all(any(word in test.lower() for word in GPU_ONLY) for test in item["tests"]):
+        return "out-of-scope"
+    return None
+
+
+def replay_plan(gpu_ci, replays, contracts, sha_of_day, limit=REPLAYS_PER_RUN):
+    """Plan entries for the regressions not replayed yet, newest first: one per (regression, fleet).
+
+    A bisected regression replays its bad commit and that commit's parent; a sticky onset the
+    daily CI's commits on the day before and on the day it started. Regressions that need no run
+    (not covered, out of scope, no commit to replay) get their verdict in `replays` directly.
+    """
+    plan, keys = [], set()
+    for key, item in sorted(gpu_ci.items(), key=lambda kv: (kv[1].get("date", ""), kv[0]), reverse=True):
+        if key in replays:
+            continue
+        scope = replay_scope(item, contracts)
+        if scope:
+            replays[key] = {"verdict": scope}
+            continue
+        if len(keys) >= limit:
+            continue
+        if item.get("bad_commit"):
+            parent, bad = f"{item['bad_commit']}^", item["bad_commit"]
+        else:
+            before = (dt.date.fromisoformat(item["date"]) - dt.timedelta(days=1)).isoformat()
+            parent, bad = sha_of_day(before), sha_of_day(item["date"])
+            if not parent or not bad:
+                replays[key] = {"verdict": "broken", "reason": "no daily CI commit pair to replay"}
+                continue
+            if parent == bad:
+                replays[key] = {"verdict": "no-code-change", "reason": f"the daily CI tested {bad[:10]} on both days"}
+                continue
+        by_fleet = defaultdict(list)
+        for fleet_name, contract in contracts[norm(item["model"])]:
+            by_fleet[fleet_name].append(contract)
+        for fleet_name, names in sorted(by_fleet.items()):
+            plan.append({"key": key, "model": item["model"], "fleet": fleet_name, "variants": PR_CI_VARIANTS[fleet_name],
+                         "contracts": names, "parent": parent, "bad": bad})
+        keys.add(key)
+    return plan
+
+
+def replay_verdicts(records, replays, run_url=""):
+    """Fold replay records (backfill.py --plan) into `replays`: caught | missed | already-red | broken.
+
+    A side is red when any of its contracts fails or errors (a traceback in the call is an error).
+    A parent without the model (the bad commit added it) counts as green: there was nothing to break.
+    """
+    sides = defaultdict(lambda: defaultdict(list))
+    for record in records:
+        sides[record["replay"]["key"]][record["replay"]["side"]].append(record)
+    for key, by_side in sides.items():
+        meta = {side: rs[0]["replay"] for side, rs in by_side.items()}
+        entry = {
+            "parent": (meta.get("parent") or {}).get("sha"),
+            "bad": (meta.get("bad") or {}).get("sha"),
+            "contracts": sorted({r["contract"] for rs in by_side.values() for r in rs if r["contract"] not in ("*", None)}),
+            "run": run_url,
+        }
+        if set(by_side) != {"parent", "bad"} or any(r["contract"] == "*" for rs in by_side.values() for r in rs):
+            broken = [f for rs in by_side.values() for r in rs if r["contract"] == "*" for f in r.get("failures", [])]
+            replays[key] = {**entry, "verdict": "broken", "reason": (broken or ["a side did not run"])[0][:300]}
+            continue
+        red = {side: [r for r in rs if r["status"] in RED] for side, rs in by_side.items()}
+        if all(r["status"] == "absent" for r in by_side["parent"]):
+            entry["model_added"] = True
+        if red["parent"]:
+            verdict = "already-red"
+        else:
+            verdict = "caught" if red["bad"] else "missed"
+        failures = [
+            f"{r['target']} ({r.get('variant', 'default')}): {((r.get('failures') or ['?'])[0]).splitlines()[0][:150]}"
+            for r in red["bad"] or red["parent"]
+        ]
+        replays[key] = {**entry, "verdict": verdict, "failures": failures[:5]}
+    return replays
+
+
+def write_replay_plan(results, folder, download, sha_of_day=daily_sha, limit=REPLAYS_PER_RUN):
+    """Write folder/plan.json; record the verdicts that need no run. Returns the entries.
+
+    Each entry names its fleet's revision now, so both sides of a regression run the same contracts.
+    """
+    results, folder = Path(results), Path(folder)
+    types = fixture_model_types(results, download)
+    locks, revisions = {}, {}
+    for name in PR_CI_VARIANTS:
+        path, revisions[name] = download(name, "main")
+        locks[name] = json.loads(Path(path).read_text())
+    replays = load(results / "replays.json", {})
+    plan = replay_plan(load(results / "gpu-ci.json", {}), replays, model_contracts(locks, types), sha_of_day, limit)
+    for entry in plan:
+        entry["fleet_revision"] = revisions[entry["fleet"]]
+    write(results / "replays.json", replays)
+    write(folder / "plan.json", plan)
+    return plan
+
+
+REPLAY_VERDICTS = (
+    ("caught", "green on the parent, red on the bad commit"),
+    ("missed", "green on both"),
+    ("already-red", "red on the parent already: says nothing about this regression"),
+    ("no-code-change", "the daily CI tested the same commit the day before: nothing for a contract to catch"),
+    ("broken", "the replay could not run (commit, install or harness)"),
+    ("out-of-scope", "every failing test is GPU-only (flash-attention, quantization, compile, fp16)"),
+    ("not-covered", "no contract for the model"),
+)
+
+
+def replay_lines(gpu_ci, replays):
+    counts = Counter(replays.get(k, {}).get("verdict", "pending") for k in gpu_ci)
+    decided = counts["caught"] + counts["missed"]
+    lines = [
+        "## Does MIC catch the daily GPU CI's regressions?",
+        "",
+        "Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers_daily_ci`) — bisected to a "
+        "commit, or a sticky failure's first day — is replayed with the model's fixture contracts as Transformers PR CI "
+        "runs them (today's fleets; control in the default and bfloat16 variants, prototypes in bfloat16; "
+        "`run-model-contracts` on the same runner and image) on the commit before it and on the commit that broke it. "
+        "When that commit added the model, only its side runs.",
+        "",
+        f"**Catch rate: {counts['caught']} of {decided}**" + (f" ({100 * counts['caught'] / decided:.0f}%)" if decided else "")
+        + " — caught / (caught + missed).",
+        "",
+        "| verdict | regressions | meaning |",
+        "|---|---|---|",
+    ]
+    lines += [f"| {name} | {counts[name]} | {meaning} |" for name, meaning in REPLAY_VERDICTS]
+    if counts["pending"]:
+        lines.append(f"| pending | {counts['pending']} | not replayed yet |")
+    lines += ["", "| date | model | regression | verdict | at the bad commit |", "|---|---|---|---|---|"]
+    for key, item in sorted(gpu_ci.items(), key=lambda kv: (kv[1].get("date", ""), kv[0]), reverse=True):
+        replay = replays.get(key, {})
+        if replay.get("verdict") in (None, "not-covered"):
+            continue
+        source = f"[PR #{item['pr']}](https://github.com/{TRANSFORMERS}/pull/{item['pr']})" if item.get("pr") else "sticky onset"
+        verdict = f"[{replay['verdict']}]({replay['run']})" if replay.get("run") else replay["verdict"]
+        detail = ("model added; " if replay.get("model_added") else "") + "; ".join(replay.get("failures") or [replay.get("reason", "")])
+        detail = detail[:200].replace("|", "/")
+        lines.append(f"| {item.get('date', '')} | {item.get('model')} | {source} | {verdict} | {detail} |")
+    return lines + [""], counts
+
+
+def replay_rows(gpu_ci, replays):
+    """The overview's regression table: every replayed or in-scope regression, newest first."""
+    rows = []
+    for key, item in sorted(gpu_ci.items(), key=lambda kv: (kv[1].get("date", ""), kv[0]), reverse=True):
+        replay = replays.get(key, {})
+        if replay.get("verdict") == "not-covered":
+            continue
+        rows.append({
+            "date": item.get("date", ""),
+            "model": item.get("model"),
+            "pr": item.get("pr"),
+            "job": item.get("job_link") or "",
+            "tests": len(item.get("tests", [])),
+            "integration": bool(item.get("integration")),
+            "verdict": replay.get("verdict", "pending"),
+            "run": replay.get("run", ""),
+            "detail": (("model added; " if replay.get("model_added") else "") + "; ".join(replay.get("failures") or [replay.get("reason", "")]))[:200],
+        })
+    return rows
+
+
 def summarize(results):
     results = Path(results)
     candidates = load(results / "candidates.json", {})
@@ -916,6 +1129,8 @@ def summarize(results):
         return f"{n} ({100 * n / d:.0f}%)" if d else str(n)
 
     decision, checks = replay_blocking(results, day_rows, candidates, labels, baselines, first, last)
+    replays = load(results / "replays.json", {})
+    replayed, replay_counts = replay_lines(gpu_ci, replays)
     lines = [
         "# MIC impact on Transformers PRs",
         "",
@@ -927,6 +1142,7 @@ def summarize(results):
         f"**systemic** (the same case failed on ≥{SYSTEMIC_PRS} PRs that day), or **PR-only**. PR-only cases are followed to an outcome. Outcomes are observations; verdicts come from "
         "`labels.jsonl`.",
         "",
+        *replayed,
         *decision,
         "## 1. Real bugs caught on PRs",
         "",
@@ -1074,6 +1290,8 @@ def summarize(results):
     batch = {s["model"] for s in draftable(suggestions, drafts)[:DRAFTS_PER_DAY]}
     write(results / "overview.json", {
         "window": [first or None, last or None],
+        "replay": {name: replay_counts[name] for name, _ in REPLAY_VERDICTS} | {"pending": replay_counts["pending"]},
+        "regressions": replay_rows(gpu_ci, replays),
         "caught": {
             "fixed_by_push": outcomes["fixed-by-push"],
             "merged_then_main_failed": outcomes["merged-then-main-failed"],
@@ -1246,6 +1464,9 @@ def main():
     parser.add_argument("--refresh", action="store_true", help="only update the drafts' state and shrink pages, then rewrite the summary (a draft run finished)")
     parser.add_argument("--publish-space", metavar="REPO", help="also upload the summary page to this Hugging Face Space")
     parser.add_argument("--draft", type=int, default=0, metavar="N", help=f"dispatch {TMIC_RUN} for the top N suggested contracts not drafted yet")
+    parser.add_argument("--replay-plan", type=Path, metavar="DIR", help="write DIR/plan.json for the regressions not replayed yet")
+    parser.add_argument("--replay-results", type=Path, metavar="FILE", help="fold replay records (backfill.py --plan) into replays.json")
+    parser.add_argument("--replay-run", default="", metavar="URL", help="the workflow run that produced --replay-results")
     args = parser.parse_args()
     args.results.mkdir(parents=True, exist_ok=True)
     if not args.summary_only:
@@ -1262,6 +1483,14 @@ def main():
                 now = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
                 dispatch_drafts(load(args.results / "suggestions.json", {"new": []}), drafts, args.draft, now)
         write(args.results / "drafts.json", drafts)
+    if args.replay_plan:
+        from transformers_mic import fleet
+
+        plan = write_replay_plan(args.results, args.replay_plan, fleet.download)
+        print(f"replay plan: {len(plan)} entries", file=sys.stderr)
+    if args.replay_results:
+        replays = replay_verdicts(read_jsonl(args.replay_results), load(args.results / "replays.json", {}), args.replay_run)
+        write(args.results / "replays.json", replays)
     with tempfile.TemporaryDirectory() as shrink:
         if args.publish_space:
             drafts = load(args.results / "drafts.json", {})

@@ -412,3 +412,95 @@ def test_a_failed_draft_is_retried_only_on_a_new_checkpoint():
     lines = "\n".join(impact.draft_lines({**suggestions, "extend": {}}, drafts))
     assert "failure" in lines.split("| switch |")[1].split("\n")[0]
     assert "failure" not in lines.split("| moshi |")[1].split("\n")[0]
+
+
+def regression(model="llama", date="2026-10-02", tests=("tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_x",), **extra):
+    return {"model": model, "date": date, "tests": list(tests), "integration": True, **extra}
+
+
+CONTRACTS = {"llama": [("control", "huggingface-mic/llama-mic"), ("prototypes", "huggingface-mic/llama-2-mic")]}
+
+
+def test_replay_plan_pairs_each_regression_with_its_commits():
+    gpu_ci = {
+        "7#llama": regression(pr="7", bad_commit="b" * 40),
+        "sticky#llama#2026-10-03": regression(date="2026-10-03"),
+        "sticky#bert#2026-10-03": regression(model="bert", date="2026-10-03"),
+        "8#llama": regression(pr="8", bad_commit="c" * 40, tests=["tests/models/llama/test_modeling_llama.py::LlamaTest::test_flash_attn_2_x"]),
+    }
+    days = {"2026-10-02": "p" * 40, "2026-10-03": "q" * 40}
+    replays = {}
+    plan = impact.replay_plan(gpu_ci, replays, CONTRACTS, days.get)
+    assert replays == {"sticky#bert#2026-10-03": {"verdict": "not-covered"}, "8#llama": {"verdict": "out-of-scope"}}
+    # Newest first; one entry per fleet holding the model's contracts.
+    assert [(p["key"], p["fleet"], p["variants"], p["parent"], p["bad"]) for p in plan] == [
+        ("sticky#llama#2026-10-03", "control", ["default", "bfloat16"], "p" * 40, "q" * 40),
+        ("sticky#llama#2026-10-03", "prototypes", ["bfloat16"], "p" * 40, "q" * 40),
+        ("7#llama", "control", ["default", "bfloat16"], "b" * 40 + "^", "b" * 40),
+        ("7#llama", "prototypes", ["bfloat16"], "b" * 40 + "^", "b" * 40),
+    ]
+    assert plan[0]["model"] == "llama" and plan[0]["contracts"] == ["huggingface-mic/llama-mic"]
+    # Replayed regressions are not planned again; the limit counts regressions, not entries.
+    assert impact.replay_plan(gpu_ci, {**replays, "7#llama": {"verdict": "missed"}}, CONTRACTS, days.get, limit=1)[0]["key"] == "sticky#llama#2026-10-03"
+    assert {p["key"] for p in impact.replay_plan(gpu_ci, {}, CONTRACTS, days.get, limit=1)} == {"sticky#llama#2026-10-03"}
+
+
+def test_a_sticky_onset_without_two_daily_commits_is_not_replayed():
+    gpu_ci = {"sticky#llama#2026-10-03": regression(date="2026-10-03")}
+    replays = {}
+    assert impact.replay_plan(gpu_ci, replays, CONTRACTS, {"2026-10-03": "q" * 40}.get) == []
+    assert replays["sticky#llama#2026-10-03"]["verdict"] == "broken"
+    # The same commit on both days: the failure started without a code change.
+    replays = {}
+    assert impact.replay_plan(gpu_ci, replays, CONTRACTS, lambda day: "q" * 40) == []
+    assert replays["sticky#llama#2026-10-03"]["verdict"] == "no-code-change"
+
+
+def replayed(key, side, status, contract="huggingface-mic/llama-mic", failures=()):
+    return {"contract": contract, "target": "llama-mic", "variant": "bfloat16", "status": status, "failures": list(failures),
+            "replay": {"key": key, "side": side, "sha": side[0] * 40}}
+
+
+def test_replay_verdicts():
+    records = [
+        replayed("a", "parent", "pass"), replayed("a", "bad", "fail", failures=["logits: max delta 3.1\nmore"]),
+        replayed("b", "parent", "pass"), replayed("b", "bad", "pass"),
+        replayed("c", "parent", "fail"), replayed("c", "bad", "fail"),
+        replayed("d", "parent", "pass"), replayed("d", "bad", "error", failures=["Traceback ..."]),
+        replayed("e", "parent", "pass"),
+        replayed("f", "parent", "error", contract="*", failures=["deadbeef^: unknown revision"]), replayed("f", "bad", "pass"),
+        replayed("g", "parent", "pass"), replayed("g", "bad", "unsupported"),
+        # The bad commit added the model: the parent has nothing to run.
+        replayed("h", "parent", "absent", contract=None), replayed("h", "bad", "fail"),
+        replayed("i", "parent", "absent", contract=None), replayed("i", "bad", "pass"),
+    ]
+    out = impact.replay_verdicts(records, {}, "https://github.com/x/runs/1")
+    assert {k: v["verdict"] for k, v in out.items()} == {
+        "a": "caught", "b": "missed", "c": "already-red", "d": "caught", "e": "broken", "f": "broken", "g": "missed",
+        "h": "caught", "i": "missed",
+    }
+    assert out["h"]["model_added"] and out["h"]["contracts"] == ["huggingface-mic/llama-mic"] and "model_added" not in out["a"]
+    assert out["a"]["failures"] == ["llama-mic (bfloat16): logits: max delta 3.1"]
+    assert out["a"]["parent"] == "p" * 40 and out["a"]["bad"] == "b" * 40 and out["a"]["run"] == "https://github.com/x/runs/1"
+    assert out["f"]["reason"].startswith("deadbeef^")
+
+
+def test_overview_counts_the_replays(tmp_path):
+    results = results_dir(tmp_path)
+    write(results / "gpu-ci.json", {
+        "1#a": regression(model="a", pr="1"),
+        "2#b": regression(model="b", pr="2"),
+        "sticky#c#d": regression(model="c"),
+        "sticky#e#d": regression(model="e"),
+    })
+    write(results / "replays.json", {
+        "1#a": {"verdict": "caught", "failures": ["a-mic: logits"], "run": "https://github.com/x/runs/1"},
+        "2#b": {"verdict": "missed", "failures": []},
+        "sticky#c#d": {"verdict": "not-covered"},
+    })
+    impact.summarize(results)
+    o = json.loads((results / "overview.json").read_text())
+    assert o["replay"] == {"caught": 1, "missed": 1, "already-red": 0, "no-code-change": 0, "broken": 0, "out-of-scope": 0, "not-covered": 1, "pending": 1}
+    assert [(g["model"], g["verdict"]) for g in o["regressions"]] == [("e", "pending"), ("b", "missed"), ("a", "caught")]
+    summary = (results / "summary.md").read_text()
+    assert "**Catch rate: 1 of 2** (50%)" in summary
