@@ -3,6 +3,10 @@
 The dataset stores each fleet as readable CSV tables under ``<fleet>/``; tmic
 converts them to and from the JSON lock the runners read. Revisions from before
 the tables only have the JSON files (``FILES``), which are still read as they are.
+
+Sentence Transformers contracts that have no Transformers usage live in their own
+dataset (``ST_REPOSITORY``, fleet ``ST_FLEET``) with the same tables, so they never
+count as Transformers coverage.
 """
 
 import csv
@@ -18,6 +22,9 @@ from huggingface_hub.errors import EntryNotFoundError
 REPOSITORY = "huggingface-mic/transformers-fleet"
 FILES = {"control": "fleet-lock.json", "prototypes": "prototype-fleet.lock"}
 FRAMEWORK = "transformers"
+ST_REPOSITORY = "huggingface-mic/sentence-transformers-fleet"
+ST_FLEET = "sentence_transformers"
+ST_FRAMEWORK = "sentence_transformers"
 COLUMNS = {
     "contracts": (
         "contract",
@@ -64,10 +71,10 @@ def _split(cell):
     return [part.strip() for part in cell.split(";") if part.strip()]
 
 
-def to_tables(lock):
+def to_tables(lock, framework=FRAMEWORK):
     """The lock as {table: CSV text}; refuses anything the tables cannot hold exactly."""
-    if lock.get("framework", FRAMEWORK) != FRAMEWORK:
-        raise ValueError(f"The fleet dataset only holds {FRAMEWORK} locks")
+    if lock.get("framework", framework) != framework:
+        raise ValueError(f"This fleet dataset only holds {framework} locks")
     contracts = []
     for name, contract in lock["contracts"].items():
         extra = set(contract) - {
@@ -156,7 +163,7 @@ def to_tables(lock):
     return tables
 
 
-def from_tables(tables):
+def from_tables(tables, framework=FRAMEWORK):
     """The JSON lock for {table: CSV text}, as the runners read it."""
     contracts = {}
     for row in _rows("contracts", tables["contracts"]):
@@ -210,7 +217,7 @@ def from_tables(tables):
             entry["issue"] if len(entry) == 1 else entry
         )
     lock = {
-        "framework": FRAMEWORK,
+        "framework": framework,
         "environment": {
             row["package"]: row["version"]
             for row in _rows("environment", tables["environment"])
@@ -222,15 +229,39 @@ def from_tables(tables):
     return lock
 
 
-def operations(name, lock):
+def operations(name, lock, framework=FRAMEWORK):
     """Dataset files for one fleet: its tables."""
-    return {table_path(name, table): text for table, text in to_tables(lock).items()}
+    return {
+        table_path(name, table): text
+        for table, text in to_tables(lock, framework).items()
+    }
 
 
-def resolve(revision="main"):
+def resolve(revision="main", repository=REPOSITORY):
     if re.fullmatch(r"[0-9a-f]{40}", revision):
         return revision
-    return HfApi().dataset_info(REPOSITORY, revision=revision).sha
+    return HfApi().dataset_info(repository, revision=revision).sha
+
+
+def download_st(revision="main"):
+    """The Sentence Transformers fleet's JSON lock at an immutable revision."""
+    revision = resolve(revision, ST_REPOSITORY)
+
+    def fetch(table):
+        return Path(
+            hf_hub_download(
+                ST_REPOSITORY,
+                table_path(ST_FLEET, table),
+                repo_type="dataset",
+                revision=revision,
+            )
+        ).read_text()
+
+    lock = from_tables({table: fetch(table) for table in COLUMNS}, ST_FRAMEWORK)
+    path = Path(tempfile.gettempdir()) / "tmic-fleet" / revision / f"{ST_FLEET}.lock"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(lock, indent=2) + "\n")
+    return path, revision
 
 
 def read_pin(path):

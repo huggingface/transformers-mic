@@ -255,16 +255,22 @@ def test_publication_requires_every_integration(workspace):
     commands.publication_ready(workspace)
 
 
-def test_nightly_selects_advertised_contracts_at_one_revision(tmp_path, monkeypatch):
+def test_nightly_selects_st_fleet_and_advertised_contracts(tmp_path, monkeypatch):
     source = (
         Path(__file__).parents[1] / ".github/scripts/sentence_transformers_nightly.py"
     )
     spec = importlib.util.spec_from_file_location("st_nightly", source)
     nightly = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(nightly)
-    revision = "a" * 40
+    revision, st_revision = "a" * 40, "b" * 40
     monkeypatch.setattr(fleet, "resolve", lambda ref: revision)
     calls = []
+
+    def contract(repo, *advertised):
+        value = {"integration": {"repo": repo}}
+        if advertised:
+            value["integrations"] = list(advertised)
+        return value
 
     def download(name, pin):
         assert pin == revision
@@ -272,10 +278,17 @@ def test_nightly_selects_advertised_contracts_at_one_revision(tmp_path, monkeypa
         write(
             path,
             {
+                "framework": "transformers",
                 "contracts": {
-                    "Selected": {"integrations": ["transformers", integrations.NAME]},
-                    "Legacy": {},
-                    "Other": {"integrations": ["transformers"]},
+                    "Selected": contract(
+                        "org/selected-mic", "transformers", integrations.NAME
+                    ),
+                    "Legacy": contract("org/legacy-mic"),
+                    "Other": contract("org/other-mic", "transformers"),
+                    # Also in the ST fleet: checked once.
+                    "Twice": contract(
+                        "org/st-a-mic", "transformers", integrations.NAME
+                    ),
                 },
                 "known_failures": {"Selected/fixture": "TF failure"},
                 "local_patches": {"old-patch": {}},
@@ -283,20 +296,37 @@ def test_nightly_selects_advertised_contracts_at_one_revision(tmp_path, monkeypa
         )
         return path, pin
 
+    def download_st(pin):
+        assert pin == "main"
+        path = tmp_path / "st.json"
+        write(
+            path,
+            {
+                "framework": fleet.ST_FRAMEWORK,
+                "contracts": {
+                    "st-a": contract("org/st-a-mic"),
+                    "st-b": contract("org/st-b-mic"),
+                },
+            },
+        )
+        return path, st_revision
+
     def invoke(tool, cwd, options):
         lock = json.loads(Path(options[options.index("--lock") + 1]).read_text())
-        assert list(lock["contracts"]) == ["Selected"]
         assert "known_failures" not in lock and "local_patches" not in lock
         assert options[options.index("--framework") + 1] == integrations.NAME
-        calls.append(options)
+        calls.append(options[options.index("--contract") + 1])
         return SimpleNamespace(returncode=1)
 
     monkeypatch.setattr(fleet, "download", download)
+    monkeypatch.setattr(fleet, "download_st", download_st)
     monkeypatch.setattr(nightly.backend, "invoke", invoke)
     monkeypatch.setattr(sys, "argv", ["nightly", "--out", str(tmp_path / "out")])
     assert nightly.main() == 1
-    assert len(calls) == 2
+    # A MIC repo in several fleets is checked once, from the first that lists it.
+    assert calls == ["st-a", "st-b", "Selected"]
     assert (tmp_path / "out/fleet-revision.txt").read_text().strip() == revision
+    assert (tmp_path / "out/st-fleet-revision.txt").read_text().strip() == st_revision
 
 
 def test_scenario_uses_query_and_passages_and_returns_numpy_vector(monkeypatch):

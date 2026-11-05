@@ -1,4 +1,5 @@
-"""Select advertised ST MICs from one immutable fleet snapshot and check fixtures."""
+"""Check the fixtures of every ST MIC: the Sentence Transformers fleet, plus the
+Transformers fleets' contracts that advertise a sentence_transformers usage."""
 
 import argparse
 import json
@@ -47,6 +48,7 @@ def main():
     parser.add_argument("--out", type=Path, default=Path("out/sentence-transformers"))
     parser.add_argument("--mode", choices=("check", "record"), default="check")
     parser.add_argument("--fleet-revision", default="main")
+    parser.add_argument("--st-fleet-revision", default="main")
     parser.add_argument("--model-repo", default="")
     parser.add_argument("--model-revision", default="")
     args = parser.parse_args()
@@ -61,17 +63,25 @@ def main():
     else:
         revision = fleet.resolve(args.fleet_revision)
         (args.out / "fleet-revision.txt").write_text(revision + "\n")
-        inputs = []
+        path, st_revision = fleet.download_st(args.st_fleet_revision)
+        (args.out / "st-fleet-revision.txt").write_text(st_revision + "\n")
+        inputs = [(fleet.ST_FLEET, json.loads(path.read_text()))]
         for name in fleet.FILES:
             path, _ = fleet.download(name, revision)
             inputs.append((name, json.loads(path.read_text())))
-    count, status = 0, 0
+    count, status, seen = 0, 0, set()
     for name, lock in inputs:
+        # Every ST fleet contract is an ST MIC; the others only if they say so.
         selected = {
             key: value
             for key, value in lock["contracts"].items()
-            if "sentence_transformers" in value.get("integrations", [])
+            if (
+                lock.get("framework") == fleet.ST_FRAMEWORK
+                or "sentence_transformers" in value.get("integrations", [])
+            )
+            and value["integration"]["repo"] not in seen
         }
+        seen.update(value["integration"]["repo"] for value in selected.values())
         if not selected:
             continue
         count += len(selected)
