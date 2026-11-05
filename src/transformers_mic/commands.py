@@ -435,6 +435,25 @@ def check_transducer_inputs(plan):
         )
 
 
+def check_audio_waveforms(plan):
+    """Reject audio file paths given to processor(...), which takes decoded waveforms.
+
+    mistralai/Voxtral-Mini-4B-Realtime-2602's drafts wrote WAV files and passed their paths:
+    "Invalid input type. Must be a single audio, a list of audio…". Only a chat template's
+    {"type": "audio", "path": …} entries load files (Voxtral-Mini-3B's contract).
+    """
+    usage = plan["usage"]
+    if "apply_chat_template" in usage:
+        return
+    paths = re.findall(r"[\"']([^\"'\n]+\.(?:wav|mp3|flac|ogg|m4a))[\"']", usage)
+    if paths and re.search(r"\bprocessor\([^\n]*\baudio\s*=|\bprocessor\(\s*\w+\s*[,)]", usage):
+        raise ValueError(
+            f"the usage passes audio files ({paths[0]!r}) to the processor, which takes decoded waveforms: "
+            "build NumPy arrays at the processor's sampling rate in the block (e.g. sine waves) and pass them "
+            "as audio=[wave_a, wave_b]"
+        )
+
+
 def check_chat_template(plan, context):
     """Reject apply_chat_template on a processor that has no chat template.
 
@@ -981,6 +1000,7 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
                 check_batch_encoding_dtype(plan, context["config"])
             check_transducer_inputs(plan)
             check_chat_template(plan, context)
+            check_audio_waveforms(plan)
             check_partial_training(plan, context)
             return plan, llm
         except (ValueError, jsonschema.ValidationError) as exc:

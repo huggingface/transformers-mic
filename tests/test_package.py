@@ -1947,3 +1947,13 @@ def test_apply_chat_template_needs_a_template(monkeypatch):
         commands.check_chat_template(usage, {"model": "mistralai/Voxtral-Mini-4B-Realtime-2602"})
     NoTemplate.chat_template = "{{ messages }}"
     commands.check_chat_template(usage, {"model": "o/m"})
+
+
+def test_audio_reaches_the_processor_as_waveforms():
+    # Voxtral-Mini-4B-Realtime: WAV paths written in the block, then handed to the processor.
+    bad = 'sf.write("a.wav", wave, sr)\ninputs = processor(text=texts, audio=["a.wav"], sampling_rate=sr)\n'
+    with pytest.raises(ValueError, match="waveforms"):
+        commands.check_audio_waveforms({"usage": bad})
+    commands.check_audio_waveforms({"usage": "inputs = processor(audio=[wave_a, wave_b], sampling_rate=sr)\n"})
+    # A chat template's audio entries load files (Voxtral-Mini-3B).
+    commands.check_audio_waveforms({"usage": bad + 'processor.apply_chat_template([{"type": "audio", "path": "a.wav"}])\n'})
