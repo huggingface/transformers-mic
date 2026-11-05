@@ -1895,3 +1895,49 @@ def test_planner_records_every_call_with_its_listed_price(monkeypatch):
     assert first == {"model": "m", "provider": "p", "prompt_tokens": 10_000, "cached_tokens": 4_000,
                      "completion_tokens": 2_000, "reasoning_tokens": 0, "seconds": 3.2, "listed_usd": 0.0054}
     assert "listed_usd" not in second
+
+
+@pytest.mark.requires_runtime
+def test_a_batch_encoding_is_not_cast_with_dtype():
+    # microsoft/layoutlmv3-base: LayoutLMv3Processor returns its tokenizer's BatchEncoding.
+    bad = 'inputs = processor(images=images, text=words, boxes=boxes, return_tensors="pt")\ninputs = inputs.to(device, dtype=model.dtype)\n'
+    with pytest.raises(ValueError, match="BatchEncoding"):
+        commands.check_batch_encoding_dtype({"usage": bad}, {"model_type": "layoutlmv3"})
+    good = bad.replace("inputs.to(device, dtype=model.dtype)", 'inputs.to(device)\ninputs["pixel_values"] = inputs["pixel_values"].to(dtype=model.dtype)')
+    commands.check_batch_encoding_dtype({"usage": good}, {"model_type": "layoutlmv3"})
+    commands.check_batch_encoding_dtype({"usage": bad}, {"model_type": "clip"})  # a BatchFeature takes dtype
+    with pytest.raises(ValueError, match="BatchEncoding"):
+        commands.check_batch_encoding_dtype({"usage": 'batch = tokenizer(texts, return_tensors="pt").to(device, dtype=torch.bfloat16)\n'}, {})
+
+
+def test_a_transducer_forward_needs_decoder_inputs():
+    # nvidia/parakeet-tdt-0.6b-v3: labels alone leave the prediction network without input.
+    bad = "model = AutoModelForTDT.from_pretrained(model_id)\ninputs = processor(audio=audio, return_tensors='pt')\nloss = model(**inputs, labels=labels).loss\n"
+    with pytest.raises(ValueError, match="decoder_input_ids"):
+        commands.check_transducer_inputs({"usage": bad})
+    with_ids = bad.replace("labels=labels)", "decoder_input_ids=decoder_input_ids, labels=labels)")
+    commands.check_transducer_inputs({"usage": with_ids})
+    from_text = bad.replace("processor(audio=audio,", "processor(audio=audio, text=transcripts,")
+    commands.check_transducer_inputs({"usage": from_text})
+    commands.check_transducer_inputs({"usage": bad.replace("AutoModelForTDT", "AutoModelForCTC")})
+
+
+@pytest.mark.requires_runtime
+def test_apply_chat_template_needs_a_template(monkeypatch):
+    from transformers import ProcessorMixin
+
+    class NoTemplate(ProcessorMixin):
+        attributes = []
+        chat_template = None
+
+        def __init__(self):
+            pass
+
+    import transformers
+
+    monkeypatch.setattr(transformers.AutoProcessor, "from_pretrained", lambda *a, **k: NoTemplate())
+    usage = {"usage": "inputs = processor.apply_chat_template(conversation)"}
+    with pytest.raises(ValueError, match="no chat template"):
+        commands.check_chat_template(usage, {"model": "mistralai/Voxtral-Mini-4B-Realtime-2602"})
+    NoTemplate.chat_template = "{{ messages }}"
+    commands.check_chat_template(usage, {"model": "o/m"})

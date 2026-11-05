@@ -359,6 +359,95 @@ def check_trainable_selection(plan, config, parameters=None):
                 )
 
 
+def check_batch_encoding_dtype(plan, config):
+    """Reject .to(..., dtype=...) on a BatchEncoding, whose .to() takes a device only.
+
+    A tokenizer returns one, and so do processors that return their tokenizer's encoding with
+    the pixels added (LayoutLMv3: microsoft/layoutlmv3-base's drafts failed three times on
+    "BatchEncoding.to() got an unexpected keyword argument 'dtype'").
+    """
+    import inspect
+
+    import transformers
+    from transformers.models.auto.processing_auto import PROCESSOR_MAPPING_NAMES
+
+    usage = plan["usage"]
+    cast = {m.group(1) for m in re.finditer(r"\b(\w+)\.to\([^)\n]*\bdtype\s*=", usage)}
+    chained = re.findall(r"\b(\w+)\([^\n]*\)\.to\([^)\n]*\bdtype\s*=", usage)  # tokenizer(...).to(..., dtype=)
+    if not cast and not chained:
+        return
+    made = {}
+    for name, maker in re.findall(r"^\s*(\w+)\s*=\s*(\w+)(?:\.\w+)?\(", usage, re.M):
+        made.setdefault(name, maker)  # the first assignment makes it; inputs = inputs.to(...) moves it
+    cls = getattr(transformers, PROCESSOR_MAPPING_NAMES.get(config.get("model_type"), ""), None)
+    try:
+        source = inspect.getsource(cls.__call__) if cls else ""
+    except (OSError, TypeError):
+        source = ""
+    encoding = "encoded_inputs = self.tokenizer(" in source and "return encoded_inputs" in source and "BatchFeature(" not in source
+    for name, maker in [(n, made.get(n, "")) for n in sorted(cast)] + [(m, m) for m in chained]:
+        if "tokenizer" in maker.lower() or (encoding and "processor" in maker.lower()):
+            raise ValueError(
+                f"{name} comes from {maker}(...), which returns a BatchEncoding: its .to() takes a device, "
+                "not dtype=; move it with .to(device) and cast only the floating tensors, e.g. "
+                f'{name}["pixel_values"] = {name}["pixel_values"].to(model.dtype)'
+            )
+
+
+def check_transducer_inputs(plan):
+    """An RNN-T/TDT forward needs decoder_input_ids: labels alone leave the prediction network no input.
+
+    nvidia/parakeet-tdt-0.6b-v3 and nvidia/nemotron-3.5-asr-streaming-0.6b drafts called
+    model(**inputs, labels=labels) on audio-only inputs: "embedding(): argument 'indices' must be
+    Tensor, not NoneType". The processor builds both from transcripts.
+    """
+    usage = plan["usage"]
+    if not re.search(r"\bAutoModelFor(?:TDT|RNNT)\b|\w+For(?:TDT|RNNT)\b", usage):
+        return
+    # processor(audio=..., text=...) returns labels and decoder_input_ids; so does a dict given them.
+    carriers = set(re.findall(r"^\s*(\w+)\s*=\s*processor\([^)]*\btext\s*=", usage, re.M))
+    carriers |= set(re.findall(r"\b(\w+)\[[\"']decoder_input_ids[\"']\]\s*=", usage))
+    for match in re.finditer(r"\bmodel\(", usage):
+        depth, end = 1, match.end()
+        while depth and end < len(usage):
+            depth += {"(": 1, ")": -1}.get(usage[end], 0)
+            end += 1
+        args = usage[match.end() : end - 1]
+        if "decoder_input_ids" in args or any(f"**{name}" in args for name in carriers):
+            continue
+        raise ValueError(
+            "a transducer (RNN-T/TDT) forward needs decoder_input_ids, which labels do not provide: build the "
+            "training inputs with processor(audio=..., text=transcripts, ...), which returns labels and "
+            "decoder_input_ids ([blank] + labels), and use model.generate for inference"
+        )
+
+
+def check_chat_template(plan, context):
+    """Reject apply_chat_template on a processor that has no chat template.
+
+    mistralai/Voxtral-Mini-4B-Realtime-2602's draft: "Cannot use apply_chat_template because this
+    processor does not have a chat template". Voxtral-Mini-3B has no template file either, but its
+    processor overrides apply_chat_template (mistral-common), so the processor is loaded and asked.
+    """
+    if "processor.apply_chat_template(" not in plan["usage"] or not context.get("model"):
+        return
+    try:
+        from transformers import AutoProcessor, ProcessorMixin
+
+        processor = AutoProcessor.from_pretrained(context["model"], revision=context.get("revision"))
+    except Exception:  # noqa: BLE001 - no processor to ask: the build will tell
+        return
+    if not isinstance(processor, ProcessorMixin):
+        return
+    overridden = type(processor).apply_chat_template is not ProcessorMixin.apply_chat_template
+    tokenizer = getattr(processor, "tokenizer", None)
+    if not overridden and not getattr(processor, "chat_template", None) and not getattr(tokenizer, "chat_template", None):
+        raise ValueError(
+            f"{type(processor).__name__} for {context['model']} has no chat template: do not call "
+            "processor.apply_chat_template; call the processor directly with the text and audio/images"
+        )
+
+
 def check_undefined_names(plan):
     """Reject usage that reads a name no block sharing its state ever defines."""
     import builtins
@@ -872,6 +961,9 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
                 check_parameter_names(plan, context["config"])
                 check_encoder_decoder_calls(plan, context["config"])
                 check_trainable_selection(plan, context["config"], loaded_parameters(context))
+                check_batch_encoding_dtype(plan, context["config"])
+            check_transducer_inputs(plan)
+            check_chat_template(plan, context)
             check_partial_training(plan, context)
             return plan, llm
         except (ValueError, jsonschema.ValidationError) as exc:
