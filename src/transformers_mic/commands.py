@@ -579,14 +579,10 @@ def names_per_layer_kind(real, limit=80, pattern=False):
     pattern=True writes layer indices as N: the slim fixture keeps other indices than
     the checkpoint (DeepSeek-V3.2's first MoE layer is 3 there and 1 in the fixture),
     so a contract that copied a real index failed with a KeyError on the fixture.
-
-    Only the first index is the layer: later ones name a sublayer and stay literal.
-    Switch Transformers keeps its router in block.N.layer.1; written as layer.N, every
-    draft looked for it in layer.0 (2026-11-05).
     """
     kinds = {}
     for n in sorted(real, key=lambda n: [int(t) if t.isdigit() else t for t in n.split(".")]):
-        kinds.setdefault(re.sub(r"\.\d+\.", ".N.", n, count=1), n)
+        kinds.setdefault(re.sub(r"\.\d+\.", ".N.", n), n)
     return sorted(kinds if pattern else kinds.values())[:limit]
 
 
