@@ -184,8 +184,8 @@ jobs:
       contents: read
       actions: write
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.11"
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
@@ -216,14 +216,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run coverage-space.yml --repo "$GITHUB_REPOSITORY" --ref main
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: tmic-publication
           path: publish-result.json
           if-no-files-found: ignore
           retention-days: 30
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: tmic-cloud-workspace
