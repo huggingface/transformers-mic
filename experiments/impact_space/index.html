@@ -72,7 +72,7 @@
   </div>
 
   <h2>GPU CI regressions, replayed</h2>
-  <p class="muted">Each regression of Transformers' daily GPU CI (bisected to a commit, or a sticky failure's first day) on a model with a contract: the model's fixture contracts run on the commit before and on the commit that broke it. <b>caught</b>: green before, red after · <b>missed</b>: green on both · <b>already-red</b>: red before too · <b>out-of-scope</b>: GPU-only tests (flash-attention, quantization, compile, fp16).</p>
+  <p class="muted">Each regression of Transformers' daily GPU CI (bisected to a commit, or a sticky failure's first day) on a model with a contract: the model's fixture contracts run on the commit before and on the commit that broke it. <b>caught</b>: green before, red after · <b>missed</b>: green on both · <b>already-red</b>: red before too · <b>not-a-regression</b>: the failing test fails on both sides of the range too, checked by hand · <b>out-of-scope</b>: GPU-only tests (flash-attention, quantization, compile, fp16).</p>
   <div class="table-wrap">
     <table>
       <thead><tr><th>Date</th><th>Model</th><th>Regression</th><th class="num">Tests</th><th>Verdict</th><th>MIC at the bad commit</th></tr></thead>
@@ -126,7 +126,7 @@
     const r = o.replay || {};
     const decided = (r.caught || 0) + (r.missed || 0);
     set("caught", decided ? `${r.caught} of ${decided}` : "–");
-    const other = [["already-red", "already red"], ["no-code-change", "with no code change"], ["broken", "could not replay"], ["pending", "pending"]]
+    const other = [["not-a-regression", "not a regression (checked by hand)"], ["already-red", "already red"], ["no-code-change", "with no code change"], ["broken", "could not replay"], ["pending", "pending"]]
       .filter(([k]) => r[k]).map(([k, text]) => `${r[k]} ${text}`);
     set("caught-note", `GPU CI regressions on covered models that the contracts turn red on${other.length ? " · " + other.join(" · ") : ""}`);
 

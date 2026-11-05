@@ -902,7 +902,10 @@ def draft_lines(suggestions, drafts):
 
 REPLAYS_PER_RUN = 40  # regressions replayed per run; the rest wait for the next one
 REGRESSION_ROWS = 100  # newest regressions on the overview; the full report lists them all
-REPLAY_VERSION = 6  # bump when a rule below changes: every verdict is recomputed
+REPLAY_VERSION = 7  # bump when a rule below changes, or the fleet's inputs change: every verdict is recomputed
+# Replay verdicts only a human sets, in labels.jsonl as {"key": "replay#<regression key>", ...}: the
+# replay cannot tell them apart from "missed", because both sides are green for the contracts.
+REPLAY_LABELS = {"not-a-regression"}
 # Failures that say the replay could not measure anything: the fixture or its baselines, not the code.
 SETUP_ERRORS = (
     "no reviewed baseline", "no golden baseline", "fixture files differ", "wrong hardware", "not measured",
@@ -1174,6 +1177,7 @@ def write_replay_plan(results, folder, download, sha_of_day=daily_sha, limit=REP
 REPLAY_VERDICTS = (
     ("caught", "the contracts' result changes between the two commits: green to red, or red to green when the baseline was recorded after the change"),
     ("missed", "green on both"),
+    ("not-a-regression", "a human reproduced the failing test on both sides of the range: the failure is not from these commits (the environment, a Hub checkpoint, a tokenizer); see the note"),
     ("already-red", "red on both: says nothing about this regression"),
     ("no-code-change", "the daily CI tested the same commit the day before: nothing for a contract to catch"),
     ("not-reproduced", "a failing run the daily CI did not repeat: transient, not a regression"),
@@ -1184,6 +1188,19 @@ REPLAY_VERDICTS = (
     ("out-of-scope", "no failing *IntegrationTest a CPU fixture contract mirrors: GPU-only, or a feature contracts do not call (export, offloading, parallelism, processors)"),
     ("not-covered", "no contract for the model"),
 )
+
+
+def with_replay_labels(replays, labels):
+    """Overlay the human replay verdicts of labels.jsonl; the measured verdict stays in `measured`."""
+    replays = dict(replays)
+    for label in labels:
+        key = label.get("key", "")
+        if key.startswith("replay#") and label.get("verdict") in REPLAY_LABELS:
+            key = key.removeprefix("replay#")
+            measured = replays.get(key, {})
+            replays[key] = {**measured, "verdict": label["verdict"], "measured": measured.get("verdict"),
+                            "failures": [], "reason": f"{label.get('note', '')} ({label.get('by', '?')})"}
+    return replays
 
 
 def replay_lines(gpu_ci, replays):
@@ -1277,7 +1294,7 @@ def summarize(results):
         return f"{n} ({100 * n / d:.0f}%)" if d else str(n)
 
     decision, checks = replay_blocking(results, day_rows, candidates, labels, baselines, first, last)
-    replays = load(results / "replays.json", {})
+    replays = with_replay_labels(load(results / "replays.json", {}), read_jsonl(results / "labels.jsonl"))
     replayed, replay_counts = replay_lines(gpu_ci, replays)
     lines = [
         "# MIC impact on Transformers PRs",
