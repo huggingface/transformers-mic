@@ -78,8 +78,16 @@
  },
  "fsmt": {
   "checkpoint": "facebook/wmt19-en-ru",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-05T09:06:37Z",
+  "run_id": 41999677156,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41999677156"
+ },
+ "jetmoe": {
+  "checkpoint": "jetmoe/jetmoe-8b",
+  "conclusion": null,
+  "dispatched_at": "2026-11-05T11:13:13Z",
   "status": "queued"
  },
  "kolibri1": {
@@ -102,8 +110,16 @@
  },
  "moshi": {
   "checkpoint": "kmhf/hf-moshika",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-05T09:06:37Z",
+  "run_id": 41999673429,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41999673429"
+ },
+ "muse_spark": {
+  "checkpoint": "meta-models/Muse-Spark-Open-816B-A42B",
+  "conclusion": null,
+  "dispatched_at": "2026-11-05T11:13:13Z",
   "status": "queued"
  },
  "poolformer": {

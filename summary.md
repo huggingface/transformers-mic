@@ -198,30 +198,30 @@ Replayed on the 218 PRs merged 2026-10-20 → 2026-11-02: which merges a red MIC
 
 | rule | blocked merges | justified | wrong | unresolved |
 |---|---|---|---|---|
-| A: any red case | 2 | 0 | 2 | 0 |
-| B: red, not infra, not failing on main | 0 | 0 | 0 | 0 |
+| A: any red case | 3 | 0 | 2 | 1 |
+| B: red, not infra, not failing on main | 1 | 0 | 0 | 1 |
 
 Proposed bar for rule B (constants `DECISION` in `experiments/impact.py`):
 
 - ❌ 14 of 30 days observed
 - ✅ wrong blocks 0 = 0.00% of 218 merged PRs (bar ≤ 1%)
 - ❌ justified blocks 0 (bar ≥ 1)
-- ✅ unresolved blocks 0 of 0 (bar ≤ 10%)
+- ❌ unresolved blocks 1 of 1 (bar ≤ 10%)
 - ❌ re-baselined contracts 31.5/week (bar ≤ 10)
 
 **Not yet** — the call stays with a maintainer; unresolved blocks shrink as cases get an outcome or a verdict in `labels.jsonl`.
 
 ## 1. Real bugs caught on PRs
 
-- PR-only failures: **242** across 20 PRs.
+- PR-only failures: **245** across 21 PRs.
 - Fixed by a push, then passed: **7** — the strongest catch signal.
 - Merged red, then the same case failed on main: **0** — a change that landed (a bug, or an intended change needing a re-baseline).
 - Labelled `real-bug`: **0**; `intended`: 0.
 
 ## 2. False alarms
 
-- PR failure groups: 1132 — infra 138 (12%), pre-existing 318 (28%), systemic (same case on ≥3 PRs that day) 11 (1%), PR-only 665 (59%).
-- PRs that saw a MIC failure: 121; of those, only failures they did not cause: **101 (83%)**.
+- PR failure groups: 1148 — infra 138 (12%), pre-existing 331 (29%), systemic (same case on ≥3 PRs that day) 11 (1%), PR-only 668 (58%).
+- PRs that saw a MIC failure: 125; of those, only failures they did not cause: **104 (83%)**.
 - PR-only cases that recovered with no push (flaky/environment): 0; merged and main stayed green for 3 days: 0; labelled `false-alarm`/`flake`: 0.
 
 ## 3. Baseline review work
@@ -289,7 +289,7 @@ Real-checkpoint failures MIC stayed green on, waiting for a verdict. A miss is n
 | weights | PR-only | fixed by push | merged→main failed | labelled real-bug |
 |---|---|---|---|---|
 | overfit | 22 | 1 | 0 | 0 |
-| random | 205 | 6 | 0 | 0 |
+| random | 208 | 6 | 0 | 0 |
 | real | 9 | 0 | 0 | 0 |
 | unknown | 6 | 0 | 0 | 0 |
 
@@ -300,12 +300,12 @@ Models with real-checkpoint regressions in the daily GPU CI and no contract, shr
 | model | real-ckpt regressions | other | checkpoint | shrinkable | draft |
 |---|---|---|---|---|---|
 | colpali | 0 | 3 | [vidore/colpali-v1.2-hf](https://huggingface.co/vidore/colpali-v1.2-hf) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41994158679) |
-| moshi | 0 | 2 | [kmhf/hf-moshika](https://huggingface.co/kmhf/hf-moshika) | yes | queued |
+| moshi | 0 | 2 | [kmhf/hf-moshika](https://huggingface.co/kmhf/hf-moshika) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41999673429) |
 | bridgetower | 0 | 1 | [regisss/bridgetower-newyorker-a100-8x](https://huggingface.co/regisss/bridgetower-newyorker-a100-8x) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41626675456) |
 | cosmos3_edge | 0 | 1 | [nvidia/Cosmos3-Edge](https://huggingface.co/nvidia/Cosmos3-Edge) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41964667193) |
-| fsmt | 0 | 1 | [facebook/wmt19-en-ru](https://huggingface.co/facebook/wmt19-en-ru) | yes | queued |
-| jetmoe | 0 | 1 | [jetmoe/jetmoe-8b](https://huggingface.co/jetmoe/jetmoe-8b) | yes | — |
-| muse_spark | 0 | 1 | [meta-models/Muse-Spark-Open-816B-A42B](https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B) | yes | — |
+| fsmt | 0 | 1 | [facebook/wmt19-en-ru](https://huggingface.co/facebook/wmt19-en-ru) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41999677156) |
+| jetmoe | 0 | 1 | [jetmoe/jetmoe-8b](https://huggingface.co/jetmoe/jetmoe-8b) | yes | queued |
+| muse_spark | 0 | 1 | [meta-models/Muse-Spark-Open-816B-A42B](https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B) | yes | queued |
 | mvp | 0 | 1 | [RUCAIBox/mvp](https://huggingface.co/RUCAIBox/mvp) | yes | — |
 | nemotron | 0 | 1 | [thhaus/nemotron3-8b](https://huggingface.co/thhaus/nemotron3-8b) | yes | — |
 | pegasus_x | 0 | 1 | [google/pegasus-x-base](https://huggingface.co/google/pegasus-x-base) | yes | — |

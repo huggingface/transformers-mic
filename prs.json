@@ -545,9 +545,9 @@
   "state": "open"
  },
  "50360": {
-  "closed_at": null,
+  "closed_at": "2026-11-05T09:30:16Z",
   "merged_at": null,
-  "state": "open"
+  "state": "closed"
  },
  "50362": {
   "closed_at": null,
@@ -579,7 +579,27 @@
   "merged_at": null,
   "state": "open"
  },
+ "50384": {
+  "closed_at": "2026-11-05T11:07:51Z",
+  "merged_at": "2026-11-05T11:07:51Z",
+  "state": "merged"
+ },
  "50385": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50387": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50388": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50391": {
   "closed_at": null,
   "merged_at": null,
   "state": "open"
