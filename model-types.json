@@ -94,6 +94,7 @@
  "huggingface-mic/csm-1b-mic": "csm",
  "huggingface-mic/deberta-large-mnli-mic": "deberta",
  "huggingface-mic/detr-mic": "detr",
+ "huggingface-mic/diffusiongemma-26B-A4B-it-mic": "diffusion_gemma",
  "huggingface-mic/dinov2-small-mic": "dinov2",
  "huggingface-mic/dinov2-with-registers-base-mic": "dinov2_with_registers",
  "huggingface-mic/dinov3-vitl16-pretrain-lvd1689m-mic": "dinov3_vit",
