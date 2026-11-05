@@ -967,3 +967,30 @@ def test_sentence_transformer_module_path_cannot_escape_source(tmp_path):
     (tmp_path / "modules.json").write_text('[{"path": "../outside"}]')
     with pytest.raises(ValueError, match="Invalid Sentence Transformers module path"):
         build_fixtures.copied_files(tmp_path)
+
+
+def test_shrink_keeps_relations_the_widths_imply():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import GPTJConfig, MobileBertConfig, XLNetConfig
+
+    # GPT-J rotates rotary_dim channels of a head it derives from n_embd / n_head.
+    gptj = shrink(GPTJConfig(n_embd=4096, n_head=16, rotary_dim=64))
+    assert gptj.rotary_dim == 64 * (gptj.n_embd // gptj.n_head) // 256
+    # XLNet validates d_head == d_model // n_head: only that config is repaired.
+    xlnet = shrink(XLNetConfig(d_model=1024, n_head=16, d_head=64))
+    assert xlnet.d_head == xlnet.d_model // xlnet.n_head
+    # MobileBERT's bottleneck widths stay the same fraction of hidden_size.
+    mobile = shrink(MobileBertConfig())
+    assert mobile.intra_bottleneck_size == mobile.true_hidden_size == mobile.hidden_size // 4
+
+
+def test_input_layouts_keep_the_first_layout_and_add_what_it_lacks():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import input_layouts
+    from transformers import VideoMAEConfig, VideoMAEModel
+
+    config = VideoMAEConfig(hidden_size=32, num_hidden_layers=1, num_attention_heads=2, intermediate_size=64, num_frames=4, image_size=32, patch_size=16)
+    layouts = input_layouts(VideoMAEModel(config), config)
+    assert layouts[0]["pixel_values"].shape == (2, 3, 32, 32)  # what the sweep sent before
+    assert layouts[1]["pixel_values"].shape == (2, 4, 3, 32, 32)  # frames, as the processor sends
