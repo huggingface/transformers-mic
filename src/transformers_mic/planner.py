@@ -38,6 +38,50 @@ class MalformedDraft(ValueError):
     """The reply is not a draft: empty, or missing a top-level key."""
 
 
+# One entry per completion this process made, malformed replies included (they are
+# billed too): what `tmic create` writes to .mic/planner-calls.json for cost comparisons.
+CALLS = []
+PRICES_URL = "https://router.huggingface.co/v1/models"
+_prices = {}
+
+
+def price(model, provider):
+    """The router's listed USD per million (input, output) tokens, or None.
+
+    Not every provider lists one (together does not), and billing can differ: a
+    request costs at least $0.01. The billing API has the amounts actually charged.
+    """
+    if not _prices:
+        try:
+            for entry in httpx2.get(PRICES_URL, timeout=30).json()["data"]:
+                for p in entry.get("providers", []):
+                    if p.get("pricing"):
+                        _prices[(entry["id"], p["provider"])] = (p["pricing"]["input"], p["pricing"]["output"])
+        except Exception:  # noqa: BLE001 - pricing is advisory
+            _prices[None] = None
+    return _prices.get((model, provider))
+
+
+def record_call(response, model, provider, seconds):
+    usage = getattr(response, "usage", None)
+    tokens = lambda name: int(getattr(usage, name, 0) or 0) if usage else 0
+    details = getattr(usage, "prompt_tokens_details", None)
+    completion = getattr(usage, "completion_tokens_details", None)
+    call = {
+        "model": model,
+        "provider": provider,
+        "prompt_tokens": tokens("prompt_tokens"),
+        "cached_tokens": int(getattr(details, "cached_tokens", 0) or 0) if details else 0,
+        "completion_tokens": tokens("completion_tokens"),
+        "reasoning_tokens": int(getattr(completion, "reasoning_tokens", 0) or 0) if completion else 0,
+        "seconds": round(seconds, 1),
+    }
+    listed = price(model, provider)
+    if listed:
+        call["listed_usd"] = round((call["prompt_tokens"] * listed[0] + call["completion_tokens"] * listed[1]) / 1e6, 6)
+    CALLS.append(call)
+
+
 def propose(
     context,
     *,
@@ -52,7 +96,9 @@ def propose(
         model=model, provider=provider, timeout=120, bill_to=bill_to or None
     )
     try:
+        started = time.monotonic()
         response = complete_with_backoff(client, context, model, max_tokens, temperature=temperature)
+        record_call(response, model, provider, time.monotonic() - started)
     except HfHubHTTPError as error:
         status = getattr(error.response, "status_code", None)
         if bill_to and status in (401, 402, 403):
