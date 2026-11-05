@@ -150,7 +150,10 @@ def test_download_reads_tables_and_falls_back_to_json_for_old_revisions(
             if legacy[revision] is None:
                 raise EntryNotFoundError(filename)
             path.write_text(json.dumps({"comment": "ignored", **legacy[revision]}))
-        elif has_tables[revision] and filename.split("/")[1].removesuffix(".csv") in tables:
+        elif (
+            has_tables[revision]
+            and filename.split("/")[1].removesuffix(".csv") in tables
+        ):
             path.write_text(tables[filename.split("/")[1].removesuffix(".csv")])
         else:
             raise EntryNotFoundError(filename)
@@ -169,3 +172,23 @@ def test_download_reads_tables_and_falls_back_to_json_for_old_revisions(
     # Tables alone: the dataset after the JSON locks were removed
     path, _ = fleet.download("control", "4" * 40)
     assert json.loads(path.read_text()) == LOCK
+
+
+def test_sentence_transformers_fleet_round_trips_with_its_own_framework():
+    lock = {
+        "framework": fleet.ST_FRAMEWORK,
+        "environment": {},
+        "contracts": {"TimesFM": LOCK["contracts"]["TimesFM"]},
+    }
+    tables = fleet.to_tables(lock, fleet.ST_FRAMEWORK)
+    assert fleet.from_tables(tables, fleet.ST_FRAMEWORK) == lock
+    # Neither dataset accepts the other's locks.
+    with pytest.raises(ValueError, match="only holds transformers"):
+        fleet.to_tables(lock)
+    with pytest.raises(ValueError, match="only holds sentence_transformers"):
+        fleet.to_tables(LOCK, fleet.ST_FRAMEWORK)
+    assert set(fleet.operations(fleet.ST_FLEET, lock, fleet.ST_FRAMEWORK)) == {
+        "sentence_transformers/contracts.csv",
+        "sentence_transformers/environment.csv",
+        "sentence_transformers/known_failures.csv",
+    }

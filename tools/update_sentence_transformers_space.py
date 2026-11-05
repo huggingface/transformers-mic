@@ -62,6 +62,7 @@ def result_run(folder, *, run_id, attempt, conclusion, mode, repository, now=Non
     else:
         status = "pass"
     pin = folder / "fleet-revision.txt"
+    st_pin = folder / "st-fleet-revision.txt"
     freeze = folder / "pip-freeze.txt"
     # Keep only relevant public package versions/direct references, not arbitrary pip URLs.
     dependencies = (
@@ -104,6 +105,7 @@ def result_run(folder, *, run_id, attempt, conclusion, mode, repository, now=Non
         "results": rows,
         "url": f"https://github.com/{repository}/actions/runs/{run_id}/attempts/{attempt}",
         "fleet_revision": pin.read_text().strip() if pin.exists() else None,
+        "st_fleet_revision": st_pin.read_text().strip() if st_pin.exists() else None,
         "dependencies": dependencies,
     }
 

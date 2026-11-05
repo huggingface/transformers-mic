@@ -1068,14 +1068,19 @@ table advertises integration names with the contract revision. Existing fleet
 CSV tables keep their format, so older clients can still read dual-integration
 MICs and run only their Transformers path. Stale integration metadata from an
 older exporter is ignored when its revision no longer matches the contract.
-Sentence-Transformers-only MICs require the updated runner, which skips
-contracts that do not declare the selected integration.
+Sentence-Transformers-only MICs (no Transformers usage) do not go in that
+dataset: they live in their own fleet,
+[`huggingface-mic/sentence-transformers-fleet`](https://huggingface.co/datasets/huggingface-mic/sentence-transformers-fleet),
+under `sentence_transformers/` with the same `contracts`, `environment` and
+`known_failures` tables and a `sentence_transformers` lock framework, so they
+never count as Transformers coverage. `fleet.download_st()` reads it.
 
 The `sentence-transformers-nightly.yml` workflow runs daily at **04:23 UTC**.
-It resolves one immutable fleet revision, selects advertised Sentence
-Transformers MICs from both fleets, and checks their fixtures on Linux CPU.
+It resolves one immutable revision of each dataset, checks every contract in the
+Sentence Transformers fleet plus the Transformers fleets' contracts that advertise
+`sentence_transformers` (a MIC repo listed twice runs once), on Linux CPU.
 It uses Sentence Transformers and Transformers `main` by default; manual dispatch
-can select the latest Sentence Transformers release. Results, the fleet revision
+can select the latest Sentence Transformers release. Results, both fleet revisions
 and installed package versions are uploaded as artifacts. Transformers-specific
 known failures and patches do not apply to this job. Empty selection or failed
 comparisons fail the job.
