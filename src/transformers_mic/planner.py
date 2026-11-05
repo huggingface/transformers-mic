@@ -317,6 +317,9 @@ not memory:
   models), use the architecture's image or base model class for the training step.
 - Image processor classes have no Fast suffix in Transformers 5 (use
   XImageProcessor, not XImageProcessorFast). device_map needs accelerate in requires.
+- Audio goes to processors as decoded waveforms (NumPy arrays or tensors at the processor's
+  sampling rate), never file paths, URLs or base64: build them in the block (e.g. sine waves).
+  A transcription-only processor (Voxtral Realtime) takes audio and no text.
 - Processors take singular keyword arguments in Transformers 5: text=, images=,
   videos=, audio= (audios= raises). For a chat-template VLM, render the prompts
   with processor.apply_chat_template(messages, add_generation_prompt=True,

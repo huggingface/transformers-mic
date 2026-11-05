@@ -1922,6 +1922,10 @@ def test_a_transducer_forward_needs_decoder_inputs():
     commands.check_transducer_inputs({"usage": bad.replace("AutoModelForTDT", "AutoModelForCTC")})
     nested = "model = AutoModelForTDT.from_pretrained(model_id)\nbatch = processor(\n    audio=[np.zeros(16000), np.ones(16000)],\n    text=['a', 'b'],\n)\nloss = model(**batch).loss\n"
     commands.check_transducer_inputs({"usage": nested})  # a ")" before text= is still a text call
+    # nemotron-3.5-asr: training fixed, inference still model(**inputs) on audio only.
+    inference = "model = Nemotron3_5AsrForRNNT.from_pretrained(m)\ninputs = processor(audio=a)\noutputs = model(**inputs)\nbatch = processor(audio=a, text=t)\nloss = model(**batch).loss\n"
+    with pytest.raises(ValueError, match=r"line 3: model\(\*\*inputs\)"):
+        commands.check_transducer_inputs({"usage": inference})
 
 
 @pytest.mark.requires_runtime

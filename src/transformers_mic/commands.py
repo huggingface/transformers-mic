@@ -424,11 +424,14 @@ def check_transducer_inputs(plan):
         args = call_arguments(usage, match.end())
         if "decoder_input_ids" in args or any(f"**{name}" in args for name in carriers):
             continue
+        line = usage.count("\n", 0, match.start()) + 1
         raise ValueError(
-            "a transducer (RNN-T/TDT) forward needs decoder_input_ids, which labels do not provide: build the "
-            "training inputs with the transcripts, batch = processor(audio=audios, text=transcripts, "
+            f"usage line {line}: model({' '.join(args.split())[:80]}) has no decoder_input_ids, and a transducer "
+            "(RNN-T/TDT) forward needs them, also for inference: labels do not provide them. For inference use "
+            "model.generate(**inputs), or pass decoder_input_ids=torch.full((batch, 1), "
+            "model.config.blank_token_id); for training build batch = processor(audio=audios, text=transcripts, "
             "sampling_rate=sr, return_tensors=\"pt\"), which returns labels and decoder_input_ids "
-            "([blank] + labels), then model(**batch); use model.generate for inference, never model(**audio_inputs)"
+            "([blank] + labels), then model(**batch)"
         )
 
 
