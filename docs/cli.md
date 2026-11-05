@@ -1079,9 +1079,13 @@ The `sentence-transformers-nightly.yml` workflow runs daily at **04:23 UTC**.
 It resolves one immutable revision of each dataset, checks every contract in the
 Sentence Transformers fleet plus the Transformers fleets' contracts that advertise
 `sentence_transformers` (a MIC repo listed twice runs once), on Linux CPU.
-It uses Sentence Transformers and Transformers `main` by default; manual dispatch
-can select the latest Sentence Transformers release. Results, both fleet revisions
-and installed package versions are uploaded as artifacts. Transformers-specific
+Every run resolves the latest `main` commit of both Sentence Transformers and
+Transformers, upgrades both from those exact Git commits, and verifies installed
+Git provenance before executing contracts. There is no release option. Fleet
+versions for these two projects are excluded from the run's dependency pins;
+fleet revisions still select the MICs, fixture snapshots and reviewed baselines.
+The resolved SHAs (`upstream-commits.json`), results, both fleet revisions and
+installed package versions are uploaded as artifacts. Transformers-specific
 known failures and patches do not apply to this job. Empty selection or failed
 comparisons fail the job.
 
