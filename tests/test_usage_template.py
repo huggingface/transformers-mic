@@ -37,3 +37,86 @@ def test_render_writes_the_scaffold():
                  'model = AutoModelForMaskedLM.from_pretrained(model_id, **variant).to(device)',
                  'checked = ("lm_head.weight",)', '"logits": logits.float().tolist(),', 'optimizer.step()'):
         assert line in page
+
+
+def _plan(record, training="loss = model(**inputs).loss"):
+    return f"""# T
+
+## Run
+
+```py runnable:x
+import torch
+from transformers import AutoModel
+import json  # doc-builder: hide
+import os  # doc-builder: hide
+
+model_id = "org/m"
+model_id = os.environ.get("MIC_MODEL", model_id)  # doc-builder: hide
+variant = json.loads(os.environ.get("MIC_MODEL_KWARGS", "{{}}"))  # doc-builder: hide
+device = "cpu"
+model = AutoModel.from_pretrained(model_id, **{{"dtype": torch.float32, **variant}}).to(device)
+out = model(**inputs)
+```
+
+## One training step
+
+```py runnable:x:2
+model.train()
+optimizer = torch.optim.SGD([p for p in model.parameters() if p.requires_grad], lr=0.01)
+{training}
+loss.backward()
+before = {{n: p.detach().cpu().clone() for n, p in model.named_parameters() if p.requires_grad}}  # doc-builder: hide
+optimizer.step()
+print(f"loss: {{loss.item():.4f}}")
+
+{record}
+```
+"""
+
+
+def test_planner_written_variations_extract_and_render():
+    record = '''if os.environ.get("MIC_RUNNER"):  # doc-builder: hide
+    named = dict(model.named_parameters())
+    experts = next(n for n in named if n.endswith("experts.gate_up_proj"))
+    checked = ("lm_head.weight", experts)
+    result = {
+        "runtime": {"device": model.device.type, "dtype": str(model.dtype), "attn_implementation": "x"},
+        "probe": out.last_hidden_state[0, 0, :4].tolist(),
+        "training": {"loss": loss.item(), "gradients": {}, "frozen": 1, "updated": True},
+    }
+    print(json.dumps(result))'''
+    slots = usage_template.extract(_plan(record))
+    assert slots["load_kwargs"] == '{"dtype": torch.float32}'
+    assert slots["training"]["optimizer"] == "trainable" and slots["training"]["record"] == {"frozen": "1"}
+    page = usage_template.render(slots, "org/m")
+    # checked uses `experts`, which the record computes first.
+    assert page.index("experts = next(") < page.index('checked = ("lm_head.weight", experts)')
+    assert '**{"dtype": torch.float32, **variant}' in page and "del model  # doc-builder: hide" in page
+    assert usage_template.render(usage_template.extract(page), "org/m") == page
+
+
+def test_checked_defined_by_the_training_code_is_not_overwritten():
+    record = '''if os.environ.get("MIC_RUNNER"):  # doc-builder: hide
+    result = {"runtime": {}, "probe": 1, "training": {"loss": 0, "gradients": {}, "updated": True}}
+    print(json.dumps(result))'''
+    training = 'named = dict(model.named_parameters())\nchecked = ("lm_head.weight",)\nloss = model(**inputs).loss'
+    page = usage_template.render(usage_template.extract(_plan(record, training)), "org/m")
+    assert "checked = ()" not in page and page.count("checked = (") == 1
+
+
+def test_slots_reply_expands_to_a_valid_plan():
+    from transformers_mic import commands
+
+    folder = next(f for f in CATALOG if f.name == "T5-integration")
+    manifest = json.loads((folder / "integration.json").read_text())
+    usage = (folder / "integrations/transformers/usage.md").read_text()
+    model = next(iter(manifest["checkpoints"]))
+    fixture = manifest["checkpoints"][model]["fixture"]
+    reply = usage_template.as_slots({"name": "T5", "manifest": manifest, "usage": usage, "rationale": "", "historical_candidates": []}, fixture)
+    reply["slots"]["outputs"]["training.loss"] = "loss.item()"  # reserved: the template writes it
+    plan = usage_template.expand(reply, model, fixture)
+    commands.validate_plan(plan, model, fixture)
+    assert plan["manifest"]["outputs"]["training.loss"]["atol"] == 1e-4
+    # A full page in slots mode is converted, not rejected.
+    converted = usage_template.from_usage_reply({"name": "T5", "manifest": manifest, "usage": usage, "rationale": "", "historical_candidates": []}, fixture)
+    commands.validate_plan(usage_template.expand(converted, model, fixture), model, fixture)

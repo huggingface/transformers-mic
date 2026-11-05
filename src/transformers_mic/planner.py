@@ -1,6 +1,7 @@
 """HF Inference Providers propose usage code, never measured expectations."""
 
 import json
+import os
 import re
 import sys
 import time
@@ -22,12 +23,15 @@ NO_THINKING = {
 DEFAULT_BILL_TO = "huggingface"
 PLAN_SCHEMA = {
     "type": "object",
-    "required": ["name", "manifest", "usage", "rationale", "historical_candidates"],
+    "required": ["name", "manifest", "rationale", "historical_candidates"],
+    # A full usage page, or the slots usage_template renders into one.
+    "anyOf": [{"required": ["usage"]}, {"required": ["slots"]}],
     "additionalProperties": False,
     "properties": {
         "name": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]*$"},
         "manifest": {"type": "object"},
         "usage": {"type": "string", "minLength": 100},
+        "slots": {"type": "object"},
         "rationale": {"type": "string"},
         "historical_candidates": {"type": "array", "items": {"type": "object"}},
     },
@@ -97,7 +101,7 @@ def complete(client, context, model, max_tokens, temperature=0.0):
     to get out of a repeated mistake."""
     return client.chat_completion(
         messages=[
-            {"role": "system", "content": SYSTEM},
+            {"role": "system", "content": SYSTEM + (SLOTS if slots_enabled() else "")},
             {
                 "role": "user",
                 "content": json.dumps(context)
@@ -131,7 +135,7 @@ def parse(response, model, provider, bill_to):
     try:
         jsonschema.validate(plan, PLAN_SCHEMA)
     except jsonschema.ValidationError as error:
-        if error.validator in ("required", "type") and not error.path:
+        if error.validator in ("required", "type", "anyOf") and not error.path:
             # Missing or mistyped top-level keys: not a draft, ask again.
             raise MalformedDraft(error.message) from error
         error.plan = plan  # the retry shows the model its own draft
@@ -346,3 +350,41 @@ not memory:
   the checkpoint lacks it (handle it visibly, as for pad tokens above) or needs a
   tokenizer backend (Voxtral's chat template comes from mistral-common).
 """
+
+def slots_enabled():
+    return os.environ.get("TMIC_PLANNER_SLOTS") == "1"
+
+
+# With TMIC_PLANNER_SLOTS=1 the planner writes only the model-specific code
+# (usage_template renders the page) and the manifest fields that need judgment.
+SLOTS = """
+Return "slots" instead of "usage", and a partial "manifest". The CLI writes the
+scaffold from them: the page intro, runnable fences, the MIC_* plumbing, model_id,
+variant and device lines, set_seed(0), the hidden variant reload, the training
+step (model.train(), the optimizer, loss.backward(), the hidden before snapshot,
+optimizer.step(), the loss print) and the whole hidden result record (runtime,
+training.loss, training.gradients, training.updated). Never write any of those.
+slots (see context.example_plan.slots for an approved contract in this form):
+  title, block (runnable name), heading, text: the page's title and first section
+  imports: import lines for visible code (torch and set_seed are added)
+  setup: code before the model loads (processors, tokenizer pad settings, data)
+  model_class: the class loading the checkpoint (a name from context.transformers_classes)
+  load_kwargs: null, or a dict literal of fixed from_pretrained arguments such as
+    '{"dtype": torch.float32}' (variants are merged over it)
+  inference: code after `model` is loaded and on `device`: inputs, the forward or
+    generate call, and the values the record reports
+  sections: optional [{heading, text, code}] further runnable steps
+  training: null when the model cannot train, else {text, inputs (labels, and
+    requires_grad_(False) for partial training), loss (code assigning `loss`),
+    optimizer ("all", or "trainable" when parameters are frozen)}
+  checked: parameter names whose gradients are checked, or the source of an
+    expression computing them by suffix: [next(n for n in names if n.endswith("..."))
+    for ...] where names = list(dict(model.named_parameters()))
+  record_setup: optional code computing record values (runs hidden, before result)
+  outputs: {"name": "python expression"} for each reported value, in order
+manifest: {name, usage (a one-line description), architecture, requires,
+  resources, build (fixture build fields besides seed, e.g. config_overrides or
+  model_class), outputs: {"name": {"compare": rule}} for every slots.outputs key
+  (or a dotted path inside it); runtime and training.* are added}.
+"""
+

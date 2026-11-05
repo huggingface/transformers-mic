@@ -13,7 +13,7 @@ import tempfile
 from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download
 import jsonschema
 
-from . import backend, fleet, history, planner, policy, references, resources
+from . import backend, fleet, history, planner, policy, references, resources, usage_template
 from .hub import (
     DEFAULT_NAMESPACE,
     canonical_references,
@@ -810,9 +810,18 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
     # A provider can emit schema-valid JSON that violates runner conventions.
     # Return validation feedback for one repair; never execute an invalid draft.
     for attempt in range(3):
-        plan = None
+        plan = reply = None
         try:
-            plan, llm = propose_well_formed(context, args, attempt, format_retries)
+            reply, llm = propose_well_formed(context, args, attempt, format_retries)
+            plan = reply
+            if planner.slots_enabled() and "slots" not in reply and "usage" in reply:
+                reply = usage_template.from_usage_reply(reply, fixture) or reply
+            if "slots" in reply:
+                # The planner wrote the model-specific code; the template writes the rest.
+                try:
+                    plan = usage_template.expand(reply, model, fixture, bool(context.get("fixtures_only")))
+                except (KeyError, TypeError, AttributeError) as exc:
+                    raise ValueError(f"slots: {type(exc).__name__}: {exc}") from None
             if isinstance(plan.get("name"), str):  # "Qwen3.5-0.8B" is a slug away from valid
                 plan["name"] = re.sub(r"[^A-Za-z0-9_-]", "-", plan["name"])
             normalize_compare(plan)
@@ -838,7 +847,7 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
             print(f"tmic: planner draft {attempt + 1}/3 rejected: {str(exc).splitlines()[0][:300]}", file=sys.stderr)
             if attempt == 2:
                 raise
-            plan = plan if plan is not None else getattr(exc, "plan", None)
+            plan = reply if reply is not None else getattr(exc, "plan", None)
             context = {
                 **context,
                 "previous_draft": plan,
@@ -1041,6 +1050,14 @@ def create(args):
         if nearest:
             context["example_plan"], context["example_reason"] = nearest
             print(f"tmic: planner example: {context['example_reason']}", file=sys.stderr)
+        if planner.slots_enabled():
+            example = context["example_plan"]
+            fixture_of = next(iter(example["manifest"]["fixtures"]))
+            converted = usage_template.as_slots(example, fixture_of)
+            if converted:
+                context["example_plan"] = converted
+            else:
+                print("tmic: the planner example does not fit the usage template; showing it whole", file=sys.stderr)
         plan, llm = propose_valid(context, args, args.model, fixture)
         manifest = plan["manifest"]
         if args.name:
