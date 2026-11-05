@@ -394,6 +394,15 @@ def check_batch_encoding_dtype(plan, config):
             )
 
 
+def call_arguments(text, start):
+    """The text between the parenthesis at text[start - 1] and its match."""
+    depth, end = 1, start
+    while depth and end < len(text):
+        depth += {"(": 1, ")": -1}.get(text[end], 0)
+        end += 1
+    return text[start : end - 1]
+
+
 def check_transducer_inputs(plan):
     """An RNN-T/TDT forward needs decoder_input_ids: labels alone leave the prediction network no input.
 
@@ -405,20 +414,21 @@ def check_transducer_inputs(plan):
     if not re.search(r"\bAutoModelFor(?:TDT|RNNT)\b|\w+For(?:TDT|RNNT)\b", usage):
         return
     # processor(audio=..., text=...) returns labels and decoder_input_ids; so does a dict given them.
-    carriers = set(re.findall(r"^\s*(\w+)\s*=\s*processor\([^)]*\btext\s*=", usage, re.M))
+    carriers = set()
+    for match in re.finditer(r"^\s*(\w+)\s*=\s*processor\(|\b(\w+)\.update\(\s*processor\(", usage, re.M):
+        if re.search(r"\btext\s*=", call_arguments(usage, match.end())):
+            carriers.add(match.group(1) or match.group(2))
     carriers |= set(re.findall(r"\b(\w+)\[[\"']decoder_input_ids[\"']\]\s*=", usage))
+    carriers |= set(re.findall(r"^\s*(\w+)\s*=\s*(?:dict\(|\{)[^\n]*decoder_input_ids", usage, re.M))
     for match in re.finditer(r"\bmodel\(", usage):
-        depth, end = 1, match.end()
-        while depth and end < len(usage):
-            depth += {"(": 1, ")": -1}.get(usage[end], 0)
-            end += 1
-        args = usage[match.end() : end - 1]
+        args = call_arguments(usage, match.end())
         if "decoder_input_ids" in args or any(f"**{name}" in args for name in carriers):
             continue
         raise ValueError(
             "a transducer (RNN-T/TDT) forward needs decoder_input_ids, which labels do not provide: build the "
-            "training inputs with processor(audio=..., text=transcripts, ...), which returns labels and "
-            "decoder_input_ids ([blank] + labels), and use model.generate for inference"
+            "training inputs with the transcripts, batch = processor(audio=audios, text=transcripts, "
+            "sampling_rate=sr, return_tensors=\"pt\"), which returns labels and decoder_input_ids "
+            "([blank] + labels), then model(**batch); use model.generate for inference, never model(**audio_inputs)"
         )
 
 
@@ -934,6 +944,10 @@ def drop_unknown_manifest_keys(plan):
     return dropped
 
 
+# Drafts propose_valid refused in this process, written beside planner-calls.json.
+REJECTED = []
+
+
 def propose_valid(context, args, model, fixture, old=None, format_retries=2):
     # A provider can emit schema-valid JSON that violates runner conventions.
     # Return validation feedback for one repair; never execute an invalid draft.
@@ -968,6 +982,7 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
             return plan, llm
         except (ValueError, jsonschema.ValidationError) as exc:
             print(f"tmic: planner draft {attempt + 1}/3 rejected: {str(exc).splitlines()[0][:300]}", file=sys.stderr)
+            REJECTED.append({"attempt": attempt + 1, "error": str(exc)[:3000], "plan": plan if plan is not None else getattr(exc, "plan", None)})
             if attempt == 2:
                 raise
             plan = plan if plan is not None else getattr(exc, "plan", None)
@@ -1179,6 +1194,8 @@ def create(args):
             # Token use of every planner call, for comparing models' cost (planner-eval).
             (workspace.root / ".mic").mkdir(parents=True, exist_ok=True)
             write(workspace.root / ".mic/planner-calls.json", planner.CALLS)
+            # The drafts a check refused, with the reason: was the check or the planner wrong?
+            write(workspace.root / ".mic/rejected-drafts.json", REJECTED)
         manifest = plan["manifest"]
         if args.name:
             if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]*", args.name):

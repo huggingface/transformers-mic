@@ -1920,6 +1920,8 @@ def test_a_transducer_forward_needs_decoder_inputs():
     from_text = bad.replace("processor(audio=audio,", "processor(audio=audio, text=transcripts,")
     commands.check_transducer_inputs({"usage": from_text})
     commands.check_transducer_inputs({"usage": bad.replace("AutoModelForTDT", "AutoModelForCTC")})
+    nested = "model = AutoModelForTDT.from_pretrained(model_id)\nbatch = processor(\n    audio=[np.zeros(16000), np.ones(16000)],\n    text=['a', 'b'],\n)\nloss = model(**batch).loss\n"
+    commands.check_transducer_inputs({"usage": nested})  # a ")" before text= is still a text call
 
 
 @pytest.mark.requires_runtime
