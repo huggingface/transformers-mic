@@ -902,7 +902,7 @@ def draft_lines(suggestions, drafts):
 
 REPLAYS_PER_RUN = 40  # regressions replayed per run; the rest wait for the next one
 REGRESSION_ROWS = 100  # newest regressions on the overview; the full report lists them all
-REPLAY_VERSION = 5  # bump when a rule below changes: every verdict is recomputed
+REPLAY_VERSION = 6  # bump when a rule below changes: every verdict is recomputed
 # Failures that say the replay could not measure anything: the fixture or its baselines, not the code.
 SETUP_ERRORS = (
     "no reviewed baseline", "no golden baseline", "fixture files differ", "wrong hardware", "not measured",
@@ -1013,7 +1013,16 @@ def same_event(key, item, gpu_ci):
     return None
 
 
-def replay_plan(gpu_ci, replays, contracts, sha_of_day, limit=REPLAYS_PER_RUN, sha_of_run=run_sha, failing_on=daily_failures):
+def commit_files(sha):
+    """Files a Transformers commit changed (a squash merge: its PR's), or None when GitHub cannot say."""
+    try:
+        return [f["filename"] for f in github(f"/repos/{TRANSFORMERS}/commits/{sha}")["files"]]
+    except urllib.error.HTTPError:
+        return None
+
+
+def replay_plan(gpu_ci, replays, contracts, sha_of_day, limit=REPLAYS_PER_RUN, sha_of_run=run_sha, failing_on=daily_failures,
+                files_of=commit_files):
     """Plan entries for the regressions not replayed yet, newest first: one per (regression, fleet).
 
     A bisected regression replays its bad commit and that commit's parent. A sticky onset replays
@@ -1039,6 +1048,15 @@ def replay_plan(gpu_ci, replays, contracts, sha_of_day, limit=REPLAYS_PER_RUN, s
         if not item.get("bad_commit") and not confirmed(item, failing_on):
             replays[key] = {"verdict": "not-reproduced", "reason": "the daily CI did not fail it", "version": REPLAY_VERSION}
             continue
+        if item.get("bad_commit"):
+            # Upstream bisects a flaky test onto whatever commit came next: a docs PR, another
+            # model's tests. A culprit PR CI would not run the model's contracts for is that.
+            if "culprit_files" not in item:
+                item["culprit_files"] = files_of(item["bad_commit"])
+            if item["culprit_files"] is not None and not selects(item["culprit_files"], item["model"]):
+                replays[key] = {"verdict": "unrelated-culprit", "reason": "the bisected commit does not touch the model or shared code",
+                                "version": REPLAY_VERSION}
+                continue
         if len(keys) >= limit:
             continue
         if item.get("bad_commit"):
@@ -1143,7 +1161,9 @@ def write_replay_plan(results, folder, download, sha_of_day=daily_sha, limit=REP
         path, revisions[name] = download(name, "main")
         locks[name] = json.loads(Path(path).read_text())
     replays = load(results / "replays.json", {})
-    plan = replay_plan(load(results / "gpu-ci.json", {}), replays, model_contracts(locks, types), sha_of_day, limit)
+    gpu_ci = load(results / "gpu-ci.json", {})
+    plan = replay_plan(gpu_ci, replays, model_contracts(locks, types), sha_of_day, limit)
+    write(results / "gpu-ci.json", gpu_ci)  # keeps each culprit's files
     for entry in plan:
         entry["fleet_revision"] = revisions[entry["fleet"]]
     write(results / "replays.json", replays)
@@ -1159,6 +1179,7 @@ REPLAY_VERDICTS = (
     ("not-reproduced", "a failing run the daily CI did not repeat: transient, not a regression"),
     ("model-added", "the bad commit added the model: no contract could have run before it"),
     ("duplicate", "the same regression as a bisected one, counted there"),
+    ("unrelated-culprit", "upstream's bisect blamed a commit that does not touch the model or shared code: a flaky test"),
     ("broken", "the replay could not measure it (commit, install, fixture or baseline setup)"),
     ("out-of-scope", "no failing *IntegrationTest a CPU fixture contract mirrors: GPU-only, or a feature contracts do not call (export, offloading, parallelism, processors)"),
     ("not-covered", "no contract for the model"),

@@ -438,8 +438,8 @@ def test_replay_plan_pairs_each_regression_with_its_commits():
     }
     days = {"2026-10-02": "p" * 40, "2026-10-03": "q" * 40}
     replays = {}
-    plan = impact.replay_plan(gpu_ci, replays, CONTRACTS, days.get, sha_of_run=lambda run: None, failing_on=fails)
-    assert replays == {"sticky#bert#2026-10-03": {"verdict": "not-covered", "version": 5}, "8#llama": {"verdict": "out-of-scope", "version": 5}}
+    plan = impact.replay_plan(gpu_ci, replays, CONTRACTS, days.get, sha_of_run=lambda run: None, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py'])
+    assert replays == {"sticky#bert#2026-10-03": {"verdict": "not-covered", "version": 6}, "8#llama": {"verdict": "out-of-scope", "version": 6}}
     # Newest first; one entry per fleet holding the model's contracts.
     assert [(p["key"], p["fleet"], p["variants"], p["parent"], p["bad"]) for p in plan] == [
         ("sticky#llama#2026-10-03", "control", ["default", "bfloat16"], "p" * 40, "q" * 40),
@@ -449,19 +449,19 @@ def test_replay_plan_pairs_each_regression_with_its_commits():
     ]
     assert plan[0]["model"] == "llama" and plan[0]["contracts"] == ["huggingface-mic/llama-mic"]
     # Replayed regressions are not planned again; the limit counts regressions, not entries.
-    done = {**replays, "sticky#llama#2026-10-03": {"verdict": "missed", "version": 5}}
-    assert {p["key"] for p in impact.replay_plan(gpu_ci, done, CONTRACTS, days.get, limit=1, failing_on=fails)} == {"7#llama"}
-    assert {p["key"] for p in impact.replay_plan(gpu_ci, {}, CONTRACTS, days.get, limit=1, failing_on=fails)} == {"sticky#llama#2026-10-03"}
+    done = {**replays, "sticky#llama#2026-10-03": {"verdict": "missed", "version": 6}}
+    assert {p["key"] for p in impact.replay_plan(gpu_ci, done, CONTRACTS, days.get, limit=1, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py'])} == {"7#llama"}
+    assert {p["key"] for p in impact.replay_plan(gpu_ci, {}, CONTRACTS, days.get, limit=1, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py'])} == {"sticky#llama#2026-10-03"}
     # A verdict from older rules is planned again.
     old = {**done, "7#llama": {"verdict": "missed"}}
-    assert {p["key"] for p in impact.replay_plan(gpu_ci, old, CONTRACTS, days.get, failing_on=fails)} == {"7#llama"}
+    assert {p["key"] for p in impact.replay_plan(gpu_ci, old, CONTRACTS, days.get, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py'])} == {"7#llama"}
 
 
 def test_a_sticky_onset_replays_up_to_the_run_that_failed():
     # A push run on a commit after the daily CI's: the range must reach it.
     gpu_ci = {"sticky#llama#2026-10-03": regression(date="2026-10-03", run_id="99")}
     days = {"2026-10-02": "p" * 40, "2026-10-03": "q" * 40}
-    plan = impact.replay_plan(gpu_ci, {}, CONTRACTS, days.get, sha_of_run={"99": "r" * 40}.get, failing_on=fails)
+    plan = impact.replay_plan(gpu_ci, {}, CONTRACTS, days.get, sha_of_run={"99": "r" * 40}.get, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py'])
     assert {(p["parent"], p["bad"]) for p in plan} == {("p" * 40, "r" * 40)}
 
 
@@ -477,11 +477,11 @@ def test_only_integration_tests_a_fixture_contract_mirrors_are_in_scope():
 def test_a_sticky_onset_without_two_daily_commits_is_not_replayed():
     gpu_ci = {"sticky#llama#2026-10-03": regression(date="2026-10-03")}
     replays = {}
-    assert impact.replay_plan(gpu_ci, replays, CONTRACTS, {"2026-10-03": "q" * 40}.get, sha_of_run=lambda run: None, failing_on=fails) == []
+    assert impact.replay_plan(gpu_ci, replays, CONTRACTS, {"2026-10-03": "q" * 40}.get, sha_of_run=lambda run: None, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py']) == []
     assert replays["sticky#llama#2026-10-03"]["verdict"] == "broken"
     # The same commit on both days: the failure started without a code change.
     replays = {}
-    assert impact.replay_plan(gpu_ci, replays, CONTRACTS, lambda day: "q" * 40, sha_of_run=lambda run: None, failing_on=fails) == []
+    assert impact.replay_plan(gpu_ci, replays, CONTRACTS, lambda day: "q" * 40, sha_of_run=lambda run: None, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py']) == []
     assert replays["sticky#llama#2026-10-03"]["verdict"] == "no-code-change"
 
 
@@ -532,7 +532,7 @@ def test_overview_counts_the_replays(tmp_path):
     })
     impact.summarize(results)
     o = json.loads((results / "overview.json").read_text())
-    assert o["replay"] == {"caught": 1, "missed": 1, "already-red": 0, "no-code-change": 0, "not-reproduced": 0, "model-added": 0, "duplicate": 0, "broken": 0, "out-of-scope": 0, "not-covered": 1, "pending": 1}
+    assert o["replay"] == {"caught": 1, "missed": 1, "already-red": 0, "no-code-change": 0, "not-reproduced": 0, "model-added": 0, "duplicate": 0, "unrelated-culprit": 0, "broken": 0, "out-of-scope": 0, "not-covered": 1, "pending": 1}
     assert [(g["model"], g["verdict"]) for g in o["regressions"]] == [("e", "pending"), ("b", "missed"), ("a", "caught")]
     summary = (results / "summary.md").read_text()
     assert "**Catch rate: 1 of 2** (50%)" in summary
@@ -557,9 +557,9 @@ def test_a_sticky_onset_of_a_bisected_regression_is_counted_once():
     }
     replays = {}
     plan = impact.replay_plan(gpu_ci, replays, CONTRACTS, {"2026-10-22": "p" * 40, "2026-10-23": "q" * 40}.get,
-                              sha_of_run=lambda run: None, failing_on=fails)
+                              sha_of_run=lambda run: None, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py'])
     assert {p["key"] for p in plan} == {"49811#llama"}
-    assert replays["sticky#llama#2026-10-23"] == {"verdict": "duplicate", "reason": "same regression as 49811#llama", "version": 5}
+    assert replays["sticky#llama#2026-10-23"] == {"verdict": "duplicate", "reason": "same regression as 49811#llama", "version": 6}
 
 
 def test_a_setup_error_is_broken_not_red():
@@ -592,3 +592,16 @@ def test_backfill_adds_bisected_regressions_once(monkeypatch, tmp_path):
     write(tmp_path / "gpu-ci.json", {})
     assert impact.backfill_regressions(tmp_path, 3, impact.dt.date(2026, 11, 2)) == 1
     assert json.loads((tmp_path / "gpu-ci.json").read_text())["5#llama"]["source"] == "backfill"
+
+
+def test_a_culprit_that_does_not_touch_the_model_is_unrelated():
+    gpu_ci = {"46219#llama": regression(pr="46219", bad_commit="b" * 40)}
+    replays = {}
+    docs_only = lambda sha: ["docs/source/en/model_doc/rt_detr.md", "tests/models/rt_detr/test_modeling_rt_detr.py"]
+    assert impact.replay_plan(gpu_ci, replays, CONTRACTS, {}.get, failing_on=fails, files_of=docs_only) == []
+    assert replays["46219#llama"]["verdict"] == "unrelated-culprit"
+    assert gpu_ci["46219#llama"]["culprit_files"] == docs_only("")
+    # Shared code can break any model: replayed.
+    plan = impact.replay_plan({"1#llama": regression(pr="1", bad_commit="c" * 40)}, {}, CONTRACTS, {}.get, failing_on=fails,
+                              files_of=lambda sha: ["src/transformers/masking_utils.py"])
+    assert {p["key"] for p in plan} == {"1#llama"}
