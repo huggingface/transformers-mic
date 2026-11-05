@@ -5,7 +5,7 @@
   "unmet": [
    "14 of 30 days observed",
    "justified blocks 0 (bar \u2265 1)",
-   "re-baselined contracts 20.5/week (bar \u2264 10)"
+   "re-baselined contracts 24.5/week (bar \u2264 10)"
   ]
  },
  "caught": {
@@ -26,32 +26,32 @@
  },
  "next": [
   {
-   "checkpoint": "vidore/colpali-v1.3-hf",
-   "draft": "failure",
+   "checkpoint": "vidore/colpali-v1.2-hf",
+   "draft": "",
    "model": "colpali",
-   "next_batch": false,
+   "next_batch": true,
    "other": 2,
    "real_checkpoint": 0,
    "regressions": 2,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41626652876",
+   "run": "",
    "shrink": "",
    "shrinkable": true
   },
   {
-   "checkpoint": "allenai/FlexOlmo-7x7B-1T",
-   "draft": "failure",
+   "checkpoint": "shanearora/Flex-reddit-2x7B-1T",
+   "draft": "",
    "model": "flex_olmo",
-   "next_batch": false,
+   "next_batch": true,
    "other": 2,
    "real_checkpoint": 0,
    "regressions": 2,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41964664003",
+   "run": "",
    "shrink": "",
    "shrinkable": true
   },
   {
-   "checkpoint": null,
-   "draft": "not draftable",
+   "checkpoint": "kmhf/hf-moshika",
+   "draft": "",
    "model": "moshi",
    "next_batch": false,
    "other": 2,
@@ -89,7 +89,7 @@
    "checkpoint": "facebook/wmt19-en-ru",
    "draft": "",
    "model": "fsmt",
-   "next_batch": true,
+   "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -101,7 +101,7 @@
    "checkpoint": "jetmoe/jetmoe-8b",
    "draft": "",
    "model": "jetmoe",
-   "next_batch": true,
+   "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -110,8 +110,8 @@
    "shrinkable": true
   },
   {
-   "checkpoint": null,
-   "draft": "not draftable",
+   "checkpoint": "meta-models/Muse-Spark-Open-816B-A42B",
+   "draft": "",
    "model": "muse_spark",
    "next_batch": false,
    "other": 1,
@@ -146,7 +146,7 @@
    "shrinkable": true
   },
   {
-   "checkpoint": "google/pegasus-x-large",
+   "checkpoint": "google/pegasus-x-base",
    "draft": "",
    "model": "pegasus_x",
    "next_batch": false,
@@ -158,7 +158,7 @@
    "shrinkable": true
   },
   {
-   "checkpoint": "uclanlp/plbart-base",
+   "checkpoint": "uclanlp/plbart-java-cs",
    "draft": "",
    "model": "plbart",
    "next_batch": false,
@@ -170,7 +170,7 @@
    "shrinkable": true
   },
   {
-   "checkpoint": "microsoft/prophetnet-large-uncased",
+   "checkpoint": "microsoft/prophetnet-large-uncased-cnndm",
    "draft": "",
    "model": "prophetnet",
    "next_batch": false,

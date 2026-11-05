@@ -5002,7 +5002,8 @@
  "50379#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
   "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "commits": [
-   "6b3609ff2a8a6a3e677bea4502254150e256f59c"
+   "6b3609ff2a8a6a3e677bea4502254150e256f59c",
+   "7fed521c67239c53af35b63759e06bc94053b5b7"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/18ed0f7",
   "failure_kind": "Runtime traceback",

@@ -287,8 +287,8 @@
  },
  "new": [
   {
-   "checkpoint": "vidore/colpali-v1.3-hf",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint": "vidore/colpali-v1.2-hf",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "colpali",
    "other": 2,
@@ -300,8 +300,8 @@
    ]
   },
   {
-   "checkpoint": "allenai/FlexOlmo-7x7B-1T",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint": "shanearora/Flex-reddit-2x7B-1T",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "flex_olmo",
    "other": 2,
@@ -312,8 +312,8 @@
    ]
   },
   {
-   "checkpoint": null,
-   "checkpoint_source": null,
+   "checkpoint": "kmhf/hf-moshika",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "moshi",
    "other": 2,
@@ -346,7 +346,7 @@
   },
   {
    "checkpoint": "facebook/wmt19-en-ru",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "fsmt",
    "other": 1,
@@ -358,7 +358,7 @@
   },
   {
    "checkpoint": "jetmoe/jetmoe-8b",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "jetmoe",
    "other": 1,
@@ -368,8 +368,8 @@
    ]
   },
   {
-   "checkpoint": null,
-   "checkpoint_source": null,
+   "checkpoint": "meta-models/Muse-Spark-Open-816B-A42B",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "muse_spark",
    "other": 1,
@@ -380,7 +380,7 @@
   },
   {
    "checkpoint": "RUCAIBox/mvp",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "mvp",
    "other": 1,
@@ -392,7 +392,7 @@
   },
   {
    "checkpoint": "thhaus/nemotron3-8b",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "nemotron",
    "other": 1,
@@ -402,8 +402,8 @@
    ]
   },
   {
-   "checkpoint": "google/pegasus-x-large",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint": "google/pegasus-x-base",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "pegasus_x",
    "other": 1,
@@ -416,8 +416,8 @@
    ]
   },
   {
-   "checkpoint": "uclanlp/plbart-base",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint": "uclanlp/plbart-java-cs",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "plbart",
    "other": 1,
@@ -428,8 +428,8 @@
    ]
   },
   {
-   "checkpoint": "microsoft/prophetnet-large-uncased",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint": "microsoft/prophetnet-large-uncased-cnndm",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "prophetnet",
    "other": 1,
@@ -452,7 +452,7 @@
   },
   {
    "checkpoint": "google/shieldgemma-2-4b-it",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "shieldgemma2",
    "other": 1,
@@ -584,8 +584,8 @@
    ]
   },
   {
-   "checkpoint": null,
-   "checkpoint_source": null,
+   "checkpoint": "facebook/w2v-bert-2.0",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "wav2vec2_bert",
    "other": 3,
@@ -597,7 +597,7 @@
   },
   {
    "checkpoint": "facebook/xmod-base",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "xmod",
    "other": 3,
@@ -608,8 +608,8 @@
    ]
   },
   {
-   "checkpoint": null,
-   "checkpoint_source": null,
+   "checkpoint": "facebook/data2vec-text-base",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "data2vec",
    "other": 2,
@@ -621,7 +621,7 @@
   },
   {
    "checkpoint": "HuggingFaceM4/idefics-9b",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "idefics",
    "other": 2,
@@ -631,8 +631,8 @@
    ]
   },
   {
-   "checkpoint": null,
-   "checkpoint_source": null,
+   "checkpoint": "nvidia/NVIDIA-Nemotron-3.5-Transcribe-30B-A4B",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "nemotron3_5_transcribe",
    "other": 2,
@@ -645,8 +645,8 @@
    ]
   },
   {
-   "checkpoint": null,
-   "checkpoint_source": null,
+   "checkpoint": "andreasmadsen/efficient_mlm_m0.40",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "roberta_prelayernorm",
    "other": 2,
@@ -658,7 +658,7 @@
   },
   {
    "checkpoint": "microsoft/udop-large",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "udop",
    "other": 2,
@@ -681,8 +681,8 @@
    ]
   },
   {
-   "checkpoint": null,
-   "checkpoint_source": null,
+   "checkpoint": "facebook/wav2vec2-conformer-rel-pos-large",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "wav2vec2_conformer",
    "other": 2,
@@ -693,8 +693,8 @@
    ]
   },
   {
-   "checkpoint": null,
-   "checkpoint_source": null,
+   "checkpoint": "facebook/blenderbot-90M",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "blenderbot_small",
    "other": 1,
@@ -708,7 +708,7 @@
   },
   {
    "checkpoint": "itazap/blt-1b-hf",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "blt",
    "other": 1,
@@ -720,7 +720,7 @@
   },
   {
    "checkpoint": "nvidia/canary-1b-v2",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "canary",
    "other": 1,
@@ -733,8 +733,8 @@
    ]
   },
   {
-   "checkpoint": "syvai/hviske-v5.3",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint": "CohereLabs/cohere-transcribe-03-2026",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "cohere_asr",
    "other": 1,
@@ -747,8 +747,8 @@
    ]
   },
   {
-   "checkpoint": null,
-   "checkpoint_source": null,
+   "checkpoint": "paultltc/colmodernvbert_hf",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "colmodernvbert",
    "other": 1,
@@ -769,8 +769,8 @@
    ]
   },
   {
-   "checkpoint": null,
-   "checkpoint_source": null,
+   "checkpoint": "AntonV/Dia-1.6B",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "dia",
    "other": 1,
@@ -784,7 +784,7 @@
   },
   {
    "checkpoint": "baidu/ERNIE-4.5-21B-A3B-PT",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "ernie4_5_moe",
    "other": 1,
@@ -795,7 +795,7 @@
   },
   {
    "checkpoint": "tencent/Hunyuan-A13B-Instruct",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "hunyuan_v1_moe",
    "other": 1,
@@ -806,7 +806,7 @@
   },
   {
    "checkpoint": "kyutai/stt-2.6b-en-trfs",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "kyutai_speech_to_text",
    "other": 1,
@@ -819,8 +819,8 @@
    ]
   },
   {
-   "checkpoint": "allenai/Molmo2-8B",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint": "allenai/Molmo2-4B",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "molmo2",
    "other": 1,
@@ -830,8 +830,8 @@
    ]
   },
   {
-   "checkpoint": null,
-   "checkpoint_source": null,
+   "checkpoint": "omlab/omdet-turbo-swin-tiny-hf",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "omdet_turbo",
    "other": 1,
@@ -842,7 +842,7 @@
   },
   {
    "checkpoint": "PaddlePaddle/PP-FormulaNet_plus-L_safetensors",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "pp_formulanet",
    "other": 1,
@@ -865,7 +865,7 @@
   },
   {
    "checkpoint": "facebook/s2t-small-librispeech-asr",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "speech_to_text",
    "other": 1,
@@ -891,7 +891,7 @@
   },
   {
    "checkpoint": "google/t5gemma-2-270m-270m",
-   "checkpoint_source": "shrink sweep",
+   "checkpoint_source": "failing test",
    "integration": 0,
    "model": "t5gemma2",
    "other": 1,

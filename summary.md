@@ -206,7 +206,7 @@ Proposed bar for rule B (constants `DECISION` in `experiments/impact.py`):
 - ✅ wrong blocks 0 = 0.00% of 218 merged PRs (bar ≤ 1%)
 - ❌ justified blocks 0 (bar ≥ 1)
 - ✅ unresolved blocks 0 of 0 (bar ≤ 10%)
-- ❌ re-baselined contracts 20.5/week (bar ≤ 10)
+- ❌ re-baselined contracts 24.5/week (bar ≤ 10)
 
 **Not yet** — the call stays with a maintainer; unresolved blocks shrink as cases get an outcome or a verdict in `labels.jsonl`.
 
@@ -231,18 +231,18 @@ Re-baselined = baselines changed with the same fixture weights (the review work 
 |---|---|---|---|---|---|---|
 | 2026-W43 | 21 | 0 | 0 | 0 | 0 | 150 |
 | 2026-W44 | 343 | 163 | 36 | 17 | 380 | 1592 |
-| 2026-W45 | 35 | 5 | 5 | 22 | 210 | 41 |
+| 2026-W45 | 44 | 5 | 13 | 23 | 289 | 41 |
 
 Latest re-baselines (model commit title):
 
-- 2026-10-29 TimesFM: Publish MIC usage, slim fixture and reviewed Transformers expectations
-- 2026-10-29 mic-wav2vec2: Review cloud MIC baselines fcbf7cf0b35b43b08bea08c7da6d42e3 (#1)
-- 2026-10-30 Granite: Re-baseline cpu-x86_64-bf16 bfloat16 training.loss (10.796187 -> 10.797607): the CI image rebuild changed it; reproduced at the recording commit
-- 2026-11-02 RTDetr: Publish MIC usage, slim fixture and reviewed Transformers expectations
-- 2026-11-02 Perceiver: Publish MIC usage, slim fixture and reviewed Transformers expectations
-- 2026-11-03 Granite: Publish MIC usage, slim fixture and reviewed Transformers expectations
-- 2026-11-03 Muse-Glimmer: Publish MIC usage, slim fixture and reviewed Transformers expectations
-- 2026-11-05 EmbeddingGemma: Sentence Transformers cpu-x86_64-bf16 baseline recorded on aws-m8i-l-cache
+- 2026-11-05 PaddleOCR-VL: Publish MIC usage, slim fixture and reviewed Transformers expectations
+- 2026-11-05 DeepSeek-Coder-V2-Lite-Instruct: Publish MIC usage, slim fixture and reviewed Transformers expectations
+- 2026-11-05 LFM2-8B-A1B: Publish MIC usage, slim fixture and reviewed Transformers expectations
+- 2026-11-05 GraniteMoeHybrid: Publish MIC usage, slim fixture and reviewed Transformers expectations
+- 2026-11-05 GraniteMoe: Publish MIC usage, slim fixture and reviewed Transformers expectations
+- 2026-11-05 mic-got_ocr2: Publish MIC usage, slim fixture and reviewed Transformers expectations
+- 2026-11-05 PoolFormer: Publish MIC usage, slim fixture and reviewed Transformers expectations
+- 2026-11-05 Qwen3_5: Publish MIC usage, slim fixture and reviewed Transformers expectations
 
 ## 4. Real-checkpoint regressions: did MIC flag them first?
 
@@ -298,19 +298,19 @@ Models with real-checkpoint regressions in the daily GPU CI and no contract, shr
 
 | model | real-ckpt regressions | other | checkpoint | shrinkable | draft |
 |---|---|---|---|---|---|
-| colpali | 0 | 2 | [vidore/colpali-v1.3-hf](https://huggingface.co/vidore/colpali-v1.3-hf) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41626652876) |
-| flex_olmo | 0 | 2 | [allenai/FlexOlmo-7x7B-1T](https://huggingface.co/allenai/FlexOlmo-7x7B-1T) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41964664003) |
-| moshi | 0 | 2 | ? | yes | not draftable |
+| colpali | 0 | 2 | [vidore/colpali-v1.2-hf](https://huggingface.co/vidore/colpali-v1.2-hf) | yes | — |
+| flex_olmo | 0 | 2 | [shanearora/Flex-reddit-2x7B-1T](https://huggingface.co/shanearora/Flex-reddit-2x7B-1T) | yes | — |
+| moshi | 0 | 2 | [kmhf/hf-moshika](https://huggingface.co/kmhf/hf-moshika) | yes | — |
 | bridgetower | 0 | 1 | [regisss/bridgetower-newyorker-a100-8x](https://huggingface.co/regisss/bridgetower-newyorker-a100-8x) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41626675456) |
 | cosmos3_edge | 0 | 1 | [nvidia/Cosmos3-Edge](https://huggingface.co/nvidia/Cosmos3-Edge) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41964667193) |
 | fsmt | 0 | 1 | [facebook/wmt19-en-ru](https://huggingface.co/facebook/wmt19-en-ru) | yes | — |
 | jetmoe | 0 | 1 | [jetmoe/jetmoe-8b](https://huggingface.co/jetmoe/jetmoe-8b) | yes | — |
-| muse_spark | 0 | 1 | ? | yes | not draftable |
+| muse_spark | 0 | 1 | [meta-models/Muse-Spark-Open-816B-A42B](https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B) | yes | — |
 | mvp | 0 | 1 | [RUCAIBox/mvp](https://huggingface.co/RUCAIBox/mvp) | yes | — |
 | nemotron | 0 | 1 | [thhaus/nemotron3-8b](https://huggingface.co/thhaus/nemotron3-8b) | yes | — |
-| pegasus_x | 0 | 1 | [google/pegasus-x-large](https://huggingface.co/google/pegasus-x-large) | yes | — |
-| plbart | 0 | 1 | [uclanlp/plbart-base](https://huggingface.co/uclanlp/plbart-base) | yes | — |
-| prophetnet | 0 | 1 | [microsoft/prophetnet-large-uncased](https://huggingface.co/microsoft/prophetnet-large-uncased) | yes | — |
+| pegasus_x | 0 | 1 | [google/pegasus-x-base](https://huggingface.co/google/pegasus-x-base) | yes | — |
+| plbart | 0 | 1 | [uclanlp/plbart-java-cs](https://huggingface.co/uclanlp/plbart-java-cs) | yes | — |
+| prophetnet | 0 | 1 | [microsoft/prophetnet-large-uncased-cnndm](https://huggingface.co/microsoft/prophetnet-large-uncased-cnndm) | yes | — |
 | seamless_m4t | 0 | 1 | [facebook/hf-seamless-m4t-medium](https://huggingface.co/facebook/hf-seamless-m4t-medium) | yes | — |
 | shieldgemma2 | 0 | 1 | [google/shieldgemma-2-4b-it](https://huggingface.co/google/shieldgemma-2-4b-it) | yes | — |
 | mamba2 | 2 | 0 | [mistralai/Mamba-Codestral-7B-v0.1](https://huggingface.co/mistralai/Mamba-Codestral-7B-v0.1) | no | not draftable |
