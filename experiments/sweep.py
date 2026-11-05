@@ -52,10 +52,12 @@ WIDTHS = {
     "n_heads": 4,
 }
 # Fields that, when equal to hidden_size in the checkpoint, must stay equal to it.
-LINKED_TO_HIDDEN = ("projection_size", "word_embed_proj_dim", "embedding_size")
+LINKED_TO_HIDDEN = ("projection_size", "word_embed_proj_dim", "embedding_size", "codebook_dim")
 # The longest layer prefix a fixture keeps to build every layer kind.
 MAX_PREFIX = 8
 EXPERTS = ("num_experts", "num_local_experts", "n_routed_experts", "moe_num_experts")
+# Experts per token: no more than the experts kept (Diffusion Gemma's top_k_experts 8, ERNIE 4.5's moe_k 6).
+TOP_K = ("num_experts_per_tok", "top_k_experts", "moe_k")
 DEPTHS = ("num_layers", "num_decoder_layers", "encoder_layers", "decoder_layers", "n_layer", "n_layers")
 # Primary head, first match wins: the usage path a contract would cover first.
 HEADS = (
@@ -168,6 +170,55 @@ def sub_configs(config):
             yield from sub_configs(value)
 
 
+def subs_of(cfg):
+    """The config's direct sub-configs by key."""
+    return {key: getattr(cfg, key, None) for key in getattr(cfg, "sub_configs", {}) or {} if getattr(cfg, key, None) is not None}
+
+
+def head_width(values):
+    """The attention head width a config derives from its widths, or None."""
+    width = values.get("hidden_size") or values.get("n_embd") or values.get("d_model")
+    heads = values.get("num_attention_heads") or values.get("n_head")
+    return width // heads if isinstance(width, int) and isinstance(heads, int) and heads else None
+
+
+def repair(cfg, values):
+    """Restore the relations a config validates between the generic rule's values, in place."""
+    original = cfg.to_dict()
+    # XLNet checks d_head == d_model // n_head.
+    if original.get("d_head") and original["d_head"] == head_width(original):
+        values["d_head"] = head_width(values)
+    # GPT-Neo lists one attention kind per layer and a (pattern, repeats) summary of it.
+    if isinstance(values.get("attention_types"), list) and isinstance(values.get("num_layers"), int):
+        pattern = values["attention_types"][0][0]
+        values["attention_types"] = [[pattern, max(1, values["num_layers"] // len(pattern))]]
+        values["num_layers"] = len(pattern) * values["attention_types"][0][1]
+        values["attention_layers"] = (pattern * values["num_layers"])[: values["num_layers"]]
+    subs = subs_of(cfg)
+    for key, sub in subs.items():
+        if not isinstance(values.get(key), dict):
+            continue
+        # A field named after a sibling's width reads that sibling (Nemotron 3 Diarization's
+        # head_config.audio_hidden_size is audio_config.hidden_size).
+        for other, sibling in subs.items():
+            field = f"{other.removesuffix('_config')}_hidden_size"
+            width = values[other].get("hidden_size") if isinstance(values.get(other), dict) else None
+            if other != key and width and getattr(sub, field, None) == sibling.to_dict().get("hidden_size", -1):
+                values[key][field] = width
+        # Gradium Phonon's flow head is conditioned on the backbone's hidden states.
+        if getattr(sub, "condition_dim", None) == original.get("hidden_size", -1) and values.get("hidden_size"):
+            values[key]["condition_dim"] = values["hidden_size"]
+    # Fun-ASR-Nano's adaptor checks intermediate_size == text hidden_size // 4.
+    adaptor, text = values.get("adaptor_config"), values.get("text_config")
+    if isinstance(adaptor, dict) and isinstance(text, dict) and cfg.adaptor_config.intermediate_size == cfg.text_config.hidden_size // 4:
+        adaptor["intermediate_size"] = text["hidden_size"] // 4
+    # Molmo2's adapter reads vision layers by index: keep one per entry within the shrunk tower.
+    adapter, vision = values.get("adapter_config"), values.get("vision_config")
+    if isinstance(adapter, dict) and isinstance(adapter.get("vision_feature_layer"), list) and isinstance(vision, dict):
+        old, new = cfg.vision_config.num_hidden_layers, vision["num_hidden_layers"]
+        adapter["vision_feature_layer"] = [min(i * new // old, new - 1) if i >= 0 else i for i in adapter["vision_feature_layer"]]
+
+
 def layer_pattern(config):
     """Indices to keep: the first layer of each distinct kind (see layer_patterns.py)."""
     sys.path.insert(0, str(HERE))
@@ -198,7 +249,10 @@ def shrink(config):
             if key in values and values[key] not in (None, 0) and not isinstance(values[key], (list, dict)):
                 values[key] = value
         if "num_key_value_heads" in values and values["num_key_value_heads"]:
-            heads = cfg.num_attention_heads if hasattr(cfg, "num_attention_heads") else None
+            try:
+                heads = cfg.num_attention_heads if hasattr(cfg, "num_attention_heads") else None
+            except AttributeError:  # Step-3.5 lists head counts per layer and refuses a global read
+                heads = None
             kv = values["num_key_value_heads"]
             # MHA stays MHA, MQA keeps its single KV head, GQA groups stay groups.
             values["num_key_value_heads"] = 4 if heads and kv >= heads else 1 if kv == 1 else 2
@@ -224,8 +278,25 @@ def shrink(config):
         for key in EXPERTS:
             if isinstance(values.get(key), int) and values[key] > 4:
                 values[key] = 4
-        if isinstance(values.get("num_experts_per_tok"), int):
-            values["num_experts_per_tok"] = min(values["num_experts_per_tok"], 2)
+        for key in TOP_K:
+            if isinstance(values.get(key), int):
+                values[key] = min(values[key], 2)
+        # GPT-J and CodeGen rotate rotary_dim channels of a head they derive from the widths
+        # (no head_dim): keep the rotated fraction of the shrunk head.
+        if isinstance(original.get("rotary_dim"), int) and "head_dim" not in original and head_width(original) and head_width(values):
+            values["rotary_dim"] = max(2, original["rotary_dim"] * head_width(values) // head_width(original) // 2 * 2)
+        # MobileBERT's bottleneck widths are a fraction of hidden_size: keep the fraction.
+        if isinstance(original.get("intra_bottleneck_size"), int):
+            for key in ("embedding_size", "intra_bottleneck_size", "true_hidden_size"):
+                if isinstance(original.get(key), int):
+                    values[key] = max(8, original[key] * values["hidden_size"] // original["hidden_size"])
+        # EfficientNet derives its channels from width_coefficient; hidden_dim is the last of them.
+        if "width_coefficient" in original and "hidden_dim" in original:
+            values["hidden_dim"] = original["hidden_dim"]
+        # LayoutLMv3 concatenates 4 coordinate and 2 shape embeddings into hidden_size.
+        if original.get("coordinate_size") and 4 * original["coordinate_size"] + 2 * original.get("shape_size", 0) == original.get("hidden_size"):
+            values["coordinate_size"] = values["hidden_size"] // 8
+            values["shape_size"] = (values["hidden_size"] - 4 * values["coordinate_size"]) // 2
         for key in ("n_group", "topk_group"):
             if isinstance(values.get(key), int):
                 values[key] = 1
@@ -301,6 +372,11 @@ def shrink(config):
             for key in ("first_k_dense_replace", "num_dense_layers"):
                 if getattr(cfg, key, None) is not None:
                     values[key] = min(sum(i < getattr(cfg, key) for i in kept), len(kept) - 1)
+            for key, value in cfg.to_dict().items():
+                # Sapiens2 lists KV heads per layer: group them like num_key_value_heads.
+                if key.startswith("num_key_value_heads_") and isinstance(values.get(key), list):
+                    heads, old_heads = values.get("num_attention_heads") or 4, cfg.to_dict().get("num_attention_heads") or max(value)
+                    values[key] = [heads if kv >= old_heads else 1 if kv == 1 else 2 for kv in values[key]]
             per_layer = values.get("per_layer_config")
             if isinstance(per_layer, dict):
                 # Keys are layer indices, sometimes zero-padded (Gemma 4's "04").
@@ -468,6 +544,17 @@ def shrink(config):
                     # BART-style text configs (Florence-2) name their width d_model.
                     text_values = values["text_config"]
                     values[key][field] = text_values.get("hidden_size") or text_values["d_model"]
+        # X-CLIP's video transformer (mit_hidden_size) runs in the projection space.
+        for key, sub in subs_of(cfg).items():
+            if not isinstance(values.get(key), dict):
+                continue
+            if getattr(sub, "mit_hidden_size", None) == getattr(cfg, "projection_dim", -1) and values.get("projection_dim"):
+                values[key]["mit_hidden_size"] = values["projection_dim"]
+                values[key]["mit_intermediate_size"] = 4 * values["projection_dim"]
+            # SAM's vision neck outputs the prompt encoder's width.
+            prompt = values.get("prompt_encoder_config")
+            if getattr(sub, "output_channels", None) and isinstance(prompt, dict) and sub.output_channels == cfg.prompt_encoder_config.hidden_size:
+                values[key]["output_channels"] = prompt["hidden_size"]
         # CSM's depth decoder projects the backbone's hidden states (backbone_hidden_size).
         for key in getattr(cfg, "sub_configs", {}) or {}:
             sub = getattr(cfg, key, None)
@@ -477,6 +564,21 @@ def shrink(config):
                 and values.get("hidden_size")
             ):
                 values[key]["backbone_hidden_size"] = values["hidden_size"]
+        # Depth Anything's neck reads one backbone stage per width: keep that many stages.
+        backbone = values.get("backbone_config")
+        outs = getattr(getattr(cfg, "backbone_config", None), "out_indices", None)
+        necks = values.get("neck_hidden_sizes")
+        if (
+            isinstance(backbone, dict)
+            and isinstance(outs, (list, tuple))
+            and isinstance(necks, list)
+            and len(outs) == len(necks) > 1
+            and isinstance(backbone.get("num_hidden_layers"), int)
+            and not isinstance(backbone.get("depths"), list)
+        ):
+            backbone["num_hidden_layers"] = max(backbone["num_hidden_layers"], len(outs))
+            backbone["out_indices"] = list(range(backbone["num_hidden_layers"] - len(outs) + 1, backbone["num_hidden_layers"] + 1))
+            backbone["out_features"] = [f"stage{i}" for i in backbone["out_indices"]]
         # A sub-config's channel list that ends at a sibling's width feeds that sibling
         # (Unlimited-OCR's SAM downsample_channels [512, 1024] are the CLIP encoder's
         # patch embeddings): scale it to the sibling's resized width.
@@ -494,7 +596,10 @@ def shrink(config):
         rope = values.get("rope_parameters")
         if isinstance(rope, dict) and rope.get("mrope_section"):
             sections = rope["mrope_section"]
-            half_head = values.get("head_dim", values["hidden_size"] // values["num_attention_heads"]) // 2
+            # GLM-4.1V splits only the rotated part (partial_rotary_factor) into sections, exactly;
+            # Qwen3.5 interleaves them and keeps covering half the head.
+            partial = 1.0 if rope.get("mrope_interleaved") else rope.get("partial_rotary_factor", values.get("partial_rotary_factor", 1.0))
+            half_head = int(values.get("head_dim", values["hidden_size"] // values["num_attention_heads"]) * partial) // 2
             scaled = [size * half_head / sum(sections) for size in sections]
             kept = [int(size) for size in scaled]
             for i in sorted(range(len(kept)), key=lambda i: scaled[i] - kept[i], reverse=True)[:half_head - sum(kept)]:
@@ -514,7 +619,13 @@ def shrink(config):
                 factors = rope.get(key)
                 if isinstance(factors, list) and len(factors) != half:
                     rope[key] = [factors[i * len(factors) // half] for i in range(half)]
-        shrunk = type(cfg).from_dict(values)
+        try:
+            shrunk = type(cfg).from_dict(values)
+        except Exception:
+            # Only for a config whose own validation refuses the values above: a config that
+            # validates shrinks exactly as before, so published fixtures rebuild unchanged.
+            repair(cfg, values)
+            shrunk = type(cfg).from_dict(values)
         depth = getattr(cfg, "num_hidden_layers", None)
         if through is None and isinstance(depth, int) and isinstance(values.get("num_hidden_layers"), int) and values["num_hidden_layers"] < depth:
             # Kinds the config derives from the layer index (DeepSeek-V4's hash-routed
@@ -608,6 +719,88 @@ def synthetic_inputs(model, config):
     return inputs
 
 
+def image_size(size, default=224):
+    """(height, width) from an int, a {"height", "width"} dict or a [height, width] list."""
+    if isinstance(size, dict):
+        return size.get("height", default), size.get("width", default)
+    if isinstance(size, (list, tuple)):
+        return (size[0], size[-1]) if size else (default, default)
+    return (size, size) if isinstance(size, int) else (default, default)
+
+
+def input_layouts(model, config):
+    """Candidate inputs, the usual layout first; the sweep runs the first one the model accepts.
+
+    The config alone does not say everything synthetic_inputs needs: whether audio features are
+    (batch, mel, frames) like Whisper's or (batch, frames, mel) like Parakeet's, whether a codec
+    takes (batch, samples) or (batch, channels, samples), that a video model takes frames, or that
+    a captioning head (BLIP) or an encoder-decoder with a pixel or waveform input needs text too.
+    """
+    import torch
+
+    def find(key, default=None):
+        for cfg in sub_configs(config):
+            value = getattr(cfg, key, None)
+            if value is not None:
+                return value
+        return default
+
+    batch = 2
+    try:
+        first = synthetic_inputs(model, config)
+    except NotImplementedError:
+        first = {}
+    accepted = inspect.signature(model.forward).parameters
+    names = model.main_input_name if isinstance(model.main_input_name, list) else [model.main_input_name]
+    full = dict(first)
+    pretrained = find("pretrained_cfg") or {}
+    height, width = image_size(pretrained.get("input_size", [None])[1:] or find("image_size", 224))
+    frames = find("num_frames") or find("frames_per_clip")
+    channels = find("num_channels", 3)
+    for name in names:
+        if name in ("pixel_values", "pixel_values_videos"):
+            shape = (batch, channels, height, width)
+            video = name == "pixel_values_videos" or (frames and name == names[0])
+            full[name] = torch.randn(batch, frames, *shape[1:]) if video and frames else torch.randn(*shape)
+        elif name == "flattened_patches":  # Pix2Struct: row and column ids, then the patch pixels
+            patches = torch.randn(batch, 64, find("patch_embed_hidden_size", 768))
+            rows = torch.arange(64).repeat(batch, 1)
+            full[name] = torch.cat([(rows // 8 + 1)[..., None], (rows % 8 + 1)[..., None], patches], dim=-1).float()
+        elif name == "task_inputs":  # OneFormer's tokenized task prompt
+            full[name] = torch.randint(3, 1000, (batch, find("task_seq_len", 77)))
+        elif name == "input_values" and find("audio_channels"):
+            full[name] = torch.randn(batch, find("audio_channels"), 16000)
+        elif name == "input_values" and find("num_mel_bins") and find("max_length"):
+            full[name] = torch.randn(batch, find("max_length"), find("num_mel_bins"))  # AST's spectrogram
+    pixels = full.get("pixel_values")
+    if frames and pixels is not None and pixels.dim() == 4:  # X-CLIP: video beside the text
+        full["pixel_values"] = pixels[:, None].expand(-1, frames, -1, -1, -1).contiguous()
+    audio = getattr(config, "audio_config", None)
+    if "input_features" in accepted and "input_features" not in full and getattr(audio, "num_mel_bins", None):
+        # Voxtral Realtime streams one text token per audio_length_per_tok mel frames.
+        per_token = getattr(config, "audio_length_per_tok", None)
+        length = full["input_ids"].shape[1] * per_token if per_token and "input_ids" in full else 3000
+        full["input_features"] = torch.randn(batch, audio.num_mel_bins, length)
+    text = getattr(config, "text_config", None) or getattr(config, "decoder", None)
+    if "input_ids" in accepted and "input_ids" not in full and text is not None:
+        full["input_ids"] = torch.randint(3, min(find("vocab_size", 1000), 1000), (batch, 16))
+    if config.is_encoder_decoder and "decoder_input_ids" in accepted and "decoder_input_ids" not in full:
+        full["decoder_input_ids"] = torch.randint(3, 100, (batch, 4))
+    layouts = [first] if first else []
+    for inputs in (full,):
+        if inputs is not first and inputs:
+            layouts.append(inputs)
+        features = inputs.get("input_features")
+        if features is not None and features.dim() == 3:
+            layouts.append({**inputs, "input_features": features.transpose(1, 2).contiguous()})
+        values = inputs.get("input_values")
+        if values is not None and values.dim() == 2:
+            layouts.append({**inputs, "input_values": values[:, None]})
+    if not layouts:
+        raise NotImplementedError(f"no synthetic inputs for {model.main_input_name}")
+    return layouts
+
+
 def run_one(model_type):
     import torch
     import transformers
@@ -641,12 +834,27 @@ def run_one(model_type):
             # Only reachable inside a composite model, not a usage path of its own.
             row["stage"] = "component"
             return row
-        small = head_config(getattr(transformers, class_name), small)
-        model = getattr(transformers, class_name)._from_config(small, dtype=torch.float32)
+        try:
+            small = head_config(getattr(transformers, class_name), small)
+            model = getattr(transformers, class_name)._from_config(small, dtype=torch.float32)
+        except ValueError as exc:
+            # A head the checkpoint does not have (w2v-BERT 2.0 is pretraining-only: no vocabulary
+            # for a CTC head) or cannot pick (MusicGen's two text configs): measure the base model,
+            # the class such a contract uses.
+            from transformers.models.auto import modeling_auto
+
+            base = modeling_auto.MODEL_MAPPING_NAMES.get(small.model_type)
+            if not base or base == class_name:
+                raise
+            row["head"], row["head_error"], class_name = "MODEL_MAPPING_NAMES", str(exc)[:200], base
+            model = getattr(transformers, class_name)._from_config(small, dtype=torch.float32)
+        # A sub-config's own dtype (T5Gemma 2's bfloat16 towers) must not mix into the float32 build.
+        model = model.float()
         row["parameters"] = sum(p.numel() for p in model.parameters())
         row["layers"] = getattr(small, "num_hidden_layers", None)
         stage = "inputs"
-        inputs = synthetic_inputs(model, small)
+        layouts = input_layouts(model, small)
+        inputs = layouts[0]
         row["main_input"] = model.main_input_name
         row["inputs"] = sorted(inputs)
         # Multimodal models get text only here; their image/audio path is not exercised.
@@ -655,7 +863,17 @@ def run_one(model_type):
         )
         stage = "forward"
         start = time.perf_counter()
-        output = model(**inputs)
+        first_error = None
+        for n, candidate in enumerate(layouts):
+            try:
+                output = model(**candidate)
+                break
+            except Exception as exc:
+                first_error = first_error or exc
+                if n == len(layouts) - 1:
+                    raise first_error from None
+        if candidate is not inputs:
+            row["inputs"], row["layout"] = sorted(candidate), n
         row["forward_seconds"] = time.perf_counter() - start
         tensors = [v for v in output.values() if isinstance(v, torch.Tensor) and v.is_floating_point()]
         row["finite"] = all(bool(torch.isfinite(t).all()) for t in tensors)
