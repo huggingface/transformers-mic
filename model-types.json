@@ -160,6 +160,7 @@
  "huggingface-mic/owlv2-base-patch16-ensemble-mic": "owlv2",
  "huggingface-mic/owlvit-base-patch32-mic": "owlvit",
  "huggingface-mic/paligemma-3b-pt-224-mic": "paligemma",
+ "huggingface-mic/parakeet-tdt-0.6b-v3-mic": "parakeet_tdt",
  "huggingface-mic/pegasus-xsum-mic": "pegasus",
  "huggingface-mic/phi-2-mic": "phi",
  "huggingface-mic/poolformer_s12-mic": "poolformer",
