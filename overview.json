@@ -62,18 +62,6 @@
    "shrinkable": true
   },
   {
-   "checkpoint": "google/switch-base-8",
-   "draft": "failure",
-   "model": "switch_transformers",
-   "next_batch": false,
-   "other": 2,
-   "real_checkpoint": 0,
-   "regressions": 2,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41804368657",
-   "shrink": "",
-   "shrinkable": true
-  },
-  {
    "checkpoint": "regisss/bridgetower-newyorker-a100-8x",
    "draft": "failure",
    "model": "bridgetower",
@@ -321,6 +309,18 @@
    "other": 0,
    "real_checkpoint": 1,
    "regressions": 1,
+   "run": "",
+   "shrink": "",
+   "shrinkable": false
+  },
+  {
+   "checkpoint": null,
+   "draft": "not draftable",
+   "model": "wav2vec2_bert",
+   "next_batch": false,
+   "other": 3,
+   "real_checkpoint": 0,
+   "regressions": 3,
    "run": "",
    "shrink": "",
    "shrinkable": false

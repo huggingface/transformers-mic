@@ -179,6 +179,7 @@
  "huggingface-mic/starcoder2-3b-mic": "starcoder2",
  "huggingface-mic/swin-tiny-patch4-window7-224-mic": "swin",
  "huggingface-mic/swinv2-tiny-patch4-window16-256-mic": "swinv2",
+ "huggingface-mic/switch-base-8-mic": "switch_transformers",
  "huggingface-mic/t5-small-mic": "t5",
  "huggingface-mic/table_transformer-mic": "table-transformer",
  "huggingface-mic/tibetan-ocr-mic": "paddleocr_vl",

@@ -113,7 +113,6 @@ Models with real-checkpoint regressions in the daily GPU CI and no contract, shr
 | colpali | 0 | 2 | [vidore/colpali-v1.3-hf](https://huggingface.co/vidore/colpali-v1.3-hf) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41626652876) |
 | flex_olmo | 0 | 2 | [allenai/FlexOlmo-7x7B-1T](https://huggingface.co/allenai/FlexOlmo-7x7B-1T) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41964664003) |
 | moshi | 0 | 2 | ? | yes | not draftable |
-| switch_transformers | 0 | 2 | [google/switch-base-8](https://huggingface.co/google/switch-base-8) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41804368657) |
 | bridgetower | 0 | 1 | [regisss/bridgetower-newyorker-a100-8x](https://huggingface.co/regisss/bridgetower-newyorker-a100-8x) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41626675456) |
 | cosmos3_edge | 0 | 1 | [nvidia/Cosmos3-Edge](https://huggingface.co/nvidia/Cosmos3-Edge) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41964667193) |
 | fsmt | 0 | 1 | [facebook/wmt19-en-ru](https://huggingface.co/facebook/wmt19-en-ru) | yes | — |
@@ -135,6 +134,7 @@ Models with real-checkpoint regressions in the daily GPU CI and no contract, shr
 | granite_speech5 | 1 | 0 | [ibm-granite/granite-speech-5.0-470m-turboctc](https://huggingface.co/ibm-granite/granite-speech-5.0-470m-turboctc) | no | not draftable |
 | granite_speech_plus | 1 | 0 | [ibm-granite/granite-speech-4.1-2b-plus](https://huggingface.co/ibm-granite/granite-speech-4.1-2b-plus) | no | not draftable |
 | oneformer | 1 | 0 | [shi-labs/oneformer_ade20k_swin_tiny](https://huggingface.co/shi-labs/oneformer_ade20k_swin_tiny) | no | not draftable |
+| wav2vec2_bert | 0 | 3 | ? | no | not draftable |
 
 ### Calls to add to existing contracts
 

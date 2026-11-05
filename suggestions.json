@@ -297,17 +297,6 @@
    ]
   },
   {
-   "checkpoint": "google/switch-base-8",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "switch_transformers",
-   "other": 2,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/switch_transformers/test_modeling_switch_transformers.py::SwitchTransformersModelTest::test_generate_with_past_key_values"
-   ]
-  },
-  {
    "checkpoint": "regisss/bridgetower-newyorker-a100-8x",
    "checkpoint_source": "shrink sweep",
    "integration": 0,
