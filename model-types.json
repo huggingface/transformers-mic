@@ -72,6 +72,7 @@
  "huggingface-mic/VibeVoice-1.5B-hf-mic": "vibevoice",
  "huggingface-mic/Voxtral-Mini-3B-2507-mic": "voxtral",
  "huggingface-mic/albert-base-v2-mic": "albert",
+ "huggingface-mic/ast-finetuned-audioset-10-10-0.4593-mic": "audio-spectrogram-transformer",
  "huggingface-mic/audio-flamingo-3-hf-mic": "audioflamingo3",
  "huggingface-mic/aya-expanse-8b-ungated-mic": "cohere",
  "huggingface-mic/bart-base-mic": "bart",
