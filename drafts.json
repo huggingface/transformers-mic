@@ -86,9 +86,11 @@
  },
  "jetmoe": {
   "checkpoint": "jetmoe/jetmoe-8b",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-05T11:13:13Z",
-  "status": "queued"
+  "run_id": 42018880790,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/42018880790"
  },
  "kolibri1": {
   "checkpoint": "Aleph-Alpha/Kolibri-1",
@@ -120,7 +122,9 @@
   "checkpoint": "meta-models/Muse-Spark-Open-816B-A42B",
   "conclusion": null,
   "dispatched_at": "2026-11-05T11:13:13Z",
-  "status": "queued"
+  "run_id": 42019121893,
+  "status": "in_progress",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/42019121893"
  },
  "poolformer": {
   "checkpoint": "sail/poolformer_s12",
