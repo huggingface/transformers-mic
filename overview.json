@@ -39,13 +39,13 @@
   },
   {
    "checkpoint": "allenai/FlexOlmo-7x7B-1T",
-   "draft": "queued",
+   "draft": "failure",
    "model": "flex_olmo",
    "next_batch": false,
    "other": 2,
    "real_checkpoint": 0,
    "regressions": 2,
-   "run": "",
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41964664003",
    "shrink": "",
    "shrinkable": true
   },
@@ -87,13 +87,13 @@
   },
   {
    "checkpoint": "nvidia/Cosmos3-Edge",
-   "draft": "queued",
+   "draft": "failure",
    "model": "cosmos3_edge",
    "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
-   "run": "",
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41964667193",
    "shrink": "",
    "shrinkable": true
   },

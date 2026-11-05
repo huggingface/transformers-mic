@@ -43,9 +43,11 @@
  },
  "cosmos3_edge": {
   "checkpoint": "nvidia/Cosmos3-Edge",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-05T03:56:15Z",
-  "status": "queued"
+  "run_id": 41964667193,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41964667193"
  },
  "ernie": {
   "checkpoint": "nghuyong/ernie-3.0-base-zh",
@@ -58,9 +60,11 @@
  },
  "flex_olmo": {
   "checkpoint": "allenai/FlexOlmo-7x7B-1T",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-05T03:56:15Z",
-  "status": "queued"
+  "run_id": 41964664003,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/41964664003"
  },
  "flint": {
   "checkpoint": "RecursiveSI/flint",

@@ -111,11 +111,11 @@ Models with real-checkpoint regressions in the daily GPU CI and no contract, shr
 | model | real-ckpt regressions | other | checkpoint | shrinkable | draft |
 |---|---|---|---|---|---|
 | colpali | 0 | 2 | [vidore/colpali-v1.3-hf](https://huggingface.co/vidore/colpali-v1.3-hf) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41626652876) |
-| flex_olmo | 0 | 2 | [allenai/FlexOlmo-7x7B-1T](https://huggingface.co/allenai/FlexOlmo-7x7B-1T) | yes | queued |
+| flex_olmo | 0 | 2 | [allenai/FlexOlmo-7x7B-1T](https://huggingface.co/allenai/FlexOlmo-7x7B-1T) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41964664003) |
 | moshi | 0 | 2 | ? | yes | not draftable |
 | switch_transformers | 0 | 2 | [google/switch-base-8](https://huggingface.co/google/switch-base-8) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41804368657) |
 | bridgetower | 0 | 1 | [regisss/bridgetower-newyorker-a100-8x](https://huggingface.co/regisss/bridgetower-newyorker-a100-8x) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41626675456) |
-| cosmos3_edge | 0 | 1 | [nvidia/Cosmos3-Edge](https://huggingface.co/nvidia/Cosmos3-Edge) | yes | queued |
+| cosmos3_edge | 0 | 1 | [nvidia/Cosmos3-Edge](https://huggingface.co/nvidia/Cosmos3-Edge) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41964667193) |
 | fsmt | 0 | 1 | [facebook/wmt19-en-ru](https://huggingface.co/facebook/wmt19-en-ru) | yes | — |
 | jetmoe | 0 | 1 | [jetmoe/jetmoe-8b](https://huggingface.co/jetmoe/jetmoe-8b) | yes | — |
 | muse_spark | 0 | 1 | ? | yes | not draftable |
