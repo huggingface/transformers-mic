@@ -24,6 +24,7 @@
  "huggingface-mic/Inkling-mic": "inkling_mm_model",
  "huggingface-mic/Jamba-tiny-dev-mic": "jamba",
  "huggingface-mic/Janus-Pro-1B-mic": "janus",
+ "huggingface-mic/Kimi-K2.5-mic": "kimi_k25",
  "huggingface-mic/Kolibri-1-mic": "kolibri1",
  "huggingface-mic/LCO-Embedding-Omni-3B-mic": "qwen2_5_omni_thinker",
  "huggingface-mic/LFM2-8B-A1B-mic": "lfm2_moe",
