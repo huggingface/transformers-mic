@@ -34,6 +34,10 @@ PLAN_SCHEMA = {
 }
 
 
+class MalformedDraft(ValueError):
+    """The reply is not a draft: empty, or missing a top-level key."""
+
+
 def propose(
     context,
     *,
@@ -111,7 +115,7 @@ def complete(client, context, model, max_tokens, temperature=0.0):
 def parse(response, model, provider, bill_to):
     content = response.choices[0].message.content
     if not content:
-        raise ValueError(
+        raise MalformedDraft(
             f"Planner returned no content (finish reason: {response.choices[0].finish_reason}); try another --provider or --llm-model"
         )
     content = re.sub(r"^```(?:json)?\s*|\s*```$", "", content.strip())
@@ -127,6 +131,9 @@ def parse(response, model, provider, bill_to):
     try:
         jsonschema.validate(plan, PLAN_SCHEMA)
     except jsonschema.ValidationError as error:
+        if error.validator in ("required", "type") and not error.path:
+            # Missing or mistyped top-level keys: not a draft, ask again.
+            raise MalformedDraft(error.message) from error
         error.plan = plan  # the retry shows the model its own draft
         raise
     return plan, {

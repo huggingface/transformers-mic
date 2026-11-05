@@ -643,11 +643,50 @@ def check_parameter_names(plan, config):
 
         closest = {name: nearest(name) for name in missing}
         hints = names_per_layer_kind(real)
+        # Lead with the suffix lookups: the fix for a name that only has the wrong index.
+        by_suffix = index_only_misses(missing, real)
+        lead = (
+            f"Usage names parameters {cls.__name__} has only in some layers: "
+            + "; ".join(by_suffix)
+            + ". The fixture keeps other layer indices than the checkpoint, so select "
+            "each by its suffix, never by a layer index. "
+            if by_suffix
+            else ""
+        )
         raise ValueError(
-            f"Usage names parameters {cls.__name__} does not have after loading "
+            lead + f"Usage names parameters {cls.__name__} does not have after loading "
             f"(checkpoint keys are remapped on load). Closest loaded names: {closest}; "
             f"pick the right module from the real names: {hints}"
         )
+
+
+def index_only_misses(missing, real):
+    """For each missing name whose module exists in other layers, a real name and the suffix lookup.
+
+    Switch Transformers routes only in every other block: drafts copied T5's
+    decoder.block.0... (block 0 has no router) or dropped the sublayer (2026-11-05).
+    The lookup uses the real suffix, so it is right in both cases.
+    """
+    hints = []
+    for name in missing:
+        match = re.search(r"\.(\d+)\.", name)
+        if not match:
+            continue
+        prefix, suffix = name[: match.start() + 1], name[match.end() :]
+        found = {}
+        for r in real:
+            index, _, rest = r[len(prefix) :].partition(".")
+            if r.startswith(prefix) and index.isdigit() and ("." + rest).endswith("." + suffix):
+                found.setdefault(rest, []).append(int(index))
+        for rest, indices in sorted(found.items()):
+            indices.sort()
+            hints.append(
+                f"{name} is not a parameter, {prefix}{indices[0]}.{rest} is (layers "
+                f"{', '.join(map(str, indices[:8]))}{', ...' if len(indices) > 8 else ''}); "
+                f"use next(p for n, p in model.named_parameters() if n.startswith({prefix!r}) "
+                f"and n.endswith({'.' + rest!r}))"
+            )
+    return hints
 
 
 def check_config_facts(plan, config):
@@ -767,19 +806,13 @@ def drop_unknown_manifest_keys(plan):
     return dropped
 
 
-def propose_valid(context, args, model, fixture, old=None):
+def propose_valid(context, args, model, fixture, old=None, format_retries=2):
     # A provider can emit schema-valid JSON that violates runner conventions.
     # Return validation feedback for one repair; never execute an invalid draft.
     for attempt in range(3):
         plan = None
         try:
-            plan, llm = planner.propose(
-                context,
-                model=args.llm_model,
-                provider=args.provider,
-                bill_to=args.bill_to,
-                temperature=0.0 if attempt == 0 else 0.7,
-            )
+            plan, llm = propose_well_formed(context, args, attempt, format_retries)
             if isinstance(plan.get("name"), str):  # "Qwen3.5-0.8B" is a slug away from valid
                 plan["name"] = re.sub(r"[^A-Za-z0-9_-]", "-", plan["name"])
             normalize_compare(plan)
@@ -802,9 +835,9 @@ def propose_valid(context, args, model, fixture, old=None):
             check_partial_training(plan, context)
             return plan, llm
         except (ValueError, jsonschema.ValidationError) as exc:
+            print(f"tmic: planner draft {attempt + 1}/3 rejected: {str(exc).splitlines()[0][:300]}", file=sys.stderr)
             if attempt == 2:
                 raise
-            print(f"tmic: planner draft {attempt + 1}/3 rejected: {str(exc).splitlines()[0][:300]}", file=sys.stderr)
             plan = plan if plan is not None else getattr(exc, "plan", None)
             context = {
                 **context,
@@ -812,6 +845,28 @@ def propose_valid(context, args, model, fixture, old=None):
                 "validation_error": str(exc)[:3000],
                 "repair_request": "Fix the validation error and return the complete corrected draft.",
             }
+
+
+def propose_well_formed(context, args, attempt, retries):
+    """One draft, asking again when the reply is not a draft at all.
+
+    Broken JSON or a missing top-level key says nothing about the contract, so it
+    does not use one of the three drafts: google/switch-base-8 lost two of them to a
+    538k-character unterminated reply and a draft without its rationale (2026-11-05).
+    """
+    for extra in range(retries + 1):
+        try:
+            return planner.propose(
+                context,
+                model=args.llm_model,
+                provider=args.provider,
+                bill_to=args.bill_to,
+                temperature=0.0 if attempt == 0 and extra == 0 else 0.7,
+            )
+        except (json.JSONDecodeError, planner.MalformedDraft) as exc:
+            if extra == retries:
+                raise
+            print(f"tmic: planner reply was not a draft ({str(exc).splitlines()[0][:200]}); asking again", file=sys.stderr)
 
 
 def model_context(model, revision=None):

@@ -609,6 +609,58 @@ def test_parameter_names_accept_suffixes_and_hint_every_layer_kind():
     assert "model.layers.1.mlp.experts." in str(error.value)
 
 
+def test_index_only_misses_name_the_suffix_lookup():
+    # Switch Transformers: routers only in odd blocks; drafts copied T5's block.0.
+    real = {"decoder.block.0.layer.2.mlp.wi.weight",
+            "decoder.block.1.layer.2.mlp.router.classifier.weight",
+            "decoder.block.3.layer.2.mlp.router.classifier.weight"}
+    lookup = "n.startswith('decoder.block.') and n.endswith('.layer.2.mlp.router.classifier.weight')"
+    (hint,) = commands.index_only_misses(["decoder.block.0.layer.2.mlp.router.classifier.weight"], real)
+    assert "decoder.block.1.layer.2.mlp.router.classifier.weight is (layers 1, 3)" in hint and lookup in hint
+    # A dropped sublayer: the lookup still uses the real suffix.
+    (hint,) = commands.index_only_misses(["decoder.block.1.mlp.router.classifier.weight"], real)
+    assert lookup in hint
+    assert commands.index_only_misses(["decoder.block.0.layer.0.nope.weight"], real) == []
+
+
+def test_a_reply_that_is_not_a_draft_does_not_use_a_draft(monkeypatch, capsys):
+    plan = {"name": "M"}
+    replies = [json.JSONDecodeError("Unterminated string", "{", 0),
+               planner.MalformedDraft("'rationale' is a required property"), (plan, {})]
+
+    def propose(context, **kwargs):
+        reply = replies.pop(0)
+        if isinstance(reply, Exception):
+            raise reply
+        return reply
+
+    monkeypatch.setattr(planner, "propose", propose)
+    args = SimpleNamespace(llm_model="m", provider="p", bill_to="")
+    assert commands.propose_well_formed({}, args, attempt=0, retries=2) == (plan, {})
+    assert capsys.readouterr().err.count("not a draft") == 2
+    replies[:] = [planner.MalformedDraft("empty")] * 3
+    with pytest.raises(planner.MalformedDraft):
+        commands.propose_well_formed({}, args, attempt=0, retries=2)
+
+
+def test_planner_logs_the_last_rejected_draft(monkeypatch, capsys):
+    monkeypatch.setattr(planner, "propose", lambda context, **kwargs: ({"name": "M", "manifest": {}}, {}))
+    monkeypatch.setattr(commands, "validate_plan", lambda *a: (_ for _ in ()).throw(ValueError("bad draft")))
+    with pytest.raises(ValueError, match="bad draft"):
+        commands.propose_valid({}, SimpleNamespace(llm_model="m", provider="p", bill_to=""), "org/m", "f")
+    assert "planner draft 3/3 rejected: bad draft" in capsys.readouterr().err
+
+
+def test_parse_reports_a_missing_top_level_key_as_not_a_draft():
+    response = SimpleNamespace(
+        choices=[SimpleNamespace(message=SimpleNamespace(content=json.dumps(
+            {"name": "M", "manifest": {}, "usage": "x" * 100, "historical_candidates": []})), finish_reason="stop")],
+        usage=None,
+    )
+    with pytest.raises(planner.MalformedDraft, match="rationale"):
+        planner.parse(response, "m", "p", None)
+
+
 def test_compare_rule_spelling_slips_are_normalized():
     plan = {"manifest": {"outputs": {"g": {"compare": "alltrue"}, "l": {"compare": "AllClose"}, "x": {"compare": "fuzzy"}}}}
     commands.normalize_compare(plan)
