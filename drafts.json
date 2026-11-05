@@ -63,6 +63,7 @@
   "conclusion": "success",
   "dispatched_at": "2026-11-05T08:24:02Z",
   "run_id": 41994161784,
+  "shrink": "shrink/41994161784/shrink-Flex-reddit-2x7B-1T-mic.html",
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/41994161784"
  },
