@@ -72,6 +72,24 @@ def test_a_large_checkpoint_must_train_a_subset():
     commands.check_partial_training({"usage": "model.requires_grad_(False)"}, {"parameters": 4_676_271_104})
 
 
+def test_a_frozen_model_must_train_parameters_the_fixture_has():
+    # jetmoe/jetmoe-8b, run 42017175194: "optimizer got an empty parameter list".
+    jetmoe = """model.requires_grad_(False)
+for name, param in model.named_parameters():
+    if name.startswith("model.layers.23.") or name.startswith("lm_head."):
+        param.requires_grad = True
+"""
+    with pytest.raises(ValueError, match="layer 23 does not exist"):
+        commands.check_trainable_selection({"usage": jetmoe}, {"tie_word_embeddings": True})
+    head = jetmoe.replace('name.startswith("model.layers.23.") or ', "")
+    with pytest.raises(ValueError, match="tie_word_embeddings"):
+        commands.check_trainable_selection({"usage": head}, {"tie_word_embeddings": True})
+    commands.check_trainable_selection({"usage": head}, {"tie_word_embeddings": False})
+    last = 'model.requires_grad_(False)\nlast = f"model.layers.{model.config.num_hidden_layers - 1}."\n'
+    commands.check_trainable_selection({"usage": last}, {"tie_word_embeddings": True})
+    commands.check_trainable_selection({"usage": 'name.startswith("model.layers.23.")'}, {})  # nothing frozen
+
+
 def test_legacy_fixture_can_only_be_reused():
     metadata = {"training": {"steps": 20}}
     assert policy.decision(metadata, reused=True)["accepted"]

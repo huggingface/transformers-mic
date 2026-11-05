@@ -320,6 +320,33 @@ def check_partial_training(plan, context):
         )
 
 
+def check_trainable_selection(plan, config):
+    """A frozen model's trainable subset, chosen by parameter name, must exist in the slim fixture too.
+
+    jetmoe/jetmoe-8b's draft (2026-11-05) trained names starting with "model.layers.23." or
+    "lm_head.": the fixture keeps about 2 layers, and a tied lm_head is listed by
+    named_parameters() once, as the input embeddings, so the optimizer got an empty parameter list.
+    """
+    if "requires_grad_(False)" not in plan["usage"]:
+        return
+    literals = re.findall(r"[\"']([^\"'\n]*)[\"']", plan["usage"])
+    for text in literals:
+        index = re.search(r"\b(?:layers?|h|blocks?)\.(\d+)\b", text)
+        if index and int(index.group(1)) >= 2:
+            raise ValueError(
+                f"trainable parameters are chosen by the name {text!r}: the slim fixture keeps about 2 layers, "
+                f"so layer {index.group(1)} does not exist there and nothing trains (empty optimizer parameter list); "
+                "index the last layer from model.config.num_hidden_layers - 1, e.g. "
+                "model.model.layers[-1].requires_grad_(True)"
+            )
+    if config.get("tie_word_embeddings") is True and any(t.startswith("lm_head") for t in literals):
+        raise ValueError(
+            "trainable parameters are chosen by the name 'lm_head', but tie_word_embeddings is true: "
+            "named_parameters() lists the tied weight once, as the input embeddings, so the name matches "
+            "nothing; train the last decoder layer instead"
+        )
+
+
 def check_undefined_names(plan):
     """Reject usage that reads a name no block sharing its state ever defines."""
     import builtins
@@ -832,6 +859,7 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
                 check_label_arguments(plan, context["config"])
                 check_parameter_names(plan, context["config"])
                 check_encoder_decoder_calls(plan, context["config"])
+                check_trainable_selection(plan, context["config"])
             check_partial_training(plan, context)
             return plan, llm
         except (ValueError, jsonschema.ValidationError) as exc:

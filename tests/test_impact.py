@@ -2,6 +2,7 @@
 
 import importlib.util
 import json
+import urllib.error
 from pathlib import Path
 
 import pytest
@@ -398,6 +399,29 @@ def test_a_checkpoint_the_hub_does_not_serve_is_skipped():
     assert s["checkpoint"] == "kmhf/hf-moshika" and s["checkpoint_source"] == "failing test"
     [s] = impact.build_suggestions(gpu_ci, sweep, files, exists=lambda repo: False)["new"]
     assert s["checkpoint"] is None and s["checkpoint_source"] is None
+
+
+def test_a_gated_checkpoint_counts_only_when_the_token_can_download_it(monkeypatch):
+    """meta-models/Muse-Spark-Open-816B-A42B: the model API answers anonymously, the download 403s."""
+    granted = {"g/granted"}
+
+    def get_text(url, token=None):
+        repo = url.split("/api/models/")[-1] if "/api/models/" in url else url.split("huggingface.co/")[1].split("/resolve/")[0]
+        if "/api/models/" in url:
+            if repo == "gone/repo":
+                raise urllib.error.HTTPError(url, 404, "", {}, None)
+            return json.dumps({"id": repo, "gated": "manual" if repo.startswith("g/") else False})
+        if token != "hf_read" or repo not in granted:
+            raise urllib.error.HTTPError(url, 403 if token else 401, "", {}, None)
+        return "{}"
+
+    monkeypatch.setattr(impact, "get_text", get_text)
+    monkeypatch.setenv("HF_TOKEN", "hf_read")
+    has = lambda repo: impact.hub_has(repo, {})
+    assert has("open/model") and has("g/granted")
+    assert not has("g/refused") and not has("gone/repo")
+    monkeypatch.delenv("HF_TOKEN")
+    assert not has("g/granted") and has("open/model")
 
 
 def test_a_failed_draft_is_retried_only_on_a_new_checkpoint():
