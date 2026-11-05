@@ -19,6 +19,17 @@ commit does not accept is replaced with the newest version it does, and put
 back to the pin once a later commit accepts it again. The overrides are
 recorded under shadow.pip_overrides, and the runner's environment_differs shows
 them too.
+
+With --plan it replays regressions instead (experiments/impact.py --replay-plan),
+the way Transformers PR CI runs MIC (transformers-ci's pr-ci_contracts.yml): its
+own runner, `run-model-contracts`, in the environment the job installed, each
+entry's contracts from its fleet at a fixed revision, in each of the entry's
+variants, on its parent and bad refs (`<sha>^` allowed). The image's packages are the
+pins: an older commit whose dependency table rejects one (tokenizers, huggingface-hub)
+gets the newest version it accepts, as its own PR CI had. torch is left alone. A
+parent without the model's directory (the bad commit added the model) gets one
+`absent` record instead of a run. Records carry `replay`
+{key, side, ref, sha, fleet} instead of `shadow`.
 """
 
 import argparse
@@ -87,29 +98,135 @@ def cpu_info():
     return model, " ".join(sorted(flags))
 
 
+def resolve(repo, ref):
+    """Full sha of a commit or `<sha>^` in the clone; fetches a commit the clone does not have."""
+    try:
+        return git(repo, "rev-parse", "--verify", f"{ref}^{{commit}}").strip()
+    except subprocess.CalledProcessError:
+        git(repo, "fetch", "--quiet", "origin", ref.rstrip("^"))
+        return git(repo, "rev-parse", "--verify", f"{ref}^{{commit}}").strip()
+
+
+RUN_PY = (sys.executable, str(HERE / "example/run.py"), "--framework", "transformers", "--require-all")
+PR_CI_RUNNER = ("run-model-contracts",)
+
+
+def run_commit(repo, sha, pinned, options=(), changed=None, command=RUN_PY):
+    """Check out one commit, adapt the pins to it (unless pinned is None) and run the fixture contracts.
+
+    options: more runner options; changed: the changed files, for the selection record.
+    Returns (records, overrides).
+    """
+    git(repo, "checkout", "--quiet", "--force", sha)
+    overrides = dependency_overrides(repo, sha, pinned) if pinned is not None else {}
+    with tempfile.TemporaryDirectory() as tmp:
+        raw = Path(tmp) / "raw.jsonl"
+        extra = []
+        if changed is not None:
+            changed_path = Path(tmp) / "changed.txt"
+            changed_path.write_text(changed)
+            extra = ["--changed-files", str(changed_path)]
+        run = subprocess.run(
+            [*command, "--fixtures-only", *extra, *options, "--run-all", "--output", str(raw)],
+            capture_output=True, text=True, cwd=HERE,
+        )
+        records = [json.loads(line) for line in raw.read_text().splitlines()] if raw.exists() else []
+    if not records:
+        records = [{"contract": "*", "framework": "transformers", "variant": "default", "target": "*", "kind": "fixture",
+                    "status": "error", "failures": [run.stderr.strip()[-1500:] or f"exit {run.returncode}, no record"]}]
+    return records, overrides
+
+
+def has_model(repo, sha, model):
+    try:
+        git(repo, "cat-file", "-e", f"{sha}:src/transformers/models/{model}/__init__.py")
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+
+def installed_pins(repo):
+    """The installed version of every package main's dependency table names, torch's family aside."""
+    table = (Path(repo) / "src/transformers/dependency_versions_table.py").read_text()
+    pins = {}
+    for name in re.findall(r'"([^"]+)": "', table):
+        if normalize(name) in ("torch", "torchvision", "torchaudio"):
+            continue
+        try:
+            pins[name] = md.version(name).split("+")[0]
+        except md.PackageNotFoundError:
+            pass
+    return pins
+
+
+def replay(args):
+    """--plan: each entry's contracts on its parent and bad refs; records carry `replay` {key, side, ref, sha, fleet}."""
+    pinned = installed_pins(args.repo)
+    print(f"pins from the environment: {len(pinned)} packages", flush=True)
+    plan = json.loads(args.plan.read_text())[args.chunk :: args.chunks]
+    print(f"{len(plan)} replays in chunk {args.chunk}/{args.chunks}", flush=True)
+    for index, entry in enumerate(plan):
+        contracts = [a for name in entry["contracts"] for a in ("--contract", name)]
+        for side in ("parent", "bad"):
+            start, overrides = time.perf_counter(), {}
+            try:
+                sha = resolve(args.repo, entry[side])
+                if side == "parent" and entry.get("model") and not has_model(args.repo, sha, entry["model"]):
+                    records = [{"contract": None, "target": "*", "status": "absent",
+                                "failures": [f"no src/transformers/models/{entry['model']} before this commit"]}]
+                else:
+                    records = []
+                    for variant in entry["variants"]:
+                        options = ["--fleet", entry["fleet"], "--fleet-revision", entry["fleet_revision"], "--variant", variant, *contracts]
+                        found, overrides = run_commit(args.repo, sha, pinned, options, command=PR_CI_RUNNER)
+                        records += found
+            except subprocess.CalledProcessError as error:
+                sha, overrides = None, {}
+                records = [{"contract": "*", "target": "*", "status": "error",
+                            "failures": [f"{entry[side]}: {(error.stderr or str(error)).strip()[-500:]}"]}]
+            meta = {"key": entry["key"], "side": side, "ref": entry[side], "sha": sha, "fleet": entry["fleet"],
+                    "pip_overrides": overrides if sha else {}, "run_id": os.environ.get("GITHUB_RUN_ID", "")}
+            if side == "bad" and sha:
+                try:  # how many commits the regression may come from
+                    meta["commits"] = int(git(args.repo, "rev-list", "--count", f"{resolve(args.repo, entry['parent'])}..{sha}"))
+                except subprocess.CalledProcessError:
+                    pass
+            with args.output.open("a") as f:
+                for record in records:
+                    f.write(json.dumps({**record, "replay": meta}) + "\n")
+            bad = [f"{r['target']}/{r.get('variant', '')}={r['status']}" for r in records if r["status"] not in ("pass", "xfail", "unsupported")]
+            print(f"[{index + 1}/{len(plan)}] {entry['key']} {entry['fleet']} {side} {(sha or entry[side])[:10]} "
+                  f"{time.perf_counter() - start:.0f}s: {'all pass' if not bad else ' '.join(bad)}", flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--repo", required=True)
-    parser.add_argument("--since", required=True)
-    parser.add_argument("--until", required=True)
+    parser.add_argument("--since")
+    parser.add_argument("--until")
     parser.add_argument("--ref", default="main", help="branch whose first-parent history is walked")
+    parser.add_argument("--plan", type=Path, help="JSON list of {key, model, fleet, fleet_revision, variants, contracts, parent, bad} to replay instead of a window")
     parser.add_argument("--chunk", type=int, default=0)
     parser.add_argument("--chunks", type=int, default=1)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    if not args.plan and not (args.since and args.until):
+        parser.error("--since and --until, or --plan")
 
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    if args.plan:
+        return replay(args)
+    pinned = json.loads((HERE / "example/transformers/tests/contracts/fleet.lock").read_text())["environment"]
     shas = git(args.repo, "rev-list", "--first-parent", "--reverse", f"--since={args.since}", f"--until={args.until}", args.ref).split()
     mine = shas[args.chunk :: args.chunks]
     cpu, flags = cpu_info()
-    pinned = json.loads((HERE / "example/transformers/tests/contracts/fleet.lock").read_text())["environment"]
     print(f"{len(shas)} commits in {args.since}..{args.until}; chunk {args.chunk}/{args.chunks}: {len(mine)}", flush=True)
-    args.output.parent.mkdir(parents=True, exist_ok=True)
     for index, sha in enumerate(mine):
-        git(args.repo, "checkout", "--quiet", "--force", sha)
         subject = git(args.repo, "log", "-1", "--format=%s", sha).strip()
         date = git(args.repo, "log", "-1", "--format=%cI", sha).strip()
         changed = git(args.repo, "diff", "--name-only", f"{sha}^", sha)
-        overrides = dependency_overrides(args.repo, sha, pinned)
+        start = time.perf_counter()
+        records, overrides = run_commit(args.repo, sha, pinned, changed=changed)
         meta = {
             "transformers_ref": "main", "transformers_sha": sha, "commit_subject": subject, "commit_date": date,
             "event": "backfill", "run_id": os.environ.get("GITHUB_RUN_ID", ""), "runner": os.environ.get("RUNNER_NAME", ""),
@@ -117,19 +234,6 @@ def main():
             "changed_files_source": f"diff {sha[:10]}^..{sha[:10]}", "changed_files": len(changed.split()),
             "changed_files_truncated": False, "position": shas.index(sha), "pip_overrides": overrides,
         }
-        with tempfile.TemporaryDirectory() as tmp:
-            changed_path, raw = Path(tmp) / "changed.txt", Path(tmp) / "raw.jsonl"
-            changed_path.write_text(changed)
-            start = time.perf_counter()
-            run = subprocess.run(
-                [sys.executable, str(HERE / "example/run.py"), "--framework", "transformers", "--fixtures-only",
-                 "--changed-files", str(changed_path), "--run-all", "--require-all", "--output", str(raw)],
-                capture_output=True, text=True, cwd=HERE,
-            )
-            records = [json.loads(line) for line in raw.read_text().splitlines()] if raw.exists() else []
-        if not records:
-            records = [{"contract": "*", "framework": "transformers", "variant": "default", "target": "*", "kind": "fixture",
-                        "status": "error", "failures": [run.stderr.strip()[-1500:] or f"exit {run.returncode}, no record"]}]
         with args.output.open("a") as f:
             for record in records:
                 f.write(json.dumps({**record, "shadow": meta}) + "\n")
