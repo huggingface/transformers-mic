@@ -1955,5 +1955,8 @@ def test_audio_reaches_the_processor_as_waveforms():
     with pytest.raises(ValueError, match="waveforms"):
         commands.check_audio_waveforms({"usage": bad})
     commands.check_audio_waveforms({"usage": "inputs = processor(audio=[wave_a, wave_b], sampling_rate=sr)\n"})
+    multiline = 'path_a = os.path.join(tmp, "a.wav")\ninputs = processor(\n    text=["x"],\n    audio=[path_a],\n)\n'
+    with pytest.raises(ValueError, match="waveforms"):
+        commands.check_audio_waveforms({"usage": multiline})
     # A chat template's audio entries load files (Voxtral-Mini-3B).
     commands.check_audio_waveforms({"usage": bad + 'processor.apply_chat_template([{"type": "audio", "path": "a.wav"}])\n'})

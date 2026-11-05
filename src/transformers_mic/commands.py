@@ -446,11 +446,13 @@ def check_audio_waveforms(plan):
     if "apply_chat_template" in usage:
         return
     paths = re.findall(r"[\"']([^\"'\n]+\.(?:wav|mp3|flac|ogg|m4a))[\"']", usage)
-    if paths and re.search(r"\bprocessor\([^\n]*\baudio\s*=|\bprocessor\(\s*\w+\s*[,)]", usage):
+    calls = [call_arguments(usage, m.end()) for m in re.finditer(r"\bprocessor\(", usage)]
+    if paths and any(re.search(r"\baudio\s*=", args) or re.match(r"\s*\w+\s*[,)]?\s*$|\s*\w+\s*,", args) for args in calls):
         raise ValueError(
             f"the usage passes audio files ({paths[0]!r}) to the processor, which takes decoded waveforms: "
-            "build NumPy arrays at the processor's sampling rate in the block (e.g. sine waves) and pass them "
-            "as audio=[wave_a, wave_b]"
+            "build NumPy arrays at the processor's sampling rate in the block (e.g. sine waves), pass them "
+            "as audio=[wave_a, wave_b] and write no files; a transcription-only processor (Voxtral Realtime) "
+            "takes audio and no text"
         )
 
 
