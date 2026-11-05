@@ -826,8 +826,11 @@ existed says so on the page: its changes were chosen by hand.
 
 Catalog reuse requires no inference call. For a new model, or with `create --llm`,
 the planner uses **Hugging Face Inference Providers**, default model
-**`deepseek-ai/DeepSeek-V4.1-Flash-1017`**, with `provider="together"` and thinking
-disabled. Set `--provider` or `--llm-model` on `create` and `update` to override them. Authentication uses the normal HF token
+**`deepseek-ai/DeepSeek-V4-Pro-0813`**, with `provider="together"` and thinking
+disabled. It replaced `deepseek-ai/DeepSeek-V4.1-Flash-1017` on 2026-11-05: in
+`planner-eval` it built as often (26/48 against 27/48) and had far more drafts
+accepted (45/48 against 33/48), so it made fewer calls and cost less on together,
+which bills each call at least $0.01. Set `--provider` or `--llm-model` on `create` and `update` to override them. Authentication uses the normal HF token
 (`HF_TOKEN` or `hf auth login`) with Inference Providers permission.
 
 Planner calls are billed to the **`huggingface` organization** by default: each
