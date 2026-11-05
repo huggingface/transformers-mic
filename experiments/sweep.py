@@ -268,6 +268,12 @@ def shrink(config):
         for key in LINKED_TO_HIDDEN:
             if original.get(key) and original.get(key) == original.get("hidden_size"):
                 values[key] = values["hidden_size"]
+        # Aliases of a width (Kimi K2.5's vision tower repeats hidden_size as mm_hidden_size and
+        # vt_hidden_size, intermediate_size as vt_intermediate_size) shrink with it.
+        for key, value in original.items():
+            width = next((w for w in ("hidden_size", "intermediate_size") if key in (f"mm_{w}", f"vt_{w}")), None)
+            if width and isinstance(value, int) and value == original.get(width):
+                values[key] = values[width]
         # A top-k sparse attention (Mistral-Large-4's indexer, 2048) at least as long as
         # the contract's sequences selects every token. Contract prompts can be 5 tokens
         # (DeepSeek-V3.2: top-k 8 left every output unchanged), so keep 2.
@@ -555,6 +561,11 @@ def shrink(config):
             prompt = values.get("prompt_encoder_config")
             if getattr(sub, "output_channels", None) and isinstance(prompt, dict) and sub.output_channels == cfg.prompt_encoder_config.hidden_size:
                 values[key]["output_channels"] = prompt["hidden_size"]
+        # Kimi K2.5's projector reads the vision tower's width (projection_hidden_size).
+        vision_values = values.get("vision_config")
+        if isinstance(vision_values, dict) and getattr(cfg, "vision_config", None) is not None and isinstance(values.get("projection_hidden_size"), int):
+            if cfg.to_dict()["projection_hidden_size"] == cfg.vision_config.to_dict().get("hidden_size"):
+                values["projection_hidden_size"] = vision_values["hidden_size"]
         # CSM's depth decoder projects the backbone's hidden states (backbone_hidden_size).
         for key in getattr(cfg, "sub_configs", {}) or {}:
             sub = getattr(cfg, key, None)
