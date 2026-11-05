@@ -61,8 +61,8 @@ jobs:
           date -u +%Y-%m-%dT%H:%M:%SZ > out/sentence-transformers/started-at.txt
       - name: Install
         run: |
-          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
-          python -m pip install -e '.[runtime]' torchvision \
+          # torch comes from the pinned image: the baselines are recorded against it.
+          python -m pip install -e '.[runtime]' \
             'transformers @ git+https://github.com/huggingface/transformers.git@main' \
             'hf-doc-builder @ git+https://github.com/huggingface/doc-builder.git@main'
           if [ "$DEPENDENCY" = main ]; then

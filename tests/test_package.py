@@ -638,6 +638,21 @@ def test_planner_context_names_one_parameter_per_layer_kind():
         "lm_head.weight", "model.layers.N.mlp.down_proj.weight", "model.layers.N.mlp.experts.down_proj"]
 
 
+def test_parameter_patterns_keep_sublayer_indices():
+    # Switch Transformers: the router is in every other block, always in sublayer 1.
+    names = {"encoder.block.0.layer.0.SelfAttention.q.weight",
+             "encoder.block.0.layer.1.mlp.wi.weight",
+             "encoder.block.1.layer.1.mlp.router.classifier.weight",
+             "encoder.block.3.layer.1.mlp.router.classifier.weight",
+             "decoder.block.0.layer.1.EncDecAttention.q.weight",
+             "decoder.block.2.layer.1.EncDecAttention.q.weight"}
+    assert commands.names_per_layer_kind(names, pattern=True) == [
+        "decoder.block.N.layer.1.EncDecAttention.q.weight",
+        "encoder.block.N.layer.0.SelfAttention.q.weight",
+        "encoder.block.N.layer.1.mlp.router.classifier.weight",
+        "encoder.block.N.layer.1.mlp.wi.weight"]
+
+
 @pytest.mark.requires_runtime
 def test_update_keeps_fixture_pin_and_old_source(workspace, monkeypatch):
     plan = {
