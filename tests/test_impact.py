@@ -439,7 +439,7 @@ def test_replay_plan_pairs_each_regression_with_its_commits():
     days = {"2026-10-02": "p" * 40, "2026-10-03": "q" * 40}
     replays = {}
     plan = impact.replay_plan(gpu_ci, replays, CONTRACTS, days.get, sha_of_run=lambda run: None, failing_on=fails)
-    assert replays == {"sticky#bert#2026-10-03": {"verdict": "not-covered", "version": 3}, "8#llama": {"verdict": "out-of-scope", "version": 3}}
+    assert replays == {"sticky#bert#2026-10-03": {"verdict": "not-covered", "version": 4}, "8#llama": {"verdict": "out-of-scope", "version": 4}}
     # Newest first; one entry per fleet holding the model's contracts.
     assert [(p["key"], p["fleet"], p["variants"], p["parent"], p["bad"]) for p in plan] == [
         ("sticky#llama#2026-10-03", "control", ["default", "bfloat16"], "p" * 40, "q" * 40),
@@ -449,7 +449,7 @@ def test_replay_plan_pairs_each_regression_with_its_commits():
     ]
     assert plan[0]["model"] == "llama" and plan[0]["contracts"] == ["huggingface-mic/llama-mic"]
     # Replayed regressions are not planned again; the limit counts regressions, not entries.
-    done = {**replays, "sticky#llama#2026-10-03": {"verdict": "missed", "version": 3}}
+    done = {**replays, "sticky#llama#2026-10-03": {"verdict": "missed", "version": 4}}
     assert {p["key"] for p in impact.replay_plan(gpu_ci, done, CONTRACTS, days.get, limit=1, failing_on=fails)} == {"7#llama"}
     assert {p["key"] for p in impact.replay_plan(gpu_ci, {}, CONTRACTS, days.get, limit=1, failing_on=fails)} == {"sticky#llama#2026-10-03"}
     # A verdict from older rules is planned again.
@@ -559,7 +559,7 @@ def test_a_sticky_onset_of_a_bisected_regression_is_counted_once():
     plan = impact.replay_plan(gpu_ci, replays, CONTRACTS, {"2026-10-22": "p" * 40, "2026-10-23": "q" * 40}.get,
                               sha_of_run=lambda run: None, failing_on=fails)
     assert {p["key"] for p in plan} == {"49811#llama"}
-    assert replays["sticky#llama#2026-10-23"] == {"verdict": "duplicate", "reason": "same regression as 49811#llama", "version": 3}
+    assert replays["sticky#llama#2026-10-23"] == {"verdict": "duplicate", "reason": "same regression as 49811#llama", "version": 4}
 
 
 def test_a_setup_error_is_broken_not_red():
@@ -568,9 +568,11 @@ def test_a_setup_error_is_broken_not_red():
         replayed("k", "bad", "error", failures=["fixture files differ from build.json: ['1_Pooling/config.json']"]),
         replayed("m", "parent", "fail", failures=["no reviewed baseline at /x/expectations/cpu-x86_64-bf16/a.json"]),
         replayed("m", "bad", "fail", failures=["no reviewed baseline at /x/expectations/cpu-x86_64-bf16/a.json"]),
+        replayed("n", "parent", "absent", contract=None),
+        replayed("n", "bad", "error", failures=["Traceback\nImportError: tokenizers>=0.22.0,<=0.23.0 is required for a normal functioning of this module, but found tokenizers==0.23.3."]),
     ]
     out = impact.replay_verdicts(records, {})
-    assert out["k"]["verdict"] == out["m"]["verdict"] == "broken"
+    assert out["k"]["verdict"] == out["m"]["verdict"] == out["n"]["verdict"] == "broken"
     assert out["k"]["reason"].startswith("llama-mic: fixture files differ")
 
 

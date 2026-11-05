@@ -24,9 +24,11 @@ With --plan it replays regressions instead (experiments/impact.py --replay-plan)
 the way Transformers PR CI runs MIC (transformers-ci's pr-ci_contracts.yml): its
 own runner, `run-model-contracts`, in the environment the job installed, each
 entry's contracts from its fleet at a fixed revision, in each of the entry's
-variants, on its parent and bad refs (`<sha>^` allowed). No pin is adapted: PR CI
-does not either. A parent without the model's directory (the bad commit added the
-model) gets one `absent` record instead of a run. Records carry `replay`
+variants, on its parent and bad refs (`<sha>^` allowed). The image's packages are the
+pins: an older commit whose dependency table rejects one (tokenizers, huggingface-hub)
+gets the newest version it accepts, as its own PR CI had. torch is left alone. A
+parent without the model's directory (the bad commit added the model) gets one
+`absent` record instead of a run. Records carry `replay`
 {key, side, ref, sha, fleet} instead of `shadow`.
 """
 
@@ -143,14 +145,30 @@ def has_model(repo, sha, model):
         return False
 
 
+def installed_pins(repo):
+    """The installed version of every package main's dependency table names, torch's family aside."""
+    table = (Path(repo) / "src/transformers/dependency_versions_table.py").read_text()
+    pins = {}
+    for name in re.findall(r'"([^"]+)": "', table):
+        if normalize(name) in ("torch", "torchvision", "torchaudio"):
+            continue
+        try:
+            pins[name] = md.version(name).split("+")[0]
+        except md.PackageNotFoundError:
+            pass
+    return pins
+
+
 def replay(args):
     """--plan: each entry's contracts on its parent and bad refs; records carry `replay` {key, side, ref, sha, fleet}."""
+    pinned = installed_pins(args.repo)
+    print(f"pins from the environment: {len(pinned)} packages", flush=True)
     plan = json.loads(args.plan.read_text())[args.chunk :: args.chunks]
     print(f"{len(plan)} replays in chunk {args.chunk}/{args.chunks}", flush=True)
     for index, entry in enumerate(plan):
         contracts = [a for name in entry["contracts"] for a in ("--contract", name)]
         for side in ("parent", "bad"):
-            start = time.perf_counter()
+            start, overrides = time.perf_counter(), {}
             try:
                 sha = resolve(args.repo, entry[side])
                 if side == "parent" and entry.get("model") and not has_model(args.repo, sha, entry["model"]):
@@ -160,13 +178,14 @@ def replay(args):
                     records = []
                     for variant in entry["variants"]:
                         options = ["--fleet", entry["fleet"], "--fleet-revision", entry["fleet_revision"], "--variant", variant, *contracts]
-                        records += run_commit(args.repo, sha, None, options, command=PR_CI_RUNNER)[0]
+                        found, overrides = run_commit(args.repo, sha, pinned, options, command=PR_CI_RUNNER)
+                        records += found
             except subprocess.CalledProcessError as error:
-                sha = None
+                sha, overrides = None, {}
                 records = [{"contract": "*", "target": "*", "status": "error",
                             "failures": [f"{entry[side]}: {(error.stderr or str(error)).strip()[-500:]}"]}]
             meta = {"key": entry["key"], "side": side, "ref": entry[side], "sha": sha, "fleet": entry["fleet"],
-                    "run_id": os.environ.get("GITHUB_RUN_ID", "")}
+                    "pip_overrides": overrides if sha else {}, "run_id": os.environ.get("GITHUB_RUN_ID", "")}
             if side == "bad" and sha:
                 try:  # how many commits the regression may come from
                     meta["commits"] = int(git(args.repo, "rev-list", "--count", f"{resolve(args.repo, entry['parent'])}..{sha}"))

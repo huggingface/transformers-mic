@@ -902,9 +902,12 @@ def draft_lines(suggestions, drafts):
 
 REPLAYS_PER_RUN = 40  # regressions replayed per run; the rest wait for the next one
 REGRESSION_ROWS = 100  # newest regressions on the overview; the full report lists them all
-REPLAY_VERSION = 3  # bump when a rule below changes: every verdict is recomputed
+REPLAY_VERSION = 4  # bump when a rule below changes: every verdict is recomputed
 # Failures that say the replay could not measure anything: the fixture or its baselines, not the code.
-SETUP_ERRORS = ("no reviewed baseline", "no golden baseline", "fixture files differ", "wrong hardware", "not measured")
+SETUP_ERRORS = (
+    "no reviewed baseline", "no golden baseline", "fixture files differ", "wrong hardware", "not measured",
+    "is required for a normal functioning of this module",  # Transformers' own dependency check: the environment, not the code
+)
 CONFIRM_DAYS = 3  # a sticky onset counts when the daily CI fails one of its tests within this many days
 SAME_EVENT_DAYS = 2  # a sticky onset this close to a bisected regression of the same model is that regression
 # What Transformers PR CI runs of each fleet (transformers-ci .github/workflows/pr-ci_contracts.yml).
