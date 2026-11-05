@@ -439,7 +439,7 @@ def test_replay_plan_pairs_each_regression_with_its_commits():
     days = {"2026-10-02": "p" * 40, "2026-10-03": "q" * 40}
     replays = {}
     plan = impact.replay_plan(gpu_ci, replays, CONTRACTS, days.get, sha_of_run=lambda run: None, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py'])
-    assert replays == {"sticky#bert#2026-10-03": {"verdict": "not-covered", "version": 6}, "8#llama": {"verdict": "out-of-scope", "version": 6}}
+    assert replays == {"sticky#bert#2026-10-03": {"verdict": "not-covered", "version": impact.REPLAY_VERSION}, "8#llama": {"verdict": "out-of-scope", "version": impact.REPLAY_VERSION}}
     # Newest first; one entry per fleet holding the model's contracts.
     assert [(p["key"], p["fleet"], p["variants"], p["parent"], p["bad"]) for p in plan] == [
         ("sticky#llama#2026-10-03", "control", ["default", "bfloat16"], "p" * 40, "q" * 40),
@@ -449,7 +449,7 @@ def test_replay_plan_pairs_each_regression_with_its_commits():
     ]
     assert plan[0]["model"] == "llama" and plan[0]["contracts"] == ["huggingface-mic/llama-mic"]
     # Replayed regressions are not planned again; the limit counts regressions, not entries.
-    done = {**replays, "sticky#llama#2026-10-03": {"verdict": "missed", "version": 6}}
+    done = {**replays, "sticky#llama#2026-10-03": {"verdict": "missed", "version": impact.REPLAY_VERSION}}
     assert {p["key"] for p in impact.replay_plan(gpu_ci, done, CONTRACTS, days.get, limit=1, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py'])} == {"7#llama"}
     assert {p["key"] for p in impact.replay_plan(gpu_ci, {}, CONTRACTS, days.get, limit=1, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py'])} == {"sticky#llama#2026-10-03"}
     # A verdict from older rules is planned again.
@@ -532,10 +532,27 @@ def test_overview_counts_the_replays(tmp_path):
     })
     impact.summarize(results)
     o = json.loads((results / "overview.json").read_text())
-    assert o["replay"] == {"caught": 1, "missed": 1, "already-red": 0, "no-code-change": 0, "not-reproduced": 0, "model-added": 0, "duplicate": 0, "unrelated-culprit": 0, "broken": 0, "out-of-scope": 0, "not-covered": 1, "pending": 1}
+    assert o["replay"] == {"caught": 1, "missed": 1, "not-a-regression": 0, "already-red": 0, "no-code-change": 0, "not-reproduced": 0, "model-added": 0, "duplicate": 0, "unrelated-culprit": 0, "broken": 0, "out-of-scope": 0, "not-covered": 1, "pending": 1}
     assert [(g["model"], g["verdict"]) for g in o["regressions"]] == [("e", "pending"), ("b", "missed"), ("a", "caught")]
     summary = (results / "summary.md").read_text()
     assert "**Catch rate: 1 of 2** (50%)" in summary
+
+
+def test_a_human_label_takes_a_miss_out_of_the_catch_rate(tmp_path):
+    results = results_dir(tmp_path)
+    write(results / "gpu-ci.json", {"1#a": regression(model="a", pr="1"), "sticky#b#d": regression(model="b")})
+    write(results / "replays.json", {
+        "1#a": {"verdict": "caught", "failures": ["a-mic: logits"]},
+        "sticky#b#d": {"verdict": "missed", "failures": []},
+    })
+    with open(results / "labels.jsonl", "a") as f:
+        f.write(json.dumps({"key": "replay#sticky#b#d", "verdict": "not-a-regression", "note": "fails at both ends", "by": "me"}) + "\n")
+        f.write(json.dumps({"key": "replay#1#a", "verdict": "flake", "note": "not a replay verdict", "by": "me"}) + "\n")
+    impact.summarize(results)
+    o = json.loads((results / "overview.json").read_text())
+    assert (o["replay"]["caught"], o["replay"]["missed"], o["replay"]["not-a-regression"]) == (1, 0, 1)
+    assert [g["detail"] for g in o["regressions"] if g["model"] == "b"] == ["fails at both ends (me)"]
+    assert "**Catch rate: 1 of 1** (100%)" in (results / "summary.md").read_text()
 
 
 def test_a_sticky_onset_the_daily_ci_did_not_repeat_is_not_reproduced():
@@ -559,7 +576,7 @@ def test_a_sticky_onset_of_a_bisected_regression_is_counted_once():
     plan = impact.replay_plan(gpu_ci, replays, CONTRACTS, {"2026-10-22": "p" * 40, "2026-10-23": "q" * 40}.get,
                               sha_of_run=lambda run: None, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py'])
     assert {p["key"] for p in plan} == {"49811#llama"}
-    assert replays["sticky#llama#2026-10-23"] == {"verdict": "duplicate", "reason": "same regression as 49811#llama", "version": 6}
+    assert replays["sticky#llama#2026-10-23"] == {"verdict": "duplicate", "reason": "same regression as 49811#llama", "version": impact.REPLAY_VERSION}
 
 
 def test_a_setup_error_is_broken_not_red():
