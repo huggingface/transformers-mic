@@ -439,6 +439,12 @@ No Git commit or framework PR is created automatically.""",
                 action="store_true",
                 help="Run contracts without comparing against reviewed baselines",
             )
+            run.add_argument(
+                "--allow-missing-baseline",
+                action="store_true",
+                help="Pass targets that have no reviewed baseline for this platform "
+                "when their outputs are valid (marked baseline_missing)",
+            )
     review = sub.add_parser(
         "review", help="Compare measured candidates with approved expectations"
     )
@@ -599,6 +605,8 @@ def external_check(args):
         options.append("--run-all")
     if args.no_baseline:
         options.append("--no-baseline")
+    if args.allow_missing_baseline:
+        options.append("--allow-missing-baseline")
     if not args.all_variants:
         for name in args.contract or []:
             options += ["--contract", name]

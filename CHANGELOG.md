@@ -15,6 +15,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- `tmic check --allow-missing-baseline` passes a target that has no reviewed baseline for this platform
+  (e.g. `cpu-arm64` on a laptop) when its outputs are valid, marking the record `baseline_missing`.
+  Targets that do have a baseline are still compared; CI keeps failing on a missing baseline.
 - `tmic run` and `tmic create` keep a reviewed `tmic fixture org/model` recipe: the contract pins its
   revision and adds its `config_overrides`. `tmic run` finds `./<model>-fixture/` by itself;
   `--fixture-recipe DIR` points elsewhere.
