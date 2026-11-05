@@ -1960,3 +1960,25 @@ def test_audio_reaches_the_processor_as_waveforms():
         commands.check_audio_waveforms({"usage": multiline})
     # A chat template's audio entries load files (Voxtral-Mini-3B).
     commands.check_audio_waveforms({"usage": bad + 'processor.apply_chat_template([{"type": "audio", "path": "a.wav"}])\n'})
+
+
+def test_every_draft_problem_is_reported_at_once(monkeypatch):
+    # Voxtral Realtime: three problems, one per draft, ran out of drafts.
+    calls = []
+
+    def fake(context, args, attempt, retries):
+        calls.append(context.get("validation_error"))
+        return {"usage": "", "manifest": {}}, None
+
+    monkeypatch.setattr(commands, "propose_well_formed", fake)
+    monkeypatch.setattr(commands, "normalize_compare", lambda plan: None)
+    monkeypatch.setattr(commands, "drop_unknown_manifest_keys", lambda plan: None)
+    monkeypatch.setattr(commands, "validate_plan", lambda *a: None)
+    for name in ("check_imports", "check_undefined_names", "check_targets", "check_code_fences", "check_no_remote_code",
+                 "check_image_shapes", "check_loss_has_gradients", "check_transducer_inputs", "check_partial_training"):
+        monkeypatch.setattr(commands, name, lambda *a: None)
+    monkeypatch.setattr(commands, "check_chat_template", lambda *a: (_ for _ in ()).throw(ValueError("no chat template")))
+    monkeypatch.setattr(commands, "check_audio_waveforms", lambda *a: (_ for _ in ()).throw(ValueError("audio files")))
+    with pytest.raises(ValueError, match=r"2 problems: \(1\) no chat template \(2\) audio files"):
+        commands.propose_valid({}, SimpleNamespace(), "o/m", "o/m-mic")
+    assert "no chat template" in calls[1] and "audio files" in calls[1]
