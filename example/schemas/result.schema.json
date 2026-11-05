@@ -77,6 +77,10 @@
   "baseline": {
    "type": "string"
   },
+  "baseline_missing": {
+   "type": "boolean",
+   "description": "--allow-missing-baseline: this platform has no reviewed baseline, so outputs were validated but not compared"
+  },
   "golden": {
    "type": "string"
   },

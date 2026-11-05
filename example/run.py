@@ -638,6 +638,9 @@ def main():
                         help="fail on targets skipped for this host's hardware or an undefined variant; only skips the manifest declares are allowed")
     parser.add_argument("--no-baseline", action="store_true",
                         help="run contracts without comparing against reviewed baselines; pass when outputs are valid, skip the baseline check entirely")
+    parser.add_argument("--allow-missing-baseline", action="store_true",
+                        help="compare against reviewed baselines where this platform has one; a target without one passes when its outputs are valid "
+                             "and is marked baseline_missing (local runs on platforms CI does not record, e.g. cpu-arm64)")
     args = parser.parse_args()
     if args.golden:
         args.golden = platform_class(args.golden)
@@ -822,6 +825,9 @@ def main():
                     continue
                 if args.no_baseline:
                     emit({**record, "status": "pass", "failures": []})
+                    continue
+                if not baseline.exists() and args.allow_missing_baseline:
+                    emit({**record, "status": "pass", "failures": [], "baseline_missing": True})
                     continue
                 if not baseline.exists():
                     failures = [f"no reviewed baseline at {record['baseline']}"]

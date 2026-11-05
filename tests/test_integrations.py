@@ -219,6 +219,71 @@ def test_runner_uses_only_selected_outputs_and_checks_numeric_shape(
     assert run.main() == 0
 
 
+@pytest.mark.requires_runtime
+def test_allow_missing_baseline_validates_outputs_without_comparing(
+    workspace, monkeypatch, capsys
+):
+    integrations.generate(
+        SimpleNamespace(
+            workspace=workspace.root, integration=["transformers", integrations.NAME]
+        )
+    )
+    sys.path.insert(0, str(resources.backend()))
+    import run
+
+    monkeypatch.setattr(
+        run, "contract_folder", lambda *a: (workspace.contract_root, "local")
+    )
+    monkeypatch.setattr(
+        run,
+        "targets",
+        lambda *a: iter([("fixture", "fixture", "/fixture", "a" * 40, None)]),
+    )
+    values = {
+        "runtime": {"device": "cpu", "dtype": "float32"},
+        "scores": [0.1, 0.2, 0.3, 0.4],
+    }
+
+    class Executor:
+        def __init__(self, *a):
+            pass
+
+        def environment(self):
+            return {"python": "3.11", "sentence-transformers": "test"}
+
+        def run(self, *a, **kw):
+            return True, json.dumps(values), ""
+
+    monkeypatch.setattr(run, "Executor", Executor)
+    options = [
+        "run",
+        "--framework",
+        integrations.NAME,
+        "--lock",
+        str(workspace.lock_path),
+    ]
+
+    def records():
+        return [
+            json.loads(line)
+            for line in capsys.readouterr().out.splitlines()
+            if line.startswith('{"contract"')
+        ]
+
+    # No baseline has been recorded: a plain check fails on it ...
+    monkeypatch.setattr(sys, "argv", options)
+    assert run.main() == 1
+    assert records()[0]["failures"][0].startswith("no reviewed baseline at ")
+    # ... while the opt-in passes valid outputs and says they were not compared.
+    monkeypatch.setattr(sys, "argv", [*options, "--allow-missing-baseline"])
+    assert run.main() == 0
+    (record,) = records()
+    assert record["status"] == "pass" and record["baseline_missing"] is True
+    # Outputs are still validated: a broken output fails even without a baseline.
+    values.pop("scores")
+    assert run.main() == 1
+
+
 def test_publication_requires_every_integration(workspace):
     import hashlib
 
