@@ -167,6 +167,11 @@ def replay(args):
                             "failures": [f"{entry[side]}: {(error.stderr or str(error)).strip()[-500:]}"]}]
             meta = {"key": entry["key"], "side": side, "ref": entry[side], "sha": sha, "fleet": entry["fleet"],
                     "run_id": os.environ.get("GITHUB_RUN_ID", "")}
+            if side == "bad" and sha:
+                try:  # how many commits the regression may come from
+                    meta["commits"] = int(git(args.repo, "rev-list", "--count", f"{resolve(args.repo, entry['parent'])}..{sha}"))
+                except subprocess.CalledProcessError:
+                    pass
             with args.output.open("a") as f:
                 for record in records:
                     f.write(json.dumps({**record, "replay": meta}) + "\n")
