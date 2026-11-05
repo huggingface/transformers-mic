@@ -984,26 +984,45 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
             normalize_compare(plan)
             drop_unknown_manifest_keys(plan)
             validate_plan(plan, model, fixture, old)
-            check_imports(plan)
-            check_undefined_names(plan)
-            check_targets(plan)
-            check_code_fences(plan)
-            check_no_remote_code(plan)
-            check_image_shapes(plan)
-            check_loss_has_gradients(plan)
-            if context.get("config"):
-                check_float16_load(plan, context["config"], loaded_parameters(context))
-                check_config_facts(plan, context["config"])
-                check_model_classes(plan, context["config"])
-                check_label_arguments(plan, context["config"])
-                check_parameter_names(plan, context["config"])
-                check_encoder_decoder_calls(plan, context["config"])
-                check_trainable_selection(plan, context["config"], loaded_parameters(context))
-                check_batch_encoding_dtype(plan, context["config"])
-            check_transducer_inputs(plan)
-            check_chat_template(plan, context)
-            check_audio_waveforms(plan)
-            check_partial_training(plan, context)
+            config, parameters = context.get("config"), loaded_parameters(context)
+            checks = [
+                lambda: check_imports(plan),
+                lambda: check_undefined_names(plan),
+                lambda: check_targets(plan),
+                lambda: check_code_fences(plan),
+                lambda: check_no_remote_code(plan),
+                lambda: check_image_shapes(plan),
+                lambda: check_loss_has_gradients(plan),
+            ]
+            if config:
+                checks += [
+                    lambda: check_float16_load(plan, config, parameters),
+                    lambda: check_config_facts(plan, config),
+                    lambda: check_model_classes(plan, config),
+                    lambda: check_label_arguments(plan, config),
+                    lambda: check_parameter_names(plan, config),
+                    lambda: check_encoder_decoder_calls(plan, config),
+                    lambda: check_trainable_selection(plan, config, parameters),
+                    lambda: check_batch_encoding_dtype(plan, config),
+                ]
+            checks += [
+                lambda: check_transducer_inputs(plan),
+                lambda: check_chat_template(plan, context),
+                lambda: check_audio_waveforms(plan),
+                lambda: check_partial_training(plan, context),
+            ]
+            # Every check runs, so one repair turn sees every problem: Voxtral Realtime spent its
+            # three drafts fixing one rejection each (bfloat16 load, chat template, audio paths).
+            problems = []
+            for check in checks:
+                try:
+                    check()
+                except ValueError as exc:
+                    problems.append(str(exc)[:1200])
+            if len(problems) == 1:
+                raise ValueError(problems[0])
+            if problems:
+                raise ValueError(f"{len(problems)} problems: " + " ".join(f"({n}) {p}" for n, p in enumerate(problems, 1)))
             return plan, llm
         except (ValueError, jsonschema.ValidationError) as exc:
             print(f"tmic: planner draft {attempt + 1}/3 rejected: {str(exc).splitlines()[0][:300]}", file=sys.stderr)
@@ -1014,7 +1033,7 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
             context = {
                 **context,
                 "previous_draft": plan,
-                "validation_error": str(exc)[:3000],
+                "validation_error": str(exc)[:6000],
                 "repair_request": "Fix the validation error and return the complete corrected draft.",
             }
 
