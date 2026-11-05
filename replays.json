@@ -1,1815 +1,1421 @@
 {
- "41693#mask2former": {
-  "bad": "c9de1097eed992fe205f876415e7a7cfaa06be50",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/mask2former-swin-tiny-coco-instance-mic"
-  ],
-  "failures": [
-   "mask2former-swin-tiny-coco-instance-mic (bfloat16): t      | MISSING    | "
-  ],
-  "parent": "381032b7e0a8896ae48f90dbe83eae3bf7630953",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "already-red",
-  "version": 6
- },
  "43451#molmo2": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45396#colqwen2": {
   "verdict": "not-covered",
-  "version": 6
- },
- "45752#phimoe": {
-  "bad": "855aad560d172faff711c233a96c8e0c3c198e70",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/Phi-3.5-MoE-0.8B-A0.2B-mic"
-  ],
-  "failures": [],
-  "parent": "5390fc300b75be7bfa59b5e208de0fafc524278d",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "missed",
-  "version": 6
+  "version": 7
  },
  "45777#aimv2": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#altclip": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#beit": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
-  "version": 6
+  "version": 7
  },
  "45777#bit": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#blip_2": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#chinese_clip": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "45777#clip": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "45777#clipseg": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "45777#conditional_detr": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#csm": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
-  "version": 6
+  "version": 7
  },
  "45777#d_fine": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#dab_detr": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#data2vec": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#deformable_detr": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#deimv2": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#deit": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#depth_pro": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#detr": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
-  "version": 6
+  "version": 7
  },
  "45777#dinov2": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "45777#dinov2_with_registers": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "45777#dinov3_convnext": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#dinov3_vit": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "45777#dpt": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
-  "version": 6
+  "version": 7
  },
  "45777#edgetam_video": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#encodec": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#fastspeech2_conformer": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#flava": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#groupvit": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#ijepa": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#kyutai_speech_to_text": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#lasr": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#levit": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#mask2former": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
-  "version": 6
+  "version": 7
  },
  "45777#maskformer": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#metaclip_2": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#mlcd": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#mm_grounding_dino": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
-  "version": 6
+  "version": 7
  },
  "45777#mobilenet_v1": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#mobilenet_v2": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
-  "version": 6
+  "version": 7
  },
  "45777#mobilevit": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
-  "version": 6
+  "version": 7
  },
  "45777#mobilevitv2": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#moonshine": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#musicgen": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#pixtral": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#poolformer": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
-  "version": 6
+  "version": 7
  },
  "45777#rf_detr": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#rt_detr": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
-  "version": 6
+  "version": 7
  },
  "45777#rt_detr_v2": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
-  "version": 6
+  "version": 7
  },
  "45777#sam": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#sam2": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
-  "version": 6
+  "version": 7
  },
  "45777#sam2_video": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#sam3": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#sam3_tracker": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#sam3_tracker_video": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#sam_hq": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#sew": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#sew_d": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#shared": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#timesformer": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#univnet": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#upernet": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#vit": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "45777#vit_msn": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#vitdet": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#x_clip": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#xcodec": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45777#yolos": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "45818#idefics3": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "45847#shared": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45892#deepseek_v4": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "45942#convnextv2": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
-  "version": 6
+  "version": 7
  },
  "45942#cvt": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45942#dac": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45942#moonshine_streaming": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "45942#vivit": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "46091#blip_2": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "46091#shared": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "46091#vision_encoder_decoder": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "46115#cohere2_vision": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "46135#phimoe": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
-  "version": 6
+  "version": 7
  },
  "46196#xcodec2": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "46219#phimoe": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
-  "version": 6
+  "version": 7
  },
  "46246#qwen3_omni_moe": {
   "verdict": "not-covered",
-  "version": 6
- },
- "46318#phimoe": {
-  "bad": "595721c44cb14db37fa504903e2edd5e9f0eba43",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/Phi-3.5-MoE-0.8B-A0.2B-mic"
-  ],
-  "failures": [],
-  "parent": "0f0036c888ed81b714cb04aa6fe6689eb36bce0a",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "missed",
-  "version": 6
+  "version": 7
  },
  "46332#nemotron_asr_streaming": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "46381#shared": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "46401#granite4_vision": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
-  "version": 6
+  "version": 7
  },
  "46401#granite_speech": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "46401#granite_speech_plus": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "46401#instructblip": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "46405#shared": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "46419#esmfold2": {
   "verdict": "not-covered",
-  "version": 6
- },
- "46446#janus": {
-  "bad": "e7835fba01322488d685a3b2e75273361f3100f5",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/Janus-Pro-1B-mic"
-  ],
-  "failures": [
-   "Janus-Pro-1B-mic (bfloat16): ackages/torch/nn/modules/module.py\", line 1787, in _wrapped_call_impl"
-  ],
-  "parent": "c415352161bff71a97738822fa25d934a6b2b28a",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "already-red",
-  "version": 6
+  "version": 7
  },
  "46472#vibevoice_asr": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "46509#nemotron_h_omni": {
   "verdict": "not-covered",
-  "version": 6
- },
- "46556#florence2": {
-  "bad": "254e4b6e7cd955c0c095b7f3bfa800006b3153e8",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/Florence-2-base-mic"
-  ],
-  "failures": [
-   "Florence-2-base-mic (bfloat16): inference_logits: max delta 0.344 over tolerance"
-  ],
-  "parent": "5f8521c0b3e41c8ccbb679afce947e61cc2d3051",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "caught",
-  "version": 6
+  "version": 7
  },
  "46556#ovis2": {
   "verdict": "not-covered",
-  "version": 6
- },
- "46600#minimax_m3_vl": {
-  "bad": "f208766a6551d381475cd8eeed1256f9a5af7b65",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/MiniMax-M3-MXFP8-mic"
-  ],
-  "parent": "47ae4def650eb8508a9b0f76059b15a4e2730ae7",
-  "reason": "the bad commit added the model",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "model-added",
-  "version": 6
- },
- "46719#minimax_m3_vl": {
-  "bad": "2a4ead1823b99478189f8fde0bb41d668961b62e",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/MiniMax-M3-MXFP8-mic"
-  ],
-  "failures": [
-   "MiniMax-M3-MXFP8-mic (bfloat16): logits_probe: max delta 0.125 over tolerance"
-  ],
-  "parent": "4f04136307b73dc153e4e9937a9909f1b96b6beb",
-  "reversed": true,
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "caught",
-  "version": 6
+  "version": 7
  },
  "46738#blt": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "46738#diffllama": {
   "verdict": "not-covered",
-  "version": 6
- },
- "46738#minicpmv4_6": {
-  "bad": "181beb3ba4c47098ed8cbc97ee250d1d45ae0107",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/MiniCPM-V-4.6-mic"
-  ],
-  "failures": [
-   "MiniCPM-V-4.6-mic (bfloat16): logits.probe: max delta 0.00195 over tolerance"
-  ],
-  "parent": "45b004d7bb505a258542d1965b0f9e0d8b03b89d",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "already-red",
-  "version": 6
+  "version": 7
  },
  "46850#phimoe": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
-  "version": 6
+  "version": 7
  },
  "46886#yolos": {
   "verdict": "out-of-scope",
-  "version": 6
- },
- "46911#olmo3": {
-  "bad": "326683dc4d28355f534681c81681734328371f46",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/Olmo-3-7B-Instruct-mic"
-  ],
-  "failures": [
-   "Olmo-3-7B-Instruct-mic (bfloat16): next_token_ids: [82253, 61111] != [82253, 72520]"
-  ],
-  "parent": "d9e7791b129797be80ca7b3b0bf2a53cda0d4b8c",
-  "reversed": true,
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "caught",
-  "version": 6
- },
- "46960#gemma4": {
-  "bad": "9d011e8375ab802f1b9ada2d488af35232f6dd3e",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/gemma-4-E2B-it-mic"
-  ],
-  "failures": [
-   "gemma-4-E2B-it-mic (bfloat16): ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
-  ],
-  "parent": "fde2b96b5e515af54d50e952ff0a3e011fe98e91",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "already-red",
-  "version": 6
+  "version": 7
  },
  "46977#moshi": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "46980#shared": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47003#perceiver": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47014#moshi": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47014#musicgen": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47014#musicgen_melody": {
   "verdict": "not-covered",
-  "version": 6
- },
- "47096#cosmos3_omni": {
-  "bad": "b9090ae58cdaf9e7a195f38d3b2574dd408acaa6",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/Cosmos3-Nano-mic"
-  ],
-  "failures": [
-   "Cosmos3-Nano-mic (bfloat16): logits.probe: max delta 0.000977 over tolerance"
-  ],
-  "parent": "5e413aa4f514bc59cb18821019b745e81e4a403e",
-  "reversed": true,
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "caught",
-  "version": 6
+  "version": 7
  },
  "47118#moshi": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47201#mamba2": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47201#recurrent_gemma": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47203#depth_pro": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47203#sam": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47203#sam_hq": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47203#timm_wrapper": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#afmoe": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#axk2": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#bart": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#bigbird_pegasus": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#blenderbot": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#blenderbot_small": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#cohere2": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#cwm": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#deepseek_ocr2": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#deepseek_v32": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#dots1": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#exaone4": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#exaone4_5": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#exaone_moe": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#fast_vlm": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#gemma2": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#gemma3": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#gemma3n": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#gemma4": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#gemma4_unified": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#glm_moe_dsa": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#got_ocr2": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#granite_swa": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#granitemoe_swa": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#granitemoehybrid": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#idefics2": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#idefics3": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#internvl": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#jamba": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#laguna": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#lfm2": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#lfm2_moe": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#llava_onevision": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#marian": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#mbart": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#mellum": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#mimo_v2_flash": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#minimax_m3_vl": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#ministral": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#mllama": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#modernbert_decoder": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#mvp": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#nemotron_h": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#olmo3": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#openai": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#ovis2": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#pegasus": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#plbart": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#prophetnet": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#qianfan_ocr": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#qwen2_5_vl": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#qwen2_vl": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#qwen3_5": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#qwen3_next": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#reformer": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#shared": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#smollm3": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#smolvlm": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#trocr": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#vaultgemma": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47243#xlm": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47243#xlnet": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47290#shared": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47493#phimoe": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
-  "version": 6
+  "version": 7
  },
  "47573#kimi_k25": {
   "verdict": "not-covered",
-  "version": 6
- },
- "47573#paddleocr_vl": {
-  "bad": "bed02e1faee69e866e382f835b4f7b0a3c7b8431",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/tibetan-ocr-mic"
-  ],
-  "failures": [],
-  "parent": "c62820a73c77e7ee1f8b92e9fc248fb1982f22e6",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "missed",
-  "version": 6
+  "version": 7
  },
  "47598#pp_doclayout_v2": {
   "verdict": "not-covered",
-  "version": 6
- },
- "47598#recurrent_gemma": {
-  "bad": "6034e90c7d1b591e1404596bf1d9617b529a1550",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/recurrentgemma-2b-mic"
-  ],
-  "failures": [
-   "recurrentgemma-2b-mic (bfloat16): logits.last: max delta 0.0195 over tolerance"
-  ],
-  "parent": "d24918c442dc4f91922647d71e3086a8b851e7ec",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "caught",
-  "version": 6
- },
- "47622#qwen2_5_omni": {
-  "bad": "16780c86b20a1aa95fda4c534667baa151ca87b8",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/qwen2_5_omni-mic"
-  ],
-  "failures": [
-   "mic-qwen2_5_omni-slim (bfloat16): training.gradients: checks differ from the baseline (missing ['thinker.model.language_model.embed_tokens.weight', 'thinker.model.language_model.layers"
-  ],
-  "parent": "6034e90c7d1b591e1404596bf1d9617b529a1550",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "already-red",
-  "version": 6
+  "version": 7
  },
  "47622#voxtral_realtime": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47625#minicpmv4_6": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
-  "version": 6
+  "version": 7
  },
  "47645#dac": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47725#moshi": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47731#t5": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47747#kolibri1": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47753#idefics2": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47753#idefics3": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47753#mllama": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47753#smolvlm": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "47809#shared": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47827#inkling": {
   "verdict": "not-covered",
-  "version": 6
- },
- "47867#muse_glimmer": {
-  "bad": "fe95f5423d65951cf63055d519dd7fa5ae12eb8d",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/Muse-Glimmer-30B-mic"
-  ],
-  "parent": "4a980975052d19eea29ba66ec28a8e08ba0f3760",
-  "reason": "the bad commit added the model",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "model-added",
-  "version": 6
+  "version": 7
  },
  "47878#cohere_compass": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47922#layoutxlm": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47939#pe_audio_video": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47939#pe_video": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "47988#modernbert_decoder": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "48028#moshi": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "48118#longcat_flash": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "48141#glm46v": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "48141#glm4v": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "48141#glm_image": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "48141#glm_ocr": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "48250#kimi_linear": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "48264#moshi": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "48282#colpali": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "48282#shared": {
   "verdict": "not-covered",
-  "version": 6
- },
- "48282#whisper": {
-  "bad": "d4f69a869d66eeba7af0cc19a585552b14ddd6f2",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/whisper-mic",
-   "huggingface-mic/whisper-tiny-mic"
-  ],
-  "failures": [
-   "mic-whisper-tiny-slim (default): gface-mic--whisper-tiny-mic/snapshots/9d85803a8fb0226794764f4b12a4d4fd74d160ed/integrations/transformers/usage.md\", line 25, in <module>",
-   "mic-whisper-tiny-slim (bfloat16): gface-mic--whisper-tiny-mic/snapshots/9d85803a8fb0226794764f4b12a4d4fd74d160ed/integrations/transformers/usage.md\", line 25, in <module>",
-   "whisper-mic (bfloat16): uggingface-mic--whisper-mic/snapshots/1f40ed2753f5ba347b5bd1ba3624c971b9327ab8/integrations/transformers/usage.md\", line 25, in <module>"
-  ],
-  "parent": "125f265a26c76c90e371b83386830cd61e5341fe",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "already-red",
-  "version": 6
+  "version": 7
  },
  "48317#auto": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "48331#zamba": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "48340#qwen4_exp": {
   "verdict": "out-of-scope",
-  "version": 6
- },
- "48435#laguna": {
-  "bad": "d3f494b047238a2b9d89e59c88e61d0a27f50849",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/Laguna-XS.2-mic"
-  ],
-  "failures": [
-   "Laguna-XS.2-mic (bfloat16): next_token_logits: max delta 0.0293 over tolerance"
-  ],
-  "parent": "c676202114bb929ba4377f90fc92c5a8fec72da6",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "already-red",
-  "version": 6
+  "version": 7
  },
  "48435#zaya": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "48498#shared": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "48578#moshi": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "48652#glm4v_moe": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "48714#qwen3_omni_moe": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "48814#imagegpt": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "48854#moshi": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "48876#axk2": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "48961#recurrent_gemma": {
   "verdict": "out-of-scope",
-  "version": 6
- },
- "48978#granitemoehybrid": {
-  "bad": "a52f659318fe32cb6b6fc5ae3aec883d5c926eb4",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/granite-4.0-h-350m-mic"
-  ],
-  "failures": [],
-  "parent": "d53e587669ec639a422ca33f3711b48f24cdf135",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "missed",
-  "version": 6
+  "version": 7
  },
  "48979#minicpmv4_7": {
   "verdict": "not-covered",
-  "version": 6
- },
- "48981#whisper": {
-  "bad": "87d34bfa80aa884bca90c4da79cca18feed90ff6",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/whisper-mic",
-   "huggingface-mic/whisper-tiny-mic"
-  ],
-  "failures": [
-   "mic-whisper-tiny-slim (default): language=\"en\", task=\"transcribe\", return_timestamps=True, max_new_tokens=8)",
-   "mic-whisper-tiny-slim (bfloat16): language=\"en\", task=\"transcribe\", return_timestamps=True, max_new_tokens=8)",
-   "whisper-mic (bfloat16): ntation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)"
-  ],
-  "parent": "e2d83fdf9c25a0f6021e90a241263a4a59faa15f",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "already-red",
-  "version": 6
+  "version": 7
  },
  "48992#shared": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "49112#shared": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "49138#udop": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "49206#muse_spark": {
   "verdict": "not-covered",
-  "version": 6
- },
- "49364#embedding_gemma2": {
-  "bad": "92cd495f2720c064bc78eb2d93e28704c5bce51f",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/embeddinggemma-2-mic"
-  ],
-  "parent": "a7e8ff2b949679a29d72462effc4da0b57a7b9f3",
-  "reason": "embeddinggemma-2-mic: fixture files differ from build.json: ['1_Pooling/config.json'] (build it with: python example/build_fixtures.py --fixture aba894c888d7641bc368f324ecf00ea403686a46)",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "broken",
-  "version": 6
- },
- "49404#gemma4": {
-  "bad": "c48824e840247c860e394bcc58aa35dfffa9e67f",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/gemma-4-E2B-it-mic"
-  ],
-  "failures": [],
-  "parent": "c05860687fa3655900e2ddd824a59bbe964b185d",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "missed",
-  "version": 6
+  "version": 7
  },
  "49421#shared": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "49589#pocket_tts": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "49664#beam": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "49725#colmodernvbert": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "49791#gradium_phonon_tts": {
   "verdict": "not-covered",
-  "version": 6
- },
- "49811#gemma2": {
-  "bad": "7d3ae42ee810431d4df15dcbf3bc5bce70221cc5",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/gemma-2-2b-it-mic"
-  ],
-  "failures": [
-   "gemma-2-2b-it-mic (bfloat16): runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager"
-  ],
-  "parent": "5fd67cf1d9091ce84f193b3376c8072de6fa6552",
-  "reversed": true,
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "caught",
-  "version": 6
- },
- "49811#vaultgemma": {
-  "bad": "7d3ae42ee810431d4df15dcbf3bc5bce70221cc5",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/vaultgemma-1b-mic"
-  ],
-  "failures": [
-   "vaultgemma-1b-mic (bfloat16): runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager"
-  ],
-  "parent": "5fd67cf1d9091ce84f193b3376c8072de6fa6552",
-  "reversed": true,
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "caught",
-  "version": 6
+  "version": 7
  },
  "49832#eomt": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "49832#eomt_dinov3": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
- "49920#minicpm_ocr": {
-  "bad": "77cfe2724ec16c67778693c0da0f3425aa0afd1d",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/MiniCPM-OCR-1.0-mic"
-  ],
-  "parent": "05a2d95bf36096f79a85af682ac387beb68f447b",
-  "reason": "the bad commit added the model",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "model-added",
-  "version": 6
+ "49862#colpali": {
+  "verdict": "not-covered",
+  "version": 7
  },
  "50084#nemotron3_5_transcribe": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#albert#2026-10-06": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#albert#2026-10-08": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#albert#2026-10-24": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#axk1#2026-10-06": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#axk1#2026-10-18": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#bart#2026-10-30": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#beam#2026-10-17": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#bert#2026-10-19": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#bigbird_pegasus#2026-10-30": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#blenderbot#2026-10-30": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#blenderbot_small#2026-10-30": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#blip_2#2026-11-05": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#blt#2026-10-30": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#bridgetower#2026-10-17": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#canary#2026-10-30": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#cohere#2026-10-17": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#cohere_asr#2026-10-30": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#colpali#2026-10-10": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#cosmos3_edge#2026-10-17": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#cwm#2026-10-09": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#data2vec#2026-10-06": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#data2vec#2026-10-10": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#deepseek_ocr2#2026-10-24": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#deepseek_v3#2026-10-16": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#dia#2026-10-30": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#electra#2026-10-09": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#ernie#2026-10-06": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#ernie#2026-10-08": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#ernie#2026-10-12": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#ernie4_5_moe#2026-10-10": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#flex_olmo#2026-10-14": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#flex_olmo#2026-10-24": {
   "verdict": "not-covered",
-  "version": 6
- },
- "sticky#flint#2026-10-22": {
-  "bad": "f2754311602414ed561cdf8ed9d852390f514404",
-  "commits": 216,
-  "contracts": [
-   "huggingface-mic/flint-mic"
-  ],
-  "parent": "60f49549e0db78f022ee30aa1571d9ab6e4a15bf",
-  "reason": "the bad commit added the model",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "model-added",
-  "version": 6
+  "version": 7
  },
  "sticky#florence2#2026-10-30": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#fsmt#2026-10-30": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#gemma2#2026-10-22": {
   "reason": "same regression as 49811#gemma2",
   "verdict": "duplicate",
-  "version": 6
+  "version": 7
  },
  "sticky#gemma3#2026-11-02": {
   "reason": "the daily CI did not fail it",
   "verdict": "not-reproduced",
-  "version": 6
+  "version": 7
  },
  "sticky#gemma3n#2026-10-09": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#gemma3n#2026-11-02": {
   "reason": "the daily CI did not fail it",
   "verdict": "not-reproduced",
-  "version": 6
+  "version": 7
  },
  "sticky#gemma4#2026-10-10": {
   "reason": "same regression as 49404#gemma4",
   "verdict": "duplicate",
-  "version": 6
+  "version": 7
  },
  "sticky#glm4#2026-10-07": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#glm4#2026-10-10": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#glm4_moe_lite#2026-10-06": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#glm4_moe_lite#2026-10-30": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#glm_moe_dsa#2026-10-19": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#got_ocr2#2026-10-20": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#gradium_phonon_tts#2026-10-21": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#granite_speech5#2026-10-22": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#granite_speech_plus#2026-10-22": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#granitemoe#2026-10-19": {
   "verdict": "out-of-scope",
-  "version": 6
- },
- "sticky#grounding_dino#2026-10-13": {
-  "bad": "d203390173fc074638e2268c6becd140fca5d92b",
-  "commits": 385,
-  "contracts": [
-   "huggingface-mic/grounding-dino-tiny-mic"
-  ],
-  "failures": [
-   "grounding-dino-tiny-mic (bfloat16): class_scores: max delta 7.06 over tolerance"
-  ],
-  "parent": "55c3cc9f03cd4fbf2d27d382dcc8fcc544631f8e",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "already-red",
-  "version": 6
+  "version": 7
  },
  "sticky#hunyuan_v1_moe#2026-10-10": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#idefics#2026-10-07": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#idefics#2026-10-10": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#internvl#2026-11-02": {
   "reason": "the daily CI did not fail it",
   "verdict": "not-reproduced",
-  "version": 6
+  "version": 7
  },
  "sticky#jetmoe#2026-10-10": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#kolibri1#2026-10-14": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#kyutai_speech_to_text#2026-10-18": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#llama#2026-11-01": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#llama#2026-11-02": {
   "reason": "the daily CI did not fail it",
   "verdict": "not-reproduced",
-  "version": 6
+  "version": 7
  },
  "sticky#llava#2026-11-02": {
   "reason": "the daily CI did not fail it",
   "verdict": "not-reproduced",
-  "version": 6
+  "version": 7
  },
  "sticky#longt5#2026-10-30": {
   "verdict": "out-of-scope",
-  "version": 6
- },
- "sticky#m2m_100#2026-10-12": {
-  "bad": "d203390173fc074638e2268c6becd140fca5d92b",
-  "commits": 386,
-  "contracts": [
-   "huggingface-mic/nllb-200-distilled-600M-mic"
-  ],
-  "failures": [],
-  "parent": "536ecc007387a50e77603bb5d92100e9b07514cc",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "missed",
-  "version": 6
+  "version": 7
  },
  "sticky#m2m_100#2026-10-30": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#mamba2#2026-10-06": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#mamba2#2026-10-13": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#marian#2026-10-30": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#mbart#2026-10-30": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#minicpm3#2026-10-06": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#minicpm3#2026-10-08": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#minicpm3#2026-10-10": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#minimax_m2#2026-10-30": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#mistral3#2026-10-19": {
   "reason": "the daily CI did not fail it",
   "verdict": "not-reproduced",
-  "version": 6
+  "version": 7
  },
  "sticky#mixtral#2026-10-07": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#mixtral#2026-10-17": {
   "verdict": "out-of-scope",
-  "version": 6
- },
- "sticky#mm_grounding_dino#2026-10-17": {
-  "bad": "d203390173fc074638e2268c6becd140fca5d92b",
-  "commits": 305,
-  "contracts": [
-   "huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic"
-  ],
-  "failures": [
-   "mm_grounding_dino_tiny_o365v1_goldg_v3det-mic (bfloat16): logits_probe: max delta 1.25 over tolerance"
-  ],
-  "parent": "683b721971417b3b2c64fba9001f525607547e5a",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "already-red",
-  "version": 6
+  "version": 7
  },
  "sticky#moshi#2026-10-06": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#moshi#2026-10-08": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#mt5#2026-10-30": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#mvp#2026-10-30": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#nemotron#2026-10-27": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#nemotron3_5_transcribe#2026-10-29": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#nemotron_h#2026-10-30": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#omdet_turbo#2026-10-25": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#oneformer#2026-10-18": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#pegasus#2026-10-30": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#pegasus_x#2026-10-30": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#plbart#2026-10-30": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#pocket_tts#2026-10-21": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#poolformer#2026-10-19": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#poolformer#2026-10-23": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#pp_formulanet#2026-10-30": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#prophetnet#2026-10-30": {
   "verdict": "not-covered",
-  "version": 6
- },
- "sticky#qwen3_5#2026-10-12": {
-  "bad": "d203390173fc074638e2268c6becd140fca5d92b",
-  "commits": 386,
-  "contracts": [
-   "huggingface-mic/Qwen3.5-0.8B-mic"
-  ],
-  "failures": [],
-  "parent": "536ecc007387a50e77603bb5d92100e9b07514cc",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
-  "verdict": "missed",
-  "version": 6
+  "version": 7
  },
  "sticky#qwen3_asr#2026-10-15": {
   "verdict": "out-of-scope",
-  "version": 6
- },
- "sticky#qwen3_moe#2026-11-05": {
-  "reason": "the daily CI did not fail it",
-  "verdict": "not-reproduced",
-  "version": 6
+  "version": 7
  },
  "sticky#reformer#2026-10-07": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#roberta_prelayernorm#2026-10-07": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#roberta_prelayernorm#2026-10-10": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#seamless_m4t#2026-10-12": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#shieldgemma2#2026-10-07": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#speech_to_text#2026-10-30": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#speecht5#2026-10-30": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#swinv2#2026-10-23": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#switch_transformers#2026-10-06": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#switch_transformers#2026-10-16": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#t5#2026-10-29": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#t5gemma#2026-10-30": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#t5gemma2#2026-10-30": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#udop#2026-10-16": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#umt5#2026-10-30": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#utils#2026-10-14": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#utils#2026-10-17": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#wav2vec2_bert#2026-10-07": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#wav2vec2_bert#2026-10-15": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#wav2vec2_bert#2026-10-20": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#wav2vec2_conformer#2026-10-16": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#wav2vec2_conformer#2026-10-18": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#whisper#2026-10-29": {
   "verdict": "out-of-scope",
-  "version": 6
+  "version": 7
  },
  "sticky#xmod#2026-10-07": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#xmod#2026-10-11": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  },
  "sticky#xmod#2026-10-14": {
   "verdict": "not-covered",
-  "version": 6
+  "version": 7
  }
 }

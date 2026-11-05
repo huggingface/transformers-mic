@@ -4920,6 +4920,20 @@
    "tests/models/eomt_dinov3/test_modeling_eomt_dinov3.py::EomtDinov3ForUniversalSegmentationIntegrationTest::test_segmentation_pipeline"
   ]
  },
+ "49862#colpali": {
+  "bad_commit": "f8a1e1fba977ecd39e1b877312f4452a2ba570fa",
+  "date": "2026-11-05",
+  "integration": false,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/41954992211/job/127032214450",
+  "mic": "not-covered",
+  "model": "colpali",
+  "pr": "49862",
+  "tests": [
+   "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_cpu_offload",
+   "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_disk_offload_bin",
+   "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_disk_offload_safetensors"
+  ]
+ },
  "49920#minicpm_ocr": {
   "bad_commit": "77cfe2724ec16c67778693c0da0f3425aa0afd1d",
   "culprit_files": [

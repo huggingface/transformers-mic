@@ -5,7 +5,7 @@
   "unmet": [
    "14 of 30 days observed",
    "justified blocks 0 (bar \u2265 1)",
-   "re-baselined contracts 24.5/week (bar \u2264 10)"
+   "re-baselined contracts 31.5/week (bar \u2264 10)"
   ]
  },
  "caught": {
@@ -27,21 +27,21 @@
  "next": [
   {
    "checkpoint": "vidore/colpali-v1.2-hf",
-   "draft": "",
+   "draft": "queued",
    "model": "colpali",
-   "next_batch": true,
-   "other": 2,
+   "next_batch": false,
+   "other": 3,
    "real_checkpoint": 0,
-   "regressions": 2,
+   "regressions": 3,
    "run": "",
    "shrink": "",
    "shrinkable": true
   },
   {
    "checkpoint": "shanearora/Flex-reddit-2x7B-1T",
-   "draft": "",
+   "draft": "queued",
    "model": "flex_olmo",
-   "next_batch": true,
+   "next_batch": false,
    "other": 2,
    "real_checkpoint": 0,
    "regressions": 2,
@@ -53,7 +53,7 @@
    "checkpoint": "kmhf/hf-moshika",
    "draft": "",
    "model": "moshi",
-   "next_batch": false,
+   "next_batch": true,
    "other": 2,
    "real_checkpoint": 0,
    "regressions": 2,
@@ -89,7 +89,7 @@
    "checkpoint": "facebook/wmt19-en-ru",
    "draft": "",
    "model": "fsmt",
-   "next_batch": false,
+   "next_batch": true,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -329,14 +329,14 @@
  "regressions": [
   {
    "date": "2026-11-05",
-   "detail": "the daily CI did not fail it",
+   "detail": "",
    "integration": true,
    "job": "",
    "model": "qwen3_moe",
    "pr": null,
    "run": "",
    "tests": 4,
-   "verdict": "not-reproduced"
+   "verdict": "pending"
   },
   {
    "date": "2026-11-02",
@@ -593,14 +593,14 @@
   },
   {
    "date": "2026-10-26",
-   "detail": "the bad commit added the model",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/40260447300/job/121371676229",
    "model": "minicpm_ocr",
    "pr": "49920",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
+   "run": "",
    "tests": 3,
-   "verdict": "model-added"
+   "verdict": "pending"
   },
   {
    "date": "2026-10-24",
@@ -648,36 +648,36 @@
   },
   {
    "date": "2026-10-22",
-   "detail": "216 commits in range; the bad commit added the model",
+   "detail": "",
    "integration": true,
    "job": "",
    "model": "flint",
    "pr": null,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
+   "run": "",
    "tests": 1,
-   "verdict": "model-added"
+   "verdict": "pending"
   },
   {
    "date": "2026-10-22",
-   "detail": "red before, green after; vaultgemma-1b-mic (bfloat16): runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': '",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/39712427605/job/119609248616",
    "model": "vaultgemma",
    "pr": "49811",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
+   "run": "",
    "tests": 4,
-   "verdict": "caught"
+   "verdict": "pending"
   },
   {
    "date": "2026-10-22",
-   "detail": "red before, green after; gemma-2-2b-it-mic (bfloat16): runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': '",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/39712427605/job/119609253029",
    "model": "gemma2",
    "pr": "49811",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
+   "run": "",
    "tests": 3,
-   "verdict": "caught"
+   "verdict": "pending"
   },
   {
    "date": "2026-10-20",
@@ -758,14 +758,14 @@
   },
   {
    "date": "2026-10-17",
-   "detail": "305 commits in range; mm_grounding_dino_tiny_o365v1_goldg_v3det-mic (bfloat16): logits_probe: max delta 1.25 over tolerance",
+   "detail": "",
    "integration": true,
    "job": "",
    "model": "mm_grounding_dino",
    "pr": null,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
+   "run": "",
    "tests": 3,
-   "verdict": "already-red"
+   "verdict": "pending"
   },
   {
    "date": "2026-10-17",
@@ -868,36 +868,36 @@
   },
   {
    "date": "2026-10-13",
-   "detail": "385 commits in range; grounding-dino-tiny-mic (bfloat16): class_scores: max delta 7.06 over tolerance",
+   "detail": "",
    "integration": true,
    "job": "",
    "model": "grounding_dino",
    "pr": null,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
+   "run": "",
    "tests": 4,
-   "verdict": "already-red"
+   "verdict": "pending"
   },
   {
    "date": "2026-10-12",
-   "detail": "386 commits in range; ",
+   "detail": "test_model_video_generation fails identically on CPU at both ends (536ecc0, d203390) at its first assertion: prompt token order (vision_start vs timestamp) before the model runs; video preprocessing b",
    "integration": true,
    "job": "",
    "model": "qwen3_5",
    "pr": null,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
+   "run": "",
    "tests": 2,
-   "verdict": "missed"
+   "verdict": "not-a-regression"
   },
   {
    "date": "2026-10-12",
-   "detail": "386 commits in range; ",
+   "detail": "test_seq_to_seq_generation fails identically on CPU at both ends (536ecc0, d203390); generated ids identical, only the '</s> __en__' spacing of the decode with special tokens differs: tokenizer/enviro",
    "integration": true,
    "job": "",
    "model": "m2m_100",
    "pr": null,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
+   "run": "",
    "tests": 1,
-   "verdict": "missed"
+   "verdict": "not-a-regression"
   },
   {
    "date": "2026-10-12",
@@ -950,9 +950,9 @@
    "job": "https://github.com/huggingface/transformers/actions/runs/38018121662/job/114233333289",
    "model": "gemma4",
    "pr": "49404",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
+   "run": "",
    "tests": 1,
-   "verdict": "missed"
+   "verdict": "pending"
   },
   {
    "date": "2026-10-09",
@@ -978,14 +978,14 @@
   },
   {
    "date": "2026-10-09",
-   "detail": "mic-whisper-tiny-slim (default): gface-mic--whisper-tiny-mic/snapshots/9d85803a8fb0226794764f4b12a4d4fd74d160ed/integrations/transformers/usage.md\", line 25, in <module>; mic-whisper-tiny-slim (bfloat",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/37876159550/job/113648952724",
    "model": "whisper",
    "pr": "48282",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
+   "run": "",
    "tests": 2,
-   "verdict": "already-red"
+   "verdict": "pending"
   },
   {
    "date": "2026-10-08",
@@ -1044,14 +1044,14 @@
   },
   {
    "date": "2026-10-07",
-   "detail": "embeddinggemma-2-mic: fixture files differ from build.json: ['1_Pooling/config.json'] (build it with: python example/build_fixtures.py --fixture aba894c888d7641bc368f324ecf00ea403686a46)",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/37563588666/job/112608047988",
    "model": "embedding_gemma2",
    "pr": "49364",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
+   "run": "",
    "tests": 7,
-   "verdict": "broken"
+   "verdict": "pending"
   },
   {
    "date": "2026-10-06",
@@ -1121,14 +1121,14 @@
   },
   {
    "date": "2026-09-23",
-   "detail": "mic-whisper-tiny-slim (default): language=\"en\", task=\"transcribe\", return_timestamps=True, max_new_tokens=8); mic-whisper-tiny-slim (bfloat16): language=\"en\", task=\"transcribe\", return_timestamps=True",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/35811007536/job/107027562813",
    "model": "whisper",
    "pr": "48981",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
+   "run": "",
    "tests": 2,
-   "verdict": "already-red"
+   "verdict": "pending"
   },
   {
    "date": "2026-09-23",
@@ -1159,9 +1159,9 @@
    "job": "https://github.com/huggingface/transformers/actions/runs/35680047781/job/106605850400",
    "model": "granitemoehybrid",
    "pr": "48978",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
+   "run": "",
    "tests": 2,
-   "verdict": "missed"
+   "verdict": "pending"
   },
   {
    "date": "2026-09-17",
@@ -1187,14 +1187,14 @@
   },
   {
    "date": "2026-09-05",
-   "detail": "Laguna-XS.2-mic (bfloat16): next_token_logits: max delta 0.0293 over tolerance",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/33939401495/job/101235761496",
    "model": "laguna",
    "pr": "48435",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
+   "run": "",
    "tests": 1,
-   "verdict": "already-red"
+   "verdict": "pending"
   },
   {
    "date": "2026-09-03",
@@ -1220,14 +1220,14 @@
   },
   {
    "date": "2026-08-11",
-   "detail": "the bad commit added the model",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/31454046729/job/93664844811",
    "model": "muse_glimmer",
    "pr": "47867",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
+   "run": "",
    "tests": 16,
-   "verdict": "model-added"
+   "verdict": "pending"
   },
   {
    "date": "2026-08-05",
@@ -1247,9 +1247,9 @@
    "job": "https://github.com/huggingface/transformers/actions/runs/30972202198/job/92205669582",
    "model": "paddleocr_vl",
    "pr": "47573",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41981789923",
+   "run": "",
    "tests": 2,
-   "verdict": "missed"
+   "verdict": "pending"
   },
   {
    "date": "2026-08-04",
@@ -1429,17 +1429,18 @@
   }
  ],
  "replay": {
-  "already-red": 10,
-  "broken": 1,
-  "caught": 7,
+  "already-red": 0,
+  "broken": 0,
+  "caught": 0,
   "duplicate": 2,
-  "missed": 7,
-  "model-added": 4,
+  "missed": 0,
+  "model-added": 0,
   "no-code-change": 0,
-  "not-covered": 213,
-  "not-reproduced": 7,
+  "not-a-regression": 2,
+  "not-covered": 214,
+  "not-reproduced": 6,
   "out-of-scope": 107,
-  "pending": 0,
+  "pending": 28,
   "unrelated-culprit": 19
  },
  "window": [
