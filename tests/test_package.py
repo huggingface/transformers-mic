@@ -537,6 +537,7 @@ def test_planner_repairs_invalid_draft(workspace, monkeypatch):
     }
     invalid = copy.deepcopy(plan)
     del invalid["manifest"]["outputs"]["training.updated"]
+    monkeypatch.setenv("TMIC_PLANNER_SLOTS", "0")  # the full-page reply path
     calls = []
 
     def propose(context, **kwargs):
@@ -569,6 +570,7 @@ def test_planner_repairs_invented_parameter_names(workspace, monkeypatch):
     }
     invented = copy.deepcopy(plan)
     invented["usage"] = usage + '\nchecked = ("bert.encoder.layers.0.q_proj.weight",)\n'
+    monkeypatch.setenv("TMIC_PLANNER_SLOTS", "0")  # the full-page reply path
     calls = []
 
     def propose(context, **kwargs):

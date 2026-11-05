@@ -846,7 +846,17 @@ input modality (`input_features`, `pixel_values`, `input_ids`) and the head; tmi
 prints the choice (`planner example: …`) and falls back to BERT when nothing matches
 or the fleet is unreachable. The first draft is greedy (temperature 0), so the same
 inputs give nearly the same draft; retries sample (0.7) so a rejected draft is not
-repeated. It proposes a manifest and runnable usage, stored in `.mic/plan.json`.
+repeated. It proposes the model-specific parts only, stored in `.mic/plan.json`:
+**slots** (imports, setup, the model class and fixed load arguments, inference code,
+extra sections, training inputs and loss, checked parameters, output expressions)
+and the manifest fields that need judgment (description, `requires`, resources,
+fixture build fields, compare rules of the task outputs). `usage_template` renders
+`usage.md` from the slots, with the page scaffold every contract shares (the hidden
+MIC plumbing, the variant reload, the training step and the result record), and
+assembles the rest of the manifest; a full usage page in the reply is converted to
+slots. `TMIC_PLANNER_SLOTS=0` asks for a whole page and manifest instead. The
+template expresses 191 of the 197 fleet contracts (`tools/usage_template_fleet_roundtrip.py`
+compares recorded outputs of an approved page and its rendering).
 Invalid drafts are returned with the validation error and the draft itself, up to
 three attempts; persistent errors stop creation without executing the draft. It cannot generate expected numeric values, loosen tolerances, or choose overfit weights. Review generated `integration.json` and `usage.md` before running them: syntax/schema checks do not sandbox Python. `create` alone does not execute the proposed model code; `--build` and `--record` are explicit execution shortcuts.
 

@@ -120,3 +120,13 @@ def test_slots_reply_expands_to_a_valid_plan():
     # A full page in slots mode is converted, not rejected.
     converted = usage_template.from_usage_reply({"name": "T5", "manifest": manifest, "usage": usage, "rationale": "", "historical_candidates": []}, fixture)
     commands.validate_plan(usage_template.expand(converted, model, fixture), model, fixture)
+
+
+def test_a_runaway_nested_reply_is_not_a_draft():
+    from types import SimpleNamespace
+
+    from transformers_mic import planner
+
+    response = SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content="[" * 100000), finish_reason="length")], usage=None)
+    with pytest.raises(planner.MalformedDraft, match="nests too deeply"):
+        planner.parse(response, "m", "p", None)

@@ -123,7 +123,10 @@ def parse(response, model, provider, bill_to):
             f"Planner returned no content (finish reason: {response.choices[0].finish_reason}); try another --provider or --llm-model"
         )
     content = re.sub(r"^```(?:json)?\s*|\s*```$", "", content.strip())
-    plan = json.loads(content)
+    try:
+        plan = json.loads(content)
+    except RecursionError:  # a runaway reply nested past the parser's limit (switch-base-8)
+        raise MalformedDraft("the reply nests too deeply to be a draft") from None
     if isinstance(plan, dict) and isinstance(plan.get("name"), str):
         # "Kimi-K2.5" is a slug away from valid: never spend a retry on it.
         plan["name"] = re.sub(r"[^A-Za-z0-9_-]", "-", plan["name"])
@@ -352,10 +355,10 @@ not memory:
 """
 
 def slots_enabled():
-    return os.environ.get("TMIC_PLANNER_SLOTS") == "1"
+    return os.environ.get("TMIC_PLANNER_SLOTS", "1") != "0"
 
 
-# With TMIC_PLANNER_SLOTS=1 the planner writes only the model-specific code
+# By default (TMIC_PLANNER_SLOTS=0 turns it off) the planner writes only the model-specific code
 # (usage_template renders the page) and the manifest fields that need judgment.
 SLOTS = """
 Return "slots" instead of "usage", and a partial "manifest". The CLI writes the

@@ -109,6 +109,7 @@ def _record(slots):
         checked_line = None
     if training:
         lines.append("    named = dict(model.named_parameters())")
+        lines.append("    names = list(named)  # for suffix lookups: next(n for n in names if n.endswith(...))")
     # checked may use names the setup computes (an expert's suffix lookup), or the reverse.
     setup_first = bool(setup) and not re.search(r"\bchecked\b", setup)
     if setup and setup_first:
@@ -324,7 +325,7 @@ def _record_slots(record, source):
     checked, setup, outputs, extra = [], [], {}, {}
     for s in record.body:
         target = ast.unparse(s.targets[0]) if isinstance(s, ast.Assign) else None
-        if target == "named":
+        if target == "named" or (target == "names" and ast.unparse(s.value) == "list(named)"):
             continue
         if target == "checked":
             try:
@@ -526,7 +527,7 @@ def assemble(partial, slots, model, fixture, fixtures_only=False):
         "training": training,
     }
     if partial.get("resources"):
-        integration["resources"] = partial["resources"]
+        integration["resources"] = _resources(partial["resources"], model)
     manifest = {
         "mic": "0.3",
         "name": partial.get("name") or slots["title"],
@@ -539,6 +540,22 @@ def assemble(partial, slots, model, fixture, fixtures_only=False):
     if partial.get("architecture"):
         manifest["architecture"] = partial["architecture"]
     return manifest
+
+
+def _resources(resources, model):
+    """The schema's resource fields only: they are advisory, and an invented key
+    (download_200) must not cost a draft."""
+    from .commands import manifest_schema
+
+    entry = manifest_schema()["properties"]["integrations"]["additionalProperties"]["properties"]["resources"]
+    known = set(entry["additionalProperties"]["properties"])
+    kept = {}
+    for target, fields in resources.items() if isinstance(resources, dict) else ():
+        if target == "fixture" or target == model:
+            fields = {k: v for k, v in (fields or {}).items() if k in known}
+            if fields:
+                kept[target] = fields
+    return kept
 
 
 def expand(reply, model, fixture, fixtures_only=False):

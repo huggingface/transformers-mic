@@ -815,7 +815,13 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
             reply, llm = propose_well_formed(context, args, attempt, format_retries)
             plan = reply
             if planner.slots_enabled() and "slots" not in reply and "usage" in reply:
-                reply = usage_template.from_usage_reply(reply, fixture) or reply
+                converted = usage_template.from_usage_reply(reply, fixture)
+                if not converted:
+                    raise ValueError(
+                        "Return slots and a partial manifest, not a usage page: the CLI "
+                        "writes the page scaffold and the rest of the manifest"
+                    )
+                reply = converted
             if "slots" in reply:
                 # The planner wrote the model-specific code; the template writes the rest.
                 try:
