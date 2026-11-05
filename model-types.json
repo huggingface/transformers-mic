@@ -80,6 +80,7 @@
  "huggingface-mic/bigbird-pegasus-large-arxiv-mic": "bigbird_pegasus",
  "huggingface-mic/bigbird-roberta-base-mic": "big_bird",
  "huggingface-mic/blenderbot-400M-distill-mic": "blenderbot",
+ "huggingface-mic/blip-image-captioning-base-mic": "blip",
  "huggingface-mic/bloomz-560m-mic": "bloom",
  "huggingface-mic/camembert-base-mic": "camembert",
  "huggingface-mic/canine-c-mic": "canine",
