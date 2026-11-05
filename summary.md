@@ -4,6 +4,165 @@ Observed 2026-10-20 → 2026-11-05 (3 collections). Source: [MIC failures](https
 
 Each PR failure is classified on the day it first failed: **infra** (setup error, wrong hardware, missing baseline), **pre-existing** (the same case failed on main that day or the day before), or **systemic** (the same case failed on ≥3 PRs that day), or **PR-only**. PR-only cases are followed to an outcome. Outcomes are observations; verdicts come from `labels.jsonl`.
 
+## Does MIC catch the daily GPU CI's regressions?
+
+Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers_daily_ci`) — bisected to a commit, or a sticky failure's first day — is replayed with the model's fixture contracts as Transformers PR CI runs them (today's fleets; control in the default and bfloat16 variants, prototypes in bfloat16; `run-model-contracts` on the same runner and image) on the commit before it and on the commit that broke it. When that commit added the model, only its side runs.
+
+**Catch rate: 0 of 0** — caught / (caught + missed).
+
+| verdict | regressions | meaning |
+|---|---|---|
+| caught | 0 | the contracts' result changes between the two commits: green to red, or red to green when the baseline was recorded after the change |
+| missed | 0 | green on both |
+| already-red | 0 | red on both: says nothing about this regression |
+| no-code-change | 0 | the daily CI tested the same commit the day before: nothing for a contract to catch |
+| not-reproduced | 7 | a failing run the daily CI did not repeat: transient, not a regression |
+| model-added | 0 | the bad commit added the model: no contract could have run before it |
+| duplicate | 2 | the same regression as a bisected one, counted there |
+| unrelated-culprit | 19 | upstream's bisect blamed a commit that does not touch the model or shared code: a flaky test |
+| broken | 0 | the replay could not measure it (commit, install, fixture or baseline setup) |
+| out-of-scope | 107 | no failing *IntegrationTest a CPU fixture contract mirrors: GPU-only, or a feature contracts do not call (export, offloading, parallelism, processors) |
+| not-covered | 213 | no contract for the model |
+| pending | 29 | not replayed yet |
+
+| date | model | regression | verdict | at the bad commit |
+|---|---|---|---|---|
+| 2026-11-05 | qwen3_moe | sticky onset | not-reproduced | the daily CI did not fail it |
+| 2026-11-02 | llava | sticky onset | not-reproduced | the daily CI did not fail it |
+| 2026-11-02 | llama | sticky onset | not-reproduced | the daily CI did not fail it |
+| 2026-11-02 | internvl | sticky onset | not-reproduced | the daily CI did not fail it |
+| 2026-11-02 | gemma3n | sticky onset | not-reproduced | the daily CI did not fail it |
+| 2026-11-02 | gemma3 | sticky onset | not-reproduced | the daily CI did not fail it |
+| 2026-11-01 | llama | sticky onset | out-of-scope |  |
+| 2026-10-30 | umt5 | sticky onset | out-of-scope |  |
+| 2026-10-30 | speecht5 | sticky onset | out-of-scope |  |
+| 2026-10-30 | pegasus | sticky onset | out-of-scope |  |
+| 2026-10-30 | nemotron_h | sticky onset | out-of-scope |  |
+| 2026-10-30 | mt5 | sticky onset | out-of-scope |  |
+| 2026-10-30 | minimax_m2 | sticky onset | out-of-scope |  |
+| 2026-10-30 | mbart | sticky onset | out-of-scope |  |
+| 2026-10-30 | marian | sticky onset | out-of-scope |  |
+| 2026-10-30 | m2m_100 | sticky onset | out-of-scope |  |
+| 2026-10-30 | longt5 | sticky onset | out-of-scope |  |
+| 2026-10-30 | glm4_moe_lite | sticky onset | out-of-scope |  |
+| 2026-10-30 | florence2 | sticky onset | out-of-scope |  |
+| 2026-10-30 | blenderbot | sticky onset | out-of-scope |  |
+| 2026-10-30 | bigbird_pegasus | sticky onset | out-of-scope |  |
+| 2026-10-30 | bart | sticky onset | out-of-scope |  |
+| 2026-10-29 | whisper | sticky onset | out-of-scope |  |
+| 2026-10-29 | t5 | sticky onset | out-of-scope |  |
+| 2026-10-24 | albert | sticky onset | out-of-scope |  |
+| 2026-10-23 | swinv2 | sticky onset | out-of-scope |  |
+| 2026-10-23 | poolformer | sticky onset | out-of-scope |  |
+| 2026-10-22 | gemma2 | sticky onset | duplicate | same regression as 49811#gemma2 |
+| 2026-10-20 | got_ocr2 | sticky onset | out-of-scope |  |
+| 2026-10-19 | poolformer | sticky onset | out-of-scope |  |
+| 2026-10-19 | mistral3 | sticky onset | not-reproduced | the daily CI did not fail it |
+| 2026-10-19 | granitemoe | sticky onset | out-of-scope |  |
+| 2026-10-19 | glm_moe_dsa | sticky onset | out-of-scope |  |
+| 2026-10-19 | bert | sticky onset | out-of-scope |  |
+| 2026-10-18 | axk1 | sticky onset | out-of-scope |  |
+| 2026-10-17 | mixtral | sticky onset | out-of-scope |  |
+| 2026-10-17 | cohere | sticky onset | out-of-scope |  |
+| 2026-10-17 | beam | sticky onset | out-of-scope |  |
+| 2026-10-17 | beam | [PR #49664](https://github.com/huggingface/transformers/pull/49664) | out-of-scope |  |
+| 2026-10-16 | switch_transformers | sticky onset | out-of-scope |  |
+| 2026-10-16 | deepseek_v3 | sticky onset | out-of-scope |  |
+| 2026-10-15 | qwen3_asr | sticky onset | out-of-scope |  |
+| 2026-10-15 | kolibri1 | [PR #47747](https://github.com/huggingface/transformers/pull/47747) | out-of-scope |  |
+| 2026-10-14 | kolibri1 | sticky onset | out-of-scope |  |
+| 2026-10-12 | ernie | sticky onset | out-of-scope |  |
+| 2026-10-10 | minicpm3 | sticky onset | out-of-scope |  |
+| 2026-10-10 | glm4 | sticky onset | out-of-scope |  |
+| 2026-10-10 | gemma4 | sticky onset | duplicate | same regression as 49404#gemma4 |
+| 2026-10-09 | gemma3n | sticky onset | out-of-scope |  |
+| 2026-10-09 | electra | sticky onset | out-of-scope |  |
+| 2026-10-08 | minicpm3 | sticky onset | out-of-scope |  |
+| 2026-10-08 | ernie | sticky onset | out-of-scope |  |
+| 2026-10-08 | albert | sticky onset | out-of-scope |  |
+| 2026-10-07 | mixtral | sticky onset | out-of-scope |  |
+| 2026-10-07 | glm4 | sticky onset | out-of-scope |  |
+| 2026-10-06 | switch_transformers | sticky onset | out-of-scope |  |
+| 2026-10-06 | minicpm3 | sticky onset | out-of-scope |  |
+| 2026-10-06 | glm4_moe_lite | sticky onset | out-of-scope |  |
+| 2026-10-06 | ernie | sticky onset | out-of-scope |  |
+| 2026-10-06 | axk1 | sticky onset | out-of-scope |  |
+| 2026-10-06 | albert | sticky onset | out-of-scope |  |
+| 2026-09-23 | recurrent_gemma | [PR #48961](https://github.com/huggingface/transformers/pull/48961) | out-of-scope |  |
+| 2026-09-23 | perceiver | [PR #47003](https://github.com/huggingface/transformers/pull/47003) | out-of-scope |  |
+| 2026-09-17 | glm_ocr | [PR #48141](https://github.com/huggingface/transformers/pull/48141) | out-of-scope |  |
+| 2026-09-10 | yolos | [PR #46886](https://github.com/huggingface/transformers/pull/46886) | out-of-scope |  |
+| 2026-09-03 | qwen4_exp | [PR #48340](https://github.com/huggingface/transformers/pull/48340) | out-of-scope |  |
+| 2026-08-29 | minicpmv4_6 | [PR #47625](https://github.com/huggingface/transformers/pull/47625) | unrelated-culprit | the bisected commit does not touch the model or shared code |
+| 2026-08-05 | t5 | [PR #47731](https://github.com/huggingface/transformers/pull/47731) | out-of-scope |  |
+| 2026-08-04 | smolvlm | [PR #47753](https://github.com/huggingface/transformers/pull/47753) | out-of-scope |  |
+| 2026-08-04 | mllama | [PR #47753](https://github.com/huggingface/transformers/pull/47753) | out-of-scope |  |
+| 2026-08-04 | idefics3 | [PR #47753](https://github.com/huggingface/transformers/pull/47753) | out-of-scope |  |
+| 2026-08-04 | phimoe | [PR #47493](https://github.com/huggingface/transformers/pull/47493) | unrelated-culprit | the bisected commit does not touch the model or shared code |
+| 2026-08-04 | vaultgemma | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | smolvlm | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | smollm3 | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | qwen3_next | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | qwen3_5 | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | qwen2_vl | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | qwen2_5_vl | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | pegasus | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | olmo3 | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | nemotron_h | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | mllama | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | minimax_m3_vl | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | mbart | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | marian | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | llava_onevision | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | lfm2_moe | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | lfm2 | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | laguna | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | jamba | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | internvl | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | idefics3 | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | granitemoehybrid | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | got_ocr2 | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | glm_moe_dsa | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | gemma4_unified | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | gemma4 | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | gemma3n | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | gemma3 | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | gemma2 | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | deepseek_v32 | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | cohere2 | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | blenderbot | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | bigbird_pegasus | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | bart | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-07-09 | recurrent_gemma | [PR #47201](https://github.com/huggingface/transformers/pull/47201) | out-of-scope |  |
+| 2026-07-09 | idefics3 | [PR #45818](https://github.com/huggingface/transformers/pull/45818) | out-of-scope |  |
+| 2026-07-01 | phimoe | [PR #46850](https://github.com/huggingface/transformers/pull/46850) | unrelated-culprit | the bisected commit does not touch the model or shared code |
+| 2026-06-17 | granite_speech | [PR #46401](https://github.com/huggingface/transformers/pull/46401) | out-of-scope |  |
+| 2026-06-17 | granite4_vision | [PR #46401](https://github.com/huggingface/transformers/pull/46401) | unrelated-culprit | the bisected commit does not touch the model or shared code |
+| 2026-06-10 | phimoe | [PR #46219](https://github.com/huggingface/transformers/pull/46219) | unrelated-culprit | the bisected commit does not touch the model or shared code |
+| 2026-05-29 | phimoe | [PR #46135](https://github.com/huggingface/transformers/pull/46135) | unrelated-culprit | the bisected commit does not touch the model or shared code |
+| 2026-05-14 | convnextv2 | [PR #45942](https://github.com/huggingface/transformers/pull/45942) | unrelated-culprit | the bisected commit does not touch the model or shared code |
+| 2026-05-13 | deepseek_v4 | [PR #45892](https://github.com/huggingface/transformers/pull/45892) | out-of-scope |  |
+| 2026-05-13 | yolos | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | out-of-scope |  |
+| 2026-05-13 | vit | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | out-of-scope |  |
+| 2026-05-13 | sam2 | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | unrelated-culprit | the bisected commit does not touch the model or shared code |
+| 2026-05-13 | rt_detr_v2 | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | unrelated-culprit | the bisected commit does not touch the model or shared code |
+| 2026-05-13 | rt_detr | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | unrelated-culprit | the bisected commit does not touch the model or shared code |
+| 2026-05-13 | poolformer | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | unrelated-culprit | the bisected commit does not touch the model or shared code |
+| 2026-05-13 | mobilevit | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | unrelated-culprit | the bisected commit does not touch the model or shared code |
+| 2026-05-13 | mobilenet_v2 | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | unrelated-culprit | the bisected commit does not touch the model or shared code |
+| 2026-05-13 | mm_grounding_dino | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | unrelated-culprit | the bisected commit does not touch the model or shared code |
+| 2026-05-13 | mask2former | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | unrelated-culprit | the bisected commit does not touch the model or shared code |
+| 2026-05-13 | dpt | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | unrelated-culprit | the bisected commit does not touch the model or shared code |
+| 2026-05-13 | dinov3_vit | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | out-of-scope |  |
+| 2026-05-13 | dinov2_with_registers | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | out-of-scope |  |
+| 2026-05-13 | dinov2 | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | out-of-scope |  |
+| 2026-05-13 | detr | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | unrelated-culprit | the bisected commit does not touch the model or shared code |
+| 2026-05-13 | csm | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | unrelated-culprit | the bisected commit does not touch the model or shared code |
+| 2026-05-13 | clipseg | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | out-of-scope |  |
+| 2026-05-13 | clip | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | out-of-scope |  |
+| 2026-05-13 | chinese_clip | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | out-of-scope |  |
+| 2026-05-13 | beit | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | unrelated-culprit | the bisected commit does not touch the model or shared code |
+
 ## Decision: block merges when MIC is red?
 
 Replayed on the 218 PRs merged 2026-10-20 → 2026-11-02: which merges a red MIC case would have stopped, and whether stopping them was right.
@@ -19,21 +178,21 @@ Proposed bar for rule B (constants `DECISION` in `experiments/impact.py`):
 - ✅ wrong blocks 0 = 0.00% of 218 merged PRs (bar ≤ 1%)
 - ❌ justified blocks 0 (bar ≥ 1)
 - ✅ unresolved blocks 0 of 0 (bar ≤ 10%)
-- ❌ re-baselined contracts 20.0/week (bar ≤ 10)
+- ❌ re-baselined contracts 20.5/week (bar ≤ 10)
 
 **Not yet** — the call stays with a maintainer; unresolved blocks shrink as cases get an outcome or a verdict in `labels.jsonl`.
 
 ## 1. Real bugs caught on PRs
 
-- PR-only failures: **241** across 19 PRs.
+- PR-only failures: **242** across 20 PRs.
 - Fixed by a push, then passed: **7** — the strongest catch signal.
 - Merged red, then the same case failed on main: **0** — a change that landed (a bug, or an intended change needing a re-baseline).
 - Labelled `real-bug`: **0**; `intended`: 0.
 
 ## 2. False alarms
 
-- PR failure groups: 1119 — infra 138 (12%), pre-existing 306 (27%), systemic (same case on ≥3 PRs that day) 11 (1%), PR-only 664 (59%).
-- PRs that saw a MIC failure: 118; of those, only failures they did not cause: **99 (84%)**.
+- PR failure groups: 1128 — infra 138 (12%), pre-existing 314 (28%), systemic (same case on ≥3 PRs that day) 11 (1%), PR-only 665 (59%).
+- PRs that saw a MIC failure: 120; of those, only failures they did not cause: **100 (83%)**.
 - PR-only cases that recovered with no push (flaky/environment): 0; merged and main stayed green for 3 days: 0; labelled `false-alarm`/`flake`: 0.
 
 ## 3. Baseline review work
@@ -44,11 +203,10 @@ Re-baselined = baselines changed with the same fixture weights (the review work 
 |---|---|---|---|---|---|---|
 | 2026-W43 | 21 | 0 | 0 | 0 | 0 | 150 |
 | 2026-W44 | 343 | 163 | 36 | 17 | 380 | 1592 |
-| 2026-W45 | 32 | 4 | 4 | 22 | 209 | 28 |
+| 2026-W45 | 35 | 5 | 5 | 22 | 210 | 41 |
 
 Latest re-baselines (model commit title):
 
-- 2026-10-27 Gemma3n-E2B-it: Review cloud MIC baselines 7d8449a176b7481f9cb779992b3f8cb3 (#1)
 - 2026-10-29 TimesFM: Publish MIC usage, slim fixture and reviewed Transformers expectations
 - 2026-10-29 mic-wav2vec2: Review cloud MIC baselines fcbf7cf0b35b43b08bea08c7da6d42e3 (#1)
 - 2026-10-30 Granite: Re-baseline cpu-x86_64-bf16 bfloat16 training.loss (10.796187 -> 10.797607): the CI image rebuild changed it; reproduced at the recording commit
@@ -56,6 +214,7 @@ Latest re-baselines (model commit title):
 - 2026-11-02 Perceiver: Publish MIC usage, slim fixture and reviewed Transformers expectations
 - 2026-11-03 Granite: Publish MIC usage, slim fixture and reviewed Transformers expectations
 - 2026-11-03 Muse-Glimmer: Publish MIC usage, slim fixture and reviewed Transformers expectations
+- 2026-11-05 EmbeddingGemma: Sentence Transformers cpu-x86_64-bf16 baseline recorded on aws-m8i-l-cache
 
 ## 4. Real-checkpoint regressions: did MIC flag them first?
 
@@ -74,8 +233,8 @@ Sticky GPU failures that started in the window ([Fix failures](https://transform
 | MIC on main | integration (real checkpoints) | other GPU tests |
 |---|---|---|
 | red-on-main | 1 | 0 |
-| green-on-main | 14 | 36 |
-| not-covered | 9 | 60 |
+| green-on-main | 15 | 36 |
+| not-covered | 10 | 60 |
 
 Real-checkpoint failures MIC stayed green on, waiting for a verdict. A miss is not proof that real weights were needed: often the contract does not make the call that broke. Label each with `{"key": "gpu#<key>", "verdict": "call-not-covered|needs-real-weights"}`.
 
@@ -93,6 +252,7 @@ Real-checkpoint failures MIC stayed green on, waiting for a verdict. A miss is n
 - `gpu#sticky#m2m_100#2026-10-12`: 2026-10-12, 1 test(s), e.g. `tests/models/m2m_100/test_modeling_m2m_100.py::M2M100ModelIntegrationTests::test_seq_to_seq_generation`
 - `gpu#sticky#mistral3#2026-10-19`: 2026-10-19, 2 test(s), e.g. `tests/models/mistral3/test_modeling_mistral3.py::Mistral3IntegrationTest::test_mistral3_integration_batched_generate_multi_image`
 - `gpu#sticky#mm_grounding_dino#2026-10-17`: 2026-10-17, 3 test(s), e.g. `tests/models/mm_grounding_dino/test_modeling_mm_grounding_dino.py::MMGroundingDinoModelIntegrationTests::test_inference_object_detection_head`
+- `gpu#sticky#qwen3_moe#2026-11-05`: 2026-11-05, 4 test(s), e.g. `tests/models/qwen3_moe/test_modeling_qwen3_moe.py::Qwen3MoeIntegrationTest::test_model_15b_a2b_generation`
 - `gpu#sticky#swinv2#2026-10-23`: 2026-10-23, 1 test(s), e.g. `tests/models/swinv2/test_modeling_swinv2.py::Swinv2ModelIntegrationTest::test_inference_fp16`
 
 ## 5. Overfit vs random fixtures
@@ -100,7 +260,7 @@ Real-checkpoint failures MIC stayed green on, waiting for a verdict. A miss is n
 | weights | PR-only | fixed by push | merged→main failed | labelled real-bug |
 |---|---|---|---|---|
 | overfit | 22 | 1 | 0 | 0 |
-| random | 204 | 6 | 0 | 0 |
+| random | 205 | 6 | 0 | 0 |
 | real | 9 | 0 | 0 | 0 |
 | unknown | 6 | 0 | 0 | 0 |
 
@@ -128,13 +288,13 @@ Models with real-checkpoint regressions in the daily GPU CI and no contract, shr
 | mamba2 | 2 | 0 | [mistralai/Mamba-Codestral-7B-v0.1](https://huggingface.co/mistralai/Mamba-Codestral-7B-v0.1) | no | not draftable |
 | pocket_tts | 2 | 0 | [eustlb/pocket-tts](https://huggingface.co/eustlb/pocket-tts) | no | not draftable |
 | gradium_phonon_tts | 1 | 1 | [gradium/phonon-voices](https://huggingface.co/gradium/phonon-voices) | no | not draftable |
+| blip_2 | 1 | 0 | [Salesforce/blip2-opt-2.7b](https://huggingface.co/Salesforce/blip2-opt-2.7b) | no | not draftable |
 | cwm | 1 | 0 | [facebook/cwm](https://huggingface.co/facebook/cwm) | no | not draftable |
 | eomt | 1 | 0 | [tue-mps/coco_panoptic_eomt_large_640](https://huggingface.co/tue-mps/coco_panoptic_eomt_large_640) | no | not draftable |
 | eomt_dinov3 | 1 | 0 | [tue-mps/eomt-dinov3-coco-panoptic-large-640](https://huggingface.co/tue-mps/eomt-dinov3-coco-panoptic-large-640) | no | not draftable |
 | granite_speech5 | 1 | 0 | [ibm-granite/granite-speech-5.0-470m-turboctc](https://huggingface.co/ibm-granite/granite-speech-5.0-470m-turboctc) | no | not draftable |
 | granite_speech_plus | 1 | 0 | [ibm-granite/granite-speech-4.1-2b-plus](https://huggingface.co/ibm-granite/granite-speech-4.1-2b-plus) | no | not draftable |
 | oneformer | 1 | 0 | [shi-labs/oneformer_ade20k_swin_tiny](https://huggingface.co/shi-labs/oneformer_ade20k_swin_tiny) | no | not draftable |
-| wav2vec2_bert | 0 | 3 | ? | no | not draftable |
 
 ### Calls to add to existing contracts
 
@@ -154,17 +314,19 @@ GPU CI regressions on models whose contract stayed green; **bold** models have a
 - **gemma3**: `Gemma3IntegrationTest::test_model_4b_multiimage` — `tmic update '<the call these tests make>'`
 - **gemma3n**: `Gemma3nIntegrationTest::test_generation_beyond_sliding_window_with_generation_config`, `Gemma3nIntegrationTest::test_generation_beyond_sliding_window`, `Gemma3nIntegrationTest::test_model_4b_bf16`, `Gemma3nIntegrationTest::test_model_4b_image` — `tmic update '<the call these tests make>'`
 - **gemma4**: `Gemma4IntegrationTest::test_generation_beyond_sliding_window_0_sdpa` — `tmic update '<the call these tests make>'`
-- glm_moe_dsa: `GlmMoeDsaModelTest::test_sdpa_can_dispatch_on_flash` — `tmic update '<the call these tests make>'`
+- glm_moe_dsa (GPU-only): `test_sdpa_can_dispatch_on_flash`
 - got_ocr2: `GotOcr2ProcessingTest::test_backends_equivalence_batched_crop_to_patches` — `tmic update '<the call these tests make>'`
 - **grounding_dino**: `GroundingDinoModelIntegrationTests::test_cross_attention_mask`, `GroundingDinoModelIntegrationTests::test_grounding_dino_loss`, `GroundingDinoModelIntegrationTests::test_inference_object_detection_head_equivalence_cpu_accelerator`, `GroundingDinoModelIntegrationTests::test_inference_object_detection_head` — `tmic update '<the call these tests make>'`
 - **internvl**: `InternVLLlamaIntegrationTest::test_llama_small_model_integration_forward`, `InternVLLlamaIntegrationTest::test_llama_small_model_integration_generate_text_only` — `tmic update '<the call these tests make>'`
-- **llama**: `LlamaIntegrationTest::test_flash_with_static_cache`, `LlamaIntegrationTest::test_llama_3_1_hard` — `tmic update '<the call these tests make>'`
+- **llama**: `LlamaIntegrationTest::test_llama_3_1_hard` — `tmic update '<the call these tests make>'`
+- llama (GPU-only): `test_flash_with_static_cache`
 - **m2m_100**: `M2M100ModelIntegrationTests::test_seq_to_seq_generation` — `tmic update '<the call these tests make>'`
 - minicpm3: `MiniCPM3ModelTest::test_eager_padding_matches_padding_free_with_position_ids` — `tmic update '<the call these tests make>'`
 - minicpm3 (GPU-only): `test_flash_attention_2_padding_matches_padding_free_with_position_ids`, `test_flash_attention_2_padding_matches_padding_free_with_position_ids_and_fa_kwargs`
 - **mistral3**: `Mistral3IntegrationTest::test_mistral3_integration_batched_generate_multi_image`, `Mistral3IntegrationTest::test_mistral3_integration_generate` — `tmic update '<the call these tests make>'`
 - **mm_grounding_dino**: `MMGroundingDinoModelIntegrationTests::test_inference_object_detection_head_equivalence_cpu_gpu`, `MMGroundingDinoModelIntegrationTests::test_inference_object_detection_head`, `MMGroundingDinoModelIntegrationTests::test_mm_grounding_dino_loss` — `tmic update '<the call these tests make>'`
 - qwen3_asr: `Qwen3ASRFeatureExtractionTest::test_mel_padding_aligns_to_chunk` — `tmic update '<the call these tests make>'`
+- **qwen3_moe**: `Qwen3MoeIntegrationTest::test_model_15b_a2b_generation`, `Qwen3MoeIntegrationTest::test_model_15b_a2b_logits`, `Qwen3MoeIntegrationTest::test_model_15b_a2b_long_prompt_sdpa`, `Qwen3MoeIntegrationTest::test_speculative_generation` — `tmic update '<the call these tests make>'`
 - swinv2 (GPU-only): `test_inference_fp16`
 
 ## Waiting for a verdict (10)

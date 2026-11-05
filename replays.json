@@ -1,0 +1,1422 @@
+{
+ "43451#molmo2": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45396#colqwen2": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#aimv2": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#altclip": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#beit": {
+  "reason": "the bisected commit does not touch the model or shared code",
+  "verdict": "unrelated-culprit",
+  "version": 6
+ },
+ "45777#bit": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#blip_2": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#chinese_clip": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "45777#clip": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "45777#clipseg": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "45777#conditional_detr": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#csm": {
+  "reason": "the bisected commit does not touch the model or shared code",
+  "verdict": "unrelated-culprit",
+  "version": 6
+ },
+ "45777#d_fine": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#dab_detr": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#data2vec": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#deformable_detr": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#deimv2": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#deit": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#depth_pro": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#detr": {
+  "reason": "the bisected commit does not touch the model or shared code",
+  "verdict": "unrelated-culprit",
+  "version": 6
+ },
+ "45777#dinov2": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "45777#dinov2_with_registers": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "45777#dinov3_convnext": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#dinov3_vit": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "45777#dpt": {
+  "reason": "the bisected commit does not touch the model or shared code",
+  "verdict": "unrelated-culprit",
+  "version": 6
+ },
+ "45777#edgetam_video": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#encodec": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#fastspeech2_conformer": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#flava": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#groupvit": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#ijepa": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#kyutai_speech_to_text": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#lasr": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#levit": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#mask2former": {
+  "reason": "the bisected commit does not touch the model or shared code",
+  "verdict": "unrelated-culprit",
+  "version": 6
+ },
+ "45777#maskformer": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#metaclip_2": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#mlcd": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#mm_grounding_dino": {
+  "reason": "the bisected commit does not touch the model or shared code",
+  "verdict": "unrelated-culprit",
+  "version": 6
+ },
+ "45777#mobilenet_v1": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#mobilenet_v2": {
+  "reason": "the bisected commit does not touch the model or shared code",
+  "verdict": "unrelated-culprit",
+  "version": 6
+ },
+ "45777#mobilevit": {
+  "reason": "the bisected commit does not touch the model or shared code",
+  "verdict": "unrelated-culprit",
+  "version": 6
+ },
+ "45777#mobilevitv2": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#moonshine": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#musicgen": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#pixtral": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#poolformer": {
+  "reason": "the bisected commit does not touch the model or shared code",
+  "verdict": "unrelated-culprit",
+  "version": 6
+ },
+ "45777#rf_detr": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#rt_detr": {
+  "reason": "the bisected commit does not touch the model or shared code",
+  "verdict": "unrelated-culprit",
+  "version": 6
+ },
+ "45777#rt_detr_v2": {
+  "reason": "the bisected commit does not touch the model or shared code",
+  "verdict": "unrelated-culprit",
+  "version": 6
+ },
+ "45777#sam": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#sam2": {
+  "reason": "the bisected commit does not touch the model or shared code",
+  "verdict": "unrelated-culprit",
+  "version": 6
+ },
+ "45777#sam2_video": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#sam3": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#sam3_tracker": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#sam3_tracker_video": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#sam_hq": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#sew": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#sew_d": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#shared": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#timesformer": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#univnet": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#upernet": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#vit": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "45777#vit_msn": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#vitdet": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#x_clip": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#xcodec": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45777#yolos": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "45818#idefics3": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "45847#shared": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45892#deepseek_v4": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "45942#convnextv2": {
+  "reason": "the bisected commit does not touch the model or shared code",
+  "verdict": "unrelated-culprit",
+  "version": 6
+ },
+ "45942#cvt": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45942#dac": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45942#moonshine_streaming": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "45942#vivit": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "46091#blip_2": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "46091#shared": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "46091#vision_encoder_decoder": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "46115#cohere2_vision": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "46135#phimoe": {
+  "reason": "the bisected commit does not touch the model or shared code",
+  "verdict": "unrelated-culprit",
+  "version": 6
+ },
+ "46196#xcodec2": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "46219#phimoe": {
+  "reason": "the bisected commit does not touch the model or shared code",
+  "verdict": "unrelated-culprit",
+  "version": 6
+ },
+ "46246#qwen3_omni_moe": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "46332#nemotron_asr_streaming": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "46381#shared": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "46401#granite4_vision": {
+  "reason": "the bisected commit does not touch the model or shared code",
+  "verdict": "unrelated-culprit",
+  "version": 6
+ },
+ "46401#granite_speech": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "46401#granite_speech_plus": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "46401#instructblip": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "46405#shared": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "46419#esmfold2": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "46472#vibevoice_asr": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "46509#nemotron_h_omni": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "46556#ovis2": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "46738#blt": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "46738#diffllama": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "46850#phimoe": {
+  "reason": "the bisected commit does not touch the model or shared code",
+  "verdict": "unrelated-culprit",
+  "version": 6
+ },
+ "46886#yolos": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "46977#moshi": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "46980#shared": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47003#perceiver": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47014#moshi": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47014#musicgen": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47014#musicgen_melody": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47118#moshi": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47201#mamba2": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47201#recurrent_gemma": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47203#depth_pro": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47203#sam": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47203#sam_hq": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47203#timm_wrapper": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#afmoe": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#axk2": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#bart": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#bigbird_pegasus": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#blenderbot": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#blenderbot_small": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#cohere2": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#cwm": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#deepseek_ocr2": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#deepseek_v32": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#dots1": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#exaone4": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#exaone4_5": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#exaone_moe": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#fast_vlm": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#gemma2": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#gemma3": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#gemma3n": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#gemma4": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#gemma4_unified": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#glm_moe_dsa": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#got_ocr2": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#granite_swa": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#granitemoe_swa": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#granitemoehybrid": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#idefics2": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#idefics3": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#internvl": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#jamba": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#laguna": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#lfm2": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#lfm2_moe": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#llava_onevision": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#marian": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#mbart": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#mellum": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#mimo_v2_flash": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#minimax_m3_vl": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#ministral": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#mllama": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#modernbert_decoder": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#mvp": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#nemotron_h": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#olmo3": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#openai": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#ovis2": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#pegasus": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#plbart": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#prophetnet": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#qianfan_ocr": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#qwen2_5_vl": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#qwen2_vl": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#qwen3_5": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#qwen3_next": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#reformer": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#shared": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#smollm3": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#smolvlm": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#trocr": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#vaultgemma": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47243#xlm": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47243#xlnet": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47290#shared": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47493#phimoe": {
+  "reason": "the bisected commit does not touch the model or shared code",
+  "verdict": "unrelated-culprit",
+  "version": 6
+ },
+ "47573#kimi_k25": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47598#pp_doclayout_v2": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47622#voxtral_realtime": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47625#minicpmv4_6": {
+  "reason": "the bisected commit does not touch the model or shared code",
+  "verdict": "unrelated-culprit",
+  "version": 6
+ },
+ "47645#dac": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47725#moshi": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47731#t5": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47747#kolibri1": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47753#idefics2": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47753#idefics3": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47753#mllama": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47753#smolvlm": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "47809#shared": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47827#inkling": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47878#cohere_compass": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47922#layoutxlm": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47939#pe_audio_video": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47939#pe_video": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "47988#modernbert_decoder": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48028#moshi": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48118#longcat_flash": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48141#glm46v": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48141#glm4v": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48141#glm_image": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48141#glm_ocr": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "48250#kimi_linear": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48264#moshi": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48282#colpali": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48282#shared": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48317#auto": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48331#zamba": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48340#qwen4_exp": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "48435#zaya": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48498#shared": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48578#moshi": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48652#glm4v_moe": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48714#qwen3_omni_moe": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48814#imagegpt": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48854#moshi": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48876#axk2": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48961#recurrent_gemma": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "48979#minicpmv4_7": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "48992#shared": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "49112#shared": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "49138#udop": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "49206#muse_spark": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "49421#shared": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "49589#pocket_tts": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "49664#beam": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "49725#colmodernvbert": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "49791#gradium_phonon_tts": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "49832#eomt": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "49832#eomt_dinov3": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "50084#nemotron3_5_transcribe": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#albert#2026-10-06": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#albert#2026-10-08": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#albert#2026-10-24": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#axk1#2026-10-06": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#axk1#2026-10-18": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#bart#2026-10-30": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#beam#2026-10-17": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#bert#2026-10-19": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#bigbird_pegasus#2026-10-30": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#blenderbot#2026-10-30": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#blenderbot_small#2026-10-30": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#blip_2#2026-11-05": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#blt#2026-10-30": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#bridgetower#2026-10-17": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#canary#2026-10-30": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#cohere#2026-10-17": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#cohere_asr#2026-10-30": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#colpali#2026-10-10": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#cosmos3_edge#2026-10-17": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#cwm#2026-10-09": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#data2vec#2026-10-06": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#data2vec#2026-10-10": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#deepseek_ocr2#2026-10-24": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#deepseek_v3#2026-10-16": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#dia#2026-10-30": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#electra#2026-10-09": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#ernie#2026-10-06": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#ernie#2026-10-08": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#ernie#2026-10-12": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#ernie4_5_moe#2026-10-10": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#flex_olmo#2026-10-14": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#flex_olmo#2026-10-24": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#florence2#2026-10-30": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#fsmt#2026-10-30": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#gemma2#2026-10-22": {
+  "reason": "same regression as 49811#gemma2",
+  "verdict": "duplicate",
+  "version": 6
+ },
+ "sticky#gemma3#2026-11-02": {
+  "reason": "the daily CI did not fail it",
+  "verdict": "not-reproduced",
+  "version": 6
+ },
+ "sticky#gemma3n#2026-10-09": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#gemma3n#2026-11-02": {
+  "reason": "the daily CI did not fail it",
+  "verdict": "not-reproduced",
+  "version": 6
+ },
+ "sticky#gemma4#2026-10-10": {
+  "reason": "same regression as 49404#gemma4",
+  "verdict": "duplicate",
+  "version": 6
+ },
+ "sticky#glm4#2026-10-07": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#glm4#2026-10-10": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#glm4_moe_lite#2026-10-06": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#glm4_moe_lite#2026-10-30": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#glm_moe_dsa#2026-10-19": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#got_ocr2#2026-10-20": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#gradium_phonon_tts#2026-10-21": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#granite_speech5#2026-10-22": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#granite_speech_plus#2026-10-22": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#granitemoe#2026-10-19": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#hunyuan_v1_moe#2026-10-10": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#idefics#2026-10-07": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#idefics#2026-10-10": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#internvl#2026-11-02": {
+  "reason": "the daily CI did not fail it",
+  "verdict": "not-reproduced",
+  "version": 6
+ },
+ "sticky#jetmoe#2026-10-10": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#kolibri1#2026-10-14": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#kyutai_speech_to_text#2026-10-18": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#llama#2026-11-01": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#llama#2026-11-02": {
+  "reason": "the daily CI did not fail it",
+  "verdict": "not-reproduced",
+  "version": 6
+ },
+ "sticky#llava#2026-11-02": {
+  "reason": "the daily CI did not fail it",
+  "verdict": "not-reproduced",
+  "version": 6
+ },
+ "sticky#longt5#2026-10-30": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#m2m_100#2026-10-30": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#mamba2#2026-10-06": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#mamba2#2026-10-13": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#marian#2026-10-30": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#mbart#2026-10-30": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#minicpm3#2026-10-06": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#minicpm3#2026-10-08": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#minicpm3#2026-10-10": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#minimax_m2#2026-10-30": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#mistral3#2026-10-19": {
+  "reason": "the daily CI did not fail it",
+  "verdict": "not-reproduced",
+  "version": 6
+ },
+ "sticky#mixtral#2026-10-07": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#mixtral#2026-10-17": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#moshi#2026-10-06": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#moshi#2026-10-08": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#mt5#2026-10-30": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#mvp#2026-10-30": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#nemotron#2026-10-27": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#nemotron3_5_transcribe#2026-10-29": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#nemotron_h#2026-10-30": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#omdet_turbo#2026-10-25": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#oneformer#2026-10-18": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#pegasus#2026-10-30": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#pegasus_x#2026-10-30": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#plbart#2026-10-30": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#pocket_tts#2026-10-21": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#poolformer#2026-10-19": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#poolformer#2026-10-23": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#pp_formulanet#2026-10-30": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#prophetnet#2026-10-30": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#qwen3_asr#2026-10-15": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#qwen3_moe#2026-11-05": {
+  "reason": "the daily CI did not fail it",
+  "verdict": "not-reproduced",
+  "version": 6
+ },
+ "sticky#reformer#2026-10-07": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#roberta_prelayernorm#2026-10-07": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#roberta_prelayernorm#2026-10-10": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#seamless_m4t#2026-10-12": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#shieldgemma2#2026-10-07": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#speech_to_text#2026-10-30": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#speecht5#2026-10-30": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#swinv2#2026-10-23": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#switch_transformers#2026-10-06": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#switch_transformers#2026-10-16": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#t5#2026-10-29": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#t5gemma#2026-10-30": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#t5gemma2#2026-10-30": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#udop#2026-10-16": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#umt5#2026-10-30": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#utils#2026-10-14": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#utils#2026-10-17": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#wav2vec2_bert#2026-10-07": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#wav2vec2_bert#2026-10-15": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#wav2vec2_bert#2026-10-20": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#wav2vec2_conformer#2026-10-16": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#wav2vec2_conformer#2026-10-18": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#whisper#2026-10-29": {
+  "verdict": "out-of-scope",
+  "version": 6
+ },
+ "sticky#xmod#2026-10-07": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#xmod#2026-10-11": {
+  "verdict": "not-covered",
+  "version": 6
+ },
+ "sticky#xmod#2026-10-14": {
+  "verdict": "not-covered",
+  "version": 6
+ }
+}

@@ -113,7 +113,7 @@
   "glm_moe_dsa": [
    {
     "date": "2026-10-19",
-    "gpu_only": false,
+    "gpu_only": true,
     "integration": false,
     "test": "tests/models/glm_moe_dsa/test_modeling_glm_moe_dsa.py::GlmMoeDsaModelTest::test_sdpa_can_dispatch_on_flash"
    }
@@ -168,16 +168,16 @@
   ],
   "llama": [
    {
-    "date": "2026-11-01",
-    "gpu_only": false,
-    "integration": true,
-    "test": "tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_flash_with_static_cache"
-   },
-   {
     "date": "2026-11-02",
     "gpu_only": false,
     "integration": true,
     "test": "tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_llama_3_1_hard"
+   },
+   {
+    "date": "2026-11-01",
+    "gpu_only": true,
+    "integration": true,
+    "test": "tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_flash_with_static_cache"
    }
   ],
   "m2m_100": [
@@ -250,6 +250,32 @@
     "test": "tests/models/qwen3_asr/test_feature_extraction_qwen3_asr.py::Qwen3ASRFeatureExtractionTest::test_mel_padding_aligns_to_chunk"
    }
   ],
+  "qwen3_moe": [
+   {
+    "date": "2026-11-05",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/qwen3_moe/test_modeling_qwen3_moe.py::Qwen3MoeIntegrationTest::test_model_15b_a2b_generation"
+   },
+   {
+    "date": "2026-11-05",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/qwen3_moe/test_modeling_qwen3_moe.py::Qwen3MoeIntegrationTest::test_model_15b_a2b_logits"
+   },
+   {
+    "date": "2026-11-05",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/qwen3_moe/test_modeling_qwen3_moe.py::Qwen3MoeIntegrationTest::test_model_15b_a2b_long_prompt_sdpa"
+   },
+   {
+    "date": "2026-11-05",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/qwen3_moe/test_modeling_qwen3_moe.py::Qwen3MoeIntegrationTest::test_speculative_generation"
+   }
+  ],
   "swinv2": [
    {
     "date": "2026-10-23",
@@ -281,8 +307,8 @@
    "other": 2,
    "shrinkable": true,
    "tests": [
-    "tests/models/flex_olmo/test_modeling_flex_olmo.py::FlexOlmoModelTest::test_sdpa_padding_matches_padding_free_with_position_ids",
-    "tests/models/flex_olmo/test_modeling_flex_olmo.py::FlexOlmoModelTest::test_flash_attn_2_equivalence"
+    "tests/models/flex_olmo/test_modeling_flex_olmo.py::FlexOlmoModelTest::test_flash_attn_2_equivalence",
+    "tests/models/flex_olmo/test_modeling_flex_olmo.py::FlexOlmoModelTest::test_sdpa_padding_matches_padding_free_with_position_ids"
    ]
   },
   {
@@ -474,6 +500,17 @@
     "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_torch_export_generate_dynamic",
     "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_torch_export_generate_dynamic_static_cache",
     "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSIntegrationTest::test_batch"
+   ]
+  },
+  {
+   "checkpoint": "Salesforce/blip2-opt-2.7b",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "blip_2",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/blip_2/test_modeling_blip_2.py::Blip2ModelIntegrationTest::test_inference_t5_multi_accelerator"
    ]
   },
   {

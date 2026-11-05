@@ -4999,6 +4999,26 @@
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41956096156%3A2&var-pr=50346&var-gh_run_id=41956096156",
   "weights": "random"
  },
+ "50379#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
+  "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "commits": [
+   "6b3609ff2a8a6a3e677bea4502254150e256f59c"
+  ],
+  "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/18ed0f7",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1793855334.673561,
+  "first_seen": "2026-11-05",
+  "key": "50379#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20762,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50379",
+  "pr_state": "open",
+  "pr_title": "Multimodal Model Output for generative LMs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41972049124%3A1&var-pr=50379&var-gh_run_id=41972049124",
+  "weights": "random"
+ },
  "gh-readonly-queue/main/pr-50263-e03c353939b8396e1e29d92e4d11245dca493dd1#huggingface-mic/table_transformer-mic|table_transformer-mic|bfloat16|cpu-x86_64": {
   "case": "huggingface-mic/table_transformer-mic|table_transformer-mic|bfloat16|cpu-x86_64",
   "commits": [],
