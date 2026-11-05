@@ -655,8 +655,9 @@ CHECKPOINT_RE = re.compile(r"""["']([A-Za-z0-9][\w.-]*/[\w.-]+)["']""")
 FILE_RE = re.compile(r"\.(json|png|jpe?g|wav|mp3|flac|txt|py|safetensors|bin|pt|gguf|mp4|npy|md)$")
 
 
-def get_text(url):
-    request = urllib.request.Request(url, headers={"User-Agent": "mic-impact"})
+def get_text(url, token=None):
+    headers = {"User-Agent": "mic-impact"} | ({"Authorization": f"Bearer {token}"} if token else {})
+    request = urllib.request.Request(url, headers=headers)
     with urllib.request.urlopen(request, timeout=60) as response:
         return response.read().decode()
 
@@ -698,14 +699,18 @@ def class_checkpoints(text, class_names):
 
 
 def hub_has(repo, _seen={}):
-    """Does the Hub serve this model repo without a token? Gated repos do (200); private or deleted ones do not."""
+    """Can a draft download this model repo? Private or deleted repos are not served; a gated one
+    answers the model API anonymously and refuses the download to a token not granted access
+    (tmic-run.yml downloads with HF_HUB_READ_TOKEN, passed here as HF_TOKEN)."""
     if repo not in _seen:
         try:
-            get_text(f"{HUB}/api/models/{repo}")
+            info = json.loads(get_text(f"{HUB}/api/models/{repo}"))
+            if info.get("gated"):
+                get_text(f"{HUB}/{repo}/resolve/main/config.json", os.environ.get("HF_TOKEN"))
             _seen[repo] = True
         except urllib.error.HTTPError as e:
             _seen[repo] = e.code not in (401, 403, 404)  # a 5xx says nothing about the repo
-        except (urllib.error.URLError, http.client.IncompleteRead):
+        except (urllib.error.URLError, http.client.IncompleteRead, ValueError):
             _seen[repo] = True
     return _seen[repo]
 

@@ -109,6 +109,9 @@ jobs:
           echo "RESULTS=$dir" >> "$GITHUB_ENV"
 
       - name: Observe
+        env:
+          # Suggests a gated checkpoint only if tmic-run.yml's token can download it.
+          HF_TOKEN: ${{ secrets.HF_HUB_READ_TOKEN }}
         run: |
           set -o pipefail  # a crashed collection must not be pushed
           if [ "$GITHUB_EVENT_NAME" = workflow_run ]; then mode=(--refresh); else mode=(--days "$DAYS" --draft "$DRAFTS" --replay-plan replay --replay-limit "$REPLAY_LIMIT" --backfill-days "$BACKFILL_DAYS"); fi
