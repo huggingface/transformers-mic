@@ -17,6 +17,7 @@ name: MIC impact
 #   gh workflow run mic-impact.yml --repo huggingface/transformers-mic             # yesterday
 #   gh workflow run mic-impact.yml --repo huggingface/transformers-mic -f days=30  # re-seed a month
 #   gh workflow run mic-impact.yml --repo huggingface/transformers-mic --ref <branch> -f publish=false -f drafts=0  # try a branch
+#   gh workflow run mic-impact.yml --repo huggingface/transformers-mic -f backfill_days=180 -f replay_limit=300     # seed the replays
 #
 # When a tmic-run.yml run finishes, it only refreshes the drafts' state and shrink
 # pages (--refresh): no collection, no new drafts. The Space's front page is
@@ -44,6 +45,16 @@ on:
         required: false
         type: string
         default: "2"
+      backfill_days:
+        description: "Also replay the daily GPU CI's bisected regressions of this many days back (0: none)"
+        required: false
+        type: string
+        default: "0"
+      replay_limit:
+        description: "Regressions to replay at most in this run"
+        required: false
+        type: string
+        default: "40"
       publish:
         description: "Push to impact-results and publish the Space (off: a dry run, results in the run summary)"
         required: false
@@ -71,6 +82,8 @@ jobs:
       PYTHONUNBUFFERED: "1"
       DAYS: ${{ inputs.days || '1' }}
       DRAFTS: ${{ inputs.drafts || '2' }}
+      BACKFILL_DAYS: ${{ inputs.backfill_days || '0' }}
+      REPLAY_LIMIT: ${{ inputs.replay_limit || '40' }}
       PUBLISH: ${{ github.event_name != 'workflow_dispatch' || inputs.publish }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -98,7 +111,7 @@ jobs:
       - name: Observe
         run: |
           set -o pipefail  # a crashed collection must not be pushed
-          if [ "$GITHUB_EVENT_NAME" = workflow_run ]; then mode=(--refresh); else mode=(--days "$DAYS" --draft "$DRAFTS" --replay-plan replay); fi
+          if [ "$GITHUB_EVENT_NAME" = workflow_run ]; then mode=(--refresh); else mode=(--days "$DAYS" --draft "$DRAFTS" --replay-plan replay --replay-limit "$REPLAY_LIMIT" --backfill-days "$BACKFILL_DAYS"); fi
           python experiments/impact.py --results "$RESULTS" "${mode[@]}" | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Replay plan
@@ -141,7 +154,7 @@ jobs:
       group: ${{ vars.MIC_CPU_BASELINE_RUNNER || 'aws-m8i-l-cache' }}
     container:
       image: huggingface/transformers-torch-light
-    timeout-minutes: 120
+    timeout-minutes: 300
     strategy:
       fail-fast: false
       matrix:

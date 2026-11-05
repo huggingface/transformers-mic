@@ -901,7 +901,12 @@ def draft_lines(suggestions, drafts):
 # ---------------------------------------------------------------- replays
 
 REPLAYS_PER_RUN = 40  # regressions replayed per run; the rest wait for the next one
-REPLAY_VERSION = 2  # bump when a rule below changes: every verdict is recomputed
+REGRESSION_ROWS = 100  # newest regressions on the overview; the full report lists them all
+REPLAY_VERSION = 3  # bump when a rule below changes: every verdict is recomputed
+# Failures that say the replay could not measure anything: the fixture or its baselines, not the code.
+SETUP_ERRORS = ("no reviewed baseline", "no golden baseline", "fixture files differ", "wrong hardware", "not measured")
+CONFIRM_DAYS = 3  # a sticky onset counts when the daily CI fails one of its tests within this many days
+SAME_EVENT_DAYS = 2  # a sticky onset this close to a bisected regression of the same model is that regression
 # What Transformers PR CI runs of each fleet (transformers-ci .github/workflows/pr-ci_contracts.yml).
 PR_CI_VARIANTS = {"control": ["default", "bfloat16"], "prototypes": ["bfloat16"]}
 REPLAY_CHUNKS = 8  # parallel replay jobs in mic-impact.yml
@@ -968,7 +973,44 @@ def run_sha(run_id):
         return None
 
 
-def replay_plan(gpu_ci, replays, contracts, sha_of_day, limit=REPLAYS_PER_RUN, sha_of_run=run_sha):
+def daily_failures(date, _cache={}):
+    """Node ids the daily GPU CI's scheduled run failed on `date` (model_results.json; empty when it did not run)."""
+    if date not in _cache:
+        try:
+            data = get_json(f"{HUB}/datasets/{DAILY_CI}/resolve/main/{date}/ci_results_run_models_gpu/model_results.json")
+        except urllib.error.HTTPError as error:
+            if error.code != 404:
+                raise
+            data = {}
+        _cache[date] = {f["line"] for model in data.values() for fails in (model.get("failures") or {}).values() for f in fails}
+    return _cache[date]
+
+
+def confirmed(item, failing_on=daily_failures):
+    """Whether the daily scheduled run failed one of a sticky onset's in-scope tests within CONFIRM_DAYS.
+
+    The Fix failures page also counts push runs, and one failing push run can be transient: the
+    11-02 batch (llama, gemma3, llava, internvl, gemma3n) failed once on push and passed the next
+    daily run with the same code.
+    """
+    tests = {t for t in item["tests"] if in_scope(t)}
+    start = dt.date.fromisoformat(item["date"])
+    return any(tests & failing_on((start + dt.timedelta(days=d)).isoformat()) for d in range(CONFIRM_DAYS))
+
+
+def same_event(key, item, gpu_ci):
+    """The bisected regression a sticky onset duplicates (a shared failing test, within SAME_EVENT_DAYS), or None."""
+    if not key.startswith("sticky#"):
+        return None
+    day = dt.date.fromisoformat(item["date"])
+    for other, regression in gpu_ci.items():
+        if regression.get("bad_commit") and set(regression.get("tests", [])) & set(item["tests"]):
+            if abs((dt.date.fromisoformat(regression["date"]) - day).days) <= SAME_EVENT_DAYS:
+                return other
+    return None
+
+
+def replay_plan(gpu_ci, replays, contracts, sha_of_day, limit=REPLAYS_PER_RUN, sha_of_run=run_sha, failing_on=daily_failures):
     """Plan entries for the regressions not replayed yet, newest first: one per (regression, fleet).
 
     A bisected regression replays its bad commit and that commit's parent. A sticky onset replays
@@ -986,6 +1028,13 @@ def replay_plan(gpu_ci, replays, contracts, sha_of_day, limit=REPLAYS_PER_RUN, s
         scope = replay_scope(item, contracts)
         if scope:
             replays[key] = {"verdict": scope, "version": REPLAY_VERSION}
+            continue
+        duplicate = same_event(key, item, gpu_ci)
+        if duplicate:
+            replays[key] = {"verdict": "duplicate", "reason": f"same regression as {duplicate}", "version": REPLAY_VERSION}
+            continue
+        if not item.get("bad_commit") and not confirmed(item, failing_on):
+            replays[key] = {"verdict": "not-reproduced", "reason": "the daily CI did not fail it", "version": REPLAY_VERSION}
             continue
         if len(keys) >= limit:
             continue
@@ -1034,6 +1083,11 @@ def replay_verdicts(records, replays, run_url=""):
             broken = [f for rs in by_side.values() for r in rs if r["contract"] == "*" for f in r.get("failures", [])]
             replays[key] = {**entry, "verdict": "broken", "reason": (broken or ["a side did not run"])[0][:300]}
             continue
+        setup = [r for rs in by_side.values() for r in rs if any(p in " ".join(r.get("failures") or []) for p in SETUP_ERRORS)]
+        if setup:
+            reason = f"{setup[0]['target']}: {(setup[0].get('failures') or ['?'])[0].splitlines()[0][:200]}"
+            replays[key] = {**entry, "verdict": "broken", "reason": reason}
+            continue
         red = {side: [r for r in rs if r["status"] in RED] for side, rs in by_side.items()}
         if all(r["status"] == "absent" for r in by_side["parent"]):
             entry["model_added"] = True
@@ -1051,6 +1105,25 @@ def replay_verdicts(records, replays, run_url=""):
         ]
         replays[key] = {**entry, "verdict": verdict, "failures": failures[:5]}
     return replays
+
+
+def backfill_regressions(results, days, today):
+    """Add the daily GPU CI's bisected regressions of the `days` before `today` to gpu-ci.json; returns how many.
+
+    Upstream bisects every new failure of its scheduled run, so the dataset holds years of
+    regressions with their culprit commit: replaying months of them gives the catch rate a
+    denominator that one month cannot. Entries already there (with what MIC did on the PR) stay.
+    """
+    gpu_ci = load(results / "gpu-ci.json", {})
+    added = 0
+    for offset in range(days, 0, -1):
+        found = gpu_ci_regressions((today - dt.timedelta(days=offset)).isoformat())
+        for key, item in found.items():
+            if key not in gpu_ci:
+                gpu_ci[key] = {**item, "source": "backfill"}
+                added += 1
+    write(results / "gpu-ci.json", gpu_ci)
+    return added
 
 
 def write_replay_plan(results, folder, download, sha_of_day=daily_sha, limit=REPLAYS_PER_RUN):
@@ -1078,7 +1151,9 @@ REPLAY_VERDICTS = (
     ("missed", "green on both"),
     ("already-red", "red on both: says nothing about this regression"),
     ("no-code-change", "the daily CI tested the same commit the day before: nothing for a contract to catch"),
-    ("broken", "the replay could not run (commit, install or harness)"),
+    ("not-reproduced", "a failing run the daily CI did not repeat: transient, not a regression"),
+    ("duplicate", "the same regression as a bisected one, counted there"),
+    ("broken", "the replay could not measure it (commit, install, fixture or baseline setup)"),
     ("out-of-scope", "no failing *IntegrationTest a CPU fixture contract mirrors: GPU-only, or a feature contracts do not call (export, offloading, parallelism, processors)"),
     ("not-covered", "no contract for the model"),
 )
@@ -1339,7 +1414,7 @@ def summarize(results):
     write(results / "overview.json", {
         "window": [first or None, last or None],
         "replay": {name: replay_counts[name] for name, _ in REPLAY_VERDICTS} | {"pending": replay_counts["pending"]},
-        "regressions": replay_rows(gpu_ci, replays),
+        "regressions": replay_rows(gpu_ci, replays)[:REGRESSION_ROWS],
         "caught": {
             "fixed_by_push": outcomes["fixed-by-push"],
             "merged_then_main_failed": outcomes["merged-then-main-failed"],
@@ -1515,6 +1590,8 @@ def main():
     parser.add_argument("--replay-plan", type=Path, metavar="DIR", help="write DIR/plan.json for the regressions not replayed yet")
     parser.add_argument("--replay-results", type=Path, metavar="FILE", help="fold replay records (backfill.py --plan) into replays.json")
     parser.add_argument("--replay-run", default="", metavar="URL", help="the workflow run that produced --replay-results")
+    parser.add_argument("--replay-limit", type=int, default=REPLAYS_PER_RUN, metavar="N", help="regressions to plan at most")
+    parser.add_argument("--backfill-days", type=int, default=0, metavar="N", help="first add the daily GPU CI's bisected regressions of the last N days")
     args = parser.parse_args()
     args.results.mkdir(parents=True, exist_ok=True)
     if not args.summary_only:
@@ -1531,10 +1608,13 @@ def main():
                 now = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
                 dispatch_drafts(load(args.results / "suggestions.json", {"new": []}), drafts, args.draft, now)
         write(args.results / "drafts.json", drafts)
+    if args.backfill_days:
+        added = backfill_regressions(args.results, args.backfill_days, dt.date.today())
+        print(f"backfill: {added} bisected regressions added", file=sys.stderr)
     if args.replay_plan:
         from transformers_mic import fleet
 
-        plan = write_replay_plan(args.results, args.replay_plan, fleet.download)
+        plan = write_replay_plan(args.results, args.replay_plan, fleet.download, limit=args.replay_limit)
         print(f"replay plan: {len(plan)} entries", file=sys.stderr)
     if args.replay_results:
         replays = replay_verdicts(read_jsonl(args.replay_results), load(args.results / "replays.json", {}), args.replay_run)
