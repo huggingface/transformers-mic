@@ -1897,6 +1897,7 @@ def test_planner_records_every_call_with_its_listed_price(monkeypatch):
     assert "listed_usd" not in second
 
 
+@pytest.mark.requires_runtime
 def test_a_batch_encoding_is_not_cast_with_dtype():
     # microsoft/layoutlmv3-base: LayoutLMv3Processor returns its tokenizer's BatchEncoding.
     bad = 'inputs = processor(images=images, text=words, boxes=boxes, return_tensors="pt")\ninputs = inputs.to(device, dtype=model.dtype)\n'
@@ -1921,6 +1922,7 @@ def test_a_transducer_forward_needs_decoder_inputs():
     commands.check_transducer_inputs({"usage": bad.replace("AutoModelForTDT", "AutoModelForCTC")})
 
 
+@pytest.mark.requires_runtime
 def test_apply_chat_template_needs_a_template(monkeypatch):
     from transformers import ProcessorMixin
 
