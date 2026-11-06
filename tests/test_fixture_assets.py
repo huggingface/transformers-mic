@@ -1091,3 +1091,23 @@ def test_save_updates_nested_dtype_after_cast_and_round_trips(tmp_path, dtype):
     reloaded = AutoConfig.from_pretrained(out)
     assert reloaded.dtype == reloaded.text_config.dtype == reloaded.vision_config.dtype == dtype
     assert all(t.dtype == dtype for t in safetensors.load_file(out / "model.safetensors").values() if t.is_floating_point())
+
+
+def test_numeric_health_records_and_casts_dequantized_parameters(tmp_path):
+    class Dequantized(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.proj = torch.nn.Linear(2, 2).bfloat16()
+            self.hf_quantizer = SimpleNamespace(quantization_config=SimpleNamespace(dequantize=True))
+
+        @classmethod
+        def from_pretrained(cls, folder, dtype):
+            return cls()
+
+        def forward(self, x):
+            return {"logits": self.proj(x)}
+
+    rows = build_fixtures.numeric_health(Dequantized, tmp_path, {"x": torch.ones(2, 2)})
+    assert all(row["finite"] for row in rows.values())
+    assert rows["float32"]["cast_after_dequantization"] is True
+    assert rows["float32"]["loaded_parameter_dtypes"] == ["torch.bfloat16"]
