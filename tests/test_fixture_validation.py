@@ -3,8 +3,8 @@ import pytest
 torch = pytest.importorskip("torch")
 pytest.importorskip("transformers")
 
-from transformers_mic.fixture_validation import config_findings, validate_model
-from transformers_mic import shrink_view
+from transformers_mic.fixture_validation import config_findings, validate_model  # noqa: E402
+from transformers_mic import shrink_view  # noqa: E402
 
 
 def test_inconsistent_attention_and_shared_cache_are_findings():
@@ -50,3 +50,29 @@ def test_saved_config_rejects_stale_derived_values(tmp_path):
     path.write_text(json.dumps(saved))
     with pytest.raises(ValueError, match="Stale fixture config: head_dim"):
         validate_saved_config(model, path)
+
+
+def test_compact_saved_config_preserves_effective_dimensions_and_patterns(tmp_path):
+    import json
+    from types import SimpleNamespace
+    from transformers import MistralLarge4Config
+    from transformers_mic.fixture_validation import compact_saved_config
+
+    config = MistralLarge4Config(text_config={"num_hidden_layers": 2,
+        "qk_rope_head_dim": 16, "qk_nope_head_dim": 16,
+        "no_rope_layers": [1, 0], "kv_source_layers": [0, 1]})
+    config.dtype = config.text_config.dtype = config.vision_config.dtype = torch.bfloat16
+    path = tmp_path / "config.json"
+    path.write_text(config.to_json_string())
+    compact_saved_config(SimpleNamespace(config=config), path)
+    saved = json.loads(path.read_text())
+    text = saved["text_config"]
+    assert "qk_head_dim" not in text
+    assert "no_rope_layer_interval" not in text
+    assert "dtype" not in text and "dtype" not in saved["vision_config"]
+    assert saved["dtype"] == "bfloat16"
+    assert text["head_dim"] == 16 and text["no_rope_layers"] == [1, 0]
+    restored = MistralLarge4Config.from_dict(saved)
+    assert restored.text_config.qk_head_dim == 32
+    assert restored.text_config.head_dim == 16
+    assert restored.text_config.no_rope_layers == [1, 0]

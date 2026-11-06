@@ -50,6 +50,36 @@ def validate_saved_config(model, path):
     validate_model(model, config=restored)
 
 
+def compact_saved_config(model, path):
+    """Omit redundant derived fields and inherited nested dtype metadata.
+
+    Keep explicit dimensions and layer patterns. A derived/default field is
+    removed only when rebuilding the config reproduces the same effective value.
+    """
+    saved = json.loads(path.read_text())
+
+    def compact(values, config, inherited_dtype=None):
+        dtype = values.get("dtype", inherited_dtype)
+        if inherited_dtype is not None and values.get("dtype") == inherited_dtype:
+            values.pop("dtype", None)
+        for key in ("qk_head_dim", "no_rope_layer_interval"):
+            if key not in values:
+                continue
+            if key == "no_rope_layer_interval" and not isinstance(values.get("no_rope_layers"), list):
+                continue
+            candidate = {name: value for name, value in values.items() if name != key}
+            restored = type(config).from_dict(candidate)
+            if getattr(restored, key, None) == values[key]:
+                values.pop(key)
+        for key, value in values.items():
+            subconfig = getattr(config, key, None)
+            if isinstance(value, dict) and hasattr(subconfig, "to_dict"):
+                compact(value, subconfig, dtype)
+
+    compact(saved, model.config)
+    path.write_text(json.dumps(saved, indent=2) + "\n")
+
+
 def config_findings(config, prefix="model"):
     findings = []
     rope, nope = config.get("qk_rope_head_dim"), config.get("qk_nope_head_dim")

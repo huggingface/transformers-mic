@@ -1086,10 +1086,12 @@ def test_save_updates_nested_dtype_after_cast_and_round_trips(tmp_path, dtype):
     saved = json.loads((out / "config.json").read_text())
     expected = str(dtype).removeprefix("torch.")
     assert saved["dtype"] == expected
-    assert saved["text_config"]["dtype"] == expected
-    assert saved["vision_config"]["dtype"] == expected
+    assert "dtype" not in saved["text_config"]
+    assert "dtype" not in saved["vision_config"]
     reloaded = AutoConfig.from_pretrained(out)
-    assert reloaded.dtype == reloaded.text_config.dtype == reloaded.vision_config.dtype == dtype
+    assert reloaded.dtype == dtype
+    loaded = type(model).from_pretrained(out, dtype="auto")
+    assert loaded.dtype == loaded.config.text_config.dtype == loaded.config.vision_config.dtype == dtype
     assert all(t.dtype == dtype for t in safetensors.load_file(out / "model.safetensors").values() if t.is_floating_point())
 
 

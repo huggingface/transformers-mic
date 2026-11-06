@@ -7,7 +7,8 @@ indexers and an `index_topk` below the test sequence length). A core maintainer'
 caveat: when a model was added quickly the tester can be thin or unrepresentative, so
 these findings are advisory, never a source of fixture values.
 
-The tester file is read and parsed, never imported or run.
+A static `get_small_config_defaults()` can expose a literal dictionary shared with
+the tester constructor. The tester file is read and parsed, never imported or run.
 """
 
 import ast
@@ -71,20 +72,31 @@ def literal(node):
 
 
 def values(code):
-    """Literal config values the testers' __init__ set: defaults, kwargs.setdefault, self.x = ..."""
+    """Read static small-config defaults and legacy constructor literals without executing code."""
     found = {}
     for cls in ast.walk(ast.parse(code)):
         if not (isinstance(cls, ast.ClassDef) and "Tester" in cls.name):
             continue
+        defaults = {}
+        for method in cls.body:
+            if not isinstance(method, ast.FunctionDef) or method.name != "get_small_config_defaults":
+                continue
+            if not any(isinstance(d, ast.Name) and d.id == "staticmethod" for d in method.decorator_list):
+                continue
+            body = method.body
+            if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant) and isinstance(body[0].value.value, str):
+                body = body[1:]
+            if len(body) == 1 and isinstance(body[0], ast.Return):
+                data = literal(body[0].value)
+                if isinstance(data, dict) and all(isinstance(key, str) for key in data):
+                    defaults = data
         init = next((f for f in cls.body if isinstance(f, ast.FunctionDef) and f.name == "__init__"), None)
-        if init is None:
-            continue
-        args = init.args.args[-len(init.args.defaults):] if init.args.defaults else []
-        for arg, default in zip(args, init.args.defaults):
+        args = init.args.args[-len(init.args.defaults):] if init and init.args.defaults else []
+        for arg, default in zip(args, init.args.defaults if init else []):
             value = literal(default)
             if value is not None:
                 found.setdefault(arg.arg, value)
-        for node in ast.walk(init):
+        for node in ast.walk(init) if init else []:
             if (
                 isinstance(node, ast.Call)
                 and isinstance(node.func, ast.Attribute)
@@ -101,6 +113,8 @@ def values(code):
                     value = literal(node.value)
                     if value is not None:
                         found.setdefault(target.attr, value)
+        for key, value in defaults.items():
+            found.setdefault(key, value)
     return found
 
 
