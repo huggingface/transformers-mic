@@ -333,9 +333,9 @@
    "job": "https://github.com/huggingface/transformers/actions/runs/42150076346/job/127672207497",
    "model": "phi4_multimodal",
    "pr": "49976",
-   "run": "",
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42192062856",
    "tests": 4,
-   "verdict": "pending"
+   "verdict": "missed"
   },
   {
    "date": "2026-11-05",
@@ -1432,14 +1432,14 @@
   "broken": 1,
   "caught": 8,
   "duplicate": 2,
-  "missed": 6,
+  "missed": 7,
   "model-added": 4,
   "no-code-change": 0,
   "not-a-regression": 2,
   "not-covered": 218,
   "not-reproduced": 6,
   "out-of-scope": 110,
-  "pending": 1,
+  "pending": 0,
   "unrelated-culprit": 19
  },
  "window": [

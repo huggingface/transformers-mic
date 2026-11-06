@@ -1273,6 +1273,18 @@
   "verdict": "model-added",
   "version": 7
  },
+ "49976#phi4_multimodal": {
+  "bad": "fa421d61e569c4cad3e7e988b199d7222dde0435",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/Phi-4-multimodal-instruct-mic"
+  ],
+  "failures": [],
+  "parent": "f262c71703eb138381d65ced86b3aaa496be0196",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42192062856",
+  "verdict": "missed",
+  "version": 7
+ },
  "49976#qianfan_ocr": {
   "verdict": "not-covered",
   "version": 7
