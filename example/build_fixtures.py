@@ -701,6 +701,8 @@ def numeric_health(cls, folder, batch, captured=None):
     slightly; an overflow is not that small); NaN never is. Unscaled float16
     gradients are reported but do not gate: float16 training needs a loss scaler.
     """
+    config_path = Path(folder) / "config.json"
+    source_quantization = json.loads(config_path.read_text()).get("quantization_config") if config_path.exists() else None
     rows, structural = {}, {}
     for name in DTYPES:
         dtype = getattr(torch, name)
@@ -708,7 +710,9 @@ def numeric_health(cls, folder, batch, captured=None):
         try:
             loaded = cls.from_pretrained(folder, dtype=dtype)
             quantizer = getattr(loaded, "hf_quantizer", None)
-            if quantizer and getattr(quantizer.quantization_config, "dequantize", False):
+            if (source_quantization and not getattr(loaded, "is_quantized", False)) or (
+                quantizer and getattr(quantizer.quantization_config, "dequantize", False)
+            ):
                 # FP8 dequantization may retain the checkpoint dtype on converted
                 # projections. Test the requested compute dtype explicitly, and
                 # record this distinction from raw from_pretrained behavior.
