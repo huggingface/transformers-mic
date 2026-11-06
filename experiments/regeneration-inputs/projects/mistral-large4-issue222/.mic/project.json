@@ -1,0 +1,8 @@
+{
+  "model": "mistralai/Mistral-Large-4-1T-A52B",
+  "contract": "mistral-large-4-issue222",
+  "weights": "auto",
+  "readable_output": false,
+  "origin": "llm",
+  "validated": false
+}

@@ -1,0 +1,38 @@
+{
+  "framework": "transformers",
+  "environment": {
+    "python": "3.11",
+    "torch": "2.14.0",
+    "torchvision": "0.29.1",
+    "torchaudio": "2.11.0",
+    "tokenizers": "0.23.3",
+    "numpy": "2.3.5",
+    "pillow": "12.3.0",
+    "accelerate": "1.15.0",
+    "safetensors": "0.8.0",
+    "huggingface-hub": "2.3.0",
+    "sentencepiece": "0.2.2",
+    "protobuf": "7.36.2",
+    "librosa": "0.11.0",
+    "soundfile": "0.14.0",
+    "scipy": "1.17.1"
+  },
+  "contracts": {
+    "mistral-large-4-issue222": {
+      "integration": {
+        "repo": "huggingface-mic/mistral-large-4-issue222-mic",
+        "revision": "unpublished",
+        "path": "../../../hub/mistral-large-4-issue222-mic"
+      },
+      "fixtures": {
+        "huggingface-mic/mistral-large-4-issue222-mic": {
+          "revision": "unpublished",
+          "path": "../../../hub/mistral-large-4-issue222-mic"
+        }
+      },
+      "checkpoints": {
+        "mistralai/Mistral-Large-4-1T-A52B": "af26e7869af601441d5cdf75a1272469ddc3d059"
+      }
+    }
+  }
+}

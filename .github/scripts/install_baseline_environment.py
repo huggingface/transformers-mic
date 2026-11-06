@@ -19,7 +19,9 @@ def main():
         raise ValueError("Immutable revisions required")
     environments = []
     workspace = cloud_inputs.from_env()
-    if workspace:
+    if local_lock := os.environ.get("MIC_BASELINE_LOCAL_LOCK"):
+        environments.append(read(Path(local_lock))["environment"])
+    elif workspace:
         environments.append(cloud_inputs.lock(workspace)["environment"])
     else:
         for name in os.environ["FLEETS"].split(","):

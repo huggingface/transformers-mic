@@ -34,6 +34,12 @@ on:
         type: string
         default: ""
 
+      local_workspace:
+        description: "Reviewed source workspace in this Git checkout; build and measure via Actions artifacts only"
+        required: false
+        type: string
+        default: ""
+
       workspace_repo:
         required: false
         type: string
@@ -52,6 +58,7 @@ concurrency:
 
 jobs:
   validate:
+    if: inputs.local_workspace == ''
     runs-on: ubuntu-latest
     outputs:
       cpu_image: ${{ steps.images.outputs.cpu_image }}
@@ -265,3 +272,114 @@ jobs:
           name: mic-baselines-publication
           path: publication/publication.json
           if-no-files-found: error
+
+  build-local:
+    if: inputs.local_workspace != ''
+    runs-on:
+      group: ${{ vars.MIC_CPU_BASELINE_RUNNER || 'aws-m8i-l-cache' }}
+    timeout-minutes: 120
+    container:
+      image: ${{ vars.MIC_CPU_BASELINE_IMAGE || 'huggingface/transformers-torch-light' }}
+      options: --shm-size=16gb
+    env:
+      HF_TOKEN: ${{ secrets.HF_HUB_READ_TOKEN }}
+      HF_HOME: /tmp/mic-hf
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      PYTHONUNBUFFERED: "1"
+      CUDA_VISIBLE_DEVICES: ""
+      OMP_NUM_THREADS: "4"
+      MIC_TRANSFORMERS_CHECKOUT: /tmp/mic-transformers
+      TRANSFORMERS_SHA: ${{ inputs.transformers_sha }}
+      FLEET_REVISION: ${{ inputs.fleet_revision }}
+      FLEETS: prototypes
+      MIC_BASELINE_LOCAL_LOCK: out/workspace/example/transformers/tests/contracts/fleet.lock
+      SOURCE_WORKSPACE: ${{ inputs.local_workspace }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ inputs.mic_sha }}
+          persist-credentials: false
+      - name: Copy reviewed source workspace
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, shutil
+          root = pathlib.Path.cwd().resolve()
+          source = (root / os.environ['SOURCE_WORKSPACE']).resolve()
+          assert source.is_relative_to(root / 'experiments'), 'Expected a checked-in experiment workspace'
+          assert (source / '.mic/project.json').is_file()
+          shutil.copytree(source, root / 'out/workspace')
+          PY
+      - name: Install pinned code in the CPU image
+        run: |
+          python3 -m pip install .
+          python3 .github/scripts/install_baseline_environment.py
+      - name: Build and gate the fixture
+        run: python3 -m transformers_mic.cli --workspace out/workspace build
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: mic-local-workspace
+          path: out/workspace
+          include-hidden-files: true
+          retention-days: 14
+
+  measure-local:
+    needs: build-local
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - profile: cpu
+            runner: ${{ vars.MIC_CPU_BASELINE_RUNNER || 'aws-m8i-l-cache' }}
+          - profile: cuda
+            runner: ${{ vars.MIC_GPU_BASELINE_RUNNER || 'aws-g5-4xlarge-cache' }}
+    runs-on:
+      group: ${{ matrix.runner }}
+    timeout-minutes: 120
+    container:
+      image: ${{ matrix.profile == 'cpu' && (vars.MIC_CPU_BASELINE_IMAGE || 'huggingface/transformers-torch-light') || (vars.MIC_GPU_BASELINE_IMAGE || 'huggingface/transformers-all-latest-gpu') }}
+      options: ${{ matrix.profile == 'cuda' && '--gpus all --shm-size=16gb' || '--shm-size=16gb' }}
+    env:
+      HF_TOKEN: ${{ secrets.HF_HUB_READ_TOKEN }}
+      HF_HOME: /tmp/mic-hf
+      HF_HUB_DISABLE_PROGRESS_BARS: "1"
+      PYTHONUNBUFFERED: "1"
+      CUDA_VISIBLE_DEVICES: ${{ matrix.profile == 'cuda' && '0' || '' }}
+      CUBLAS_WORKSPACE_CONFIG: ":4096:8"
+      OMP_NUM_THREADS: "4"
+      MKL_NUM_THREADS: "4"
+      OPENBLAS_NUM_THREADS: "4"
+      MIC_TRANSFORMERS_CHECKOUT: /tmp/mic-transformers
+      TRANSFORMERS_SHA: ${{ inputs.transformers_sha }}
+      FLEET_REVISION: ${{ inputs.fleet_revision }}
+      FLEETS: prototypes
+      MIC_BASELINE_LOCAL_LOCK: out/workspace/example/transformers/tests/contracts/fleet.lock
+      PROFILE: ${{ matrix.profile }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ inputs.mic_sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: mic-local-workspace
+          path: out/workspace
+      - name: Install pinned code in the runner image
+        run: |
+          python3 -m pip install .
+          python3 .github/scripts/install_baseline_environment.py
+      - name: Record and independently check every fixture variant
+        run: python3 .github/scripts/verify_workspace_baselines.py out/workspace --profile "$PROFILE"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: mic-local-baselines-${{ matrix.profile }}
+          path: out/workspace
+          include-hidden-files: true
+          retention-days: 14
