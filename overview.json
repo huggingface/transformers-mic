@@ -1,39 +1,85 @@
 {
- "awaiting_verdict": 10,
+ "awaiting_verdict": 11,
  "block_merges": {
   "ready": false,
   "unmet": [
    "14 of 30 days observed",
-   "justified blocks 0 (bar \u2265 1)",
-   "unresolved blocks 1 of 1 (bar \u2264 10%)",
    "re-baselined contracts 31.5/week (bar \u2264 10)"
   ]
  },
  "caught": {
   "fixed_by_push": 7,
   "labelled_real_bug": 0,
-  "merged_then_main_failed": 0,
+  "merged_then_main_failed": 1,
   "real_checkpoint": 1
  },
  "drafts_per_day": 2,
  "false_alarms": {
-  "prs_not_their_fault": 104,
-  "prs_with_failure": 125
+  "prs_not_their_fault": 115,
+  "prs_with_failure": 139
  },
  "missed": {
-  "awaiting_verdict": 16,
-  "not_covered": 17,
-  "real_checkpoint": 16
+  "awaiting_verdict": 17,
+  "not_covered": 18,
+  "real_checkpoint": 17
  },
  "next": [
+  {
+   "checkpoint": "eustlb/pocket-tts",
+   "draft": "queued",
+   "model": "pocket_tts",
+   "next_batch": false,
+   "other": 0,
+   "real_checkpoint": 2,
+   "regressions": 2,
+   "run": "",
+   "shrink": "",
+   "shrinkable": true
+  },
+  {
+   "checkpoint": "gradium/phonon-voices",
+   "draft": "queued",
+   "model": "gradium_phonon_tts",
+   "next_batch": false,
+   "other": 1,
+   "real_checkpoint": 1,
+   "regressions": 2,
+   "run": "",
+   "shrink": "",
+   "shrinkable": true
+  },
+  {
+   "checkpoint": "shi-labs/oneformer_ade20k_swin_tiny",
+   "draft": "",
+   "model": "oneformer",
+   "next_batch": true,
+   "other": 0,
+   "real_checkpoint": 1,
+   "regressions": 1,
+   "run": "",
+   "shrink": "",
+   "shrinkable": true
+  },
+  {
+   "checkpoint": "bairongz/QianfanOCR",
+   "draft": "",
+   "model": "qianfan_ocr",
+   "next_batch": true,
+   "other": 0,
+   "real_checkpoint": 1,
+   "regressions": 1,
+   "run": "",
+   "shrink": "",
+   "shrinkable": true
+  },
   {
    "checkpoint": "vidore/colpali-v1.2-hf",
    "draft": "failure",
    "model": "colpali",
    "next_batch": false,
-   "other": 3,
+   "other": 4,
    "real_checkpoint": 0,
-   "regressions": 3,
+   "regressions": 4,
    "run": "https://github.com/huggingface/transformers-mic/actions/runs/41994158679",
    "shrink": "",
    "shrinkable": true
@@ -63,6 +109,30 @@
    "shrinkable": true
   },
   {
+   "checkpoint": "nvidia/canary-1b-v2",
+   "draft": "",
+   "model": "canary",
+   "next_batch": false,
+   "other": 1,
+   "real_checkpoint": 0,
+   "regressions": 1,
+   "run": "",
+   "shrink": "",
+   "shrinkable": true
+  },
+  {
+   "checkpoint": "CohereLabs/cohere-transcribe-03-2026",
+   "draft": "",
+   "model": "cohere_asr",
+   "next_batch": false,
+   "other": 1,
+   "real_checkpoint": 0,
+   "regressions": 1,
+   "run": "",
+   "shrink": "",
+   "shrinkable": true
+  },
+  {
    "checkpoint": "nvidia/Cosmos3-Edge",
    "draft": "failure",
    "model": "cosmos3_edge",
@@ -71,6 +141,18 @@
    "real_checkpoint": 0,
    "regressions": 1,
    "run": "https://github.com/huggingface/transformers-mic/actions/runs/41964667193",
+   "shrink": "",
+   "shrinkable": true
+  },
+  {
+   "checkpoint": "baidu/ERNIE-4.5-21B-A3B-PT",
+   "draft": "",
+   "model": "ernie4_5_moe",
+   "next_batch": false,
+   "other": 1,
+   "real_checkpoint": 0,
+   "regressions": 1,
+   "run": "",
    "shrink": "",
    "shrinkable": true
   },
@@ -87,14 +169,26 @@
    "shrinkable": true
   },
   {
-   "checkpoint": "meta-models/Muse-Spark-Open-816B-A42B",
-   "draft": "failure",
+   "checkpoint": "microsoft/layoutlmv3-base",
+   "draft": "",
+   "model": "layoutlmv3",
+   "next_batch": false,
+   "other": 1,
+   "real_checkpoint": 0,
+   "regressions": 1,
+   "run": "",
+   "shrink": "",
+   "shrinkable": true
+  },
+  {
+   "checkpoint": null,
+   "draft": "not draftable",
    "model": "muse_spark",
    "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42019121893",
+   "run": "",
    "shrink": "",
    "shrinkable": true
   },
@@ -102,7 +196,7 @@
    "checkpoint": "RUCAIBox/mvp",
    "draft": "",
    "model": "mvp",
-   "next_batch": true,
+   "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -114,7 +208,7 @@
    "checkpoint": "thhaus/nemotron3-8b",
    "draft": "",
    "model": "nemotron",
-   "next_batch": true,
+   "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -183,36 +277,36 @@
    "shrinkable": true
   },
   {
+   "checkpoint": "facebook/s2t-small-librispeech-asr",
+   "draft": "",
+   "model": "speech_to_text",
+   "next_batch": false,
+   "other": 1,
+   "real_checkpoint": 0,
+   "regressions": 1,
+   "run": "",
+   "shrink": "",
+   "shrinkable": true
+  },
+  {
+   "checkpoint": "google/t5gemma-2-270m-270m",
+   "draft": "",
+   "model": "t5gemma2",
+   "next_batch": false,
+   "other": 1,
+   "real_checkpoint": 0,
+   "regressions": 1,
+   "run": "",
+   "shrink": "",
+   "shrinkable": true
+  },
+  {
    "checkpoint": "mistralai/Mamba-Codestral-7B-v0.1",
    "draft": "not draftable",
    "model": "mamba2",
    "next_batch": false,
    "other": 0,
    "real_checkpoint": 2,
-   "regressions": 2,
-   "run": "",
-   "shrink": "",
-   "shrinkable": false
-  },
-  {
-   "checkpoint": "eustlb/pocket-tts",
-   "draft": "not draftable",
-   "model": "pocket_tts",
-   "next_batch": false,
-   "other": 0,
-   "real_checkpoint": 2,
-   "regressions": 2,
-   "run": "",
-   "shrink": "",
-   "shrinkable": false
-  },
-  {
-   "checkpoint": "gradium/phonon-voices",
-   "draft": "not draftable",
-   "model": "gradium_phonon_tts",
-   "next_batch": false,
-   "other": 1,
-   "real_checkpoint": 1,
    "regressions": 2,
    "run": "",
    "shrink": "",
@@ -229,105 +323,20 @@
    "run": "",
    "shrink": "",
    "shrinkable": false
-  },
-  {
-   "checkpoint": "facebook/cwm",
-   "draft": "not draftable",
-   "model": "cwm",
-   "next_batch": false,
-   "other": 0,
-   "real_checkpoint": 1,
-   "regressions": 1,
-   "run": "",
-   "shrink": "",
-   "shrinkable": false
-  },
-  {
-   "checkpoint": "tue-mps/coco_panoptic_eomt_large_640",
-   "draft": "not draftable",
-   "model": "eomt",
-   "next_batch": false,
-   "other": 0,
-   "real_checkpoint": 1,
-   "regressions": 1,
-   "run": "",
-   "shrink": "",
-   "shrinkable": false
-  },
-  {
-   "checkpoint": "tue-mps/eomt-dinov3-coco-panoptic-large-640",
-   "draft": "not draftable",
-   "model": "eomt_dinov3",
-   "next_batch": false,
-   "other": 0,
-   "real_checkpoint": 1,
-   "regressions": 1,
-   "run": "",
-   "shrink": "",
-   "shrinkable": false
-  },
-  {
-   "checkpoint": "ibm-granite/granite-speech-5.0-470m-turboctc",
-   "draft": "not draftable",
-   "model": "granite_speech5",
-   "next_batch": false,
-   "other": 0,
-   "real_checkpoint": 1,
-   "regressions": 1,
-   "run": "",
-   "shrink": "",
-   "shrinkable": false
-  },
-  {
-   "checkpoint": "ibm-granite/granite-speech-4.1-2b-plus",
-   "draft": "not draftable",
-   "model": "granite_speech_plus",
-   "next_batch": false,
-   "other": 0,
-   "real_checkpoint": 1,
-   "regressions": 1,
-   "run": "",
-   "shrink": "",
-   "shrinkable": false
-  },
-  {
-   "checkpoint": "shi-labs/oneformer_ade20k_swin_tiny",
-   "draft": "not draftable",
-   "model": "oneformer",
-   "next_batch": false,
-   "other": 0,
-   "real_checkpoint": 1,
-   "regressions": 1,
-   "run": "",
-   "shrink": "",
-   "shrinkable": false
-  },
-  {
-   "checkpoint": "facebook/w2v-bert-2.0",
-   "draft": "not draftable",
-   "model": "wav2vec2_bert",
-   "next_batch": false,
-   "other": 3,
-   "real_checkpoint": 0,
-   "regressions": 3,
-   "run": "",
-   "shrink": "",
-   "shrinkable": false
-  },
-  {
-   "checkpoint": "facebook/xmod-base",
-   "draft": "not draftable",
-   "model": "xmod",
-   "next_batch": false,
-   "other": 3,
-   "real_checkpoint": 0,
-   "regressions": 3,
-   "run": "",
-   "shrink": "",
-   "shrinkable": false
   }
  ],
  "regressions": [
+  {
+   "date": "2026-11-06",
+   "detail": "",
+   "integration": true,
+   "job": "https://github.com/huggingface/transformers/actions/runs/42150076346/job/127672207497",
+   "model": "phi4_multimodal",
+   "pr": "49976",
+   "run": "",
+   "tests": 4,
+   "verdict": "pending"
+  },
   {
    "date": "2026-11-05",
    "detail": "17 commits in range; ",
@@ -849,6 +858,17 @@
    "date": "2026-10-15",
    "detail": "",
    "integration": false,
+   "job": "",
+   "model": "minicpm3",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-10-15",
+   "detail": "",
+   "integration": false,
    "job": "https://github.com/huggingface/transformers/actions/runs/38671843837/job/116221192777",
    "model": "kolibri1",
    "pr": "47747",
@@ -862,6 +882,17 @@
    "integration": false,
    "job": "",
    "model": "kolibri1",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-10-14",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "hy_v3",
    "pr": null,
    "run": "",
    "tests": 1,
@@ -906,6 +937,17 @@
    "integration": false,
    "job": "",
    "model": "ernie",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-10-10",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "minimax_m2",
    "pr": null,
    "run": "",
    "tests": 1,
@@ -1383,50 +1425,6 @@
    "run": "",
    "tests": 4,
    "verdict": "out-of-scope"
-  },
-  {
-   "date": "2026-08-04",
-   "detail": "",
-   "integration": false,
-   "job": "https://github.com/huggingface/transformers/actions/runs/30874774683/job/91885748917",
-   "model": "olmo3",
-   "pr": "47243",
-   "run": "",
-   "tests": 2,
-   "verdict": "out-of-scope"
-  },
-  {
-   "date": "2026-08-04",
-   "detail": "",
-   "integration": false,
-   "job": "https://github.com/huggingface/transformers/actions/runs/30874774683/job/91885748124",
-   "model": "nemotron_h",
-   "pr": "47243",
-   "run": "",
-   "tests": 2,
-   "verdict": "out-of-scope"
-  },
-  {
-   "date": "2026-08-04",
-   "detail": "",
-   "integration": false,
-   "job": "https://github.com/huggingface/transformers/actions/runs/30874774683/job/91885746115",
-   "model": "mllama",
-   "pr": "47243",
-   "run": "",
-   "tests": 2,
-   "verdict": "out-of-scope"
-  },
-  {
-   "date": "2026-08-04",
-   "detail": "",
-   "integration": false,
-   "job": "https://github.com/huggingface/transformers/actions/runs/30874774683/job/91885745602",
-   "model": "minimax_m3_vl",
-   "pr": "47243",
-   "run": "",
-   "tests": 2,
-   "verdict": "out-of-scope"
   }
  ],
  "replay": {
@@ -1438,14 +1436,14 @@
   "model-added": 4,
   "no-code-change": 0,
   "not-a-regression": 2,
-  "not-covered": 214,
+  "not-covered": 218,
   "not-reproduced": 6,
-  "out-of-scope": 107,
-  "pending": 0,
+  "out-of-scope": 110,
+  "pending": 1,
   "unrelated-culprit": 19
  },
  "window": [
   "2026-10-20",
-  "2026-11-05"
+  "2026-11-06"
  ]
 }

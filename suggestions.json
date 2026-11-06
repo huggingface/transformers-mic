@@ -202,7 +202,19 @@
     "test": "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids"
    },
    {
+    "date": "2026-10-15",
+    "gpu_only": true,
+    "integration": false,
+    "test": "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids"
+   },
+   {
     "date": "2026-10-08",
+    "gpu_only": true,
+    "integration": false,
+    "test": "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids_and_fa_kwargs"
+   },
+   {
+    "date": "2026-10-15",
     "gpu_only": true,
     "integration": false,
     "test": "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids_and_fa_kwargs"
@@ -240,6 +252,32 @@
     "gpu_only": false,
     "integration": true,
     "test": "tests/models/mm_grounding_dino/test_modeling_mm_grounding_dino.py::MMGroundingDinoModelIntegrationTests::test_mm_grounding_dino_loss"
+   }
+  ],
+  "phi4_multimodal": [
+   {
+    "date": "2026-11-06",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/phi4_multimodal/test_modeling_phi4_multimodal.py::Phi4MultimodalIntegrationTest::test_audio_text_generation"
+   },
+   {
+    "date": "2026-11-06",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/phi4_multimodal/test_modeling_phi4_multimodal.py::Phi4MultimodalIntegrationTest::test_multi_image_vision_text_generation"
+   },
+   {
+    "date": "2026-11-06",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/phi4_multimodal/test_modeling_phi4_multimodal.py::Phi4MultimodalIntegrationTest::test_text_only_generation"
+   },
+   {
+    "date": "2026-11-06",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/phi4_multimodal/test_modeling_phi4_multimodal.py::Phi4MultimodalIntegrationTest::test_vision_text_generation"
    }
   ],
   "qwen3_asr": [
@@ -287,11 +325,68 @@
  },
  "new": [
   {
+   "checkpoint": "eustlb/pocket-tts",
+   "checkpoint_source": "failing test",
+   "integration": 2,
+   "model": "pocket_tts",
+   "other": 0,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_onnx_export_generate_dynamic",
+    "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_onnx_export_generate_dynamic_static_cache",
+    "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_torch_export_generate_dynamic",
+    "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_torch_export_generate_dynamic_static_cache",
+    "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSIntegrationTest::test_drifting"
+   ]
+  },
+  {
+   "checkpoint": "gradium/phonon-voices",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "gradium_phonon_tts",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_onnx_export_generate_dynamic",
+    "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_onnx_export_generate_dynamic_static_cache",
+    "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_torch_export_generate_dynamic",
+    "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_torch_export_generate_dynamic_static_cache",
+    "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSIntegrationTest::test_batch"
+   ]
+  },
+  {
+   "checkpoint": "shi-labs/oneformer_ade20k_swin_tiny",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "oneformer",
+   "other": 0,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_no_head",
+    "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_universal_segmentation_head"
+   ]
+  },
+  {
+   "checkpoint": "bairongz/QianfanOCR",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "qianfan_ocr",
+   "other": 0,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/qianfan_ocr/test_modeling_qianfan_ocr.py::QianfanOCRIntegrationTest::test_model_integration_batched_generate",
+    "tests/models/qianfan_ocr/test_modeling_qianfan_ocr.py::QianfanOCRIntegrationTest::test_model_integration_forward",
+    "tests/models/qianfan_ocr/test_modeling_qianfan_ocr.py::QianfanOCRIntegrationTest::test_model_integration_generate",
+    "tests/models/qianfan_ocr/test_processing_qianfan_ocr.py::QianfanOCRProcessorTest::test_apply_chat_template_assistant_mask",
+    "tests/models/qianfan_ocr/test_processing_qianfan_ocr.py::QianfanOCRProcessorTest::test_apply_chat_template_image_0"
+   ]
+  },
+  {
    "checkpoint": "vidore/colpali-v1.2-hf",
    "checkpoint_source": "failing test",
    "integration": 0,
    "model": "colpali",
-   "other": 3,
+   "other": 4,
    "shrinkable": true,
    "tests": [
     "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_flex_attention_with_grads",
@@ -324,6 +419,34 @@
    ]
   },
   {
+   "checkpoint": "nvidia/canary-1b-v2",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "canary",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/canary/test_modeling_canary.py::CanaryModelTest::test_torch_export_generate_dynamic",
+    "tests/models/canary/test_modeling_canary.py::CanaryModelTest::test_torch_export_generate_dynamic_static_cache",
+    "tests/models/canary/test_modeling_canary.py::CanaryModelTest::test_torch_export_generate_static",
+    "tests/models/canary/test_modeling_canary.py::CanaryModelTest::test_torch_export_generate_static_static_cache"
+   ]
+  },
+  {
+   "checkpoint": "CohereLabs/cohere-transcribe-03-2026",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "cohere_asr",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_dynamic",
+    "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_dynamic_static_cache",
+    "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_static",
+    "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_static_static_cache"
+   ]
+  },
+  {
    "checkpoint": "nvidia/Cosmos3-Edge",
    "checkpoint_source": "shrink sweep",
    "integration": 0,
@@ -332,6 +455,17 @@
    "shrinkable": true,
    "tests": [
     "tests/models/cosmos3_edge/test_image_processing_cosmos3_edge.py::Cosmos3EdgeImageProcessingTest::test_backends_equivalence_batched"
+   ]
+  },
+  {
+   "checkpoint": "baidu/ERNIE-4.5-21B-A3B-PT",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "ernie4_5_moe",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/ernie4_5_moe/test_modeling_ernie4_5_moe.py::Ernie4_5_MoeModelTest::test_flash_attn_2_equivalence"
    ]
   },
   {
@@ -347,8 +481,19 @@
    ]
   },
   {
-   "checkpoint": "meta-models/Muse-Spark-Open-816B-A42B",
+   "checkpoint": "microsoft/layoutlmv3-base",
    "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "layoutlmv3",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/layoutlmv3/test_modeling_layoutlmv3.py::LayoutLMv3ModelTest::test_inputs_embeds_matches_input_ids"
+   ]
+  },
+  {
+   "checkpoint": null,
+   "checkpoint_source": null,
    "integration": 0,
    "model": "muse_spark",
    "other": 1,
@@ -441,6 +586,32 @@
    ]
   },
   {
+   "checkpoint": "facebook/s2t-small-librispeech-asr",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "speech_to_text",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/speech_to_text/test_modeling_speech_to_text.py::Speech2TextModelTest::test_torch_export_generate_dynamic",
+    "tests/models/speech_to_text/test_modeling_speech_to_text.py::Speech2TextModelTest::test_torch_export_generate_static"
+   ]
+  },
+  {
+   "checkpoint": "google/t5gemma-2-270m-270m",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "t5gemma2",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/t5gemma2/test_modeling_t5gemma2.py::T5Gemma2ModelTest::test_torch_export_generate_dynamic",
+    "tests/models/t5gemma2/test_modeling_t5gemma2.py::T5Gemma2ModelTest::test_torch_export_generate_dynamic_static_cache",
+    "tests/models/t5gemma2/test_modeling_t5gemma2.py::T5Gemma2ModelTest::test_torch_export_generate_static",
+    "tests/models/t5gemma2/test_modeling_t5gemma2.py::T5Gemma2ModelTest::test_torch_export_generate_static_static_cache"
+   ]
+  },
+  {
    "checkpoint": "mistralai/Mamba-Codestral-7B-v0.1",
    "checkpoint_source": "failing test",
    "integration": 2,
@@ -449,36 +620,6 @@
    "shrinkable": false,
    "tests": [
     "tests/models/mamba2/test_modeling_mamba2.py::Mamba2IntegrationTest::test_mamba2_mixer_train_vs_eval_equivalence"
-   ]
-  },
-  {
-   "checkpoint": "eustlb/pocket-tts",
-   "checkpoint_source": "failing test",
-   "integration": 2,
-   "model": "pocket_tts",
-   "other": 0,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_onnx_export_generate_dynamic",
-    "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_onnx_export_generate_dynamic_static_cache",
-    "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_torch_export_generate_dynamic",
-    "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSModelTest::test_torch_export_generate_dynamic_static_cache",
-    "tests/models/pocket_tts/test_modeling_pocket_tts.py::PocketTTSIntegrationTest::test_drifting"
-   ]
-  },
-  {
-   "checkpoint": "gradium/phonon-voices",
-   "checkpoint_source": "failing test",
-   "integration": 1,
-   "model": "gradium_phonon_tts",
-   "other": 1,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_onnx_export_generate_dynamic",
-    "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_onnx_export_generate_dynamic_static_cache",
-    "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_torch_export_generate_dynamic",
-    "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSModelTest::test_torch_export_generate_dynamic_static_cache",
-    "tests/models/gradium_phonon_tts/test_modeling_gradium_phonon_tts.py::GradiumPhononTTSIntegrationTest::test_batch"
    ]
   },
   {
@@ -548,18 +689,6 @@
    "tests": [
     "tests/models/granite_speech_plus/test_modeling_granite_speech_plus.py::GraniteSpeechPlusForConditionalGenerationIntegrationTest::test_small_model_integration_test_batch",
     "tests/models/granite_speech_plus/test_modeling_granite_speech_plus.py::GraniteSpeechPlusForConditionalGenerationIntegrationTest::test_small_model_integration_test_single"
-   ]
-  },
-  {
-   "checkpoint": "shi-labs/oneformer_ade20k_swin_tiny",
-   "checkpoint_source": "failing test",
-   "integration": 1,
-   "model": "oneformer",
-   "other": 0,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_no_head",
-    "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_universal_segmentation_head"
    ]
   },
   {
@@ -698,34 +827,6 @@
    ]
   },
   {
-   "checkpoint": "nvidia/canary-1b-v2",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "canary",
-   "other": 1,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/canary/test_modeling_canary.py::CanaryModelTest::test_torch_export_generate_dynamic",
-    "tests/models/canary/test_modeling_canary.py::CanaryModelTest::test_torch_export_generate_dynamic_static_cache",
-    "tests/models/canary/test_modeling_canary.py::CanaryModelTest::test_torch_export_generate_static",
-    "tests/models/canary/test_modeling_canary.py::CanaryModelTest::test_torch_export_generate_static_static_cache"
-   ]
-  },
-  {
-   "checkpoint": "CohereLabs/cohere-transcribe-03-2026",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "cohere_asr",
-   "other": 1,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_dynamic",
-    "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_dynamic_static_cache",
-    "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_static",
-    "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_static_static_cache"
-   ]
-  },
-  {
    "checkpoint": "paultltc/colmodernvbert_hf",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -762,14 +863,14 @@
    ]
   },
   {
-   "checkpoint": "baidu/ERNIE-4.5-21B-A3B-PT",
+   "checkpoint": "ibm/PowerMoE-3b",
    "checkpoint_source": "failing test",
    "integration": 0,
-   "model": "ernie4_5_moe",
+   "model": "granitemoeshared",
    "other": 1,
    "shrinkable": false,
    "tests": [
-    "tests/models/ernie4_5_moe/test_modeling_ernie4_5_moe.py::Ernie4_5_MoeModelTest::test_flash_attn_2_equivalence"
+    "tests/models/granitemoeshared/test_modeling_granitemoeshared.py::GraniteMoeSharedModelTest::test_flash_attn_2_equivalence"
    ]
   },
   {
@@ -843,18 +944,6 @@
    ]
   },
   {
-   "checkpoint": "facebook/s2t-small-librispeech-asr",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "speech_to_text",
-   "other": 1,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/speech_to_text/test_modeling_speech_to_text.py::Speech2TextModelTest::test_torch_export_generate_dynamic",
-    "tests/models/speech_to_text/test_modeling_speech_to_text.py::Speech2TextModelTest::test_torch_export_generate_static"
-   ]
-  },
-  {
    "checkpoint": null,
    "checkpoint_source": null,
    "integration": 0,
@@ -867,20 +956,6 @@
     "tests/models/t5gemma/test_modeling_t5gemma.py::T5GemmaModelTest::test_torch_export_generate_static",
     "tests/models/t5gemma/test_modeling_t5gemma.py::T5GemmaModelTest::test_torch_export_generate_static_static_cache"
    ]
-  },
-  {
-   "checkpoint": "google/t5gemma-2-270m-270m",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "t5gemma2",
-   "other": 1,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/t5gemma2/test_modeling_t5gemma2.py::T5Gemma2ModelTest::test_torch_export_generate_dynamic",
-    "tests/models/t5gemma2/test_modeling_t5gemma2.py::T5Gemma2ModelTest::test_torch_export_generate_dynamic_static_cache",
-    "tests/models/t5gemma2/test_modeling_t5gemma2.py::T5Gemma2ModelTest::test_torch_export_generate_static",
-    "tests/models/t5gemma2/test_modeling_t5gemma2.py::T5Gemma2ModelTest::test_torch_export_generate_static_static_cache"
-   ]
   }
  ],
  "shared": {
@@ -888,6 +963,8 @@
    "axk1",
    "glm4",
    "granitemoe",
+   "hy_v3",
+   "minimax_m2",
    "mixtral"
   ],
   "test_flash_attn_2_inference_equivalence_right_padding": [

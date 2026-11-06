@@ -4977,6 +4977,122 @@
    "tests/models/minicpm_ocr/test_modeling_minicpm_ocr.py::MiniCPMOcrIntegrationTest::test_small_model_vision_generation_batch"
   ]
  },
+ "49976#phi4_multimodal": {
+  "bad_commit": "fa421d61e569c4cad3e7e988b199d7222dde0435",
+  "culprit_files": [
+   "src/transformers/models/colmodernvbert/processing_colmodernvbert.py",
+   "src/transformers/models/deepseek_ocr2/processing_deepseek_ocr2.py",
+   "src/transformers/models/embedding_gemma2/modular_embedding_gemma2.py",
+   "src/transformers/models/embedding_gemma2/processing_embedding_gemma2.py",
+   "src/transformers/models/florence2/modular_florence2.py",
+   "src/transformers/models/florence2/processing_florence2.py",
+   "src/transformers/models/gemma3/processing_gemma3.py",
+   "src/transformers/models/gemma3n/processing_gemma3n.py",
+   "src/transformers/models/gemma4/processing_gemma4.py",
+   "src/transformers/models/gemma4_unified/processing_gemma4_unified.py",
+   "src/transformers/models/got_ocr2/processing_got_ocr2.py",
+   "src/transformers/models/hunyuan_vl/processing_hunyuan_vl.py",
+   "src/transformers/models/idefics3/processing_idefics3.py",
+   "src/transformers/models/lfm2_vl/processing_lfm2_vl.py",
+   "src/transformers/models/llama4/processing_llama4.py",
+   "src/transformers/models/mllama/processing_mllama.py",
+   "src/transformers/models/phi4_multimodal/processing_phi4_multimodal.py",
+   "src/transformers/models/pocket_tts/processing_pocket_tts.py",
+   "src/transformers/models/smolvlm/processing_smolvlm.py",
+   "src/transformers/models/unlimited_ocr/processing_unlimited_ocr.py",
+   "src/transformers/processing_utils.py",
+   "tests/models/audioflamingo3/test_processing_audioflamingo3.py",
+   "tests/models/aya_vision/test_processing_aya_vision.py",
+   "tests/models/chameleon/test_processing_chameleon.py",
+   "tests/models/colpali/test_processing_colpali.py",
+   "tests/models/colqwen2/test_processing_colqwen2.py",
+   "tests/models/deepseek_ocr2/test_processing_deepseek_ocr2.py",
+   "tests/models/embedding_gemma2/test_processing_embedding_gemma2.py",
+   "tests/models/emu3/test_processing_emu3.py",
+   "tests/models/ernie4_5_vl_moe/test_processing_ernie4_5_vl_moe.py",
+   "tests/models/gemma3/test_processing_gemma3.py",
+   "tests/models/gemma3n/test_processing_gemma3n.py",
+   "tests/models/gemma4/test_processing_gemma4.py",
+   "tests/models/gemma4_unified/test_processing_gemma4_unified.py",
+   "tests/models/glm_image/test_processing_glm_image.py",
+   "tests/models/glmasr/test_processing_glmasr.py",
+   "tests/models/got_ocr2/test_processing_got_ocr2.py",
+   "tests/models/granite4_vision/test_processing_granite4_vision.py",
+   "tests/models/hunyuan_vl/test_processing_hunyuan_vl.py",
+   "tests/models/idefics3/test_processing_idefics3.py",
+   "tests/models/inkling/test_processing_inkling.py",
+   "tests/models/janus/test_processing_janus.py",
+   "tests/models/kimi_k25/test_processing_kimi_k25.py",
+   "tests/models/kosmos2_5/test_processing_kosmos2_5.py",
+   "tests/models/lfm2_vl/test_processing_lfm2_vl.py",
+   "tests/models/llama4/test_processing_llama4.py",
+   "tests/models/llava/test_processing_llava.py",
+   "tests/models/llava_next/test_processing_llava_next.py",
+   "tests/models/llava_onevision/test_processing_llava_onevision.py",
+   "tests/models/minicpm_ocr/test_processing_minicpm_ocr.py",
+   "tests/models/minicpmv4_6/test_processing_minicpmv4_6.py",
+   "tests/models/minicpmv4_7/test_processing_minicpmv4_7.py",
+   "tests/models/mllama/test_processing_mllama.py",
+   "tests/models/musicflamingo/test_processing_musicflamingo.py",
+   "tests/models/neomme/test_processing_neomme.py",
+   "tests/models/ovis2/test_processing_ovis2.py",
+   "tests/models/paligemma/test_processing_paligemma.py",
+   "tests/models/perception_lm/test_processing_perception_lm.py",
+   "tests/models/phi4_multimodal/test_processing_phi4_multimodal.py",
+   "tests/models/pi0/test_processing_pi0.py",
+   "tests/models/pocket_tts/test_processing_pocket_tts.py",
+   "tests/models/qwen2_5_vl/test_processing_qwen2_5_vl.py",
+   "tests/models/qwen2_audio/test_processing_qwen2_audio.py",
+   "tests/models/qwen2_vl/test_processing_qwen2_vl.py",
+   "tests/models/qwen3_vl/test_processing_qwen3_vl.py",
+   "tests/models/smolvlm/test_processing_smolvlm.py",
+   "tests/models/step3p7/test_processing_step3p7.py",
+   "tests/models/vibevoice/test_processing_vibevoice.py",
+   "tests/models/vibevoice_asr/test_processing_vibevoice_asr.py",
+   "tests/models/video_llama_3/test_processing_video_llama_3.py",
+   "tests/test_processing_common.py"
+  ],
+  "date": "2026-11-06",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/42150076346/job/127672207497",
+  "mic": "missed",
+  "model": "phi4_multimodal",
+  "pr": "49976",
+  "tests": [
+   "tests/models/phi4_multimodal/test_modeling_phi4_multimodal.py::Phi4MultimodalIntegrationTest::test_audio_text_generation",
+   "tests/models/phi4_multimodal/test_modeling_phi4_multimodal.py::Phi4MultimodalIntegrationTest::test_multi_image_vision_text_generation",
+   "tests/models/phi4_multimodal/test_modeling_phi4_multimodal.py::Phi4MultimodalIntegrationTest::test_text_only_generation",
+   "tests/models/phi4_multimodal/test_modeling_phi4_multimodal.py::Phi4MultimodalIntegrationTest::test_vision_text_generation"
+  ]
+ },
+ "49976#qianfan_ocr": {
+  "bad_commit": "fa421d61e569c4cad3e7e988b199d7222dde0435",
+  "date": "2026-11-06",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/42150076346/job/127672175235",
+  "mic": "not-covered",
+  "model": "qianfan_ocr",
+  "pr": "49976",
+  "tests": [
+   "tests/models/qianfan_ocr/test_modeling_qianfan_ocr.py::QianfanOCRIntegrationTest::test_model_integration_batched_generate",
+   "tests/models/qianfan_ocr/test_modeling_qianfan_ocr.py::QianfanOCRIntegrationTest::test_model_integration_forward",
+   "tests/models/qianfan_ocr/test_modeling_qianfan_ocr.py::QianfanOCRIntegrationTest::test_model_integration_generate",
+   "tests/models/qianfan_ocr/test_processing_qianfan_ocr.py::QianfanOCRProcessorTest::test_apply_chat_template_assistant_mask",
+   "tests/models/qianfan_ocr/test_processing_qianfan_ocr.py::QianfanOCRProcessorTest::test_apply_chat_template_image_0",
+   "tests/models/qianfan_ocr/test_processing_qianfan_ocr.py::QianfanOCRProcessorTest::test_apply_chat_template_image_1",
+   "tests/models/qianfan_ocr/test_processing_qianfan_ocr.py::QianfanOCRProcessorTest::test_flat_kwarg_applied_when_modality_dict_lacks_it",
+   "tests/models/qianfan_ocr/test_processing_qianfan_ocr.py::QianfanOCRProcessorTest::test_get_num_multimodal_tokens_matches_processor_call",
+   "tests/models/qianfan_ocr/test_processing_qianfan_ocr.py::QianfanOCRProcessorTest::test_kwargs_overrides_default_subprocessor_kwargs_0_images",
+   "tests/models/qianfan_ocr/test_processing_qianfan_ocr.py::QianfanOCRProcessorTest::test_model_input_names",
+   "tests/models/qianfan_ocr/test_processing_qianfan_ocr.py::QianfanOCRProcessorTest::test_processor_text_has_no_visual",
+   "tests/models/qianfan_ocr/test_processing_qianfan_ocr.py::QianfanOCRProcessorTest::test_processor_with_multiple_inputs",
+   "tests/models/qianfan_ocr/test_processing_qianfan_ocr.py::QianfanOCRProcessorTest::test_replacement_offsets",
+   "tests/models/qianfan_ocr/test_processing_qianfan_ocr.py::QianfanOCRProcessorTest::test_structured_kwargs_nested_from_dict_0_images",
+   "tests/models/qianfan_ocr/test_processing_qianfan_ocr.py::QianfanOCRProcessorTest::test_subprocessor_defaults_preserved_by_kwargs_0_images",
+   "tests/models/qianfan_ocr/test_processing_qianfan_ocr.py::QianfanOCRProcessorTest::test_unstructured_kwargs_0_images",
+   "tests/models/qianfan_ocr/test_processing_qianfan_ocr.py::QianfanOCRProcessorTest::test_unstructured_kwargs_batched_0_images"
+  ]
+ },
  "50084#nemotron3_5_transcribe": {
   "bad_commit": "1b754e9a4636191852a1618fc588ad5c863ab4d5",
   "date": "2026-10-29",
@@ -5222,6 +5338,20 @@
   "tests": [
    "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_flash_attn_2_inference_equivalence",
    "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
+ "sticky#colpali#2026-11-05": {
+  "date": "2026-11-05",
+  "day": 20762,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "colpali",
+  "run_id": "42150076346",
+  "signal": "RuntimeError",
+  "tests": [
+   "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_cpu_offload",
+   "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_disk_offload_bin",
+   "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_disk_offload_safetensors"
   ]
  },
  "sticky#cosmos3_edge#2026-10-17": {
@@ -5623,6 +5753,18 @@
    "tests/models/granitemoe/test_modeling_granitemoe.py::GraniteMoeModelTest::test_flash_attn_2_equivalence"
   ]
  },
+ "sticky#granitemoeshared#2026-10-21": {
+  "date": "2026-10-21",
+  "day": 20747,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "granitemoeshared",
+  "run_id": "42150048723",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/granitemoeshared/test_modeling_granitemoeshared.py::GraniteMoeSharedModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
  "sticky#grounding_dino#2026-10-13": {
   "date": "2026-10-13",
   "day": 20739,
@@ -5648,6 +5790,18 @@
   "signal": "AssertionError",
   "tests": [
    "tests/models/hunyuan_v1_moe/test_modeling_hunyuan_v1_moe.py::HunYuanMoEV1ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#hy_v3#2026-10-14": {
+  "date": "2026-10-14",
+  "day": 20740,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "hy_v3",
+  "run_id": "42150048723",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/hy_v3/test_modeling_hy_v3.py::HYV3ModelTest::test_flash_attn_2_equivalence"
   ]
  },
  "sticky#idefics#2026-10-07": {
@@ -5723,6 +5877,18 @@
    "tests/models/kyutai_speech_to_text/test_modeling_kyutai_speech_to_text.py::KyutaiSpeechToTextModelTest::test_flash_attn_2_from_config",
    "tests/models/kyutai_speech_to_text/test_modeling_kyutai_speech_to_text.py::KyutaiSpeechToTextModelTest::test_flash_attn_2_inference_equivalence",
    "tests/models/kyutai_speech_to_text/test_modeling_kyutai_speech_to_text.py::KyutaiSpeechToTextModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
+ "sticky#layoutlmv3#2026-10-13": {
+  "date": "2026-10-13",
+  "day": 20739,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "layoutlmv3",
+  "run_id": "42150076346",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/layoutlmv3/test_modeling_layoutlmv3.py::LayoutLMv3ModelTest::test_inputs_embeds_matches_input_ids"
   ]
  },
  "sticky#llama#2026-11-01": {
@@ -5890,6 +6056,31 @@
   "signal": "AssertionError",
   "tests": [
    "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_sdpa_padding_matches_padding_free_with_position_ids"
+  ]
+ },
+ "sticky#minicpm3#2026-10-15": {
+  "date": "2026-10-15",
+  "day": 20741,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "minicpm3",
+  "run_id": "41565843144",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids",
+   "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids_and_fa_kwargs"
+  ]
+ },
+ "sticky#minimax_m2#2026-10-10": {
+  "date": "2026-10-10",
+  "day": 20736,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "minimax_m2",
+  "run_id": "42150048723",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/minimax_m2/test_modeling_minimax_m2.py::MiniMaxM2ModelTest::test_flash_attn_2_equivalence"
   ]
  },
  "sticky#minimax_m2#2026-10-30": {

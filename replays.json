@@ -1273,6 +1273,10 @@
   "verdict": "model-added",
   "version": 7
  },
+ "49976#qianfan_ocr": {
+  "verdict": "not-covered",
+  "version": 7
+ },
  "50084#nemotron3_5_transcribe": {
   "verdict": "not-covered",
   "version": 7
@@ -1346,6 +1350,10 @@
   "version": 7
  },
  "sticky#colpali#2026-10-10": {
+  "verdict": "not-covered",
+  "version": 7
+ },
+ "sticky#colpali#2026-11-05": {
   "verdict": "not-covered",
   "version": 7
  },
@@ -1489,6 +1497,10 @@
   "verdict": "out-of-scope",
   "version": 7
  },
+ "sticky#granitemoeshared#2026-10-21": {
+  "verdict": "not-covered",
+  "version": 7
+ },
  "sticky#grounding_dino#2026-10-13": {
   "bad": "d203390173fc074638e2268c6becd140fca5d92b",
   "commits": 385,
@@ -1505,6 +1517,10 @@
  },
  "sticky#hunyuan_v1_moe#2026-10-10": {
   "verdict": "not-covered",
+  "version": 7
+ },
+ "sticky#hy_v3#2026-10-14": {
+  "verdict": "out-of-scope",
   "version": 7
  },
  "sticky#idefics#2026-10-07": {
@@ -1529,6 +1545,10 @@
   "version": 7
  },
  "sticky#kyutai_speech_to_text#2026-10-18": {
+  "verdict": "not-covered",
+  "version": 7
+ },
+ "sticky#layoutlmv3#2026-10-13": {
   "verdict": "not-covered",
   "version": 7
  },
@@ -1591,6 +1611,14 @@
   "version": 7
  },
  "sticky#minicpm3#2026-10-10": {
+  "verdict": "out-of-scope",
+  "version": 7
+ },
+ "sticky#minicpm3#2026-10-15": {
+  "verdict": "out-of-scope",
+  "version": 7
+ },
+ "sticky#minimax_m2#2026-10-10": {
   "verdict": "out-of-scope",
   "version": 7
  },

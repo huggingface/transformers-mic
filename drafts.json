@@ -84,6 +84,12 @@
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/41999677156"
  },
+ "gradium_phonon_tts": {
+  "checkpoint": "gradium/phonon-voices",
+  "conclusion": null,
+  "dispatched_at": "2026-11-06T09:06:13Z",
+  "status": "queued"
+ },
  "jetmoe": {
   "checkpoint": "jetmoe/jetmoe-8b",
   "conclusion": "failure",
@@ -125,6 +131,12 @@
   "run_id": 42019121893,
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/42019121893"
+ },
+ "pocket_tts": {
+  "checkpoint": "eustlb/pocket-tts",
+  "conclusion": null,
+  "dispatched_at": "2026-11-06T09:06:13Z",
+  "status": "queued"
  },
  "poolformer": {
   "checkpoint": "sail/poolformer_s12",
