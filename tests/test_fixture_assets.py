@@ -1213,3 +1213,25 @@ def test_shrunk_shared_cache_preserves_source_rope_flags_and_runs():
     with torch.no_grad():
         logits = model(input_ids=torch.tensor([[1, 2, 3, 4, 5]]), use_cache=False).last_hidden_state
     assert torch.isfinite(logits).all()
+
+
+@pytest.mark.parametrize("dtype", [torch.bfloat16, torch.float16])
+def test_save_updates_nested_dtype_after_cast_and_round_trips(tmp_path, dtype):
+    from transformers import AutoConfig
+
+    model = _tiny_llava().to(dtype)
+    model.config.dtype = torch.float32
+    model.config.text_config.dtype = torch.float32
+    model.config.vision_config.dtype = torch.float32
+    source = tmp_path / "source"
+    source.mkdir()
+    out = tmp_path / "out"
+    build_fixtures.save(model, out, source, [])
+    saved = json.loads((out / "config.json").read_text())
+    expected = str(dtype).removeprefix("torch.")
+    assert saved["dtype"] == expected
+    assert saved["text_config"]["dtype"] == expected
+    assert saved["vision_config"]["dtype"] == expected
+    reloaded = AutoConfig.from_pretrained(out)
+    assert reloaded.dtype == reloaded.text_config.dtype == reloaded.vision_config.dtype == dtype
+    assert all(t.dtype == dtype for t in safetensors.load_file(out / "model.safetensors").values() if t.is_floating_point())
