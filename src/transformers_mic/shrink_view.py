@@ -388,6 +388,8 @@ def brief(value):
 
 
 def analyze(data):
+    from .fixture_validation import config_findings
+
     build = data["build"]
     class_name = (
         build.get("model_class") or (data["shrunk"].get("architectures") or [None])[0]
@@ -404,6 +406,7 @@ def analyze(data):
         data["original"], data["shrunk"]
     )
     report["properties"] = properties(data["original"], data["shrunk"])
+    report["config_findings"] = config_findings(data["shrunk"])
     from . import tester
 
     # The model's own test config: advisory, since a tester can be unrepresentative.
@@ -486,7 +489,7 @@ def verdict(report):
     """Findings a reviewer should look at: what the original has and the fixture lost."""
     from .hub import is_test_checkpoint
 
-    findings = []
+    findings = list(report.get("config_findings", []))
     source = report.get("source", "").partition("@")[0]
     if is_test_checkpoint(source):
         findings.append(f"{source} is a test checkpoint (untrained): build from a trained checkpoint of this model type")
