@@ -1,0 +1,98 @@
+{
+  "mic": "0.3",
+  "name": "Mistral-Large-4 image-text-to-text",
+  "usage": "AutoProcessor + MistralLarge4ForConditionalGeneration, chat template, text-only batch with padding",
+  "architecture": "MistralLarge4ForConditionalGeneration",
+  "checkpoints": {
+    "mistralai/Mistral-Large-4-1T-A52B": {
+      "fixture": "huggingface-mic/mistral-large-4-issue222-mic"
+    }
+  },
+  "fixtures": {
+    "huggingface-mic/mistral-large-4-issue222-mic": {
+      "built_from": "mistralai/Mistral-Large-4-1T-A52B",
+      "covers": [
+        "mistralai/Mistral-Large-4-1T-A52B"
+      ],
+      "build": {
+        "seed": 17,
+        "model_class": "MistralLarge4ForConditionalGeneration"
+      }
+    }
+  },
+  "integrations": {
+    "transformers": {
+      "entry_point": "integrations/transformers/usage.md",
+      "format": "runnable-markdown",
+      "requires": [
+        "transformers>=5",
+        "torch",
+        "torchvision"
+      ],
+      "targets": [
+        "fixtures"
+      ],
+      "variants": {
+        "default": {
+          "dtype": "float32"
+        },
+        "eager": {
+          "dtype": "float32",
+          "attn_implementation": "eager"
+        },
+        "bfloat16": {
+          "dtype": "bfloat16"
+        }
+      },
+      "training": true,
+      "resources": {
+        "fixture": {
+          "download_mb": 100
+        },
+        "mistralai/Mistral-Large-4-1T-A52B": {
+          "memory_gb": 2000,
+          "gpu_memory_gb": 22,
+          "download_mb": 2100000,
+          "devices": [
+            "cuda"
+          ],
+          "variants": {
+            "default": {
+              "devices": []
+            },
+            "eager": {
+              "devices": []
+            },
+            "bfloat16": {
+              "devices": []
+            }
+          }
+        }
+      }
+    }
+  },
+  "outputs": {
+    "runtime": {
+      "compare": "exact"
+    },
+    "predicted_tokens": {
+      "compare": "exact"
+    },
+    "answer_logits": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.loss": {
+      "compare": "allclose",
+      "atol": 0.0001,
+      "rtol": 0.0001
+    },
+    "training.gradients": {
+      "compare": "all_true"
+    },
+    "training.updated": {
+      "compare": "true"
+    }
+  }
+}

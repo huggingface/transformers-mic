@@ -91,6 +91,31 @@ profiles and the unchanged model input. The `check` stages validate this returne
 cloud evidence rather than requiring a GPU on the caller's machine. `--local-only`
 and `--baseline-execution local` retain the local workflow.
 
+## Runner checks without Hub staging
+
+`cloud-baselines.yml` also accepts `local_workspace`, a reviewed source workspace
+checked into the selected MIC commit under `experiments/`. This mode builds and
+gates the fixture on the CPU runner, transfers that same workspace through an
+Actions artifact, and records and independently checks every declared variant
+on CPU and CUDA. It uses only the read token; it does not stage or publish a MIC
+on the Hub, update a fleet, or run the workflow's publication job.
+
+Dispatch the workflow on the branch containing the source workspace, with its
+immutable `mic_sha` and `transformers_sha`. The existing required `job_id`,
+`fleet_revision`, `fleets`, and `fixtures_only` inputs must still be supplied;
+the workspace's own lock and declared targets determine this mode's execution.
+Leave `workspace_repo`, `workspace_revision`, and `upload_repo` empty. For example,
+`local_workspace=experiments/regeneration-inputs/projects/mistral-large4-issue222`
+selects the reviewed issue-222 text inference/training contract.
+
+Artifacts are `mic-local-workspace`, `mic-local-baselines-cpu`, and
+`mic-local-baselines-cuda`. Each measurement artifact contains the candidate
+baselines under `.mic/candidates/`, record/check rows, and
+`.mic/runner-validation.json`. Candidate approval is local to the temporary
+runner workspace so an independent check can compare against the measurements;
+it is not approval for publication. CPU and CUDA measurements use their own
+platform baselines and do not assert cross-device numerical equality.
+
 ## Progress and resuming
 
 The CLI prints progress to stderr as work happens remotely: queueing, environment
