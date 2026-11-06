@@ -706,7 +706,16 @@ def numeric_health(cls, folder, batch, captured=None):
         dtype = getattr(torch, name)
         row = {}
         try:
-            model = called_module(cls.from_pretrained(folder, dtype=dtype), captured or {}).train()
+            loaded = cls.from_pretrained(folder, dtype=dtype)
+            quantizer = getattr(loaded, "hf_quantizer", None)
+            if quantizer and getattr(quantizer.quantization_config, "dequantize", False):
+                # FP8 dequantization may retain the checkpoint dtype on converted
+                # projections. Test the requested compute dtype explicitly, and
+                # record this distinction from raw from_pretrained behavior.
+                row["loaded_parameter_dtypes"] = sorted({str(p.dtype) for p in loaded.parameters()})
+                loaded = loaded.to(dtype=dtype)
+                row["cast_after_dequantization"] = True
+            model = called_module(loaded, captured or {}).train()
             with torch.autocast("cpu", dtype=dtype, enabled=dtype != torch.float32):
                 output = model(**as_dtype(batch, dtype))
             logits = logits_of(output)
