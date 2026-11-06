@@ -1,6 +1,7 @@
 """Measure a local workspace without Hub writes; verify every declared variant."""
 import argparse
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -15,6 +16,8 @@ def main():
     parser.add_argument("--profile", choices=("cpu", "cuda"), required=True)
     args = parser.parse_args()
     workspace = Workspace(args.workspace)
+    if cache := os.environ.get("HF_HOME"):
+        Path(cache).mkdir(parents=True, exist_ok=True)
     import torch
     if torch.cuda.is_available() != (args.profile == "cuda"):
         raise ValueError("Runner hardware does not match the requested profile")
