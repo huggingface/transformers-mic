@@ -285,6 +285,19 @@ def properties(original, shrunk):
                 }
             )
             continue
+        quantization = before.get("quantization_config") or {}
+        if quantization:
+            original_method = quantization.get("quant_method", "unspecified")
+            fixture_method = (after.get("quantization_config") or {}).get("quant_method", "missing")
+            rows.append(
+                {
+                    "config": name,
+                    "property": "quantization method",
+                    "original": original_method,
+                    "fixture": fixture_method,
+                    "kept": original_method == fixture_method,
+                }
+            )
         style = attention_style(
             before.get("num_attention_heads"), before.get("num_key_value_heads")
         )
