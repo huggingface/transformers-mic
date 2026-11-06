@@ -1175,3 +1175,41 @@ def test_fp8_save_and_reload_uses_source_metadata_for_another_architecture(tmp_p
     assert not any(info.values())
     with torch.no_grad():
         assert torch.isfinite(reloaded(input_ids=torch.tensor([[1, 2, 3]])).logits).all()
+
+
+@pytest.mark.parametrize("rope,nope,expected", [(64, 64, 16), (64, 128, 8), (0, 128, 0)])
+def test_mla_shrink_preserves_rotary_proportion_and_updates_derived_width(rope, nope, expected):
+    from transformers import DeepseekV3Config
+    from sweep import shrink
+
+    config = DeepseekV3Config(num_hidden_layers=2, vocab_size=32,
+                             qk_rope_head_dim=rope, qk_nope_head_dim=nope)
+    config.qk_head_dim = rope + nope
+    shrunk = shrink(config)
+    assert shrunk.qk_rope_head_dim == expected
+    assert shrunk.qk_nope_head_dim == 16
+    assert shrunk.qk_head_dim == expected + 16
+
+
+def test_shrunk_shared_cache_preserves_source_rope_flags_and_runs():
+    from transformers import MistralLarge4TextConfig, MistralLarge4TextModel
+    from sweep import shrink
+    from layer_patterns import pattern_indices
+    from transformers_mic.fixture_validation import validate_model
+
+    config = MistralLarge4TextConfig(
+        num_hidden_layers=8, vocab_size=32, qk_rope_head_dim=64, qk_nope_head_dim=64,
+        no_rope_layers=[1, 1, 0, 1, 1, 0, 0, 0],
+        kv_source_layers=[0, 1, 2, 3, 4, 5, 6, 6],
+        indexer_types=["full"] * 8, index_head_dim=16, index_n_heads=2,
+    )
+    kept = pattern_indices(config)
+    shrunk = shrink(config)
+    assert shrunk.no_rope_layers == [config.no_rope_layers[i] for i in kept]
+    assert shrunk.kv_source_layers == [kept.index(config.kv_source_layers[i]) for i in kept]
+    assert shrunk.qk_head_dim == 32 and shrunk.head_dim == 16
+    model = MistralLarge4TextModel(shrunk).eval()
+    validate_model(model)
+    with torch.no_grad():
+        logits = model(input_ids=torch.tensor([[1, 2, 3, 4, 5]]), use_cache=False).last_hidden_state
+    assert torch.isfinite(logits).all()

@@ -309,6 +309,16 @@ def shrink(config):
             kv = values["num_key_value_heads"]
             # MHA stays MHA, MQA keeps its single KV head, GQA groups stay groups.
             values["num_key_value_heads"] = 4 if heads and kv >= heads else 1 if kv == 1 else 2
+        # Preserve the rotary/non-rotary proportion, not two independent widths.
+        # Rotary channels come in pairs; round down to an even width (at least 2).
+        old_rope = getattr(cfg, "qk_rope_head_dim", None)
+        old_nope = getattr(cfg, "qk_nope_head_dim", None)
+        if isinstance(old_rope, int) and old_rope > 0 and isinstance(old_nope, int) and old_nope > 0:
+            values["qk_rope_head_dim"] = max(2, old_rope * values["qk_nope_head_dim"] // old_nope // 2 * 2)
+        # Serialized derived fields can override constructor calculations. Update
+        # the total before rebuilding, including in nested configurations.
+        if "qk_head_dim" in values and isinstance(values.get("qk_rope_head_dim"), int) and isinstance(values.get("qk_nope_head_dim"), int):
+            values["qk_head_dim"] = values["qk_rope_head_dim"] + values["qk_nope_head_dim"]
         # MLA models whose rotary tables are sized by head_dim (DeepSeek-V3, Kimi
         # K2.5) set it to qk_rope_head_dim; keep them equal after shrinking.
         if cfg.to_dict().get("head_dim") and cfg.to_dict().get("head_dim") == cfg.to_dict().get("qk_rope_head_dim"):

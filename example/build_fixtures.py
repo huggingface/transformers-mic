@@ -472,7 +472,9 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
     the loader's conversions read, and a .bin container tests nothing more.
     """
     from safetensors.torch import load_file, save_file
+    from transformers_mic.fixture_validation import validate_model
 
+    validate_model(model)
     out.mkdir(parents=True, exist_ok=True)
     for file in out.iterdir():
         if file.is_file() and file.name != "README.md":
