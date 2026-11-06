@@ -427,8 +427,9 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
     the loader's conversions read, and a .bin container tests nothing more.
     """
     from safetensors.torch import load_file, save_file
-    from transformers_mic.fixture_validation import validate_model
+    from transformers_mic.fixture_validation import sync_dtype, validate_model, validate_saved_config
 
+    sync_dtype(model)
     validate_model(model)
     out.mkdir(parents=True, exist_ok=True)
     for file in out.iterdir():
@@ -464,6 +465,7 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
             saved_config = json.loads(config_path.read_text())
             saved_config["quantization_config"] = quantization
             config_path.write_text(json.dumps(saved_config, indent=2) + "\n")
+    validate_saved_config(model, out / "config.json")
     save_file(tensors, weights, metadata={"format": "pt"})
     copied = copied_files(source, recipe)
     for name in copied:
