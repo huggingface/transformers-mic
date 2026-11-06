@@ -60,6 +60,21 @@ def test_a_faithful_shrink_has_no_findings():
     assert "Same architecture, smaller" in shrink_view.render(result)
 
 
+@pytest.mark.parametrize("nested", [False, True])
+@pytest.mark.parametrize("method", [None, "fp8", "mxfp4"])
+def test_quantization_loss_is_a_finding(nested, method):
+    original = {"quantization_config": {"quant_method": "fp8"}}
+    shrunk = {"quantization_config": {"quant_method": method}} if method else {}
+    if nested:
+        original, shrunk = {"text_config": original}, {"text_config": shrunk}
+    findings = shrink_view.verdict({"properties": shrink_view.properties(original, shrunk)})
+    if method == "fp8":
+        assert findings == []
+    else:
+        assert len(findings) == 1
+        assert f"quantization method fp8 became {method or 'missing'}" in findings[0]
+
+
 def test_the_page_is_titled_by_the_model_and_links_both_pins():
     original = gemma(["sliding_attention"] * 5 + ["full_attention"])
     result = report(original, gemma(["sliding_attention", "full_attention"]))
