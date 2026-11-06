@@ -120,3 +120,49 @@ class FooModelTester(VLMModelTester):
     assert tester.compare(found, original, shrunk, kept_whole=True) == [
         "no_rope_layers: the model tester covers 0, the fixture has only 1"]
 
+
+
+def test_static_small_config_defaults_are_extracted_without_importing():
+    from transformers_mic import tester
+
+    code = '''
+raise AssertionError("Do not import this test module")
+class FooModelTester(VLMModelTester):
+    @staticmethod
+    def get_small_config_defaults():
+        """Defaults shared by the tests and fixture tools."""
+        return {"qk_rope_head_dim": 32, "index_head_dim": 32, "no_rope_layers": [1, 0]}
+'''
+    assert tester.values(code) == {
+        "qk_rope_head_dim": 32, "index_head_dim": 32, "no_rope_layers": [1, 0],
+    }
+
+
+def test_static_defaults_preserve_constructor_overrides():
+    from transformers_mic import tester
+
+    code = '''
+class FooModelTester(VLMModelTester):
+    @staticmethod
+    def get_small_config_defaults():
+        return {"hidden_size": 32, "index_head_dim": 32}
+    def __init__(self, parent, **kwargs):
+        kwargs.setdefault("hidden_size", 64)
+        for key, value in self.get_small_config_defaults().items():
+            kwargs.setdefault(key, value)
+'''
+    assert tester.values(code) == {"hidden_size": 64, "index_head_dim": 32}
+
+
+def test_computed_static_defaults_fall_back_to_legacy_literals():
+    from transformers_mic import tester
+
+    code = '''
+class FooModelTester(VLMModelTester):
+    @staticmethod
+    def get_small_config_defaults():
+        return expensive_or_unsafe_function()
+    def __init__(self, parent, hidden_size=64):
+        pass
+'''
+    assert tester.values(code) == {"hidden_size": 64}
