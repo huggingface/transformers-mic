@@ -453,6 +453,15 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
             # (OPT's .bin stores lm_head.weight, save_pretrained keeps embed_tokens).
             if kept in tensors and kept not in checkpoint["keys"] and alias in checkpoint["keys"] and alias not in tensors:
                 tensors[alias] = tensors.pop(kept)
+    if checkpoint:
+        from transformers_mic.fixture_quantization import quantize
+
+        tensors, quantization = quantize(tensors, checkpoint.get("quantization_config"), checkpoint["keys"])
+        if quantization:
+            config_path = out / "config.json"
+            saved_config = json.loads(config_path.read_text())
+            saved_config["quantization_config"] = quantization
+            config_path.write_text(json.dumps(saved_config, indent=2) + "\n")
     save_file(tensors, weights, metadata={"format": "pt"})
     copied = copied_files(source, recipe)
     for name in copied:
@@ -840,7 +849,11 @@ def review_fixture(name, fixture, revisions, out, artifact=None, inspect_checkpo
     if artifact is None:
         lacks = (inspect_checkpoint(cls, source, source_repo, revision) if inspect_checkpoint
                  else missing_parameters(cls, run.checkpoint_path(source_repo, revision)))
-        checkpoint = {"keys": set(source_keys), "binary": inspection.loads_binary(source_repo, revision, source)}
+        checkpoint = {
+            "keys": set(source_keys),
+            "binary": inspection.loads_binary(source_repo, revision, source),
+            "quantization_config": getattr(cls.config_class.from_pretrained(source), "quantization_config", None),
+        }
         source_file = source_weights_file(source, checkpoint["binary"])
         dtype = getattr(torch, source_dtype(source))
         real = keeps_source(source, cls, shrunk_config(source, cls, recipe))
@@ -931,6 +944,7 @@ def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out,
     checkpoint = {
         "keys": inspection.checkpoint_keys(source_repo, revisions[source_repo], source),
         "binary": inspection.loads_binary(source_repo, revisions[source_repo], source),
+        "quantization_config": getattr(cls.config_class.from_pretrained(source), "quantization_config", None),
     }
     cls = model_class(source, recipe)
     tolerance = recipe.get("gate_tolerance") or max(

@@ -1000,3 +1000,34 @@ def test_input_layouts_keep_the_first_layout_and_add_what_it_lacks():
     layouts = input_layouts(VideoMAEModel(config), config)
     assert layouts[0]["pixel_values"].shape == (2, 3, 32, 32)  # what the sweep sent before
     assert layouts[1]["pixel_values"].shape == (2, 4, 3, 32, 32)  # frames, as the processor sends
+
+
+def test_fp8_save_and_reload_uses_source_metadata_for_another_architecture(tmp_path):
+    from transformers import LlamaConfig, LlamaForCausalLM, FineGrainedFP8Config
+
+    model = LlamaForCausalLM(LlamaConfig(
+        vocab_size=32, hidden_size=16, intermediate_size=32,
+        num_hidden_layers=1, num_attention_heads=2, num_key_value_heads=2,
+    )).eval().bfloat16()
+    config = {"quant_method": "fp8", "activation_scheme": "dynamic",
+              "weight_block_size": [128, 128], "modules_to_not_convert": ["lm_head"]}
+    quantized = {name + ".weight" for name, module in model.named_modules()
+                 if isinstance(module, torch.nn.Linear) and name != "lm_head"}
+    keys = set(model.state_dict()) | {name.removesuffix(".weight") + ".weight_scale_inv" for name in quantized}
+    source = tmp_path / "source"
+    source.mkdir()
+    out = tmp_path / "out"
+    build_fixtures.save(model, out, source, [], checkpoint={
+        "keys": keys, "binary": False, "quantization_config": config,
+    })
+    saved = safetensors.load_file(out / "model.safetensors")
+    assert all(saved[name].dtype == torch.float8_e4m3fn for name in quantized)
+    assert saved["lm_head.weight"].dtype == torch.bfloat16
+    assert json.loads((out / "config.json").read_text())["quantization_config"]["weight_block_size"] == [8, 8]
+    reloaded, info = LlamaForCausalLM.from_pretrained(
+        out, dtype=torch.bfloat16, output_loading_info=True,
+        quantization_config=FineGrainedFP8Config(dequantize=True),
+    )
+    assert not any(info.values())
+    with torch.no_grad():
+        assert torch.isfinite(reloaded(input_ids=torch.tensor([[1, 2, 3]])).logits).all()

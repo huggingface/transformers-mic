@@ -233,7 +233,8 @@ def shrink(config):
 
     def rebuilt(cfg, through=None):
         values = cfg.to_dict()
-        # A slim fixture holds dense random weights, whatever the checkpoint's format.
+        # Initialize/fit dense weights. Supported quantized families restore their
+        # quantization config and encode weights when build_fixtures.save serializes.
         values.pop("quantization_config", None)
         # Random fixture weights need a signal: Unlimited-OCR's SAM tower inits with
         # 1e-10, which vanishes to 1e-37 over the tower and makes images inert.
