@@ -159,6 +159,7 @@
  "huggingface-mic/nllb-200-distilled-600M-mic": "m2m_100",
  "huggingface-mic/nomic-embed-text-v1.5-mic": "nomic_bert",
  "huggingface-mic/nsfw_image_detector-mic": "timm_wrapper",
+ "huggingface-mic/oneformer_ade20k_swin_tiny-mic": "oneformer",
  "huggingface-mic/opt-125m-mic": "opt",
  "huggingface-mic/opus-mt-fr-en-mic": "marian",
  "huggingface-mic/owlv2-base-patch16-ensemble-mic": "owlv2",

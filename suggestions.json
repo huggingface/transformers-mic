@@ -361,18 +361,6 @@
    ]
   },
   {
-   "checkpoint": "shi-labs/oneformer_ade20k_swin_tiny",
-   "checkpoint_source": "failing test",
-   "integration": 1,
-   "model": "oneformer",
-   "other": 0,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_no_head",
-    "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_universal_segmentation_head"
-   ]
-  },
-  {
    "checkpoint": "llava-hf/vip-llava-7b-hf",
    "checkpoint_source": "failing test",
    "integration": 1,

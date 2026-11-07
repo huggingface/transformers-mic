@@ -49,18 +49,6 @@
    "shrinkable": true
   },
   {
-   "checkpoint": "shi-labs/oneformer_ade20k_swin_tiny",
-   "draft": "failure",
-   "model": "oneformer",
-   "next_batch": false,
-   "other": 0,
-   "real_checkpoint": 1,
-   "regressions": 1,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42358296744",
-   "shrink": "",
-   "shrinkable": true
-  },
-  {
    "checkpoint": "llava-hf/vip-llava-7b-hf",
    "draft": "",
    "model": "vipllava",
@@ -316,6 +304,18 @@
    "checkpoint": "Salesforce/blip2-opt-2.7b",
    "draft": "not draftable",
    "model": "blip_2",
+   "next_batch": false,
+   "other": 0,
+   "real_checkpoint": 1,
+   "regressions": 1,
+   "run": "",
+   "shrink": "",
+   "shrinkable": false
+  },
+  {
+   "checkpoint": "tue-mps/coco_panoptic_eomt_large_640",
+   "draft": "not draftable",
+   "model": "eomt",
    "next_batch": false,
    "other": 0,
    "real_checkpoint": 1,
