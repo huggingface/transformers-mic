@@ -457,7 +457,11 @@ def check_trainable_selection(plan, config, parameters=None):
                 "its gradient is None and the check fails; check the trained layer, e.g. "
                 "f\"...layers.{model.config.num_hidden_layers - 1}.<suffix>\" (text_config for a VLM)"
             )
-    if config.get("tie_word_embeddings") is True and any(t.startswith("lm_head") for t in literals):
+    # A VLM states the tie in its text_config (BLIP-2's OPT: language_model.lm_head.weight, 2026-11-07).
+    tied = config.get("tie_word_embeddings")
+    if tied is None:
+        tied = (config.get("text_config") or {}).get("tie_word_embeddings")
+    if tied is True and any(re.match(r"(?:[\w.]*\.)?lm_head(?:\.|$)", t) for t in literals):
         raise ValueError(
             "trainable parameters are chosen by the name 'lm_head', but tie_word_embeddings is true: "
             "named_parameters() lists the tied weight once, as the input embeddings, so the name matches "

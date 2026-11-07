@@ -1950,6 +1950,10 @@ def test_gradient_checks_must_name_the_trained_last_layer():
     qformer = usage.replace("language_model.model.decoder.layers[-1]", "qformer.encoder.layer[-1]")
     with pytest.raises(ValueError, match="names layer 0"):
         commands.check_trainable_selection({"usage": qformer}, {})
+    tied = "```py runnable:t\nmodel.requires_grad_(False)\nchecked = (\"language_model.lm_head.weight\",)\n```\n"
+    with pytest.raises(ValueError, match="tie_word_embeddings"):
+        commands.check_trainable_selection({"usage": tied}, {"text_config": {"tie_word_embeddings": True}})
+    commands.check_trainable_selection({"usage": tied}, {"text_config": {"tie_word_embeddings": False}})
     projection = "```py runnable:t\nmodel.requires_grad_(False)\nn.endswith(\"language_projection.weight\")\n```\n"
     commands.check_trainable_selection({"usage": projection}, {}, parameters=4e9)
 
