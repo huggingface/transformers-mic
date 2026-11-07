@@ -28,7 +28,7 @@ result = {
     "capability": torch.cuda.get_device_capability(),
     "torch": torch.__version__,
     "cuda": torch.version.cuda,
-    "dequantize": model.hf_quantizer.quantization_config.dequantize,
+    "execution_mode": "native_fp8" if any(p.dtype == torch.float8_e4m3fn for p in model.parameters()) else "dequantized",
     "parameter_dtypes": dict(Counter(str(p.dtype) for p in model.parameters())),
     "forward_finite": True,
     "cache_max_absolute_delta": (cached.logits[:, -1].float() - full.logits[:, -1].float()).abs().max().item(),
