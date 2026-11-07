@@ -361,6 +361,8 @@ not memory:
   takes no labels, and Transformers may have no pretraining head for it: train it
   with a small linear probe on pooled hidden states, built with .to(device,
   model.dtype) so the bfloat16 variant runs, optimizing both together.
+  Check gradients only on the branch that probe's loss reaches: VJEPA2Model's
+  last_hidden_state is the encoder's, so predictor.* weights get none.
 - Get a word's token id with tokenizer.encode(word, add_special_tokens=False)[0],
   not convert_tokens_to_ids (None for BPE tokens with a leading space).
 - get_text_features / get_image_features / get_audio_features take only their own
