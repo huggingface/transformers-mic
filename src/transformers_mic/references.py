@@ -67,6 +67,7 @@ def collect(model, revision, config):
         result["output_fields"] = fields
     return result
 
+
 def output_field_names(architecture):
     """{output class: field names} that the architecture's forward returns."""
     import transformers
