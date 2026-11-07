@@ -174,6 +174,9 @@ def eligible(workspace, stage, log, command=()):
             # A missing package is the environment's problem, not the contract's.
             "library but it was not found in your environment",
             "Missing runtime dependency",
+            # The sensitivity gate cannot perturb the inputs: a tmic gap (vjepa2's
+            # pixel_values_videos spent two repairs and 40 minutes of overfitting).
+            "no input perturbation is defined",
         )
     )
 

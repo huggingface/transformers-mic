@@ -236,3 +236,12 @@ def test_unchanged_repair_is_shown_its_rejection_once(setup, monkeypatch):
     assert len(s.contexts) == 2
     assert "did not change the failing usage" in s.contexts[1]["validation_error"]
     assert s.contexts[1]["previous_draft"]["rationale"]
+
+
+def test_missing_input_perturbation_is_not_repairable(setup):
+    setup.log.write_text(
+        'MIC_PROGRESS {"phase": "Check random-weight input sensitivity", "detail": ""}\n'
+        "org/m-mic: no input perturbation is defined for the contract's inputs ['x']; "
+        "add them to PERTURBATIONS (a tmic gap, not a contract error)\nthe contract fails\n"
+    )
+    assert not repair.eligible(setup.workspace, "build", setup.log)

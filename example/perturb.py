@@ -41,6 +41,9 @@ PERTURBATIONS = {
     "decoder_attention_mask": (all_ones,),
     "token_type_ids": (all_ones,),
     "pixel_values": (roll_batch, swap_channels, reverse, halve),
+    # Video models (V-JEPA 2, Qwen2-VL): (batch, frames, channels, H, W). Without an
+    # entry the gate measured nothing and overfit for 20 minutes before failing.
+    "pixel_values_videos": (roll_batch, reverse, halve),
     "input_features": (roll_batch, reverse, halve),
     "input_values": (roll_batch, reverse, halve),
     "state": (roll_batch, reverse, halve),
