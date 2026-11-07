@@ -309,6 +309,72 @@ def check_encoder_decoder_calls(plan, config):
             )
 
 
+def check_image_tokens_in_text(plan, config):
+    """A VLM call with pixel_values needs input_ids that carry the processor's image tokens.
+
+    Salesforce/blip2-opt-2.7b's draft (2026-11-07) trained on
+    model(pixel_values=inputs.pixel_values, input_ids=targets.input_ids) with targets =
+    processor(text=captions): no image tokens, so the image features were never inserted and
+    every pixel_values perturbation moved the logits by exactly 0.0, random and overfit.
+    """
+    if not any(isinstance(config.get(k), int) for k in ("image_token_index", "image_token_id")):
+        return
+    import ast
+
+    code = "\n".join(re.findall(r"^```py runnable:[^\n]*\n(.*?)^```", plan["usage"], re.M | re.S))
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:  # the build reports real syntax errors
+        return
+
+    def unwrap(node):  # processor(...).to(device, ...) -> processor(...)
+        while isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "to":
+            node = node.func.value
+        return node
+
+    text_only = {}
+    assigns = sorted((n for n in ast.walk(tree) if isinstance(n, ast.Assign)), key=lambda n: n.lineno)
+    for node in assigns:
+        if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            call = unwrap(node.value)
+            if not isinstance(call, ast.Call):
+                continue
+            callee = call.func.id if isinstance(call.func, ast.Name) else getattr(call.func, "attr", "")
+            keywords = {k.arg for k in call.keywords}
+            if (callee.endswith(("processor", "tokenizer")) and "text" in keywords
+                    and not keywords & {"images", "videos", None} and not call.args):
+                text_only[node.targets[0].id] = node.lineno
+            else:
+                text_only.pop(node.targets[0].id, None)
+
+    def source(value):
+        if isinstance(value, ast.Attribute) and value.attr == "input_ids":
+            value = value.value
+        elif isinstance(value, ast.Subscript) and getattr(value.slice, "value", None) == "input_ids":
+            value = value.value
+        else:
+            return None
+        return value.id if isinstance(value, ast.Name) else None
+
+    for node in ast.walk(tree):
+        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "model"):
+            continue
+        keywords = {k.arg: k.value for k in node.keywords}
+        if "pixel_values" not in keywords:
+            continue
+        names = [source(keywords["input_ids"])] if "input_ids" in keywords else [
+            k.value.id for k in node.keywords if k.arg is None and isinstance(k.value, ast.Name)
+        ]
+        for name in names:
+            if name in text_only:
+                raise ValueError(
+                    f"line {node.lineno}: model(pixel_values=..., input_ids from {name}) but {name} = "
+                    f"processor(text=...) on line {text_only[name]} has no images, so input_ids carry no "
+                    "image token and pixel_values never reach the logits; tokenize the text with its "
+                    "images, processor(images=images, text=texts), and set image-token labels to -100"
+                )
+
+
 def check_partial_training(plan, context):
     """Above ~3B parameters the real checkpoint's training step must freeze most of it."""
     count = loaded_parameters(context) or 0
@@ -1002,6 +1068,7 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
                     lambda: check_label_arguments(plan, config),
                     lambda: check_parameter_names(plan, config),
                     lambda: check_encoder_decoder_calls(plan, config),
+                    lambda: check_image_tokens_in_text(plan, config),
                     lambda: check_trainable_selection(plan, config, parameters),
                     lambda: check_batch_encoding_dtype(plan, config),
                 ]

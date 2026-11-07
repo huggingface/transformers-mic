@@ -394,6 +394,14 @@ not memory:
   is rescaled by 1/255 again and becomes near-constant: the fixture cannot tell two
   images apart (ConvNeXt, Swin-v2). Make the two images differ in colour, not only
   in texture: global pooling averages random noise away.
+- Videos are lists of such frames: each frame an (H, W, 3) uint8 array, never
+  torch.full(..., 0.2) float clips (VideoMAE: rescaled to two near-identical clips,
+  and a constant patch has a zero normalized-pixel target). Give frames texture
+  and each clip its own colour.
+- A vision-language model inserts image features only at the image tokens the
+  processor puts in input_ids: tokenize the training text with its images,
+  processor(images=images, text=texts), and set image-token labels to -100. Text
+  tokenized alone has none, so pixel_values never reach the logits (BLIP-2).
 - OWL-ViT/OWLv2 processors pad each image's text queries separately: pass
   padding="max_length" so the query batches concatenate.
 - The fixture ships the checkpoint's own processor files: never patch a chat

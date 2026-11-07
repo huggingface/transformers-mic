@@ -1883,6 +1883,28 @@ def test_encoder_decoder_calls_need_decoder_inputs():
 
 
 
+def test_vlm_training_text_must_carry_image_tokens():
+    # Salesforce/blip2-opt-2.7b (2026-11-07): captions tokenized alone, so pixel_values moved nothing.
+    blip2 = {"image_token_index": 50265}
+    usage = (
+        "```py runnable:t\n"
+        "inputs = processor(images=images, return_tensors=\"pt\").to(device, model.dtype)\n"
+        "targets = processor(text=captions, return_tensors=\"pt\", padding=True).to(device)\n"
+        "loss = model(pixel_values=inputs.pixel_values, input_ids=targets.input_ids, labels=labels).loss\n"
+        "```\n"
+    )
+    with pytest.raises(ValueError, match="no image token"):
+        commands.check_image_tokens_in_text({"usage": usage}, blip2)
+    with pytest.raises(ValueError, match="no image token"):
+        commands.check_image_tokens_in_text({"usage": usage.replace("targets.input_ids", 'targets["input_ids"]')}, blip2)
+    joint = usage.replace("processor(text=captions,", "processor(images=images, text=captions,")
+    commands.check_image_tokens_in_text({"usage": joint}, blip2)
+    commands.check_image_tokens_in_text({"usage": usage}, {"model_type": "clip"})  # no image token to carry
+    # A later reassignment with images clears the name.
+    fixed = usage.replace("loss = ", "targets = processor(images=images, text=captions)\nloss = ")
+    commands.check_image_tokens_in_text({"usage": fixed}, blip2)
+
+
 def test_planner_records_every_call_with_its_listed_price(monkeypatch):
     monkeypatch.setattr(planner, "CALLS", [])
     monkeypatch.setattr(planner, "_prices", {("m", "p"): (0.3, 1.2)})
