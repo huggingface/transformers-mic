@@ -308,8 +308,7 @@ Models with real-checkpoint regressions in the daily GPU CI and no contract, shr
 |---|---|---|---|---|---|
 | pocket_tts | 2 | 0 | [eustlb/pocket-tts](https://huggingface.co/eustlb/pocket-tts) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/42192482634) |
 | gradium_phonon_tts | 1 | 1 | [gradium/phonon-voices](https://huggingface.co/gradium/phonon-voices) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/42192485403) |
-| oneformer | 1 | 0 | [shi-labs/oneformer_ade20k_swin_tiny](https://huggingface.co/shi-labs/oneformer_ade20k_swin_tiny) | yes | queued |
-| qianfan_ocr | 1 | 0 | [bairongz/QianfanOCR](https://huggingface.co/bairongz/QianfanOCR) | yes | queued |
+| oneformer | 1 | 0 | [shi-labs/oneformer_ade20k_swin_tiny](https://huggingface.co/shi-labs/oneformer_ade20k_swin_tiny) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/42358296744) |
 | vipllava | 1 | 0 | [llava-hf/vip-llava-7b-hf](https://huggingface.co/llava-hf/vip-llava-7b-hf) | yes | — |
 | colpali | 0 | 4 | [vidore/colpali-v1.2-hf](https://huggingface.co/vidore/colpali-v1.2-hf) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41994158679) |
 | moshi | 0 | 2 | [kmhf/hf-moshika](https://huggingface.co/kmhf/hf-moshika) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41999673429) |
@@ -331,6 +330,7 @@ Models with real-checkpoint regressions in the daily GPU CI and no contract, shr
 | speech_to_text | 0 | 1 | [facebook/s2t-small-librispeech-asr](https://huggingface.co/facebook/s2t-small-librispeech-asr) | yes | — |
 | t5gemma2 | 0 | 1 | [google/t5gemma-2-270m-270m](https://huggingface.co/google/t5gemma-2-270m-270m) | yes | — |
 | cwm | 2 | 0 | [facebook/cwm](https://huggingface.co/facebook/cwm) | no | not draftable |
+| mamba2 | 2 | 0 | [mistralai/Mamba-Codestral-7B-v0.1](https://huggingface.co/mistralai/Mamba-Codestral-7B-v0.1) | no | not draftable |
 
 ### Calls to add to existing contracts
 

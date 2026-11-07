@@ -373,21 +373,6 @@
    ]
   },
   {
-   "checkpoint": "bairongz/QianfanOCR",
-   "checkpoint_source": "failing test",
-   "integration": 1,
-   "model": "qianfan_ocr",
-   "other": 0,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/qianfan_ocr/test_modeling_qianfan_ocr.py::QianfanOCRIntegrationTest::test_model_integration_batched_generate",
-    "tests/models/qianfan_ocr/test_modeling_qianfan_ocr.py::QianfanOCRIntegrationTest::test_model_integration_forward",
-    "tests/models/qianfan_ocr/test_modeling_qianfan_ocr.py::QianfanOCRIntegrationTest::test_model_integration_generate",
-    "tests/models/qianfan_ocr/test_processing_qianfan_ocr.py::QianfanOCRProcessorTest::test_apply_chat_template_assistant_mask",
-    "tests/models/qianfan_ocr/test_processing_qianfan_ocr.py::QianfanOCRProcessorTest::test_apply_chat_template_image_0"
-   ]
-  },
-  {
    "checkpoint": "llava-hf/vip-llava-7b-hf",
    "checkpoint_source": "failing test",
    "integration": 1,

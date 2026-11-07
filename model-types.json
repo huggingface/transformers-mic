@@ -53,6 +53,7 @@
  "huggingface-mic/Phi-3.5-MoE-0.8B-A0.2B-mic": "phimoe",
  "huggingface-mic/Phi-3.5-mini-instruct-mic": "phi3",
  "huggingface-mic/Phi-4-multimodal-instruct-mic": "phi4_multimodal",
+ "huggingface-mic/QianfanOCR-mic": "qianfan_ocr",
  "huggingface-mic/Qwen1.5-MoE-A2.7B-mic": "qwen2_moe",
  "huggingface-mic/Qwen2-VL-2B-Instruct-mic": "qwen2_vl",
  "huggingface-mic/Qwen3-0.6B-mic": "qwen3",

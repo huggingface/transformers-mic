@@ -136,9 +136,11 @@
  },
  "oneformer": {
   "checkpoint": "shi-labs/oneformer_ade20k_swin_tiny",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-07T09:06:24Z",
-  "status": "queued"
+  "run_id": 42358296744,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/42358296744"
  },
  "pocket_tts": {
   "checkpoint": "eustlb/pocket-tts",
@@ -159,9 +161,11 @@
  },
  "qianfan_ocr": {
   "checkpoint": "bairongz/QianfanOCR",
-  "conclusion": null,
+  "conclusion": "success",
   "dispatched_at": "2026-11-07T09:06:24Z",
-  "status": "queued"
+  "run_id": 42358298240,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/42358298240"
  },
  "qwen3_5": {
   "checkpoint": "Qwen/Qwen3.5-0.8B",
