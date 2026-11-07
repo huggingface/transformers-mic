@@ -149,6 +149,7 @@
  "huggingface-mic/mistral3-mic": "mistral3",
  "huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic": "mm-grounding-dino",
  "huggingface-mic/mms-tts-eng-mic": "vits",
+ "huggingface-mic/mobilebert-uncased-mic": "mobilebert",
  "huggingface-mic/mobilenet_v2_1.0_224-mic": "mobilenet_v2",
  "huggingface-mic/mobilevit-xx-small-mic": "mobilevit",
  "huggingface-mic/modernbert-mic": "modernbert",
