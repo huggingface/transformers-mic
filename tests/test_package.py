@@ -1948,6 +1948,14 @@ def test_gradient_checks_must_name_the_trained_last_layer():
     commands.check_trainable_selection({"usage": trained}, {})
 
 
+def test_blip2_q_former_first_query_gets_no_fixture_gradient():
+    usage = '```py runnable:t\nchecked = ("qformer.encoder.layer.0.attention.attention.query.weight",)\n```\n'
+    with pytest.raises(ValueError, match="zero-initialized"):
+        commands.check_zero_query_gradients({"usage": usage}, {"num_query_tokens": 32})
+    commands.check_zero_query_gradients({"usage": usage}, {"model_type": "bert"})
+    commands.check_zero_query_gradients({"usage": usage.replace("layer.0.attention.attention", "layer.0.crossattention.attention")}, {"num_query_tokens": 32})
+
+
 def test_planner_records_every_call_with_its_listed_price(monkeypatch):
     monkeypatch.setattr(planner, "CALLS", [])
     monkeypatch.setattr(planner, "_prices", {("m", "p"): (0.3, 1.2)})

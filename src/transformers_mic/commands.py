@@ -375,6 +375,25 @@ def check_image_tokens_in_text(plan, config):
                 )
 
 
+def check_zero_query_gradients(plan, config):
+    """BLIP-2-style models zero-initialize query_tokens: the Q-Former's first self-attention
+    query/key projections see zeros in the random fixture and get no gradient.
+
+    Salesforce/blip2-opt-2.7b (2026-11-07): drafts checked
+    qformer.encoder.layer.0.attention.attention.query.weight; record failed on every variant
+    and the repair returned the same usage, despite the prompt bullet.
+    """
+    if not isinstance(config.get("num_query_tokens"), int):
+        return
+    for name in re.findall(r"[\"']([^\"'\n]*)[\"']", plan["usage"]):
+        if re.search(r"qformer\.encoder\.layer\.0\.attention\.attention\.(?:query|key)\.", name):
+            raise ValueError(
+                f"the gradient of {name!r} is zero in the random fixture: query_tokens are zero-initialized, "
+                "so the Q-Former's first self-attention query/key see zeros; check language_projection.weight "
+                "or a trained layer the loss reaches"
+            )
+
+
 def check_image_processor_videos(plan):
     """An image processor takes clips as images=; videos= is for video and multimodal processors.
 
@@ -1100,6 +1119,7 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
                     lambda: check_parameter_names(plan, config),
                     lambda: check_encoder_decoder_calls(plan, config),
                     lambda: check_image_tokens_in_text(plan, config),
+                    lambda: check_zero_query_gradients(plan, config),
                     lambda: check_trainable_selection(plan, config, parameters),
                     lambda: check_batch_encoding_dtype(plan, config),
                 ]
