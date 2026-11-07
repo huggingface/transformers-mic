@@ -583,6 +583,42 @@ def check_image_shapes(plan):
         )
 
 
+def check_video_frames(plan, config):
+    """Videos must have the config's num_frames frames when the model reshapes by it.
+
+    X-CLIP (vision_config.num_frames 32), VideoMAE and ViViT size position embeddings and
+    reshape the frame batch by num_frames; the processor keeps the frames it is given. The
+    microsoft/xclip-base-patch16-zero-shot draft built two 8-frame clips ("XCLIP samples
+    8 frames per clip"): shape '[0, 32, 64]' is invalid, and the repair kept the 8.
+    The usage passes when it names num_frames or the number itself.
+    """
+    code = "\n".join(re.findall(r"```(?:py|python) runnable:[^\n]*\n(.*?)```", plan["usage"], re.S))
+    if not re.search(r"\bvideos?\s*=|\bvideos?\b\s*[,)]|pixel_values_videos", code):
+        return
+    try:  # config.json omits defaults (VideoMAE's 16); the config class knows them
+        from transformers import CONFIG_MAPPING
+
+        config = CONFIG_MAPPING[config["model_type"]].from_dict(config).to_dict()
+    except Exception:
+        pass
+    found = [
+        (path, value)
+        for path, value in [("num_frames", config.get("num_frames"))]
+        + [(f"{key}.num_frames", sub.get("num_frames")) for key, sub in config.items() if isinstance(sub, dict)]
+        if isinstance(value, int) and not isinstance(value, bool) and value > 1
+    ]
+    if not found:
+        return
+    path, frames = found[0]
+    if "num_frames" in code or re.search(rf"(?<![\w.]){frames}(?![\w.])", code):
+        return
+    raise ValueError(
+        f"the usage builds videos, and the config's {path} is {frames}: this model reshapes the frames "
+        f"by it and the processor keeps the frames it is given, so each video needs exactly {frames} frames "
+        f"(e.g. num_frames = model.config.{path}, then build that many frames)"
+    )
+
+
 def check_loss_has_gradients(plan):
     """Reject a loss whose dependencies never call the model with gradients.
 
@@ -1004,6 +1040,7 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
                     lambda: check_encoder_decoder_calls(plan, config),
                     lambda: check_trainable_selection(plan, config, parameters),
                     lambda: check_batch_encoding_dtype(plan, config),
+                    lambda: check_video_frames(plan, config),
                 ]
             checks += [
                 lambda: check_transducer_inputs(plan),
