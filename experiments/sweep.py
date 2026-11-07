@@ -53,6 +53,10 @@ WIDTHS = {
 }
 # Fields that, when equal to hidden_size in the checkpoint, must stay equal to it.
 LINKED_TO_HIDDEN = ("projection_size", "word_embed_proj_dim", "embedding_size", "codebook_dim")
+# The same for hidden_dim: OneFormer projects its pixel decoder's conv_dim features to
+# hidden_dim only when they differ, and keeps those projections in a plain list that
+# from_pretrained never materializes (they stay on the meta device; backward then fails).
+LINKED_TO_HIDDEN_DIM = ("conv_dim", "mask_dim")
 # The longest layer prefix a fixture keeps to build every layer kind.
 MAX_PREFIX = 8
 EXPERTS = ("num_experts", "num_local_experts", "n_routed_experts", "moe_num_experts")
@@ -299,6 +303,9 @@ def shrink(config):
         # EfficientNet derives its channels from width_coefficient; hidden_dim is the last of them.
         if "width_coefficient" in original and "hidden_dim" in original:
             values["hidden_dim"] = original["hidden_dim"]
+        for key in LINKED_TO_HIDDEN_DIM:
+            if isinstance(original.get(key), int) and original.get(key) == original.get("hidden_dim"):
+                values[key] = values["hidden_dim"]
         # LayoutLMv3 concatenates 4 coordinate and 2 shape embeddings into hidden_size.
         if original.get("coordinate_size") and 4 * original["coordinate_size"] + 2 * original.get("shape_size", 0) == original.get("hidden_size"):
             values["coordinate_size"] = values["hidden_size"] // 8

@@ -368,6 +368,24 @@ def test_shrink_renumbers_layer_indices_into_the_shrunk_depth():
     assert granite.spatial_target_layers and all(0 <= t < layers for t in granite.spatial_target_layers)
 
 
+def test_shrink_keeps_oneformer_pixel_decoder_width_equal_to_hidden_dim():
+    # shi-labs/oneformer_*: conv_dim == mask_dim == hidden_dim (256). Shrinking only
+    # hidden_dim made OneFormerTransformerModule build input projections it keeps in a
+    # plain list, which from_pretrained leaves on the meta device: backward failed with
+    # "expected device meta but got cpu".
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import OneFormerConfig, OneFormerForUniversalSegmentation
+
+    config = shrink(OneFormerConfig(hidden_dim=256, conv_dim=256, mask_dim=256))
+    assert config.conv_dim == config.mask_dim == config.hidden_dim < 256
+    with torch.device("meta"):
+        model = OneFormerForUniversalSegmentation(config)
+    assert all(isinstance(p, torch.nn.Sequential) for p in model.model.transformer_module.input_projections)
+    # A checkpoint that does project keeps its own widths.
+    assert shrink(OneFormerConfig(hidden_dim=256, conv_dim=512, mask_dim=512)).conv_dim == 512
+
+
 def test_shrink_keeps_projector_inputs_tied_to_the_shrunk_encoders():
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
     from sweep import shrink
