@@ -1816,6 +1816,38 @@ def test_create_rejects_the_broadcast_image_idiom():
     commands.check_image_shapes({"usage": bad.replace("view(H, 1, 1)", "view(1, H, 1)").replace("view(1, W, 1)", "view(1, 1, W)")})
 
 
+def test_create_rejects_videos_without_the_configs_num_frames():
+    # microsoft/xclip-base-patch16-zero-shot: two 8-frame clips for vision_config.num_frames 32.
+    usage = (
+        "```py runnable:x\n"
+        "frames = [torch.full((3, 224, 224), 200, dtype=torch.uint8) for _ in range(8)]\n"
+        "inputs = processor(text=texts, videos=[frames, frames], return_tensors='pt')\n"
+        "```\n"
+    )
+    config = {"model_type": "xclip", "vision_config": {"num_frames": 32}}
+    with pytest.raises(ValueError, match="vision_config.num_frames is 32"):
+        commands.check_video_frames({"usage": usage}, config)
+    commands.check_video_frames({"usage": usage.replace("range(8)", "range(32)")}, config)
+    named = usage.replace("range(8)", "range(model.config.vision_config.num_frames)")
+    commands.check_video_frames({"usage": named}, config)
+    # Video models without a fixed frame count, and image-only usage, are not checked.
+    commands.check_video_frames({"usage": usage}, {"model_type": "llava_next_video"})
+    commands.check_video_frames({"usage": usage.replace("videos=[frames, frames]", "images=frames")}, config)
+
+
+@pytest.mark.requires_runtime
+def test_video_frames_check_reads_config_class_defaults():
+    # VideoMAE's config.json omits its default num_frames (16); the config class supplies it.
+    usage = (
+        "```py runnable:x\n"
+        "frames = [torch.full((3, 224, 224), 200, dtype=torch.uint8) for _ in range(8)]\n"
+        "inputs = processor(videos=[frames, frames], return_tensors='pt')\n"
+        "```\n"
+    )
+    with pytest.raises(ValueError, match="num_frames is 16"):
+        commands.check_video_frames({"usage": usage}, {"model_type": "videomae"})
+
+
 def test_create_rejects_a_loss_built_only_from_no_grad_outputs():
     usage = (
         "```py runnable:a\nwith torch.no_grad():\n    outputs = model(**inputs)\n"
