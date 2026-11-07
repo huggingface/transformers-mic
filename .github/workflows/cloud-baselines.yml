@@ -317,7 +317,7 @@ jobs:
           python3 -m pip install .
           python3 .github/scripts/install_baseline_environment.py
       - name: Build and gate the fixture
-        run: python3 -m transformers_mic.cli --workspace out/workspace build
+        run: python3 -m transformers_mic.cli --workspace out/workspace build --rebuild --reshrink
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         if: always()
         with:
@@ -332,8 +332,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - profile: cpu
-            runner: ${{ vars.MIC_CPU_BASELINE_RUNNER || 'aws-m8i-l-cache' }}
           - profile: cuda
             runner: ${{ vars.MIC_GPU_BASELINE_RUNNER || 'aws-g5-4xlarge-cache' }}
     runs-on:
@@ -374,6 +372,8 @@ jobs:
         run: |
           python3 -m pip install .
           python3 .github/scripts/install_baseline_environment.py
+      - name: Inspect GPU quantization and cached decoding
+        run: python3 experiments/mistral4-gpu/check_gpu.py
       - name: Record and independently check every fixture variant
         run: python3 .github/scripts/verify_workspace_baselines.py out/workspace --profile "$PROFILE"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9

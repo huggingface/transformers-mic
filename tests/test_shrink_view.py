@@ -166,3 +166,24 @@ class FooModelTester(VLMModelTester):
         pass
 '''
     assert tester.values(code) == {"hidden_size": 64}
+
+
+def test_explicit_tester_widths_override_generic_without_copying_source_semantics(monkeypatch):
+    from transformers_mic import tester
+
+    code = '''
+class ExampleModelTester:
+    @staticmethod
+    def get_small_config_defaults():
+        return {"qk_rope_head_dim": 32, "qk_nope_head_dim": 32, "index_head_dim": 32,
+                "vocab_size": 99, "image_size": 16, "num_hidden_layers": 4,
+                "index_topk": 4, "no_rope_layers": [1, 0, 1, 0]}
+'''
+    monkeypatch.setattr(tester, "source", lambda *args: ("local", code))
+    original = {"text_config": {"qk_rope_head_dim": 64, "qk_nope_head_dim": 64,
+        "index_head_dim": 128, "vocab_size": 204800, "num_hidden_layers": 48,
+        "index_topk": 2048, "no_rope_layers": [1] * 48}, "vision_config": {"image_size": 1540}}
+    _, fields = tester.preferred_sizes("example", original)
+    assert fields == {("text_config", "qk_rope_head_dim"): 32,
+                      ("text_config", "qk_nope_head_dim"): 32,
+                      ("text_config", "index_head_dim"): 32}

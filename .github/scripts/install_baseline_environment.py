@@ -56,6 +56,7 @@ def main():
     subprocess.run(
         ["git", "-C", str(checkout), "checkout", "--detach", "FETCH_HEAD"], check=True
     )
+    subprocess.run(["git", "-C", str(checkout), "apply", str(Path("experiments/mistral4-gpu/transformers.patch").resolve())], check=True)
     # Constrain every install to the image's own versions: missing tools are added,
     # nothing the image ships (numpy, torch, ...) is upgraded or downgraded.
     frozen = subprocess.run(

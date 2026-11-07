@@ -4,6 +4,44 @@ import copy
 import json
 
 
+def validate_preservation(original, fixture, quantization=False):
+    """A smaller fixture must keep sparse routing and the source's layer kinds."""
+    from .shrink_view import configs
+
+    after_configs = dict(configs(fixture))
+    failures = []
+    for path, before in configs(original):
+        after = after_configs.get(path, {})
+        if quantization and before.get("quantization_config"):
+            method = before["quantization_config"].get("quant_method")
+            if (after.get("quantization_config") or {}).get("quant_method") != method:
+                failures.append(f"{path}: lost {method} quantization")
+        experts = next((key for key in ("n_routed_experts", "num_local_experts", "num_experts", "moe_num_experts")
+                        if isinstance(before.get(key), int) and before[key] > 1), None)
+        if experts:
+            count = after.get(experts, 0)
+            if not isinstance(count, int) or count <= 1:
+                failures.append(f"{path}: MoE experts became dense")
+            else:
+                for top_key in ("num_experts_per_tok", "top_k_experts", "moe_k"):
+                    top = before.get(top_key)
+                    if isinstance(top, int) and 0 < top < before[experts]:
+                        new_top = after.get(top_key, count)
+                        if not isinstance(new_top, int) or not 0 < new_top < count:
+                            failures.append(f"{path}: sparse {top_key} routing became dense")
+            dense, depth = before.get("first_k_dense_replace"), before.get("num_hidden_layers")
+            if isinstance(dense, int) and isinstance(depth, int) and dense < depth:
+                if after.get("first_k_dense_replace", 0) >= after.get("num_hidden_layers", 0):
+                    failures.append(f"{path}: no MoE layer remains")
+        for key in ("layer_types", "mlp_layer_types"):
+            kinds, new_kinds = before.get(key), after.get(key)
+            if isinstance(kinds, list) and all(isinstance(kind, str) for kind in kinds):
+                if not isinstance(new_kinds, list) or set(kinds) - set(new_kinds):
+                    failures.append(f"{path}: lost {key} kinds")
+    if failures:
+        raise ValueError("Lossy fixture: " + "; ".join(failures))
+
+
 def sync_dtype(model):
     """Fixture builders cast the whole model; reflect that in every subconfig.
 
@@ -62,8 +100,10 @@ def compact_saved_config(model, path):
         dtype = values.get("dtype", inherited_dtype)
         if inherited_dtype is not None and values.get("dtype") == inherited_dtype:
             values.pop("dtype", None)
-        for key in ("qk_head_dim", "no_rope_layer_interval"):
+        for key in ("head_dim", "qk_head_dim", "no_rope_layer_interval"):
             if key not in values:
+                continue
+            if key == "head_dim" and "qk_rope_head_dim" not in values:
                 continue
             if key == "no_rope_layer_interval" and not isinstance(values.get("no_rope_layers"), list):
                 continue

@@ -227,11 +227,11 @@ def layer_pattern(config):
     return pattern_indices(config)
 
 
-def shrink(config):
+def shrink(config, size_defaults=None):
     """Apply the generic rule in place, innermost configs first, then rebuild each."""
     from transformers import PretrainedConfig
 
-    def rebuilt(cfg, through=None):
+    def rebuilt(cfg, through=None, path=()):
         values = cfg.to_dict()
         # Initialize/fit dense weights. Supported quantized families restore their
         # quantization config and encode weights when build_fixtures.save serializes.
@@ -244,7 +244,7 @@ def shrink(config):
         for key in getattr(cfg, "sub_configs", {}) or {}:
             sub = getattr(cfg, key, None)
             if isinstance(sub, PretrainedConfig):
-                values[key] = rebuilt(sub).to_dict()
+                values[key] = rebuilt(sub, path=(*path, key)).to_dict()
         for key, value in WIDTHS.items():
             # 0 is a choice, not a width (GLM-5.3's NoPE qk_rope_head_dim).
             if key in values and values[key] not in (None, 0) and not isinstance(values[key], (list, dict)):
@@ -257,11 +257,13 @@ def shrink(config):
             kv = values["num_key_value_heads"]
             # MHA stays MHA, MQA keeps its single KV head, GQA groups stay groups.
             values["num_key_value_heads"] = 4 if heads and kv >= heads else 1 if kv == 1 else 2
-        # Preserve the rotary/non-rotary proportion, not two independent widths.
+        preferred = {key[-1]: value for key, value in (size_defaults or {}).items() if key[:-1] == path}
+        values.update(preferred)
+        # Preserve the rotary/non-rotary proportion when no explicit tester width is supplied.
         # Rotary channels come in pairs; round down to an even width (at least 2).
         old_rope = getattr(cfg, "qk_rope_head_dim", None)
         old_nope = getattr(cfg, "qk_nope_head_dim", None)
-        if isinstance(old_rope, int) and old_rope > 0 and isinstance(old_nope, int) and old_nope > 0:
+        if "qk_rope_head_dim" not in preferred and isinstance(old_rope, int) and old_rope > 0 and isinstance(old_nope, int) and old_nope > 0:
             values["qk_rope_head_dim"] = max(2, old_rope * values["qk_nope_head_dim"] // old_nope // 2 * 2)
         # Serialized derived fields can override constructor calculations. Update
         # the total before rebuilding, including in nested configurations.
@@ -290,10 +292,10 @@ def shrink(config):
         # (DeepSeek-V3.2: top-k 8 left every output unchanged), so keep 2.
         if isinstance(values.get("index_topk"), int):
             values["index_topk"] = min(values["index_topk"], 2)
-        if values.get("q_lora_rank"):
+        if values.get("q_lora_rank") and "q_lora_rank" not in preferred:
             values["q_lora_rank"] = 16
         for key in EXPERTS:
-            if isinstance(values.get(key), int) and values[key] > 4:
+            if key not in preferred and isinstance(values.get(key), int) and values[key] > 4:
                 values[key] = 4
         for key in TOP_K:
             if isinstance(values.get(key), int):
@@ -648,6 +650,9 @@ def shrink(config):
             # validates shrinks exactly as before, so published fixtures rebuild unchanged.
             repair(cfg, values)
             shrunk = type(cfg).from_dict(values)
+        for key, value in preferred.items():
+            if shrunk.to_dict().get(key) != value:
+                raise ValueError(f"Explicit tester default {'.'.join((*path, key))}={value} conflicts with the config's dimension constraints")
         depth = getattr(cfg, "num_hidden_layers", None)
         if through is None and isinstance(depth, int) and isinstance(values.get("num_hidden_layers"), int) and values["num_hidden_layers"] < depth:
             # Kinds the config derives from the layer index (DeepSeek-V4's hash-routed
@@ -658,7 +663,7 @@ def shrink(config):
 
             prefix = kind_prefix(cfg, shrunk)
             if prefix and prefix <= MAX_PREFIX:
-                return rebuilt(cfg, through=prefix)
+                return rebuilt(cfg, through=prefix, path=path)
         return shrunk
 
     return rebuilt(config)

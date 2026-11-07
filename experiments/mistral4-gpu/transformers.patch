@@ -1,0 +1,99 @@
+diff --git a/src/transformers/integrations/finegrained_fp8.py b/src/transformers/integrations/finegrained_fp8.py
+index 483958a425..c5ae91b45d 100644
+--- a/src/transformers/integrations/finegrained_fp8.py
++++ b/src/transformers/integrations/finegrained_fp8.py
+@@ -1186,6 +1186,14 @@ class Fp8Dequantize(ConversionOps):
+         **kwargs,
+     ) -> dict[str, list[torch.Tensor] | torch.Tensor]:
+         output_dtype = self._get_target_dtype(model, full_layer_name)
++
++        def cast_unquantized(value):
++            if isinstance(value, list):
++                return [cast_unquantized(tensor) for tensor in value]
++            if output_dtype is not None and value.is_floating_point() and value.element_size() >= 2:
++                return value.to(dtype=output_dtype)
++            return value
++
+         if "weight" in input_dict:
+             # The downstream renamer in `core_model_loading._convert_one_module` uses the
+             # output dict's *key*, not its content, to derive prefix/suffix; if `full_layer_name`
+@@ -1197,7 +1205,7 @@ class Fp8Dequantize(ConversionOps):
+                 scales = input_dict["weight_scale_inv"]
+                 scales = scales[0] if isinstance(scales, list) else scales
+                 return {target_key: self._dequantize_one(quantized, scales, output_dtype=output_dtype)}
+-            return {target_key: quantized}
++            return {target_key: cast_unquantized(quantized)}
+ 
+         # Generic chain path: dequantize every weight pattern that has a sibling scale.
+         result: dict[str, list[torch.Tensor] | torch.Tensor] = {}
+@@ -1206,8 +1214,8 @@ class Fp8Dequantize(ConversionOps):
+                 continue  # consumed by the dequant; drop from the chain
+             scale_key = f"{key}_scale_inv"
+             if scale_key not in input_dict:
+-                # No scale to apply (e.g. unrelated entry) — pass through untouched.
+-                result[key] = value
++                # These weights bypass dequantization but still need the destination dtype.
++                result[key] = cast_unquantized(value)
+                 continue
+             weights = value if isinstance(value, list) else [value]
+             scales = input_dict[scale_key]
+diff --git a/tests/models/mistral_large4/test_modeling_mistral_large4.py b/tests/models/mistral_large4/test_modeling_mistral_large4.py
+index 6ee40a0cb5..b488f14bb1 100644
+--- a/tests/models/mistral_large4/test_modeling_mistral_large4.py
++++ b/tests/models/mistral_large4/test_modeling_mistral_large4.py
+@@ -81,12 +81,12 @@ class MistralLarge4VisionText2TextModelTester(VLMModelTester):
+             "kv_lora_rank": 16,
+             # Keep the rotary and non-rotary widths together. The config derives head_dim and qk_head_dim;
+             # LeRoPE's alpha has qk_rope_head_dim // 2 entries, so it must be rebuilt with the model.
+-            "qk_rope_head_dim": 32,
+-            "qk_nope_head_dim": 32,
++            "qk_rope_head_dim": 16,
++            "qk_nope_head_dim": 16,
+             "v_head_dim": 16,
+             # DSA indexer. `index_topk` is smaller than the test sequences, so the indexer drops tokens
+             "index_topk": 4,
+-            "index_head_dim": 32,
++            "index_head_dim": 16,
+             "index_n_heads": 2,
+             # RoPE, NoPE, RoPE, NoPE. Since KV can only be shared by layers with the same PE, layer 3 reuse layer 1's KV,
+             # and layer 2 reuses layer 0's KV. We also test index sharing in the last two layers.
+@@ -94,10 +94,10 @@ class MistralLarge4VisionText2TextModelTester(VLMModelTester):
+             "no_rope_layers": [1, 0, 1, 0],
+             "kv_source_layers": [0, 1, 0, 1],
+             "indexer_types": ["full", "full", "shared", "shared"],
+-            # MoE: layer 0 is dense, the others route to 2 of 8 experts plus a shared expert
++            # MoE: layer 0 is dense, the others route to 2 of 4 experts plus a shared expert
+             "first_k_dense_replace": 1,
+-            "moe_intermediate_size": 16,
+-            "n_routed_experts": 8,
++            "moe_intermediate_size": 32,
++            "n_routed_experts": 4,
+             "n_shared_experts": 1,
+             "n_group": 1,
+             "topk_group": 1,
+diff --git a/tests/utils/test_core_model_loading.py b/tests/utils/test_core_model_loading.py
+index 32355f9a2f..3ebec97e4f 100644
+--- a/tests/utils/test_core_model_loading.py
++++ b/tests/utils/test_core_model_loading.py
+@@ -682,6 +682,21 @@ class TestConvertAndLoadStateDict(unittest.TestCase):
+         )
+         torch.testing.assert_close(dequantized_q, expected_q, rtol=1e-2, atol=1e-2)
+ 
++    def test_fp8_dequantize_unquantized_weights_use_destination_dtype(self):
++        from transformers.integrations.finegrained_fp8 import Fp8Dequantize
++
++        converter = Fp8Dequantize(SimpleNamespace())
++        for source_dtype, target_dtype in [(torch.float32, torch.bfloat16), (torch.bfloat16, torch.float32)]:
++            model = torch.nn.Linear(8, 8, bias=False, dtype=target_dtype)
++            weight = torch.ones(8, 8, dtype=source_dtype)
++            for key, value in [("weight", weight), ("experts.*.weight", [weight])]:
++                with self.subTest(source_dtype=source_dtype, target_dtype=target_dtype, key=key):
++                    converted = converter.convert({key: value}, full_layer_name="weight", model=model)[key]
++                    tensor = converted[0] if isinstance(converted, list) else converted
++                    self.assertEqual(tensor.dtype, target_dtype)
++                    model.weight = torch.nn.Parameter(tensor)
++                    self.assertTrue(torch.isfinite(model(torch.ones(1, 8, dtype=target_dtype))).all())
++
+     def test_fp8_ue8m0_quantize_dequantize_round_trip(self):
+         # ``scale_fmt="ue8m0"`` rounds weight_scale_inv to a power of two; the weight has to be
+         # quantized with that same rounded scale, or ``weight * weight_scale_inv`` at dequant

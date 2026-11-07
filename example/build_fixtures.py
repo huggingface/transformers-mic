@@ -204,24 +204,39 @@ TESTER_SIZES, TESTER_OFF = {}, {}
 
 
 def shrunk_config(source, cls, recipe=None):
+    from transformers_mic.fixture_quantization import require_supported_source
+    from transformers_mic.fixture_validation import validate_preservation
+    from transformers_mic import tester
+
+    original = cls.config_class.from_pretrained(source).to_dict()
+    require_supported_source(original)
     recorded = (recipe or {}).get("recorded_config")
     if recorded is not None:  # a rebuild reproduces the published config, not today's rule
+        validate_preservation(original, recorded)
         return cls.config_class.from_dict(recorded)
     config = cls.config_class.from_pretrained(source)
     if parameter_count(cls, config) > SMALL_SOURCE:
         original = config.to_dict()
-        config = shrink(config)
+        url, preferred = tester.preferred_sizes(original.get("model_type"), original)
+        config = shrink(config, size_defaults=preferred)
         if str(source) not in TESTER_OFF:
             config = adopt_tester_sizes(cls, original, config)
             # Provenance goes to build.json, never into the fixture's config.json.
             sizes = config.__dict__.pop("_mic_tester_sizes", None)
             if sizes:
                 TESTER_SIZES[str(source)] = sizes
+        if preferred:
+            sizes = TESTER_SIZES.setdefault(str(source), {"source": url, "fields": {}})
+            sizes["fields"].update({".".join(path): value for path, value in preferred.items()})
+            sizes["explicit"] = True
     overrides = (recipe or {}).get("config_overrides", {}).get("fields", {})
     if not overrides:
+        validate_preservation(original, config.to_dict())
         return config
     values = config.to_dict()
     for dotted, value in overrides.items():
+        if dotted == "quantization_config.weight_block_size":
+            continue  # Applied and validated when encoding weights, not during dense initialization.
         *parents, field = dotted.split(".")
         target = values
         for key in parents:
@@ -231,7 +246,9 @@ def shrunk_config(source, cls, recipe=None):
                 continue  # dropping a field the shrunk config already lacks
             raise SystemExit(f"config_overrides: the shrunk config has no field {dotted}")
         target[field] = value
-    return type(config).from_dict(values)
+    config = type(config).from_dict(values)
+    validate_preservation(original, config.to_dict())
+    return config
 
 
 def adopt_tester_sizes(cls, original, config):
@@ -427,8 +444,13 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
     the loader's conversions read, and a .bin container tests nothing more.
     """
     from safetensors.torch import load_file, save_file
-    from transformers_mic.fixture_validation import compact_saved_config, sync_dtype, validate_model, validate_saved_config
+    from transformers_mic.fixture_validation import compact_saved_config, sync_dtype, validate_model, validate_saved_config, validate_preservation
+    from transformers_mic.fixture_quantization import require_supported_source
 
+    source_config = source / "config.json"
+    original = json.loads(source_config.read_text()) if source_config.exists() else {}
+    require_supported_source(original)
+    validate_preservation(original, model.config.to_dict())
     sync_dtype(model)
     validate_model(model)
     out.mkdir(parents=True, exist_ok=True)
@@ -459,13 +481,15 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
     if checkpoint:
         from transformers_mic.fixture_quantization import quantize
 
-        tensors, quantization = quantize(tensors, checkpoint.get("quantization_config"), checkpoint["keys"])
+        block = (recipe or {}).get("config_overrides", {}).get("fields", {}).get("quantization_config.weight_block_size")
+        tensors, quantization = quantize(tensors, checkpoint.get("quantization_config"), checkpoint["keys"], block_size=block)
         if quantization:
             config_path = out / "config.json"
             saved_config = json.loads(config_path.read_text())
             saved_config["quantization_config"] = quantization
             config_path.write_text(json.dumps(saved_config, indent=2) + "\n")
     compact_saved_config(model, out / "config.json")
+    validate_preservation(original, json.loads((out / "config.json").read_text()), quantization=True)
     validate_saved_config(model, out / "config.json")
     save_file(tensors, weights, metadata={"format": "pt"})
     copied = copied_files(source, recipe)
@@ -646,16 +670,12 @@ def numeric_health(cls, folder, batch, captured=None):
         row = {}
         try:
             loaded = cls.from_pretrained(folder, dtype=dtype)
-            quantizer = getattr(loaded, "hf_quantizer", None)
-            if (source_quantization and not getattr(loaded, "is_quantized", False)) or (
-                quantizer and getattr(quantizer.quantization_config, "dequantize", False)
-            ):
-                # FP8 dequantization may retain the checkpoint dtype on converted
-                # projections. Test the requested compute dtype explicitly, and
-                # record this distinction from raw from_pretrained behavior.
+            if source_quantization:
+                # Test raw loading before autocast can hide incompatible parameter dtypes.
                 row["loaded_parameter_dtypes"] = sorted({str(p.dtype) for p in loaded.parameters()})
-                loaded = loaded.to(dtype=dtype)
-                row["cast_after_dequantization"] = True
+                with torch.no_grad():
+                    called_module(loaded, captured or {}).eval()(**as_dtype(batch, dtype))
+                row["raw_load_forward"] = True
             model = called_module(loaded, captured or {}).train()
             with torch.autocast("cpu", dtype=dtype, enabled=dtype != torch.float32):
                 output = model(**as_dtype(batch, dtype))
@@ -806,7 +826,7 @@ def build_fixture(*args, **kwargs):
     try:
         return _build_fixture(*args, **kwargs)
     except (SystemExit, Exception) as error:
-        adopted = [source for source in TESTER_SIZES if source not in TESTER_OFF]
+        adopted = [source for source in TESTER_SIZES if source not in TESTER_OFF and not TESTER_SIZES[source].get("explicit")]
         missing = missing_package(error)
         if missing:
             # Other sizes would fail the same way: say what to install instead of retrying.

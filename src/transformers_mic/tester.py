@@ -5,7 +5,8 @@ usually sets every field a small but representative model needs (Mistral-Large-4
 sets NoPE layers, KV sharing between layers of the same positional encoding, shared
 indexers and an `index_topk` below the test sequence length). A core maintainer's
 caveat: when a model was added quickly the tester can be thin or unrepresentative, so
-these findings are advisory, never a source of fixture values.
+legacy hints only fill unshrunk widths. Explicit static defaults can override
+supported dimensions; source semantics remain protected.
 
 A static `get_small_config_defaults()` can expose a literal dictionary shared with
 the tester constructor. The tester file is read and parsed, never imported or run.
@@ -13,6 +14,8 @@ the tester constructor. The tester file is read and parsed, never imported or ru
 
 import ast
 import functools
+import os
+from pathlib import Path
 import re
 import urllib.request
 
@@ -51,6 +54,10 @@ def fetch(url, timeout=20):
 
 
 def source(model_type, ref="main"):
+    if checkout := os.environ.get("MIC_TRANSFORMERS_CHECKOUT"):
+        path = Path(checkout) / "tests/models" / folder(model_type) / f"test_modeling_{folder(model_type)}.py"
+        if path.is_file():
+            return str(path.resolve()), path.read_text()
     url = RAW.format(ref=ref, folder=folder(model_type))
     return url, fetch(url)
 
@@ -71,7 +78,7 @@ def literal(node):
         return None
 
 
-def values(code):
+def values(code, static_only=False):
     """Read static small-config defaults and legacy constructor literals without executing code."""
     found = {}
     for cls in ast.walk(ast.parse(code)):
@@ -91,6 +98,10 @@ def values(code):
                 if isinstance(data, dict) and all(isinstance(key, str) for key in data):
                     defaults = data
         init = next((f for f in cls.body if isinstance(f, ast.FunctionDef) and f.name == "__init__"), None)
+        if static_only:
+            for key, value in defaults.items():
+                found.setdefault(key, value)
+            continue
         args = init.args.args[-len(init.args.defaults):] if init and init.args.defaults else []
         for arg, default in zip(args, init.args.defaults if init else []):
             value = literal(default)
@@ -194,6 +205,23 @@ def unshrunk_sizes(tester, original, shrunk):
         ):
             adopted[path] = value
     return adopted
+
+
+def preferred_sizes(model_type, original):
+    """Explicit tester widths win; checkpoint semantics and layer patterns stay with the recipe."""
+    try:
+        url, code = source(model_type)
+    except (OSError, ValueError, KeyError):
+        return None, {}
+    selected = {}
+    for key, value in values(code, static_only=True).items():
+        path, before = locate(original, key)
+        protected = PRESERVED.search(key) and key != "qk_rope_head_dim"
+        if (path and SIZES.search(key) and not protected and not key.endswith(("topk", "_per_tok"))
+                and isinstance(value, int) and not isinstance(value, bool) and value > 0
+                and isinstance(before, int) and not isinstance(before, bool) and before > 0):
+            selected[path] = min(value, before)
+    return url, selected
 
 
 def tester_values(model_type, ref="main"):

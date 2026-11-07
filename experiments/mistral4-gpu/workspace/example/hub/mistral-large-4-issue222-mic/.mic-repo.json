@@ -1,0 +1,7 @@
+{
+  "format": "mic-umbrella-v1",
+  "contract_files": [
+    "integration.json",
+    "integrations/transformers/usage.md"
+  ]
+}

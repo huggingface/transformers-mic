@@ -3,7 +3,7 @@ import pytest
 torch = pytest.importorskip("torch")
 pytest.importorskip("transformers")
 
-from transformers_mic.fixture_quantization import quantize
+from transformers_mic.fixture_quantization import quantize  # noqa: E402
 
 
 def source(**options):
@@ -46,8 +46,8 @@ def test_missing_scale_names_fail_instead_of_saving_dense_weights():
         quantize({"p.weight": torch.ones(8, 8)}, source(), set())
 
 
-@pytest.mark.parametrize("config", [None, {"quant_method": "mxfp4"}])
-def test_other_quantization_methods_are_unchanged(config):
+def test_unquantized_sources_are_unchanged():
+    config = None
     tensors = {"p.weight": torch.ones(8, 8)}
     result, quantization = quantize(tensors, config, {"p.qscale_weight"})
     assert result is tensors and quantization is None
@@ -77,3 +77,37 @@ def test_ambiguous_scale_names_are_rejected():
 def test_static_activation_quantization_is_not_silently_changed():
     with pytest.raises(ValueError, match="dynamic activation"):
         quantize({"p.weight": torch.ones(8, 8)}, source(activation_scheme="static"), {"p.weight_scale_inv"})
+
+
+@pytest.mark.parametrize("method", ["mxfp4", "compressed-tensors", "gptq"])
+def test_unsupported_quantization_never_becomes_dense(method):
+    with pytest.raises(ValueError, match="refusing a dense fixture"):
+        quantize({"p.weight": torch.ones(8, 8)}, {"quant_method": method}, set())
+
+
+def test_nested_quantization_is_not_missed():
+    from transformers_mic.fixture_quantization import require_supported_source
+
+    with pytest.raises(ValueError, match=r"model.text_config.*compressed-tensors.*refusing a dense fixture"):
+        require_supported_source({"text_config": {"quantization_config": {"quant_method": "compressed-tensors"}}})
+
+
+def test_explicit_blocks_are_preserved_and_round_trip():
+    weight = torch.randn(32, 64).bfloat16()
+    result, config = quantize({"p.weight": weight}, source(), {"p.weight_scale_inv"}, block_size=[16, 32])
+    assert config["weight_block_size"] == [16, 32]
+    scale = result["p.weight_scale_inv"]
+    assert scale.shape == (2, 2)
+    decoded = result["p.weight"].float() * scale.repeat_interleave(16, 0).repeat_interleave(32, 1)
+    torch.testing.assert_close(decoded, weight.float(), rtol=0.07, atol=0.001)
+
+
+def test_explicit_blocks_never_silently_shrink():
+    with pytest.raises(ValueError, match="Explicit FP8 block.*does not divide"):
+        quantize({"p.weight": torch.ones(32, 16)}, source(), {"p.weight_scale_inv"}, block_size=[16, 32])
+
+
+@pytest.mark.parametrize("block", [[True, 32], [16], [16, 0], "16,32"])
+def test_invalid_explicit_blocks_fail(block):
+    with pytest.raises(ValueError, match="two positive integers"):
+        quantize({"p.weight": torch.ones(32, 64)}, source(), {"p.weight_scale_inv"}, block_size=block)

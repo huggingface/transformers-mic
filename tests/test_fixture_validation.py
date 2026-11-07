@@ -71,8 +71,40 @@ def test_compact_saved_config_preserves_effective_dimensions_and_patterns(tmp_pa
     assert "no_rope_layer_interval" not in text
     assert "dtype" not in text and "dtype" not in saved["vision_config"]
     assert saved["dtype"] == "bfloat16"
-    assert text["head_dim"] == 16 and text["no_rope_layers"] == [1, 0]
+    assert "head_dim" not in text and text["no_rope_layers"] == [1, 0]
     restored = MistralLarge4Config.from_dict(saved)
     assert restored.text_config.qk_head_dim == 32
     assert restored.text_config.head_dim == 16
     assert restored.text_config.no_rope_layers == [1, 0]
+
+
+@pytest.mark.parametrize("fixture", [
+    {"num_experts": 1, "num_experts_per_tok": 1},
+    {"num_experts": 4, "num_experts_per_tok": 4},
+    {"num_experts": 4, "num_experts_per_tok": 2, "first_k_dense_replace": 2, "num_hidden_layers": 2},
+])
+def test_sparse_source_cannot_become_dense(fixture):
+    from transformers_mic.fixture_validation import validate_preservation
+
+    original = {"num_experts": 64, "num_experts_per_tok": 8, "first_k_dense_replace": 1, "num_hidden_layers": 48}
+    with pytest.raises(ValueError, match="Lossy fixture"):
+        validate_preservation(original, fixture)
+
+
+def test_quantization_and_layer_kinds_cannot_be_lost():
+    from transformers_mic.fixture_validation import validate_preservation
+
+    original = {"text_config": {"quantization_config": {"quant_method": "fp8"},
+        "mlp_layer_types": ["dense", "sparse"]}}
+    with pytest.raises(ValueError, match="lost fp8 quantization"):
+        validate_preservation(original, {"text_config": {"mlp_layer_types": ["dense"]}}, quantization=True)
+    validate_preservation({"num_experts": 64, "num_experts_per_tok": 8},
+                          {"num_experts": 4, "num_experts_per_tok": 2})
+
+
+@pytest.mark.parametrize("top_key", ["num_experts_per_tok", "top_k_experts", "moe_k"])
+def test_sparse_routing_aliases_cannot_select_all_experts(top_key):
+    from transformers_mic.fixture_validation import validate_preservation
+
+    with pytest.raises(ValueError, match="routing became dense"):
+        validate_preservation({"moe_num_experts": 64, top_key: 8}, {"moe_num_experts": 4, top_key: 4})

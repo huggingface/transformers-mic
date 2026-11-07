@@ -627,7 +627,7 @@ def test_a_rebuild_reuses_the_recorded_config_even_when_the_rule_changes(tmp_pat
     assert build_fixtures.recorded_config(out, fixture) == json.loads(json.dumps(config))
 
     # Today's rule makes something else; the recorded config still reproduces the key.
-    monkeypatch.setattr(build_fixtures, "shrink", lambda c: BertConfig(hidden_size=32, num_attention_heads=2))
+    monkeypatch.setattr(build_fixtures, "shrink", lambda c, **kwargs: BertConfig(hidden_size=32, num_attention_heads=2))
     assert build_fixtures.fixture_key(source, BertModel, [], recipe)[0] != key
     recorded = {**recipe, "recorded_config": build_fixtures.recorded_config(out, fixture)}
     assert build_fixtures.fixture_key(source, BertModel, [], recorded)[0] == key
@@ -1002,11 +1002,12 @@ def test_input_layouts_keep_the_first_layout_and_add_what_it_lacks():
     assert layouts[1]["pixel_values"].shape == (2, 4, 3, 32, 32)  # frames, as the processor sends
 
 
-def test_fp8_save_and_reload_uses_source_metadata_for_another_architecture(tmp_path):
+@pytest.mark.parametrize("block", [None, [16, 32]])
+def test_fp8_save_and_reload_uses_source_metadata_for_another_architecture(tmp_path, block):
     from transformers import LlamaConfig, LlamaForCausalLM, FineGrainedFP8Config
 
     model = LlamaForCausalLM(LlamaConfig(
-        vocab_size=32, hidden_size=16, intermediate_size=32,
+        vocab_size=32, hidden_size=32, intermediate_size=32,
         num_hidden_layers=1, num_attention_heads=2, num_key_value_heads=2,
     )).eval().bfloat16()
     config = {"quant_method": "fp8", "activation_scheme": "dynamic",
@@ -1017,13 +1018,14 @@ def test_fp8_save_and_reload_uses_source_metadata_for_another_architecture(tmp_p
     source = tmp_path / "source"
     source.mkdir()
     out = tmp_path / "out"
-    build_fixtures.save(model, out, source, [], checkpoint={
+    recipe = {"config_overrides": {"fields": {"quantization_config.weight_block_size": block}}} if block else {}
+    build_fixtures.save(model, out, source, [], recipe=recipe, checkpoint={
         "keys": keys, "binary": False, "quantization_config": config,
     })
     saved = safetensors.load_file(out / "model.safetensors")
     assert all(saved[name].dtype == torch.float8_e4m3fn for name in quantized)
     assert saved["lm_head.weight"].dtype == torch.bfloat16
-    assert json.loads((out / "config.json").read_text())["quantization_config"]["weight_block_size"] == [8, 8]
+    assert json.loads((out / "config.json").read_text())["quantization_config"]["weight_block_size"] == (block or [8, 8])
     reloaded, info = LlamaForCausalLM.from_pretrained(
         out, dtype=torch.bfloat16, output_loading_info=True,
         quantization_config=FineGrainedFP8Config(dequantize=True),
@@ -1096,7 +1098,7 @@ def test_save_updates_nested_dtype_after_cast_and_round_trips(tmp_path, dtype):
 
 
 @pytest.mark.parametrize("retains_quantizer", [True, False])
-def test_numeric_health_records_and_casts_dequantized_parameters(tmp_path, retains_quantizer):
+def test_numeric_health_rejects_broken_raw_dequantized_loading(tmp_path, retains_quantizer):
     class Dequantized(torch.nn.Module):
         def __init__(self):
             super().__init__()
@@ -1113,6 +1115,43 @@ def test_numeric_health_records_and_casts_dequantized_parameters(tmp_path, retai
 
     (tmp_path / "config.json").write_text(json.dumps({"quantization_config": {"quant_method": "fp8"}}))
     rows = build_fixtures.numeric_health(Dequantized, tmp_path, {"x": torch.ones(2, 2)})
-    assert all(row["finite"] for row in rows.values())
-    assert rows["float32"]["cast_after_dequantization"] is True
-    assert rows["float32"]["loaded_parameter_dtypes"] == ["torch.bfloat16"]
+    assert rows["float32"]["finite"] is False
+    assert "dtype" in rows["float32"]["error"]
+    assert rows["bfloat16"]["finite"] is True
+    assert rows["bfloat16"]["raw_load_forward"] is True
+    assert "cast_after_dequantization" not in rows["bfloat16"]
+
+
+def test_explicit_widths_survive_shrink_and_keep_dependent_dimensions():
+    from sweep import shrink
+    from transformers import MistralLarge4Config
+
+    original = MistralLarge4Config(text_config={"num_hidden_layers": 4,
+        "no_rope_layers": [1, 0, 1, 0], "kv_source_layers": [0, 1, 0, 1],
+        "indexer_types": ["full", "full", "shared", "shared"]})
+    shrunk = shrink(original, size_defaults={
+        ("text_config", "qk_rope_head_dim"): 32,
+        ("text_config", "qk_nope_head_dim"): 32,
+        ("text_config", "index_head_dim"): 32,
+        ("text_config", "n_routed_experts"): 8})
+    assert shrunk.text_config.qk_head_dim == 64
+    assert shrunk.text_config.head_dim == shrunk.text_config.qk_rope_head_dim == 32
+    assert shrunk.text_config.index_head_dim == 32
+    assert shrunk.text_config.n_routed_experts == 8
+    assert shrunk.text_config.vocab_size == original.text_config.vocab_size
+    assert shrunk.vision_config.image_size == original.vision_config.image_size
+
+
+def test_invalid_explicit_tester_defaults_do_not_fall_back(monkeypatch):
+    monkeypatch.setattr(build_fixtures, "TESTER_SIZES", {"src": {"explicit": True, "fields": {"head_dim": 32}}})
+    monkeypatch.setattr(build_fixtures, "TESTER_OFF", {})
+    calls = []
+
+    def fail(*args, **kwargs):
+        calls.append(True)
+        raise ValueError("invalid explicit dimensions")
+
+    monkeypatch.setattr(build_fixtures, "_build_fixture", fail)
+    with pytest.raises(ValueError, match="invalid explicit dimensions"):
+        build_fixtures.build_fixture()
+    assert len(calls) == 1
