@@ -159,6 +159,9 @@ def eligible(workspace, stage, log, command=()):
             "RuntimeError:",
             "fail the gate",
             "sensitivity",
+            # A drafted gradient check the loss never reaches (BLIP-2's Q-Former layer 0 sits
+            # behind zero-initialized query_tokens): record fails with no traceback.
+            "training.gradients: [",
         )
     ) and not any(
         marker in text

@@ -239,7 +239,9 @@ dict of named BOOLEAN checks for finite, nonzero gradients, never raw norms, on
 parameters the loss reaches: not a decoder training never runs (VibeVoice's
 acoustic decoder), a router whose routing can give zero (PhiMoE's sparsemixer), or
 a layer behind a zero-initialized one (RT-DETR's bbox_embed MLP zero-inits its
-output layer, so on the first step only that last linear gets a gradient).
+output layer, so on the first step only that last linear gets a gradient; BLIP-2
+zero-inits query_tokens, so in the random fixture the Q-Former's first self-attention
+query/key weights get none: check language_projection or a later layer).
 Find a layer of one kind by name, never by index: next(n for n in names if
 n.endswith("experts.gate_up_proj")), since the fixture's depth follows its layer kinds
 and early layers may be dense before MoE ones (first_k_dense_replace).
@@ -397,7 +399,12 @@ not memory:
 - Videos are lists of such frames: each frame an (H, W, 3) uint8 array, never
   torch.full(..., 0.2) float clips (VideoMAE: rescaled to two near-identical clips,
   and a constant patch has a zero normalized-pixel target). Give frames texture
-  and each clip its own colour. An image processor (VideoMAEImageProcessor) takes
+  and each clip its own colour. Texture is structure that moves (gradients, stripes,
+  a shape shifting with the frame index), never i.i.d. noise: a noise clip flipped
+  in time or width is an equally random clip, so the gate sees no change, and a
+  masked-patch model cannot predict noise, so the fixture never fits (VideoMAE).
+  E.g. y, x = np.mgrid[:H, :W]; frame[..., c] = (x + 2 * y + 16 * t + offset[c]) % 256.
+  An image processor (VideoMAEImageProcessor) takes
   the clips as images=; videos= is only for video and multimodal processors.
 - A vision-language model inserts image features only at the image tokens the
   processor puts in input_ids: tokenize the training text with its images,
