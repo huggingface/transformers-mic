@@ -386,11 +386,13 @@ def check_zero_query_gradients(plan, config):
     if not isinstance(config.get("num_query_tokens"), int):
         return
     for name in re.findall(r"[\"']([^\"'\n]*)[\"']", plan["usage"]):
-        if re.search(r"qformer\.encoder\.layer\.0\.attention\.attention\.(?:query|key)\.", name):
+        # Measured on the fixture: layer 0's self-attention (all of it) and its cross-attention
+        # query/key get exactly zero gradient; cross-attention value/output and the query MLP do not.
+        if re.search(r"qformer\.encoder\.layer\.0\.(?:attention\.|crossattention\.attention\.(?:query|key)\.)", name):
             raise ValueError(
                 f"the gradient of {name!r} is zero in the random fixture: query_tokens are zero-initialized, "
-                "so the Q-Former's first self-attention query/key see zeros; check language_projection.weight "
-                "or a trained layer the loss reaches"
+                "so the Q-Former's first self-attention and its cross-attention query/key see zeros; check "
+                "language_projection.weight or qformer.encoder.layer.0.crossattention.output.dense.weight"
             )
 
 

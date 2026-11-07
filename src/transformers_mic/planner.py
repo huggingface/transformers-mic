@@ -240,8 +240,8 @@ parameters the loss reaches: not a decoder training never runs (VibeVoice's
 acoustic decoder), a router whose routing can give zero (PhiMoE's sparsemixer), or
 a layer behind a zero-initialized one (RT-DETR's bbox_embed MLP zero-inits its
 output layer, so on the first step only that last linear gets a gradient; BLIP-2
-zero-inits query_tokens, so in the random fixture the Q-Former's first self-attention
-query/key weights get none: check language_projection or a later layer).
+zero-inits query_tokens, so in the random fixture the Q-Former's layer-0 self-attention
+and cross-attention query/key get none: check language_projection).
 Find a layer of one kind by name, never by index: next(n for n in names if
 n.endswith("experts.gate_up_proj")), since the fixture's depth follows its layer kinds
 and early layers may be dense before MoE ones (first_k_dense_replace).

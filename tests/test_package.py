@@ -1963,7 +1963,9 @@ def test_blip2_q_former_first_query_gets_no_fixture_gradient():
     with pytest.raises(ValueError, match="zero-initialized"):
         commands.check_zero_query_gradients({"usage": usage}, {"num_query_tokens": 32})
     commands.check_zero_query_gradients({"usage": usage}, {"model_type": "bert"})
-    commands.check_zero_query_gradients({"usage": usage.replace("layer.0.attention.attention", "layer.0.crossattention.attention")}, {"num_query_tokens": 32})
+    with pytest.raises(ValueError, match="zero-initialized"):  # round 7's draft
+        commands.check_zero_query_gradients({"usage": usage.replace("layer.0.attention", "layer.0.crossattention")}, {"num_query_tokens": 32})
+    commands.check_zero_query_gradients({"usage": usage.replace("layer.0.attention.attention.query", "layer.0.crossattention.output.dense")}, {"num_query_tokens": 32})
 
 
 def test_planner_records_every_call_with_its_listed_price(monkeypatch):
