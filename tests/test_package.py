@@ -1905,6 +1905,33 @@ def test_vlm_training_text_must_carry_image_tokens():
     commands.check_image_tokens_in_text({"usage": fixed}, blip2)
 
 
+def test_an_image_processor_takes_clips_as_images():
+    # MCG-NJU/videomae-base (2026-11-07): VideoMAEImageProcessor(videos=...) raised "missing 'images'".
+    usage = (
+        "```py runnable:t\n"
+        "processor = VideoMAEImageProcessor.from_pretrained(model_id)\n"
+        "inputs = processor(videos=videos, return_tensors=\"pt\")\n"
+        "```\n"
+    )
+    with pytest.raises(ValueError, match="takes no videos="):
+        commands.check_image_processor_videos({"usage": usage})
+    commands.check_image_processor_videos({"usage": usage.replace("videos=videos", "images=videos")})
+    commands.check_image_processor_videos({"usage": usage.replace("VideoMAEImageProcessor", "AutoProcessor")})
+
+
+def test_any_requires_grad_selection_by_a_deep_layer_name_is_rejected():
+    # Salesforce/blip2-opt-2.7b (2026-11-07): frozen per parameter, without requires_grad_(False).
+    usage = (
+        "```py runnable:t\n"
+        "for name, param in model.named_parameters():\n"
+        "    param.requires_grad_(name.startswith(\"language_model.model.decoder.layers.31.\"))\n"
+        "```\n"
+    )
+    with pytest.raises(ValueError, match="layer 31 does not exist"):
+        commands.check_trainable_selection({"usage": usage}, {})
+    commands.check_trainable_selection({"usage": usage.replace("layers.31.", "layers.1.")}, {})
+
+
 def test_planner_records_every_call_with_its_listed_price(monkeypatch):
     monkeypatch.setattr(planner, "CALLS", [])
     monkeypatch.setattr(planner, "_prices", {("m", "p"): (0.3, 1.2)})

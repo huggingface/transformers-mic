@@ -397,7 +397,8 @@ not memory:
 - Videos are lists of such frames: each frame an (H, W, 3) uint8 array, never
   torch.full(..., 0.2) float clips (VideoMAE: rescaled to two near-identical clips,
   and a constant patch has a zero normalized-pixel target). Give frames texture
-  and each clip its own colour.
+  and each clip its own colour. An image processor (VideoMAEImageProcessor) takes
+  the clips as images=; videos= is only for video and multimodal processors.
 - A vision-language model inserts image features only at the image tokens the
   processor puts in input_ids: tokenize the training text with its images,
   processor(images=images, text=texts), and set image-token labels to -100. Text

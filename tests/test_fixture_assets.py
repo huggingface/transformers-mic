@@ -1007,7 +1007,8 @@ def test_input_diagnosis_names_inputs_that_cannot_move_the_outputs():
 
     # MCG-NJU/videomae-base: float clips of 0.2 and 0.8 rescaled by 1/255 again.
     clips = torch.stack([torch.full((2, 3, 4, 4), -1.983), torch.full((2, 3, 4, 4), -1.972)])
-    assert "spans only" in build_fixtures.input_diagnosis(SimpleNamespace(), {"pixel_values": clips})[0]
+    clips[:, :, 2] += 0.3  # channels are normalized apart: the span is not the signal
+    assert "nearly the same image" in build_fixtures.input_diagnosis(SimpleNamespace(), {"pixel_values": clips})[0]
     images = torch.stack([torch.full((3, 4, 4), -1.9), torch.full((3, 4, 4), 2.1)])
     assert build_fixtures.input_diagnosis(SimpleNamespace(), {"pixel_values": images}) == []
 

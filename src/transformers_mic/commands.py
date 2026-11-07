@@ -375,6 +375,22 @@ def check_image_tokens_in_text(plan, config):
                 )
 
 
+def check_image_processor_videos(plan):
+    """An image processor takes clips as images=; videos= is for video and multimodal processors.
+
+    MCG-NJU/videomae-base's drafts (2026-11-07) called VideoMAEImageProcessor(videos=...), which
+    raises "missing 1 required positional argument: 'images'", and the repair kept the call.
+    """
+    usage = plan["usage"]
+    for name in re.findall(r"^\s*(\w+)\s*=\s*\w*ImageProcessor\w*\.from_pretrained\(", usage, re.M):
+        match = re.search(rf"\b{re.escape(name)}\((?:[^()]|\([^()]*\))*\bvideos\s*=", usage)
+        if match:
+            raise ValueError(
+                f"{name} is an image processor and takes no videos=: pass the clips as images=videos "
+                "(each clip a list of (H, W, 3) uint8 frames)"
+            )
+
+
 def check_partial_training(plan, context):
     """Above ~3B parameters the real checkpoint's training step must freeze most of it."""
     count = loaded_parameters(context) or 0
@@ -395,8 +411,12 @@ def check_trainable_selection(plan, config, parameters=None):
     named_parameters() once, as the input embeddings: empty optimizer parameter list); then
     name.endswith("mlp.input_linear.weight") trained that weight in all 24 layers, about 4B
     parameters, and the backward ran out of the 22 GB GPU while the 2-layer fixture passed.
+
+    Salesforce/blip2-opt-2.7b's draft (2026-11-07) froze without requires_grad_(False), by
+    param.requires_grad_(name.startswith("language_model.model.decoder.layers.31.")), and
+    failed the same way: any requires_grad_ call selects a subset.
     """
-    if "requires_grad_(False)" not in plan["usage"]:
+    if "requires_grad_(" not in plan["usage"]:
         return
     literals = re.findall(r"[\"']([^\"'\n]*)[\"']", plan["usage"])
     for text in literals:
@@ -1058,6 +1078,7 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
                 lambda: check_code_fences(plan),
                 lambda: check_no_remote_code(plan),
                 lambda: check_image_shapes(plan),
+                lambda: check_image_processor_videos(plan),
                 lambda: check_loss_has_gradients(plan),
             ]
             if config:

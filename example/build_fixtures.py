@@ -119,10 +119,10 @@ def config_insensitive(config, batch):
         )
     return inert
 
-# A uint8 image normalized by the processor spans units (about +-2); a float image in [0, 1]
-# that the processor rescales by 1/255 again spans at most 1/255/std (~0.017, VideoMAE's
-# torch.full(0.2) and torch.full(0.8) clips: -1.983 and -1.972).
-MIN_PIXEL_SPAN = 0.05
+# Two uint8 images of different colours differ by units after normalization; float images
+# in [0, 1] that the processor rescales by 1/255 again differ by at most 1/255/std (~0.017:
+# VideoMAE's torch.full(0.2) and torch.full(0.8) clips became -1.983 and -1.972).
+MIN_ROW_DIFFERENCE = 0.05
 
 
 def input_diagnosis(config, batch):
@@ -133,15 +133,17 @@ def input_diagnosis(config, batch):
     """
     problems = []
     for name, value in batch.items():
-        if not (name.startswith("pixel_values") and isinstance(value, torch.Tensor) and value.is_floating_point()):
+        if not (name.startswith("pixel_values") and isinstance(value, torch.Tensor)
+                and value.is_floating_point() and value.dim() > 1 and len(value) > 1):
             continue
-        span = float(value.float().max() - value.float().min()) if value.numel() else 0.0
-        if span < MIN_PIXEL_SPAN:
+        rows = value.float()
+        difference = float((rows[1:] - rows[:1]).abs().max())
+        if difference < MIN_ROW_DIFFERENCE:
             problems.append(
-                f"{name} spans only {span:.3g} after preprocessing: the images or video frames reached the "
-                "processor as floats in [0, 1] and were rescaled by 1/255 again, so every row is nearly the "
-                "same image. Build each image or frame as an (H, W, 3) uint8 array with texture and a "
-                "different colour per example"
+                f"the rows of {name} differ by at most {difference:.3g} after preprocessing, so the "
+                "examples are nearly the same image: images or video frames given as floats in [0, 1] are "
+                "rescaled by 1/255 again. Build each image or frame as an (H, W, 3) uint8 array with "
+                "texture and a different colour per example"
             )
     token = next((getattr(config, k) for k in ("image_token_index", "image_token_id")
                   if isinstance(getattr(config, k, None), int)), None)
