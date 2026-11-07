@@ -428,6 +428,16 @@ def check_trainable_selection(plan, config, parameters=None):
                 "index the last layer from model.config.num_hidden_layers - 1, e.g. "
                 "model.model.layers[-1].requires_grad_(True)"
             )
+    # Salesforce/blip2-opt-2.7b (2026-11-07): trained decoder.layers[-1] and checked the
+    # gradients of decoder.layers.0, which requires_grad_(False) froze: record failed.
+    if "requires_grad_(False)" in plan["usage"] and re.search(r"layers\[\s*-1\s*\]", plan["usage"]):
+        first = [t for t in literals if re.search(r"\b(?:layers?|h|blocks?)\.0\.", t)]
+        if first:
+            raise ValueError(
+                f"only layers[-1] trains, but {first[0]!r} names layer 0, which requires_grad_(False) froze: "
+                "its gradient is None and the check fails; check the trained layer, e.g. "
+                "f\"...layers.{model.config.num_hidden_layers - 1}.<suffix>\" (text_config for a VLM)"
+            )
     if config.get("tie_word_embeddings") is True and any(t.startswith("lm_head") for t in literals):
         raise ValueError(
             "trainable parameters are chosen by the name 'lm_head', but tie_word_embeddings is true: "

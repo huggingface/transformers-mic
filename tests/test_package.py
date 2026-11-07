@@ -1932,6 +1932,22 @@ def test_any_requires_grad_selection_by_a_deep_layer_name_is_rejected():
     commands.check_trainable_selection({"usage": usage.replace("layers.31.", "layers.1.")}, {})
 
 
+def test_gradient_checks_must_name_the_trained_last_layer():
+    # Salesforce/blip2-opt-2.7b (2026-11-07): trained layers[-1], checked layers.0.
+    usage = (
+        "```py runnable:t\n"
+        "model.requires_grad_(False)\n"
+        "model.language_model.model.decoder.layers[-1].requires_grad_(True)\n"
+        "checked = (\"language_model.model.decoder.layers.0.fc1.weight\",)\n"
+        "```\n"
+    )
+    with pytest.raises(ValueError, match="names layer 0"):
+        commands.check_trainable_selection({"usage": usage}, {})
+    trained = usage.replace('\"language_model.model.decoder.layers.0.fc1.weight\"',
+                            'f\"language_model.model.decoder.layers.{last}.fc1.weight\"')
+    commands.check_trainable_selection({"usage": trained}, {})
+
+
 def test_planner_records_every_call_with_its_listed_price(monkeypatch):
     monkeypatch.setattr(planner, "CALLS", [])
     monkeypatch.setattr(planner, "_prices", {("m", "p"): (0.3, 1.2)})
