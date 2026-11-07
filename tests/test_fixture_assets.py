@@ -1,5 +1,6 @@
 """Regression coverage for non-language-model fixture inputs."""
 
+import copy
 import hashlib
 import json
 import sys
@@ -154,6 +155,65 @@ def test_shrink_resamples_longrope_factors_to_the_resized_head():
     rope = shrink(config).rope_parameters
     assert len(rope["short_factor"]) == len(rope["long_factor"]) < half
     assert rope["short_factor"][0] == 1.0 and rope["long_factor"][0] == 2.0
+
+
+def glm4v_source():
+    from transformers import Glm4vConfig
+
+    return Glm4vConfig(
+        text_config={
+            "hidden_size": 4096,
+            "num_attention_heads": 32,
+            "num_key_value_heads": 2,
+            "rope_parameters": {
+                "rope_type": "default",
+                "mrope_section": [8, 12, 12],
+                "rope_theta": 10000,
+                "partial_rotary_factor": 0.5,
+            },
+        }
+    )
+
+
+def test_config_overrides_that_resize_the_head_refit_mrope_sections(tmp_path, monkeypatch):
+    # GLM-4.1V's planner overrode text_config.hidden_size to 128 after the rule had fitted
+    # mrope_section to a 64-wide model: [1, 2, 1] split 8 rotary channels and the forward raised.
+    from transformers import Glm4vForConditionalGeneration
+
+    glm4v_source().save_pretrained(tmp_path)
+    monkeypatch.setitem(build_fixtures.TESTER_OFF, str(tmp_path), {})
+    recipe = {"config_overrides": {"fields": {"text_config.hidden_size": 128, "vision_config.out_hidden_size": 128}}}
+    text = build_fixtures.shrunk_config(tmp_path, Glm4vForConditionalGeneration, recipe).text_config
+    half = text.hidden_size // text.num_attention_heads * text.rope_parameters["partial_rotary_factor"] // 2
+    assert sum(text.rope_parameters["mrope_section"]) == half == 8
+    assert text.rope_parameters["mrope_section"] == [2, 3, 3]  # the checkpoint's 8:12:12, not [1, 2, 1] doubled
+
+    unchanged = build_fixtures.shrunk_config(tmp_path, Glm4vForConditionalGeneration, None).text_config
+    assert unchanged.rope_parameters["mrope_section"] == [1, 2, 1]
+
+
+def test_fit_rope_leaves_the_rules_own_tables_unchanged():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import fit_rope_everywhere, shrink
+    from transformers import Phi3Config
+
+    half = 3072 // 24 * 3 // 4 // 2
+    longrope = Phi3Config(
+        hidden_size=3072,
+        num_attention_heads=24,
+        partial_rotary_factor=0.75,
+        max_position_embeddings=131072,
+        original_max_position_embeddings=4096,
+        rope_scaling={
+            "type": "longrope",
+            "short_factor": [1.0 + i for i in range(half)],
+            "long_factor": [2.0 + i for i in range(half)],
+        },
+    )
+    for source in (glm4v_source(), longrope):
+        original = source.to_dict()
+        values = shrink(source).to_dict()
+        assert fit_rope_everywhere(copy.deepcopy(values), original) == values
 
 
 def test_shrink_keeps_stage_backbone_outputs_and_matches_encoder_channels():
