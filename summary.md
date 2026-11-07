@@ -314,7 +314,6 @@ Models with real-checkpoint regressions in the daily GPU CI and no contract, shr
 | moshi | 0 | 2 | [kmhf/hf-moshika](https://huggingface.co/kmhf/hf-moshika) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41999673429) |
 | bridgetower | 0 | 1 | [regisss/bridgetower-newyorker-a100-8x](https://huggingface.co/regisss/bridgetower-newyorker-a100-8x) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41626675456) |
 | canary | 0 | 1 | [nvidia/canary-1b-v2](https://huggingface.co/nvidia/canary-1b-v2) | yes | — |
-| cohere_asr | 0 | 1 | [CohereLabs/cohere-transcribe-03-2026](https://huggingface.co/CohereLabs/cohere-transcribe-03-2026) | yes | — |
 | cosmos3_edge | 0 | 1 | [nvidia/Cosmos3-Edge](https://huggingface.co/nvidia/Cosmos3-Edge) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41964667193) |
 | ernie4_5_moe | 0 | 1 | [baidu/ERNIE-4.5-21B-A3B-PT](https://huggingface.co/baidu/ERNIE-4.5-21B-A3B-PT) | yes | — |
 | fsmt | 0 | 1 | [facebook/wmt19-en-ru](https://huggingface.co/facebook/wmt19-en-ru) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41999677156) |
@@ -331,6 +330,7 @@ Models with real-checkpoint regressions in the daily GPU CI and no contract, shr
 | t5gemma2 | 0 | 1 | [google/t5gemma-2-270m-270m](https://huggingface.co/google/t5gemma-2-270m-270m) | yes | — |
 | cwm | 2 | 0 | [facebook/cwm](https://huggingface.co/facebook/cwm) | no | not draftable |
 | mamba2 | 2 | 0 | [mistralai/Mamba-Codestral-7B-v0.1](https://huggingface.co/mistralai/Mamba-Codestral-7B-v0.1) | no | not draftable |
+| blip_2 | 1 | 0 | [Salesforce/blip2-opt-2.7b](https://huggingface.co/Salesforce/blip2-opt-2.7b) | no | not draftable |
 
 ### Calls to add to existing contracts
 

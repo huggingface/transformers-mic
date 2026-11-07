@@ -92,6 +92,7 @@
  "huggingface-mic/clip-vit-base-patch32-mic": "clip",
  "huggingface-mic/clip-vit-base-patch32-vision-mic": "clip_vision_model",
  "huggingface-mic/clipseg-rd64-refined-mic": "clipseg",
+ "huggingface-mic/cohere-transcribe-03-2026-ungated-mic": "cohere_asr",
  "huggingface-mic/conv-bert-base-mic": "convbert",
  "huggingface-mic/convnext-tiny-224-mic": "convnext",
  "huggingface-mic/convnextv2-nano-1k-224-mic": "convnextv2",

@@ -435,20 +435,6 @@
    ]
   },
   {
-   "checkpoint": "CohereLabs/cohere-transcribe-03-2026",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "cohere_asr",
-   "other": 1,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_dynamic",
-    "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_dynamic_static_cache",
-    "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_static",
-    "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_static_static_cache"
-   ]
-  },
-  {
    "checkpoint": "nvidia/Cosmos3-Edge",
    "checkpoint_source": "shrink sweep",
    "integration": 0,

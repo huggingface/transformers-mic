@@ -121,18 +121,6 @@
    "shrinkable": true
   },
   {
-   "checkpoint": "CohereLabs/cohere-transcribe-03-2026",
-   "draft": "",
-   "model": "cohere_asr",
-   "next_batch": false,
-   "other": 1,
-   "real_checkpoint": 0,
-   "regressions": 1,
-   "run": "",
-   "shrink": "",
-   "shrinkable": true
-  },
-  {
    "checkpoint": "nvidia/Cosmos3-Edge",
    "draft": "failure",
    "model": "cosmos3_edge",
@@ -320,6 +308,18 @@
    "other": 0,
    "real_checkpoint": 2,
    "regressions": 2,
+   "run": "",
+   "shrink": "",
+   "shrinkable": false
+  },
+  {
+   "checkpoint": "Salesforce/blip2-opt-2.7b",
+   "draft": "not draftable",
+   "model": "blip_2",
+   "next_batch": false,
+   "other": 0,
+   "real_checkpoint": 1,
+   "regressions": 1,
    "run": "",
    "shrink": "",
    "shrinkable": false
