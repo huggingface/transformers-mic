@@ -4800,6 +4800,18 @@
    "tests/models/pocket_tts/test_processing_pocket_tts.py::PocketTTSProcessingIntegrationTest::test_split_text"
   ]
  },
+ "49594#vipllava": {
+  "bad_commit": "c5bd76ec51a70c303be110cc04be3d78cf755299",
+  "date": "2026-11-07",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/42328939060/job/128283323643",
+  "mic": "not-covered",
+  "model": "vipllava",
+  "pr": "49594",
+  "tests": [
+   "tests/models/vipllava/test_modeling_vipllava.py::VipLlavaForConditionalGenerationIntegrationTest::test_small_model_integration_test"
+  ]
+ },
  "49664#beam": {
   "bad_commit": "966f59c897c15db8a5e14882d086beba8d6d0b9f",
   "date": "2026-10-17",
@@ -5105,6 +5117,19 @@
    "tests/models/nemotron3_5_transcribe/test_modeling_nemotron3_5_transcribe.py::Nemotron3_5TranscribeForConditionalGenerationModelTest::test_sdpa_can_dispatch_on_flash"
   ]
  },
+ "50406#shared": {
+  "bad_commit": "92b21f8daa4b226821ab9aa5774f4b4887af0225",
+  "date": "2026-11-07",
+  "integration": false,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/42328939060/job/128283332421",
+  "mic": "not-covered",
+  "model": null,
+  "pr": "50406",
+  "tests": [
+   "tests/tensor_parallel/test_tensor_parallel.py::TestTensorParallelTiedWeights::test_checkpoint_with_both_tied_keys_matches_tp1_0_equal",
+   "tests/tensor_parallel/test_tensor_parallel.py::TestTensorParallelTiedWeights::test_checkpoint_with_both_tied_keys_matches_tp1_1_different"
+  ]
+ },
  "sticky#albert#2026-10-06": {
   "date": "2026-10-06",
   "day": 20732,
@@ -5300,6 +5325,18 @@
    "tests/models/canary/test_modeling_canary.py::CanaryModelTest::test_torch_export_generate_static_static_cache"
   ]
  },
+ "sticky#clipseg#2026-11-07": {
+  "date": "2026-11-07",
+  "day": 20764,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "clipseg",
+  "run_id": "42328911987",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/clipseg/test_modeling_clipseg.py::CLIPSegModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
  "sticky#cohere#2026-10-17": {
   "date": "2026-10-17",
   "day": 20743,
@@ -5376,6 +5413,18 @@
   "signal": "torch.OutOfMemoryError",
   "tests": [
    "tests/models/cwm/test_modeling_cwm.py::CwmIntegrationTest::test_cwm_generation_20_tokens",
+   "tests/models/cwm/test_modeling_cwm.py::CwmIntegrationTest::test_cwm_sliding_window_long_sequence"
+  ]
+ },
+ "sticky#cwm#2026-10-12": {
+  "date": "2026-10-12",
+  "day": 20738,
+  "integration": true,
+  "mic": "not-covered",
+  "model": "cwm",
+  "run_id": "42328939060",
+  "signal": "torch.OutOfMemoryError",
+  "tests": [
    "tests/models/cwm/test_modeling_cwm.py::CwmIntegrationTest::test_cwm_sliding_window_long_sequence"
   ]
  },
@@ -5595,6 +5644,18 @@
   "mic": "green-on-main",
   "model": "gemma3n",
   "run_id": "41452669419",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/gemma3n/test_modeling_gemma3n.py::Gemma3nTextModelTest::test_generate_with_static_cache"
+  ]
+ },
+ "sticky#gemma3n#2026-10-13": {
+  "date": "2026-10-13",
+  "day": 20739,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "gemma3n",
+  "run_id": "42174793978",
   "signal": "AssertionError",
   "tests": [
    "tests/models/gemma3n/test_modeling_gemma3n.py::Gemma3nTextModelTest::test_generate_with_static_cache"

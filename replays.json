@@ -1207,6 +1207,10 @@
   "verdict": "not-covered",
   "version": 7
  },
+ "49594#vipllava": {
+  "verdict": "not-covered",
+  "version": 7
+ },
  "49664#beam": {
   "verdict": "out-of-scope",
   "version": 7
@@ -1293,6 +1297,10 @@
   "verdict": "not-covered",
   "version": 7
  },
+ "50406#shared": {
+  "verdict": "not-covered",
+  "version": 7
+ },
  "sticky#albert#2026-10-06": {
   "verdict": "out-of-scope",
   "version": 7
@@ -1353,6 +1361,10 @@
   "verdict": "not-covered",
   "version": 7
  },
+ "sticky#clipseg#2026-11-07": {
+  "verdict": "out-of-scope",
+  "version": 7
+ },
  "sticky#cohere#2026-10-17": {
   "verdict": "out-of-scope",
   "version": 7
@@ -1374,6 +1386,10 @@
   "version": 7
  },
  "sticky#cwm#2026-10-09": {
+  "verdict": "not-covered",
+  "version": 7
+ },
+ "sticky#cwm#2026-10-12": {
   "verdict": "not-covered",
   "version": 7
  },
@@ -1456,6 +1472,10 @@
   "version": 7
  },
  "sticky#gemma3n#2026-10-09": {
+  "verdict": "out-of-scope",
+  "version": 7
+ },
+ "sticky#gemma3n#2026-10-13": {
   "verdict": "out-of-scope",
   "version": 7
  },

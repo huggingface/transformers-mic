@@ -100,6 +100,12 @@
     "gpu_only": false,
     "integration": false,
     "test": "tests/models/gemma3n/test_modeling_gemma3n.py::Gemma3nTextModelTest::test_generate_with_static_cache"
+   },
+   {
+    "date": "2026-10-13",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/gemma3n/test_modeling_gemma3n.py::Gemma3nTextModelTest::test_generate_with_static_cache"
    }
   ],
   "gemma4": [
@@ -382,6 +388,17 @@
    ]
   },
   {
+   "checkpoint": "llava-hf/vip-llava-7b-hf",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "vipllava",
+   "other": 0,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/vipllava/test_modeling_vipllava.py::VipLlavaForConditionalGenerationIntegrationTest::test_small_model_integration_test"
+   ]
+  },
+  {
    "checkpoint": "vidore/colpali-v1.2-hf",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -612,6 +629,18 @@
    ]
   },
   {
+   "checkpoint": "facebook/cwm",
+   "checkpoint_source": "failing test",
+   "integration": 2,
+   "model": "cwm",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/cwm/test_modeling_cwm.py::CwmIntegrationTest::test_cwm_generation_20_tokens",
+    "tests/models/cwm/test_modeling_cwm.py::CwmIntegrationTest::test_cwm_sliding_window_long_sequence"
+   ]
+  },
+  {
    "checkpoint": "mistralai/Mamba-Codestral-7B-v0.1",
    "checkpoint_source": "failing test",
    "integration": 2,
@@ -631,18 +660,6 @@
    "shrinkable": false,
    "tests": [
     "tests/models/blip_2/test_modeling_blip_2.py::Blip2ModelIntegrationTest::test_inference_t5_multi_accelerator"
-   ]
-  },
-  {
-   "checkpoint": "facebook/cwm",
-   "checkpoint_source": "failing test",
-   "integration": 1,
-   "model": "cwm",
-   "other": 0,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/cwm/test_modeling_cwm.py::CwmIntegrationTest::test_cwm_generation_20_tokens",
-    "tests/models/cwm/test_modeling_cwm.py::CwmIntegrationTest::test_cwm_sliding_window_long_sequence"
    ]
   },
   {
@@ -970,6 +987,7 @@
   "test_flash_attn_2_inference_equivalence_right_padding": [
    "albert",
    "bert",
+   "clipseg",
    "electra",
    "ernie"
   ],

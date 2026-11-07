@@ -1,5 +1,5 @@
 {
- "awaiting_verdict": 11,
+ "awaiting_verdict": 15,
  "block_merges": {
   "ready": false,
   "unmet": [
@@ -15,44 +15,44 @@
  },
  "drafts_per_day": 2,
  "false_alarms": {
-  "prs_not_their_fault": 115,
-  "prs_with_failure": 139
+  "prs_not_their_fault": 121,
+  "prs_with_failure": 147
  },
  "missed": {
   "awaiting_verdict": 17,
-  "not_covered": 18,
+  "not_covered": 20,
   "real_checkpoint": 17
  },
  "next": [
   {
    "checkpoint": "eustlb/pocket-tts",
-   "draft": "queued",
+   "draft": "failure",
    "model": "pocket_tts",
    "next_batch": false,
    "other": 0,
    "real_checkpoint": 2,
    "regressions": 2,
-   "run": "",
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42192482634",
    "shrink": "",
    "shrinkable": true
   },
   {
    "checkpoint": "gradium/phonon-voices",
-   "draft": "queued",
+   "draft": "failure",
    "model": "gradium_phonon_tts",
    "next_batch": false,
    "other": 1,
    "real_checkpoint": 1,
    "regressions": 2,
-   "run": "",
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42192485403",
    "shrink": "",
    "shrinkable": true
   },
   {
    "checkpoint": "shi-labs/oneformer_ade20k_swin_tiny",
-   "draft": "",
+   "draft": "queued",
    "model": "oneformer",
-   "next_batch": true,
+   "next_batch": false,
    "other": 0,
    "real_checkpoint": 1,
    "regressions": 1,
@@ -62,8 +62,20 @@
   },
   {
    "checkpoint": "bairongz/QianfanOCR",
-   "draft": "",
+   "draft": "queued",
    "model": "qianfan_ocr",
+   "next_batch": false,
+   "other": 0,
+   "real_checkpoint": 1,
+   "regressions": 1,
+   "run": "",
+   "shrink": "",
+   "shrinkable": true
+  },
+  {
+   "checkpoint": "llava-hf/vip-llava-7b-hf",
+   "draft": "",
+   "model": "vipllava",
    "next_batch": true,
    "other": 0,
    "real_checkpoint": 1,
@@ -112,7 +124,7 @@
    "checkpoint": "nvidia/canary-1b-v2",
    "draft": "",
    "model": "canary",
-   "next_batch": false,
+   "next_batch": true,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -301,9 +313,9 @@
    "shrinkable": true
   },
   {
-   "checkpoint": "mistralai/Mamba-Codestral-7B-v0.1",
+   "checkpoint": "facebook/cwm",
    "draft": "not draftable",
-   "model": "mamba2",
+   "model": "cwm",
    "next_batch": false,
    "other": 0,
    "real_checkpoint": 2,
@@ -311,21 +323,20 @@
    "run": "",
    "shrink": "",
    "shrinkable": false
-  },
-  {
-   "checkpoint": "Salesforce/blip2-opt-2.7b",
-   "draft": "not draftable",
-   "model": "blip_2",
-   "next_batch": false,
-   "other": 0,
-   "real_checkpoint": 1,
-   "regressions": 1,
-   "run": "",
-   "shrink": "",
-   "shrinkable": false
   }
  ],
  "regressions": [
+  {
+   "date": "2026-11-07",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "clipseg",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
   {
    "date": "2026-11-06",
    "detail": "",
@@ -910,6 +921,17 @@
    "verdict": "already-red"
   },
   {
+   "date": "2026-10-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "gemma3n",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
    "date": "2026-10-12",
    "detail": "386 commits in range; test_model_video_generation fails identically on CPU at both ends (536ecc0, d203390) at its first assertion: prompt token order (vision_start vs timestamp) before the model runs;",
    "integration": true,
@@ -1403,28 +1425,6 @@
    "run": "",
    "tests": 2,
    "verdict": "out-of-scope"
-  },
-  {
-   "date": "2026-08-04",
-   "detail": "",
-   "integration": false,
-   "job": "https://github.com/huggingface/transformers/actions/runs/30874774683/job/91885739976",
-   "model": "qwen2_5_vl",
-   "pr": "47243",
-   "run": "",
-   "tests": 2,
-   "verdict": "out-of-scope"
-  },
-  {
-   "date": "2026-08-04",
-   "detail": "",
-   "integration": false,
-   "job": "https://github.com/huggingface/transformers/actions/runs/30874774683/job/91885750561",
-   "model": "pegasus",
-   "pr": "47243",
-   "run": "",
-   "tests": 4,
-   "verdict": "out-of-scope"
   }
  ],
  "replay": {
@@ -1436,14 +1436,14 @@
   "model-added": 4,
   "no-code-change": 0,
   "not-a-regression": 2,
-  "not-covered": 218,
+  "not-covered": 221,
   "not-reproduced": 6,
-  "out-of-scope": 110,
+  "out-of-scope": 112,
   "pending": 0,
   "unrelated-culprit": 19
  },
  "window": [
   "2026-10-20",
-  "2026-11-06"
+  "2026-11-07"
  ]
 }

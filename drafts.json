@@ -86,9 +86,11 @@
  },
  "gradium_phonon_tts": {
   "checkpoint": "gradium/phonon-voices",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-06T09:06:13Z",
-  "status": "queued"
+  "run_id": 42192485403,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/42192485403"
  },
  "jetmoe": {
   "checkpoint": "jetmoe/jetmoe-8b",
@@ -132,11 +134,19 @@
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/42019121893"
  },
+ "oneformer": {
+  "checkpoint": "shi-labs/oneformer_ade20k_swin_tiny",
+  "conclusion": null,
+  "dispatched_at": "2026-11-07T09:06:24Z",
+  "status": "queued"
+ },
  "pocket_tts": {
   "checkpoint": "eustlb/pocket-tts",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-06T09:06:13Z",
-  "status": "queued"
+  "run_id": 42192482634,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/42192482634"
  },
  "poolformer": {
   "checkpoint": "sail/poolformer_s12",
@@ -146,6 +156,12 @@
   "shrink": "shrink/41626664595/shrink-poolformer_s12-mic.html",
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/41626664595"
+ },
+ "qianfan_ocr": {
+  "checkpoint": "bairongz/QianfanOCR",
+  "conclusion": null,
+  "dispatched_at": "2026-11-07T09:06:24Z",
+  "status": "queued"
  },
  "qwen3_5": {
   "checkpoint": "Qwen/Qwen3.5-0.8B",
