@@ -1415,6 +1415,9 @@ def test_visible_usage_never_shows_runner_plumbing():
     assert commands.visible_plumbing(blocks) == [
         "model = AutoModel.from_pretrained(model_id, **variant).to(device)"
     ]
+    # Prose in a comment is not plumbing; an environment variable is, even in a comment.
+    assert commands.visible_plumbing(["# Cast so the bfloat16 variant runs.\nx = 1\n"]) == []
+    assert commands.visible_plumbing(["# set MIC_MODEL to override\n"]) == ["# set MIC_MODEL to override"]
 
 
 def test_create_rejects_unknown_override_fields_and_adds_missing_requires():

@@ -158,7 +158,10 @@ def visible_plumbing(blocks):
                 if line.split("#", 1)[0].rstrip().endswith(":"):
                     hidden_indent = indent
                 continue
-            if re.search(r"\bvariant\b|MIC_|os\.environ", line):
+            # "variant" in a comment is prose ("so the bfloat16 variant runs"): vjepa2's
+            # three drafts kept such a comment and were all rejected (2026-11-07).
+            code = line.split("#", 1)[0]
+            if re.search(r"\bvariant\b", code) or re.search(r"MIC_|os\.environ", line):
                 leaked.append(line.strip())
     return leaked
 
@@ -893,7 +896,7 @@ def output_fields(cls):
     for output in returned:
         try:
             hints = typing.get_type_hints(output)
-        except Exception:  # a string annotation that does not resolve: no nesting
+        except (NameError, TypeError, AttributeError):  # an annotation that does not resolve: no nesting
             hints = {}
         result[output] = {f.name: output_classes(hints.get(f.name)) for f in dataclasses.fields(output)}
     return result
@@ -988,7 +991,7 @@ def check_output_attributes(plan, config):
         return
     try:
         tree = ast.parse(
-            "\n".join(re.findall(r"```(?:py|python) runnable:[^\n]*\n(.*?)```", plan["usage"], re.S))
+            "\n".join(re.findall(r"```(?:py|python) runnable:[^\n]*\n(.*?)```", plan["usage"], re.DOTALL))
         )
     except SyntaxError:
         return
