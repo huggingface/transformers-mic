@@ -1835,9 +1835,9 @@ def test_create_rejects_videos_without_the_configs_num_frames():
     commands.check_video_frames({"usage": usage.replace("videos=[frames, frames]", "images=frames")}, config)
 
 
+@pytest.mark.requires_runtime
 def test_video_frames_check_reads_config_class_defaults():
     # VideoMAE's config.json omits its default num_frames (16); the config class supplies it.
-    pytest.importorskip("transformers")
     usage = (
         "```py runnable:x\n"
         "frames = [torch.full((3, 224, 224), 200, dtype=torch.uint8) for _ in range(8)]\n"
