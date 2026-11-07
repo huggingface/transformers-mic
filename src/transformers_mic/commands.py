@@ -449,11 +449,11 @@ def check_trainable_selection(plan, config, parameters=None):
             )
     # Salesforce/blip2-opt-2.7b (2026-11-07): trained decoder.layers[-1] and checked the
     # gradients of decoder.layers.0, which requires_grad_(False) froze: record failed.
-    if "requires_grad_(False)" in plan["usage"] and re.search(r"layers\[\s*-1\s*\]", plan["usage"]):
+    if "requires_grad_(False)" in plan["usage"] and re.search(r"\b(?:layers?|h|blocks?)\[\s*-1\s*\]", plan["usage"]):
         first = [t for t in literals if re.search(r"\b(?:layers?|h|blocks?)\.0\.", t)]
         if first:
             raise ValueError(
-                f"only layers[-1] trains, but {first[0]!r} names layer 0, which requires_grad_(False) froze: "
+                f"only the last layer ([-1]) trains, but {first[0]!r} names layer 0, which requires_grad_(False) froze: "
                 "its gradient is None and the check fails; check the trained layer, e.g. "
                 "f\"...layers.{model.config.num_hidden_layers - 1}.<suffix>\" (text_config for a VLM)"
             )
@@ -465,7 +465,11 @@ def check_trainable_selection(plan, config, parameters=None):
         )
     if (parameters or 0) > 3e9:
         for suffix in re.findall(r"\.endswith\(\s*[\"']([^\"'\n]+)[\"']", plan["usage"]):
-            if not suffix.startswith(("lm_head", "model.", "embed", "score", "classifier")):
+            # A projection between towers is one module, not one per layer (BLIP-2's
+            # language_projection was rejected on every draft, 2026-11-07).
+            if not suffix.startswith(("lm_head", "model.", "embed", "score", "classifier")) and not re.match(
+                r"[\w]*(?:projection|projector)\.", suffix
+            ):
                 raise ValueError(
                     f"trainable parameters are chosen by name.endswith({suffix!r}), which matches that "
                     "parameter in every layer: on the real checkpoint the gradients do not fit the 22 GB GPU, "

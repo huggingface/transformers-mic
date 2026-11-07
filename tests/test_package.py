@@ -1946,6 +1946,12 @@ def test_gradient_checks_must_name_the_trained_last_layer():
     trained = usage.replace('\"language_model.model.decoder.layers.0.fc1.weight\"',
                             'f\"language_model.model.decoder.layers.{last}.fc1.weight\"')
     commands.check_trainable_selection({"usage": trained}, {})
+    # The same draft shape on the Q-Former: layer[-1] trained, layer.0 checked.
+    qformer = usage.replace("language_model.model.decoder.layers[-1]", "qformer.encoder.layer[-1]")
+    with pytest.raises(ValueError, match="names layer 0"):
+        commands.check_trainable_selection({"usage": qformer}, {})
+    projection = "```py runnable:t\nmodel.requires_grad_(False)\nn.endswith(\"language_projection.weight\")\n```\n"
+    commands.check_trainable_selection({"usage": projection}, {}, parameters=4e9)
 
 
 def test_blip2_q_former_first_query_gets_no_fixture_gradient():
