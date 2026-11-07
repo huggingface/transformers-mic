@@ -119,6 +119,45 @@ def config_insensitive(config, batch):
         )
     return inert
 
+# Two uint8 images of different colours differ by units after normalization; float images
+# in [0, 1] that the processor rescales by 1/255 again differ by at most 1/255/std (~0.017:
+# VideoMAE's torch.full(0.2) and torch.full(0.8) clips became -1.983 and -1.972).
+MIN_ROW_DIFFERENCE = 0.05
+
+
+def input_diagnosis(config, batch):
+    """Why the contract's own inputs cannot move the outputs, when the gate fails.
+
+    Training cannot fix these: they are contract bugs, so the build stops with the
+    reason instead of overfitting. Diagnoses only; the gate thresholds are unchanged.
+    """
+    problems = []
+    for name, value in batch.items():
+        if not (name.startswith("pixel_values") and isinstance(value, torch.Tensor)
+                and value.is_floating_point() and value.dim() > 1 and len(value) > 1):
+            continue
+        rows = value.float()
+        difference = float((rows[1:] - rows[:1]).abs().max())
+        if difference < MIN_ROW_DIFFERENCE:
+            problems.append(
+                f"the rows of {name} differ by at most {difference:.3g} after preprocessing, so the "
+                "examples are nearly the same image: images or video frames given as floats in [0, 1] are "
+                "rescaled by 1/255 again. Build each image or frame as an (H, W, 3) uint8 array with "
+                "texture and a different colour per example"
+            )
+    token = next((getattr(config, k) for k in ("image_token_index", "image_token_id")
+                  if isinstance(getattr(config, k, None), int)), None)
+    ids = batch.get("input_ids")
+    if token is not None and isinstance(ids, torch.Tensor) and isinstance(batch.get("pixel_values"), torch.Tensor):
+        if not (ids == token).any():
+            problems.append(
+                f"input_ids carry no image token (id {token}), so the model never inserts the image "
+                "features and pixel_values cannot move the logits (BLIP-2). Tokenize the text together "
+                "with the images, processor(images=images, text=texts), and mask the image tokens in labels"
+            )
+    return problems
+
+
 def report_phase(phase, detail=""):
     print("MIC_PROGRESS " + json.dumps({"phase": phase, "detail": detail}), flush=True)
 
@@ -965,6 +1004,12 @@ def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out,
             f"{name}: no input perturbation is defined for the contract's inputs {unmeasured}; "
             "add them to PERTURBATIONS in example/perturb.py (a tmic gap, not a contract error)"
         )
+    diagnosis = [] if gate[weights]["pass"] else input_diagnosis(model.config, batch)
+    if diagnosis:
+        raise SystemExit(
+            f"{name}: the contract's inputs cannot move the outputs, and overfitting cannot fix that: "
+            + " ".join(f"({n}) {p}." for n, p in enumerate(diagnosis, 1)) + f" Gate: {gate[weights]}"
+        )
     if real and not gate["real"]["pass"]:
         raise SystemExit(f"{name}: the trained weights are insensitive to the contract's inputs: {gate['real']}")
     if not real and not keep_random and (not gate["random"]["pass"] or recipe.get("overfit")):
@@ -982,7 +1027,12 @@ def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out,
         report_phase("Verify trained fixture sensitivity")
         gate["overfit"] = sensitivity(called_module(model, captured), as_dtype(batch, dtype), threshold, accepted)
         if not training["converged"] or not gate["overfit"]["pass"]:
-            raise SystemExit(f"{name}: random weights fail the gate and overfitting did not fix it: {training}, {gate}")
+            # Zero-initialized gates (Mllama) give 0.0 at random weights; still 0.0 after
+            # training means the contract's call never routes that input to the outputs.
+            unrouted = sorted(k for k, v in gate["overfit"]["deltas"].items() if v == 0.0 and k not in accepted)
+            hint = (f" {', '.join(unrouted)} moved nothing even after training: the contract's model call does "
+                    "not route that input to the outputs." if unrouted else "")
+            raise SystemExit(f"{name}: random weights fail the gate and overfitting did not fix it:{hint} {training}, {gate}")
         weights = "overfit"
         save(model, out, source, lacks, recipe, checkpoint)
     mirrored = missing_parameters(cls, out)

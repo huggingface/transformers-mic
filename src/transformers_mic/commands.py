@@ -313,6 +313,109 @@ def check_encoder_decoder_calls(plan, config):
             )
 
 
+def check_image_tokens_in_text(plan, config):
+    """A VLM call with pixel_values needs input_ids that carry the processor's image tokens.
+
+    Salesforce/blip2-opt-2.7b's draft (2026-11-07) trained on
+    model(pixel_values=inputs.pixel_values, input_ids=targets.input_ids) with targets =
+    processor(text=captions): no image tokens, so the image features were never inserted and
+    every pixel_values perturbation moved the logits by exactly 0.0, random and overfit.
+    """
+    if not any(isinstance(config.get(k), int) for k in ("image_token_index", "image_token_id")):
+        return
+    import ast
+
+    code = "\n".join(re.findall(r"^```py runnable:[^\n]*\n(.*?)^```", plan["usage"], re.M | re.S))
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:  # the build reports real syntax errors
+        return
+
+    def unwrap(node):  # processor(...).to(device, ...) -> processor(...)
+        while isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "to":
+            node = node.func.value
+        return node
+
+    text_only = {}
+    assigns = sorted((n for n in ast.walk(tree) if isinstance(n, ast.Assign)), key=lambda n: n.lineno)
+    for node in assigns:
+        if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            call = unwrap(node.value)
+            if not isinstance(call, ast.Call):
+                continue
+            callee = call.func.id if isinstance(call.func, ast.Name) else getattr(call.func, "attr", "")
+            keywords = {k.arg for k in call.keywords}
+            if (callee.endswith(("processor", "tokenizer")) and "text" in keywords
+                    and not keywords & {"images", "videos", None} and not call.args):
+                text_only[node.targets[0].id] = node.lineno
+            else:
+                text_only.pop(node.targets[0].id, None)
+
+    def source(value):
+        if isinstance(value, ast.Attribute) and value.attr == "input_ids":
+            value = value.value
+        elif isinstance(value, ast.Subscript) and getattr(value.slice, "value", None) == "input_ids":
+            value = value.value
+        else:
+            return None
+        return value.id if isinstance(value, ast.Name) else None
+
+    for node in ast.walk(tree):
+        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "model"):
+            continue
+        keywords = {k.arg: k.value for k in node.keywords}
+        if "pixel_values" not in keywords:
+            continue
+        names = [source(keywords["input_ids"])] if "input_ids" in keywords else [
+            k.value.id for k in node.keywords if k.arg is None and isinstance(k.value, ast.Name)
+        ]
+        for name in names:
+            if name in text_only:
+                raise ValueError(
+                    f"line {node.lineno}: model(pixel_values=..., input_ids from {name}) but {name} = "
+                    f"processor(text=...) on line {text_only[name]} has no images, so input_ids carry no "
+                    "image token and pixel_values never reach the logits; tokenize the text with its "
+                    "images, processor(images=images, text=texts), and set image-token labels to -100"
+                )
+
+
+def check_zero_query_gradients(plan, config):
+    """BLIP-2-style models zero-initialize query_tokens: the Q-Former's first self-attention
+    query/key projections see zeros in the random fixture and get no gradient.
+
+    Salesforce/blip2-opt-2.7b (2026-11-07): drafts checked
+    qformer.encoder.layer.0.attention.attention.query.weight; record failed on every variant
+    and the repair returned the same usage, despite the prompt bullet.
+    """
+    if not isinstance(config.get("num_query_tokens"), int):
+        return
+    for name in re.findall(r"[\"']([^\"'\n]*)[\"']", plan["usage"]):
+        # Measured on the fixture: layer 0's self-attention (all of it) and its cross-attention
+        # query/key get exactly zero gradient; cross-attention value/output and the query MLP do not.
+        if re.search(r"qformer\.encoder\.layer\.0\.(?:attention\.|crossattention\.attention\.(?:query|key)\.)", name):
+            raise ValueError(
+                f"the gradient of {name!r} is zero in the random fixture: query_tokens are zero-initialized, "
+                "so the Q-Former's first self-attention and its cross-attention query/key see zeros; check "
+                "language_projection.weight or qformer.encoder.layer.0.crossattention.output.dense.weight"
+            )
+
+
+def check_image_processor_videos(plan):
+    """An image processor takes clips as images=; videos= is for video and multimodal processors.
+
+    MCG-NJU/videomae-base's drafts (2026-11-07) called VideoMAEImageProcessor(videos=...), which
+    raises "missing 1 required positional argument: 'images'", and the repair kept the call.
+    """
+    usage = plan["usage"]
+    for name in re.findall(r"^\s*(\w+)\s*=\s*\w*ImageProcessor\w*\.from_pretrained\(", usage, re.M):
+        match = re.search(rf"\b{re.escape(name)}\((?:[^()]|\([^()]*\))*\bvideos\s*=", usage)
+        if match:
+            raise ValueError(
+                f"{name} is an image processor and takes no videos=: pass the clips as images=videos "
+                "(each clip a list of (H, W, 3) uint8 frames)"
+            )
+
+
 def check_partial_training(plan, context):
     """Above ~3B parameters the real checkpoint's training step must freeze most of it."""
     count = loaded_parameters(context) or 0
@@ -333,8 +436,12 @@ def check_trainable_selection(plan, config, parameters=None):
     named_parameters() once, as the input embeddings: empty optimizer parameter list); then
     name.endswith("mlp.input_linear.weight") trained that weight in all 24 layers, about 4B
     parameters, and the backward ran out of the 22 GB GPU while the 2-layer fixture passed.
+
+    Salesforce/blip2-opt-2.7b's draft (2026-11-07) froze without requires_grad_(False), by
+    param.requires_grad_(name.startswith("language_model.model.decoder.layers.31.")), and
+    failed the same way: any requires_grad_ call selects a subset.
     """
-    if "requires_grad_(False)" not in plan["usage"]:
+    if "requires_grad_(" not in plan["usage"]:
         return
     literals = re.findall(r"[\"']([^\"'\n]*)[\"']", plan["usage"])
     for text in literals:
@@ -346,7 +453,21 @@ def check_trainable_selection(plan, config, parameters=None):
                 "index the last layer from model.config.num_hidden_layers - 1, e.g. "
                 "model.model.layers[-1].requires_grad_(True)"
             )
-    if config.get("tie_word_embeddings") is True and any(t.startswith("lm_head") for t in literals):
+    # Salesforce/blip2-opt-2.7b (2026-11-07): trained decoder.layers[-1] and checked the
+    # gradients of decoder.layers.0, which requires_grad_(False) froze: record failed.
+    if "requires_grad_(False)" in plan["usage"] and re.search(r"\b(?:layers?|h|blocks?)\[\s*-1\s*\]", plan["usage"]):
+        first = [t for t in literals if re.search(r"\b(?:layers?|h|blocks?)\.0\.", t)]
+        if first:
+            raise ValueError(
+                f"only the last layer ([-1]) trains, but {first[0]!r} names layer 0, which requires_grad_(False) froze: "
+                "its gradient is None and the check fails; check the trained layer, e.g. "
+                "f\"...layers.{model.config.num_hidden_layers - 1}.<suffix>\" (text_config for a VLM)"
+            )
+    # A VLM states the tie in its text_config (BLIP-2's OPT: language_model.lm_head.weight, 2026-11-07).
+    tied = config.get("tie_word_embeddings")
+    if tied is None:
+        tied = (config.get("text_config") or {}).get("tie_word_embeddings")
+    if tied is True and any(re.match(r"(?:[\w.]*\.)?lm_head(?:\.|$)", t) for t in literals):
         raise ValueError(
             "trainable parameters are chosen by the name 'lm_head', but tie_word_embeddings is true: "
             "named_parameters() lists the tied weight once, as the input embeddings, so the name matches "
@@ -354,7 +475,11 @@ def check_trainable_selection(plan, config, parameters=None):
         )
     if (parameters or 0) > 3e9:
         for suffix in re.findall(r"\.endswith\(\s*[\"']([^\"'\n]+)[\"']", plan["usage"]):
-            if not suffix.startswith(("lm_head", "model.", "embed", "score", "classifier")):
+            # A projection between towers is one module, not one per layer (BLIP-2's
+            # language_projection was rejected on every draft, 2026-11-07).
+            if not suffix.startswith(("lm_head", "model.", "embed", "score", "classifier")) and not re.match(
+                r"[\w]*(?:projection|projector)\.", suffix
+            ):
                 raise ValueError(
                     f"trainable parameters are chosen by name.endswith({suffix!r}), which matches that "
                     "parameter in every layer: on the real checkpoint the gradients do not fit the 22 GB GPU, "
@@ -1203,6 +1328,7 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
                 lambda: check_code_fences(plan),
                 lambda: check_no_remote_code(plan),
                 lambda: check_image_shapes(plan),
+                lambda: check_image_processor_videos(plan),
                 lambda: check_loss_has_gradients(plan),
             ]
             if config:
@@ -1214,6 +1340,8 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
                     lambda: check_parameter_names(plan, config),
                     lambda: check_output_attributes(plan, config),
                     lambda: check_encoder_decoder_calls(plan, config),
+                    lambda: check_image_tokens_in_text(plan, config),
+                    lambda: check_zero_query_gradients(plan, config),
                     lambda: check_trainable_selection(plan, config, parameters),
                     lambda: check_batch_encoding_dtype(plan, config),
                 ]

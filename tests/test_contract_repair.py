@@ -245,3 +245,12 @@ def test_missing_input_perturbation_is_not_repairable(setup):
         "add them to PERTURBATIONS (a tmic gap, not a contract error)\nthe contract fails\n"
     )
     assert not repair.eligible(setup.workspace, "build", setup.log)
+
+
+def test_a_gradient_check_the_loss_never_reaches_is_repairable(setup):
+    # Salesforce/blip2-opt-2.7b (2026-11-07): record failed with no traceback.
+    setup.log.write_text(
+        '{"kind": "fixture", "status": "fail", "failures": ["training.gradients: '
+        "['qformer.encoder.layer.0.attention.attention.query.weight'] false\"]}\n"
+    )
+    assert repair.eligible(setup.workspace, "record", setup.log)
