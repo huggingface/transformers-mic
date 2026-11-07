@@ -1982,3 +1982,53 @@ def test_every_draft_problem_is_reported_at_once(monkeypatch):
     with pytest.raises(ValueError, match=r"2 problems: \(1\) no chat template \(2\) audio files"):
         commands.propose_valid({}, SimpleNamespace(), "o/m", "o/m-mic")
     assert "no chat template" in calls[1] and "audio files" in calls[1]
+
+
+VJEPA2_USAGE = """```py runnable:video
+import torch
+from transformers import {cls}
+
+model = {cls}.from_pretrained(model_id).to(device)
+if variant:  # doc-builder: hide
+    del model  # doc-builder: hide
+    model = {cls}.from_pretrained(model_id, **variant).to(device)  # doc-builder: hide
+with torch.no_grad():
+    outputs = model(**inputs)
+features = outputs.{field}
+print(outputs.to_tuple()[0].shape)
+```
+"""
+
+
+@pytest.mark.requires_runtime
+@pytest.mark.parametrize("cls", ["VJEPA2Model", "AutoModel"])
+def test_output_attributes_must_exist_on_the_returned_output(cls):
+    # vjepa2 (2026-11-07) read outputs.predictor_embeddings; the build raised AttributeError.
+    config = {"model_type": "vjepa2", "architectures": ["VJEPA2Model"]}
+    usage = lambda field: {"usage": VJEPA2_USAGE.format(cls=cls, field=field)}
+    commands.check_output_attributes(usage("predictor_output.last_hidden_state"), config)
+    commands.check_output_attributes(usage("last_hidden_state"), config)
+    with pytest.raises(ValueError, match="outputs.predictor_embeddings.*predictor_output"):
+        commands.check_output_attributes(usage("predictor_embeddings"), config)
+    with pytest.raises(ValueError, match="predictor_output.embeddings.*target_hidden_state"):
+        commands.check_output_attributes(usage("predictor_output.embeddings"), config)
+
+
+@pytest.mark.requires_runtime
+def test_output_attributes_skip_variables_bound_to_anything_else():
+    config = {"model_type": "vjepa2"}
+    usage = VJEPA2_USAGE.format(cls="VJEPA2Model", field="anything")
+    commands.check_output_attributes({"usage": usage.replace("features =", "outputs = outputs[0]\nfeatures =")}, config)
+    commands.check_output_attributes({"usage": usage.replace("model = VJEPA2Model.from_pretrained(model_id)", "model = build()")}, config)
+
+
+@pytest.mark.requires_runtime
+def test_output_fields_include_the_class_forward_builds():
+    # CLIPSegForImageSegmentation is annotated CLIPSegOutput but returns
+    # CLIPSegImageSegmentationOutput, whose .logits the approved contract reads.
+    import transformers
+
+    fields = commands.describe_output_fields(transformers.CLIPSegForImageSegmentation)
+    assert "logits" in fields["CLIPSegImageSegmentationOutput"]
+    fields = commands.describe_output_fields(transformers.VJEPA2Model)
+    assert "predictor_output.last_hidden_state" in fields["VJEPA2WithMaskedInputModelOutput"]

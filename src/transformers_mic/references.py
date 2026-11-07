@@ -57,7 +57,29 @@ def collect(model, revision, config):
         # Checkpoint keys are often remapped on load; without the real names the
         # planner guesses from the checkpoint layout and names missing parameters.
         result["parameter_names"] = names
+    fields = {
+        architecture: found
+        for architecture in classes
+        if (found := output_field_names(architecture))
+    }
+    if fields:
+        # vjepa2's draft read outputs.predictor_embeddings, a field no output class has.
+        result["output_fields"] = fields
     return result
+
+def output_field_names(architecture):
+    """{output class: field names} that the architecture's forward returns."""
+    import transformers
+
+    from . import commands
+
+    cls = getattr(transformers, architecture, None)
+    if not isinstance(cls, type):
+        return None
+    try:
+        return commands.describe_output_fields(cls) or None
+    except Exception:  # advisory context; check_output_attributes still runs
+        return None
 
 
 def exported(names):

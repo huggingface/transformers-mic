@@ -9,6 +9,7 @@ import re
 import sys
 import shutil
 import tempfile
+import textwrap
 
 from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download
 import jsonschema
@@ -851,6 +852,213 @@ def index_only_misses(missing, real):
     return hints
 
 
+def output_classes(annotation):
+    """The ModelOutput dataclasses in a forward's return annotation (tuple | XOutput)."""
+    import dataclasses
+    import typing
+
+    from transformers.utils import ModelOutput
+
+    if isinstance(annotation, type):
+        # The base class says nothing about the fields a subclass returns.
+        if issubclass(annotation, ModelOutput) and annotation is not ModelOutput and dataclasses.is_dataclass(annotation):
+            return [annotation]
+        return []
+    return [cls for arg in typing.get_args(annotation) for cls in output_classes(arg)]
+
+
+def output_fields(cls):
+    """{output class: {field: nested output classes}} that cls.forward returns, or {} if unknown."""
+    import dataclasses
+    import inspect
+    import typing
+
+    try:
+        returned = output_classes(inspect.signature(cls.forward).return_annotation)
+    except (TypeError, ValueError):
+        return {}
+    # Annotations can be wrong: CLIPSegForImageSegmentation says CLIPSegOutput and
+    # returns CLIPSegImageSegmentationOutput. Add the classes `return X(...)` builds.
+    try:
+        forward = inspect.unwrap(cls.forward)
+        namespace = sys.modules[forward.__module__].__dict__
+        for node in ast.walk(ast.parse(textwrap.dedent(inspect.getsource(forward)))):
+            if isinstance(node, ast.Return) and isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Name):
+                for built in output_classes(namespace.get(node.value.func.id)):
+                    if built not in returned:
+                        returned.append(built)
+    except (OSError, TypeError, KeyError, SyntaxError):
+        pass
+    result = {}
+    for output in returned:
+        try:
+            hints = typing.get_type_hints(output)
+        except Exception:  # a string annotation that does not resolve: no nesting
+            hints = {}
+        result[output] = {f.name: output_classes(hints.get(f.name)) for f in dataclasses.fields(output)}
+    return result
+
+
+def describe_output_fields(cls):
+    """Field names per output class, for the planner: {class: [field, nested.field, ...]}."""
+    described = {}
+    for output, fields in output_fields(cls).items():
+        names = []
+        for name, nested in fields.items():
+            names.append(name)
+            for inner in nested:
+                names += [f"{name}.{field}" for field in output_fields_of(inner)]
+        described[output.__name__] = names
+    return described
+
+
+def output_fields_of(output):
+    import dataclasses
+
+    return [f.name for f in dataclasses.fields(output)]
+
+
+def usage_model_classes(tree, config):
+    """{variable: model classes} for variables bound only to X.from_pretrained(...)[.to(...)]."""
+    import transformers
+
+    model_type = (config or {}).get("model_type")
+
+    def resolve(name):
+        cls = getattr(transformers, name, None)
+        if not isinstance(cls, type):
+            return None
+        if issubclass(cls, transformers.PreTrainedModel):
+            return cls
+        names = getattr(getattr(cls, "_model_mapping", None), "_model_mapping", None)
+        if name.startswith("AutoModel") and isinstance(names, dict) and isinstance(names.get(model_type), str):
+            return resolve(names[model_type])
+        return None
+
+    def loaded(value, variable):
+        """The class a value loads, the variable itself for model.to(...), else None."""
+        while isinstance(value, ast.Call) and isinstance(value.func, ast.Attribute):
+            if value.func.attr == "from_pretrained":
+                base = value.func.value
+                name = base.id if isinstance(base, ast.Name) else getattr(base, "attr", None)
+                return resolve(name) if name else None
+            value = value.func.value
+        if isinstance(value, ast.Name) and value.id == variable:
+            return variable
+        return None
+
+    found, unknown = {}, other_bindings(tree)
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Assign):
+            continue
+        if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            variable = node.targets[0].id
+            cls = loaded(node.value, variable)
+            if cls is None:
+                unknown.add(variable)
+            elif cls != variable:
+                found.setdefault(variable, set()).add(cls)
+        else:
+            unknown |= {n.id for t in node.targets for n in ast.walk(t) if isinstance(n, ast.Name)}
+    return {name: classes for name, classes in found.items() if name not in unknown}
+
+
+def other_bindings(tree):
+    """Names bound other than by a plain assignment (loops, with, augmented, annotated)."""
+    names = set()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.For, ast.comprehension, ast.withitem, ast.AugAssign, ast.AnnAssign)):
+            target = node.optional_vars if isinstance(node, ast.withitem) else node.target
+            if target is not None:
+                names |= {n.id for n in ast.walk(target) if isinstance(n, ast.Name)}
+    return names
+
+
+def check_output_attributes(plan, config):
+    """Reject usage that reads a field the model's output class does not have.
+
+    vjepa2 (2026-11-07) read outputs.predictor_embeddings from VJEPA2Model, whose
+    VJEPA2WithMaskedInputModelOutput has predictor_output.last_hidden_state: the
+    build failed with an AttributeError, and a repair could not see the real names.
+    Only variables bound to a model call of a known class are checked.
+    """
+    try:
+        from transformers.utils import ModelOutput
+    except ImportError:  # no runtime: the build still runs the contract
+        return
+    try:
+        tree = ast.parse(
+            "\n".join(re.findall(r"```(?:py|python) runnable:[^\n]*\n(.*?)```", plan["usage"], re.S))
+        )
+    except SyntaxError:
+        return
+    models = usage_model_classes(tree, config)
+    if not models:
+        return
+    # Output variables: every binding is a call of one model variable (model(...) or model.forward(...)).
+    outputs, unknown = {}, other_bindings(tree)
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Assign):
+            continue
+        names = [n.id for t in node.targets for n in ast.walk(t) if isinstance(n, ast.Name)]
+        call = node.value
+        func = call.func if isinstance(call, ast.Call) else None
+        if isinstance(func, ast.Attribute) and func.attr == "forward":
+            func = func.value
+        model = func.id if isinstance(func, ast.Name) and func.id in models else None
+        if model and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            outputs.setdefault(names[0], set()).update(models[model])
+        else:
+            unknown.update(names)
+    common = {name for name in dir(ModelOutput) if not name.startswith("_")}
+    problems = []
+    for variable, classes in sorted(outputs.items()):
+        if variable in unknown:
+            continue
+        fields = {}
+        for cls in classes:
+            known = output_fields(cls)
+            if not known:
+                fields = None  # an unannotated forward: nothing to compare with
+                break
+            for output, names in known.items():
+                fields.setdefault(output, names)
+        if not fields:
+            continue
+        allowed = {name for names in fields.values() for name in names}
+        nested = {}
+        for names in fields.values():
+            for name, inner in names.items():
+                nested.setdefault(name, []).extend(inner)
+        returned = ", ".join(sorted(o.__name__ for o in fields))
+        for node in ast.walk(tree):
+            if not (isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name) and node.value.id == variable):
+                continue
+            if node.attr not in allowed | common:
+                problems.append(
+                    f"{variable}.{node.attr}: {'/'.join(sorted(c.__name__ for c in classes))}.forward returns "
+                    f"{returned}, whose fields are {sorted(allowed)}"
+                )
+            elif nested.get(node.attr):
+                inner_allowed = {f for o in nested[node.attr] for f in output_fields_of(o)}
+                for parent in ast.walk(tree):
+                    if (
+                        isinstance(parent, ast.Attribute)
+                        and parent.value is node
+                        and parent.attr not in inner_allowed | common
+                    ):
+                        problems.append(
+                            f"{variable}.{node.attr}.{parent.attr}: {node.attr} is "
+                            f"{'/'.join(o.__name__ for o in nested[node.attr])}, whose fields are {sorted(inner_allowed)}"
+                        )
+    if problems:
+        raise ValueError(
+            "Usage reads model output fields that do not exist: "
+            + "; ".join(sorted(set(problems)))
+            + ". Read only these fields (context.output_fields lists them per class)."
+        )
+
+
 def check_config_facts(plan, config):
     """Overrides must name real config fields; requires gains the model's imports."""
     full = config
@@ -1001,6 +1209,7 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
                     lambda: check_model_classes(plan, config),
                     lambda: check_label_arguments(plan, config),
                     lambda: check_parameter_names(plan, config),
+                    lambda: check_output_attributes(plan, config),
                     lambda: check_encoder_decoder_calls(plan, config),
                     lambda: check_trainable_selection(plan, config, parameters),
                     lambda: check_batch_encoding_dtype(plan, config),

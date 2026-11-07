@@ -345,6 +345,12 @@ not memory:
   tokenized target text (SeamlessM4T).
 - The training step runs its own forward with gradients: never build the loss
   from tensors computed under torch.no_grad() in the inference block.
+- Read only the model output fields context.output_fields lists for the class you
+  call (nested fields as a.b): a field that sounds right may not exist (vjepa2's
+  VJEPA2Model has predictor_output.last_hidden_state, not predictor_embeddings).
+  Slice a probe with at most as many indices as the tensor has dimensions, from
+  the documented shape: VitPose heatmaps are (batch, keypoints, height, width),
+  so heatmaps[:, :, 0, :4], not heatmaps[:, :, 0, 0, :4].
 - Every key declared in outputs must appear in the printed result; a nested value
   is declared by its dotted path (logits.probe for {"logits": {"probe": ...}}).
 - Many causal-LM tokenizers define no pad token (MiniMax-M2.5, Llama-style):

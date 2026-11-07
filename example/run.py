@@ -92,6 +92,7 @@ import gc
 import hashlib
 import io
 import json
+import linecache
 import math
 import os
 import re
@@ -318,6 +319,10 @@ def execute_inline(code, filename, env):
     ok = True
     with environ(env), contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
         try:
+            # The code is the runnable blocks joined, not the Markdown file: without
+            # this a traceback quotes whatever line of usage.md has the same number
+            # (vjepa2's AttributeError showed the processor call), misleading repairs.
+            linecache.cache[filename] = (len(code), None, code.splitlines(True), filename)
             exec(compile(code, filename, "exec"), namespace)
         except BaseException:  # noqa: BLE001 - a contract failure is a result, not a runner crash
             traceback.print_exc(file=err)

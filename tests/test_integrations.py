@@ -457,3 +457,17 @@ def test_preview_requires_an_immutable_pin():
     spec.loader.exec_module(nightly)
     with pytest.raises(ValueError, match="immutable"):
         nightly.preview_lock("huggingface-mic/embeddinggemma-2-mic", "main")
+
+
+@pytest.mark.requires_runtime
+def test_inline_traceback_quotes_the_executed_line(tmp_path):
+    # The runnable blocks are joined: line N of the code is not line N of usage.md,
+    # and vjepa2's AttributeError was shown under the processor call.
+    sys.path.insert(0, str(resources.backend()))
+    import run
+
+    entry = tmp_path / "usage.md"
+    entry.write_text("# Title\n\nprose\n```py runnable:x\nvalue = 1\n```\n")
+    ok, _, err = run.execute_inline("value = 1\nvalue.missing_field\n", str(entry), {})
+    assert not ok
+    assert "value.missing_field" in err and "prose" not in err
