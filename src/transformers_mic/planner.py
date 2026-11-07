@@ -327,6 +327,10 @@ not memory:
   images= to apply_chat_template(tokenize=True) raises "multiple values". Pass
   exactly one image per image placeholder: an extra image for a text-only prompt
   raises "Image features and image tokens do not match" (Mistral-Large-4).
+- A per-sample list argument next to images (OneFormer task_inputs, text
+  prompts, boxes) needs one entry per image: task_inputs=["semantic"] * len(images).
+  A single entry for a batch of two builds a batch-1 task query and fails in the
+  decoder with "key shape ... does not match value shape" (OneFormer).
 - Pass audio as a list of 1-D float NumPy arrays: some feature extractors (CLAP)
   read a list of torch tensors as one unbatched clip and allocate tens of GB. A
   fusion extractor (CLAP, enable_fusion) marks a random clip "longer" when none
