@@ -1830,12 +1830,22 @@ def test_create_rejects_videos_without_the_configs_num_frames():
     commands.check_video_frames({"usage": usage.replace("range(8)", "range(32)")}, config)
     named = usage.replace("range(8)", "range(model.config.vision_config.num_frames)")
     commands.check_video_frames({"usage": named}, config)
-    # VideoMAE's config.json omits its default num_frames (16); the config class supplies it.
-    with pytest.raises(ValueError, match="num_frames is 16"):
-        commands.check_video_frames({"usage": usage}, {"model_type": "videomae"})
     # Video models without a fixed frame count, and image-only usage, are not checked.
     commands.check_video_frames({"usage": usage}, {"model_type": "llava_next_video"})
     commands.check_video_frames({"usage": usage.replace("videos=[frames, frames]", "images=frames")}, config)
+
+
+def test_video_frames_check_reads_config_class_defaults():
+    # VideoMAE's config.json omits its default num_frames (16); the config class supplies it.
+    pytest.importorskip("transformers")
+    usage = (
+        "```py runnable:x\n"
+        "frames = [torch.full((3, 224, 224), 200, dtype=torch.uint8) for _ in range(8)]\n"
+        "inputs = processor(videos=[frames, frames], return_tensors='pt')\n"
+        "```\n"
+    )
+    with pytest.raises(ValueError, match="num_frames is 16"):
+        commands.check_video_frames({"usage": usage}, {"model_type": "videomae"})
 
 
 def test_create_rejects_a_loss_built_only_from_no_grad_outputs():
