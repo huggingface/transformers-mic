@@ -85,7 +85,7 @@ HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE.parent / "experiments"))
 import run  # noqa: E402
 from perturb import logits_of, sensitivity  # noqa: E402
-from sweep import shrink  # noqa: E402
+from sweep import fit_rope_everywhere, shrink  # noqa: E402
 
 WEIGHTS = (".safetensors", ".bin", ".pt", ".pth", ".msgpack", ".h5", ".ot", ".onnx", ".tflite", ".ckpt", ".gguf", ".npz", ".pdparams", ".pkl", ".nemo")  # .nemo: NVIDIA NeMo archives beside the HF weights (Parakeet)
 # Processor files are a few MB; anything this large is weights in a format WEIGHTS
@@ -208,8 +208,9 @@ def shrunk_config(source, cls, recipe=None):
     if recorded is not None:  # a rebuild reproduces the published config, not today's rule
         return cls.config_class.from_dict(recorded)
     config = cls.config_class.from_pretrained(source)
-    if parameter_count(cls, config) > SMALL_SOURCE:
-        original = config.to_dict()
+    original = config.to_dict()
+    shrunk = parameter_count(cls, config) > SMALL_SOURCE
+    if shrunk:
         config = shrink(config)
         if str(source) not in TESTER_OFF:
             config = adopt_tester_sizes(cls, original, config)
@@ -231,6 +232,11 @@ def shrunk_config(source, cls, recipe=None):
                 continue  # dropping a field the shrunk config already lacks
             raise SystemExit(f"config_overrides: the shrunk config has no field {dotted}")
         target[field] = value
+    if shrunk:
+        # Overrides that resize a head (GLM-4.1V's text_config.hidden_size 128) leave the
+        # rotary tables the rule fitted to its head; fit them again, as the rule would. A
+        # head the overrides leave alone keeps its tables: the fit is the rule's own.
+        fit_rope_everywhere(values, original)
     return type(config).from_dict(values)
 
 
@@ -256,7 +262,7 @@ def adopt_tester_sizes(cls, original, config):
             node = node[part]
         node[path[-1]] = value
     try:
-        candidate = type(config).from_dict(values)
+        candidate = type(config).from_dict(fit_rope_everywhere(values, original))
         with torch.device("meta"):
             cls._from_config(candidate)
     except Exception as error:
