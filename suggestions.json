@@ -114,6 +114,68 @@
     "gpu_only": false,
     "integration": true,
     "test": "tests/models/gemma4/test_modeling_gemma4.py::Gemma4IntegrationTest::test_generation_beyond_sliding_window_0_sdpa"
+   },
+   {
+    "date": "2026-10-19",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/gemma4/test_modeling_gemma4.py::Gemma4IntegrationTest::test_generation_beyond_sliding_window_0_sdpa"
+   },
+   {
+    "date": "2026-11-02",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/gemma4/test_modeling_gemma4.py::Gemma4IntegrationTest::test_generation_beyond_sliding_window_1_eager"
+   },
+   {
+    "date": "2026-11-07",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/gemma4/test_modeling_gemma4.py::Gemma4Vision2TextModelTest::test_flex_attention_with_grads"
+   },
+   {
+    "date": "2026-11-07",
+    "gpu_only": true,
+    "integration": false,
+    "test": "tests/models/gemma4/test_modeling_gemma4.py::Gemma4TextModelTest::test_flash_attn_2_from_config"
+   },
+   {
+    "date": "2026-10-26",
+    "gpu_only": true,
+    "integration": false,
+    "test": "tests/models/gemma4/test_modeling_gemma4.py::Gemma4Vision2TextModelTest::test_eager_matches_batched_and_grouped_inference_0_fp16"
+   },
+   {
+    "date": "2026-11-07",
+    "gpu_only": true,
+    "integration": false,
+    "test": "tests/models/gemma4/test_modeling_gemma4.py::Gemma4Vision2TextModelTest::test_eager_matches_fa2_generate"
+   },
+   {
+    "date": "2026-11-07",
+    "gpu_only": true,
+    "integration": false,
+    "test": "tests/models/gemma4/test_modeling_gemma4.py::Gemma4Vision2TextModelTest::test_flash_attention_2_continue_generate_with_position_ids"
+   },
+   {
+    "date": "2026-11-07",
+    "gpu_only": true,
+    "integration": false,
+    "test": "tests/models/gemma4/test_modeling_gemma4.py::Gemma4Vision2TextModelTest::test_flash_attn_2_fp32_ln"
+   },
+   {
+    "date": "2026-11-07",
+    "gpu_only": true,
+    "integration": false,
+    "test": "tests/models/gemma4/test_modeling_gemma4.py::Gemma4Vision2TextModelTest::test_flash_attn_2_from_config"
+   }
+  ],
+  "gemma4_unified": [
+   {
+    "date": "2026-11-07",
+    "gpu_only": true,
+    "integration": false,
+    "test": "tests/models/gemma4_unified/test_modeling_gemma4_unified.py::Gemma4UnifiedTextModelTest::test_flash_attn_2_from_config"
    }
   ],
   "glm_moe_dsa": [
@@ -158,6 +220,38 @@
     "test": "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_inference_object_detection_head_equivalence_cpu_accelerator"
    }
   ],
+  "hunyuan_vl": [
+   {
+    "date": "2026-10-20",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/hunyuan_vl/test_image_processing_hunyuan_vl.py::HunYuanVLImageProcessorTest::test_backends_equivalence_batched"
+   },
+   {
+    "date": "2026-11-07",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/hunyuan_vl/test_modeling_hunyuan_vl.py::HunYuanVLModelTest::test_onnx_export_dynamic"
+   },
+   {
+    "date": "2026-11-07",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/hunyuan_vl/test_modeling_hunyuan_vl.py::HunYuanVLModelTest::test_onnx_export_static"
+   },
+   {
+    "date": "2026-11-07",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/hunyuan_vl/test_modeling_hunyuan_vl.py::HunYuanVLModelTest::test_torch_export_dynamic"
+   },
+   {
+    "date": "2026-11-07",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/hunyuan_vl/test_modeling_hunyuan_vl.py::HunYuanVLModelTest::test_torch_export_static"
+   }
+  ],
   "internvl": [
    {
     "date": "2026-11-02",
@@ -170,6 +264,14 @@
     "gpu_only": false,
     "integration": true,
     "test": "tests/models/internvl/test_modeling_internvl.py::InternVLLlamaIntegrationTest::test_llama_small_model_integration_generate_text_only"
+   }
+  ],
+  "janus": [
+   {
+    "date": "2026-11-08",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/janus/test_modeling_janus.py::JanusIntegrationTest::test_model_text_generation"
    }
   ],
   "llama": [
@@ -200,30 +302,6 @@
     "gpu_only": false,
     "integration": false,
     "test": "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_eager_padding_matches_padding_free_with_position_ids"
-   },
-   {
-    "date": "2026-10-08",
-    "gpu_only": true,
-    "integration": false,
-    "test": "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids"
-   },
-   {
-    "date": "2026-10-15",
-    "gpu_only": true,
-    "integration": false,
-    "test": "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids"
-   },
-   {
-    "date": "2026-10-08",
-    "gpu_only": true,
-    "integration": false,
-    "test": "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids_and_fa_kwargs"
-   },
-   {
-    "date": "2026-10-15",
-    "gpu_only": true,
-    "integration": false,
-    "test": "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids_and_fa_kwargs"
    }
   ],
   "mistral3": [
@@ -286,6 +364,14 @@
     "test": "tests/models/phi4_multimodal/test_modeling_phi4_multimodal.py::Phi4MultimodalIntegrationTest::test_vision_text_generation"
    }
   ],
+  "qianfan_ocr": [
+   {
+    "date": "2026-11-06",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/qianfan_ocr/test_modeling_qianfan_ocr.py::QianfanOCRIntegrationTest::test_model_integration_forward"
+   }
+  ],
   "qwen3_asr": [
    {
     "date": "2026-10-15",
@@ -346,6 +432,17 @@
    ]
   },
   {
+   "checkpoint": "llava-hf/vip-llava-7b-hf",
+   "checkpoint_source": "failing test",
+   "integration": 2,
+   "model": "vipllava",
+   "other": 0,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/vipllava/test_modeling_vipllava.py::VipLlavaForConditionalGenerationIntegrationTest::test_small_model_integration_test"
+   ]
+  },
+  {
    "checkpoint": "gradium/phonon-voices",
    "checkpoint_source": "failing test",
    "integration": 1,
@@ -361,17 +458,6 @@
    ]
   },
   {
-   "checkpoint": "llava-hf/vip-llava-7b-hf",
-   "checkpoint_source": "failing test",
-   "integration": 1,
-   "model": "vipllava",
-   "other": 0,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/vipllava/test_modeling_vipllava.py::VipLlavaForConditionalGenerationIntegrationTest::test_small_model_integration_test"
-   ]
-  },
-  {
    "checkpoint": "vidore/colpali-v1.2-hf",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -384,6 +470,17 @@
     "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_disk_offload_bin",
     "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_disk_offload_safetensors",
     "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_flash_attn_2_inference_equivalence"
+   ]
+  },
+  {
+   "checkpoint": "baidu/ERNIE-4.5-21B-A3B-PT",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "ernie4_5_moe",
+   "other": 2,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/ernie4_5_moe/test_modeling_ernie4_5_moe.py::Ernie4_5_MoeModelTest::test_flash_attn_2_equivalence"
    ]
   },
   {
@@ -431,17 +528,6 @@
    "shrinkable": true,
    "tests": [
     "tests/models/cosmos3_edge/test_image_processing_cosmos3_edge.py::Cosmos3EdgeImageProcessingTest::test_backends_equivalence_batched"
-   ]
-  },
-  {
-   "checkpoint": "baidu/ERNIE-4.5-21B-A3B-PT",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "ernie4_5_moe",
-   "other": 1,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/ernie4_5_moe/test_modeling_ernie4_5_moe.py::Ernie4_5_MoeModelTest::test_flash_attn_2_equivalence"
    ]
   },
   {
@@ -600,6 +686,18 @@
    ]
   },
   {
+   "checkpoint": "tue-mps/eomt-dinov3-coco-panoptic-large-640",
+   "checkpoint_source": "failing test",
+   "integration": 2,
+   "model": "eomt_dinov3",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/eomt_dinov3/test_modeling_eomt_dinov3.py::EomtDinov3ForUniversalSegmentationIntegrationTest::test_segmentation_pipeline",
+    "tests/models/eomt_dinov3/test_modeling_eomt_dinov3.py::EomtDinov3ForUniversalSegmentationIntegrationTest::test_inference_bf16"
+   ]
+  },
+  {
    "checkpoint": "mistralai/Mamba-Codestral-7B-v0.1",
    "checkpoint_source": "failing test",
    "integration": 2,
@@ -633,17 +731,6 @@
    ]
   },
   {
-   "checkpoint": "tue-mps/eomt-dinov3-coco-panoptic-large-640",
-   "checkpoint_source": "failing test",
-   "integration": 1,
-   "model": "eomt_dinov3",
-   "other": 0,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/eomt_dinov3/test_modeling_eomt_dinov3.py::EomtDinov3ForUniversalSegmentationIntegrationTest::test_segmentation_pipeline"
-   ]
-  },
-  {
    "checkpoint": "ibm-granite/granite-speech-5.0-470m-turboctc",
    "checkpoint_source": "failing test",
    "integration": 1,
@@ -665,6 +752,28 @@
    "tests": [
     "tests/models/granite_speech_plus/test_modeling_granite_speech_plus.py::GraniteSpeechPlusForConditionalGenerationIntegrationTest::test_small_model_integration_test_batch",
     "tests/models/granite_speech_plus/test_modeling_granite_speech_plus.py::GraniteSpeechPlusForConditionalGenerationIntegrationTest::test_small_model_integration_test_single"
+   ]
+  },
+  {
+   "checkpoint": "openbmb/MiniCPM-V-4.7-1B",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "minicpmv4_7",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/minicpmv4_7/test_modeling_minicpmv4_7.py::MiniCPMV4_7IntegrationTest::test_small_model_vision_generation_batch_mixed"
+   ]
+  },
+  {
+   "checkpoint": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "qwen3_omni_moe",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/qwen3_omni_moe/test_modeling_qwen3_omni_moe.py::Qwen3OmniModelIntegrationTest::test_small_model_integration_test_batch"
    ]
   },
   {
@@ -701,6 +810,17 @@
    "tests": [
     "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_flash_attn_2_inference_equivalence",
     "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+   ]
+  },
+  {
+   "checkpoint": "tencent/Hunyuan-A13B-Instruct",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "hunyuan_v1_moe",
+   "other": 2,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/hunyuan_v1_moe/test_modeling_hunyuan_v1_moe.py::HunYuanMoEV1ModelTest::test_flash_attn_2_equivalence"
    ]
   },
   {
@@ -850,17 +970,6 @@
    ]
   },
   {
-   "checkpoint": "tencent/Hunyuan-A13B-Instruct",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "hunyuan_v1_moe",
-   "other": 1,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/hunyuan_v1_moe/test_modeling_hunyuan_v1_moe.py::HunYuanMoEV1ModelTest::test_flash_attn_2_equivalence"
-   ]
-  },
-  {
    "checkpoint": "kyutai/stt-2.6b-en-trfs",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -932,9 +1041,31 @@
     "tests/models/t5gemma/test_modeling_t5gemma.py::T5GemmaModelTest::test_torch_export_generate_static",
     "tests/models/t5gemma/test_modeling_t5gemma.py::T5GemmaModelTest::test_torch_export_generate_static_static_cache"
    ]
+  },
+  {
+   "checkpoint": null,
+   "checkpoint_source": null,
+   "integration": 0,
+   "model": "tensor_parallel",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/tensor_parallel/test_tensor_parallel.py::TestTensorParallelTiedWeights::test_checkpoint_with_both_tied_keys_matches_tp1_0_equal",
+    "tests/tensor_parallel/test_tensor_parallel.py::TestTensorParallelTiedWeights::test_checkpoint_with_both_tied_keys_matches_tp1_1_different"
+   ]
   }
  ],
  "shared": {
+  "test_flash_attention_2_padding_matches_padding_free_with_position_ids": [
+   "gemma4",
+   "gemma4_unified",
+   "minicpm3"
+  ],
+  "test_flash_attention_2_padding_matches_padding_free_with_position_ids_and_fa_kwargs": [
+   "gemma4",
+   "gemma4_unified",
+   "minicpm3"
+  ],
   "test_flash_attn_2_equivalence": [
    "axk1",
    "glm4",
@@ -948,7 +1079,8 @@
    "bert",
    "clipseg",
    "electra",
-   "ernie"
+   "ernie",
+   "owlvit"
   ],
   "test_sdpa_padding_matches_padding_free_with_position_ids": [
    "glm4_moe_lite",

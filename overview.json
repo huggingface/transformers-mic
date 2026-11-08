@@ -11,17 +11,17 @@
   "fixed_by_push": 7,
   "labelled_real_bug": 0,
   "merged_then_main_failed": 1,
-  "real_checkpoint": 1
+  "real_checkpoint": 2
  },
  "drafts_per_day": 2,
  "false_alarms": {
-  "prs_not_their_fault": 121,
-  "prs_with_failure": 147
+  "prs_not_their_fault": 124,
+  "prs_with_failure": 150
  },
  "missed": {
-  "awaiting_verdict": 17,
-  "not_covered": 20,
-  "real_checkpoint": 17
+  "awaiting_verdict": 21,
+  "not_covered": 24,
+  "real_checkpoint": 21
  },
  "next": [
   {
@@ -33,6 +33,18 @@
    "real_checkpoint": 2,
    "regressions": 2,
    "run": "https://github.com/huggingface/transformers-mic/actions/runs/42192482634",
+   "shrink": "",
+   "shrinkable": true
+  },
+  {
+   "checkpoint": "llava-hf/vip-llava-7b-hf",
+   "draft": "queued",
+   "model": "vipllava",
+   "next_batch": false,
+   "other": 0,
+   "real_checkpoint": 2,
+   "regressions": 2,
+   "run": "",
    "shrink": "",
    "shrinkable": true
   },
@@ -49,18 +61,6 @@
    "shrinkable": true
   },
   {
-   "checkpoint": "llava-hf/vip-llava-7b-hf",
-   "draft": "",
-   "model": "vipllava",
-   "next_batch": true,
-   "other": 0,
-   "real_checkpoint": 1,
-   "regressions": 1,
-   "run": "",
-   "shrink": "",
-   "shrinkable": true
-  },
-  {
    "checkpoint": "vidore/colpali-v1.2-hf",
    "draft": "failure",
    "model": "colpali",
@@ -69,6 +69,18 @@
    "real_checkpoint": 0,
    "regressions": 4,
    "run": "https://github.com/huggingface/transformers-mic/actions/runs/41994158679",
+   "shrink": "",
+   "shrinkable": true
+  },
+  {
+   "checkpoint": "baidu/ERNIE-4.5-21B-A3B-PT",
+   "draft": "queued",
+   "model": "ernie4_5_moe",
+   "next_batch": false,
+   "other": 2,
+   "real_checkpoint": 0,
+   "regressions": 2,
+   "run": "",
    "shrink": "",
    "shrinkable": true
   },
@@ -121,18 +133,6 @@
    "shrinkable": true
   },
   {
-   "checkpoint": "baidu/ERNIE-4.5-21B-A3B-PT",
-   "draft": "",
-   "model": "ernie4_5_moe",
-   "next_batch": false,
-   "other": 1,
-   "real_checkpoint": 0,
-   "regressions": 1,
-   "run": "",
-   "shrink": "",
-   "shrinkable": true
-  },
-  {
    "checkpoint": "facebook/wmt19-en-ru",
    "draft": "failure",
    "model": "fsmt",
@@ -148,7 +148,7 @@
    "checkpoint": "microsoft/layoutlmv3-base",
    "draft": "",
    "model": "layoutlmv3",
-   "next_batch": false,
+   "next_batch": true,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -289,6 +289,18 @@
    "shrinkable": false
   },
   {
+   "checkpoint": "tue-mps/eomt-dinov3-coco-panoptic-large-640",
+   "draft": "not draftable",
+   "model": "eomt_dinov3",
+   "next_batch": false,
+   "other": 0,
+   "real_checkpoint": 2,
+   "regressions": 2,
+   "run": "",
+   "shrink": "",
+   "shrinkable": false
+  },
+  {
    "checkpoint": "mistralai/Mamba-Codestral-7B-v0.1",
    "draft": "not draftable",
    "model": "mamba2",
@@ -311,21 +323,64 @@
    "run": "",
    "shrink": "",
    "shrinkable": false
-  },
-  {
-   "checkpoint": "tue-mps/coco_panoptic_eomt_large_640",
-   "draft": "not draftable",
-   "model": "eomt",
-   "next_batch": false,
-   "other": 0,
-   "real_checkpoint": 1,
-   "regressions": 1,
-   "run": "",
-   "shrink": "",
-   "shrinkable": false
   }
  ],
  "regressions": [
+  {
+   "date": "2026-11-08",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "owlvit",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-08",
+   "detail": "",
+   "integration": true,
+   "job": "",
+   "model": "janus",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "pending"
+  },
+  {
+   "date": "2026-11-07",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "hunyuan_vl",
+   "pr": null,
+   "run": "",
+   "tests": 4,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-07",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "gemma4_unified",
+   "pr": null,
+   "run": "",
+   "tests": 3,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-07",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "gemma4",
+   "pr": null,
+   "run": "",
+   "tests": 8,
+   "verdict": "out-of-scope"
+  },
   {
    "date": "2026-11-07",
    "detail": "",
@@ -336,6 +391,17 @@
    "run": "",
    "tests": 1,
    "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-06",
+   "detail": "same regression as 49976#qianfan_ocr",
+   "integration": true,
+   "job": "",
+   "model": "qianfan_ocr",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "duplicate"
   },
   {
    "date": "2026-11-06",
@@ -358,6 +424,17 @@
    "run": "https://github.com/huggingface/transformers-mic/actions/runs/41993679537",
    "tests": 4,
    "verdict": "missed"
+  },
+  {
+   "date": "2026-11-02",
+   "detail": "the daily CI did not fail it",
+   "integration": true,
+   "job": "",
+   "model": "smolvlm",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "not-reproduced"
   },
   {
    "date": "2026-11-02",
@@ -390,6 +467,17 @@
    "pr": null,
    "run": "",
    "tests": 2,
+   "verdict": "not-reproduced"
+  },
+  {
+   "date": "2026-11-02",
+   "detail": "the daily CI did not fail it",
+   "integration": true,
+   "job": "",
+   "model": "gemma4",
+   "pr": null,
+   "run": "",
+   "tests": 1,
    "verdict": "not-reproduced"
   },
   {
@@ -614,6 +702,17 @@
   },
   {
    "date": "2026-10-26",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "gemma4",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-10-26",
    "detail": "the bad commit added the model",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/40260447300/job/121371676229",
@@ -705,6 +804,17 @@
    "detail": "",
    "integration": false,
    "job": "",
+   "model": "hunyuan_vl",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-10-20",
+   "detail": "",
+   "integration": false,
+   "job": "",
    "model": "got_ocr2",
    "pr": null,
    "run": "",
@@ -738,6 +848,17 @@
    "detail": "",
    "integration": false,
    "job": "",
+   "model": "minimax_m2",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-10-19",
+   "detail": "",
+   "integration": false,
+   "job": "",
    "model": "granitemoe",
    "pr": null,
    "run": "",
@@ -754,6 +875,28 @@
    "run": "",
    "tests": 1,
    "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-10-19",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "glm4",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-10-19",
+   "detail": "",
+   "integration": true,
+   "job": "",
+   "model": "gemma4",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "pending"
   },
   {
    "date": "2026-10-19",
@@ -1282,168 +1425,25 @@
    "run": "",
    "tests": 1,
    "verdict": "unrelated-culprit"
-  },
-  {
-   "date": "2026-08-11",
-   "detail": "the bad commit added the model",
-   "integration": true,
-   "job": "https://github.com/huggingface/transformers/actions/runs/31454046729/job/93664844811",
-   "model": "muse_glimmer",
-   "pr": "47867",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41993679537",
-   "tests": 16,
-   "verdict": "model-added"
-  },
-  {
-   "date": "2026-08-05",
-   "detail": "",
-   "integration": true,
-   "job": "https://github.com/huggingface/transformers/actions/runs/30972202198/job/92205665698",
-   "model": "t5",
-   "pr": "47731",
-   "run": "",
-   "tests": 1,
-   "verdict": "out-of-scope"
-  },
-  {
-   "date": "2026-08-05",
-   "detail": "tibetan-ocr-mic (bfloat16): logits.probe: max delta 0.105 over tolerance",
-   "integration": true,
-   "job": "https://github.com/huggingface/transformers/actions/runs/30972202198/job/92205669582",
-   "model": "paddleocr_vl",
-   "pr": "47573",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41993679537",
-   "tests": 2,
-   "verdict": "caught"
-  },
-  {
-   "date": "2026-08-04",
-   "detail": "",
-   "integration": false,
-   "job": "https://github.com/huggingface/transformers/actions/runs/30874774683/job/91885744220",
-   "model": "smolvlm",
-   "pr": "47753",
-   "run": "",
-   "tests": 4,
-   "verdict": "out-of-scope"
-  },
-  {
-   "date": "2026-08-04",
-   "detail": "",
-   "integration": false,
-   "job": "https://github.com/huggingface/transformers/actions/runs/30874774683/job/91885746115",
-   "model": "mllama",
-   "pr": "47753",
-   "run": "",
-   "tests": 4,
-   "verdict": "out-of-scope"
-  },
-  {
-   "date": "2026-08-04",
-   "detail": "",
-   "integration": false,
-   "job": "https://github.com/huggingface/transformers/actions/runs/30874774683/job/91885740865",
-   "model": "idefics3",
-   "pr": "47753",
-   "run": "",
-   "tests": 5,
-   "verdict": "out-of-scope"
-  },
-  {
-   "date": "2026-08-04",
-   "detail": "the bisected commit does not touch the model or shared code",
-   "integration": true,
-   "job": "https://github.com/huggingface/transformers/actions/runs/30874774683/job/91885751295",
-   "model": "phimoe",
-   "pr": "47493",
-   "run": "",
-   "tests": 1,
-   "verdict": "unrelated-culprit"
-  },
-  {
-   "date": "2026-08-04",
-   "detail": "",
-   "integration": false,
-   "job": "https://github.com/huggingface/transformers/actions/runs/30874774683/job/91885747347",
-   "model": "vaultgemma",
-   "pr": "47243",
-   "run": "",
-   "tests": 2,
-   "verdict": "out-of-scope"
-  },
-  {
-   "date": "2026-08-04",
-   "detail": "",
-   "integration": false,
-   "job": "https://github.com/huggingface/transformers/actions/runs/30874774683/job/91885744220",
-   "model": "smolvlm",
-   "pr": "47243",
-   "run": "",
-   "tests": 2,
-   "verdict": "out-of-scope"
-  },
-  {
-   "date": "2026-08-04",
-   "detail": "",
-   "integration": false,
-   "job": "https://github.com/huggingface/transformers/actions/runs/30874774683/job/91885744216",
-   "model": "smollm3",
-   "pr": "47243",
-   "run": "",
-   "tests": 2,
-   "verdict": "out-of-scope"
-  },
-  {
-   "date": "2026-08-04",
-   "detail": "",
-   "integration": false,
-   "job": "https://github.com/huggingface/transformers/actions/runs/30874774683/job/91885740902",
-   "model": "qwen3_next",
-   "pr": "47243",
-   "run": "",
-   "tests": 2,
-   "verdict": "out-of-scope"
-  },
-  {
-   "date": "2026-08-04",
-   "detail": "",
-   "integration": false,
-   "job": "https://github.com/huggingface/transformers/actions/runs/30874774683/job/91885740908",
-   "model": "qwen3_5",
-   "pr": "47243",
-   "run": "",
-   "tests": 4,
-   "verdict": "out-of-scope"
-  },
-  {
-   "date": "2026-08-04",
-   "detail": "",
-   "integration": false,
-   "job": "https://github.com/huggingface/transformers/actions/runs/30874774683/job/91885740940",
-   "model": "qwen2_vl",
-   "pr": "47243",
-   "run": "",
-   "tests": 2,
-   "verdict": "out-of-scope"
   }
  ],
  "replay": {
   "already-red": 9,
   "broken": 1,
   "caught": 8,
-  "duplicate": 2,
+  "duplicate": 3,
   "missed": 7,
   "model-added": 4,
   "no-code-change": 0,
   "not-a-regression": 2,
-  "not-covered": 221,
-  "not-reproduced": 6,
-  "out-of-scope": 112,
-  "pending": 0,
+  "not-covered": 228,
+  "not-reproduced": 8,
+  "out-of-scope": 120,
+  "pending": 2,
   "unrelated-culprit": 19
  },
  "window": [
   "2026-10-20",
-  "2026-11-07"
+  "2026-11-08"
  ]
 }

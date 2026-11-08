@@ -58,6 +58,12 @@
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/41626657364"
  },
+ "ernie4_5_moe": {
+  "checkpoint": "baidu/ERNIE-4.5-21B-A3B-PT",
+  "conclusion": null,
+  "dispatched_at": "2026-11-08T09:05:40Z",
+  "status": "queued"
+ },
  "flex_olmo": {
   "checkpoint": "shanearora/Flex-reddit-2x7B-1T",
   "conclusion": "success",
@@ -192,5 +198,11 @@
   "run_id": 41626645840,
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/41626645840"
+ },
+ "vipllava": {
+  "checkpoint": "llava-hf/vip-llava-7b-hf",
+  "conclusion": null,
+  "dispatched_at": "2026-11-08T09:05:40Z",
+  "status": "queued"
  }
 }

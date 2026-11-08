@@ -5502,6 +5502,18 @@
    "tests/models/electra/test_modeling_electra.py::ElectraModelTest::test_flash_attn_2_inference_equivalence_right_padding"
   ]
  },
+ "sticky#eomt_dinov3#2026-11-08": {
+  "date": "2026-11-08",
+  "day": 20765,
+  "integration": true,
+  "mic": "not-covered",
+  "model": "eomt_dinov3",
+  "run_id": "42438362392",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/eomt_dinov3/test_modeling_eomt_dinov3.py::EomtDinov3ForUniversalSegmentationIntegrationTest::test_inference_bf16"
+  ]
+ },
  "sticky#ernie#2026-10-06": {
   "date": "2026-10-06",
   "day": 20732,
@@ -5544,6 +5556,18 @@
   "mic": "not-covered",
   "model": "ernie4_5_moe",
   "run_id": "41954951296",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/ernie4_5_moe/test_modeling_ernie4_5_moe.py::Ernie4_5_MoeModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#ernie4_5_moe#2026-10-13": {
+  "date": "2026-10-13",
+  "day": 20739,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "ernie4_5_moe",
+  "run_id": "42328911987",
   "signal": "AssertionError",
   "tests": [
    "tests/models/ernie4_5_moe/test_modeling_ernie4_5_moe.py::Ernie4_5_MoeModelTest::test_flash_attn_2_equivalence"
@@ -5689,6 +5713,75 @@
    "tests/models/gemma4/test_modeling_gemma4.py::Gemma4IntegrationTest::test_generation_beyond_sliding_window_0_sdpa"
   ]
  },
+ "sticky#gemma4#2026-10-19": {
+  "date": "2026-10-19",
+  "day": 20745,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "gemma4",
+  "run_id": "41954992211",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/gemma4/test_modeling_gemma4.py::Gemma4IntegrationTest::test_generation_beyond_sliding_window_0_sdpa"
+  ]
+ },
+ "sticky#gemma4#2026-10-26": {
+  "date": "2026-10-26",
+  "day": 20752,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "gemma4",
+  "run_id": "42438362392",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/gemma4/test_modeling_gemma4.py::Gemma4Vision2TextModelTest::test_eager_matches_batched_and_grouped_inference_0_fp16"
+  ]
+ },
+ "sticky#gemma4#2026-11-02": {
+  "date": "2026-11-02",
+  "day": 20759,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "gemma4",
+  "run_id": "42438362392",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/gemma4/test_modeling_gemma4.py::Gemma4IntegrationTest::test_generation_beyond_sliding_window_1_eager"
+  ]
+ },
+ "sticky#gemma4#2026-11-07": {
+  "date": "2026-11-07",
+  "day": 20764,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "gemma4",
+  "run_id": "42438362392",
+  "signal": "torch._inductor.exc.InductorError",
+  "tests": [
+   "tests/models/gemma4/test_modeling_gemma4.py::Gemma4Vision2TextModelTest::test_flex_attention_with_grads",
+   "tests/models/gemma4/test_modeling_gemma4.py::Gemma4TextModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids",
+   "tests/models/gemma4/test_modeling_gemma4.py::Gemma4TextModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids_and_fa_kwargs",
+   "tests/models/gemma4/test_modeling_gemma4.py::Gemma4TextModelTest::test_flash_attn_2_from_config",
+   "tests/models/gemma4/test_modeling_gemma4.py::Gemma4Vision2TextModelTest::test_eager_matches_fa2_generate",
+   "tests/models/gemma4/test_modeling_gemma4.py::Gemma4Vision2TextModelTest::test_flash_attention_2_continue_generate_with_position_ids",
+   "tests/models/gemma4/test_modeling_gemma4.py::Gemma4Vision2TextModelTest::test_flash_attn_2_fp32_ln",
+   "tests/models/gemma4/test_modeling_gemma4.py::Gemma4Vision2TextModelTest::test_flash_attn_2_from_config"
+  ]
+ },
+ "sticky#gemma4_unified#2026-11-07": {
+  "date": "2026-11-07",
+  "day": 20764,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "gemma4_unified",
+  "run_id": "42438326937",
+  "signal": "IndexError",
+  "tests": [
+   "tests/models/gemma4_unified/test_modeling_gemma4_unified.py::Gemma4UnifiedTextModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids",
+   "tests/models/gemma4_unified/test_modeling_gemma4_unified.py::Gemma4UnifiedTextModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids_and_fa_kwargs",
+   "tests/models/gemma4_unified/test_modeling_gemma4_unified.py::Gemma4UnifiedTextModelTest::test_flash_attn_2_from_config"
+  ]
+ },
  "sticky#glm4#2026-10-07": {
   "date": "2026-10-07",
   "day": 20733,
@@ -5707,6 +5800,18 @@
   "mic": "green-on-main",
   "model": "glm4",
   "run_id": "41954951296",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/glm4/test_modeling_glm4.py::Glm4ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#glm4#2026-10-19": {
+  "date": "2026-10-19",
+  "day": 20745,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "glm4",
+  "run_id": "42438326937",
   "signal": "AssertionError",
   "tests": [
    "tests/models/glm4/test_modeling_glm4.py::Glm4ModelTest::test_flash_attn_2_equivalence"
@@ -5853,6 +5958,45 @@
    "tests/models/hunyuan_v1_moe/test_modeling_hunyuan_v1_moe.py::HunYuanMoEV1ModelTest::test_flash_attn_2_equivalence"
   ]
  },
+ "sticky#hunyuan_v1_moe#2026-10-15": {
+  "date": "2026-10-15",
+  "day": 20741,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "hunyuan_v1_moe",
+  "run_id": "42438326937",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/hunyuan_v1_moe/test_modeling_hunyuan_v1_moe.py::HunYuanMoEV1ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#hunyuan_vl#2026-10-20": {
+  "date": "2026-10-20",
+  "day": 20746,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "hunyuan_vl",
+  "run_id": "42438362392",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/hunyuan_vl/test_image_processing_hunyuan_vl.py::HunYuanVLImageProcessorTest::test_backends_equivalence_batched"
+  ]
+ },
+ "sticky#hunyuan_vl#2026-11-07": {
+  "date": "2026-11-07",
+  "day": 20764,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "hunyuan_vl",
+  "run_id": "42438362392",
+  "signal": "torch.fx.experimental.symbolic_shapes.GuardOnDataDependentSymNode",
+  "tests": [
+   "tests/models/hunyuan_vl/test_modeling_hunyuan_vl.py::HunYuanVLModelTest::test_onnx_export_dynamic",
+   "tests/models/hunyuan_vl/test_modeling_hunyuan_vl.py::HunYuanVLModelTest::test_onnx_export_static",
+   "tests/models/hunyuan_vl/test_modeling_hunyuan_vl.py::HunYuanVLModelTest::test_torch_export_dynamic",
+   "tests/models/hunyuan_vl/test_modeling_hunyuan_vl.py::HunYuanVLModelTest::test_torch_export_static"
+  ]
+ },
  "sticky#hy_v3#2026-10-14": {
   "date": "2026-10-14",
   "day": 20740,
@@ -5899,6 +6043,18 @@
   "tests": [
    "tests/models/internvl/test_modeling_internvl.py::InternVLLlamaIntegrationTest::test_llama_small_model_integration_forward",
    "tests/models/internvl/test_modeling_internvl.py::InternVLLlamaIntegrationTest::test_llama_small_model_integration_generate_text_only"
+  ]
+ },
+ "sticky#janus#2026-11-08": {
+  "date": "2026-11-08",
+  "day": 20765,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "janus",
+  "run_id": "42438362392",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/janus/test_modeling_janus.py::JanusIntegrationTest::test_model_text_generation"
   ]
  },
  "sticky#jetmoe#2026-10-10": {
@@ -6132,6 +6288,18 @@
    "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids_and_fa_kwargs"
   ]
  },
+ "sticky#minicpmv4_7#2026-10-20": {
+  "date": "2026-10-20",
+  "day": 20746,
+  "integration": true,
+  "mic": "not-covered",
+  "model": "minicpmv4_7",
+  "run_id": "42438362392",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/minicpmv4_7/test_modeling_minicpmv4_7.py::MiniCPMV4_7IntegrationTest::test_small_model_vision_generation_batch_mixed"
+  ]
+ },
  "sticky#minimax_m2#2026-10-10": {
   "date": "2026-10-10",
   "day": 20736,
@@ -6139,6 +6307,18 @@
   "mic": "green-on-main",
   "model": "minimax_m2",
   "run_id": "42150048723",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/minimax_m2/test_modeling_minimax_m2.py::MiniMaxM2ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#minimax_m2#2026-10-19": {
+  "date": "2026-10-19",
+  "day": 20745,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "minimax_m2",
+  "run_id": "42438326937",
   "signal": "AssertionError",
   "tests": [
    "tests/models/minimax_m2/test_modeling_minimax_m2.py::MiniMaxM2ModelTest::test_flash_attn_2_equivalence"
@@ -6324,6 +6504,18 @@
    "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_universal_segmentation_head"
   ]
  },
+ "sticky#owlvit#2026-11-08": {
+  "date": "2026-11-08",
+  "day": 20765,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "owlvit",
+  "run_id": "42438326937",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/owlvit/test_modeling_owlvit.py::OwlViTForObjectDetectionTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
  "sticky#pegasus#2026-10-30": {
   "date": "2026-10-30",
   "day": 20756,
@@ -6443,6 +6635,18 @@
    "tests/models/prophetnet/test_modeling_prophetnet.py::ProphetNetModelTest::test_torch_export_generate_static"
   ]
  },
+ "sticky#qianfan_ocr#2026-11-06": {
+  "date": "2026-11-06",
+  "day": 20763,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "qianfan_ocr",
+  "run_id": "42438362392",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/qianfan_ocr/test_modeling_qianfan_ocr.py::QianfanOCRIntegrationTest::test_model_integration_forward"
+  ]
+ },
  "sticky#qwen3_5#2026-10-12": {
   "date": "2026-10-12",
   "day": 20738,
@@ -6481,6 +6685,18 @@
    "tests/models/qwen3_moe/test_modeling_qwen3_moe.py::Qwen3MoeIntegrationTest::test_model_15b_a2b_logits",
    "tests/models/qwen3_moe/test_modeling_qwen3_moe.py::Qwen3MoeIntegrationTest::test_model_15b_a2b_long_prompt_sdpa",
    "tests/models/qwen3_moe/test_modeling_qwen3_moe.py::Qwen3MoeIntegrationTest::test_speculative_generation"
+  ]
+ },
+ "sticky#qwen3_omni_moe#2026-10-15": {
+  "date": "2026-10-15",
+  "day": 20741,
+  "integration": true,
+  "mic": "not-covered",
+  "model": "qwen3_omni_moe",
+  "run_id": "42438362392",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/qwen3_omni_moe/test_modeling_qwen3_omni_moe.py::Qwen3OmniModelIntegrationTest::test_small_model_integration_test_batch"
   ]
  },
  "sticky#reformer#2026-10-07": {
@@ -6538,6 +6754,18 @@
   "signal": "AssertionError",
   "tests": [
    "tests/models/shieldgemma2/test_modeling_shieldgemma2.py::ShieldGemma2ModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
+ "sticky#smolvlm#2026-11-02": {
+  "date": "2026-11-02",
+  "day": 20759,
+  "integration": true,
+  "mic": "red-on-main",
+  "model": "smolvlm",
+  "run_id": "42438362392",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/smolvlm/test_modeling_smolvlm.py::SmolVLMForConditionalGenerationIntegrationTest::test_integration_test"
   ]
  },
  "sticky#speech_to_text#2026-10-30": {
@@ -6646,6 +6874,19 @@
    "tests/models/t5gemma2/test_modeling_t5gemma2.py::T5Gemma2ModelTest::test_torch_export_generate_static_static_cache"
   ]
  },
+ "sticky#tensor_parallel#2026-11-07": {
+  "date": "2026-11-07",
+  "day": 20764,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "tensor_parallel",
+  "run_id": "42438362392",
+  "signal": "ConnectionResetError",
+  "tests": [
+   "tests/tensor_parallel/test_tensor_parallel.py::TestTensorParallelTiedWeights::test_checkpoint_with_both_tied_keys_matches_tp1_0_equal",
+   "tests/tensor_parallel/test_tensor_parallel.py::TestTensorParallelTiedWeights::test_checkpoint_with_both_tied_keys_matches_tp1_1_different"
+  ]
+ },
  "sticky#udop#2026-10-16": {
   "date": "2026-10-16",
   "day": 20742,
@@ -6696,6 +6937,18 @@
   "signal": "httpx2.ReadTimeout",
   "tests": [
    "tests/utils/test_image_utils.py::LoadImageTester::test_load_img_url_timeout"
+  ]
+ },
+ "sticky#vipllava#2026-11-07": {
+  "date": "2026-11-07",
+  "day": 20764,
+  "integration": true,
+  "mic": "not-covered",
+  "model": "vipllava",
+  "run_id": "42438362392",
+  "signal": "RuntimeError",
+  "tests": [
+   "tests/models/vipllava/test_modeling_vipllava.py::VipLlavaForConditionalGenerationIntegrationTest::test_small_model_integration_test"
   ]
  },
  "sticky#wav2vec2_bert#2026-10-07": {

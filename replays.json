@@ -1417,6 +1417,10 @@
   "verdict": "out-of-scope",
   "version": 7
  },
+ "sticky#eomt_dinov3#2026-11-08": {
+  "verdict": "not-covered",
+  "version": 7
+ },
  "sticky#ernie#2026-10-06": {
   "verdict": "out-of-scope",
   "version": 7
@@ -1430,6 +1434,10 @@
   "version": 7
  },
  "sticky#ernie4_5_moe#2026-10-10": {
+  "verdict": "not-covered",
+  "version": 7
+ },
+ "sticky#ernie4_5_moe#2026-10-13": {
   "verdict": "not-covered",
   "version": 7
  },
@@ -1489,11 +1497,32 @@
   "verdict": "duplicate",
   "version": 7
  },
+ "sticky#gemma4#2026-10-26": {
+  "verdict": "out-of-scope",
+  "version": 7
+ },
+ "sticky#gemma4#2026-11-02": {
+  "reason": "the daily CI did not fail it",
+  "verdict": "not-reproduced",
+  "version": 7
+ },
+ "sticky#gemma4#2026-11-07": {
+  "verdict": "out-of-scope",
+  "version": 7
+ },
+ "sticky#gemma4_unified#2026-11-07": {
+  "verdict": "out-of-scope",
+  "version": 7
+ },
  "sticky#glm4#2026-10-07": {
   "verdict": "out-of-scope",
   "version": 7
  },
  "sticky#glm4#2026-10-10": {
+  "verdict": "out-of-scope",
+  "version": 7
+ },
+ "sticky#glm4#2026-10-19": {
   "verdict": "out-of-scope",
   "version": 7
  },
@@ -1549,6 +1578,18 @@
  },
  "sticky#hunyuan_v1_moe#2026-10-10": {
   "verdict": "not-covered",
+  "version": 7
+ },
+ "sticky#hunyuan_v1_moe#2026-10-15": {
+  "verdict": "not-covered",
+  "version": 7
+ },
+ "sticky#hunyuan_vl#2026-10-20": {
+  "verdict": "out-of-scope",
+  "version": 7
+ },
+ "sticky#hunyuan_vl#2026-11-07": {
+  "verdict": "out-of-scope",
   "version": 7
  },
  "sticky#hy_v3#2026-10-14": {
@@ -1650,7 +1691,15 @@
   "verdict": "out-of-scope",
   "version": 7
  },
+ "sticky#minicpmv4_7#2026-10-20": {
+  "verdict": "not-covered",
+  "version": 7
+ },
  "sticky#minimax_m2#2026-10-10": {
+  "verdict": "out-of-scope",
+  "version": 7
+ },
+ "sticky#minimax_m2#2026-10-19": {
   "verdict": "out-of-scope",
   "version": 7
  },
@@ -1719,6 +1768,10 @@
   "verdict": "not-covered",
   "version": 7
  },
+ "sticky#owlvit#2026-11-08": {
+  "verdict": "out-of-scope",
+  "version": 7
+ },
  "sticky#pegasus#2026-10-30": {
   "verdict": "out-of-scope",
   "version": 7
@@ -1751,6 +1804,11 @@
   "verdict": "not-covered",
   "version": 7
  },
+ "sticky#qianfan_ocr#2026-11-06": {
+  "reason": "same regression as 49976#qianfan_ocr",
+  "verdict": "duplicate",
+  "version": 7
+ },
  "sticky#qwen3_5#2026-10-12": {
   "bad": "d203390173fc074638e2268c6becd140fca5d92b",
   "commits": 386,
@@ -1779,6 +1837,10 @@
   "verdict": "missed",
   "version": 7
  },
+ "sticky#qwen3_omni_moe#2026-10-15": {
+  "verdict": "not-covered",
+  "version": 7
+ },
  "sticky#reformer#2026-10-07": {
   "verdict": "not-covered",
   "version": 7
@@ -1797,6 +1859,11 @@
  },
  "sticky#shieldgemma2#2026-10-07": {
   "verdict": "not-covered",
+  "version": 7
+ },
+ "sticky#smolvlm#2026-11-02": {
+  "reason": "the daily CI did not fail it",
+  "verdict": "not-reproduced",
   "version": 7
  },
  "sticky#speech_to_text#2026-10-30": {
@@ -1831,6 +1898,10 @@
   "verdict": "not-covered",
   "version": 7
  },
+ "sticky#tensor_parallel#2026-11-07": {
+  "verdict": "not-covered",
+  "version": 7
+ },
  "sticky#udop#2026-10-16": {
   "verdict": "not-covered",
   "version": 7
@@ -1844,6 +1915,10 @@
   "version": 7
  },
  "sticky#utils#2026-10-17": {
+  "verdict": "not-covered",
+  "version": 7
+ },
+ "sticky#vipllava#2026-11-07": {
   "verdict": "not-covered",
   "version": 7
  },
