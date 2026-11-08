@@ -1497,6 +1497,18 @@
   "verdict": "duplicate",
   "version": 7
  },
+ "sticky#gemma4#2026-10-19": {
+  "bad": "d203390173fc074638e2268c6becd140fca5d92b",
+  "commits": 290,
+  "contracts": [
+   "huggingface-mic/gemma-4-E2B-it-mic"
+  ],
+  "failures": [],
+  "parent": "d4804f9d76b8c071b993d813e9e87067b780cbee",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42465423950",
+  "verdict": "missed",
+  "version": 7
+ },
  "sticky#gemma4#2026-10-26": {
   "verdict": "out-of-scope",
   "version": 7
@@ -1607,6 +1619,18 @@
  "sticky#internvl#2026-11-02": {
   "reason": "the daily CI did not fail it",
   "verdict": "not-reproduced",
+  "version": 7
+ },
+ "sticky#janus#2026-11-08": {
+  "bad": "a6f5c8676b158c367dc3389f68dde7a97fb619d6",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/Janus-Pro-1B-mic"
+  ],
+  "failures": [],
+  "parent": "0f53828e83f2212060233d2ea552cc76617b8712",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42465423950",
+  "verdict": "missed",
   "version": 7
  },
  "sticky#jetmoe#2026-10-10": {

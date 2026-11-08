@@ -344,9 +344,9 @@
    "job": "",
    "model": "janus",
    "pr": null,
-   "run": "",
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42465423950",
    "tests": 1,
-   "verdict": "pending"
+   "verdict": "missed"
   },
   {
    "date": "2026-11-07",
@@ -889,14 +889,14 @@
   },
   {
    "date": "2026-10-19",
-   "detail": "",
+   "detail": "290 commits in range; ",
    "integration": true,
    "job": "",
    "model": "gemma4",
    "pr": null,
-   "run": "",
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42465423950",
    "tests": 1,
-   "verdict": "pending"
+   "verdict": "missed"
   },
   {
    "date": "2026-10-19",
@@ -1432,14 +1432,14 @@
   "broken": 1,
   "caught": 8,
   "duplicate": 3,
-  "missed": 7,
+  "missed": 9,
   "model-added": 4,
   "no-code-change": 0,
   "not-a-regression": 2,
   "not-covered": 228,
   "not-reproduced": 8,
   "out-of-scope": 120,
-  "pending": 2,
+  "pending": 0,
   "unrelated-culprit": 19
  },
  "window": [

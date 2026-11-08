@@ -8,12 +8,12 @@ Each PR failure is classified on the day it first failed: **infra** (setup error
 
 Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers_daily_ci`) — bisected to a commit, or a sticky failure's first day — is replayed with the model's fixture contracts as Transformers PR CI runs them (today's fleets; control in the default and bfloat16 variants, prototypes in bfloat16; `run-model-contracts` on the same runner and image) on the commit before it and on the commit that broke it. When that commit added the model, only its side runs.
 
-**Catch rate: 8 of 15** (53%) — caught / (caught + missed).
+**Catch rate: 8 of 17** (47%) — caught / (caught + missed).
 
 | verdict | regressions | meaning |
 |---|---|---|
 | caught | 8 | the contracts' result changes between the two commits: green to red, or red to green when the baseline was recorded after the change |
-| missed | 7 | green on both |
+| missed | 9 | green on both |
 | not-a-regression | 2 | a human reproduced the failing test on both sides of the range: the failure is not from these commits (the environment, a Hub checkpoint, a tokenizer); see the note |
 | already-red | 9 | red on both: says nothing about this regression |
 | no-code-change | 0 | the daily CI tested the same commit the day before: nothing for a contract to catch |
@@ -24,11 +24,11 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 | broken | 1 | the replay could not measure it (commit, install, fixture or baseline setup) |
 | out-of-scope | 120 | no failing *IntegrationTest a CPU fixture contract mirrors: GPU-only, or a feature contracts do not call (export, offloading, parallelism, processors) |
 | not-covered | 228 | no contract for the model |
-| pending | 2 | not replayed yet |
 
 | date | model | regression | verdict | at the bad commit |
 |---|---|---|---|---|
 | 2026-11-08 | owlvit | sticky onset | out-of-scope |  |
+| 2026-11-08 | janus | sticky onset | [missed](https://github.com/huggingface/transformers-mic/actions/runs/42465423950) |  |
 | 2026-11-07 | hunyuan_vl | sticky onset | out-of-scope |  |
 | 2026-11-07 | gemma4_unified | sticky onset | out-of-scope |  |
 | 2026-11-07 | gemma4 | sticky onset | out-of-scope |  |
@@ -78,6 +78,7 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 | 2026-10-19 | granitemoe | sticky onset | out-of-scope |  |
 | 2026-10-19 | glm_moe_dsa | sticky onset | out-of-scope |  |
 | 2026-10-19 | glm4 | sticky onset | out-of-scope |  |
+| 2026-10-19 | gemma4 | sticky onset | [missed](https://github.com/huggingface/transformers-mic/actions/runs/42465423950) | 290 commits in range;  |
 | 2026-10-19 | bert | sticky onset | out-of-scope |  |
 | 2026-10-18 | axk1 | sticky onset | out-of-scope |  |
 | 2026-10-17 | mm_grounding_dino | sticky onset | [missed](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | 305 commits in range;  |
