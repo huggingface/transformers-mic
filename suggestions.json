@@ -432,17 +432,6 @@
    ]
   },
   {
-   "checkpoint": "llava-hf/vip-llava-7b-hf",
-   "checkpoint_source": "failing test",
-   "integration": 2,
-   "model": "vipllava",
-   "other": 0,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/vipllava/test_modeling_vipllava.py::VipLlavaForConditionalGenerationIntegrationTest::test_small_model_integration_test"
-   ]
-  },
-  {
    "checkpoint": "gradium/phonon-voices",
    "checkpoint_source": "failing test",
    "integration": 1,
@@ -470,17 +459,6 @@
     "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_disk_offload_bin",
     "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_disk_offload_safetensors",
     "tests/models/colpali/test_modeling_colpali.py::ColPaliForRetrievalModelTest::test_flash_attn_2_inference_equivalence"
-   ]
-  },
-  {
-   "checkpoint": "baidu/ERNIE-4.5-21B-A3B-PT",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "ernie4_5_moe",
-   "other": 2,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/ernie4_5_moe/test_modeling_ernie4_5_moe.py::Ernie4_5_MoeModelTest::test_flash_attn_2_equivalence"
    ]
   },
   {
@@ -706,17 +684,6 @@
    "shrinkable": false,
    "tests": [
     "tests/models/mamba2/test_modeling_mamba2.py::Mamba2IntegrationTest::test_mamba2_mixer_train_vs_eval_equivalence"
-   ]
-  },
-  {
-   "checkpoint": "Salesforce/blip2-opt-2.7b",
-   "checkpoint_source": "failing test",
-   "integration": 1,
-   "model": "blip_2",
-   "other": 0,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/blip_2/test_modeling_blip_2.py::Blip2ModelIntegrationTest::test_inference_t5_multi_accelerator"
    ]
   },
   {

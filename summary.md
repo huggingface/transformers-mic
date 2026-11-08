@@ -323,10 +323,8 @@ Models with real-checkpoint regressions in the daily GPU CI and no contract, shr
 | model | real-ckpt regressions | other | checkpoint | shrinkable | draft |
 |---|---|---|---|---|---|
 | pocket_tts | 2 | 0 | [eustlb/pocket-tts](https://huggingface.co/eustlb/pocket-tts) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/42192482634) |
-| vipllava | 2 | 0 | [llava-hf/vip-llava-7b-hf](https://huggingface.co/llava-hf/vip-llava-7b-hf) | yes | queued |
 | gradium_phonon_tts | 1 | 1 | [gradium/phonon-voices](https://huggingface.co/gradium/phonon-voices) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/42192485403) |
 | colpali | 0 | 4 | [vidore/colpali-v1.2-hf](https://huggingface.co/vidore/colpali-v1.2-hf) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41994158679) |
-| ernie4_5_moe | 0 | 2 | [baidu/ERNIE-4.5-21B-A3B-PT](https://huggingface.co/baidu/ERNIE-4.5-21B-A3B-PT) | yes | queued |
 | moshi | 0 | 2 | [kmhf/hf-moshika](https://huggingface.co/kmhf/hf-moshika) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41999673429) |
 | bridgetower | 0 | 1 | [regisss/bridgetower-newyorker-a100-8x](https://huggingface.co/regisss/bridgetower-newyorker-a100-8x) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41626675456) |
 | canary | 0 | 1 | [nvidia/canary-1b-v2](https://huggingface.co/nvidia/canary-1b-v2) | yes | — |
@@ -346,7 +344,9 @@ Models with real-checkpoint regressions in the daily GPU CI and no contract, shr
 | cwm | 2 | 0 | [facebook/cwm](https://huggingface.co/facebook/cwm) | no | not draftable |
 | eomt_dinov3 | 2 | 0 | [tue-mps/eomt-dinov3-coco-panoptic-large-640](https://huggingface.co/tue-mps/eomt-dinov3-coco-panoptic-large-640) | no | not draftable |
 | mamba2 | 2 | 0 | [mistralai/Mamba-Codestral-7B-v0.1](https://huggingface.co/mistralai/Mamba-Codestral-7B-v0.1) | no | not draftable |
-| blip_2 | 1 | 0 | [Salesforce/blip2-opt-2.7b](https://huggingface.co/Salesforce/blip2-opt-2.7b) | no | not draftable |
+| eomt | 1 | 0 | [tue-mps/coco_panoptic_eomt_large_640](https://huggingface.co/tue-mps/coco_panoptic_eomt_large_640) | no | not draftable |
+| granite_speech5 | 1 | 0 | [ibm-granite/granite-speech-5.0-470m-turboctc](https://huggingface.co/ibm-granite/granite-speech-5.0-470m-turboctc) | no | not draftable |
+| granite_speech_plus | 1 | 0 | [ibm-granite/granite-speech-4.1-2b-plus](https://huggingface.co/ibm-granite/granite-speech-4.1-2b-plus) | no | not draftable |
 
 ### Calls to add to existing contracts
 

@@ -37,18 +37,6 @@
    "shrinkable": true
   },
   {
-   "checkpoint": "llava-hf/vip-llava-7b-hf",
-   "draft": "queued",
-   "model": "vipllava",
-   "next_batch": false,
-   "other": 0,
-   "real_checkpoint": 2,
-   "regressions": 2,
-   "run": "",
-   "shrink": "",
-   "shrinkable": true
-  },
-  {
    "checkpoint": "gradium/phonon-voices",
    "draft": "failure",
    "model": "gradium_phonon_tts",
@@ -69,18 +57,6 @@
    "real_checkpoint": 0,
    "regressions": 4,
    "run": "https://github.com/huggingface/transformers-mic/actions/runs/41994158679",
-   "shrink": "",
-   "shrinkable": true
-  },
-  {
-   "checkpoint": "baidu/ERNIE-4.5-21B-A3B-PT",
-   "draft": "queued",
-   "model": "ernie4_5_moe",
-   "next_batch": false,
-   "other": 2,
-   "real_checkpoint": 0,
-   "regressions": 2,
-   "run": "",
    "shrink": "",
    "shrinkable": true
   },
@@ -313,9 +289,33 @@
    "shrinkable": false
   },
   {
-   "checkpoint": "Salesforce/blip2-opt-2.7b",
+   "checkpoint": "tue-mps/coco_panoptic_eomt_large_640",
    "draft": "not draftable",
-   "model": "blip_2",
+   "model": "eomt",
+   "next_batch": false,
+   "other": 0,
+   "real_checkpoint": 1,
+   "regressions": 1,
+   "run": "",
+   "shrink": "",
+   "shrinkable": false
+  },
+  {
+   "checkpoint": "ibm-granite/granite-speech-5.0-470m-turboctc",
+   "draft": "not draftable",
+   "model": "granite_speech5",
+   "next_batch": false,
+   "other": 0,
+   "real_checkpoint": 1,
+   "regressions": 1,
+   "run": "",
+   "shrink": "",
+   "shrinkable": false
+  },
+  {
+   "checkpoint": "ibm-granite/granite-speech-4.1-2b-plus",
+   "draft": "not draftable",
+   "model": "granite_speech_plus",
    "next_batch": false,
    "other": 0,
    "real_checkpoint": 1,
