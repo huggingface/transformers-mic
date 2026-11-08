@@ -204,6 +204,7 @@
  "huggingface-mic/tipsv2-b14-mic": "tipsv2",
  "huggingface-mic/umt5-small-mic": "umt5",
  "huggingface-mic/vaultgemma-1b-mic": "vaultgemma",
+ "huggingface-mic/videomae-base-mic": "videomae",
  "huggingface-mic/vip-llava-7b-hf-mic": "vipllava",
  "huggingface-mic/vit-mic": "vit",
  "huggingface-mic/vitmatte-small-composition-1k-mic": "vitmatte",
