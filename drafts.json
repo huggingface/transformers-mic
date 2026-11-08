@@ -63,6 +63,7 @@
   "conclusion": "success",
   "dispatched_at": "2026-11-08T09:05:40Z",
   "run_id": 42465698230,
+  "shrink": "shrink/42465698230/shrink-ERNIE-4.5-21B-A3B-PT-mic.html",
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/42465698230"
  },
@@ -206,6 +207,7 @@
   "conclusion": "success",
   "dispatched_at": "2026-11-08T09:05:40Z",
   "run_id": 42465696778,
+  "shrink": "shrink/42465696778/shrink-vip-llava-7b-hf-mic.html",
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/42465696778"
  }
