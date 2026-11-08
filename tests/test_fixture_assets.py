@@ -1078,3 +1078,21 @@ def test_input_layouts_keep_the_first_layout_and_add_what_it_lacks():
     layouts = input_layouts(VideoMAEModel(config), config)
     assert layouts[0]["pixel_values"].shape == (2, 3, 32, 32)  # what the sweep sent before
     assert layouts[1]["pixel_values"].shape == (2, 4, 3, 32, 32)  # frames, as the processor sends
+
+
+def test_input_diagnosis_names_inputs_that_cannot_move_the_outputs():
+    from types import SimpleNamespace
+
+    # MCG-NJU/videomae-base: float clips of 0.2 and 0.8 rescaled by 1/255 again.
+    clips = torch.stack([torch.full((2, 3, 4, 4), -1.983), torch.full((2, 3, 4, 4), -1.972)])
+    clips[:, :, 2] += 0.3  # channels are normalized apart: the span is not the signal
+    assert "nearly the same image" in build_fixtures.input_diagnosis(SimpleNamespace(), {"pixel_values": clips})[0]
+    images = torch.stack([torch.full((3, 4, 4), -1.9), torch.full((3, 4, 4), 2.1)])
+    assert build_fixtures.input_diagnosis(SimpleNamespace(), {"pixel_values": images}) == []
+
+    # Salesforce/blip2-opt-2.7b: input_ids without the image token drop pixel_values.
+    blip2 = SimpleNamespace(image_token_index=7)
+    batch = {"pixel_values": images, "input_ids": torch.tensor([[1, 2, 3], [1, 4, 3]])}
+    assert "no image token" in build_fixtures.input_diagnosis(blip2, batch)[0]
+    batch["input_ids"] = torch.tensor([[7, 2, 3], [7, 4, 3]])
+    assert build_fixtures.input_diagnosis(blip2, batch) == []

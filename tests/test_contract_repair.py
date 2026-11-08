@@ -214,3 +214,12 @@ def test_missing_backend_is_not_repairable(setup):
         "ImportError:\nPixtralProcessor requires the Torchvision library but it was not found in your environment.\n"
     )
     assert not repair.eligible(setup.workspace, "build", setup.log)
+
+
+def test_a_gradient_check_the_loss_never_reaches_is_repairable(setup):
+    # Salesforce/blip2-opt-2.7b (2026-11-07): record failed with no traceback.
+    setup.log.write_text(
+        '{"kind": "fixture", "status": "fail", "failures": ["training.gradients: '
+        "['qformer.encoder.layer.0.attention.attention.query.weight'] false\"]}\n"
+    )
+    assert repair.eligible(setup.workspace, "record", setup.log)
