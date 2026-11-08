@@ -85,7 +85,7 @@ HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE.parent / "experiments"))
 import run  # noqa: E402
 from perturb import logits_of, sensitivity  # noqa: E402
-from sweep import shrink  # noqa: E402
+from sweep import fit_rope_everywhere, shrink  # noqa: E402
 
 WEIGHTS = (".safetensors", ".bin", ".pt", ".pth", ".msgpack", ".h5", ".ot", ".onnx", ".tflite", ".ckpt", ".gguf", ".npz", ".pdparams", ".pkl", ".nemo")  # .nemo: NVIDIA NeMo archives beside the HF weights (Parakeet)
 # Processor files are a few MB; anything this large is weights in a format WEIGHTS
@@ -118,6 +118,45 @@ def config_insensitive(config, batch):
             "values cannot move the output"
         )
     return inert
+
+# Two uint8 images of different colours differ by units after normalization; float images
+# in [0, 1] that the processor rescales by 1/255 again differ by at most 1/255/std (~0.017:
+# VideoMAE's torch.full(0.2) and torch.full(0.8) clips became -1.983 and -1.972).
+MIN_ROW_DIFFERENCE = 0.05
+
+
+def input_diagnosis(config, batch):
+    """Why the contract's own inputs cannot move the outputs, when the gate fails.
+
+    Training cannot fix these: they are contract bugs, so the build stops with the
+    reason instead of overfitting. Diagnoses only; the gate thresholds are unchanged.
+    """
+    problems = []
+    for name, value in batch.items():
+        if not (name.startswith("pixel_values") and isinstance(value, torch.Tensor)
+                and value.is_floating_point() and value.dim() > 1 and len(value) > 1):
+            continue
+        rows = value.float()
+        difference = float((rows[1:] - rows[:1]).abs().max())
+        if difference < MIN_ROW_DIFFERENCE:
+            problems.append(
+                f"the rows of {name} differ by at most {difference:.3g} after preprocessing, so the "
+                "examples are nearly the same image: images or video frames given as floats in [0, 1] are "
+                "rescaled by 1/255 again. Build each image or frame as an (H, W, 3) uint8 array with "
+                "texture and a different colour per example"
+            )
+    token = next((getattr(config, k) for k in ("image_token_index", "image_token_id")
+                  if isinstance(getattr(config, k, None), int)), None)
+    ids = batch.get("input_ids")
+    if token is not None and isinstance(ids, torch.Tensor) and isinstance(batch.get("pixel_values"), torch.Tensor):
+        if not (ids == token).any():
+            problems.append(
+                f"input_ids carry no image token (id {token}), so the model never inserts the image "
+                "features and pixel_values cannot move the logits (BLIP-2). Tokenize the text together "
+                "with the images, processor(images=images, text=texts), and mask the image tokens in labels"
+            )
+    return problems
+
 
 def report_phase(phase, detail=""):
     print("MIC_PROGRESS " + json.dumps({"phase": phase, "detail": detail}), flush=True)
@@ -208,8 +247,9 @@ def shrunk_config(source, cls, recipe=None):
     if recorded is not None:  # a rebuild reproduces the published config, not today's rule
         return cls.config_class.from_dict(recorded)
     config = cls.config_class.from_pretrained(source)
-    if parameter_count(cls, config) > SMALL_SOURCE:
-        original = config.to_dict()
+    original = config.to_dict()
+    shrunk = parameter_count(cls, config) > SMALL_SOURCE
+    if shrunk:
         config = shrink(config)
         if str(source) not in TESTER_OFF:
             config = adopt_tester_sizes(cls, original, config)
@@ -231,6 +271,11 @@ def shrunk_config(source, cls, recipe=None):
                 continue  # dropping a field the shrunk config already lacks
             raise SystemExit(f"config_overrides: the shrunk config has no field {dotted}")
         target[field] = value
+    if shrunk:
+        # Overrides that resize a head (GLM-4.1V's text_config.hidden_size 128) leave the
+        # rotary tables the rule fitted to its head; fit them again, as the rule would. A
+        # head the overrides leave alone keeps its tables: the fit is the rule's own.
+        fit_rope_everywhere(values, original)
     return type(config).from_dict(values)
 
 
@@ -256,7 +301,7 @@ def adopt_tester_sizes(cls, original, config):
             node = node[part]
         node[path[-1]] = value
     try:
-        candidate = type(config).from_dict(values)
+        candidate = type(config).from_dict(fit_rope_everywhere(values, original))
         with torch.device("meta"):
             cls._from_config(candidate)
     except Exception as error:
@@ -965,6 +1010,12 @@ def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out,
             f"{name}: no input perturbation is defined for the contract's inputs {unmeasured}; "
             "add them to PERTURBATIONS in example/perturb.py (a tmic gap, not a contract error)"
         )
+    diagnosis = [] if gate[weights]["pass"] else input_diagnosis(model.config, batch)
+    if diagnosis:
+        raise SystemExit(
+            f"{name}: the contract's inputs cannot move the outputs, and overfitting cannot fix that: "
+            + " ".join(f"({n}) {p}." for n, p in enumerate(diagnosis, 1)) + f" Gate: {gate[weights]}"
+        )
     if real and not gate["real"]["pass"]:
         raise SystemExit(f"{name}: the trained weights are insensitive to the contract's inputs: {gate['real']}")
     if not real and not keep_random and (not gate["random"]["pass"] or recipe.get("overfit")):
@@ -982,7 +1033,12 @@ def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out,
         report_phase("Verify trained fixture sensitivity")
         gate["overfit"] = sensitivity(called_module(model, captured), as_dtype(batch, dtype), threshold, accepted)
         if not training["converged"] or not gate["overfit"]["pass"]:
-            raise SystemExit(f"{name}: random weights fail the gate and overfitting did not fix it: {training}, {gate}")
+            # Zero-initialized gates (Mllama) give 0.0 at random weights; still 0.0 after
+            # training means the contract's call never routes that input to the outputs.
+            unrouted = sorted(k for k, v in gate["overfit"]["deltas"].items() if v == 0.0 and k not in accepted)
+            hint = (f" {', '.join(unrouted)} moved nothing even after training: the contract's model call does "
+                    "not route that input to the outputs." if unrouted else "")
+            raise SystemExit(f"{name}: random weights fail the gate and overfitting did not fix it:{hint} {training}, {gate}")
         weights = "overfit"
         save(model, out, source, lacks, recipe, checkpoint)
     mirrored = missing_parameters(cls, out)

@@ -53,6 +53,10 @@ WIDTHS = {
 }
 # Fields that, when equal to hidden_size in the checkpoint, must stay equal to it.
 LINKED_TO_HIDDEN = ("projection_size", "word_embed_proj_dim", "embedding_size", "codebook_dim")
+# The same for hidden_dim: OneFormer projects its pixel decoder's conv_dim features to
+# hidden_dim only when they differ, and keeps those projections in a plain list that
+# from_pretrained never materializes (they stay on the meta device; backward then fails).
+LINKED_TO_HIDDEN_DIM = ("conv_dim", "mask_dim")
 # The longest layer prefix a fixture keeps to build every layer kind.
 MAX_PREFIX = 8
 EXPERTS = ("num_experts", "num_local_experts", "n_routed_experts", "moe_num_experts")
@@ -227,6 +231,54 @@ def layer_pattern(config):
     return pattern_indices(config)
 
 
+def fit_rope(values, source=None):
+    """Resize the rotary tables a config sizes by its head to the head it has now, in place.
+
+    The shrink rule calls it, and so does the builder after model-tester sizes and reviewed
+    config_overrides: GLM-4.1V's planner overrides set text_config.hidden_size 128 after the
+    rule had fitted mrope_section to 64, and the forward split 8 channels into [1, 2, 1].
+    Tables are resampled from `source` (the checkpoint's config dict) when given, so the
+    proportions are the checkpoint's, not a smaller fixture's rounding of them.
+    """
+    rope = values.get("rope_parameters")
+    source_rope = (source or {}).get("rope_parameters")
+    source_rope = source_rope if isinstance(source_rope, dict) else rope
+    heads = values.get("num_attention_heads")
+    width = values.get("head_dim") or (values["hidden_size"] // heads if values.get("hidden_size") and isinstance(heads, int) and heads else None)
+    # Multimodal RoPE partitions must still cover half the resized head.
+    if isinstance(rope, dict) and rope.get("mrope_section") and width:
+        sections = source_rope.get("mrope_section") or rope["mrope_section"]
+        # GLM-4.1V splits only the rotated part (partial_rotary_factor) into sections, exactly;
+        # Qwen3.5 interleaves them and keeps covering half the head.
+        partial = 1.0 if rope.get("mrope_interleaved") else rope.get("partial_rotary_factor", values.get("partial_rotary_factor", 1.0))
+        half_head = int(width * partial) // 2
+        scaled = [size * half_head / sum(sections) for size in sections]
+        kept = [int(size) for size in scaled]
+        for i in sorted(range(len(kept)), key=lambda i: scaled[i] - kept[i], reverse=True)[:half_head - sum(kept)]:
+            kept[i] += 1
+        rope["mrope_section"] = kept
+    # LongRoPE keeps one factor per rotary frequency; resample to the resized head.
+    if isinstance(rope, dict) and isinstance(rope.get("short_factor"), list):
+        # MLA models (MiniCPM3, DeepSeek) rotate only qk_rope_head_dim channels.
+        head = values.get("qk_rope_head_dim") or width
+        partial = rope.get("partial_rotary_factor", values.get("partial_rotary_factor", 1.0))
+        half = int(head * partial) // 2
+        for key in ("short_factor", "long_factor"):
+            factors = source_rope.get(key) if isinstance(source_rope.get(key), list) else rope.get(key)
+            if isinstance(factors, list) and len(factors) != half:
+                rope[key] = [factors[i * len(factors) // half] for i in range(half)]
+    return values
+
+
+def fit_rope_everywhere(values, source=None):
+    """fit_rope on a config dict and every nested config dict in it."""
+    source = source or {}
+    for key, value in values.items():
+        if isinstance(value, dict) and "model_type" in value:
+            fit_rope_everywhere(value, source.get(key) if isinstance(source.get(key), dict) else None)
+    return fit_rope(values, source)
+
+
 def shrink(config):
     """Apply the generic rule in place, innermost configs first, then rebuild each."""
     from transformers import PretrainedConfig
@@ -299,6 +351,9 @@ def shrink(config):
         # EfficientNet derives its channels from width_coefficient; hidden_dim is the last of them.
         if "width_coefficient" in original and "hidden_dim" in original:
             values["hidden_dim"] = original["hidden_dim"]
+        for key in LINKED_TO_HIDDEN_DIM:
+            if isinstance(original.get(key), int) and original.get(key) == original.get("hidden_dim"):
+                values[key] = values["hidden_dim"]
         # LayoutLMv3 concatenates 4 coordinate and 2 shape embeddings into hidden_size.
         if original.get("coordinate_size") and 4 * original["coordinate_size"] + 2 * original.get("shape_size", 0) == original.get("hidden_size"):
             values["coordinate_size"] = values["hidden_size"] // 8
@@ -603,33 +658,7 @@ def shrink(config):
                 if other != key and width == channels[-1] and isinstance(values.get(other), dict):
                     resized = values[other]["hidden_size"]
                     values[key]["downsample_channels"] = [c * resized // width for c in channels]
-        # Multimodal RoPE partitions must still cover half the resized head.
-        rope = values.get("rope_parameters")
-        if isinstance(rope, dict) and rope.get("mrope_section"):
-            sections = rope["mrope_section"]
-            # GLM-4.1V splits only the rotated part (partial_rotary_factor) into sections, exactly;
-            # Qwen3.5 interleaves them and keeps covering half the head.
-            partial = 1.0 if rope.get("mrope_interleaved") else rope.get("partial_rotary_factor", values.get("partial_rotary_factor", 1.0))
-            half_head = int(values.get("head_dim", values["hidden_size"] // values["num_attention_heads"]) * partial) // 2
-            scaled = [size * half_head / sum(sections) for size in sections]
-            kept = [int(size) for size in scaled]
-            for i in sorted(range(len(kept)), key=lambda i: scaled[i] - kept[i], reverse=True)[:half_head - sum(kept)]:
-                kept[i] += 1
-            rope["mrope_section"] = kept
-        # LongRoPE keeps one factor per rotary frequency; resample to the resized head.
-        if isinstance(rope, dict) and isinstance(rope.get("short_factor"), list):
-            # MLA models (MiniCPM3, DeepSeek) rotate only qk_rope_head_dim channels.
-            head = (
-                values.get("qk_rope_head_dim")
-                or values.get("head_dim")
-                or values["hidden_size"] // values["num_attention_heads"]
-            )
-            partial = rope.get("partial_rotary_factor", values.get("partial_rotary_factor", 1.0))
-            half = int(head * partial) // 2
-            for key in ("short_factor", "long_factor"):
-                factors = rope.get(key)
-                if isinstance(factors, list) and len(factors) != half:
-                    rope[key] = [factors[i * len(factors) // half] for i in range(half)]
+        fit_rope(values, cfg.to_dict())
         try:
             shrunk = type(cfg).from_dict(values)
         except Exception:

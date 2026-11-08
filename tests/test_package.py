@@ -1819,6 +1819,38 @@ def test_create_rejects_the_broadcast_image_idiom():
     commands.check_image_shapes({"usage": bad.replace("view(H, 1, 1)", "view(1, H, 1)").replace("view(1, W, 1)", "view(1, 1, W)")})
 
 
+def test_create_rejects_videos_without_the_configs_num_frames():
+    # microsoft/xclip-base-patch16-zero-shot: two 8-frame clips for vision_config.num_frames 32.
+    usage = (
+        "```py runnable:x\n"
+        "frames = [torch.full((3, 224, 224), 200, dtype=torch.uint8) for _ in range(8)]\n"
+        "inputs = processor(text=texts, videos=[frames, frames], return_tensors='pt')\n"
+        "```\n"
+    )
+    config = {"model_type": "xclip", "vision_config": {"num_frames": 32}}
+    with pytest.raises(ValueError, match="vision_config.num_frames is 32"):
+        commands.check_video_frames({"usage": usage}, config)
+    commands.check_video_frames({"usage": usage.replace("range(8)", "range(32)")}, config)
+    named = usage.replace("range(8)", "range(model.config.vision_config.num_frames)")
+    commands.check_video_frames({"usage": named}, config)
+    # Video models without a fixed frame count, and image-only usage, are not checked.
+    commands.check_video_frames({"usage": usage}, {"model_type": "llava_next_video"})
+    commands.check_video_frames({"usage": usage.replace("videos=[frames, frames]", "images=frames")}, config)
+
+
+@pytest.mark.requires_runtime
+def test_video_frames_check_reads_config_class_defaults():
+    # VideoMAE's config.json omits its default num_frames (16); the config class supplies it.
+    usage = (
+        "```py runnable:x\n"
+        "frames = [torch.full((3, 224, 224), 200, dtype=torch.uint8) for _ in range(8)]\n"
+        "inputs = processor(videos=[frames, frames], return_tensors='pt')\n"
+        "```\n"
+    )
+    with pytest.raises(ValueError, match="num_frames is 16"):
+        commands.check_video_frames({"usage": usage}, {"model_type": "videomae"})
+
+
 def test_create_rejects_a_loss_built_only_from_no_grad_outputs():
     usage = (
         "```py runnable:a\nwith torch.no_grad():\n    outputs = model(**inputs)\n"
@@ -1884,6 +1916,91 @@ def test_encoder_decoder_calls_need_decoder_inputs():
     # RT-DETR is an encoder-decoder over pixel_values that builds its own queries.
     commands.check_encoder_decoder_calls({"usage": usage}, {"is_encoder_decoder": True, "architectures": ["RTDetrForObjectDetection"]})
 
+
+
+def test_vlm_training_text_must_carry_image_tokens():
+    # Salesforce/blip2-opt-2.7b (2026-11-07): captions tokenized alone, so pixel_values moved nothing.
+    blip2 = {"image_token_index": 50265}
+    usage = (
+        "```py runnable:t\n"
+        "inputs = processor(images=images, return_tensors=\"pt\").to(device, model.dtype)\n"
+        "targets = processor(text=captions, return_tensors=\"pt\", padding=True).to(device)\n"
+        "loss = model(pixel_values=inputs.pixel_values, input_ids=targets.input_ids, labels=labels).loss\n"
+        "```\n"
+    )
+    with pytest.raises(ValueError, match="no image token"):
+        commands.check_image_tokens_in_text({"usage": usage}, blip2)
+    with pytest.raises(ValueError, match="no image token"):
+        commands.check_image_tokens_in_text({"usage": usage.replace("targets.input_ids", 'targets["input_ids"]')}, blip2)
+    joint = usage.replace("processor(text=captions,", "processor(images=images, text=captions,")
+    commands.check_image_tokens_in_text({"usage": joint}, blip2)
+    commands.check_image_tokens_in_text({"usage": usage}, {"model_type": "clip"})  # no image token to carry
+    # A later reassignment with images clears the name.
+    fixed = usage.replace("loss = ", "targets = processor(images=images, text=captions)\nloss = ")
+    commands.check_image_tokens_in_text({"usage": fixed}, blip2)
+
+
+def test_an_image_processor_takes_clips_as_images():
+    # MCG-NJU/videomae-base (2026-11-07): VideoMAEImageProcessor(videos=...) raised "missing 'images'".
+    usage = (
+        "```py runnable:t\n"
+        "processor = VideoMAEImageProcessor.from_pretrained(model_id)\n"
+        "inputs = processor(videos=videos, return_tensors=\"pt\")\n"
+        "```\n"
+    )
+    with pytest.raises(ValueError, match="takes no videos="):
+        commands.check_image_processor_videos({"usage": usage})
+    commands.check_image_processor_videos({"usage": usage.replace("videos=videos", "images=videos")})
+    commands.check_image_processor_videos({"usage": usage.replace("VideoMAEImageProcessor", "AutoProcessor")})
+
+
+def test_any_requires_grad_selection_by_a_deep_layer_name_is_rejected():
+    # Salesforce/blip2-opt-2.7b (2026-11-07): frozen per parameter, without requires_grad_(False).
+    usage = (
+        "```py runnable:t\n"
+        "for name, param in model.named_parameters():\n"
+        "    param.requires_grad_(name.startswith(\"language_model.model.decoder.layers.31.\"))\n"
+        "```\n"
+    )
+    with pytest.raises(ValueError, match="layer 31 does not exist"):
+        commands.check_trainable_selection({"usage": usage}, {})
+    commands.check_trainable_selection({"usage": usage.replace("layers.31.", "layers.1.")}, {})
+
+
+def test_gradient_checks_must_name_the_trained_last_layer():
+    # Salesforce/blip2-opt-2.7b (2026-11-07): trained layers[-1], checked layers.0.
+    usage = (
+        "```py runnable:t\n"
+        "model.requires_grad_(False)\n"
+        "model.language_model.model.decoder.layers[-1].requires_grad_(True)\n"
+        "checked = (\"language_model.model.decoder.layers.0.fc1.weight\",)\n"
+        "```\n"
+    )
+    with pytest.raises(ValueError, match="names layer 0"):
+        commands.check_trainable_selection({"usage": usage}, {})
+    trained = usage.replace('\"language_model.model.decoder.layers.0.fc1.weight\"',
+                            'f\"language_model.model.decoder.layers.{last}.fc1.weight\"')
+    commands.check_trainable_selection({"usage": trained}, {})
+    # The same draft shape on the Q-Former: layer[-1] trained, layer.0 checked.
+    qformer = usage.replace("language_model.model.decoder.layers[-1]", "qformer.encoder.layer[-1]")
+    with pytest.raises(ValueError, match="names layer 0"):
+        commands.check_trainable_selection({"usage": qformer}, {})
+    tied = "```py runnable:t\nmodel.requires_grad_(False)\nchecked = (\"language_model.lm_head.weight\",)\n```\n"
+    with pytest.raises(ValueError, match="tie_word_embeddings"):
+        commands.check_trainable_selection({"usage": tied}, {"text_config": {"tie_word_embeddings": True}})
+    commands.check_trainable_selection({"usage": tied}, {"text_config": {"tie_word_embeddings": False}})
+    projection = "```py runnable:t\nmodel.requires_grad_(False)\nn.endswith(\"language_projection.weight\")\n```\n"
+    commands.check_trainable_selection({"usage": projection}, {}, parameters=4e9)
+
+
+def test_blip2_q_former_first_query_gets_no_fixture_gradient():
+    usage = '```py runnable:t\nchecked = ("qformer.encoder.layer.0.attention.attention.query.weight",)\n```\n'
+    with pytest.raises(ValueError, match="zero-initialized"):
+        commands.check_zero_query_gradients({"usage": usage}, {"num_query_tokens": 32})
+    commands.check_zero_query_gradients({"usage": usage}, {"model_type": "bert"})
+    with pytest.raises(ValueError, match="zero-initialized"):  # round 7's draft
+        commands.check_zero_query_gradients({"usage": usage.replace("layer.0.attention", "layer.0.crossattention")}, {"num_query_tokens": 32})
+    commands.check_zero_query_gradients({"usage": usage.replace("layer.0.attention.attention.query", "layer.0.crossattention.output.dense")}, {"num_query_tokens": 32})
 
 
 def test_planner_records_every_call_with_its_listed_price(monkeypatch):

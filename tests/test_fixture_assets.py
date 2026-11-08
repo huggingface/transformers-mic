@@ -1,5 +1,6 @@
 """Regression coverage for non-language-model fixture inputs."""
 
+import copy
 import hashlib
 import json
 import sys
@@ -154,6 +155,65 @@ def test_shrink_resamples_longrope_factors_to_the_resized_head():
     rope = shrink(config).rope_parameters
     assert len(rope["short_factor"]) == len(rope["long_factor"]) < half
     assert rope["short_factor"][0] == 1.0 and rope["long_factor"][0] == 2.0
+
+
+def glm4v_source():
+    from transformers import Glm4vConfig
+
+    return Glm4vConfig(
+        text_config={
+            "hidden_size": 4096,
+            "num_attention_heads": 32,
+            "num_key_value_heads": 2,
+            "rope_parameters": {
+                "rope_type": "default",
+                "mrope_section": [8, 12, 12],
+                "rope_theta": 10000,
+                "partial_rotary_factor": 0.5,
+            },
+        }
+    )
+
+
+def test_config_overrides_that_resize_the_head_refit_mrope_sections(tmp_path, monkeypatch):
+    # GLM-4.1V's planner overrode text_config.hidden_size to 128 after the rule had fitted
+    # mrope_section to a 64-wide model: [1, 2, 1] split 8 rotary channels and the forward raised.
+    from transformers import Glm4vForConditionalGeneration
+
+    glm4v_source().save_pretrained(tmp_path)
+    monkeypatch.setitem(build_fixtures.TESTER_OFF, str(tmp_path), {})
+    recipe = {"config_overrides": {"fields": {"text_config.hidden_size": 128, "vision_config.out_hidden_size": 128}}}
+    text = build_fixtures.shrunk_config(tmp_path, Glm4vForConditionalGeneration, recipe).text_config
+    half = text.hidden_size // text.num_attention_heads * text.rope_parameters["partial_rotary_factor"] // 2
+    assert sum(text.rope_parameters["mrope_section"]) == half == 8
+    assert text.rope_parameters["mrope_section"] == [2, 3, 3]  # the checkpoint's 8:12:12, not [1, 2, 1] doubled
+
+    unchanged = build_fixtures.shrunk_config(tmp_path, Glm4vForConditionalGeneration, None).text_config
+    assert unchanged.rope_parameters["mrope_section"] == [1, 2, 1]
+
+
+def test_fit_rope_leaves_the_rules_own_tables_unchanged():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import fit_rope_everywhere, shrink
+    from transformers import Phi3Config
+
+    half = 3072 // 24 * 3 // 4 // 2
+    longrope = Phi3Config(
+        hidden_size=3072,
+        num_attention_heads=24,
+        partial_rotary_factor=0.75,
+        max_position_embeddings=131072,
+        original_max_position_embeddings=4096,
+        rope_scaling={
+            "type": "longrope",
+            "short_factor": [1.0 + i for i in range(half)],
+            "long_factor": [2.0 + i for i in range(half)],
+        },
+    )
+    for source in (glm4v_source(), longrope):
+        original = source.to_dict()
+        values = shrink(source).to_dict()
+        assert fit_rope_everywhere(copy.deepcopy(values), original) == values
 
 
 def test_shrink_keeps_stage_backbone_outputs_and_matches_encoder_channels():
@@ -385,6 +445,24 @@ def test_shrink_renumbers_layer_indices_into_the_shrunk_depth():
     states, layers = granite.vision_config.num_hidden_layers + 1, granite.text_config.num_hidden_layers
     assert all(-states <= v < 0 and 0 <= t < layers for v, t in granite.deepstack_layer_map)
     assert granite.spatial_target_layers and all(0 <= t < layers for t in granite.spatial_target_layers)
+
+
+def test_shrink_keeps_oneformer_pixel_decoder_width_equal_to_hidden_dim():
+    # shi-labs/oneformer_*: conv_dim == mask_dim == hidden_dim (256). Shrinking only
+    # hidden_dim made OneFormerTransformerModule build input projections it keeps in a
+    # plain list, which from_pretrained leaves on the meta device: backward failed with
+    # "expected device meta but got cpu".
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import shrink
+    from transformers import OneFormerConfig, OneFormerForUniversalSegmentation
+
+    config = shrink(OneFormerConfig(hidden_dim=256, conv_dim=256, mask_dim=256))
+    assert config.conv_dim == config.mask_dim == config.hidden_dim < 256
+    with torch.device("meta"):
+        model = OneFormerForUniversalSegmentation(config)
+    assert all(isinstance(p, torch.nn.Sequential) for p in model.model.transformer_module.input_projections)
+    # A checkpoint that does project keeps its own widths.
+    assert shrink(OneFormerConfig(hidden_dim=256, conv_dim=512, mask_dim=512)).conv_dim == 512
 
 
 def test_shrink_keeps_projector_inputs_tied_to_the_shrunk_encoders():
@@ -1019,3 +1097,21 @@ def test_input_layouts_keep_the_first_layout_and_add_what_it_lacks():
     layouts = input_layouts(VideoMAEModel(config), config)
     assert layouts[0]["pixel_values"].shape == (2, 3, 32, 32)  # what the sweep sent before
     assert layouts[1]["pixel_values"].shape == (2, 4, 3, 32, 32)  # frames, as the processor sends
+
+
+def test_input_diagnosis_names_inputs_that_cannot_move_the_outputs():
+    from types import SimpleNamespace
+
+    # MCG-NJU/videomae-base: float clips of 0.2 and 0.8 rescaled by 1/255 again.
+    clips = torch.stack([torch.full((2, 3, 4, 4), -1.983), torch.full((2, 3, 4, 4), -1.972)])
+    clips[:, :, 2] += 0.3  # channels are normalized apart: the span is not the signal
+    assert "nearly the same image" in build_fixtures.input_diagnosis(SimpleNamespace(), {"pixel_values": clips})[0]
+    images = torch.stack([torch.full((3, 4, 4), -1.9), torch.full((3, 4, 4), 2.1)])
+    assert build_fixtures.input_diagnosis(SimpleNamespace(), {"pixel_values": images}) == []
+
+    # Salesforce/blip2-opt-2.7b: input_ids without the image token drop pixel_values.
+    blip2 = SimpleNamespace(image_token_index=7)
+    batch = {"pixel_values": images, "input_ids": torch.tensor([[1, 2, 3], [1, 4, 3]])}
+    assert "no image token" in build_fixtures.input_diagnosis(blip2, batch)[0]
+    batch["input_ids"] = torch.tensor([[7, 2, 3], [7, 4, 3]])
+    assert build_fixtures.input_diagnosis(blip2, batch) == []
