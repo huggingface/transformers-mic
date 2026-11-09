@@ -427,6 +427,16 @@ No Git commit or framework PR is created automatically.""",
             )
             run.add_argument("--fixtures-only", action="store_true")
             run.add_argument("--changed-files", type=Path)
+            run.add_argument(
+                "--diff-base",
+                help="With --changed-files: base revision, so registry-only model "
+                "additions select just those models",
+            )
+            run.add_argument(
+                "--run-declared",
+                action="store_true",
+                help="Also run variants the contracts declare unmeasured",
+            )
             run.add_argument("--output", type=Path)
             run.add_argument("--run-all", action="store_true")
             run.add_argument(
@@ -599,6 +609,10 @@ def external_check(args):
         options.append("--fixtures-only")
     if args.changed_files:
         options += ["--changed-files", str(args.changed_files.resolve())]
+        if args.diff_base:
+            options += ["--diff-base", args.diff_base]
+    if args.run_declared:
+        options.append("--run-declared")
     if args.output:
         options += ["--output", str(args.output.resolve())]
     if args.run_all or not args.changed_files:

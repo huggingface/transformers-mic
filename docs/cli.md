@@ -979,6 +979,19 @@ An explicit `--fleet-revision` overrides that pin; without a local pin the datas
 ref defaults to `main` and is resolved once. `--lock PATH` also accepts a custom
 JSON fleet, or `tests/contracts.lock` for the pinned control fleet.
 
+On a pull request, select from the diff the way Transformers CI does:
+
+```sh
+git diff --name-only HEAD^1 HEAD > changed.txt
+tmic check --fleet control --fixtures-only --changed-files changed.txt --diff-base HEAD^1
+```
+
+With `--diff-base`, a change that only adds Auto/import registrations selects just the
+registered models instead of every contract. `--run-declared` also runs the variants a
+contract declares unmeasured, to reproduce the bug behind the declaration or check its fix.
+A bfloat16 case on an x86 CPU without native bfloat16 fails as *wrong hardware*: it is
+neither compared with nor recorded as the `cpu-x86_64-bf16` baseline.
+
 `tmic status` shows project state. Workspaces contain source, history, candidate
 expectations, checks and artifacts; keep them outside versioned source or ignore
 `work/`. The current release implements Transformers orchestration; the bundled
