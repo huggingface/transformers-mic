@@ -15,6 +15,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Result records name what ran as Hub locations: `fixture_repo`, `source_model` and `weights` (from the
+  fixture's `build.json`), and `baseline_repo` / `baseline_revision` / `baseline_path` for the reviewed
+  baseline. Transformers CI's span attributes and MIC dashboard page read them.
 - `tmic check --diff-base REV` (with `--changed-files`): a change that only adds Auto/import model
   registrations selects just the registered models, not the whole fleet, as Transformers CI's runner did.
 - `tmic check --run-declared` runs the variants a contract declares unmeasured.

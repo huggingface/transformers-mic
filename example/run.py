@@ -784,6 +784,16 @@ def main():
                     continue
                 if callable(model):
                     model = model()
+                if kind == "fixture":
+                    # Provenance for dashboards: which fixture repo ran, built from what, with which weights.
+                    build_file = Path(model) / "build.json"
+                    if build_file.exists():
+                        build = json.loads(build_file.read_text())
+                        source = build.get("built_from", {})
+                        record["source_model"] = source.get("repo", "") if isinstance(source, dict) else ""
+                        record["weights"] = build.get("weights", "unknown")
+                    record["fixture_repo"] = next(
+                        (repo for repo, pin in contract.get("fixtures", {}).items() if pin.get("target", short(repo)) == target), "")
                 env_info = env_info or executor.environment()
                 start = time.perf_counter()
                 env = {
@@ -816,6 +826,10 @@ def main():
                 platform_dir = (args.expectations or (root / "integrations" / args.framework / "expectations" if (root / ".mic-repo.json").exists() else lock_dir / "expectations" / name)) / (args.golden or platform)
                 baseline = platform_dir / f"{target}{suffix}.json"
                 record["baseline"] = shown(baseline)
+                if (root / ".mic-repo.json").exists() and not args.expectations:
+                    # The reviewed baseline as a Hub location, not a cache path.
+                    record.update(baseline_repo=contract["integration"]["repo"], baseline_revision=contract_revision,
+                                  baseline_path=baseline.relative_to(root).as_posix())
                 if args.golden:
                     if not baseline.exists():
                         emit({**record, "status": "error", "failures": [f"no golden baseline at {record['baseline']}"]})

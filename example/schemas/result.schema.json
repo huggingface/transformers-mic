@@ -25,6 +25,30 @@
   "variant": {
    "type": "string"
   },
+  "fixture_repo": {
+   "type": "string",
+   "description": "Hub repository of the fixture this target ran (fixtures only)"
+  },
+  "source_model": {
+   "type": "string",
+   "description": "Checkpoint the fixture was built from, per its build.json"
+  },
+  "weights": {
+   "type": "string",
+   "description": "Fixture weights kind, per its build.json (random, overfit, real, unknown)"
+  },
+  "baseline_repo": {
+   "type": "string",
+   "description": "Hub repository holding the reviewed baseline"
+  },
+  "baseline_revision": {
+   "type": "string",
+   "description": "Revision of baseline_repo the baseline was read at"
+  },
+  "baseline_path": {
+   "type": "string",
+   "description": "Path of the baseline inside baseline_repo"
+  },
   "selected_by": {
    "type": [
     "string",
