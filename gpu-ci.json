@@ -5428,6 +5428,18 @@
    "tests/models/cwm/test_modeling_cwm.py::CwmIntegrationTest::test_cwm_sliding_window_long_sequence"
   ]
  },
+ "sticky#cwm#2026-11-02": {
+  "date": "2026-11-02",
+  "day": 20759,
+  "integration": true,
+  "mic": "not-covered",
+  "model": "cwm",
+  "run_id": "42550812015",
+  "signal": "torch.OutOfMemoryError",
+  "tests": [
+   "tests/models/cwm/test_modeling_cwm.py::CwmIntegrationTest::test_cwm_integration"
+  ]
+ },
  "sticky#data2vec#2026-10-06": {
   "date": "2026-10-06",
   "day": 20732,
@@ -5473,6 +5485,18 @@
   "signal": "AssertionError",
   "tests": [
    "tests/models/deepseek_v3/test_modeling_deepseek_v3.py::DeepseekV3IntegrationTest::test_compile_static_cache"
+  ]
+ },
+ "sticky#deepseek_v32#2026-11-08": {
+  "date": "2026-11-08",
+  "day": 20765,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "deepseek_v32",
+  "run_id": "42550812015",
+  "signal": "torch.AcceleratorError",
+  "tests": [
+   "tests/models/deepseek_v32/test_modeling_deepseek_v32.py::DeepseekV32ModelTest::test_static_cache_no_recompile_with_smaller_length"
   ]
  },
  "sticky#dia#2026-10-30": {
@@ -5914,6 +5938,7 @@
   "integration": false,
   "mic": "green-on-main",
   "model": "granitemoe",
+  "run_id": "42550772023",
   "signal": "AssertionError",
   "tests": [
    "tests/models/granitemoe/test_modeling_granitemoe.py::GraniteMoeModelTest::test_flash_attn_2_equivalence"
@@ -6409,6 +6434,18 @@
    "tests/models/moshi/test_modeling_moshi.py::MoshiDecoderTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids"
   ]
  },
+ "sticky#moshi#2026-10-17": {
+  "date": "2026-10-17",
+  "day": 20743,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "moshi",
+  "run_id": "42550812015",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/moshi/test_modeling_moshi.py::MoshiTest::test_model_parallelism"
+  ]
+ },
  "sticky#mt5#2026-10-30": {
   "date": "2026-10-30",
   "day": 20756,
@@ -6502,6 +6539,18 @@
   "tests": [
    "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_no_head",
    "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_universal_segmentation_head"
+  ]
+ },
+ "sticky#owlv2#2026-11-09": {
+  "date": "2026-11-09",
+  "day": 20766,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "owlv2",
+  "run_id": "42550772023",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/owlv2/test_modeling_owlv2.py::Owlv2ForObjectDetectionTest::test_flash_attn_2_inference_equivalence_right_padding"
   ]
  },
  "sticky#owlvit#2026-11-08": {
@@ -6915,6 +6964,18 @@
    "tests/models/umt5/test_modeling_umt5.py::UMT5ModelTest::test_torch_export_generate_static_static_cache"
   ]
  },
+ "sticky#unlimited_ocr#2026-11-08": {
+  "date": "2026-11-08",
+  "day": 20765,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "unlimited_ocr",
+  "run_id": "42550812015",
+  "signal": "torch._inductor.exc.InductorError",
+  "tests": [
+   "tests/models/unlimited_ocr/test_modeling_unlimited_ocr.py::UnlimitedOcrModelTest::test_sdpa_can_compile_dynamic"
+  ]
+ },
  "sticky#utils#2026-10-14": {
   "date": "2026-10-14",
   "day": 20740,
@@ -7023,6 +7084,18 @@
    "tests/models/whisper/test_modeling_whisper.py::WhisperModelTest::test_torch_export_generate_dynamic_static_cache",
    "tests/models/whisper/test_modeling_whisper.py::WhisperModelTest::test_torch_export_generate_static",
    "tests/models/whisper/test_modeling_whisper.py::WhisperModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#whisper#2026-11-08": {
+  "date": "2026-11-08",
+  "day": 20765,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "whisper",
+  "run_id": "42550812015",
+  "signal": "RuntimeError",
+  "tests": [
+   "tests/models/whisper/test_modeling_whisper.py::WhisperModelTest::test_onnx_export_generate_dynamic_static_cache"
   ]
  },
  "sticky#xmod#2026-10-07": {

@@ -1393,6 +1393,10 @@
   "verdict": "not-covered",
   "version": 7
  },
+ "sticky#cwm#2026-11-02": {
+  "verdict": "not-covered",
+  "version": 7
+ },
  "sticky#data2vec#2026-10-06": {
   "verdict": "not-covered",
   "version": 7
@@ -1406,6 +1410,10 @@
   "version": 7
  },
  "sticky#deepseek_v3#2026-10-16": {
+  "verdict": "out-of-scope",
+  "version": 7
+ },
+ "sticky#deepseek_v32#2026-11-08": {
   "verdict": "out-of-scope",
   "version": 7
  },
@@ -1764,6 +1772,10 @@
   "verdict": "not-covered",
   "version": 7
  },
+ "sticky#moshi#2026-10-17": {
+  "verdict": "not-covered",
+  "version": 7
+ },
  "sticky#mt5#2026-10-30": {
   "verdict": "out-of-scope",
   "version": 7
@@ -1790,6 +1802,10 @@
  },
  "sticky#oneformer#2026-10-18": {
   "verdict": "not-covered",
+  "version": 7
+ },
+ "sticky#owlv2#2026-11-09": {
+  "verdict": "out-of-scope",
   "version": 7
  },
  "sticky#owlvit#2026-11-08": {
@@ -1934,6 +1950,10 @@
   "verdict": "out-of-scope",
   "version": 7
  },
+ "sticky#unlimited_ocr#2026-11-08": {
+  "verdict": "out-of-scope",
+  "version": 7
+ },
  "sticky#utils#2026-10-14": {
   "verdict": "not-covered",
   "version": 7
@@ -1967,6 +1987,10 @@
   "version": 7
  },
  "sticky#whisper#2026-10-29": {
+  "verdict": "out-of-scope",
+  "version": 7
+ },
+ "sticky#whisper#2026-11-08": {
   "verdict": "out-of-scope",
   "version": 7
  },

@@ -33,6 +33,12 @@
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/41626675456"
  },
+ "canary": {
+  "checkpoint": "nvidia/canary-1b-v2",
+  "conclusion": null,
+  "dispatched_at": "2026-11-09T09:05:10Z",
+  "status": "queued"
+ },
  "colpali": {
   "checkpoint": "vidore/colpali-v1.2-hf",
   "conclusion": "failure",
@@ -117,6 +123,12 @@
   "shrink": "shrink/41626661233/shrink-Kolibri-1-mic.html",
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/41626661233"
+ },
+ "layoutlmv3": {
+  "checkpoint": "microsoft/layoutlmv3-base",
+  "conclusion": null,
+  "dispatched_at": "2026-11-09T09:05:10Z",
+  "status": "queued"
  },
  "minicpm_ocr": {
   "checkpoint": "openbmb/MiniCPM-OCR-1.0",

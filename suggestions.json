@@ -30,6 +30,14 @@
     "test": "tests/models/deepseek_v3/test_modeling_deepseek_v3.py::DeepseekV3IntegrationTest::test_compile_static_cache"
    }
   ],
+  "deepseek_v32": [
+   {
+    "date": "2026-11-08",
+    "gpu_only": true,
+    "integration": false,
+    "test": "tests/models/deepseek_v32/test_modeling_deepseek_v32.py::DeepseekV32ModelTest::test_static_cache_no_recompile_with_smaller_length"
+   }
+  ],
   "gemma2": [
    {
     "date": "2026-10-22",
@@ -413,6 +421,22 @@
     "integration": true,
     "test": "tests/models/swinv2/test_modeling_swinv2.py::Swinv2ModelIntegrationTest::test_inference_fp16"
    }
+  ],
+  "unlimited_ocr": [
+   {
+    "date": "2026-11-08",
+    "gpu_only": true,
+    "integration": false,
+    "test": "tests/models/unlimited_ocr/test_modeling_unlimited_ocr.py::UnlimitedOcrModelTest::test_sdpa_can_compile_dynamic"
+   }
+  ],
+  "whisper": [
+   {
+    "date": "2026-11-08",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/whisper/test_modeling_whisper.py::WhisperModelTest::test_onnx_export_generate_dynamic_static_cache"
+   }
   ]
  },
  "new": [
@@ -466,10 +490,11 @@
    "checkpoint_source": "failing test",
    "integration": 0,
    "model": "moshi",
-   "other": 2,
+   "other": 3,
    "shrinkable": true,
    "tests": [
-    "tests/models/moshi/test_modeling_moshi.py::MoshiDecoderTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids"
+    "tests/models/moshi/test_modeling_moshi.py::MoshiDecoderTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids",
+    "tests/models/moshi/test_modeling_moshi.py::MoshiTest::test_model_parallelism"
    ]
   },
   {
@@ -654,13 +679,14 @@
   {
    "checkpoint": "facebook/cwm",
    "checkpoint_source": "failing test",
-   "integration": 2,
+   "integration": 3,
    "model": "cwm",
    "other": 0,
    "shrinkable": false,
    "tests": [
     "tests/models/cwm/test_modeling_cwm.py::CwmIntegrationTest::test_cwm_generation_20_tokens",
-    "tests/models/cwm/test_modeling_cwm.py::CwmIntegrationTest::test_cwm_sliding_window_long_sequence"
+    "tests/models/cwm/test_modeling_cwm.py::CwmIntegrationTest::test_cwm_sliding_window_long_sequence",
+    "tests/models/cwm/test_modeling_cwm.py::CwmIntegrationTest::test_cwm_integration"
    ]
   },
   {
@@ -1047,6 +1073,7 @@
    "clipseg",
    "electra",
    "ernie",
+   "owlv2",
    "owlvit"
   ],
   "test_sdpa_padding_matches_padding_free_with_position_ids": [

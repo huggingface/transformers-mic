@@ -1,5 +1,5 @@
 {
- "awaiting_verdict": 15,
+ "awaiting_verdict": 19,
  "block_merges": {
   "ready": false,
   "unmet": [
@@ -15,12 +15,12 @@
  },
  "drafts_per_day": 2,
  "false_alarms": {
-  "prs_not_their_fault": 124,
-  "prs_with_failure": 150
+  "prs_not_their_fault": 127,
+  "prs_with_failure": 154
  },
  "missed": {
   "awaiting_verdict": 21,
-  "not_covered": 24,
+  "not_covered": 25,
   "real_checkpoint": 21
  },
  "next": [
@@ -65,9 +65,9 @@
    "draft": "failure",
    "model": "moshi",
    "next_batch": false,
-   "other": 2,
+   "other": 3,
    "real_checkpoint": 0,
-   "regressions": 2,
+   "regressions": 3,
    "run": "https://github.com/huggingface/transformers-mic/actions/runs/41999673429",
    "shrink": "",
    "shrinkable": true
@@ -86,9 +86,9 @@
   },
   {
    "checkpoint": "nvidia/canary-1b-v2",
-   "draft": "",
+   "draft": "queued",
    "model": "canary",
-   "next_batch": true,
+   "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -122,9 +122,9 @@
   },
   {
    "checkpoint": "microsoft/layoutlmv3-base",
-   "draft": "",
+   "draft": "queued",
    "model": "layoutlmv3",
-   "next_batch": true,
+   "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -148,7 +148,7 @@
    "checkpoint": "RUCAIBox/mvp",
    "draft": "",
    "model": "mvp",
-   "next_batch": false,
+   "next_batch": true,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -160,7 +160,7 @@
    "checkpoint": "thhaus/nemotron3-8b",
    "draft": "",
    "model": "nemotron",
-   "next_batch": false,
+   "next_batch": true,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -258,8 +258,8 @@
    "model": "cwm",
    "next_batch": false,
    "other": 0,
-   "real_checkpoint": 2,
-   "regressions": 2,
+   "real_checkpoint": 3,
+   "regressions": 3,
    "run": "",
    "shrink": "",
    "shrinkable": false
@@ -327,6 +327,39 @@
  ],
  "regressions": [
   {
+   "date": "2026-11-09",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "owlv2",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-08",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "whisper",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-08",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "unlimited_ocr",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
    "date": "2026-11-08",
    "detail": "",
    "integration": false,
@@ -347,6 +380,17 @@
    "run": "https://github.com/huggingface/transformers-mic/actions/runs/42465423950",
    "tests": 1,
    "verdict": "missed"
+  },
+  {
+   "date": "2026-11-08",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "deepseek_v32",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
   },
   {
    "date": "2026-11-07",
@@ -1381,50 +1425,6 @@
    "run": "",
    "tests": 1,
    "verdict": "out-of-scope"
-  },
-  {
-   "date": "2026-09-10",
-   "detail": "",
-   "integration": false,
-   "job": "https://github.com/huggingface/transformers/actions/runs/34430027063/job/102730482140",
-   "model": "yolos",
-   "pr": "46886",
-   "run": "",
-   "tests": 2,
-   "verdict": "out-of-scope"
-  },
-  {
-   "date": "2026-09-05",
-   "detail": "Laguna-XS.2-mic (bfloat16): next_token_logits: max delta 0.0293 over tolerance",
-   "integration": true,
-   "job": "https://github.com/huggingface/transformers/actions/runs/33939401495/job/101235761496",
-   "model": "laguna",
-   "pr": "48435",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41993679537",
-   "tests": 1,
-   "verdict": "already-red"
-  },
-  {
-   "date": "2026-09-03",
-   "detail": "",
-   "integration": false,
-   "job": "https://github.com/huggingface/transformers/actions/runs/33711416858/job/100517396583",
-   "model": "qwen4_exp",
-   "pr": "48340",
-   "run": "",
-   "tests": 1,
-   "verdict": "out-of-scope"
-  },
-  {
-   "date": "2026-08-29",
-   "detail": "the bisected commit does not touch the model or shared code",
-   "integration": true,
-   "job": "https://github.com/huggingface/transformers/actions/runs/33229090125/job/99039067856",
-   "model": "minicpmv4_6",
-   "pr": "47625",
-   "run": "",
-   "tests": 1,
-   "verdict": "unrelated-culprit"
   }
  ],
  "replay": {
@@ -1436,14 +1436,14 @@
   "model-added": 4,
   "no-code-change": 0,
   "not-a-regression": 2,
-  "not-covered": 228,
+  "not-covered": 230,
   "not-reproduced": 8,
-  "out-of-scope": 120,
+  "out-of-scope": 124,
   "pending": 0,
   "unrelated-culprit": 19
  },
  "window": [
   "2026-10-20",
-  "2026-11-08"
+  "2026-11-09"
  ]
 }
