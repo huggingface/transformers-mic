@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- `tmic check --diff-base REV` (with `--changed-files`): a change that only adds Auto/import model
+  registrations selects just the registered models, not the whole fleet, as Transformers CI's runner did.
+- `tmic check --run-declared` runs the variants a contract declares unmeasured.
+- A bfloat16 case on an x86 CPU without native bfloat16 fails as *wrong hardware* instead of being
+  compared with, or recorded as, a `cpu-x86_64` baseline.
 - `tmic check --allow-missing-baseline` passes a target that has no reviewed baseline for this platform
   (e.g. `cpu-arm64` on a laptop) when its outputs are valid, marking the record `baseline_missing`.
   Targets that do have a baseline are still compared; CI keeps failing on a missing baseline.

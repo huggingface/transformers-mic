@@ -29,7 +29,9 @@ process instead. Script contracts (Transformers.js) always run in their own proc
 --changed-files runs only the contracts the listed Transformers files can
 affect (select_contracts.py): a model directory selects the contracts whose
 fixtures use it, other library code selects all of them, and files outside the
-library select none. With --run-all every contract runs anyway and each record
+library select none. --diff-base names the base revision: a change that only adds
+Auto/import registrations then selects just the registered models, not every
+contract. With --run-all every contract runs anyway and each record
 carries selected_by (null when not selected), to measure what selection misses.
 
 Contracts are downloaded at the Hub revision the fleet lock pins and checked
@@ -600,6 +602,27 @@ def platform_class(device, dtype=None):
     return f"cpu-{arch}"
 
 
+def wrong_hardware(runtime, platform):
+    """Why a case cannot be checked on this host: a bfloat16 run on an x86 CPU without
+    native bfloat16 lands in cpu-x86_64, where bfloat16 values are neither compared
+    nor recorded, even if an old baseline sits there."""
+    if runtime.get("dtype") != "bfloat16" or platform != "cpu-x86_64":
+        return None
+    try:
+        cpu = next(
+            line.split(":", 1)[1].strip()
+            for line in Path("/proc/cpuinfo").read_text(encoding="utf-8").splitlines()
+            if line.startswith("model name")
+        )
+    except (OSError, StopIteration):
+        cpu = "this CPU"
+    return (
+        f"wrong hardware: {cpu} has no native bfloat16 (avx512_bf16/amx_bf16), so this "
+        "bfloat16 case was measured as cpu-x86_64; its reviewed baseline is under "
+        "cpu-x86_64-bf16. Rerun on a native-bfloat16 runner."
+    )
+
+
 def rules_for(manifest, platform_dir):
     """The manifest's comparison rules with this platform's tolerance overrides."""
     rules = {name: dict(rule) for name, rule in manifest["outputs"].items()}
@@ -632,6 +655,7 @@ def main():
     parser.add_argument("--output", type=Path, help="append result records to this JSON lines file")
     parser.add_argument("--changed-files", type=Path, metavar="FILE",
                         help="run only the contracts these changed Transformers files can affect (one path per line; - for stdin)")
+    parser.add_argument("--diff-base", help="base Git revision for recognizing registry-only model additions; used with --changed-files")
     parser.add_argument("--run-all", action="store_true",
                         help="with --changed-files: run every contract anyway, recording selected_by (null if not selected)")
     parser.add_argument("--require-all", action="store_true",
@@ -660,12 +684,17 @@ def main():
         import select_contracts
 
         lines = sys.stdin.read() if str(args.changed_files) == "-" else args.changed_files.read_text()
+        changed_files = [line.strip() for line in lines.splitlines() if line.strip()]
         dirs = {
             name: sorted({d for repo, pin in contract.get("fixtures", {}).items()
                           for d in select_contracts.code_dirs(fixture_folder(lock_dir, repo, pin, args.local_fixtures))})
             for name, contract in lock["contracts"].items()
         }
-        selected_by = select_contracts.select([line.strip() for line in lines.splitlines() if line.strip()], dirs)
+        sources = select_contracts.changed_sources(changed_files, args.diff_base) if args.diff_base else None
+        resolve_model_type = None
+        if sources:
+            from transformers.models.auto.configuration_auto import model_type_to_module_name as resolve_model_type
+        selected_by = select_contracts.select(changed_files, dirs, sources=sources, model_type_to_module=resolve_model_type)
         print(json.dumps({"selection": selected_by, "code_dirs": dirs}), file=sys.stderr, flush=True)
     known = {} if args.framework == "sentence_transformers" else lock.get("known_failures", {})
     import template_date
@@ -720,7 +749,6 @@ def main():
                     raise SystemExit(f"{root}: differs from the pinned {contract['integration']['repo']}; publish it or pass --local-contracts")
             base = {
                 "contract": contract["integration"]["repo"],
-                "contract_name": name,
                 "contract_name": name,
                 "contract_revision": contract_revision,
                 "framework": args.framework,
@@ -801,6 +829,12 @@ def main():
                         if r["compare"] == "allclose" and lookup(actual, k) is not None
                     }
                     emit({**record, "golden": args.golden, "status": "fail" if failures else "pass", "failures": failures, "max_delta": deltas})
+                    continue
+                wrong = wrong_hardware(actual["runtime"], platform)
+                if wrong:
+                    # Never compare or record across hardware: a bfloat16 value
+                    # from a non-native CPU says nothing about the reviewed one.
+                    emit({**record, "status": "fail", "failures": [wrong]})
                     continue
                 broken = missing(checked, actual) + non_finite(outputs, actual) + violated(outputs, actual)
                 if broken:
