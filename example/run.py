@@ -659,7 +659,7 @@ def main():
     parser.add_argument("--run-all", action="store_true",
                         help="with --changed-files: run every contract anyway, recording selected_by (null if not selected)")
     parser.add_argument("--skip-wrong-hardware", action="store_true",
-                        help="report bfloat16 cases on an x86 CPU without native bfloat16 as unsupported, not failed (hosts that cannot be native-bfloat16, like the nightly's)")
+                        help="report a bfloat16 case on an x86 CPU without native bfloat16 as unsupported (skip wrong-hardware) when its outputs are valid, instead of failing it; for hosts that can never be native-bfloat16, like the nightly's and the drafting runner's. --require-all accepts it.")
     parser.add_argument("--require-all", action="store_true",
                         help="fail on targets skipped for this host's hardware or an undefined variant; only skips the manifest declares are allowed")
     parser.add_argument("--no-baseline", action="store_true",
@@ -729,7 +729,7 @@ def main():
         counts[record["status"]] = counts.get(record["status"], 0) + 1
         declared[0] += record["status"] == "unsupported" and record.get("skip") == "declared"
         status |= record["status"] in ("fail", "error")
-        status |= args.require_all and record["status"] == "unsupported" and record["skip"] != "declared"
+        status |= args.require_all and record["status"] == "unsupported" and record["skip"] not in ("declared", "wrong-hardware")
 
     with tempfile.TemporaryDirectory() as tmp:
         for name, contract in lock["contracts"].items():
@@ -850,10 +850,12 @@ def main():
                 if wrong:
                     # Never compare or record across hardware: a bfloat16 value
                     # from a non-native CPU says nothing about the reviewed one.
-                    if args.skip_wrong_hardware:
-                        emit({**record, "status": "unsupported", "skip": "hardware", "failures": [wrong]})
+                    broken = missing(checked, actual) + non_finite(outputs, actual) + violated(outputs, actual)
+                    if args.skip_wrong_hardware and not broken:
+                        # The case ran and its outputs are valid; only the comparison needs other hardware.
+                        emit({**record, "status": "unsupported", "skip": "wrong-hardware", "failures": [wrong]})
                     else:
-                        emit({**record, "status": "fail", "failures": [wrong]})
+                        emit({**record, "status": "fail", "failures": broken or [wrong]})
                     continue
                 broken = missing(checked, actual) + non_finite(outputs, actual) + violated(outputs, actual)
                 if broken:
