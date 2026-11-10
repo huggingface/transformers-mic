@@ -998,6 +998,25 @@ expectations, checks and artifacts; keep them outside versioned source or ignore
 prototype still includes Transformers.js contracts, but the CLI does not publish
 or export a JavaScript fleet.
 
+### Fixtures published as pytorch_model.bin
+
+Fixtures built before 2026-11-03 can still ship `pytorch_model.bin`. `tmic reserialize`
+rewrites one as `model.safetensors` without rebuilding it:
+
+```sh
+tmic reserialize huggingface-mic/opt-125m-mic --out /tmp/opt   # convert and verify, upload nothing
+tmic reserialize huggingface-mic/opt-125m-mic --execute        # commit, then repin every fleet
+```
+
+It downloads the repository head, refuses a fixture or contract that differs from
+its fleet pin, keeps every tensor name the `.bin` had (tied aliases included) with
+bit-identical values, and loads both folders with `from_pretrained` to check that the
+loaded models and loading info are the same. `build.json` gets the new file hash and
+`serialization.file = model.safetensors`, keeping `source_file`. The fixture's
+`files_sha256` changes, so `--execute` repins each contract that uses the repository;
+the contract's own hash is unchanged. Rerunning after an interrupted export only
+repins. Baselines need no new recording: the tensors are the same.
+
 ## Files and publication
 
 A MIC model has one location for usage and expectations, both in the workspace

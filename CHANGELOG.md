@@ -15,6 +15,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- `tmic reserialize huggingface-mic/<name>-mic` stores a fixture published as `pytorch_model.bin` as
+  `model.safetensors`: the same tensor names (tied aliases included) and bit-identical values, checked
+  again after `from_pretrained`. Only the weights file and its `build.json` hash change; `--execute`
+  commits that to the repository and repins every fleet contract that uses it, retrying a concurrent
+  fleet update.
 - Result records name what ran as Hub locations: `fixture_repo`, `source_model` and `weights` (from the
   fixture's `build.json`), and `baseline_repo` / `baseline_revision` / `baseline_path` for the reviewed
   baseline. Transformers CI's span attributes and MIC dashboard page read them.

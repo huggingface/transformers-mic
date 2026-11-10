@@ -512,6 +512,19 @@ No Git commit or framework PR is created automatically.""",
     export.add_argument(
         "--execute", action="store_true", help="Upload the previewed fleet update"
     )
+    reserialize = sub.add_parser(
+        "reserialize",
+        help="Store a published fixture's pytorch_model.bin as model.safetensors, tensors unchanged, and repin its fleets",
+    )
+    reserialize.add_argument("repo", help="huggingface-mic/<name>-mic")
+    reserialize.add_argument(
+        "--out", type=Path, help="Also keep the converted fixture folder here"
+    )
+    reserialize.add_argument(
+        "--execute",
+        action="store_true",
+        help="Commit to the repository and repin every fleet that pins it",
+    )
     retire = sub.add_parser(
         "retire",
         help="Preview or remove one contract from a fleet (e.g. a replaced test-checkpoint source)",
@@ -735,6 +748,10 @@ def main(argv=None):
             return run(args)
         if args.command == "shrink":
             from .shrink_view import run
+
+            return run(args)
+        if args.command == "reserialize":
+            from .reserialize import run
 
             return run(args)
         if args.command == "status":
