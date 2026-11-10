@@ -122,6 +122,7 @@
  "huggingface-mic/gemma-4-E2B-it-mic": "gemma4",
  "huggingface-mic/gemma3-mic": "gemma3",
  "huggingface-mic/got_ocr2-mic": "got_ocr2",
+ "huggingface-mic/gpt-j-6b-mic": "gptj",
  "huggingface-mic/gpt-neo-125m-mic": "gpt_neo",
  "huggingface-mic/gpt2-mic": "gpt2",
  "huggingface-mic/gpt_oss-mic": "gpt_oss",
