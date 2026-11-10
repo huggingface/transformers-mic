@@ -88,6 +88,7 @@
  "huggingface-mic/blip2-opt-2.7b-mic": "blip-2",
  "huggingface-mic/bloomz-560m-mic": "bloom",
  "huggingface-mic/camembert-base-mic": "camembert",
+ "huggingface-mic/canary-1b-v2-mic": "canary",
  "huggingface-mic/canine-c-mic": "canine",
  "huggingface-mic/chinese-clip-vit-base-patch16-mic": "chinese_clip",
  "huggingface-mic/clap-htsat-fused-mic": "clap",

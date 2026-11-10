@@ -98,18 +98,6 @@
    "shrinkable": true
   },
   {
-   "checkpoint": "nvidia/canary-1b-v2",
-   "draft": "failure",
-   "model": "canary",
-   "next_batch": false,
-   "other": 1,
-   "real_checkpoint": 0,
-   "regressions": 1,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42590665006",
-   "shrink": "shrink/42590665006/shrink-canary-1b-v2-mic.html",
-   "shrinkable": true
-  },
-  {
    "checkpoint": "nvidia/Cosmos3-Edge",
    "draft": "failure",
    "model": "cosmos3_edge",
@@ -317,6 +305,18 @@
    "checkpoint": "ibm-granite/granite-speech-4.1-2b-plus",
    "draft": "not draftable",
    "model": "granite_speech_plus",
+   "next_batch": false,
+   "other": 0,
+   "real_checkpoint": 1,
+   "regressions": 1,
+   "run": "",
+   "shrink": "",
+   "shrinkable": false
+  },
+  {
+   "checkpoint": null,
+   "draft": "not draftable",
+   "model": "jev",
    "next_batch": false,
    "other": 0,
    "real_checkpoint": 1,
