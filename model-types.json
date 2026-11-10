@@ -147,6 +147,7 @@
  "huggingface-mic/luke-base-mic": "luke",
  "huggingface-mic/mDeBERTa-v3-base-xnli-multilingual-nli-2mil7-mic": "deberta-v2",
  "huggingface-mic/mamba-130m-hf-mic": "mamba",
+ "huggingface-mic/manga-ocr-base-mic": "vision-encoder-decoder",
  "huggingface-mic/mask2former-swin-tiny-coco-instance-mic": "mask2former",
  "huggingface-mic/mbart-large-50-mic": "mbart",
  "huggingface-mic/mistral3-mic": "mistral3",
