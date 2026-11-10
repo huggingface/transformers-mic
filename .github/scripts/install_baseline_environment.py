@@ -91,6 +91,8 @@ def main():
             "scipy",
             "pillow",
             "jsonschema",
+            "fugashi",  # Japanese tokenizers (manga-ocr), with the dictionary below
+            "unidic-lite",
             "hf-doc-builder @ git+https://github.com/huggingface/doc-builder@c69e96c087165ba49b1788e0c3464654dd60253c",
         ],
         check=True,
