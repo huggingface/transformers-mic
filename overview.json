@@ -1,9 +1,10 @@
 {
- "awaiting_verdict": 21,
+ "awaiting_verdict": 22,
  "block_merges": {
   "ready": false,
   "unmet": [
    "14 of 30 days observed",
+   "unresolved blocks 1 of 2 (bar \u2264 10%)",
    "re-baselined contracts 31.5/week (bar \u2264 10)"
   ]
  },
@@ -16,7 +17,7 @@
  "drafts_per_day": 2,
  "false_alarms": {
   "prs_not_their_fault": 145,
-  "prs_with_failure": 174
+  "prs_with_failure": 175
  },
  "missed": {
   "awaiting_verdict": 21,
@@ -471,14 +472,14 @@
   },
   {
    "date": "2026-11-06",
-   "detail": "QianfanOCR-mic (bfloat16): Traceback (most recent call last):",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/42150076346/job/127672175235",
    "model": "qianfan_ocr",
    "pr": "49976",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 17,
-   "verdict": "caught"
+   "verdict": "pending"
   },
   {
    "date": "2026-11-06",
@@ -487,7 +488,7 @@
    "job": "https://github.com/huggingface/transformers/actions/runs/42150076346/job/127672207497",
    "model": "phi4_multimodal",
    "pr": "49976",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 4,
    "verdict": "not-a-regression"
   },
@@ -823,14 +824,14 @@
   },
   {
    "date": "2026-10-26",
-   "detail": "the bad commit added the model",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/40260447300/job/121371676229",
    "model": "minicpm_ocr",
    "pr": "49920",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 3,
-   "verdict": "model-added"
+   "verdict": "pending"
   },
   {
    "date": "2026-10-24",
@@ -889,36 +890,36 @@
   },
   {
    "date": "2026-10-22",
-   "detail": "216 commits in range; the bad commit added the model",
+   "detail": "",
    "integration": true,
    "job": "",
    "model": "flint",
    "pr": null,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 1,
-   "verdict": "model-added"
+   "verdict": "pending"
   },
   {
    "date": "2026-10-22",
-   "detail": "red before, green after; vaultgemma-1b-mic (bfloat16): runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': '",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/39712427605/job/119609248616",
    "model": "vaultgemma",
    "pr": "49811",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 4,
-   "verdict": "caught"
+   "verdict": "pending"
   },
   {
    "date": "2026-10-22",
-   "detail": "red before, green after; gemma-2-2b-it-mic (bfloat16): runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': '",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/39712427605/job/119609253029",
    "model": "gemma2",
    "pr": "49811",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 3,
-   "verdict": "caught"
+   "verdict": "pending"
   },
   {
    "date": "2026-10-20",
@@ -1010,14 +1011,14 @@
   },
   {
    "date": "2026-10-19",
-   "detail": "290 commits in range; ",
+   "detail": "same regression as 49404#gemma4",
    "integration": true,
    "job": "",
    "model": "gemma4",
    "pr": null,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 1,
-   "verdict": "missed"
+   "verdict": "duplicate"
   },
   {
    "date": "2026-10-19",
@@ -1032,14 +1033,14 @@
   },
   {
    "date": "2026-10-18",
-   "detail": "274 commits in range; red before, green after; oneformer_ade20k_swin_tiny-mic (bfloat16): _impl",
+   "detail": "",
    "integration": true,
    "job": "",
    "model": "oneformer",
    "pr": null,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 2,
-   "verdict": "caught"
+   "verdict": "out-of-scope"
   },
   {
    "date": "2026-10-18",
@@ -1054,14 +1055,14 @@
   },
   {
    "date": "2026-10-17",
-   "detail": "305 commits in range; ",
+   "detail": "the daily CI failed it the day before too",
    "integration": true,
    "job": "",
    "model": "mm_grounding_dino",
    "pr": null,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 3,
-   "verdict": "missed"
+   "verdict": "already-failing"
   },
   {
    "date": "2026-10-17",
@@ -1208,14 +1209,14 @@
   },
   {
    "date": "2026-10-13",
-   "detail": "385 commits in range; grounding-dino-tiny-mic (bfloat16): class_scores: max delta 7.06 over tolerance",
+   "detail": "the daily CI failed it the day before too",
    "integration": true,
    "job": "",
    "model": "grounding_dino",
    "pr": null,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 4,
-   "verdict": "already-red"
+   "verdict": "already-failing"
   },
   {
    "date": "2026-10-13",
@@ -1241,23 +1242,23 @@
   },
   {
    "date": "2026-10-12",
-   "detail": "386 commits in range; test_model_video_generation fails identically on CPU at both ends (536ecc0, d203390) at its first assertion: prompt token order (vision_start vs timestamp) before the model runs;",
+   "detail": "test_model_video_generation fails identically on CPU at both ends (536ecc0, d203390) at its first assertion: prompt token order (vision_start vs timestamp) before the model runs; video preprocessing b",
    "integration": true,
    "job": "",
    "model": "qwen3_5",
    "pr": null,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 2,
    "verdict": "not-a-regression"
   },
   {
    "date": "2026-10-12",
-   "detail": "386 commits in range; test_seq_to_seq_generation fails identically on CPU at both ends (536ecc0, d203390); generated ids identical, only the '</s> __en__' spacing of the decode with special tokens dif",
+   "detail": "test_seq_to_seq_generation fails identically on CPU at both ends (536ecc0, d203390); generated ids identical, only the '</s> __en__' spacing of the decode with special tokens differs: tokenizer/enviro",
    "integration": true,
    "job": "",
    "model": "m2m_100",
    "pr": null,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 1,
    "verdict": "not-a-regression"
   },
@@ -1340,14 +1341,14 @@
   },
   {
    "date": "2026-10-10",
-   "detail": "",
+   "detail": "#49404 made Gemma4AudioModel eager-only (_supports_sdpa=False): an explicit attn_implementation='sdpa' now raises, a default load silently runs the audio tower in eager. Upstream kept it and fixed the",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/38018121662/job/114233333289",
    "model": "gemma4",
    "pr": "49404",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 1,
-   "verdict": "missed"
+   "verdict": "not-a-regression"
   },
   {
    "date": "2026-10-09",
@@ -1373,14 +1374,14 @@
   },
   {
    "date": "2026-10-09",
-   "detail": "mic-whisper-tiny-slim (default): gface-mic--whisper-tiny-mic/snapshots/9d85803a8fb0226794764f4b12a4d4fd74d160ed/integrations/transformers/usage.md\", line 25, in <module>; mic-whisper-tiny-slim (bfloat",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/37876159550/job/113648952724",
    "model": "whisper",
    "pr": "48282",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 2,
-   "verdict": "already-red"
+   "verdict": "pending"
   },
   {
    "date": "2026-10-08",
@@ -1439,14 +1440,14 @@
   },
   {
    "date": "2026-10-07",
-   "detail": "the bad commit added the model",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/37563588666/job/112608047988",
    "model": "embedding_gemma2",
    "pr": "49364",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 7,
-   "verdict": "model-added"
+   "verdict": "pending"
   },
   {
    "date": "2026-10-06",
@@ -1516,14 +1517,14 @@
   },
   {
    "date": "2026-09-23",
-   "detail": "mic-whisper-tiny-slim (default): language=\"en\", task=\"transcribe\", return_timestamps=True, max_new_tokens=8); mic-whisper-tiny-slim (bfloat16): language=\"en\", task=\"transcribe\", return_timestamps=True",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/35811007536/job/107027562813",
    "model": "whisper",
    "pr": "48981",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 2,
-   "verdict": "already-red"
+   "verdict": "pending"
   },
   {
    "date": "2026-09-23",
@@ -1549,14 +1550,14 @@
   },
   {
    "date": "2026-09-22",
-   "detail": "",
+   "detail": "#48978 rewrote the mamba2 chunk scan with einsum (an intended numerics reordering); maintainers updated the expectations the same day (#49016) and the tests pass from 09-25. CPU stays within tolerance",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/35680047781/job/106605850400",
    "model": "granitemoehybrid",
    "pr": "48978",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 2,
-   "verdict": "missed"
+   "verdict": "not-a-regression"
   },
   {
    "date": "2026-09-17",
@@ -1582,14 +1583,14 @@
   },
   {
    "date": "2026-09-05",
-   "detail": "Laguna-XS.2-mic (bfloat16): next_token_logits: max delta 0.0293 over tolerance",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/33939401495/job/101235761496",
    "model": "laguna",
    "pr": "48435",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 1,
-   "verdict": "already-red"
+   "verdict": "pending"
   },
   {
    "date": "2026-09-03",
@@ -1615,14 +1616,14 @@
   },
   {
    "date": "2026-08-11",
-   "detail": "the bad commit added the model",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/31454046729/job/93664844811",
    "model": "muse_glimmer",
    "pr": "47867",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 16,
-   "verdict": "model-added"
+   "verdict": "out-of-scope"
   },
   {
    "date": "2026-08-05",
@@ -1637,25 +1638,25 @@
   },
   {
    "date": "2026-08-05",
-   "detail": "tibetan-ocr-mic (bfloat16): logits.probe: max delta 0.105 over tolerance",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/30972202198/job/92205669582",
    "model": "paddleocr_vl",
    "pr": "47573",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 2,
-   "verdict": "caught"
+   "verdict": "pending"
   },
   {
    "date": "2026-08-05",
-   "detail": "Kimi-K2.5-mic (bfloat16): <module>",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/30972202198/job/92205662191",
    "model": "kimi_k25",
    "pr": "47573",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 2,
-   "verdict": "already-red"
+   "verdict": "pending"
   },
   {
    "date": "2026-08-04",
@@ -1692,14 +1693,14 @@
   },
   {
    "date": "2026-08-04",
-   "detail": "the bisected commit does not touch the model or shared code",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/30874774683/job/91885751295",
    "model": "phimoe",
    "pr": "47493",
    "run": "",
    "tests": 1,
-   "verdict": "unrelated-culprit"
+   "verdict": "out-of-scope"
   },
   {
    "date": "2026-08-04",
@@ -2088,47 +2089,47 @@
   },
   {
    "date": "2026-08-01",
-   "detail": "red before, green after; Cosmos3-Nano-mic (bfloat16): logits.probe: max delta 0.000977 over tolerance",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/30682020491/job/91323208822",
    "model": "cosmos3_omni",
    "pr": "47096",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 1,
-   "verdict": "caught"
+   "verdict": "pending"
   },
   {
    "date": "2026-07-31",
-   "detail": "mic-qwen2_5_omni-slim (bfloat16): training.gradients: checks differ from the baseline (missing ['thinker.model.language_model.embed_tokens.weight', 'thinker.model.language_model.layers",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/30601623379/job/91065804327",
    "model": "qwen2_5_omni",
    "pr": "47622",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 1,
-   "verdict": "already-red"
+   "verdict": "pending"
   },
   {
    "date": "2026-07-31",
-   "detail": "recurrentgemma-2b-mic (bfloat16): logits.last: max delta 0.0195 over tolerance",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/30601623379/job/91065805818",
    "model": "recurrent_gemma",
    "pr": "47598",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 1,
-   "verdict": "caught"
+   "verdict": "pending"
   },
   {
    "date": "2026-07-28",
-   "detail": "Florence-2-base-mic (bfloat16): inference_logits: max delta 0.344 over tolerance",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/30325924220/job/90171810989",
    "model": "florence2",
    "pr": "46556",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 7,
-   "verdict": "caught"
+   "verdict": "pending"
   },
   {
    "date": "2026-07-09",
@@ -2165,80 +2166,91 @@
   },
   {
    "date": "2026-07-03",
-   "detail": "gemma-4-E2B-it-mic (bfloat16): ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/28636318208/job/84925881079",
    "model": "gemma4",
    "pr": "46960",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 1,
-   "verdict": "already-red"
+   "verdict": "pending"
   },
   {
    "date": "2026-07-01",
-   "detail": "the bisected commit does not touch the model or shared code",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/28491344324/job/84450196773",
    "model": "phimoe",
    "pr": "46850",
    "run": "",
    "tests": 1,
-   "verdict": "unrelated-culprit"
+   "verdict": "out-of-scope"
   },
   {
    "date": "2026-07-01",
-   "detail": "MiniCPM-V-4.6-mic (bfloat16): logits.probe: max delta 0.00195 over tolerance",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/28491344324/job/84450206547",
    "model": "minicpmv4_6",
    "pr": "46738",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 3,
-   "verdict": "already-red"
+   "verdict": "pending"
   },
   {
    "date": "2026-06-30",
-   "detail": "red before, green after; Olmo-3-7B-Instruct-mic (bfloat16): next_token_ids: [82253, 61111] != [82253, 72520]",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/28418128395/job/84206024022",
    "model": "olmo3",
    "pr": "46911",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 2,
-   "verdict": "caught"
+   "verdict": "pending"
   },
   {
    "date": "2026-06-20",
-   "detail": "red before, green after; MiniMax-M3-MXFP8-mic (bfloat16): logits_probe: max delta 0.126 over tolerance",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/27858769081/job/82451409014",
    "model": "minimax_m3_vl",
    "pr": "46719",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 1,
-   "verdict": "caught"
+   "verdict": "pending"
   },
   {
    "date": "2026-06-20",
-   "detail": "Janus-Pro-1B-mic (bfloat16): ackages/torch/nn/modules/module.py\", line 1787, in _wrapped_call_impl",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/27858769081/job/82451414797",
    "model": "janus",
    "pr": "46446",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 1,
-   "verdict": "already-red"
+   "verdict": "pending"
   },
   {
    "date": "2026-06-20",
-   "detail": "blip2-opt-2.7b-mic (bfloat16): training.loss: max delta 0.0411 over tolerance",
+   "detail": "",
+   "integration": true,
+   "job": "https://github.com/huggingface/transformers/actions/runs/27858769081/job/82451414800",
+   "model": "vision_encoder_decoder",
+   "pr": "46091",
+   "run": "",
+   "tests": 2,
+   "verdict": "pending"
+  },
+  {
+   "date": "2026-06-20",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/27858769081/job/82451409589",
    "model": "blip_2",
    "pr": "46091",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 3,
-   "verdict": "already-red"
+   "verdict": "pending"
   },
   {
    "date": "2026-06-17",
@@ -2264,25 +2276,25 @@
   },
   {
    "date": "2026-06-13",
-   "detail": "the bad commit added the model",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/27455162377/job/81158603047",
    "model": "minimax_m3_vl",
    "pr": "46600",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 6,
-   "verdict": "model-added"
+   "verdict": "pending"
   },
   {
    "date": "2026-06-10",
-   "detail": "the bisected commit does not touch the model or shared code",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/27251020256/job/80475939924",
    "model": "phimoe",
    "pr": "46219",
    "run": "",
    "tests": 1,
-   "verdict": "unrelated-culprit"
+   "verdict": "out-of-scope"
   },
   {
    "date": "2026-06-04",
@@ -2291,9 +2303,9 @@
    "job": "https://github.com/huggingface/transformers/actions/runs/26928479951/job/79443929217",
    "model": "phimoe",
    "pr": "46318",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 1,
-   "verdict": "missed"
+   "verdict": "out-of-scope"
   },
   {
    "date": "2026-06-02",
@@ -2302,20 +2314,20 @@
    "job": "https://github.com/huggingface/transformers/actions/runs/26796424572/job/78994276709",
    "model": "phimoe",
    "pr": "45752",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 1,
-   "verdict": "missed"
+   "verdict": "out-of-scope"
   },
   {
    "date": "2026-05-29",
-   "detail": "the bisected commit does not touch the model or shared code",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/26616068218/job/78432475689",
    "model": "phimoe",
    "pr": "46135",
    "run": "",
    "tests": 1,
-   "verdict": "unrelated-culprit"
+   "verdict": "out-of-scope"
   },
   {
    "date": "2026-05-14",
@@ -2572,30 +2584,31 @@
   },
   {
    "date": "2026-05-09",
-   "detail": "mask2former-swin-tiny-coco-instance-mic (bfloat16):       | MISSING    | ",
+   "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/25590382476/job/75127168384",
    "model": "mask2former",
    "pr": "41693",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+   "run": "",
    "tests": 1,
-   "verdict": "already-red"
+   "verdict": "pending"
   }
  ],
  "replay": {
-  "already-red": 11,
+  "already-failing": 2,
+  "already-red": 0,
   "broken": 0,
-  "caught": 10,
-  "duplicate": 3,
-  "missed": 6,
-  "model-added": 5,
+  "caught": 0,
+  "duplicate": 4,
+  "missed": 0,
+  "model-added": 0,
   "no-code-change": 1,
-  "not-a-regression": 3,
-  "not-covered": 216,
+  "not-a-regression": 5,
+  "not-covered": 215,
   "not-reproduced": 7,
-  "out-of-scope": 140,
-  "pending": 0,
-  "unrelated-culprit": 19
+  "out-of-scope": 148,
+  "pending": 24,
+  "unrelated-culprit": 15
  },
  "window": [
   "2026-10-20",

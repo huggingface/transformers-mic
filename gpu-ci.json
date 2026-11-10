@@ -1227,6 +1227,11 @@
  },
  "46091#vision_encoder_decoder": {
   "bad_commit": "efe4049614793e26be02acce3597756236bb92ec",
+  "culprit_files": [
+   "src/transformers/models/auto/tokenization_auto.py",
+   "tests/models/aria/test_processing_aria.py",
+   "tests/models/auto/test_tokenization_auto.py"
+  ],
   "date": "2026-06-20",
   "integration": true,
   "job_link": "https://github.com/huggingface/transformers/actions/runs/27858769081/job/82451414800",

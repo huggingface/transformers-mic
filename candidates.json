@@ -5443,10 +5443,10 @@
   "key": "49886#huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16",
   "kind": "fixture",
   "last_seen": 20767,
-  "merged_at": null,
-  "outcome": "open",
+  "merged_at": "2026-11-10T09:40:44Z",
+  "outcome": "merged-watching",
   "pr": "49886",
-  "pr_state": "open",
+  "pr_state": "merged",
   "pr_title": "[serge] Fix 8 integration tests for model `grounding_dino` failing with `output_mismatch` (tensor values differ (6), oth",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42555010802%3A1&var-pr=49886&var-gh_run_id=42555010802",
   "weights": "random"
@@ -6192,6 +6192,20 @@
   "pr_title": "[`distributed`] Context parallel implementations, with Ulysses",
   "recovered": "after-push",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42598093244%3A1&var-pr=50493&var-gh_run_id=42598093244",
+  "weights": "random"
+ },
+ "gh-readonly-queue/main/pr-49886-a4f362742ba4846882fd0bc9636461ef3a5e3f34#huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [],
+  "failure": "logits_probe: max delta 1.28 over tolerance\nboxes_probe: max delta 0.788 over tolerance\ntraining.loss: max delta 0.00627 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794302399.038904,
+  "first_seen": "2026-11-10",
+  "key": "gh-readonly-queue/main/pr-49886-a4f362742ba4846882fd0bc9636461ef3a5e3f34#huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "pr": "gh-readonly-queue/main/pr-49886-a4f362742ba4846882fd0bc9636461ef3a5e3f34",
+  "pr_title": "[serge] Fix 8 integration tests for model `grounding_dino` failing with `output_mismatch` (tensor values differ (6), oth",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42789176772%3A1&var-pr=gh-readonly-queue%2Fmain%2Fpr-49886-a4f362742ba4846882fd0bc9636461ef3a5e3f34&var-gh_run_id=42789176772",
   "weights": "random"
  },
  "gh-readonly-queue/main/pr-50263-e03c353939b8396e1e29d92e4d11245dca493dd1#huggingface-mic/table_transformer-mic|table_transformer-mic|bfloat16|cpu-x86_64": {

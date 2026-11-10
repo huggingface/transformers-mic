@@ -270,9 +270,9 @@
   "state": "open"
  },
  "49886": {
-  "closed_at": null,
-  "merged_at": null,
-  "state": "open"
+  "closed_at": "2026-11-10T09:40:44Z",
+  "merged_at": "2026-11-10T09:40:44Z",
+  "state": "merged"
  },
  "49910": {
   "closed_at": null,
