@@ -126,11 +126,13 @@ def loaded_differences(before, after, model_class):
 
     Also refuses unexpected or mismatched keys, and missing keys beyond the ones
     build.json says the real checkpoint lacks."""
+    import torch
     import transformers
 
     cls = getattr(transformers, model_class)
     models = {}
     for label, folder in (("before", before), ("after", after)):
+        torch.manual_seed(0)  # parameters the checkpoint lacks are initialized the same way on both sides
         model, info = cls.from_pretrained(folder, output_loading_info=True)
         models[label] = (model.state_dict(), {k: sorted(map(str, v)) for k, v in info.items()})
     problems = differences(models["before"][0], models["after"][0])
