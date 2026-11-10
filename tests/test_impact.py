@@ -438,6 +438,14 @@ def test_a_failed_draft_is_retried_only_on_a_new_checkpoint():
     assert "failure" not in lines.split("| moshi |")[1].split("\n")[0]
 
 
+@pytest.fixture(autouse=True)
+def offline_sources(monkeypatch):
+    # Replay planning reads test files and commit ranges from GitHub: offline, every test file is
+    # empty (no GPU-only body) and every range unknown (replayed).
+    monkeypatch.setattr(impact, "test_file_text", lambda path, ref="main": "")
+    monkeypatch.setattr(impact, "range_files", lambda parent, bad: None)
+
+
 LLAMA_TEST = "tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_x"
 
 
@@ -656,3 +664,51 @@ def test_a_class_without_checkpoints_falls_back_to_the_integration_tests():
     files = {"tests/models/moshi/test_modeling_moshi.py": text}
     found = impact.test_checkpoints(["tests/models/moshi/test_modeling_moshi.py::MoshiDecoderTest::test_x"], files)
     assert found == ["kmhf/hf-moshika", "kmhf/hf-moshiko"]
+
+
+QWEN_MOE = """
+class Qwen3MoeIntegrationTest(unittest.TestCase):
+    @classmethod
+    def get_model(cls):
+        return Qwen3MoeForCausalLM.from_pretrained("Qwen/Qwen3-30B-A3B-Base", quantization_config=BitsAndBytesConfig(load_in_4bit=True))
+
+    @slow
+    def test_model_15b_a2b_logits(self):
+        model = self.get_model()
+
+    @slow
+    def test_plain(self):
+        model = Qwen3MoeForCausalLM.from_pretrained("Qwen/Qwen3-30B-A3B-Base")
+
+    @require_flash_attn
+    def test_decorated(self):
+        pass
+"""
+
+
+def test_a_test_whose_helper_loads_a_quantized_checkpoint_is_out_of_scope():
+    path = "tests/models/llama/test_modeling_llama.py"
+    text_of = lambda p, ref="main": QWEN_MOE.replace("Qwen3MoeIntegrationTest", "LlamaIntegrationTest")
+    node = lambda name: f"{path}::LlamaIntegrationTest::{name}"
+    assert impact.gpu_only_body(node("test_model_15b_a2b_logits"), text_of=text_of)
+    assert impact.gpu_only_body(node("test_decorated"), text_of=text_of)
+    assert not impact.gpu_only_body(node("test_plain[param]"), text_of=text_of)
+    assert impact.replay_scope(regression(tests=[node("test_model_15b_a2b_logits")]), CONTRACTS, text_of) == "out-of-scope"
+    assert impact.replay_scope(regression(tests=[node("test_model_15b_a2b_logits"), node("test_plain")]), CONTRACTS, text_of) is None
+    # Unparseable or missing source: decided by the name alone.
+    assert not impact.gpu_only_body(node("test_x"), text_of=lambda p, ref="main": "def (")
+
+
+def test_a_sticky_range_that_changes_no_model_code_is_not_replayed():
+    gpu_ci = {"sticky#llama#2026-11-08": regression(date="2026-11-08")}
+    days = {"2026-11-07": "p" * 40, "2026-11-08": "q" * 40}
+    replays = {}
+    docker_only = lambda parent, bad: [".github/workflows/build-docker-images.yml", "docker/transformers-all-latest-gpu/Dockerfile"]
+    assert impact.replay_plan(gpu_ci, replays, CONTRACTS, days.get, sha_of_run=lambda run: None, failing_on=fails,
+                              range_files_of=docker_only) == []
+    assert replays["sticky#llama#2026-11-08"]["verdict"] == "no-code-change"
+    assert "docker/transformers-all-latest-gpu/Dockerfile" in replays["sticky#llama#2026-11-08"]["reason"]
+    # Shared code in the range, or a range GitHub cannot list in full: replayed.
+    for files_of in (lambda parent, bad: ["src/transformers/generation/utils.py"], lambda parent, bad: None):
+        plan = impact.replay_plan(gpu_ci, {}, CONTRACTS, days.get, sha_of_run=lambda run: None, failing_on=fails, range_files_of=files_of)
+        assert {p["key"] for p in plan} == {"sticky#llama#2026-11-08"}
