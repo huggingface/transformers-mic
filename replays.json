@@ -1,10 +1,36 @@
 {
+ "41693#mask2former": {
+  "bad": "c9de1097eed992fe205f876415e7a7cfaa06be50",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/mask2former-swin-tiny-coco-instance-mic"
+  ],
+  "failures": [
+   "mask2former-swin-tiny-coco-instance-mic (bfloat16):       | MISSING    | "
+  ],
+  "parent": "381032b7e0a8896ae48f90dbe83eae3bf7630953",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "already-red",
+  "version": 8
+ },
  "43451#molmo2": {
   "verdict": "not-covered",
   "version": 8
  },
  "45396#colqwen2": {
   "verdict": "not-covered",
+  "version": 8
+ },
+ "45752#phimoe": {
+  "bad": "855aad560d172faff711c233a96c8e0c3c198e70",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/Phi-3.5-MoE-0.8B-A0.2B-mic"
+  ],
+  "failures": [],
+  "parent": "5390fc300b75be7bfa59b5e208de0fafc524278d",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "missed",
   "version": 8
  },
  "45777#aimv2": {
@@ -320,6 +346,20 @@
   "verdict": "not-covered",
   "version": 8
  },
+ "46091#blip_2": {
+  "bad": "efe4049614793e26be02acce3597756236bb92ec",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/blip2-opt-2.7b-mic"
+  ],
+  "failures": [
+   "blip2-opt-2.7b-mic (bfloat16): training.loss: max delta 0.0411 over tolerance"
+  ],
+  "parent": "d8904a23da05570d53eb0094aafa7df80dcb01f6",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "already-red",
+  "version": 8
+ },
  "46091#shared": {
   "verdict": "not-covered",
   "version": 8
@@ -348,6 +388,18 @@
  },
  "46246#qwen3_omni_moe": {
   "verdict": "not-covered",
+  "version": 8
+ },
+ "46318#phimoe": {
+  "bad": "595721c44cb14db37fa504903e2edd5e9f0eba43",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/Phi-3.5-MoE-0.8B-A0.2B-mic"
+  ],
+  "failures": [],
+  "parent": "0f0036c888ed81b714cb04aa6fe6689eb36bce0a",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "missed",
   "version": 8
  },
  "46332#nemotron_asr_streaming": {
@@ -383,6 +435,20 @@
   "verdict": "not-covered",
   "version": 8
  },
+ "46446#janus": {
+  "bad": "e7835fba01322488d685a3b2e75273361f3100f5",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/Janus-Pro-1B-mic"
+  ],
+  "failures": [
+   "Janus-Pro-1B-mic (bfloat16): ackages/torch/nn/modules/module.py\", line 1787, in _wrapped_call_impl"
+  ],
+  "parent": "c415352161bff71a97738822fa25d934a6b2b28a",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "already-red",
+  "version": 8
+ },
  "46472#vibevoice_asr": {
   "verdict": "not-covered",
   "version": 8
@@ -391,8 +457,49 @@
   "verdict": "not-covered",
   "version": 8
  },
+ "46556#florence2": {
+  "bad": "254e4b6e7cd955c0c095b7f3bfa800006b3153e8",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/Florence-2-base-mic"
+  ],
+  "failures": [
+   "Florence-2-base-mic (bfloat16): inference_logits: max delta 0.344 over tolerance"
+  ],
+  "parent": "5f8521c0b3e41c8ccbb679afce947e61cc2d3051",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "caught",
+  "version": 8
+ },
  "46556#ovis2": {
   "verdict": "not-covered",
+  "version": 8
+ },
+ "46600#minimax_m3_vl": {
+  "bad": "f208766a6551d381475cd8eeed1256f9a5af7b65",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/MiniMax-M3-MXFP8-mic"
+  ],
+  "parent": "47ae4def650eb8508a9b0f76059b15a4e2730ae7",
+  "reason": "the bad commit added the model",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "model-added",
+  "version": 8
+ },
+ "46719#minimax_m3_vl": {
+  "bad": "2a4ead1823b99478189f8fde0bb41d668961b62e",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/MiniMax-M3-MXFP8-mic"
+  ],
+  "failures": [
+   "MiniMax-M3-MXFP8-mic (bfloat16): logits_probe: max delta 0.126 over tolerance"
+  ],
+  "parent": "4f04136307b73dc153e4e9937a9909f1b96b6beb",
+  "reversed": true,
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "caught",
   "version": 8
  },
  "46738#blt": {
@@ -403,6 +510,20 @@
   "verdict": "not-covered",
   "version": 8
  },
+ "46738#minicpmv4_6": {
+  "bad": "181beb3ba4c47098ed8cbc97ee250d1d45ae0107",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/MiniCPM-V-4.6-mic"
+  ],
+  "failures": [
+   "MiniCPM-V-4.6-mic (bfloat16): logits.probe: max delta 0.00195 over tolerance"
+  ],
+  "parent": "45b004d7bb505a258542d1965b0f9e0d8b03b89d",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "already-red",
+  "version": 8
+ },
  "46850#phimoe": {
   "reason": "the bisected commit does not touch the model or shared code",
   "verdict": "unrelated-culprit",
@@ -410,6 +531,35 @@
  },
  "46886#yolos": {
   "verdict": "out-of-scope",
+  "version": 8
+ },
+ "46911#olmo3": {
+  "bad": "326683dc4d28355f534681c81681734328371f46",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/Olmo-3-7B-Instruct-mic"
+  ],
+  "failures": [
+   "Olmo-3-7B-Instruct-mic (bfloat16): next_token_ids: [82253, 61111] != [82253, 72520]"
+  ],
+  "parent": "d9e7791b129797be80ca7b3b0bf2a53cda0d4b8c",
+  "reversed": true,
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "caught",
+  "version": 8
+ },
+ "46960#gemma4": {
+  "bad": "9d011e8375ab802f1b9ada2d488af35232f6dd3e",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/gemma-4-E2B-it-mic"
+  ],
+  "failures": [
+   "gemma-4-E2B-it-mic (bfloat16): ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+  ],
+  "parent": "fde2b96b5e515af54d50e952ff0a3e011fe98e91",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "already-red",
   "version": 8
  },
  "46977#moshi": {
@@ -434,6 +584,21 @@
  },
  "47014#musicgen_melody": {
   "verdict": "not-covered",
+  "version": 8
+ },
+ "47096#cosmos3_omni": {
+  "bad": "b9090ae58cdaf9e7a195f38d3b2574dd408acaa6",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/Cosmos3-Nano-mic"
+  ],
+  "failures": [
+   "Cosmos3-Nano-mic (bfloat16): logits.probe: max delta 0.000977 over tolerance"
+  ],
+  "parent": "5e413aa4f514bc59cb18821019b745e81e4a403e",
+  "reversed": true,
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "caught",
   "version": 8
  },
  "47118#moshi": {
@@ -721,8 +886,64 @@
   "verdict": "unrelated-culprit",
   "version": 8
  },
+ "47573#kimi_k25": {
+  "bad": "bed02e1faee69e866e382f835b4f7b0a3c7b8431",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/Kimi-K2.5-mic"
+  ],
+  "failures": [
+   "Kimi-K2.5-mic (bfloat16): <module>"
+  ],
+  "parent": "c62820a73c77e7ee1f8b92e9fc248fb1982f22e6",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "already-red",
+  "version": 8
+ },
+ "47573#paddleocr_vl": {
+  "bad": "bed02e1faee69e866e382f835b4f7b0a3c7b8431",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/tibetan-ocr-mic"
+  ],
+  "failures": [
+   "tibetan-ocr-mic (bfloat16): logits.probe: max delta 0.105 over tolerance"
+  ],
+  "parent": "c62820a73c77e7ee1f8b92e9fc248fb1982f22e6",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "caught",
+  "version": 8
+ },
  "47598#pp_doclayout_v2": {
   "verdict": "not-covered",
+  "version": 8
+ },
+ "47598#recurrent_gemma": {
+  "bad": "6034e90c7d1b591e1404596bf1d9617b529a1550",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/recurrentgemma-2b-mic"
+  ],
+  "failures": [
+   "recurrentgemma-2b-mic (bfloat16): logits.last: max delta 0.0195 over tolerance"
+  ],
+  "parent": "d24918c442dc4f91922647d71e3086a8b851e7ec",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "caught",
+  "version": 8
+ },
+ "47622#qwen2_5_omni": {
+  "bad": "16780c86b20a1aa95fda4c534667baa151ca87b8",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/qwen2_5_omni-mic"
+  ],
+  "failures": [
+   "mic-qwen2_5_omni-slim (bfloat16): training.gradients: checks differ from the baseline (missing ['thinker.model.language_model.embed_tokens.weight', 'thinker.model.language_model.layers"
+  ],
+  "parent": "6034e90c7d1b591e1404596bf1d9617b529a1550",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "already-red",
   "version": 8
  },
  "47622#voxtral_realtime": {
@@ -772,6 +993,18 @@
  },
  "47827#inkling": {
   "verdict": "not-covered",
+  "version": 8
+ },
+ "47867#muse_glimmer": {
+  "bad": "fe95f5423d65951cf63055d519dd7fa5ae12eb8d",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/Muse-Glimmer-30B-mic"
+  ],
+  "parent": "4a980975052d19eea29ba66ec28a8e08ba0f3760",
+  "reason": "the bad commit added the model",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "model-added",
   "version": 8
  },
  "47878#cohere_compass": {
@@ -834,6 +1067,23 @@
   "verdict": "not-covered",
   "version": 8
  },
+ "48282#whisper": {
+  "bad": "d4f69a869d66eeba7af0cc19a585552b14ddd6f2",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/whisper-mic",
+   "huggingface-mic/whisper-tiny-mic"
+  ],
+  "failures": [
+   "mic-whisper-tiny-slim (default): gface-mic--whisper-tiny-mic/snapshots/9d85803a8fb0226794764f4b12a4d4fd74d160ed/integrations/transformers/usage.md\", line 25, in <module>",
+   "mic-whisper-tiny-slim (bfloat16): gface-mic--whisper-tiny-mic/snapshots/9d85803a8fb0226794764f4b12a4d4fd74d160ed/integrations/transformers/usage.md\", line 25, in <module>",
+   "whisper-mic (bfloat16): uggingface-mic--whisper-mic/snapshots/1f40ed2753f5ba347b5bd1ba3624c971b9327ab8/integrations/transformers/usage.md\", line 25, in <module>"
+  ],
+  "parent": "125f265a26c76c90e371b83386830cd61e5341fe",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "already-red",
+  "version": 8
+ },
  "48317#auto": {
   "verdict": "not-covered",
   "version": 8
@@ -844,6 +1094,20 @@
  },
  "48340#qwen4_exp": {
   "verdict": "out-of-scope",
+  "version": 8
+ },
+ "48435#laguna": {
+  "bad": "d3f494b047238a2b9d89e59c88e61d0a27f50849",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/Laguna-XS.2-mic"
+  ],
+  "failures": [
+   "Laguna-XS.2-mic (bfloat16): next_token_logits: max delta 0.0293 over tolerance"
+  ],
+  "parent": "c676202114bb929ba4377f90fc92c5a8fec72da6",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "already-red",
   "version": 8
  },
  "48435#zaya": {
@@ -882,8 +1146,37 @@
   "verdict": "out-of-scope",
   "version": 8
  },
+ "48978#granitemoehybrid": {
+  "bad": "a52f659318fe32cb6b6fc5ae3aec883d5c926eb4",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/granite-4.0-h-350m-mic"
+  ],
+  "failures": [],
+  "parent": "d53e587669ec639a422ca33f3711b48f24cdf135",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "missed",
+  "version": 8
+ },
  "48979#minicpmv4_7": {
   "verdict": "not-covered",
+  "version": 8
+ },
+ "48981#whisper": {
+  "bad": "87d34bfa80aa884bca90c4da79cca18feed90ff6",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/whisper-mic",
+   "huggingface-mic/whisper-tiny-mic"
+  ],
+  "failures": [
+   "mic-whisper-tiny-slim (default): language=\"en\", task=\"transcribe\", return_timestamps=True, max_new_tokens=8)",
+   "mic-whisper-tiny-slim (bfloat16): language=\"en\", task=\"transcribe\", return_timestamps=True, max_new_tokens=8)",
+   "whisper-mic (bfloat16): tation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)"
+  ],
+  "parent": "e2d83fdf9c25a0f6021e90a241263a4a59faa15f",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "already-red",
   "version": 8
  },
  "48992#shared": {
@@ -900,6 +1193,30 @@
  },
  "49206#muse_spark": {
   "verdict": "not-covered",
+  "version": 8
+ },
+ "49364#embedding_gemma2": {
+  "bad": "92cd495f2720c064bc78eb2d93e28704c5bce51f",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/embeddinggemma-2-mic"
+  ],
+  "parent": "a7e8ff2b949679a29d72462effc4da0b57a7b9f3",
+  "reason": "the bad commit added the model",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "model-added",
+  "version": 8
+ },
+ "49404#gemma4": {
+  "bad": "c48824e840247c860e394bcc58aa35dfffa9e67f",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/gemma-4-E2B-it-mic"
+  ],
+  "failures": [],
+  "parent": "c05860687fa3655900e2ddd824a59bbe964b185d",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "missed",
   "version": 8
  },
  "49421#shared": {
@@ -926,6 +1243,36 @@
   "verdict": "not-covered",
   "version": 8
  },
+ "49811#gemma2": {
+  "bad": "7d3ae42ee810431d4df15dcbf3bc5bce70221cc5",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/gemma-2-2b-it-mic"
+  ],
+  "failures": [
+   "gemma-2-2b-it-mic (bfloat16): runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager"
+  ],
+  "parent": "5fd67cf1d9091ce84f193b3376c8072de6fa6552",
+  "reversed": true,
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "caught",
+  "version": 8
+ },
+ "49811#vaultgemma": {
+  "bad": "7d3ae42ee810431d4df15dcbf3bc5bce70221cc5",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/vaultgemma-1b-mic"
+  ],
+  "failures": [
+   "vaultgemma-1b-mic (bfloat16): runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager"
+  ],
+  "parent": "5fd67cf1d9091ce84f193b3376c8072de6fa6552",
+  "reversed": true,
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "caught",
+  "version": 8
+ },
  "49832#eomt": {
   "verdict": "not-covered",
   "version": 8
@@ -936,6 +1283,44 @@
  },
  "49862#colpali": {
   "verdict": "not-covered",
+  "version": 8
+ },
+ "49920#minicpm_ocr": {
+  "bad": "77cfe2724ec16c67778693c0da0f3425aa0afd1d",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/MiniCPM-OCR-1.0-mic"
+  ],
+  "parent": "05a2d95bf36096f79a85af682ac387beb68f447b",
+  "reason": "the bad commit added the model",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "model-added",
+  "version": 8
+ },
+ "49976#phi4_multimodal": {
+  "bad": "fa421d61e569c4cad3e7e988b199d7222dde0435",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/Phi-4-multimodal-instruct-mic"
+  ],
+  "failures": [],
+  "parent": "f262c71703eb138381d65ced86b3aaa496be0196",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "missed",
+  "version": 8
+ },
+ "49976#qianfan_ocr": {
+  "bad": "fa421d61e569c4cad3e7e988b199d7222dde0435",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/QianfanOCR-mic"
+  ],
+  "failures": [
+   "QianfanOCR-mic (bfloat16): Traceback (most recent call last):"
+  ],
+  "parent": "f262c71703eb138381d65ced86b3aaa496be0196",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "caught",
   "version": 8
  },
  "50054#jev": {
@@ -1110,6 +1495,18 @@
   "verdict": "out-of-scope",
   "version": 8
  },
+ "sticky#flint#2026-10-22": {
+  "bad": "f2754311602414ed561cdf8ed9d852390f514404",
+  "commits": 216,
+  "contracts": [
+   "huggingface-mic/flint-mic"
+  ],
+  "parent": "60f49549e0db78f022ee30aa1571d9ab6e4a15bf",
+  "reason": "the bad commit added the model",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "model-added",
+  "version": 8
+ },
  "sticky#florence2#2026-10-30": {
   "verdict": "out-of-scope",
   "version": 8
@@ -1144,6 +1541,18 @@
  "sticky#gemma4#2026-10-10": {
   "reason": "same regression as 49404#gemma4",
   "verdict": "duplicate",
+  "version": 8
+ },
+ "sticky#gemma4#2026-10-19": {
+  "bad": "d203390173fc074638e2268c6becd140fca5d92b",
+  "commits": 290,
+  "contracts": [
+   "huggingface-mic/gemma-4-E2B-it-mic"
+  ],
+  "failures": [],
+  "parent": "d4804f9d76b8c071b993d813e9e87067b780cbee",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "missed",
   "version": 8
  },
  "sticky#gemma4#2026-10-26": {
@@ -1209,6 +1618,20 @@
  },
  "sticky#granitemoeshared#2026-10-21": {
   "verdict": "not-covered",
+  "version": 8
+ },
+ "sticky#grounding_dino#2026-10-13": {
+  "bad": "d203390173fc074638e2268c6becd140fca5d92b",
+  "commits": 385,
+  "contracts": [
+   "huggingface-mic/grounding-dino-tiny-mic"
+  ],
+  "failures": [
+   "grounding-dino-tiny-mic (bfloat16): class_scores: max delta 7.06 over tolerance"
+  ],
+  "parent": "55c3cc9f03cd4fbf2d27d382dcc8fcc544631f8e",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "already-red",
   "version": 8
  },
  "sticky#hunyuan_v1_moe#2026-10-10": {
@@ -1288,6 +1711,18 @@
   "verdict": "out-of-scope",
   "version": 8
  },
+ "sticky#m2m_100#2026-10-12": {
+  "bad": "d203390173fc074638e2268c6becd140fca5d92b",
+  "commits": 386,
+  "contracts": [
+   "huggingface-mic/nllb-200-distilled-600M-mic"
+  ],
+  "failures": [],
+  "parent": "536ecc007387a50e77603bb5d92100e9b07514cc",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "missed",
+  "version": 8
+ },
  "sticky#m2m_100#2026-10-30": {
   "verdict": "out-of-scope",
   "version": 8
@@ -1353,6 +1788,18 @@
   "verdict": "out-of-scope",
   "version": 8
  },
+ "sticky#mm_grounding_dino#2026-10-17": {
+  "bad": "d203390173fc074638e2268c6becd140fca5d92b",
+  "commits": 305,
+  "contracts": [
+   "huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic"
+  ],
+  "failures": [],
+  "parent": "683b721971417b3b2c64fba9001f525607547e5a",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "missed",
+  "version": 8
+ },
  "sticky#moshi#2026-10-06": {
   "verdict": "not-covered",
   "version": 8
@@ -1387,6 +1834,21 @@
  },
  "sticky#omdet_turbo#2026-10-25": {
   "verdict": "not-covered",
+  "version": 8
+ },
+ "sticky#oneformer#2026-10-18": {
+  "bad": "f2754311602414ed561cdf8ed9d852390f514404",
+  "commits": 274,
+  "contracts": [
+   "huggingface-mic/oneformer_ade20k_swin_tiny-mic"
+  ],
+  "failures": [
+   "oneformer_ade20k_swin_tiny-mic (bfloat16): _impl"
+  ],
+  "parent": "8498ed425fa01bbee7d086efdf1a6634c2962aed",
+  "reversed": true,
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "caught",
   "version": 8
  },
  "sticky#owlv2#2026-11-09": {
@@ -1432,6 +1894,18 @@
  "sticky#qianfan_ocr#2026-11-06": {
   "reason": "same regression as 49976#qianfan_ocr",
   "verdict": "duplicate",
+  "version": 8
+ },
+ "sticky#qwen3_5#2026-10-12": {
+  "bad": "d203390173fc074638e2268c6becd140fca5d92b",
+  "commits": 386,
+  "contracts": [
+   "huggingface-mic/Qwen3.5-0.8B-mic"
+  ],
+  "failures": [],
+  "parent": "536ecc007387a50e77603bb5d92100e9b07514cc",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/42790817318",
+  "verdict": "missed",
   "version": 8
  },
  "sticky#qwen3_asr#2026-10-15": {
