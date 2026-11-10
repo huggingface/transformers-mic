@@ -105,7 +105,7 @@
    "real_checkpoint": 0,
    "regressions": 1,
    "run": "https://github.com/huggingface/transformers-mic/actions/runs/42590665006",
-   "shrink": "",
+   "shrink": "shrink/42590665006/shrink-canary-1b-v2-mic.html",
    "shrinkable": true
   },
   {

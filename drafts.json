@@ -38,6 +38,7 @@
   "conclusion": "failure",
   "dispatched_at": "2026-11-09T09:05:10Z",
   "run_id": 42590665006,
+  "shrink": "shrink/42590665006/shrink-canary-1b-v2-mic.html",
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/42590665006"
  },
