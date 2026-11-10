@@ -64,7 +64,14 @@ permissions:
 
 jobs:
   run:
-    runs-on: ubuntu-latest
+    # The cloud CPU baselines' runner (m8i, native bfloat16), so a draft records and checks
+    # bfloat16 cases on the hardware its baselines come from. Python from a container:
+    # the group's hosts have no setup-python toolcache or sudo.
+    runs-on:
+      group: ${{ vars.MIC_CPU_BASELINE_RUNNER || 'aws-m8i-l-cache' }}
+    container:
+      image: python:3.11-bookworm
+      options: --shm-size=16gb
     timeout-minutes: 120
     env:
       SOURCE_RUN_ID: ${{ inputs.source_run_id }}
@@ -77,13 +84,12 @@ jobs:
       TRANSFORMERS_REF: ${{ inputs.transformers_ref }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
-        with:
-          python-version: "3.11"
-      - name: Free disk
-        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
       - name: Install
         run: |
+          echo "$(nproc) cores, $(awk '/MemTotal/ {printf "%.0f GiB", $2/1048576}' /proc/meminfo), $(grep -m1 '^model name' /proc/cpuinfo | cut -d: -f2)"
+          grep -qwE 'amx_bf16|avx512_bf16' /proc/cpuinfo || echo "::warning::no native bfloat16 on this host"
+          apt-get update -qq && apt-get install -y -qq gh > /dev/null
+          git config --global --add safe.directory '*'
           git clone --filter=blob:none https://github.com/huggingface/transformers.git "$RUNNER_TEMP/transformers"
           git -C "$RUNNER_TEMP/transformers" checkout -q "$TRANSFORMERS_REF"
           python -m pip install --quiet --upgrade pip
