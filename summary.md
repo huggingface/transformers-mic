@@ -8,22 +8,23 @@ Each PR failure is classified on the day it first failed: **infra** (setup error
 
 Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers_daily_ci`) — bisected to a commit, or a sticky failure's first day — is replayed with the model's fixture contracts as Transformers PR CI runs them (today's fleets; control in the default and bfloat16 variants, prototypes in bfloat16; `run-model-contracts` on the same runner and image) on the commit before it and on the commit that broke it. When that commit added the model, only its side runs.
 
-**Catch rate: 8 of 17** (47%) — caught / (caught + missed).
+**Catch rate: 0 of 0** — caught / (caught + missed).
 
 | verdict | regressions | meaning |
 |---|---|---|
-| caught | 8 | the contracts' result changes between the two commits: green to red, or red to green when the baseline was recorded after the change |
-| missed | 9 | green on both |
-| not-a-regression | 2 | a human reproduced the failing test on both sides of the range: the failure is not from these commits (the environment, a Hub checkpoint, a tokenizer); see the note |
-| already-red | 9 | red on both: says nothing about this regression |
-| no-code-change | 0 | the daily CI tested the same commit the day before: nothing for a contract to catch |
-| not-reproduced | 8 | a failing run the daily CI did not repeat: transient, not a regression |
-| model-added | 4 | the bad commit added the model: no contract could have run before it |
+| caught | 0 | the contracts' result changes between the two commits: green to red, or red to green when the baseline was recorded after the change |
+| missed | 0 | green on both |
+| not-a-regression | 3 | a human reproduced the failing test on both sides of the range: the failure is not from these commits (the environment, a Hub checkpoint, a tokenizer); see the note |
+| already-red | 0 | red on both: says nothing about this regression |
+| no-code-change | 1 | nothing between the two commits changes code the model runs (the same commit, or only CI images, docs, tests or other models): nothing for a contract to catch |
+| not-reproduced | 7 | a failing run the daily CI did not repeat: transient, not a regression |
+| model-added | 0 | the bad commit added the model: no contract could have run before it |
 | duplicate | 3 | the same regression as a bisected one, counted there |
 | unrelated-culprit | 19 | upstream's bisect blamed a commit that does not touch the model or shared code: a flaky test |
-| broken | 1 | the replay could not measure it (commit, install, fixture or baseline setup) |
-| out-of-scope | 126 | no failing *IntegrationTest a CPU fixture contract mirrors: GPU-only, or a feature contracts do not call (export, offloading, parallelism, processors) |
-| not-covered | 232 | no contract for the model |
+| broken | 0 | the replay could not measure it (commit, install, fixture or baseline setup) |
+| out-of-scope | 140 | no failing *IntegrationTest a CPU fixture contract mirrors: GPU-only, or a feature contracts do not call (export, offloading, parallelism, processors) |
+| not-covered | 216 | no contract for the model |
+| pending | 32 | not replayed yet |
 
 | date | model | regression | verdict | at the bad commit |
 |---|---|---|---|---|
@@ -31,17 +32,20 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 | 2026-11-08 | whisper | sticky onset | out-of-scope |  |
 | 2026-11-08 | unlimited_ocr | sticky onset | out-of-scope |  |
 | 2026-11-08 | owlvit | sticky onset | out-of-scope |  |
-| 2026-11-08 | janus | sticky onset | [missed](https://github.com/huggingface/transformers-mic/actions/runs/42465423950) |  |
+| 2026-11-08 | janus | sticky onset | no-code-change | nothing in the range changes code the model runs: .github/workflows/build-docker-images.yml, docker/transformers-all-latest-gpu/Dockerfile |
 | 2026-11-08 | deepseek_v32 | sticky onset | out-of-scope |  |
+| 2026-11-07 | vipllava | sticky onset | out-of-scope |  |
 | 2026-11-07 | hunyuan_vl | sticky onset | out-of-scope |  |
 | 2026-11-07 | gemma4_unified | sticky onset | out-of-scope |  |
 | 2026-11-07 | gemma4 | sticky onset | out-of-scope |  |
 | 2026-11-07 | clipseg | sticky onset | out-of-scope |  |
+| 2026-11-07 | vipllava | [PR #49594](https://github.com/huggingface/transformers/pull/49594) | out-of-scope |  |
 | 2026-11-06 | qianfan_ocr | sticky onset | duplicate | same regression as 49976#qianfan_ocr |
-| 2026-11-06 | phi4_multimodal | [PR #49976](https://github.com/huggingface/transformers/pull/49976) | [missed](https://github.com/huggingface/transformers-mic/actions/runs/42192062856) |  |
-| 2026-11-05 | qwen3_moe | sticky onset | [missed](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | 17 commits in range;  |
+| 2026-11-06 | phi4_multimodal | [PR #49976](https://github.com/huggingface/transformers/pull/49976) | not-a-regression | #49976 dropped Phi-4's own processor __call__ for ProcessorMixin's (images first, as every processor): the tests' positional processor(prompt, ...) broke, keyword calls did not. Upstream fixed the tes |
+| 2026-11-05 | qwen3_moe | sticky onset | out-of-scope |  |
+| 2026-11-05 | blip_2 | sticky onset | out-of-scope |  |
 | 2026-11-02 | smolvlm | sticky onset | not-reproduced | the daily CI did not fail it |
-| 2026-11-02 | llava | sticky onset | not-reproduced | the daily CI did not fail it |
+| 2026-11-02 | llava | sticky onset | out-of-scope |  |
 | 2026-11-02 | llama | sticky onset | not-reproduced | the daily CI did not fail it |
 | 2026-11-02 | internvl | sticky onset | not-reproduced | the daily CI did not fail it |
 | 2026-11-02 | gemma4 | sticky onset | not-reproduced | the daily CI did not fail it |
@@ -61,20 +65,18 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 | 2026-10-30 | glm4_moe_lite | sticky onset | out-of-scope |  |
 | 2026-10-30 | florence2 | sticky onset | out-of-scope |  |
 | 2026-10-30 | csm | sticky onset | out-of-scope |  |
+| 2026-10-30 | cohere_asr | sticky onset | out-of-scope |  |
 | 2026-10-30 | blenderbot | sticky onset | out-of-scope |  |
 | 2026-10-30 | bigbird_pegasus | sticky onset | out-of-scope |  |
 | 2026-10-30 | bart | sticky onset | out-of-scope |  |
 | 2026-10-29 | whisper | sticky onset | out-of-scope |  |
 | 2026-10-29 | t5 | sticky onset | out-of-scope |  |
 | 2026-10-26 | gemma4 | sticky onset | out-of-scope |  |
-| 2026-10-26 | minicpm_ocr | [PR #49920](https://github.com/huggingface/transformers/pull/49920) | [model-added](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | the bad commit added the model |
+| 2026-10-24 | flex_olmo | sticky onset | out-of-scope |  |
 | 2026-10-24 | albert | sticky onset | out-of-scope |  |
 | 2026-10-23 | swinv2 | sticky onset | out-of-scope |  |
 | 2026-10-23 | poolformer | sticky onset | out-of-scope |  |
 | 2026-10-22 | gemma2 | sticky onset | duplicate | same regression as 49811#gemma2 |
-| 2026-10-22 | flint | sticky onset | [model-added](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | 216 commits in range; the bad commit added the model |
-| 2026-10-22 | vaultgemma | [PR #49811](https://github.com/huggingface/transformers/pull/49811) | [caught](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | red before, green after; vaultgemma-1b-mic (bfloat16): runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': ' |
-| 2026-10-22 | gemma2 | [PR #49811](https://github.com/huggingface/transformers/pull/49811) | [caught](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | red before, green after; gemma-2-2b-it-mic (bfloat16): runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': ' |
 | 2026-10-20 | hunyuan_vl | sticky onset | out-of-scope |  |
 | 2026-10-20 | got_ocr2 | sticky onset | out-of-scope |  |
 | 2026-10-19 | poolformer | sticky onset | out-of-scope |  |
@@ -83,10 +85,8 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 | 2026-10-19 | granitemoe | sticky onset | out-of-scope |  |
 | 2026-10-19 | glm_moe_dsa | sticky onset | out-of-scope |  |
 | 2026-10-19 | glm4 | sticky onset | out-of-scope |  |
-| 2026-10-19 | gemma4 | sticky onset | [missed](https://github.com/huggingface/transformers-mic/actions/runs/42465423950) | 290 commits in range;  |
 | 2026-10-19 | bert | sticky onset | out-of-scope |  |
 | 2026-10-18 | axk1 | sticky onset | out-of-scope |  |
-| 2026-10-17 | mm_grounding_dino | sticky onset | [missed](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | 305 commits in range;  |
 | 2026-10-17 | mixtral | sticky onset | out-of-scope |  |
 | 2026-10-17 | jetmoe | sticky onset | out-of-scope |  |
 | 2026-10-17 | cohere | sticky onset | out-of-scope |  |
@@ -99,43 +99,38 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 | 2026-10-15 | kolibri1 | [PR #47747](https://github.com/huggingface/transformers/pull/47747) | out-of-scope |  |
 | 2026-10-14 | kolibri1 | sticky onset | out-of-scope |  |
 | 2026-10-14 | hy_v3 | sticky onset | out-of-scope |  |
-| 2026-10-13 | grounding_dino | sticky onset | [already-red](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | 385 commits in range; grounding-dino-tiny-mic (bfloat16): class_scores: max delta 7.06 over tolerance |
+| 2026-10-14 | flex_olmo | sticky onset | out-of-scope |  |
 | 2026-10-13 | gemma3n | sticky onset | out-of-scope |  |
-| 2026-10-12 | qwen3_5 | sticky onset | [not-a-regression](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | 386 commits in range; test_model_video_generation fails identically on CPU at both ends (536ecc0, d203390) at its first assertion: prompt token order (vision_start vs timestamp) before the model runs; |
-| 2026-10-12 | m2m_100 | sticky onset | [not-a-regression](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | 386 commits in range; test_seq_to_seq_generation fails identically on CPU at both ends (536ecc0, d203390); generated ids identical, only the '</s> __en__' spacing of the decode with special tokens dif |
+| 2026-10-13 | ernie4_5_moe | sticky onset | out-of-scope |  |
+| 2026-10-12 | qwen3_5 | sticky onset | not-a-regression | test_model_video_generation fails identically on CPU at both ends (536ecc0, d203390) at its first assertion: prompt token order (vision_start vs timestamp) before the model runs; video preprocessing b |
+| 2026-10-12 | m2m_100 | sticky onset | not-a-regression | test_seq_to_seq_generation fails identically on CPU at both ends (536ecc0, d203390); generated ids identical, only the '</s> __en__' spacing of the decode with special tokens differs: tokenizer/enviro |
 | 2026-10-12 | ernie | sticky onset | out-of-scope |  |
 | 2026-10-10 | minimax_m2 | sticky onset | out-of-scope |  |
 | 2026-10-10 | minicpm3 | sticky onset | out-of-scope |  |
+| 2026-10-10 | jetmoe | sticky onset | out-of-scope |  |
 | 2026-10-10 | glm4 | sticky onset | out-of-scope |  |
 | 2026-10-10 | gemma4 | sticky onset | duplicate | same regression as 49404#gemma4 |
-| 2026-10-10 | gemma4 | [PR #49404](https://github.com/huggingface/transformers/pull/49404) | [missed](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) |  |
+| 2026-10-10 | ernie4_5_moe | sticky onset | out-of-scope |  |
 | 2026-10-09 | gemma3n | sticky onset | out-of-scope |  |
 | 2026-10-09 | electra | sticky onset | out-of-scope |  |
-| 2026-10-09 | whisper | [PR #48282](https://github.com/huggingface/transformers/pull/48282) | [already-red](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | mic-whisper-tiny-slim (default): gface-mic--whisper-tiny-mic/snapshots/9d85803a8fb0226794764f4b12a4d4fd74d160ed/integrations/transformers/usage.md", line 25, in <module>; mic-whisper-tiny-slim (bfloat |
 | 2026-10-08 | minicpm3 | sticky onset | out-of-scope |  |
 | 2026-10-08 | ernie | sticky onset | out-of-scope |  |
 | 2026-10-08 | albert | sticky onset | out-of-scope |  |
 | 2026-10-07 | mixtral | sticky onset | out-of-scope |  |
 | 2026-10-07 | glm4 | sticky onset | out-of-scope |  |
-| 2026-10-07 | embedding_gemma2 | [PR #49364](https://github.com/huggingface/transformers/pull/49364) | [broken](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | embeddinggemma-2-mic: fixture files differ from build.json: ['1_Pooling/config.json'] (build it with: python example/build_fixtures.py --fixture aba894c888d7641bc368f324ecf00ea403686a46) |
 | 2026-10-06 | switch_transformers | sticky onset | out-of-scope |  |
 | 2026-10-06 | minicpm3 | sticky onset | out-of-scope |  |
 | 2026-10-06 | glm4_moe_lite | sticky onset | out-of-scope |  |
 | 2026-10-06 | ernie | sticky onset | out-of-scope |  |
 | 2026-10-06 | axk1 | sticky onset | out-of-scope |  |
 | 2026-10-06 | albert | sticky onset | out-of-scope |  |
-| 2026-09-23 | whisper | [PR #48981](https://github.com/huggingface/transformers/pull/48981) | [already-red](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | mic-whisper-tiny-slim (default): language="en", task="transcribe", return_timestamps=True, max_new_tokens=8); mic-whisper-tiny-slim (bfloat16): language="en", task="transcribe", return_timestamps=True |
 | 2026-09-23 | recurrent_gemma | [PR #48961](https://github.com/huggingface/transformers/pull/48961) | out-of-scope |  |
 | 2026-09-23 | perceiver | [PR #47003](https://github.com/huggingface/transformers/pull/47003) | out-of-scope |  |
-| 2026-09-22 | granitemoehybrid | [PR #48978](https://github.com/huggingface/transformers/pull/48978) | [missed](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) |  |
 | 2026-09-17 | glm_ocr | [PR #48141](https://github.com/huggingface/transformers/pull/48141) | out-of-scope |  |
 | 2026-09-10 | yolos | [PR #46886](https://github.com/huggingface/transformers/pull/46886) | out-of-scope |  |
-| 2026-09-05 | laguna | [PR #48435](https://github.com/huggingface/transformers/pull/48435) | [already-red](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | Laguna-XS.2-mic (bfloat16): next_token_logits: max delta 0.0293 over tolerance |
 | 2026-09-03 | qwen4_exp | [PR #48340](https://github.com/huggingface/transformers/pull/48340) | out-of-scope |  |
 | 2026-08-29 | minicpmv4_6 | [PR #47625](https://github.com/huggingface/transformers/pull/47625) | unrelated-culprit | the bisected commit does not touch the model or shared code |
-| 2026-08-11 | muse_glimmer | [PR #47867](https://github.com/huggingface/transformers/pull/47867) | [model-added](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | the bad commit added the model |
 | 2026-08-05 | t5 | [PR #47731](https://github.com/huggingface/transformers/pull/47731) | out-of-scope |  |
-| 2026-08-05 | paddleocr_vl | [PR #47573](https://github.com/huggingface/transformers/pull/47573) | [caught](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | tibetan-ocr-mic (bfloat16): logits.probe: max delta 0.105 over tolerance |
 | 2026-08-04 | smolvlm | [PR #47753](https://github.com/huggingface/transformers/pull/47753) | out-of-scope |  |
 | 2026-08-04 | mllama | [PR #47753](https://github.com/huggingface/transformers/pull/47753) | out-of-scope |  |
 | 2026-08-04 | idefics3 | [PR #47753](https://github.com/huggingface/transformers/pull/47753) | out-of-scope |  |
@@ -147,6 +142,7 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 | 2026-08-04 | qwen3_5 | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
 | 2026-08-04 | qwen2_vl | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
 | 2026-08-04 | qwen2_5_vl | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
+| 2026-08-04 | qianfan_ocr | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
 | 2026-08-04 | pegasus | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
 | 2026-08-04 | olmo3 | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
 | 2026-08-04 | nemotron_h | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
@@ -174,24 +170,13 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 | 2026-08-04 | blenderbot | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
 | 2026-08-04 | bigbird_pegasus | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
 | 2026-08-04 | bart | [PR #47243](https://github.com/huggingface/transformers/pull/47243) | out-of-scope |  |
-| 2026-08-01 | cosmos3_omni | [PR #47096](https://github.com/huggingface/transformers/pull/47096) | [caught](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | red before, green after; Cosmos3-Nano-mic (bfloat16): logits.probe: max delta 0.000977 over tolerance |
-| 2026-07-31 | qwen2_5_omni | [PR #47622](https://github.com/huggingface/transformers/pull/47622) | [already-red](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | mic-qwen2_5_omni-slim (bfloat16): training.gradients: checks differ from the baseline (missing ['thinker.model.language_model.embed_tokens.weight', 'thinker.model.language_model.layers |
-| 2026-07-31 | recurrent_gemma | [PR #47598](https://github.com/huggingface/transformers/pull/47598) | [caught](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | recurrentgemma-2b-mic (bfloat16): logits.last: max delta 0.0195 over tolerance |
-| 2026-07-28 | florence2 | [PR #46556](https://github.com/huggingface/transformers/pull/46556) | [caught](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | Florence-2-base-mic (bfloat16): inference_logits: max delta 0.344 over tolerance |
+| 2026-07-09 | timm_wrapper | [PR #47203](https://github.com/huggingface/transformers/pull/47203) | out-of-scope |  |
 | 2026-07-09 | recurrent_gemma | [PR #47201](https://github.com/huggingface/transformers/pull/47201) | out-of-scope |  |
 | 2026-07-09 | idefics3 | [PR #45818](https://github.com/huggingface/transformers/pull/45818) | out-of-scope |  |
-| 2026-07-03 | gemma4 | [PR #46960](https://github.com/huggingface/transformers/pull/46960) | [already-red](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | gemma-4-E2B-it-mic (bfloat16): ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ |
 | 2026-07-01 | phimoe | [PR #46850](https://github.com/huggingface/transformers/pull/46850) | unrelated-culprit | the bisected commit does not touch the model or shared code |
-| 2026-07-01 | minicpmv4_6 | [PR #46738](https://github.com/huggingface/transformers/pull/46738) | [already-red](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | MiniCPM-V-4.6-mic (bfloat16): logits.probe: max delta 0.00195 over tolerance |
-| 2026-06-30 | olmo3 | [PR #46911](https://github.com/huggingface/transformers/pull/46911) | [caught](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | red before, green after; Olmo-3-7B-Instruct-mic (bfloat16): next_token_ids: [82253, 61111] != [82253, 72520] |
-| 2026-06-20 | minimax_m3_vl | [PR #46719](https://github.com/huggingface/transformers/pull/46719) | [caught](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | red before, green after; MiniMax-M3-MXFP8-mic (bfloat16): logits_probe: max delta 0.126 over tolerance |
-| 2026-06-20 | janus | [PR #46446](https://github.com/huggingface/transformers/pull/46446) | [already-red](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | Janus-Pro-1B-mic (bfloat16): ackages/torch/nn/modules/module.py", line 1787, in _wrapped_call_impl |
 | 2026-06-17 | granite_speech | [PR #46401](https://github.com/huggingface/transformers/pull/46401) | out-of-scope |  |
 | 2026-06-17 | granite4_vision | [PR #46401](https://github.com/huggingface/transformers/pull/46401) | unrelated-culprit | the bisected commit does not touch the model or shared code |
-| 2026-06-13 | minimax_m3_vl | [PR #46600](https://github.com/huggingface/transformers/pull/46600) | [model-added](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | the bad commit added the model |
 | 2026-06-10 | phimoe | [PR #46219](https://github.com/huggingface/transformers/pull/46219) | unrelated-culprit | the bisected commit does not touch the model or shared code |
-| 2026-06-04 | phimoe | [PR #46318](https://github.com/huggingface/transformers/pull/46318) | [missed](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) |  |
-| 2026-06-02 | phimoe | [PR #45752](https://github.com/huggingface/transformers/pull/45752) | [missed](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) |  |
 | 2026-05-29 | phimoe | [PR #46135](https://github.com/huggingface/transformers/pull/46135) | unrelated-culprit | the bisected commit does not touch the model or shared code |
 | 2026-05-14 | convnextv2 | [PR #45942](https://github.com/huggingface/transformers/pull/45942) | unrelated-culprit | the bisected commit does not touch the model or shared code |
 | 2026-05-13 | deepseek_v4 | [PR #45892](https://github.com/huggingface/transformers/pull/45892) | out-of-scope |  |
@@ -214,8 +199,8 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 | 2026-05-13 | clipseg | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | out-of-scope |  |
 | 2026-05-13 | clip | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | out-of-scope |  |
 | 2026-05-13 | chinese_clip | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | out-of-scope |  |
+| 2026-05-13 | blip_2 | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | out-of-scope |  |
 | 2026-05-13 | beit | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | unrelated-culprit | the bisected commit does not touch the model or shared code |
-| 2026-05-09 | mask2former | [PR #41693](https://github.com/huggingface/transformers/pull/41693) | [already-red](https://github.com/huggingface/transformers-mic/actions/runs/41993679537) | mask2former-swin-tiny-coco-instance-mic (bfloat16): t      / MISSING    /  |
 
 ## Decision: block merges when MIC is red?
 
@@ -223,7 +208,7 @@ Replayed on the 218 PRs merged 2026-10-20 → 2026-11-02: which merges a red MIC
 
 | rule | blocked merges | justified | wrong | unresolved |
 |---|---|---|---|---|
-| A: any red case | 3 | 1 | 2 | 0 |
+| A: any red case | 4 | 1 | 3 | 0 |
 | B: red, not infra, not failing on main | 1 | 1 | 0 | 0 |
 
 Proposed bar for rule B (constants `DECISION` in `experiments/impact.py`):
@@ -332,14 +317,14 @@ Models with real-checkpoint regressions in the daily GPU CI and no contract, shr
 | gradium_phonon_tts | 1 | 1 | [gradium/phonon-voices](https://huggingface.co/gradium/phonon-voices) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/42192485403) |
 | colpali | 0 | 4 | [vidore/colpali-v1.2-hf](https://huggingface.co/vidore/colpali-v1.2-hf) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41994158679) |
 | moshi | 0 | 3 | [kmhf/hf-moshika](https://huggingface.co/kmhf/hf-moshika) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41999673429) |
-| seamless_m4t | 0 | 2 | [facebook/hf-seamless-m4t-medium](https://huggingface.co/facebook/hf-seamless-m4t-medium) | yes | queued |
+| seamless_m4t | 0 | 2 | [facebook/hf-seamless-m4t-medium](https://huggingface.co/facebook/hf-seamless-m4t-medium) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/42787725811) |
 | bridgetower | 0 | 1 | [regisss/bridgetower-newyorker-a100-8x](https://huggingface.co/regisss/bridgetower-newyorker-a100-8x) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41626675456) |
 | canary | 0 | 1 | [nvidia/canary-1b-v2](https://huggingface.co/nvidia/canary-1b-v2) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/42590665006) |
 | cosmos3_edge | 0 | 1 | [nvidia/Cosmos3-Edge](https://huggingface.co/nvidia/Cosmos3-Edge) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41964667193) |
 | fsmt | 0 | 1 | [facebook/wmt19-en-ru](https://huggingface.co/facebook/wmt19-en-ru) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/41999677156) |
 | layoutlmv3 | 0 | 1 | [microsoft/layoutlmv3-base](https://huggingface.co/microsoft/layoutlmv3-base) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/42590668418) |
 | muse_spark | 0 | 1 | ? | yes | not draftable |
-| mvp | 0 | 1 | [RUCAIBox/mvp](https://huggingface.co/RUCAIBox/mvp) | yes | queued |
+| mvp | 0 | 1 | [RUCAIBox/mvp](https://huggingface.co/RUCAIBox/mvp) | yes | [failure](https://github.com/huggingface/transformers-mic/actions/runs/42787729966) |
 | nemotron | 0 | 1 | [thhaus/nemotron3-8b](https://huggingface.co/thhaus/nemotron3-8b) | yes | — |
 | pegasus_x | 0 | 1 | [google/pegasus-x-base](https://huggingface.co/google/pegasus-x-base) | yes | — |
 | plbart | 0 | 1 | [uclanlp/plbart-java-cs](https://huggingface.co/uclanlp/plbart-java-cs) | yes | — |

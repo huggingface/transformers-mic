@@ -162,9 +162,11 @@
  },
  "mvp": {
   "checkpoint": "RUCAIBox/mvp",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-10T09:05:08Z",
-  "status": "queued"
+  "run_id": 42787729966,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/42787729966"
  },
  "oneformer": {
   "checkpoint": "shi-labs/oneformer_ade20k_swin_tiny",
@@ -211,9 +213,11 @@
  },
  "seamless_m4t": {
   "checkpoint": "facebook/hf-seamless-m4t-medium",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-10T09:05:08Z",
-  "status": "queued"
+  "run_id": 42787725811,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/42787725811"
  },
  "switch_transformers": {
   "checkpoint": "google/switch-base-8",
