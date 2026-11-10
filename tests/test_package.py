@@ -1915,6 +1915,22 @@ def test_encoder_decoder_calls_need_decoder_inputs():
 
 
 
+def test_a_walrus_in_a_comprehension_defines_its_name():
+    usage = "```py runnable:t\nx = {n: c for n in model.config.sub_configs if (c := getattr(model.config, n, None))}\nmodel = 1\n```\n"
+    commands.check_undefined_names({"usage": usage})
+
+
+def test_a_composite_model_records_each_sub_config_attention():
+    gemma4 = {"model_type": "gemma4", "text_config": {}, "vision_config": {}, "audio_config": {}}
+    usage = '```py runnable:t\nresult = {"runtime": {"attn_implementation": model.config._attn_implementation}}\n```\n'
+    with pytest.raises(ValueError, match="audio_config, text_config, vision_config"):
+        commands.check_sub_config_attention({"usage": usage}, gemma4)
+    ok = usage.replace("}}", ', "attn_implementations": {}}}')
+    commands.check_sub_config_attention({"usage": ok}, gemma4)
+    # No attention sub-config: nothing to record.
+    commands.check_sub_config_attention({"usage": usage}, {"model_type": "llama", "quantization_config": {}, "rope_scaling": {}})
+
+
 def test_vlm_training_text_must_carry_image_tokens():
     # Salesforce/blip2-opt-2.7b (2026-11-07): captions tokenized alone, so pixel_values moved nothing.
     blip2 = {"image_token_index": 50265}

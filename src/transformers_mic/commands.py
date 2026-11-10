@@ -309,6 +309,27 @@ def check_encoder_decoder_calls(plan, config):
             )
 
 
+# Sub-configs that resolve an attention implementation of their own (not quantization or rope).
+ATTENTION_SUB_CONFIGS = ("text_config", "vision_config", "audio_config", "speech_config", "encoder_config", "decoder_config",
+                         "qformer_config", "perceiver_config", "thinker_config", "talker_config", "llm_config")
+
+
+def check_sub_config_attention(plan, config):
+    """A model with sub-configs records the attention each resolved to in runtime.attn_implementations.
+
+    The top level can say sdpa while a tower silently runs eager: transformers#49404 made Gemma4's
+    audio tower eager-only and the gemma4 contract, recording only the top level, stayed green.
+    Drafts copy the closest approved contract's runtime block, so the prompt alone does not do it.
+    """
+    subs = sorted(k for k in ATTENTION_SUB_CONFIGS if isinstance(config.get(k), dict))
+    if subs and "attn_implementations" not in plan["usage"]:
+        raise ValueError(
+            f"the config has sub-configs ({', '.join(subs)}): runtime must also record "
+            '"attn_implementations": {n: getattr(model.config, n)._attn_implementation for n in sorted(model.config.sub_configs) '
+            "if getattr(getattr(model.config, n, None), '_attn_implementation', None)}, written exactly so"
+        )
+
+
 def check_image_tokens_in_text(plan, config):
     """A VLM call with pixel_values needs input_ids that carry the processor's image tokens.
 
@@ -628,10 +649,15 @@ def check_undefined_names(plan):
             for s in top.get_symbols()
             if s.is_assigned() or s.is_imported() or s.is_namespace()
         }
-        tables = [top]
+        tables, every = [top], []
         while tables:
             table = tables.pop()
             tables += table.get_children()
+            every.append(table)
+        # A walrus inside a comprehension, {n: c for n in subs if (c := f(n))}, binds c in the
+        # enclosing scope, but symtable marks it assigned only in the comprehension's table.
+        known |= {s.get_name() for t in every if t is not top for s in t.get_symbols() if s.is_global() and s.is_assigned()}
+        for table in every:
             for symbol in table.get_symbols():
                 read = symbol.is_referenced() and (
                     symbol.is_global()
@@ -1164,6 +1190,7 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
                     lambda: check_label_arguments(plan, config),
                     lambda: check_parameter_names(plan, config),
                     lambda: check_encoder_decoder_calls(plan, config),
+                    lambda: check_sub_config_attention(plan, config),
                     lambda: check_image_tokens_in_text(plan, config),
                     lambda: check_zero_query_gradients(plan, config),
                     lambda: check_trainable_selection(plan, config, parameters),
