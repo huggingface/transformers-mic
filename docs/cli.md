@@ -950,7 +950,12 @@ to and from the JSON lock the runners read, and refuses a lock the tables cannot
 hold exactly. Revisions from before the tables are read from their JSON lock
 (`fleet-lock.json`, `prototype-fleet.lock`); a revision with both fails if they
 disagree, which means a tmic from before the tables updated only the JSON. Exports preserve other entries and strip local paths. Environment changes must
-be reviewed separately. `tmic retire NAME --fleet prototypes --reason "..."` previews
+be reviewed separately: export refuses a workspace whose lock environment differs
+from the fleet's. `tmic environment --set torch=2.15.0 --set torchvision=0.29.2 --set torchaudio=2.11.1`
+previews moving the environment of both fleets (they must stay equal; `--fleet`
+moves one) in one dataset commit; `--execute` uploads it. It changes only
+`environment.csv`: re-measure the contracts on the new environment first, and copy
+the new block into each workspace lock before its next export. `tmic retire NAME --fleet prototypes --reason "..."` previews
 removing one contract (and its known failures), for example one replaced by a
 build from a trained checkpoint; `--execute` uploads it. Preview first, then use `--execute` to upload. A concurrent
 Hub update rejects the commit; rerun to review the new state.

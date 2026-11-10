@@ -392,6 +392,85 @@ def test_retire_removes_one_contract_after_a_preview(workspace, dataset):
         commands.retire(SimpleNamespace(fleet="prototypes", contract="Missing", reason="x", execute=False))
 
 
+def test_environment_moves_both_fleets_in_one_commit_after_a_preview(
+    workspace, dataset, monkeypatch, capsys
+):
+    from transformers_mic import fleet
+
+    monkeypatch.setattr(fleet, "resolve", lambda revision="main": "a" * 40)
+    old = read(dataset[0])
+    old["environment"].update(torch="2.14.0", torchvision="0.29.1", torchaudio="2.11.0")
+    write(dataset[0], old)
+    args = SimpleNamespace(
+        packages=["torch=2.15.0", "torchvision=0.29.2", "torchaudio=2.11.1"],
+        fleet="all",
+        execute=False,
+    )
+    commands.environment(args)
+    preview = json.loads(capsys.readouterr().out)
+    assert dataset[1] == []
+    assert preview["changes"]["torch"] == {"from": "2.14.0", "to": "2.15.0"}
+    assert preview["fleets"] == ["control", "prototypes"]
+    args.execute = True
+    commands.environment(args)
+    call = dataset[1][0]
+    assert call["parent_commit"] == "a" * 40
+    assert "torch 2.14.0 -> 2.15.0" in call["commit_message"]
+    for name in ("control", "prototypes"):
+        own = [op for op in call["operations"] if op.path_in_repo.startswith(name + "/")]
+        lock = exported({"operations": own}, name)
+        assert lock["environment"]["torch"] == "2.15.0"
+        assert lock["environment"]["torchaudio"] == "2.11.1"
+        assert lock["environment"]["python"] == old["environment"]["python"]
+        assert set(lock["contracts"]) == set(old["contracts"])
+
+
+def test_environment_refuses_unpinned_unchanged_or_malformed_packages(
+    workspace, dataset, monkeypatch
+):
+    from transformers_mic import fleet
+
+    monkeypatch.setattr(fleet, "resolve", lambda revision="main": "a" * 40)
+    torch = read(dataset[0])["environment"]["torch"]
+
+    def run(*packages):
+        commands.environment(
+            SimpleNamespace(packages=list(packages), fleet="prototypes", execute=True)
+        )
+
+    with pytest.raises(ValueError, match="Not pinned"):
+        run("jax=0.5")
+    with pytest.raises(ValueError, match="already pins"):
+        run(f"torch={torch}")
+    with pytest.raises(ValueError, match="PACKAGE=VERSION"):
+        run("torch")
+    with pytest.raises(ValueError, match="set twice"):
+        run("torch=2.15.0", "torch=2.16.0")
+    assert dataset[1] == []
+
+
+def test_environment_refuses_fleets_that_already_differ(
+    workspace, dataset, monkeypatch, tmp_path
+):
+    from transformers_mic import fleet
+
+    other = tmp_path / "other-fleet.json"
+    lock = read(dataset[0])
+    lock["environment"]["torch"] = "0.0.1"
+    write(other, lock)
+    monkeypatch.setattr(fleet, "resolve", lambda revision="main": "a" * 40)
+    monkeypatch.setattr(
+        fleet,
+        "download",
+        lambda name, revision: (other if name == "control" else dataset[0], revision),
+    )
+    with pytest.raises(ValueError, match="different environments"):
+        commands.environment(
+            SimpleNamespace(packages=["torch=2.15.0"], fleet="all", execute=True)
+        )
+    assert dataset[1] == []
+
+
 def test_export_rejects_case_collision_and_allows_explicit_name(workspace, dataset):
     approve_receipts(workspace)
     old = read(dataset[0])

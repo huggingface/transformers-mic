@@ -1926,6 +1926,80 @@ def retire(args):
     return 0
 
 
+def environment(args):
+    """Move the fleets' pinned environment in one dataset commit; preview unless --execute.
+
+    Export refuses a model whose lock environment differs from its fleet, so a new
+    torch can only reach the fleets this way. Contracts and their baselines are left
+    as they are: re-measure them on the new environment, then copy it into each
+    workspace lock before the next export.
+    """
+    changes = {}
+    for item in args.packages:
+        package, sep, version = item.partition("=")
+        if not sep or not package or not version or "=" in version:
+            raise ValueError(f"--set takes PACKAGE=VERSION, got {item!r}")
+        if package in changes and changes[package] != version:
+            raise ValueError(f"{package} is set twice")
+        changes[package] = version
+    names = list(fleet.FILES) if args.fleet == "all" else [args.fleet]
+    revision = fleet.resolve()
+    locks = {name: read(fleet.download(name, revision)[0]) for name in names}
+    before = {name: dict(lock["environment"]) for name, lock in locks.items()}
+    if len({json.dumps(env, sort_keys=True) for env in before.values()}) > 1:
+        raise ValueError(
+            "The fleets pin different environments; move each with --fleet first"
+        )
+    current = next(iter(before.values()))
+    unknown = sorted(set(changes) - set(current))
+    if unknown:
+        raise ValueError(
+            f"Not pinned by the fleet environment: {', '.join(unknown)}; only pinned packages can move"
+        )
+    moved = {
+        package: {"from": current[package], "to": version}
+        for package, version in changes.items()
+        if current[package] != version
+    }
+    if not moved:
+        raise ValueError(f"The fleet environment already pins these versions at {revision}")
+    for lock in locks.values():
+        lock["environment"].update(changes)
+    if args.execute:
+        operations = {}
+        for name, lock in locks.items():
+            operations.update(fleet.operations(name, lock))
+        commit = HfApi().create_commit(
+            repo_id=fleet.REPOSITORY,
+            repo_type="dataset",
+            parent_commit=revision,
+            operations=[
+                CommitOperationAdd(path_in_repo=p, path_or_fileobj=text.encode())
+                for p, text in operations.items()
+            ],
+            commit_message="Fleet environment: "
+            + ", ".join(f"{p} {m['from']} -> {m['to']}" for p, m in moved.items()),
+        )
+        revision = commit.oid
+    print(
+        json.dumps(
+            {
+                "repository": fleet.REPOSITORY,
+                "fleets": names,
+                "changes": moved,
+                "environment": next(iter(locks.values()))["environment"],
+                "revision": revision,
+                "execute": args.execute,
+                "next": "Copy this environment into each workspace lock before its next export."
+                if args.execute
+                else "Review, then repeat with --execute to upload.",
+            },
+            indent=2,
+        )
+    )
+    return 0
+
+
 def export(args):
     workspace = Workspace(args.workspace)
     publication_ready(workspace)

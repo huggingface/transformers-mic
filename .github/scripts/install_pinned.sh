@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Install a Transformers commit and the fleet lock's pinned environment.
 #
-#   PY=python FETCH=<sha or pull/<n>/head> [SHA=<expected sha>] [TORCH_INDEX=cu128] .github/scripts/install_pinned.sh
+#   PY=python FETCH=<sha or pull/<n>/head> [SHA=<expected sha>] [TORCH_INDEX=cu132] .github/scripts/install_pinned.sh
 #
 # torch, torchvision, and torchaudio come from PyTorch's index for TORCH_INDEX
-# (default cpu; cu128 for the same versions built with CUDA); packages the lock
+# (default cpu; cu132 for the same versions built with CUDA, as Transformers CI); packages the lock
 # does not pin are left as Transformers resolves them.
 set -euo pipefail
 
