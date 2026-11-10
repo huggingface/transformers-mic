@@ -658,6 +658,8 @@ def main():
     parser.add_argument("--diff-base", help="base Git revision for recognizing registry-only model additions; used with --changed-files")
     parser.add_argument("--run-all", action="store_true",
                         help="with --changed-files: run every contract anyway, recording selected_by (null if not selected)")
+    parser.add_argument("--skip-wrong-hardware", action="store_true",
+                        help="report bfloat16 cases on an x86 CPU without native bfloat16 as unsupported, not failed (hosts that cannot be native-bfloat16, like the nightly's)")
     parser.add_argument("--require-all", action="store_true",
                         help="fail on targets skipped for this host's hardware or an undefined variant; only skips the manifest declares are allowed")
     parser.add_argument("--no-baseline", action="store_true",
@@ -848,7 +850,10 @@ def main():
                 if wrong:
                     # Never compare or record across hardware: a bfloat16 value
                     # from a non-native CPU says nothing about the reviewed one.
-                    emit({**record, "status": "fail", "failures": [wrong]})
+                    if args.skip_wrong_hardware:
+                        emit({**record, "status": "unsupported", "skip": "hardware", "failures": [wrong]})
+                    else:
+                        emit({**record, "status": "fail", "failures": [wrong]})
                     continue
                 broken = missing(checked, actual) + non_finite(outputs, actual) + violated(outputs, actual)
                 if broken:
