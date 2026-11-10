@@ -32,6 +32,7 @@ Results layout (the impact-results branch):
 from __future__ import annotations
 
 import argparse
+import ast
 import datetime as dt
 import http.client
 import json
@@ -650,6 +651,11 @@ DRAFTS_PER_DAY = 2
 NEXT_TARGETS = 25  # rows in "contracts to add next", on the overview and in the full report
 # Test names that exercise hardware or optional backends a CPU fixture contract does not run.
 GPU_ONLY = ("flash", "fa2", "4bit", "8bit", "bnb", "bitsandbytes", "compile", "fp16", "cuda", "multi_gpu", "tensor_parallel")
+# The same, read in a test's body (its decorators and the helpers it calls on self/cls): a test
+# named test_model_logits can still load a 4-bit checkpoint (Qwen3MoeIntegrationTest.get_model).
+GPU_ONLY_CODE = ("BitsAndBytesConfig", "load_in_4bit", "load_in_8bit", "require_bitsandbytes", "GPTQConfig", "AwqConfig",
+                 "require_flash_attn", "flash_attention_2", "flash_attention_3", "torch.compile", "require_torch_multi_gpu",
+                 "require_torch_multi_accelerator")
 NOT_MODELS = {"auto", "shared", None}
 CHECKPOINT_RE = re.compile(r"""["']([A-Za-z0-9][\w.-]*/[\w.-]+)["']""")
 FILE_RE = re.compile(r"\.(json|png|jpe?g|wav|mp3|flac|txt|py|safetensors|bin|pt|gguf|mp4|npy|md)$")
@@ -919,8 +925,7 @@ def draft_lines(suggestions, drafts):
 # ---------------------------------------------------------------- replays
 
 REPLAYS_PER_RUN = 40  # regressions replayed per run; the rest wait for the next one
-REGRESSION_ROWS = 100  # newest regressions on the overview; the full report lists them all
-REPLAY_VERSION = 7  # bump when a rule below changes, or the fleet's inputs change: every verdict is recomputed
+REPLAY_VERSION = 8  # bump when a rule below changes, or the fleet's inputs change: every verdict is recomputed
 # Replay verdicts only a human sets, in labels.jsonl as {"key": "replay#<regression key>", ...}: the
 # replay cannot tell them apart from "missed", because both sides are green for the contracts.
 REPLAY_LABELS = {"not-a-regression"}
@@ -980,11 +985,56 @@ def in_scope(test):
     return "IntegrationTest" in test and not any(word in test.lower() for word in GPU_ONLY)
 
 
-def replay_scope(item, contracts):
+def test_file_text(path, ref="main", _cache={}):
+    """A Transformers test file's source at `ref`, or "" when GitHub cannot serve it."""
+    if (path, ref) not in _cache:
+        try:
+            _cache[path, ref] = get_text(f"https://raw.githubusercontent.com/{TRANSFORMERS}/{ref}/{path}")
+        except (urllib.error.URLError, http.client.IncompleteRead):
+            _cache[path, ref] = ""
+    return _cache[path, ref]
+
+
+def test_body(text, nodeid):
+    """Source of a test method, its decorators and the methods of its class it calls (self.x(), cls.x()), "" if not found."""
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return ""
+    _, _, rest = nodeid.partition("::")
+    class_name, _, method = rest.partition("::")
+    method = method.split("[")[0]
+    cls = next((n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == class_name), None)
+    if cls is None:
+        return ""
+    methods = {n.name: n for n in cls.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))}
+    todo, seen, parts = [method], set(), []
+    while todo:
+        name = todo.pop()
+        if name in seen or name not in methods:
+            continue
+        seen.add(name)
+        node = methods[name]
+        parts += [ast.get_source_segment(text, d) or "" for d in node.decorator_list] + [ast.get_source_segment(text, node) or ""]
+        for call in ast.walk(node):
+            if (isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) and isinstance(call.func.value, ast.Name)
+                    and call.func.value.id in ("self", "cls", class_name)):
+                todo.append(call.func.attr)
+    return "\n".join(parts)
+
+
+def gpu_only_body(test, ref="main", text_of=None):
+    """Whether a test's body uses something only a GPU runner has (bitsandbytes, flash attention, compile, ...)."""
+    body = test_body((text_of or test_file_text)(test.partition("::")[0], ref), test)
+    return any(word in body for word in GPU_ONLY_CODE)
+
+
+def replay_scope(item, contracts, text_of=None):
     """not-covered | out-of-scope, or None when the regression is worth replaying."""
     if item.get("model") in NOT_MODELS or norm(item.get("model")) not in contracts:
         return "not-covered"
-    if not any(in_scope(test) for test in item["tests"]):
+    ref = item.get("bad_commit") or "main"
+    if not any(in_scope(test) and not gpu_only_body(test, ref, text_of) for test in item["tests"]):
         return "out-of-scope"
     return None
 
@@ -1042,8 +1092,18 @@ def commit_files(sha):
         return None
 
 
+def range_files(parent, bad):
+    """Files changed between two Transformers commits, or None when GitHub cannot say all of them (300+ files)."""
+    try:
+        compare = github(f"/repos/{TRANSFORMERS}/compare/{parent}...{bad}")
+    except urllib.error.HTTPError:
+        return None
+    files = [f["filename"] for f in compare.get("files", [])]
+    return None if len(files) >= 300 or compare.get("total_commits", 0) > len(compare.get("commits", [])) else files
+
+
 def replay_plan(gpu_ci, replays, contracts, sha_of_day, limit=REPLAYS_PER_RUN, sha_of_run=run_sha, failing_on=daily_failures,
-                files_of=commit_files):
+                files_of=commit_files, range_files_of=None, text_of=None):
     """Plan entries for the regressions not replayed yet, newest first: one per (regression, fleet).
 
     A bisected regression replays its bad commit and that commit's parent. A sticky onset replays
@@ -1058,7 +1118,7 @@ def replay_plan(gpu_ci, replays, contracts, sha_of_day, limit=REPLAYS_PER_RUN, s
         if replays.get(key, {}).get("version") == REPLAY_VERSION:
             continue
         replays.pop(key, None)
-        scope = replay_scope(item, contracts)
+        scope = replay_scope(item, contracts, text_of)
         if scope:
             replays[key] = {"verdict": scope, "version": REPLAY_VERSION}
             continue
@@ -1091,6 +1151,14 @@ def replay_plan(gpu_ci, replays, contracts, sha_of_day, limit=REPLAYS_PER_RUN, s
                 continue
             if parent == bad:
                 replays[key] = {"verdict": "no-code-change", "reason": f"{bad[:10]} passed the day before", "version": REPLAY_VERSION}
+                continue
+            # A range that only moves CI images, docs, tests or other models runs the same model code
+            # on both sides: the janus 11-08 onset was one commit, the Nvidia CI image's torch bump.
+            files = (range_files_of or range_files)(parent, bad)
+            if files is not None and not selects(files, item["model"]):
+                shown = ", ".join(files[:3]) + (f" (+{len(files) - 3})" if len(files) > 3 else "")
+                replays[key] = {"verdict": "no-code-change", "reason": f"nothing in the range changes code the model runs: {shown}",
+                                "parent": parent, "bad": bad, "version": REPLAY_VERSION}
                 continue
         by_fleet = defaultdict(list)
         for fleet_name, contract in contracts[norm(item["model"])]:
@@ -1197,7 +1265,7 @@ REPLAY_VERDICTS = (
     ("missed", "green on both"),
     ("not-a-regression", "a human reproduced the failing test on both sides of the range: the failure is not from these commits (the environment, a Hub checkpoint, a tokenizer); see the note"),
     ("already-red", "red on both: says nothing about this regression"),
-    ("no-code-change", "the daily CI tested the same commit the day before: nothing for a contract to catch"),
+    ("no-code-change", "nothing between the two commits changes code the model runs (the same commit, or only CI images, docs, tests or other models): nothing for a contract to catch"),
     ("not-reproduced", "a failing run the daily CI did not repeat: transient, not a regression"),
     ("model-added", "the bad commit added the model: no contract could have run before it"),
     ("duplicate", "the same regression as a bisected one, counted there"),
@@ -1474,7 +1542,7 @@ def summarize(results):
     write(results / "overview.json", {
         "window": [first or None, last or None],
         "replay": {name: replay_counts[name] for name, _ in REPLAY_VERDICTS} | {"pending": replay_counts["pending"]},
-        "regressions": replay_rows(gpu_ci, replays)[:REGRESSION_ROWS],
+        "regressions": replay_rows(gpu_ci, replays),  # all of them: the Space filters by verdict
         "caught": {
             "fixed_by_push": outcomes["fixed-by-push"],
             "merged_then_main_failed": outcomes["merged-then-main-failed"],

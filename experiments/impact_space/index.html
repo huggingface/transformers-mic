@@ -44,6 +44,11 @@
   #next td:nth-child(2), #regressions td:last-child { white-space: normal; overflow-wrap: anywhere; }
   #regressions td:last-child { min-width: 240px; font-size: 13px; color: var(--muted); }
   tr.next-batch td { background: var(--tile); font-weight: 600; }
+  .filters { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 10px; }
+  .filters button { font: inherit; font-size: 13px; padding: 3px 10px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--bg); color: var(--fg); }
+  .filters button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .filters .count { opacity: .75; margin-left: 4px; font-variant-numeric: tabular-nums; }
   footer { margin-top: 28px; }
   #error { color: var(--bad); }
 </style>
@@ -72,7 +77,8 @@
   </div>
 
   <h2>GPU CI regressions, replayed</h2>
-  <p class="muted">Each regression of Transformers' daily GPU CI (bisected to a commit, or a sticky failure's first day) on a model with a contract: the model's fixture contracts run on the commit before and on the commit that broke it. <b>caught</b>: green before, red after · <b>missed</b>: green on both · <b>already-red</b>: red before too · <b>not-a-regression</b>: the failing test fails on both sides of the range too, checked by hand · <b>out-of-scope</b>: GPU-only tests (flash-attention, quantization, compile, fp16).</p>
+  <p class="muted">Each regression of Transformers' daily GPU CI (bisected to a commit, or a sticky failure's first day) on a model with a contract: the model's fixture contracts run on the commit before and on the commit that broke it. <b>caught</b>: green before, red after · <b>missed</b>: green on both · <b>already-red</b>: red before too · <b>not-a-regression</b>: the failing test fails on both sides of the range too, checked by hand · <b>no-code-change</b>: nothing in the range changes code the model runs (CI images, docs, tests, other models) · <b>out-of-scope</b>: GPU-only tests (flash-attention, quantization, compile, fp16, by name or in the test's body). <b>To fix</b> lists what MIC work can move: misses (a contract to strengthen) and replays that could not measure.</p>
+  <div class="filters" id="regression-filters" role="group" aria-label="Filter regressions by verdict"></div>
   <div class="table-wrap">
     <table>
       <thead><tr><th>Date</th><th>Model</th><th>Regression</th><th class="num">Tests</th><th>Verdict</th><th>MIC at the bad commit</th></tr></thead>
@@ -119,6 +125,72 @@
     row.appendChild(td);
   }
 
+  // What each filter shows. "To fix" is what MIC work can move: a miss (a contract to strengthen)
+  // or a replay that could not measure (a fixture, baseline or install to repair).
+  const FILTERS = [
+    ["fix", "To fix", ["missed", "broken", "pending"]],
+    ["caught", "Caught", ["caught"]],
+    ["red", "Already red", ["already-red"]],
+    ["noise", "Not a MIC problem", ["not-a-regression", "no-code-change", "not-reproduced", "duplicate", "unrelated-culprit", "model-added"]],
+    ["scope", "Out of scope", ["out-of-scope"]],
+    ["all", "All", null],
+  ];
+  let regressionFilter = "fix";
+  try { regressionFilter = new URLSearchParams(location.hash.slice(1)).get("show") || "fix"; } catch (e) {}
+
+  function regressionRow(g) {
+    const row = document.createElement("tr");
+    cell(row, g.date);
+    cell(row, g.model || "?");
+    const what = g.pr ? `PR #${g.pr}` : "sticky onset";
+    cell(row, g.pr && /^\d+$/.test(g.pr) ? link(what, `https://github.com/huggingface/transformers/pull/${g.pr}`) : what);
+    cell(row, String(g.tests) + (g.integration ? " ★" : ""), "num");
+    const verdict = /^https:\/\/github\.com\//.test(g.run || "") ? link(g.verdict, g.run) : document.createTextNode(g.verdict);
+    const span = document.createElement("span");
+    span.className = `verdict-${g.verdict}`;
+    span.appendChild(verdict);
+    cell(row, span);
+    cell(row, g.detail || "");
+    return row;
+  }
+
+  function renderRegressions(rows) {
+    const known = new Set(FILTERS.flatMap(([, , v]) => v || []));
+    const matches = (key, g) => {
+      const verdicts = FILTERS.find(([k]) => k === key)[2];
+      return !verdicts || verdicts.includes(g.verdict) || (key === "noise" && !known.has(g.verdict));
+    };
+    if (!FILTERS.some(([k]) => k === regressionFilter)) regressionFilter = "fix";
+    const bar = $("regression-filters");
+    bar.replaceChildren();
+    for (const [key, label] of FILTERS) {
+      const n = rows.filter((g) => matches(key, g)).length;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.setAttribute("aria-pressed", String(key === regressionFilter));
+      button.append(label);
+      const count = document.createElement("span");
+      count.className = "count";
+      count.textContent = n;
+      button.appendChild(count);
+      button.addEventListener("click", () => {
+        regressionFilter = key;
+        try { history.replaceState(null, "", key === "fix" ? location.pathname : `#show=${key}`); } catch (e) {}
+        renderRegressions(rows);
+      });
+      bar.appendChild(button);
+    }
+    const body = $("regressions");
+    body.replaceChildren();
+    const shown = rows.filter((g) => matches(regressionFilter, g));
+    for (const g of shown) body.appendChild(regressionRow(g));
+    if (!shown.length) {
+      const row = document.createElement("tr");
+      cell(row, rows.length ? "Nothing here." : "None replayed yet.");
+      body.appendChild(row);
+    }
+  }
+
   function render(o) {
     const [first, last] = o.window || [];
     set("window", first ? `Transformers PRs and daily GPU CI, ${first} → ${last}` : "No data yet");
@@ -138,27 +210,7 @@
     set("false", f.prs_with_failure ? `${share}%` : "–");
     set("false-note", `of ${plural(f.prs_with_failure, "PR")} with a red MIC saw only failures they did not cause`);
 
-    const regressions = $("regressions");
-    for (const g of o.regressions || []) {
-      const row = document.createElement("tr");
-      cell(row, g.date);
-      cell(row, g.model || "?");
-      const what = g.pr ? `PR #${g.pr}` : "sticky onset";
-      cell(row, g.pr && /^\d+$/.test(g.pr) ? link(what, `https://github.com/huggingface/transformers/pull/${g.pr}`) : what);
-      cell(row, String(g.tests) + (g.integration ? " ★" : ""), "num");
-      const verdict = /^https:\/\/github\.com\//.test(g.run || "") ? link(g.verdict, g.run) : document.createTextNode(g.verdict);
-      const span = document.createElement("span");
-      span.className = `verdict-${g.verdict}`;
-      span.appendChild(verdict);
-      cell(row, span);
-      cell(row, g.detail || "");
-      regressions.appendChild(row);
-    }
-    if (!(o.regressions || []).length) {
-      const row = document.createElement("tr");
-      cell(row, "None replayed yet.");
-      regressions.appendChild(row);
-    }
+    renderRegressions(o.regressions || []);
 
     const body = $("next");
     for (const t of o.next) {
