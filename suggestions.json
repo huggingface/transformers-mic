@@ -22,6 +22,14 @@
     "test": "tests/models/cohere/test_modeling_cohere.py::CohereIntegrationTest::test_batched_4bit"
    }
   ],
+  "csm": [
+   {
+    "date": "2026-10-30",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/csm/test_modeling_csm.py::CsmForConditionalGenerationTest::test_eager_matches_sdpa_generate"
+   }
+  ],
   "deepseek_v3": [
    {
     "date": "2026-10-16",
@@ -498,6 +506,17 @@
    ]
   },
   {
+   "checkpoint": "facebook/hf-seamless-m4t-medium",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "seamless_m4t",
+   "other": 2,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/seamless_m4t/test_modeling_seamless_m4t.py::SeamlessM4TModelWithSpeechInputTest::test_model_parallelism"
+   ]
+  },
+  {
    "checkpoint": "regisss/bridgetower-newyorker-a100-8x",
    "checkpoint_source": "shrink sweep",
    "integration": 0,
@@ -629,17 +648,6 @@
    ]
   },
   {
-   "checkpoint": "facebook/hf-seamless-m4t-medium",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "seamless_m4t",
-   "other": 1,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/seamless_m4t/test_modeling_seamless_m4t.py::SeamlessM4TModelWithSpeechInputTest::test_model_parallelism"
-   ]
-  },
-  {
    "checkpoint": "google/shieldgemma-2-4b-it",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -745,6 +753,19 @@
    "tests": [
     "tests/models/granite_speech_plus/test_modeling_granite_speech_plus.py::GraniteSpeechPlusForConditionalGenerationIntegrationTest::test_small_model_integration_test_batch",
     "tests/models/granite_speech_plus/test_modeling_granite_speech_plus.py::GraniteSpeechPlusForConditionalGenerationIntegrationTest::test_small_model_integration_test_single"
+   ]
+  },
+  {
+   "checkpoint": null,
+   "checkpoint_source": null,
+   "integration": 1,
+   "model": "jev",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_deciders",
+    "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_jev_35b",
+    "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_jev_9b"
    ]
   },
   {
@@ -1064,6 +1085,7 @@
    "glm4",
    "granitemoe",
    "hy_v3",
+   "jetmoe",
    "minimax_m2",
    "mixtral"
   ],

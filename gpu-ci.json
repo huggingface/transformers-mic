@@ -5105,6 +5105,20 @@
    "tests/models/qianfan_ocr/test_processing_qianfan_ocr.py::QianfanOCRProcessorTest::test_unstructured_kwargs_batched_0_images"
   ]
  },
+ "50054#jev": {
+  "bad_commit": "31d7392997c13162c58f2e3c6555b5e060d6f60b",
+  "date": "2026-11-10",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/42742482910/job/129592812715",
+  "mic": "not-covered",
+  "model": "jev",
+  "pr": "50054",
+  "tests": [
+   "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_deciders",
+   "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_jev_35b",
+   "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_jev_9b"
+  ]
+ },
  "50084#nemotron3_5_transcribe": {
   "bad_commit": "1b754e9a4636191852a1618fc588ad5c863ab4d5",
   "date": "2026-10-29",
@@ -5401,6 +5415,18 @@
   "signal": "AssertionError",
   "tests": [
    "tests/models/cosmos3_edge/test_image_processing_cosmos3_edge.py::Cosmos3EdgeImageProcessingTest::test_backends_equivalence_batched"
+  ]
+ },
+ "sticky#csm#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "csm",
+  "run_id": "42661694999",
+  "signal": "IndexError",
+  "tests": [
+   "tests/models/csm/test_modeling_csm.py::CsmForConditionalGenerationTest::test_eager_matches_sdpa_generate"
   ]
  },
  "sticky#cwm#2026-10-09": {
@@ -6089,6 +6115,18 @@
   "mic": "not-covered",
   "model": "jetmoe",
   "run_id": "41760331997",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/jetmoe/test_modeling_jetmoe.py::JetMoeModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#jetmoe#2026-10-17": {
+  "date": "2026-10-17",
+  "day": 20743,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "jetmoe",
+  "run_id": "42742393621",
   "signal": "AssertionError",
   "tests": [
    "tests/models/jetmoe/test_modeling_jetmoe.py::JetMoeModelTest::test_flash_attn_2_equivalence"
@@ -6789,6 +6827,18 @@
   "mic": "not-covered",
   "model": "seamless_m4t",
   "run_id": "41954992211",
+  "signal": "AttributeError",
+  "tests": [
+   "tests/models/seamless_m4t/test_modeling_seamless_m4t.py::SeamlessM4TModelWithSpeechInputTest::test_model_parallelism"
+  ]
+ },
+ "sticky#seamless_m4t#2026-10-16": {
+  "date": "2026-10-16",
+  "day": 20742,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "seamless_m4t",
+  "run_id": "42742482910",
   "signal": "AttributeError",
   "tests": [
    "tests/models/seamless_m4t/test_modeling_seamless_m4t.py::SeamlessM4TModelWithSpeechInputTest::test_model_parallelism"

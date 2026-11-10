@@ -1,0 +1,30 @@
+{
+ "date": "2026-11-10",
+ "main": {
+  "failed": 381,
+  "now": {
+   "cases": 221,
+   "failing": 18,
+   "rate": 8.144796380090497
+  },
+  "rate": 1.6358952340060111,
+  "total": 23290
+ },
+ "prs": {
+  "failed": 1209,
+  "now": {
+   "cases": 14242,
+   "failing": 681,
+   "rate": 4.78163179328746
+  },
+  "rate": 4.414986853637161,
+  "total": 27384
+ },
+ "truncated": {
+  "main": [],
+  "prs": [
+   "Baseline assertion"
+  ]
+ },
+ "window_days": 1
+}

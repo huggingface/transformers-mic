@@ -1293,6 +1293,10 @@
   "verdict": "not-covered",
   "version": 7
  },
+ "50054#jev": {
+  "verdict": "not-covered",
+  "version": 7
+ },
  "50084#nemotron3_5_transcribe": {
   "verdict": "not-covered",
   "version": 7
@@ -1383,6 +1387,10 @@
  },
  "sticky#cosmos3_edge#2026-10-17": {
   "verdict": "not-covered",
+  "version": 7
+ },
+ "sticky#csm#2026-10-30": {
+  "verdict": "out-of-scope",
   "version": 7
  },
  "sticky#cwm#2026-10-09": {
@@ -1645,6 +1653,10 @@
   "verdict": "not-covered",
   "version": 7
  },
+ "sticky#jetmoe#2026-10-17": {
+  "verdict": "out-of-scope",
+  "version": 7
+ },
  "sticky#kolibri1#2026-10-14": {
   "verdict": "out-of-scope",
   "version": 7
@@ -1894,6 +1906,10 @@
   "version": 7
  },
  "sticky#seamless_m4t#2026-10-12": {
+  "verdict": "not-covered",
+  "version": 7
+ },
+ "sticky#seamless_m4t#2026-10-16": {
   "verdict": "not-covered",
   "version": 7
  },

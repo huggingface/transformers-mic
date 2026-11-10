@@ -179,6 +179,11 @@
   "merged_at": null,
   "state": "open"
  },
+ "49744": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
  "49753": {
   "closed_at": null,
   "merged_at": null,
@@ -374,6 +379,11 @@
   "merged_at": null,
   "state": "open"
  },
+ "50071": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
  "50099": {
   "closed_at": null,
   "merged_at": null,
@@ -475,6 +485,16 @@
   "state": "open"
  },
  "50251": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50265": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50271": {
   "closed_at": null,
   "merged_at": null,
   "state": "open"
@@ -725,9 +745,9 @@
   "state": "open"
  },
  "50474": {
-  "closed_at": null,
+  "closed_at": "2026-11-09T17:02:03Z",
   "merged_at": null,
-  "state": "open"
+  "state": "closed"
  },
  "50477": {
   "closed_at": null,
@@ -739,7 +759,77 @@
   "merged_at": null,
   "state": "open"
  },
+ "50485": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
  "50490": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50493": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50496": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50506": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50511": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50514": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50515": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50516": {
+  "closed_at": "2026-11-10T02:50:34Z",
+  "merged_at": null,
+  "state": "closed"
+ },
+ "50521": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50523": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50532": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50534": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50535": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50548": {
   "closed_at": null,
   "merged_at": null,
   "state": "open"

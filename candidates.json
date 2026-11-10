@@ -5433,7 +5433,8 @@
  "49886#huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16": {
   "case": "huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16",
   "commits": [
-   "6b8d148791b0e1ff2e3ba8e7872e8966bd81e7aa"
+   "6b8d148791b0e1ff2e3ba8e7872e8966bd81e7aa",
+   "9afeb93ba45a87663bfdfd22524b505a8a1912b7"
   ],
   "failure": "logits_probe: max delta 1.28 over tolerance\nboxes_probe: max delta 0.788 over tolerance\ntraining.loss: max delta 0.00627 over tolerance",
   "failure_kind": "Baseline assertion",
@@ -5441,13 +5442,33 @@
   "first_seen": "2026-11-09",
   "key": "49886#huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16",
   "kind": "fixture",
-  "last_seen": 20766,
+  "last_seen": 20767,
   "merged_at": null,
   "outcome": "open",
   "pr": "49886",
   "pr_state": "open",
   "pr_title": "[serge] Fix 8 integration tests for model `grounding_dino` failing with `output_mismatch` (tensor values differ (6), oth",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42555010802%3A1&var-pr=49886&var-gh_run_id=42555010802",
+  "weights": "random"
+ },
+ "49910#huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|": {
+  "case": "huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|",
+  "commits": [
+   "afb001a3b5ff09bed9866fd4e16021b551c2f7b7"
+  ],
+  "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--vip-llava-7b-hf-mic/snapshots/5936cc60da0d85c8b3c49",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1794227006.074724,
+  "first_seen": "2026-11-10",
+  "key": "49910#huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20767,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "49910",
+  "pr_state": "open",
+  "pr_title": "fix some error in quantization xpu ci test",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42063953672%3A2&var-pr=49910&var-gh_run_id=42063953672",
   "weights": "random"
  },
  "49976#huggingface-mic/got_ocr2-mic|got_ocr2-mic|bfloat16|": {
@@ -5938,19 +5959,41 @@
   "key": "50346#huggingface-mic/MiniMax-M3-MXFP8-mic|MiniMax-M3-MXFP8-mic|bfloat16|cpu-x86_64-bf16",
   "kind": "fixture",
   "last_seen": 20766,
-  "merged_at": null,
-  "outcome": "open",
+  "main_after_merge": "fail",
+  "merged_at": "2026-11-10T02:37:28Z",
+  "outcome": "merged-then-main-failed",
   "pr": "50346",
-  "pr_state": "open",
+  "pr_state": "merged",
   "pr_title": "Fix MiniMax-M3-VL packed vision attention isolation",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41956096156%3A2&var-pr=50346&var-gh_run_id=41956096156",
+  "weights": "random"
+ },
+ "50379#huggingface-mic/GLM-5.3-Flash-mic|GLM-5.3-Flash-mic|bfloat16|": {
+  "case": "huggingface-mic/GLM-5.3-Flash-mic|GLM-5.3-Flash-mic|bfloat16|",
+  "commits": [
+   "cd229ebca589e9393a2e5e1e2c7b9dbb6f705e06"
+  ],
+  "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--GLM-5.3-Flash-mic/snapshots/53f3e5bd10a67d2c75a170a",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1794228496.236993,
+  "first_seen": "2026-11-10",
+  "key": "50379#huggingface-mic/GLM-5.3-Flash-mic|GLM-5.3-Flash-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20767,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50379",
+  "pr_state": "open",
+  "pr_title": "Multimodal Model Output for generative LMs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42619916726%3A1&var-pr=50379&var-gh_run_id=42619916726",
   "weights": "random"
  },
  "50379#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
   "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "commits": [
    "6b3609ff2a8a6a3e677bea4502254150e256f59c",
-   "7fed521c67239c53af35b63759e06bc94053b5b7"
+   "7fed521c67239c53af35b63759e06bc94053b5b7",
+   "609b827051bd20e2ffde98a0b578e946fa26b2dd"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/18ed0f7",
   "failure_kind": "Runtime traceback",
@@ -5958,13 +6001,73 @@
   "first_seen": "2026-11-05",
   "key": "50379#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20762,
+  "last_seen": 20767,
   "merged_at": null,
   "outcome": "open",
   "pr": "50379",
   "pr_state": "open",
   "pr_title": "Multimodal Model Output for generative LMs",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41972049124%3A1&var-pr=50379&var-gh_run_id=41972049124",
+  "weights": "random"
+ },
+ "50379#huggingface-mic/Qwen3-VL-30B-A3B-Instruct-mic|Qwen3-VL-30B-A3B-Instruct-mic|bfloat16|": {
+  "case": "huggingface-mic/Qwen3-VL-30B-A3B-Instruct-mic|Qwen3-VL-30B-A3B-Instruct-mic|bfloat16|",
+  "commits": [
+   "cd229ebca589e9393a2e5e1e2c7b9dbb6f705e06"
+  ],
+  "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Qwen3-VL-30B-A3B-Instruct-mic/snapshots/fce9290a855",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1794228496.236993,
+  "first_seen": "2026-11-10",
+  "key": "50379#huggingface-mic/Qwen3-VL-30B-A3B-Instruct-mic|Qwen3-VL-30B-A3B-Instruct-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20767,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50379",
+  "pr_state": "open",
+  "pr_title": "Multimodal Model Output for generative LMs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42619916726%3A1&var-pr=50379&var-gh_run_id=42619916726",
+  "weights": "random"
+ },
+ "50379#huggingface-mic/Qwen3.5-35B-A3B-mic|Qwen3.5-35B-A3B-mic|bfloat16|": {
+  "case": "huggingface-mic/Qwen3.5-35B-A3B-mic|Qwen3.5-35B-A3B-mic|bfloat16|",
+  "commits": [
+   "cd229ebca589e9393a2e5e1e2c7b9dbb6f705e06"
+  ],
+  "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Qwen3.5-35B-A3B-mic/snapshots/ed07422cd83642a6d4b22",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1794228496.236993,
+  "first_seen": "2026-11-10",
+  "key": "50379#huggingface-mic/Qwen3.5-35B-A3B-mic|Qwen3.5-35B-A3B-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20767,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50379",
+  "pr_state": "open",
+  "pr_title": "Multimodal Model Output for generative LMs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42619916726%3A1&var-pr=50379&var-gh_run_id=42619916726",
+  "weights": "random"
+ },
+ "50379#huggingface-mic/Qwen3.8-Flash-Next-mic|Qwen3.8-Flash-Next-mic|bfloat16|": {
+  "case": "huggingface-mic/Qwen3.8-Flash-Next-mic|Qwen3.8-Flash-Next-mic|bfloat16|",
+  "commits": [
+   "cd229ebca589e9393a2e5e1e2c7b9dbb6f705e06"
+  ],
+  "failure": "/torch/utils/_contextlib.py\", line 158, in no_grad\n    return func(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/__w/transformers/transformers/src/transformers/generation/utils.py\", line 3007, in generate\n    result = decoding_method(\n             ^^^^^^^^^^^^^^^^\n  File \"/__w/transform",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1794228496.236993,
+  "first_seen": "2026-11-10",
+  "key": "50379#huggingface-mic/Qwen3.8-Flash-Next-mic|Qwen3.8-Flash-Next-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20767,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50379",
+  "pr_state": "open",
+  "pr_title": "Multimodal Model Output for generative LMs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42619916726%3A1&var-pr=50379&var-gh_run_id=42619916726",
   "weights": "random"
  },
  "50384#huggingface-mic/tibetan-ocr-mic|tibetan-ocr-mic|bfloat16|cpu-x86_64-bf16": {
@@ -6011,7 +6114,8 @@
  "50428#huggingface-mic/Ministral-3-3B-Instruct-2512-mic|Ministral-3-3B-Instruct-2512-mic|bfloat16|": {
   "case": "huggingface-mic/Ministral-3-3B-Instruct-2512-mic|Ministral-3-3B-Instruct-2512-mic|bfloat16|",
   "commits": [
-   "6fad3b82510c1f3bbdeaa025dd4156237c7ce001"
+   "6fad3b82510c1f3bbdeaa025dd4156237c7ce001",
+   "7375060b069b19c86df68857624c8653745db1f7"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Ministral-3-3B-Instruct-2512-mic/snapshots/07f6f7820",
   "failure_kind": "Runtime traceback",
@@ -6019,7 +6123,7 @@
   "first_seen": "2026-11-06",
   "key": "50428#huggingface-mic/Ministral-3-3B-Instruct-2512-mic|Ministral-3-3B-Instruct-2512-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20763,
+  "last_seen": 20767,
   "merged_at": null,
   "outcome": "open",
   "pr": "50428",
@@ -6031,7 +6135,8 @@
  "50428#huggingface-mic/mistral3-mic|mistral3-mic|bfloat16|cpu-x86_64-bf16": {
   "case": "huggingface-mic/mistral3-mic|mistral3-mic|bfloat16|cpu-x86_64-bf16",
   "commits": [
-   "6fad3b82510c1f3bbdeaa025dd4156237c7ce001"
+   "6fad3b82510c1f3bbdeaa025dd4156237c7ce001",
+   "7375060b069b19c86df68857624c8653745db1f7"
   ],
   "failure": "predicted_tokens: [']', ']'] != ['', '']\nanswer_logits: max delta 1.11 over tolerance\ntraining.loss: max delta 0.0135 over tolerance",
   "failure_kind": "Baseline assertion",
@@ -6039,7 +6144,7 @@
   "first_seen": "2026-11-06",
   "key": "50428#huggingface-mic/mistral3-mic|mistral3-mic|bfloat16|cpu-x86_64-bf16",
   "kind": "fixture",
-  "last_seen": 20763,
+  "last_seen": 20767,
   "merged_at": null,
   "outcome": "open",
   "pr": "50428",
@@ -6066,6 +6171,27 @@
   "pr_state": "open",
   "pr_title": "Loss cleaning for CausalLM",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42254340832%3A1&var-pr=50441&var-gh_run_id=42254340832",
+  "weights": "random"
+ },
+ "50493#huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "82854443710c1c2e71f493b831938abead358d09"
+  ],
+  "failure": "training.gradients: ['backbone_model.layers.0.self_attn.q_proj.weight', 'backbone_model.layers.0.mlp.down_proj.weight'] false",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794219106.822937,
+  "first_seen": "2026-11-10",
+  "key": "50493#huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20767,
+  "merged_at": null,
+  "outcome": "fixed-by-push",
+  "pr": "50493",
+  "pr_state": "open",
+  "pr_title": "[`distributed`] Context parallel implementations, with Ulysses",
+  "recovered": "after-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42598093244%3A1&var-pr=50493&var-gh_run_id=42598093244",
   "weights": "random"
  },
  "gh-readonly-queue/main/pr-50263-e03c353939b8396e1e29d92e4d11245dca493dd1#huggingface-mic/table_transformer-mic|table_transformer-mic|bfloat16|cpu-x86_64": {
