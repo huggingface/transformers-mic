@@ -72,6 +72,9 @@ jobs:
     container:
       image: python:3.11-bookworm
       options: --shm-size=16gb
+    defaults:
+      run:
+        shell: bash  # the container hook runs steps with sh otherwise
     timeout-minutes: 120
     env:
       SOURCE_RUN_ID: ${{ inputs.source_run_id }}
