@@ -925,7 +925,7 @@ def draft_lines(suggestions, drafts):
 # ---------------------------------------------------------------- replays
 
 REPLAYS_PER_RUN = 40  # regressions replayed per run; the rest wait for the next one
-REPLAY_VERSION = 8  # bump when a rule below changes, or the fleet's inputs change: every verdict is recomputed
+REPLAY_VERSION = 9  # bump when a rule below changes, or the fleet's inputs change: every verdict is recomputed
 # Replay verdicts only a human sets, in labels.jsonl as {"key": "replay#<regression key>", ...}: the
 # replay cannot tell them apart from "missed", because both sides are green for the contracts.
 REPLAY_LABELS = {"not-a-regression"}
@@ -935,7 +935,12 @@ SETUP_ERRORS = (
     "is required for a normal functioning of this module",  # Transformers' own dependency check: the environment, not the code
 )
 CONFIRM_DAYS = 3  # a sticky onset counts when the daily CI fails one of its tests within this many days
-SAME_EVENT_DAYS = 2  # a sticky onset this close to a bisected regression of the same model is that regression
+# A sticky onset this close to a bisected regression sharing a failing test is that regression. Wide on
+# purpose: a test fixed by a test-only change can fail again days later (gemma4 #49404 on 10-10, its
+# sticky onset on 10-19, the same sdpa ValueError).
+SAME_EVENT_DAYS = 14
+# Failure traces that say the GPU runner, not the code, failed: a CPU fixture contract cannot see them.
+GPU_ENVIRONMENT_TRACES = ("OutOfMemoryError", "CUDA out of memory")
 # What Transformers PR CI runs of each fleet (transformers-ci .github/workflows/pr-ci_contracts.yml).
 PR_CI_VARIANTS = {"control": ["default", "bfloat16"], "prototypes": ["bfloat16"]}
 REPLAY_CHUNKS = 8  # parallel replay jobs in mic-impact.yml
@@ -1029,12 +1034,23 @@ def gpu_only_body(test, ref="main", text_of=None):
     return any(word in body for word in GPU_ONLY_CODE)
 
 
-def replay_scope(item, contracts, text_of=None):
+def gpu_environment_failure(test, traces):
+    """Whether every failure the daily CI recorded for a test is the GPU runner's own: out of memory, or
+    on the multi-GPU runner only (phimoe 06-02: OOM on single, a weight conversion error on multi).
+    False when nothing was recorded: then the test decides by its name and body alone.
+    """
+    entries = traces.get(test) or []
+    return bool(entries) and all(device == "multi" or any(t in trace for t in GPU_ENVIRONMENT_TRACES) for device, trace in entries)
+
+
+def replay_scope(item, contracts, text_of=None, traces_of=None):
     """not-covered | out-of-scope, or None when the regression is worth replaying."""
     if item.get("model") in NOT_MODELS or norm(item.get("model")) not in contracts:
         return "not-covered"
     ref = item.get("bad_commit") or "main"
-    if not any(in_scope(test) and not gpu_only_body(test, ref, text_of) for test in item["tests"]):
+    tests = [test for test in item["tests"] if in_scope(test) and not gpu_only_body(test, ref, text_of)]
+    traces = (traces_of or daily_failure_traces)(item["date"]) if tests and item.get("date") else {}
+    if not any(not gpu_environment_failure(test, traces) for test in tests):
         return "out-of-scope"
     return None
 
@@ -1047,8 +1063,9 @@ def run_sha(run_id):
         return None
 
 
-def daily_failures(date, _cache={}):
-    """Node ids the daily GPU CI's scheduled run failed on `date` (model_results.json; empty when it did not run)."""
+def daily_failure_traces(date, _cache={}):
+    """{node id: [(runner, trace)]} for what the daily GPU CI's scheduled run failed on `date`
+    (model_results.json; runner is "single" or "multi"; empty when it did not run)."""
     if date not in _cache:
         try:
             data = get_json(f"{HUB}/datasets/{DAILY_CI}/resolve/main/{date}/ci_results_run_models_gpu/model_results.json")
@@ -1056,8 +1073,28 @@ def daily_failures(date, _cache={}):
             if error.code != 404:
                 raise
             data = {}
-        _cache[date] = {f["line"] for model in data.values() for fails in (model.get("failures") or {}).values() for f in fails}
+        found = defaultdict(list)
+        for model in data.values():
+            for device, fails in (model.get("failures") or {}).items():
+                for f in fails:
+                    found[f["line"]].append((device, f.get("trace") or ""))
+        _cache[date] = dict(found)
     return _cache[date]
+
+
+def daily_failures(date):
+    """Node ids the daily GPU CI's scheduled run failed on `date`."""
+    return set(daily_failure_traces(date))
+
+
+def failing_before(item, failing_on=None):
+    """Whether the daily CI already failed one of a sticky onset's in-scope tests the day before it.
+
+    Then the onset is a gap in the Fix failures page's day strip, not a new failure:
+    mm_grounding_dino "started" on 10-17 and has failed every daily run since August, 10-16 included.
+    """
+    day = (dt.date.fromisoformat(item["date"]) - dt.timedelta(days=1)).isoformat()
+    return bool({t for t in item["tests"] if in_scope(t)} & (failing_on or daily_failures)(day))
 
 
 def confirmed(item, failing_on=daily_failures):
@@ -1103,7 +1140,7 @@ def range_files(parent, bad):
 
 
 def replay_plan(gpu_ci, replays, contracts, sha_of_day, limit=REPLAYS_PER_RUN, sha_of_run=run_sha, failing_on=daily_failures,
-                files_of=commit_files, range_files_of=None, text_of=None):
+                files_of=commit_files, range_files_of=None, text_of=None, traces_of=None, failed_before=None):
     """Plan entries for the regressions not replayed yet, newest first: one per (regression, fleet).
 
     A bisected regression replays its bad commit and that commit's parent. A sticky onset replays
@@ -1118,13 +1155,16 @@ def replay_plan(gpu_ci, replays, contracts, sha_of_day, limit=REPLAYS_PER_RUN, s
         if replays.get(key, {}).get("version") == REPLAY_VERSION:
             continue
         replays.pop(key, None)
-        scope = replay_scope(item, contracts, text_of)
+        scope = replay_scope(item, contracts, text_of, traces_of)
         if scope:
             replays[key] = {"verdict": scope, "version": REPLAY_VERSION}
             continue
         duplicate = same_event(key, item, gpu_ci)
         if duplicate:
             replays[key] = {"verdict": "duplicate", "reason": f"same regression as {duplicate}", "version": REPLAY_VERSION}
+            continue
+        if not item.get("bad_commit") and failing_before(item, failed_before):
+            replays[key] = {"verdict": "already-failing", "reason": "the daily CI failed it the day before too", "version": REPLAY_VERSION}
             continue
         if not item.get("bad_commit") and not confirmed(item, failing_on):
             replays[key] = {"verdict": "not-reproduced", "reason": "the daily CI did not fail it", "version": REPLAY_VERSION}
@@ -1266,12 +1306,13 @@ REPLAY_VERDICTS = (
     ("not-a-regression", "a human reproduced the failing test on both sides of the range: the failure is not from these commits (the environment, a Hub checkpoint, a tokenizer); see the note"),
     ("already-red", "red on both: says nothing about this regression"),
     ("no-code-change", "nothing between the two commits changes code the model runs (the same commit, or only CI images, docs, tests or other models): nothing for a contract to catch"),
+    ("already-failing", "a sticky onset the daily CI was already failing the day before: a gap in the dashboard's day strip, not a new failure"),
     ("not-reproduced", "a failing run the daily CI did not repeat: transient, not a regression"),
     ("model-added", "the bad commit added the model: no contract could have run before it"),
     ("duplicate", "the same regression as a bisected one, counted there"),
     ("unrelated-culprit", "upstream's bisect blamed a commit that does not touch the model or shared code: a flaky test"),
     ("broken", "the replay could not measure it (commit, install, fixture or baseline setup)"),
-    ("out-of-scope", "no failing *IntegrationTest a CPU fixture contract mirrors: GPU-only, or a feature contracts do not call (export, offloading, parallelism, processors)"),
+    ("out-of-scope", "no failing *IntegrationTest a CPU fixture contract mirrors: GPU-only (by name, body, or a trace that is out of memory or multi-GPU only), or a feature contracts do not call (export, offloading, parallelism, processors)"),
     ("not-covered", "no contract for the model"),
 )
 

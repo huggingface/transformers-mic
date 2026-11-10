@@ -444,6 +444,7 @@ def offline_sources(monkeypatch):
     # empty (no GPU-only body) and every range unknown (replayed).
     monkeypatch.setattr(impact, "test_file_text", lambda path, ref="main": "")
     monkeypatch.setattr(impact, "range_files", lambda parent, bad: None)
+    monkeypatch.setattr(impact, "daily_failure_traces", lambda date: {})
 
 
 LLAMA_TEST = "tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_x"
@@ -463,7 +464,7 @@ def fails(day):
 
 def test_replay_plan_pairs_each_regression_with_its_commits():
     gpu_ci = {
-        "7#llama": regression(pr="7", bad_commit="b" * 40, date="2026-09-20"),
+        "7#llama": regression(pr="7", bad_commit="b" * 40, date="2026-09-01"),
         "sticky#llama#2026-10-03": regression(date="2026-10-03"),
         "sticky#bert#2026-10-03": regression(model="bert", date="2026-10-03"),
         "8#llama": regression(pr="8", bad_commit="c" * 40, tests=["tests/models/llama/test_modeling_llama.py::LlamaTest::test_flash_attn_2_x"]),
@@ -564,7 +565,7 @@ def test_overview_counts_the_replays(tmp_path):
     })
     impact.summarize(results)
     o = json.loads((results / "overview.json").read_text())
-    assert o["replay"] == {"caught": 1, "missed": 1, "not-a-regression": 0, "already-red": 0, "no-code-change": 0, "not-reproduced": 0, "model-added": 0, "duplicate": 0, "unrelated-culprit": 0, "broken": 0, "out-of-scope": 0, "not-covered": 1, "pending": 1}
+    assert o["replay"] == {"caught": 1, "missed": 1, "not-a-regression": 0, "already-red": 0, "no-code-change": 0, "already-failing": 0, "not-reproduced": 0, "model-added": 0, "duplicate": 0, "unrelated-culprit": 0, "broken": 0, "out-of-scope": 0, "not-covered": 1, "pending": 1}
     assert [(g["model"], g["verdict"]) for g in o["regressions"]] == [("e", "pending"), ("b", "missed"), ("a", "caught")]
     summary = (results / "summary.md").read_text()
     assert "**Catch rate: 1 of 2** (50%)" in summary
@@ -712,3 +713,41 @@ def test_a_sticky_range_that_changes_no_model_code_is_not_replayed():
     for files_of in (lambda parent, bad: ["src/transformers/generation/utils.py"], lambda parent, bad: None):
         plan = impact.replay_plan(gpu_ci, {}, CONTRACTS, days.get, sha_of_run=lambda run: None, failing_on=fails, range_files_of=files_of)
         assert {p["key"] for p in plan} == {"sticky#llama#2026-11-08"}
+
+
+PHIMOE = "tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_x"
+
+
+def test_a_test_the_gpu_runner_failed_by_itself_is_out_of_scope():
+    oom = "(line 343)  torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.56 GiB."
+    conversion = "(line 273)  RuntimeError: We encountered some issues during automatic conversion of the weights."
+    item = regression(pr="45752", bad_commit="b" * 40, date="2026-06-02")
+    traces = {PHIMOE: [("single", oom), ("multi", conversion)]}
+    assert impact.replay_scope(item, CONTRACTS, traces_of=lambda date: traces) == "out-of-scope"
+    # A real failure on the single-GPU runner keeps it in scope; so does a day with no record.
+    traces = {PHIMOE: [("single", "AssertionError: Tensor-likes are not close!"), ("multi", conversion)]}
+    assert impact.replay_scope(item, CONTRACTS, traces_of=lambda date: traces) is None
+    assert impact.replay_scope(item, CONTRACTS, traces_of=lambda date: {}) is None
+
+
+def test_a_sticky_onset_the_daily_ci_already_failed_is_not_an_onset():
+    gpu_ci = {"sticky#llama#2026-10-17": regression(date="2026-10-17")}
+    replays = {}
+    days = {"2026-10-16": "p" * 40, "2026-10-17": "q" * 40}
+    assert impact.replay_plan(gpu_ci, replays, CONTRACTS, days.get, sha_of_run=lambda run: None, failing_on=fails,
+                              failed_before=fails) == []
+    assert replays["sticky#llama#2026-10-17"]["verdict"] == "already-failing"
+
+
+def test_a_sticky_onset_days_after_a_bisected_regression_is_that_regression():
+    gpu_ci = {
+        "49404#llama": regression(pr="49404", bad_commit="b" * 40, date="2026-10-10"),
+        "sticky#llama#2026-10-19": regression(date="2026-10-19"),
+    }
+    replays = {}
+    impact.replay_plan(gpu_ci, replays, CONTRACTS, {"2026-10-18": "p" * 40, "2026-10-19": "q" * 40}.get,
+                       sha_of_run=lambda run: None, failing_on=fails, files_of=lambda sha: ["src/transformers/models/llama/modeling_llama.py"])
+    assert replays["sticky#llama#2026-10-19"]["verdict"] == "duplicate"
+    # Beyond SAME_EVENT_DAYS it is a new onset.
+    gpu_ci["sticky#llama#2026-10-30"] = gpu_ci.pop("sticky#llama#2026-10-19") | {"date": "2026-10-30"}
+    assert impact.same_event("sticky#llama#2026-10-30", gpu_ci["sticky#llama#2026-10-30"], gpu_ci) is None
