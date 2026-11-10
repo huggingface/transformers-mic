@@ -1914,6 +1914,49 @@ def test_encoder_decoder_calls_need_decoder_inputs():
     commands.check_encoder_decoder_calls({"usage": usage}, {"is_encoder_decoder": True, "architectures": ["RTDetrForObjectDetection"]})
 
 
+@pytest.mark.requires_runtime
+def test_processor_audio_features_carry_no_decoder_inputs():
+    # moonshine-ai/moonshine-streaming-tiny (2026-11-10): main input input_values, and a probe
+    # model(**inputs) where inputs held only the processor's waveform.
+    moonshine = {"is_encoder_decoder": True, "architectures": ["MoonshineStreamingForConditionalGeneration"]}
+    head = (
+        "```py runnable:t\n"
+        "inputs = processor([a, b], return_tensors=\"pt\", sampling_rate=16000)\n"
+        "inputs = inputs.to(device, dtype=model.dtype)\n"
+        "loss = model(**inputs, labels=labels).loss\n"
+    )
+    with pytest.raises(ValueError, match="carry neither"):
+        commands.check_encoder_decoder_calls({"usage": head + "probe = model(**inputs).logits\n```\n"}, moonshine)
+    commands.check_encoder_decoder_calls({"usage": head + "```\n"}, moonshine)
+    # Inputs that may carry decoder inputs still pass: a processor given text, or added keys.
+    for extra in ('inputs["decoder_input_ids"] = ids\n', 'inputs = processor(a, text=t, return_tensors="pt")\n'):
+        commands.check_encoder_decoder_calls({"usage": head + extra + "probe = model(**inputs).logits\n```\n"}, moonshine)
+
+
+@pytest.mark.requires_runtime
+def test_media_inputs_follow_the_model_dtype():
+    # docling-project/DocumentFigureClassifier-v2.5 (EfficientNet, 2026-11-10): the bfloat16
+    # variant raised "Input type (torch.FloatTensor) and weight type (CPUBFloat16Type)".
+    manifest = {"integrations": {"transformers": {"variants": {"default": {}, "bfloat16": {"dtype": "bfloat16"}}}}}
+    bad = (
+        "```py runnable:t\n"
+        "inputs = processor(images=[img1, img2], return_tensors=\"pt\").to(device)\n"
+        "logits = model(**inputs).logits\n```\n"
+    )
+    with pytest.raises(ValueError, match="dtype=model.dtype"):
+        commands.check_half_precision_inputs({"usage": bad, "manifest": manifest})
+    for good in (
+        bad.replace(".to(device)", ".to(device, dtype=model.dtype)"),
+        bad.replace(".to(device)", ".to(device, model.dtype)"),
+        bad.replace(".to(device)\n", '.to(device)\ninputs["pixel_values"] = inputs["pixel_values"].to(model.dtype)\n'),
+        bad.replace("images=", "text=prompts, images="),  # a multimodal model casts its media itself
+        bad.replace("logits = model", "with torch.autocast(device, dtype=model.dtype):\n    logits = model"),
+    ):
+        commands.check_half_precision_inputs({"usage": good, "manifest": manifest})
+    full = {"integrations": {"transformers": {"variants": {"default": {}}}}}
+    commands.check_half_precision_inputs({"usage": bad, "manifest": full})
+
+
 
 def test_vlm_training_text_must_carry_image_tokens():
     # Salesforce/blip2-opt-2.7b (2026-11-07): captions tokenized alone, so pixel_values moved nothing.

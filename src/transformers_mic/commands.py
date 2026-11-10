@@ -288,7 +288,8 @@ def check_encoder_decoder_calls(plan, config):
         cls = getattr(transformers, (config.get("architectures") or [""])[0], None)
     except Exception:
         cls = None
-    if getattr(cls, "main_input_name", None) != "input_features":
+    # Moonshine reads the raw waveform (input_values) where Whisper reads features.
+    if getattr(cls, "main_input_name", None) not in ("input_features", "input_values"):
         return
     import ast
 
@@ -298,15 +299,62 @@ def check_encoder_decoder_calls(plan, config):
     except SyntaxError:  # the build reports real syntax errors
         return
     needed = {"decoder_input_ids", "decoder_inputs_embeds", "labels"}
+    audio_only = audio_only_inputs(tree, needed)
     for node in ast.walk(tree):
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "model":
             names = {k.arg for k in node.keywords}
-            if None in names or names & needed:  # **inputs may carry them
+            if names & needed:
+                continue
+            # **inputs may carry them, unless inputs is only the processor's audio features:
+            # moonshine-ai/moonshine-streaming-tiny's draft probed model(**inputs).logits
+            # after training on model(**inputs, labels=labels) (2026-11-10).
+            spread = [k.value for k in node.keywords if k.arg is None]
+            if spread and not all(isinstance(v, ast.Name) and v.id in audio_only for v in spread):
                 continue
             raise ValueError(
                 f"line {node.lineno}: model(...) of an encoder-decoder needs decoder inputs; pass "
                 "decoder_input_ids starting from config.decoder_start_token_id, or labels="
+                + (" (the processor's audio features carry neither)" if spread else "")
             )
+
+
+def audio_only_inputs(tree, needed):
+    """Names bound only to a processor or feature extractor call given no text or labels.
+
+    Such a BatchFeature holds input features and their mask, never decoder inputs. A name
+    also bound any other way, or changed by item assignment or update(), may carry them.
+    """
+    import ast
+
+    def unwrap(node):  # processor(...).to(device, ...) -> processor(...)
+        while isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "to":
+            node = node.func.value
+        return node
+
+    verdicts = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Subscript) and isinstance(target.value, ast.Name):
+                    verdicts.setdefault(target.value.id, []).append(False)
+                if not isinstance(target, ast.Name):
+                    continue
+                call = unwrap(node.value)
+                if isinstance(call, ast.Name) and call.id == target.id:
+                    continue  # inputs = inputs.to(device, dtype=...)
+                callee = ""
+                if isinstance(call, ast.Call):
+                    callee = call.func.id if isinstance(call.func, ast.Name) else getattr(call.func, "attr", "")
+                keywords = {k.arg for k in call.keywords} if isinstance(call, ast.Call) else set()
+                verdicts.setdefault(target.id, []).append(
+                    callee.endswith(("processor", "feature_extractor"))
+                    and len(call.args) <= 1
+                    and not keywords & (needed | {"text", "text_target", None})
+                )
+        elif (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+              and node.func.attr in ("update", "__setitem__") and isinstance(node.func.value, ast.Name)):
+            verdicts.setdefault(node.func.value.id, []).append(False)
+    return {name for name, seen in verdicts.items() if all(seen)}
 
 
 def check_image_tokens_in_text(plan, config):
@@ -517,6 +565,88 @@ def check_batch_encoding_dtype(plan, config):
                 "not dtype=; move it with .to(device) and cast only the floating tensors, e.g. "
                 f'{name}["pixel_values"] = {name}["pixel_values"].to(model.dtype)'
             )
+
+
+def check_half_precision_inputs(plan):
+    """Processor outputs fed to the model must follow its dtype, or the bfloat16 variant fails.
+
+    Many vision models cast pixel_values to their weights' dtype themselves, so an approved
+    contract can omit the cast and still pass; EfficientNet does not, and
+    docling-project/DocumentFigureClassifier-v2.5's draft copied such a contract's
+    processor(images=...).to(device): every bfloat16 case raised "Input type
+    (torch.FloatTensor) and weight type (CPUBFloat16Type) should be the same" (2026-11-10).
+    """
+    import ast
+
+    usage = plan["usage"]
+    variants = ((plan.get("manifest") or {}).get("integrations") or {}).get("transformers", {}).get("variants") or {}
+    if not any((kwargs or {}).get("dtype") in ("bfloat16", "float16") for kwargs in variants.values()):
+        return
+    if "torch.autocast" in usage:  # autocast casts the inputs of every matmul and convolution
+        return
+    code = "\n".join(re.findall(r"^```py runnable:[^\n]*\n(.*?)^```", usage, re.M | re.S))
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:  # the build reports real syntax errors
+        return
+
+    def unwrap(node):
+        while isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "to":
+            node = node.func.value
+        return node
+
+    def casts(node):  # x.to(device, dtype=...), x.to(device, model.dtype), x.to(torch.bfloat16)
+        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "to"):
+            return False
+        values = [k.value for k in node.keywords if k.arg == "dtype"] + list(node.args)
+        return any(
+            isinstance(v, ast.Attribute) and (v.attr == "dtype" or v.attr in ("bfloat16", "float16", "half"))
+            or isinstance(v, ast.Name) and "dtype" in v.id
+            for v in values
+        ) or casts(node.func.value)
+
+    made, cast = {}, set()  # name -> (line, callee) of a processor call given images, audio or video
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Assign) or len(node.targets) != 1:
+            continue
+        target = node.targets[0]
+        if isinstance(target, ast.Subscript) and isinstance(target.value, ast.Name):
+            if any(casts(n) for n in ast.walk(node.value)):  # inputs["pixel_values"] = ....to(model.dtype)
+                cast.add(target.value.id)
+            continue
+        if not isinstance(target, ast.Name):
+            continue
+        if casts(node.value):
+            cast.add(target.id)
+        call = unwrap(node.value)
+        if not isinstance(call, ast.Call):
+            continue
+        callee = call.func.id if isinstance(call.func, ast.Name) else getattr(call.func, "attr", "")
+        keywords = {k.arg for k in call.keywords}
+        media = call.args or keywords & {"images", "audio", "audios", "videos", "raw_speech"}
+        # Media only: a multimodal model casts the encoded media into its language model's
+        # dtype itself, and its processor may return a BatchEncoding that takes no dtype.
+        if (callee.endswith(("processor", "feature_extractor")) and "tokenizer" not in callee
+                and media and "text" not in keywords and target.id not in made):
+            made[target.id] = (node.lineno, callee)
+    spread = {
+        k.value.id
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and (isinstance(node.func, ast.Name) and node.func.id == "model"
+             or isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name)
+             and node.func.value.id == "model")
+        for k in node.keywords
+        if k.arg is None and isinstance(k.value, ast.Name)
+    }
+    for name in sorted(spread & set(made) - cast):
+        line, callee = made[name]
+        raise ValueError(
+            f"line {line}: {name} from {callee}(...) reaches the model in float32, but the bfloat16 "
+            "variant loads bfloat16 weights and not every model casts its inputs: move it with "
+            f".to(device, dtype=model.dtype) (a BatchFeature casts only floating tensors), or, for a "
+            f'BatchEncoding, {name}["pixel_values"] = {name}["pixel_values"].to(model.dtype)'
+        )
 
 
 def call_arguments(text, start):
@@ -1155,6 +1285,7 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
                 lambda: check_image_shapes(plan),
                 lambda: check_image_processor_videos(plan),
                 lambda: check_loss_has_gradients(plan),
+                lambda: check_half_precision_inputs(plan),
             ]
             if config:
                 checks += [
