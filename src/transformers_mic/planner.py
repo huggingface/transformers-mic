@@ -233,8 +233,8 @@ can capture the training inputs. Print a final JSON object only when MIC_RUNNER
 is set, plain JSON only (device as model.device.type, never a torch.device).
 Include runtime device/dtype/attn_implementation and meaningful outputs. For a model with sub-configs
 (text_config, vision_config, audio_config, ...), runtime also records the attention each one resolved to:
-"attn_implementations": {n: c._attn_implementation for n in sorted(model.config.sub_configs) if
-(c := getattr(model.config, n, None)) is not None and getattr(c, '_attn_implementation', None)}. The top level
+"attn_implementations": {n: getattr(model.config, n)._attn_implementation for n in sorted(model.config.sub_configs)
+if getattr(getattr(model.config, n, None), '_attn_implementation', None)}, written exactly so. The top level
 can say sdpa while a tower silently runs eager (Gemma4's audio tower after transformers#49404).
 The final JSON must nest training.loss, training.gradients, and training.updated
 under a training object. Declare those exact dotted keys in outputs, using

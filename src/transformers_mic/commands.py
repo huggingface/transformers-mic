@@ -325,8 +325,8 @@ def check_sub_config_attention(plan, config):
     if subs and "attn_implementations" not in plan["usage"]:
         raise ValueError(
             f"the config has sub-configs ({', '.join(subs)}): runtime must also record "
-            '"attn_implementations": {n: c._attn_implementation for n in sorted(model.config.sub_configs) '
-            "if (c := getattr(model.config, n, None)) is not None and getattr(c, '_attn_implementation', None)}"
+            '"attn_implementations": {n: getattr(model.config, n)._attn_implementation for n in sorted(model.config.sub_configs) '
+            "if getattr(getattr(model.config, n, None), '_attn_implementation', None)}, written exactly so"
         )
 
 
@@ -649,10 +649,15 @@ def check_undefined_names(plan):
             for s in top.get_symbols()
             if s.is_assigned() or s.is_imported() or s.is_namespace()
         }
-        tables = [top]
+        tables, every = [top], []
         while tables:
             table = tables.pop()
             tables += table.get_children()
+            every.append(table)
+        # A walrus inside a comprehension, {n: c for n in subs if (c := f(n))}, binds c in the
+        # enclosing scope, but symtable marks it assigned only in the comprehension's table.
+        known |= {s.get_name() for t in every if t is not top for s in t.get_symbols() if s.is_global() and s.is_assigned()}
+        for table in every:
             for symbol in table.get_symbols():
                 read = symbol.is_referenced() and (
                     symbol.is_global()

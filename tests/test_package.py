@@ -1915,6 +1915,11 @@ def test_encoder_decoder_calls_need_decoder_inputs():
 
 
 
+def test_a_walrus_in_a_comprehension_defines_its_name():
+    usage = "```py runnable:t\nx = {n: c for n in model.config.sub_configs if (c := getattr(model.config, n, None))}\nmodel = 1\n```\n"
+    commands.check_undefined_names({"usage": usage})
+
+
 def test_a_composite_model_records_each_sub_config_attention():
     gemma4 = {"model_type": "gemma4", "text_config": {}, "vision_config": {}, "audio_config": {}}
     usage = '```py runnable:t\nresult = {"runtime": {"attn_implementation": model.config._attn_implementation}}\n```\n'
