@@ -899,18 +899,6 @@
    ]
   },
   {
-   "checkpoint": "facebook/wav2vec2-conformer-rel-pos-large",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "wav2vec2_conformer",
-   "other": 2,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/wav2vec2_conformer/test_modeling_wav2vec2_conformer.py::Wav2Vec2ConformerModelTest::test_onnx_export_dynamic",
-    "tests/models/wav2vec2_conformer/test_modeling_wav2vec2_conformer.py::Wav2Vec2ConformerModelTest::test_onnx_export_static"
-   ]
-  },
-  {
    "checkpoint": "facebook/blenderbot-90M",
    "checkpoint_source": "failing test",
    "integration": 0,

@@ -212,6 +212,7 @@
  "huggingface-mic/vit-mic": "vit",
  "huggingface-mic/vitmatte-small-composition-1k-mic": "vitmatte",
  "huggingface-mic/wav2vec2-base-960h-mic": "wav2vec2",
+ "huggingface-mic/wav2vec2-conformer-rope-large-960h-ft-mic": "wav2vec2-conformer",
  "huggingface-mic/wavlm-base-plus-mic": "wavlm",
  "huggingface-mic/whisper-mic": "whisper",
  "huggingface-mic/whisper-tiny-mic": "whisper",
