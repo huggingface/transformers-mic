@@ -85,7 +85,8 @@
    "enum": [
     "declared",
     "hardware",
-    "variant"
+    "variant",
+    "wrong-hardware"
    ],
    "description": "why an unsupported target did not run: the manifest declares it unsupported, this host lacks the hardware it needs, or the variant is not defined; --require-all fails on all but declared"
   },

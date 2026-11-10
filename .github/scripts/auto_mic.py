@@ -26,7 +26,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 # Measured cases that do not stop a draft: the cloud runners have the hardware.
-HARDWARE_SKIPS = {"hardware", "declared"}
+HARDWARE_SKIPS = {"hardware", "declared", "wrong-hardware"}
 
 
 def tmic(*args):

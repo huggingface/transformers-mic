@@ -1620,6 +1620,9 @@ def execute_one(args, record=False):
             options += ["--target", target]
     if record:
         options.append("--record")
+    # A workspace is drafted and checked on whatever runner is at hand; the cloud
+    # baselines measure bfloat16 on native hardware. Transformers CI never skips.
+    options.append("--skip-wrong-hardware")
     if getattr(args, "no_baseline", False):
         options.append("--no-baseline")
     output = (
