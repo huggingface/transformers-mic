@@ -1,28 +1,27 @@
 {
- "awaiting_verdict": 22,
+ "awaiting_verdict": 23,
  "block_merges": {
   "ready": false,
   "unmet": [
    "14 of 30 days observed",
-   "unresolved blocks 1 of 2 (bar \u2264 10%)",
    "re-baselined contracts 31.5/week (bar \u2264 10)"
   ]
  },
  "caught": {
   "fixed_by_push": 8,
   "labelled_real_bug": 0,
-  "merged_then_main_failed": 2,
+  "merged_then_main_failed": 3,
   "real_checkpoint": 2
  },
  "drafts_per_day": 2,
  "false_alarms": {
-  "prs_not_their_fault": 145,
-  "prs_with_failure": 175
+  "prs_not_their_fault": 159,
+  "prs_with_failure": 189
  },
  "missed": {
-  "awaiting_verdict": 21,
-  "not_covered": 26,
-  "real_checkpoint": 21
+  "awaiting_verdict": 22,
+  "not_covered": 28,
+  "real_checkpoint": 22
  },
  "next": [
   {
@@ -70,6 +69,18 @@
    "real_checkpoint": 0,
    "regressions": 3,
    "run": "https://github.com/huggingface/transformers-mic/actions/runs/41999673429",
+   "shrink": "",
+   "shrinkable": true
+  },
+  {
+   "checkpoint": "microsoft/layoutlmv3-base",
+   "draft": "failure",
+   "model": "layoutlmv3",
+   "next_batch": false,
+   "other": 2,
+   "real_checkpoint": 0,
+   "regressions": 2,
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42590668418",
    "shrink": "",
    "shrinkable": true
   },
@@ -122,18 +133,6 @@
    "shrinkable": true
   },
   {
-   "checkpoint": "microsoft/layoutlmv3-base",
-   "draft": "failure",
-   "model": "layoutlmv3",
-   "next_batch": false,
-   "other": 1,
-   "real_checkpoint": 0,
-   "regressions": 1,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42590668418",
-   "shrink": "",
-   "shrinkable": true
-  },
-  {
    "checkpoint": null,
    "draft": "not draftable",
    "model": "muse_spark",
@@ -159,9 +158,9 @@
   },
   {
    "checkpoint": "thhaus/nemotron3-8b",
-   "draft": "",
+   "draft": "queued",
    "model": "nemotron",
-   "next_batch": true,
+   "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -171,9 +170,9 @@
   },
   {
    "checkpoint": "google/pegasus-x-base",
-   "draft": "",
+   "draft": "queued",
    "model": "pegasus_x",
-   "next_batch": true,
+   "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -185,7 +184,7 @@
    "checkpoint": "uclanlp/plbart-java-cs",
    "draft": "",
    "model": "plbart",
-   "next_batch": false,
+   "next_batch": true,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -197,7 +196,7 @@
    "checkpoint": "microsoft/prophetnet-large-uncased-cnndm",
    "draft": "",
    "model": "prophetnet",
-   "next_batch": false,
+   "next_batch": true,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -254,6 +253,18 @@
    "shrinkable": false
   },
   {
+   "checkpoint": "mistralai/Mamba-Codestral-7B-v0.1",
+   "draft": "not draftable",
+   "model": "mamba2",
+   "next_batch": false,
+   "other": 0,
+   "real_checkpoint": 3,
+   "regressions": 3,
+   "run": "",
+   "shrink": "",
+   "shrinkable": false
+  },
+  {
    "checkpoint": "tue-mps/eomt-dinov3-coco-panoptic-large-640",
    "draft": "not draftable",
    "model": "eomt_dinov3",
@@ -266,9 +277,9 @@
    "shrinkable": false
   },
   {
-   "checkpoint": "mistralai/Mamba-Codestral-7B-v0.1",
+   "checkpoint": null,
    "draft": "not draftable",
-   "model": "mamba2",
+   "model": "jev",
    "next_batch": false,
    "other": 0,
    "real_checkpoint": 2,
@@ -305,18 +316,6 @@
    "checkpoint": "ibm-granite/granite-speech-4.1-2b-plus",
    "draft": "not draftable",
    "model": "granite_speech_plus",
-   "next_batch": false,
-   "other": 0,
-   "real_checkpoint": 1,
-   "regressions": 1,
-   "run": "",
-   "shrink": "",
-   "shrinkable": false
-  },
-  {
-   "checkpoint": null,
-   "draft": "not draftable",
-   "model": "jev",
    "next_batch": false,
    "other": 0,
    "real_checkpoint": 1,
@@ -922,6 +921,17 @@
    "verdict": "caught"
   },
   {
+   "date": "2026-10-21",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "ernie4_5_moe",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
    "date": "2026-10-20",
    "detail": "",
    "integration": false,
@@ -1044,6 +1054,17 @@
   },
   {
    "date": "2026-10-18",
+   "detail": "the daily CI failed it the day before too",
+   "integration": true,
+   "job": "",
+   "model": "grounding_dino",
+   "pr": null,
+   "run": "",
+   "tests": 4,
+   "verdict": "already-failing"
+  },
+  {
+   "date": "2026-10-18",
    "detail": "",
    "integration": false,
    "job": "",
@@ -1136,6 +1157,17 @@
    "integration": true,
    "job": "",
    "model": "deepseek_v3",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-10-15",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "swin",
    "pr": null,
    "run": "",
    "tests": 1,
@@ -2595,7 +2627,7 @@
   }
  ],
  "replay": {
-  "already-failing": 2,
+  "already-failing": 3,
   "already-red": 10,
   "broken": 0,
   "caught": 10,
@@ -2604,14 +2636,14 @@
   "model-added": 4,
   "no-code-change": 1,
   "not-a-regression": 5,
-  "not-covered": 215,
+  "not-covered": 219,
   "not-reproduced": 7,
-  "out-of-scope": 148,
+  "out-of-scope": 150,
   "pending": 0,
   "unrelated-culprit": 15
  },
  "window": [
   "2026-10-20",
-  "2026-11-10"
+  "2026-11-11"
  ]
 }

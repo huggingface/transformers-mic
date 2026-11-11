@@ -168,6 +168,12 @@
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/42787729966"
  },
+ "nemotron": {
+  "checkpoint": "thhaus/nemotron3-8b",
+  "conclusion": null,
+  "dispatched_at": "2026-11-11T09:04:25Z",
+  "status": "queued"
+ },
  "oneformer": {
   "checkpoint": "shi-labs/oneformer_ade20k_swin_tiny",
   "conclusion": "failure",
@@ -175,6 +181,12 @@
   "run_id": 42358296744,
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/42358296744"
+ },
+ "pegasus_x": {
+  "checkpoint": "google/pegasus-x-base",
+  "conclusion": null,
+  "dispatched_at": "2026-11-11T09:04:25Z",
+  "status": "queued"
  },
  "pocket_tts": {
   "checkpoint": "eustlb/pocket-tts",

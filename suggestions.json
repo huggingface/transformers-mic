@@ -218,7 +218,19 @@
     "test": "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_cross_attention_mask"
    },
    {
+    "date": "2026-10-18",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_cross_attention_mask"
+   },
+   {
     "date": "2026-10-13",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_grounding_dino_loss"
+   },
+   {
+    "date": "2026-10-18",
     "gpu_only": false,
     "integration": true,
     "test": "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_grounding_dino_loss"
@@ -230,7 +242,19 @@
     "test": "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_inference_object_detection_head"
    },
    {
+    "date": "2026-10-18",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_inference_object_detection_head"
+   },
+   {
     "date": "2026-10-13",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_inference_object_detection_head_equivalence_cpu_accelerator"
+   },
+   {
+    "date": "2026-10-18",
     "gpu_only": false,
     "integration": true,
     "test": "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_inference_object_detection_head_equivalence_cpu_accelerator"
@@ -422,6 +446,14 @@
     "test": "tests/models/qwen3_moe/test_modeling_qwen3_moe.py::Qwen3MoeIntegrationTest::test_speculative_generation"
    }
   ],
+  "swin": [
+   {
+    "date": "2026-10-15",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/swin/test_modeling_swin.py::SwinModelTest::test_torch_export_dynamic"
+   }
+  ],
   "swinv2": [
    {
     "date": "2026-10-23",
@@ -506,6 +538,17 @@
    ]
   },
   {
+   "checkpoint": "microsoft/layoutlmv3-base",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "layoutlmv3",
+   "other": 2,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/layoutlmv3/test_modeling_layoutlmv3.py::LayoutLMv3ModelTest::test_inputs_embeds_matches_input_ids"
+   ]
+  },
+  {
    "checkpoint": "facebook/hf-seamless-m4t-medium",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -548,17 +591,6 @@
    "tests": [
     "tests/models/fsmt/test_modeling_fsmt.py::FSMTModelTest::test_torch_export_generate_dynamic",
     "tests/models/fsmt/test_modeling_fsmt.py::FSMTModelTest::test_torch_export_generate_static"
-   ]
-  },
-  {
-   "checkpoint": "microsoft/layoutlmv3-base",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "layoutlmv3",
-   "other": 1,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/layoutlmv3/test_modeling_layoutlmv3.py::LayoutLMv3ModelTest::test_inputs_embeds_matches_input_ids"
    ]
   },
   {
@@ -684,6 +716,17 @@
    ]
   },
   {
+   "checkpoint": "mistralai/Mamba-Codestral-7B-v0.1",
+   "checkpoint_source": "failing test",
+   "integration": 3,
+   "model": "mamba2",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/mamba2/test_modeling_mamba2.py::Mamba2IntegrationTest::test_mamba2_mixer_train_vs_eval_equivalence"
+   ]
+  },
+  {
    "checkpoint": "tue-mps/eomt-dinov3-coco-panoptic-large-640",
    "checkpoint_source": "failing test",
    "integration": 2,
@@ -696,14 +739,16 @@
    ]
   },
   {
-   "checkpoint": "mistralai/Mamba-Codestral-7B-v0.1",
-   "checkpoint_source": "failing test",
+   "checkpoint": null,
+   "checkpoint_source": null,
    "integration": 2,
-   "model": "mamba2",
+   "model": "jev",
    "other": 0,
    "shrinkable": false,
    "tests": [
-    "tests/models/mamba2/test_modeling_mamba2.py::Mamba2IntegrationTest::test_mamba2_mixer_train_vs_eval_equivalence"
+    "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_deciders",
+    "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_jev_35b",
+    "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_jev_9b"
    ]
   },
   {
@@ -739,19 +784,6 @@
    "tests": [
     "tests/models/granite_speech_plus/test_modeling_granite_speech_plus.py::GraniteSpeechPlusForConditionalGenerationIntegrationTest::test_small_model_integration_test_batch",
     "tests/models/granite_speech_plus/test_modeling_granite_speech_plus.py::GraniteSpeechPlusForConditionalGenerationIntegrationTest::test_small_model_integration_test_single"
-   ]
-  },
-  {
-   "checkpoint": null,
-   "checkpoint_source": null,
-   "integration": 1,
-   "model": "jev",
-   "other": 0,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_deciders",
-    "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_jev_35b",
-    "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_jev_9b"
    ]
   },
   {
@@ -911,6 +943,18 @@
    ]
   },
   {
+   "checkpoint": "Qwen/Qwen2.5-0.5B-Instruct",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "cli",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/cli/test_serve.py::TestSystemOneEndpoint::test_decision_with_text",
+    "tests/cli/test_serve.py::TestSystemOneEndpoint::test_response_format"
+   ]
+  },
+  {
    "checkpoint": "paultltc/colmodernvbert_hf",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -1056,6 +1100,7 @@
   ],
   "test_flash_attn_2_equivalence": [
    "axk1",
+   "ernie4_5_moe",
    "glm4",
    "granitemoe",
    "hy_v3",

@@ -5469,6 +5469,19 @@
    "tests/models/canary/test_modeling_canary.py::CanaryModelTest::test_torch_export_generate_static_static_cache"
   ]
  },
+ "sticky#cli#2026-11-10": {
+  "date": "2026-11-10",
+  "day": 20767,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "cli",
+  "run_id": "42945525063",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/cli/test_serve.py::TestSystemOneEndpoint::test_decision_with_text",
+   "tests/cli/test_serve.py::TestSystemOneEndpoint::test_response_format"
+  ]
+ },
  "sticky#clipseg#2026-11-07": {
   "date": "2026-11-07",
   "day": 20764,
@@ -5748,6 +5761,18 @@
   "mic": "not-covered",
   "model": "ernie4_5_moe",
   "run_id": "42328911987",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/ernie4_5_moe/test_modeling_ernie4_5_moe.py::Ernie4_5_MoeModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#ernie4_5_moe#2026-10-21": {
+  "date": "2026-10-21",
+  "day": 20747,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "ernie4_5_moe",
+  "run_id": "42742393621",
   "signal": "AssertionError",
   "tests": [
    "tests/models/ernie4_5_moe/test_modeling_ernie4_5_moe.py::Ernie4_5_MoeModelTest::test_flash_attn_2_equivalence"
@@ -6127,6 +6152,21 @@
    "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_inference_object_detection_head_equivalence_cpu_accelerator"
   ]
  },
+ "sticky#grounding_dino#2026-10-18": {
+  "date": "2026-10-18",
+  "day": 20744,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "grounding_dino",
+  "run_id": "42550812015",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_cross_attention_mask",
+   "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_grounding_dino_loss",
+   "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_inference_object_detection_head",
+   "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_inference_object_detection_head_equivalence_cpu_accelerator"
+  ]
+ },
  "sticky#hunyuan_v1_moe#2026-10-10": {
   "date": "2026-10-10",
   "day": 20736,
@@ -6262,6 +6302,20 @@
    "tests/models/jetmoe/test_modeling_jetmoe.py::JetMoeModelTest::test_flash_attn_2_equivalence"
   ]
  },
+ "sticky#jev#2026-11-10": {
+  "date": "2026-11-10",
+  "day": 20767,
+  "integration": true,
+  "mic": "not-covered",
+  "model": "jev",
+  "run_id": "42945525063",
+  "signal": "torch.OutOfMemoryError",
+  "tests": [
+   "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_deciders",
+   "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_jev_35b",
+   "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_jev_9b"
+  ]
+ },
  "sticky#kolibri1#2026-10-14": {
   "date": "2026-10-14",
   "day": 20740,
@@ -6296,6 +6350,18 @@
   "mic": "not-covered",
   "model": "layoutlmv3",
   "run_id": "42150076346",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/layoutlmv3/test_modeling_layoutlmv3.py::LayoutLMv3ModelTest::test_inputs_embeds_matches_input_ids"
+  ]
+ },
+ "sticky#layoutlmv3#2026-10-19": {
+  "date": "2026-10-19",
+  "day": 20745,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "layoutlmv3",
+  "run_id": "42945525063",
   "signal": "AssertionError",
   "tests": [
    "tests/models/layoutlmv3/test_modeling_layoutlmv3.py::LayoutLMv3ModelTest::test_inputs_embeds_matches_input_ids"
@@ -6397,6 +6463,18 @@
   "mic": "not-covered",
   "model": "mamba2",
   "run_id": "41954992211",
+  "signal": "torch.OutOfMemoryError",
+  "tests": [
+   "tests/models/mamba2/test_modeling_mamba2.py::Mamba2IntegrationTest::test_mamba2_mixer_train_vs_eval_equivalence"
+  ]
+ },
+ "sticky#mamba2#2026-10-31": {
+  "date": "2026-10-31",
+  "day": 20757,
+  "integration": true,
+  "mic": "not-covered",
+  "model": "mamba2",
+  "run_id": "42945525063",
   "signal": "torch.OutOfMemoryError",
   "tests": [
    "tests/models/mamba2/test_modeling_mamba2.py::Mamba2IntegrationTest::test_mamba2_mixer_train_vs_eval_equivalence"
@@ -7021,6 +7099,18 @@
   "tests": [
    "tests/models/speecht5/test_modeling_speecht5.py::SpeechT5ForSpeechToTextTest::test_torch_export_generate_dynamic",
    "tests/models/speecht5/test_modeling_speecht5.py::SpeechT5ForSpeechToTextTest::test_torch_export_generate_static"
+  ]
+ },
+ "sticky#swin#2026-10-15": {
+  "date": "2026-10-15",
+  "day": 20741,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "swin",
+  "run_id": "42945525063",
+  "signal": "Failed",
+  "tests": [
+   "tests/models/swin/test_modeling_swin.py::SwinModelTest::test_torch_export_dynamic"
   ]
  },
  "sticky#swinv2#2026-10-23": {

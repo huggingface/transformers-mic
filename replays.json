@@ -1377,6 +1377,10 @@
   "verdict": "not-covered",
   "version": 9
  },
+ "sticky#cli#2026-11-10": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#clipseg#2026-11-07": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1466,6 +1470,10 @@
   "version": 9
  },
  "sticky#ernie4_5_moe#2026-10-13": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#ernie4_5_moe#2026-10-21": {
   "verdict": "out-of-scope",
   "version": 9
  },
@@ -1600,6 +1608,11 @@
   "verdict": "already-failing",
   "version": 9
  },
+ "sticky#grounding_dino#2026-10-18": {
+  "reason": "the daily CI failed it the day before too",
+  "verdict": "already-failing",
+  "version": 9
+ },
  "sticky#hunyuan_v1_moe#2026-10-10": {
   "verdict": "not-covered",
   "version": 9
@@ -1648,6 +1661,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#jev#2026-11-10": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#kolibri1#2026-10-14": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1657,6 +1674,10 @@
   "version": 9
  },
  "sticky#layoutlmv3#2026-10-13": {
+  "verdict": "not-covered",
+  "version": 9
+ },
+ "sticky#layoutlmv3#2026-10-19": {
   "verdict": "not-covered",
   "version": 9
  },
@@ -1698,6 +1719,10 @@
   "version": 9
  },
  "sticky#mamba2#2026-10-13": {
+  "verdict": "not-covered",
+  "version": 9
+ },
+ "sticky#mamba2#2026-10-31": {
   "verdict": "not-covered",
   "version": 9
  },
@@ -1902,6 +1927,10 @@
   "version": 9
  },
  "sticky#speecht5#2026-10-30": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#swin#2026-10-15": {
   "verdict": "out-of-scope",
   "version": 9
  },
