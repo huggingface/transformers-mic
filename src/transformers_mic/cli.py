@@ -537,6 +537,27 @@ No Git commit or framework PR is created automatically.""",
     retire.add_argument(
         "--execute", action="store_true", help="Upload the previewed removal"
     )
+    environment = sub.add_parser(
+        "environment",
+        help="Preview or move every fleet's pinned environment (e.g. a new torch) in one dataset commit",
+    )
+    environment.add_argument(
+        "--set",
+        dest="packages",
+        action="append",
+        required=True,
+        metavar="PACKAGE=VERSION",
+        help="A package the environment already pins and its new version (repeatable)",
+    )
+    environment.add_argument(
+        "--fleet",
+        choices=("all", *fleet.FILES),
+        default="all",
+        help="Fleets to move together (default all: their environments must stay equal)",
+    )
+    environment.add_argument(
+        "--execute", action="store_true", help="Upload the previewed environment change"
+    )
     pin = sub.add_parser(
         "pin", help="Pin a dataset revision in a Transformers checkout"
     )

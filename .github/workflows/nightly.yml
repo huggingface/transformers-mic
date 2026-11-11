@@ -68,7 +68,7 @@ jobs:
           sha=$(git ls-remote https://github.com/huggingface/transformers "$REF" | cut -f1 | head -1)
           sha=${sha:-$REF}
           echo "SHA=$sha" >> "$GITHUB_ENV"
-          PY=python3 FETCH="$sha" TORCH_INDEX=cu128 .github/scripts/install_pinned.sh
+          PY=python3 FETCH="$sha" TORCH_INDEX=cu132 .github/scripts/install_pinned.sh
           python3 -m pip freeze > "$GITHUB_WORKSPACE/out/pip-freeze.txt"
           nvidia-smi --query-gpu=name,driver_version --format=csv,noheader | tee "$GITHUB_WORKSPACE/out/gpu.txt"
           python3 -c "import torch; print(torch.__version__, torch.cuda.is_available())"
