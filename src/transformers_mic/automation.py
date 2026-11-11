@@ -727,7 +727,12 @@ def run_locked(args, root, answer):
                         primary_integration(workspace.manifest)
                     ]["targets"]
                 ):
-                    code, log = stage(name, ["auto"])
+                    code, log = stage(
+                        name,
+                        ["auto", "--match-cloud"]
+                        if args.baseline_execution == "cloud"
+                        else ["auto"],
+                    )
                     if not code and args.baseline_execution == "cloud":
                         contract = workspace.lock["contracts"][
                             workspace.state["contract"]
