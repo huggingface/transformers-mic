@@ -11,6 +11,10 @@ PATHS=${PATHS_JSON:-/mnt/cache/ssd-moe/paths.json}
 MAX_TOKENS=${MAX_TOKENS:-32}
 PY=${PY:-python3}
 mkdir -p "$OUT"
+# CPUs this pod may use: the cgroup quota, not nproc (the node has 96 CPUs, the pod about 22).
+CPUS=$(awk '$1 != "max" {n = int($1 / $2)} END {print (n > 0 ? n : 0)}' /sys/fs/cgroup/cpu.max 2>/dev/null || echo 0)
+[ "$CPUS" -gt 0 ] || CPUS=$(nproc)
+echo "using $CPUS CPU threads" | tee "$OUT/cpus.txt"
 field() { "$PY" -c "import json,sys; print(json.load(open('$PATHS'))[sys.argv[1]])" "$1"; }
 
 { nvidia-smi || true; df -h / /tmp || true; cat /proc/meminfo; nproc
@@ -60,7 +64,7 @@ PY
       mode_args=(--mode offload --offload-gpu-mib 18432 --offload-cpu-mib 40960 --offload-folder /tmp/offload)
     fi
     PYTHONPATH=framework/src "$PY" framework/examples/generate/ssd_moe.py "$CKPT" "${mode_args[@]}" \
-      --chat --prompt-file "$HERE/prompt.txt" --device cuda --dtype bfloat16 --threads "$(nproc)" \
+      --chat --prompt-file "$HERE/prompt.txt" --device cuda --dtype bfloat16 --threads "$CPUS" \
       --max-new-tokens "$MAX_TOKENS" --runs 2 --output "$OUT/result.json" > "$OUT/engine.log" 2>&1
     ;;
   vllm)
@@ -85,7 +89,7 @@ PY
     started=$(date +%s.%N)
     # --fit on: llama.cpp's own placement of layers/experts into the 24 GB GPU, rest of the experts on the CPU (mmap).
     /app/llama-server -m "$GGUF" --host 127.0.0.1 --port 8080 --alias model --fit on -c 4096 -np 1 \
-      --jinja --seed 0 -t "$(nproc)" > "$OUT/engine.log" 2>&1 &
+      --jinja --seed 0 -t "$CPUS" -tb "$CPUS" > "$OUT/engine.log" 2>&1 &
     SERVER_PID=$!; trap stop_server EXIT
     bench "$started" '{"ignore_eos": true}' "" "$GGUF"
     ;;
