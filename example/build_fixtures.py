@@ -472,7 +472,10 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
     the loader's conversions read, and a .bin container tests nothing more.
     """
     from safetensors.torch import load_file, save_file
+    from transformers_mic.fixture_validation import compact_saved_config, sync_dtype, validate_model, validate_saved_config
 
+    sync_dtype(model)
+    validate_model(model)
     out.mkdir(parents=True, exist_ok=True)
     for file in out.iterdir():
         if file.is_file() and file.name != "README.md":
@@ -498,6 +501,17 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
             # (OPT's .bin stores lm_head.weight, save_pretrained keeps embed_tokens).
             if kept in tensors and kept not in checkpoint["keys"] and alias in checkpoint["keys"] and alias not in tensors:
                 tensors[alias] = tensors.pop(kept)
+    if checkpoint:
+        from transformers_mic.fixture_quantization import quantize
+
+        tensors, quantization = quantize(tensors, checkpoint.get("quantization_config"), checkpoint["keys"])
+        if quantization:
+            config_path = out / "config.json"
+            saved_config = json.loads(config_path.read_text())
+            saved_config["quantization_config"] = quantization
+            config_path.write_text(json.dumps(saved_config, indent=2) + "\n")
+    compact_saved_config(model, out / "config.json")
+    validate_saved_config(model, out / "config.json")
     save_file(tensors, weights, metadata={"format": "pt"})
     copied = copied_files(source, recipe)
     for name in copied:
@@ -688,12 +702,25 @@ def numeric_health(cls, folder, batch, captured=None):
     slightly; an overflow is not that small); NaN never is. Unscaled float16
     gradients are reported but do not gate: float16 training needs a loss scaler.
     """
+    config_path = Path(folder) / "config.json"
+    source_quantization = json.loads(config_path.read_text()).get("quantization_config") if config_path.exists() else None
     rows, structural = {}, {}
     for name in DTYPES:
         dtype = getattr(torch, name)
         row = {}
         try:
-            model = called_module(cls.from_pretrained(folder, dtype=dtype), captured or {}).train()
+            loaded = cls.from_pretrained(folder, dtype=dtype)
+            quantizer = getattr(loaded, "hf_quantizer", None)
+            if (source_quantization and not getattr(loaded, "is_quantized", False)) or (
+                quantizer and getattr(quantizer.quantization_config, "dequantize", False)
+            ):
+                # FP8 dequantization may retain the checkpoint dtype on converted
+                # projections. Test the requested compute dtype explicitly, and
+                # record this distinction from raw from_pretrained behavior.
+                row["loaded_parameter_dtypes"] = sorted({str(p.dtype) for p in loaded.parameters()})
+                loaded = loaded.to(dtype=dtype)
+                row["cast_after_dequantization"] = True
+            model = called_module(loaded, captured or {}).train()
             with torch.autocast("cpu", dtype=dtype, enabled=dtype != torch.float32):
                 output = model(**as_dtype(batch, dtype))
             logits = logits_of(output)
@@ -904,7 +931,11 @@ def review_fixture(name, fixture, revisions, out, artifact=None, inspect_checkpo
     if artifact is None:
         lacks = (inspect_checkpoint(cls, source, source_repo, revision) if inspect_checkpoint
                  else missing_parameters(cls, run.checkpoint_path(source_repo, revision)))
-        checkpoint = {"keys": set(source_keys), "binary": inspection.loads_binary(source_repo, revision, source)}
+        checkpoint = {
+            "keys": set(source_keys),
+            "binary": inspection.loads_binary(source_repo, revision, source),
+            "quantization_config": getattr(cls.config_class.from_pretrained(source), "quantization_config", None),
+        }
         source_file = source_weights_file(source, checkpoint["binary"])
         dtype = getattr(torch, source_dtype(source))
         real = keeps_source(source, cls, shrunk_config(source, cls, recipe))
@@ -995,6 +1026,7 @@ def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out,
     checkpoint = {
         "keys": inspection.checkpoint_keys(source_repo, revisions[source_repo], source),
         "binary": inspection.loads_binary(source_repo, revisions[source_repo], source),
+        "quantization_config": getattr(cls.config_class.from_pretrained(source), "quantization_config", None),
     }
     cls = model_class(source, recipe)
     tolerance = recipe.get("gate_tolerance") or max(

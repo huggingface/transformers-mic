@@ -297,7 +297,7 @@ def headline(data):
     if names["only_source"] and not names["only_fixture"]:
         weights = (
             f"Weight names: {len(names['matching'])} match the source; "
-            f"{len(names['only_source'])} only in the source (unused heads or quantization scales)"
+            f"{len(names['only_source'])} only in the source (review missing tensors)"
         )
     elif names["only_fixture"]:
         weights = (

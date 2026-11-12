@@ -1144,3 +1144,119 @@ def test_a_contract_failure_names_the_contract_line(tmp_path):
     )
     assert build_fixtures.contract_lines(stderr, code, entry) == "contract line 3: probe = model(**inputs).logits\n"
     assert build_fixtures.contract_lines("ValueError: x\n", code, entry) == ""
+
+
+def test_fp8_save_and_reload_uses_source_metadata_for_another_architecture(tmp_path):
+    from transformers import LlamaConfig, LlamaForCausalLM, FineGrainedFP8Config
+
+    model = LlamaForCausalLM(LlamaConfig(
+        vocab_size=32, hidden_size=16, intermediate_size=32,
+        num_hidden_layers=1, num_attention_heads=2, num_key_value_heads=2,
+    )).eval().bfloat16()
+    config = {"quant_method": "fp8", "activation_scheme": "dynamic",
+              "weight_block_size": [128, 128], "modules_to_not_convert": ["lm_head"]}
+    quantized = {name + ".weight" for name, module in model.named_modules()
+                 if isinstance(module, torch.nn.Linear) and name != "lm_head"}
+    keys = set(model.state_dict()) | {name.removesuffix(".weight") + ".weight_scale_inv" for name in quantized}
+    source = tmp_path / "source"
+    source.mkdir()
+    out = tmp_path / "out"
+    build_fixtures.save(model, out, source, [], checkpoint={
+        "keys": keys, "binary": False, "quantization_config": config,
+    })
+    saved = safetensors.load_file(out / "model.safetensors")
+    assert all(saved[name].dtype == torch.float8_e4m3fn for name in quantized)
+    assert saved["lm_head.weight"].dtype == torch.bfloat16
+    assert json.loads((out / "config.json").read_text())["quantization_config"]["weight_block_size"] == [8, 8]
+    reloaded, info = LlamaForCausalLM.from_pretrained(
+        out, dtype=torch.bfloat16, output_loading_info=True,
+        quantization_config=FineGrainedFP8Config(dequantize=True),
+    )
+    assert not any(info.values())
+    with torch.no_grad():
+        assert torch.isfinite(reloaded(input_ids=torch.tensor([[1, 2, 3]])).logits).all()
+
+
+@pytest.mark.parametrize("rope,nope,expected", [(64, 64, 16), (64, 128, 8), (0, 128, 0)])
+def test_mla_shrink_preserves_rotary_proportion_and_updates_derived_width(rope, nope, expected):
+    from transformers import DeepseekV3Config
+    from sweep import shrink
+
+    config = DeepseekV3Config(num_hidden_layers=2, vocab_size=32,
+                             qk_rope_head_dim=rope, qk_nope_head_dim=nope)
+    config.qk_head_dim = rope + nope
+    shrunk = shrink(config)
+    assert shrunk.qk_rope_head_dim == expected
+    assert shrunk.qk_nope_head_dim == 16
+    assert shrunk.qk_head_dim == expected + 16
+
+
+def test_shrunk_shared_cache_preserves_source_rope_flags_and_runs():
+    from transformers import MistralLarge4TextConfig, MistralLarge4TextModel
+    from sweep import shrink
+    from layer_patterns import pattern_indices
+    from transformers_mic.fixture_validation import validate_model
+
+    config = MistralLarge4TextConfig(
+        num_hidden_layers=8, vocab_size=32, qk_rope_head_dim=64, qk_nope_head_dim=64,
+        no_rope_layers=[1, 1, 0, 1, 1, 0, 0, 0],
+        kv_source_layers=[0, 1, 2, 3, 4, 5, 6, 6],
+        indexer_types=["full"] * 8, index_head_dim=16, index_n_heads=2,
+    )
+    kept = pattern_indices(config)
+    shrunk = shrink(config)
+    assert shrunk.no_rope_layers == [config.no_rope_layers[i] for i in kept]
+    assert shrunk.kv_source_layers == [kept.index(config.kv_source_layers[i]) for i in kept]
+    assert shrunk.qk_head_dim == 32 and shrunk.head_dim == 16
+    model = MistralLarge4TextModel(shrunk).eval()
+    validate_model(model)
+    with torch.no_grad():
+        logits = model(input_ids=torch.tensor([[1, 2, 3, 4, 5]]), use_cache=False).last_hidden_state
+    assert torch.isfinite(logits).all()
+
+
+@pytest.mark.parametrize("dtype", [torch.bfloat16, torch.float16])
+def test_save_updates_nested_dtype_after_cast_and_round_trips(tmp_path, dtype):
+    from transformers import AutoConfig
+
+    model = _tiny_llava().to(dtype)
+    model.config.dtype = torch.float32
+    model.config.text_config.dtype = torch.float32
+    model.config.vision_config.dtype = torch.float32
+    source = tmp_path / "source"
+    source.mkdir()
+    out = tmp_path / "out"
+    build_fixtures.save(model, out, source, [])
+    saved = json.loads((out / "config.json").read_text())
+    expected = str(dtype).removeprefix("torch.")
+    assert saved["dtype"] == expected
+    assert "dtype" not in saved["text_config"]
+    assert "dtype" not in saved["vision_config"]
+    reloaded = AutoConfig.from_pretrained(out)
+    assert reloaded.dtype == dtype
+    loaded = type(model).from_pretrained(out, dtype="auto")
+    assert loaded.dtype == loaded.config.text_config.dtype == loaded.config.vision_config.dtype == dtype
+    assert all(t.dtype == dtype for t in safetensors.load_file(out / "model.safetensors").values() if t.is_floating_point())
+
+
+@pytest.mark.parametrize("retains_quantizer", [True, False])
+def test_numeric_health_records_and_casts_dequantized_parameters(tmp_path, retains_quantizer):
+    class Dequantized(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.proj = torch.nn.Linear(2, 2).bfloat16()
+            if retains_quantizer:
+                self.hf_quantizer = SimpleNamespace(quantization_config=SimpleNamespace(dequantize=True))
+
+        @classmethod
+        def from_pretrained(cls, folder, dtype):
+            return cls()
+
+        def forward(self, x):
+            return {"logits": self.proj(x)}
+
+    (tmp_path / "config.json").write_text(json.dumps({"quantization_config": {"quant_method": "fp8"}}))
+    rows = build_fixtures.numeric_health(Dequantized, tmp_path, {"x": torch.ones(2, 2)})
+    assert all(row["finite"] for row in rows.values())
+    assert rows["float32"]["cast_after_dequantization"] is True
+    assert rows["float32"]["loaded_parameter_dtypes"] == ["torch.bfloat16"]
