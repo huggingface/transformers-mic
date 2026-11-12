@@ -155,7 +155,8 @@ PY
       strata_set=(--set "resident-budget-gib=${STRATA_RAM_BUDGET_GIB:-4}" --set "memory-limit-mib=$(( $(bytes_of "$MEMORY_LIMIT") / 1048576 ))")
     fi
     # Follow the engine log in the job log: an OOM kill takes the container, and the uploaded artifact, with it.
-    tail -n +1 -F "$OUT/engine.log" 2>/dev/null &
+    # The engine itself logs to /data/state/strata/launch/<profile>.engine.log, next to the launch config it was given.
+    tail -n +1 -F "$OUT/engine.log" /data/state/strata/launch/q8_0-4k.engine.log /data/state/strata/launch/q8_0-4k.json 2>/dev/null &
     TAIL_PID=$!
     started=$(date +%s.%N)
     # One request at a time, no MTP/drafting, no pictures, no tuning: plain greedy decoding like the other engines.
@@ -165,6 +166,7 @@ PY
     bench "$started" '{"ignore_eos": true}' "$KEY" "$MODELDIR" /data/Strata-data
     /opt/strata/terminal/bin/strata launch --status --output json > "$OUT/strata-status.json" 2>&1 || true
     /opt/strata/terminal/bin/strata launch --stop >> "$OUT/engine.log" 2>&1 || true
+    cp /data/state/strata/launch/q8_0-4k.engine.log /data/state/strata/launch/q8_0-4k.json "$OUT/" 2>/dev/null || true
     kill "$TAIL_PID" 2>/dev/null || true
     ;;
   *) echo "unknown engine $ENGINE" >&2; exit 2 ;;
