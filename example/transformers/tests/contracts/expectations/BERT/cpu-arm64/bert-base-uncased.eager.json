@@ -1,21 +1,40 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/BERT-integration",
-  "contract_revision": "unpublished",
+  "contract_name": "BERT",
+  "contract_revision": "6a667eafaa05f8ff3c07e7698ce768d6271b1a79",
   "framework": "transformers",
   "variant": "eager",
   "target": "bert-base-uncased",
   "kind": "checkpoint",
   "revision": "86b5e0934494bd15c9632b12f734a8a67f723594",
   "environment": {
-   "python": "3.10.19",
-   "transformers": "5.19.0.dev0",
-   "torch": "2.11.0",
+   "python": "3.11.14",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0",
+   "torchvision": "0.29.2",
+   "torchaudio": "2.11.1",
    "tokenizers": "0.23.1",
-   "numpy": "1.26.4"
+   "numpy": "1.26.4",
+   "pillow": "12.2.0",
+   "accelerate": "1.13.0",
+   "safetensors": "0.8.0",
+   "huggingface-hub": "1.32.0",
+   "sentencepiece": "0.2.1",
+   "protobuf": "6.33.6",
+   "librosa": "0.11.0",
+   "soundfile": "0.13.1",
+   "scipy": "1.15.3",
+   "local_patches": [
+    "config-field-generation-params",
+    "masked-spec-embed-init",
+    "whisper-decode-tensor-batch"
+   ]
   },
-  "seconds": 0.32,
-  "platform": "cpu-arm64"
+  "seconds": 3.09,
+  "platform": "cpu-arm64",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {

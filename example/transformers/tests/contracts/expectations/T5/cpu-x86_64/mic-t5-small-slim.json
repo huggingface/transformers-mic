@@ -1,18 +1,23 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/T5-integration",
-  "contract_revision": "f3f9d6fc9c219baae452736af8a928c091095c02",
+  "contract_name": "T5",
+  "contract_revision": "2fe60bcd6fbdf615d93cd1599a5776459e7646bf",
   "framework": "transformers",
   "variant": "default",
   "target": "mic-t5-small-slim",
   "kind": "fixture",
   "revision": "4f4d0ca0db8f1823e53ac0cbcba28bd982b6e8f4",
+  "source_model": "google-t5/t5-small",
+  "weights": "random",
+  "fixture_repo": "hf-internal-testing/mic-t5-small-slim",
   "environment": {
-   "python": "3.10.22",
-   "transformers": "5.19.0.dev0",
-   "torch": "2.11.0+cpu",
-   "torchvision": "0.26.0+cpu",
-   "torchaudio": "2.11.0+cpu",
+   "python": "3.11.18",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0+cpu",
+   "torchvision": "0.29.2+cpu",
+   "torchaudio": "2.11.1+cpu",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
    "pillow": "12.2.0",
@@ -30,8 +35,9 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 4.17,
-  "platform": "cpu-x86_64"
+  "seconds": 7.02,
+  "platform": "cpu-x86_64",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {
@@ -109,18 +115,18 @@
   ],
   "label_logprobs": [
    [
-    -10.141916275024414,
+    -10.141915321350098,
     -9.734258651733398,
     -12.010519027709961,
     -10.778444290161133,
-    -11.155023574829102,
-    -11.17411994934082,
+    -11.155022621154785,
+    -11.174120903015137,
     0.0
    ],
    [
-    -10.16841983795166,
-    -11.666160583496094,
-    -11.40478801727295,
+    -10.168418884277344,
+    -11.666159629821777,
+    -11.404788970947266,
     -9.371376037597656,
     -11.850149154663086,
     -11.123132705688477,
@@ -128,8 +134,8 @@
    ],
    [
     -10.990324020385742,
-    -10.651444435119629,
-    -11.902166366577148,
+    -10.651445388793945,
+    -11.902167320251465,
     -11.009994506835938,
     -10.28740119934082,
     -10.04874038696289,
@@ -150,7 +156,7 @@
    "Hello, world! How are you?"
   ],
   "training": {
-   "loss": 10.951407432556152,
+   "loss": 10.951408386230469,
    "gradients": {
     "encoder.block.0.layer.0.SelfAttention.q.weight": true,
     "decoder.block.0.layer.1.EncDecAttention.q.weight": true

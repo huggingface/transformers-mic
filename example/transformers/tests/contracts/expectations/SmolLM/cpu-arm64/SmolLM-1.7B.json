@@ -1,19 +1,40 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/SmolLM-integration",
-  "target": "SmolLM-1.7B",
-  "variant": "default",
-  "revision": "d7449ff7241c863f3e8accc475155f0f97afa011",
+  "contract_name": "SmolLM",
+  "contract_revision": "d52a4cb53b22c728c547919e9a3549ce6e620aac",
   "framework": "transformers",
-  "contract_revision": "unpublished",
+  "variant": "default",
+  "target": "SmolLM-1.7B",
+  "kind": "checkpoint",
+  "revision": "d7449ff7241c863f3e8accc475155f0f97afa011",
   "environment": {
-   "python": "3.10.19",
-   "transformers": "5.19.0.dev0",
-   "torch": "2.11.0",
+   "python": "3.11.14",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0",
+   "torchvision": "0.29.2",
+   "torchaudio": "2.11.1",
    "tokenizers": "0.23.1",
-   "numpy": "1.26.4"
+   "numpy": "1.26.4",
+   "pillow": "12.2.0",
+   "accelerate": "1.13.0",
+   "safetensors": "0.8.0",
+   "huggingface-hub": "1.32.0",
+   "sentencepiece": "0.2.1",
+   "protobuf": "6.33.6",
+   "librosa": "0.11.0",
+   "soundfile": "0.13.1",
+   "scipy": "1.15.3",
+   "local_patches": [
+    "config-field-generation-params",
+    "masked-spec-embed-init",
+    "whisper-decode-tensor-batch"
+   ]
   },
-  "seconds": 178.93
+  "seconds": 191.77,
+  "platform": "cpu-arm64",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {
@@ -55,32 +76,32 @@
   ],
   "next_token_logits": [
    [
-    22.58429527282715,
-    15.275422096252441,
-    14.443500518798828,
-    14.985053062438965
+    22.58428955078125,
+    15.275425910949707,
+    14.44351577758789,
+    14.985057830810547
    ],
    [
-    13.44540023803711,
-    22.911849975585938,
-    13.620931625366211,
-    14.292756080627441
+    13.445406913757324,
+    22.911869049072266,
+    13.620945930480957,
+    14.292759895324707
    ],
    [
-    13.462964057922363,
-    14.646626472473145,
-    22.840126037597656,
-    13.735419273376465
+    13.462949752807617,
+    14.646618843078613,
+    22.840124130249023,
+    13.735424041748047
    ],
    [
-    13.871338844299316,
-    13.494141578674316,
-    13.873048782348633,
-    23.268171310424805
+    13.87134838104248,
+    13.494148254394531,
+    13.873064041137695,
+    23.268207550048828
    ]
   ],
   "training": {
-   "loss": 2.9605462551116943,
+   "loss": 2.9605469703674316,
    "gradients": {
     "model.layers.0.self_attn.q_proj.weight": true,
     "model.layers.0.mlp.down_proj.weight": true

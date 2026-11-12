@@ -1,18 +1,20 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/T5-integration",
-  "contract_revision": "f3f9d6fc9c219baae452736af8a928c091095c02",
+  "contract_name": "T5",
+  "contract_revision": "2fe60bcd6fbdf615d93cd1599a5776459e7646bf",
   "framework": "transformers",
   "variant": "eager",
   "target": "t5-small",
   "kind": "checkpoint",
   "revision": "df1b051c49625cf57a3d0d8d3863ed4d13564fe4",
   "environment": {
-   "python": "3.10.12",
-   "transformers": "5.19.0.dev0",
-   "torch": "2.11.0+cu128",
-   "torchvision": "0.26.0+cu128",
-   "torchaudio": "2.11.0+cu128",
+   "python": "3.11.18",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0+cu132",
+   "torchvision": "0.29.2+cu132",
+   "torchaudio": "2.11.1+cu132",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
    "pillow": "12.2.0",
@@ -30,8 +32,9 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 8.13,
-  "platform": "cuda"
+  "seconds": 8.08,
+  "platform": "cuda",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {

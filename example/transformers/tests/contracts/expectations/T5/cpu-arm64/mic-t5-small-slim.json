@@ -1,18 +1,23 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/T5-integration",
-  "contract_revision": "unpublished",
+  "contract_name": "T5",
+  "contract_revision": "2fe60bcd6fbdf615d93cd1599a5776459e7646bf",
   "framework": "transformers",
   "variant": "default",
   "target": "mic-t5-small-slim",
   "kind": "fixture",
-  "revision": "0a9ae9de5891182e5bce5afef05dbf4bdb8e7bae",
+  "revision": "4f4d0ca0db8f1823e53ac0cbcba28bd982b6e8f4",
+  "source_model": "google-t5/t5-small",
+  "weights": "random",
+  "fixture_repo": "hf-internal-testing/mic-t5-small-slim",
   "environment": {
-   "python": "3.10.19",
-   "transformers": "5.16.0.dev0",
-   "torch": "2.11.0",
-   "torchvision": "0.26.0",
-   "torchaudio": "2.11.0",
+   "python": "3.11.14",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0",
+   "torchvision": "0.29.2",
+   "torchaudio": "2.11.1",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
    "pillow": "12.2.0",
@@ -25,12 +30,14 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 0.19,
-  "platform": "cpu-arm64"
+  "seconds": 2.37,
+  "platform": "cpu-arm64",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {
@@ -108,11 +115,11 @@
   ],
   "label_logprobs": [
    [
-    -10.141914367675781,
-    -9.734256744384766,
+    -10.141915321350098,
+    -9.734257698059082,
     -12.010519027709961,
     -10.778444290161133,
-    -11.155023574829102,
+    -11.155024528503418,
     -11.17411994934082,
     0.0
    ],
@@ -121,12 +128,12 @@
     -11.666159629821777,
     -11.404787063598633,
     -9.37137508392334,
-    -11.85014820098877,
-    -11.12313175201416,
-    -11.696166038513184
+    -11.850147247314453,
+    -11.123132705688477,
+    -11.6961669921875
    ],
    [
-    -10.990325927734375,
+    -10.990324974060059,
     -10.651445388793945,
     -11.902166366577148,
     -11.009994506835938,
@@ -137,7 +144,7 @@
    [
     -10.57217788696289,
     -10.656261444091797,
-    -10.012958526611328,
+    -10.012959480285645,
     0.0,
     0.0,
     0.0,

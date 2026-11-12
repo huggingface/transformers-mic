@@ -1,18 +1,20 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/CLIP-integration",
-  "contract_revision": "cb2e2abc4c4c992c316ab40d4a3360b1e748fcfe",
+  "contract_name": "CLIP",
+  "contract_revision": "423a026e65fe49bdc292fb25d0a67f8467f6f004",
   "framework": "transformers",
   "variant": "eager",
   "target": "clip-vit-base-patch32",
   "kind": "checkpoint",
   "revision": "3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268",
   "environment": {
-   "python": "3.10.22",
-   "transformers": "5.19.0.dev0",
-   "torch": "2.11.0+cpu",
-   "torchvision": "0.26.0+cpu",
-   "torchaudio": "2.11.0+cpu",
+   "python": "3.11.18",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0+cpu",
+   "torchvision": "0.29.2+cpu",
+   "torchaudio": "2.11.1+cpu",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
    "pillow": "12.2.0",
@@ -30,8 +32,9 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 7.3,
-  "platform": "cpu-x86_64"
+  "seconds": 23.69,
+  "platform": "cpu-x86_64",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {
@@ -53,27 +56,27 @@
   ],
   "logits_per_image": [
    [
-    29.011201858520508,
+    29.011186599731445,
     23.467313766479492,
-    24.06245231628418,
-    24.897218704223633
+    24.06244468688965,
+    24.897214889526367
    ],
    [
-    24.895204544067383,
-    30.73404884338379,
-    24.835481643676758,
+    24.895200729370117,
+    30.734052658081055,
+    24.83548355102539,
     26.031173706054688
    ],
    [
-    25.76913070678711,
-    24.2020206451416,
-    30.77471160888672,
-    25.207374572753906
+    25.769123077392578,
+    24.2020263671875,
+    30.774709701538086,
+    25.207378387451172
    ],
    [
-    22.961444854736328,
-    23.994422912597656,
-    24.10390853881836,
+    22.961437225341797,
+    23.994426727294922,
+    24.103900909423828,
     31.413105010986328
    ]
   ],
@@ -131,7 +134,7 @@
    "size"
   ],
   "training": {
-   "loss": 0.01594645529985428,
+   "loss": 0.01594652608036995,
    "gradients": {
     "visual_projection.weight": true,
     "text_projection.weight": true

@@ -1,18 +1,20 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/CLIP-integration",
-  "contract_revision": "cb2e2abc4c4c992c316ab40d4a3360b1e748fcfe",
+  "contract_name": "CLIP",
+  "contract_revision": "423a026e65fe49bdc292fb25d0a67f8467f6f004",
   "framework": "transformers",
   "variant": "default",
   "target": "clip-vit-base-patch32",
   "kind": "checkpoint",
   "revision": "3d74acf9a28c67741b2f4f2ea7635f0aaf6f0268",
   "environment": {
-   "python": "3.10.12",
-   "transformers": "5.19.0.dev0",
-   "torch": "2.11.0+cu128",
-   "torchvision": "0.26.0+cu128",
-   "torchaudio": "2.11.0+cu128",
+   "python": "3.11.18",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0+cu132",
+   "torchvision": "0.29.2+cu132",
+   "torchaudio": "2.11.1+cu132",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
    "pillow": "12.2.0",
@@ -30,8 +32,9 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 25.0,
-  "platform": "cuda"
+  "seconds": 10.75,
+  "platform": "cuda",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {
@@ -53,28 +56,28 @@
   ],
   "logits_per_image": [
    [
-    29.01119613647461,
-    23.467321395874023,
-    24.062463760375977,
-    24.897214889526367
+    29.01036834716797,
+    23.467859268188477,
+    24.062408447265625,
+    24.897687911987305
    ],
    [
-    24.895221710205078,
-    30.73406219482422,
-    24.835487365722656,
-    26.031171798706055
+    24.8953857421875,
+    30.733978271484375,
+    24.835739135742188,
+    26.031234741210938
    ],
    [
-    25.769123077392578,
-    24.202024459838867,
-    30.774703979492188,
-    25.20737075805664
+    25.768173217773438,
+    24.201236724853516,
+    30.77382469177246,
+    25.206777572631836
    ],
    [
-    22.961442947387695,
-    23.994422912597656,
-    24.103904724121094,
-    31.413114547729492
+    22.962430953979492,
+    23.99327850341797,
+    24.103979110717773,
+    31.413009643554688
    ]
   ],
   "text_kwargs_input_ids": [
@@ -131,7 +134,7 @@
    "size"
   ],
   "training": {
-   "loss": 0.01594649627804756,
+   "loss": 0.01595316082239151,
    "gradients": {
     "visual_projection.weight": true,
     "text_projection.weight": true
