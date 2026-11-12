@@ -44,7 +44,7 @@ jobs:
           df -h /mnt/cache > out/storage.txt
           cat /proc/meminfo > out/meminfo.txt
           python3 -m pip freeze > out/packages.txt
-          git rev-parse HEAD > out/mic-sha.txt
+          git -c safe.directory="$PWD" rev-parse HEAD > out/mic-sha.txt
           sha256sum experiments/ssd-moe/transformers.patch > out/patch-sha256.txt
       - name: Run correctness tests
         shell: bash
