@@ -40,7 +40,8 @@ def gpu_used_bytes():
             timeout=10,
             check=True,
         ).stdout
-        return int(out.strip().splitlines()[0]) * 1024**2
+        # Leave out the GPU balloon (run_engine.sh's simulated smaller GPU): only what the engine itself uses.
+        return int(out.strip().splitlines()[0]) * 1024**2 - int(os.environ.get("GPU_BALLOON_BYTES", "0"))
     except Exception:
         return None
 

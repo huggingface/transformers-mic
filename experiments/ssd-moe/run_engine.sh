@@ -20,7 +20,7 @@ field() { "$PY" -c "import json,sys; print(json.load(open('$PATHS'))[sys.argv[1]
 { nvidia-smi || true; df -h / /tmp || true; cat /proc/meminfo; nproc
   for f in memory.max memory.high cpu.max; do echo "cgroup $f: $(cat /sys/fs/cgroup/$f 2>/dev/null || echo n/a)"; done; } > "$OUT/environment.txt" 2>&1
 cp "$PATHS" "$OUT/paths.json"
-echo "memory limit: ${MEMORY_LIMIT:-none}" | tee "$OUT/memory-limit.txt"
+echo "memory limit: ${MEMORY_LIMIT:-none}, GPU limit: ${GPU_LIMIT:-none}" | tee "$OUT/memory-limit.txt"
 cgroup_after() {  # peak RAM of this container (anon + page cache) and whether the OOM killer fired
   { echo "balloon alive: $([ -n "${BALLOON_PID:-}" ] && kill -0 "$BALLOON_PID" 2>/dev/null && echo yes || echo no)"
     for f in memory.max memory.peak memory.events; do echo "== $f"; cat /sys/fs/cgroup/$f 2>/dev/null || echo n/a; done; } > "$OUT/cgroup-after.txt"
@@ -51,41 +51,59 @@ bench() {  # bench STARTED_AT EXTRA_JSON API_KEY EVICT_PATHS...
 
 stop_server() { kill "$SERVER_PID" 2>/dev/null || true; wait "$SERVER_PID" 2>/dev/null || true; cgroup_after; }
 
-limit_memory() {  # with MEMORY_LIMIT (e.g. 12g), leave the engine and the page cache only that much RAM; call after staging
-  [ -n "${MEMORY_LIMIT:-}" ] || return 0
-  local bytes
-  bytes=$("$1" -c "import sys; v=sys.argv[1].lower(); u={'k':1<<10,'m':1<<20,'g':1<<30}; print(int(float(v[:-1])*u[v[-1]]) if v[-1] in u else int(v))" "$MEMORY_LIMIT")
+bytes_of() { "$PY" -c "import sys; v=sys.argv[1].lower(); u={'k':1<<10,'m':1<<20,'g':1<<30}; print(int(float(v[:-1])*u[v[-1]]) if v[-1] in u else int(v))" "$1"; }
+
+limit_memory() {  # with MEMORY_LIMIT / GPU_LIMIT (e.g. 12g), leave the engine only that much RAM / GPU memory; call after staging
+  [ -n "${MEMORY_LIMIT:-}${GPU_LIMIT:-}" ] || return 0
+  local ram=0 gpu=0
+  [ -z "${MEMORY_LIMIT:-}" ] || ram=$(bytes_of "$MEMORY_LIMIT")
+  [ -z "${GPU_LIMIT:-}" ] || gpu=$(bytes_of "$GPU_LIMIT")
   rm -f /tmp/balloon.ready
-  "$1" "$HERE/balloon.py" "$bytes" /tmp/balloon.ready &
+  "$PY" "$HERE/balloon.py" "$ram" "$gpu" /tmp/balloon.ready &
   BALLOON_PID=$!
   for _ in $(seq 600); do [ -s /tmp/balloon.ready ] && break; kill -0 "$BALLOON_PID" || { echo "balloon died" >&2; exit 1; }; sleep 1; done
   [ -s /tmp/balloon.ready ] || { echo "balloon not ready" >&2; exit 1; }
-  { cat /tmp/balloon.ready; cat /proc/swaps; grep -E "^(anon|file) " /sys/fs/cgroup/memory.stat; } | tee -a "$OUT/memory-limit.txt"
+  { cat /tmp/balloon.ready; cat /proc/swaps; grep -E "^(anon|file) " /sys/fs/cgroup/memory.stat
+    nvidia-smi --query-gpu=memory.used,memory.total --format=csv; } 2>&1 | tee -a "$OUT/memory-limit.txt"
+  GPU_BALLOON_BYTES=$(awk '$1 == "gpu" {print $5}' /tmp/balloon.ready); export GPU_BALLOON_BYTES=${GPU_BALLOON_BYTES:-0}
   echo 1000 > /proc/self/oom_score_adj  # the engine, not the balloon, is what the OOM killer takes
 }
 
 case "$ENGINE" in
-  transformers-streaming | transformers-offload)
+  transformers-streaming | transformers-streaming-q8_0 | transformers-offload)
     CKPT=/tmp/qwen36-bf16
     stage "$(field safetensors)" "$CKPT"
     disk_probe "$(ls "$CKPT"/*.safetensors | head -1)"
-    limit_memory "$PY"
+    evict_paths=("$CKPT")
+    if [ "$ENGINE" = transformers-streaming-q8_0 ]; then  # the same Q8_0 GGUF file llama.cpp and Strata read
+      GGUF=/tmp/gguf/model-q8_0.gguf; stage "$(field gguf_q8_0)" "$GGUF"; evict_paths+=(/tmp/gguf)
+    fi
+    limit_memory
     git -C framework apply "$HERE/transformers.patch"
-    "$PY" -m pip install -q -e framework
+    "$PY" -m pip install -q -e framework "kernels>=0.18.2,<0.19"
     "$PY" -m pip freeze > "$OUT/packages.txt"
     (cd framework && PYTHONPATH=src "$PY" -m unittest discover -s tests/integrations -p test_ssd_moe.py -v) > "$OUT/tests.log" 2>&1
-    "$PY" - "$CKPT" <<'PY'
+    if [ "$ENGINE" = transformers-streaming-q8_0 ]; then
+      PYTHONPATH=framework/src "$PY" "$HERE/check_gguf_experts.py" "$CKPT" "$GGUF" "$OUT/gguf-check.json" 2>&1 | tee "$OUT/gguf-check.log"
+    fi
+    "$PY" - "${evict_paths[@]}" <<'PY'
 import os, sys
-for d, _, fs in os.walk(sys.argv[1]):
-    for f in fs:
-        fd = os.open(os.path.join(d, f), os.O_RDONLY); os.posix_fadvise(fd, 0, 0, os.POSIX_FADV_DONTNEED); os.close(fd)
+for root in sys.argv[1:]:
+    for d, _, fs in os.walk(root):
+        for f in fs:
+            fd = os.open(os.path.join(d, f), os.O_RDONLY); os.posix_fadvise(fd, 0, 0, os.POSIX_FADV_DONTNEED); os.close(fd)
 PY
-    if [ "$ENGINE" = transformers-streaming ]; then
-      mode_args=(--mode streaming --cache-mib "${CACHE_MIB:-16384}")
+    # Expert cache: what the GPU budget leaves after the 4.6 GiB of BF16 dense weights, activations and the CUDA context.
+    cache_mib=${CACHE_MIB:-$([ -n "${GPU_LIMIT:-}" ] && echo $(( $(bytes_of "$GPU_LIMIT") / 1048576 - 6656 )) || echo 16384)}
+    if [ "$ENGINE" = transformers-streaming-q8_0 ]; then
+      mode_args=(--mode streaming --cache-mib "$cache_mib" --experts-gguf "$GGUF")
+    elif [ "$ENGINE" = transformers-streaming ]; then
+      mode_args=(--mode streaming --cache-mib "$cache_mib")
     else
       mode_args=(--mode offload --offload-gpu-mib 18432 --offload-cpu-mib "${OFFLOAD_CPU_MIB:-$([ -n "${MEMORY_LIMIT:-}" ] && echo 2048 || echo 40960)}" --offload-folder /tmp/offload)
     fi
-    PYTHONPATH=framework/src "$PY" framework/examples/generate/ssd_moe.py "$CKPT" "${mode_args[@]}" \
+    # Hub kernels (Qwen3.6 linear attention, causal conv, RMSNorm) are fetched from the Hub, so this step is online.
+    HF_HUB_OFFLINE=0 PYTHONPATH=framework/src "$PY" framework/examples/generate/ssd_moe.py "$CKPT" "${mode_args[@]}" --use-kernels \
       --chat --prompt-file "$HERE/prompt.txt" --device cuda --dtype bfloat16 --threads "$CPUS" \
       --max-new-tokens "$MAX_TOKENS" --runs 2 --output "$OUT/result.json" > "$OUT/engine.log" 2>&1
     ;;
@@ -93,7 +111,7 @@ PY
     CKPT=/tmp/qwen36-bf16
     stage "$(field safetensors)" "$CKPT"
     disk_probe "$(ls "$CKPT"/*.safetensors | head -1)"
-    limit_memory "$PY"
+    limit_memory
     "$PY" -m pip freeze > "$OUT/packages.txt"
     started=$(date +%s.%N)
     vllm serve "$CKPT" --served-model-name model --port 8080 --host 127.0.0.1 --dtype bfloat16 --seed 0 \
@@ -106,7 +124,7 @@ PY
     if [ "$ENGINE" = llamacpp-bf16 ]; then GGUF=/tmp/gguf/model-bf16.gguf; stage "$(field gguf_bf16)" "$GGUF";
     else GGUF=/tmp/gguf/model-q8_0.gguf; stage "$(field gguf_q8_0)" "$GGUF"; fi
     disk_probe "$GGUF"
-    limit_memory "$PY"
+    limit_memory
     # The runner's container hook does not keep the image's library path; the shared libraries live next to the binaries.
     export LD_LIBRARY_PATH=/app${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
     /app/llama-server --version > "$OUT/packages.txt" 2>&1 || true
@@ -122,7 +140,7 @@ PY
     MODELDIR=/tmp/strata-models/Qwen3.6-35B-A3B-Q8_0
     stage "$(field gguf_q8_0)" "$MODELDIR/Qwen3.6-35B-A3B-Q8_0.gguf"
     disk_probe "$MODELDIR/Qwen3.6-35B-A3B-Q8_0.gguf"
-    limit_memory "$PY"
+    limit_memory
     export XDG_STATE_HOME=/data/state XDG_CONFIG_HOME=/data/config HOME=/data/home STRATA_INSTALL_DIR=/data/install
     export STRATA_COMPONENTS_DIR=/opt/strata/components STRATA_IN_DOCKER=1
     mkdir -p /data/state /data/config /data/home /data/install /data/Strata-data

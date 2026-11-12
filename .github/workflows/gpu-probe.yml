@@ -19,7 +19,10 @@ on:
         description: Generated tokens per request (greedy, same prompt for every engine)
         default: '32'
       memory_limit:
-        description: RAM cap for each engine container (docker --memory, e.g. 12g); empty = the pod's limit
+        description: RAM left to each engine (e.g. 12g), simulated with a locked-memory balloon; empty = the pod's limit
+        default: ''
+      gpu_limit:
+        description: GPU memory left to each engine (e.g. 12g), simulated with a CUDA allocation; empty = the whole GPU
         default: ''
 
 permissions:
@@ -62,6 +65,7 @@ jobs:
     container:
       image: >-
         ${{ fromJSON('{"transformers-streaming": "huggingface/transformers-all-latest-gpu",
+        "transformers-streaming-q8_0": "huggingface/transformers-all-latest-gpu",
         "transformers-offload": "huggingface/transformers-all-latest-gpu",
         "vllm": "vllm/vllm-openai:v0.32.0",
         "llamacpp-bf16": "ghcr.io/ggml-org/llama.cpp:full-cuda-b11977",
@@ -71,11 +75,11 @@ jobs:
         --gpus all --shm-size "16gb" --ipc host --ulimit memlock=-1:-1
         -e NVIDIA_DRIVER_CAPABILITIES=compute,utility
         -v /mnt/cache/.cache/huggingface:/mnt/cache/
-        ${{ inputs.memory_limit && format('--memory {0} --memory-swap {0}', inputs.memory_limit) || '' }}
     env:
       HF_HOME: /mnt/cache
       HF_HUB_OFFLINE: '1'
       MEMORY_LIMIT: ${{ inputs.memory_limit }}
+      GPU_LIMIT: ${{ inputs.gpu_limit }}
       CUDA_VISIBLE_DEVICES: '0'
       PYTHONUNBUFFERED: '1'
       TOKENIZERS_PARALLELISM: 'false'
@@ -111,10 +115,10 @@ jobs:
           merge-multiple: true
       - name: Build the comparison table
         run: |
-          echo "Memory limit per engine container: ${{ inputs.memory_limit || 'none (pod limit)' }}" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "RAM per engine: ${{ inputs.memory_limit || 'pod limit' }}; GPU memory per engine: ${{ inputs.gpu_limit || 'whole GPU' }}" | tee -a "$GITHUB_STEP_SUMMARY"
           python3 experiments/ssd-moe/summarize.py results | tee -a "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
-          name: qwen36-side-by-side${{ inputs.memory_limit && format('-mem{0}', inputs.memory_limit) || '' }}
+          name: qwen36-side-by-side${{ inputs.memory_limit && format('-ram{0}', inputs.memory_limit) || '' }}${{ inputs.gpu_limit && format('-gpu{0}', inputs.gpu_limit) || '' }}
           path: results/
           retention-days: 14

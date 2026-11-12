@@ -1,9 +1,9 @@
 diff --git a/examples/generate/ssd_moe.py b/examples/generate/ssd_moe.py
 new file mode 100644
-index 0000000000..3f8ef0b8f3
+index 0000000000..13d380c1c0
 --- /dev/null
 +++ b/examples/generate/ssd_moe.py
-@@ -0,0 +1,261 @@
+@@ -0,0 +1,279 @@
 +# Copyright 2026 The HuggingFace Team. All rights reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -161,6 +161,16 @@ index 0000000000..3f8ef0b8f3
 +    parser.add_argument(
 +        "--cache-mib", type=float, default=256, help="Global device expert-cache budget, not total memory"
 +    )
++    parser.add_argument(
++        "--experts-gguf",
++        type=Path,
++        help="streaming mode: read the experts from this llama.cpp GGUF of the same model (e.g. Q8_0) instead",
++    )
++    parser.add_argument(
++        "--use-kernels",
++        action="store_true",
++        help="Use Hub kernels (the `kernels` package) for supported layers, e.g. Qwen3.5/3.6 linear attention",
++    )
 +    parser.add_argument("--expert-token-chunk-size", type=int, default=256)
 +    parser.add_argument("--prefill-chunk-size", type=int, default=256, help="Tokens per model prefill call")
 +    parser.add_argument("--max-new-tokens", type=int, default=16)
@@ -179,6 +189,8 @@ index 0000000000..3f8ef0b8f3
 +        parser.error("Token counts, chunk sizes, runs and threads must be positive")
 +    if args.cache_mib < 0:
 +        parser.error("Cache size must be nonnegative")
++    if args.experts_gguf and args.mode != "streaming":
++        parser.error("--experts-gguf needs --mode streaming")
 +    torch.set_num_threads(args.threads)
 +    device = torch.device(args.device)
 +    dtype = getattr(torch, args.dtype)
@@ -205,6 +217,7 @@ index 0000000000..3f8ef0b8f3
 +            dtype=dtype,
 +            cache_bytes=int(args.cache_mib * 1024**2) if args.mode == "streaming" else 0,
 +            token_chunk_size=args.expert_token_chunk_size,
++            experts_gguf=args.experts_gguf,
 +        )
 +        if args.mode == "layerwise":
 +            ExpertsInterface.register("ssd_layerwise", layerwise_experts_forward)
@@ -226,6 +239,9 @@ index 0000000000..3f8ef0b8f3
 +                **kwargs,
 +            )
 +        model.eval()
++    if args.use_kernels:
++        # Kernelize after loading: the streamed experts are not a kernelized layer, so they are left as they are.
++        model.set_use_kernels(True)
 +    synchronize(device)
 +    report = {
 +        "checkpoint": str(args.checkpoint.resolve()),
@@ -237,6 +253,8 @@ index 0000000000..3f8ef0b8f3
 +        "threads": args.threads,
 +        "prompt": args.prompt,
 +        "chat_template": args.chat,
++        "experts_gguf": str(args.experts_gguf.resolve()) if args.experts_gguf else None,
++        "use_kernels": args.use_kernels,
 +        "cache_budget_bytes": int(args.cache_mib * 1024**2) if args.mode == "streaming" else None,
 +        "prefill_chunk_size": args.prefill_chunk_size,
 +        "expert_token_chunk_size": args.expert_token_chunk_size,
@@ -267,10 +285,10 @@ index 0000000000..3f8ef0b8f3
 +    main()
 diff --git a/src/transformers/integrations/ssd_moe.py b/src/transformers/integrations/ssd_moe.py
 new file mode 100644
-index 0000000000..592a8793f8
+index 0000000000..41349891fb
 --- /dev/null
 +++ b/src/transformers/integrations/ssd_moe.py
-@@ -0,0 +1,335 @@
+@@ -0,0 +1,494 @@
 +# Copyright 2026 The HuggingFace Team. All rights reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -287,6 +305,8 @@ index 0000000000..592a8793f8
 +"""Experimental, inference-only Qwen MoE expert streaming, without Accelerate or native I/O dependencies.
 +
 +Supported checkpoints: ``qwen3_moe`` and the text model of ``qwen3_5_moe`` (Qwen3.5/3.6 MoE), unquantized.
++The experts can instead come from a llama.cpp GGUF of the same model (Q8_0, F16, BF16 or F32 expert tensors), so that
++the streamed bytes match what llama.cpp-based engines read; dense weights still come from the safetensors checkpoint.
 +
 +This is a single-device proof of concept, not a general replacement for ``from_pretrained``.
 +The checkpoint remains on disk; dense parameters and a byte-bounded expert LRU live on the device.
@@ -295,6 +315,8 @@ index 0000000000..592a8793f8
 +
 +import json
 +import math
++import re
++import struct
 +from collections import OrderedDict
 +from pathlib import Path
 +
@@ -424,18 +446,126 @@ index 0000000000..592a8793f8
 +        return torch.frombuffer(data, dtype=dtype).reshape(shape)
 +
 +
++# GGUF metadata value types -> struct formats (8 = string and 9 = array are handled separately).
++_GGUF_SCALARS = {0: "<B", 1: "<b", 2: "<H", 3: "<h", 4: "<I", 5: "<i", 6: "<f", 7: "<?", 10: "<Q", 11: "<q", 12: "<d"}
++# ggml tensor types this reader understands -> (elements per block, bytes per block).
++_GGML_F32, _GGML_F16, _GGML_Q8_0, _GGML_BF16 = 0, 1, 8, 30
++_GGML_BLOCKS = {_GGML_F32: (1, 4), _GGML_F16: (1, 2), _GGML_Q8_0: (32, 34), _GGML_BF16: (1, 2)}
++_GGUF_PROJECTIONS = {"gate": "ffn_gate_exps", "up": "ffn_up_exps", "down": "ffn_down_exps"}
++
++
++def _read_gguf_index(handle):
++    """Parse a GGUF (v2/v3) header: {tensor name: (ggml dims, ggml type, absolute offset)}. Reads no tensor data."""
++
++    def read(fmt):
++        return struct.unpack(fmt, handle.read(struct.calcsize(fmt)))[0]
++
++    def string():
++        return handle.read(read("<Q")).decode("utf-8")
++
++    def value(kind):
++        if kind == 8:
++            return string()
++        if kind == 9:
++            item, count = read("<I"), read("<Q")
++            return [value(item) for _ in range(count)]
++        if kind not in _GGUF_SCALARS:
++            raise ValueError(f"Unknown GGUF metadata type {kind}")
++        return read(_GGUF_SCALARS[kind])
++
++    if handle.read(4) != b"GGUF":
++        raise ValueError("Not a GGUF file")
++    version, n_tensors, n_metadata = read("<I"), read("<Q"), read("<Q")
++    if version not in (2, 3):
++        raise ValueError(f"Unsupported GGUF version {version}")
++    metadata = {}
++    for _ in range(n_metadata):
++        key = string()
++        metadata[key] = value(read("<I"))
++    infos = []
++    for _ in range(n_tensors):
++        name = string()
++        dims = [read("<Q") for _ in range(read("<I"))]
++        infos.append((name, dims, read("<I"), read("<Q")))
++    alignment = metadata.get("general.alignment", 32)
++    start = handle.tell()
++    start += -start % alignment
++    return {name: (dims, kind, start + offset) for name, dims, kind, offset in infos}
++
++
++class GGUFExpertReader:
++    """Read single experts of llama.cpp ``blk.N.ffn_{gate,up,down}_exps`` tensors, as raw bytes.
++
++    ggml stores such a tensor with dims ``[columns, rows, experts]`` (innermost first), so one expert is one contiguous
++    ``rows x columns`` matrix in the PyTorch ``(out_features, in_features)`` orientation. Q8_0 rows are blocks of one
++    float16 scale and 32 int8 values; they stay quantized until :func:`dequantize_gguf` runs on the execution device.
++    """
++
++    def __init__(self, path):
++        self.path = Path(path).resolve()
++        with self.path.open("rb") as handle:
++            self.tensors = _read_gguf_index(handle)
++        self.read_bytes = 0
++        self.read_calls = 0
++
++    def layout(self, layer, projection):
++        name = f"blk.{layer}.{_GGUF_PROJECTIONS[projection]}.weight"
++        if name not in self.tensors:
++            raise ValueError(f"Missing GGUF expert tensor {name}")
++        dims, kind, offset = self.tensors[name]
++        if kind not in _GGML_BLOCKS or len(dims) != 3:
++            raise ValueError(f"Unsupported GGUF expert tensor {name}: ggml type {kind}, dims {dims}")
++        columns, rows, experts = dims
++        block_elements, block_bytes = _GGML_BLOCKS[kind]
++        if columns % block_elements:
++            raise ValueError(f"GGUF row of {name} is not a whole number of blocks")
++        expert_bytes = rows * columns // block_elements * block_bytes
++        return kind, rows, columns, experts, offset, expert_bytes
++
++    def read(self, layer, projection, expert):
++        kind, rows, columns, experts, offset, size = self.layout(layer, projection)
++        if not 0 <= expert < experts:
++            raise ValueError(f"Invalid expert {expert} for layer {layer}")
++        data = bytearray(size)
++        with self.path.open("rb", buffering=0) as handle:
++            handle.seek(offset + expert * size)
++            view = memoryview(data)
++            done = 0
++            while done < size:
++                count = handle.readinto(view[done:])
++                if not count:
++                    raise OSError(f"Short GGUF read: {self.path}, layer {layer} {projection}")
++                done += count
++        self.read_bytes += size
++        self.read_calls += 1
++        return torch.frombuffer(data, dtype=torch.uint8)
++
++
++def dequantize_gguf(raw, kind, rows, columns, dtype):
++    """Raw bytes of one ggml matrix (on any device) -> a ``(rows, columns)`` tensor of ``dtype`` on that device."""
++    if kind == _GGML_Q8_0:
++        blocks = raw.view(rows, columns // 32, 34)
++        scales = blocks[..., :2].contiguous().view(torch.float16).float()
++        values = blocks[..., 2:].contiguous().view(torch.int8).float()
++        return (values * scales).to(dtype).reshape(rows, columns)
++    source = {_GGML_F32: torch.float32, _GGML_F16: torch.float16, _GGML_BF16: torch.bfloat16}[kind]
++    return raw.view(source).reshape(rows, columns).to(dtype)
++
++
 +class ExpertStore:
-+    """One global LRU across layers, budgeted in bytes of the execution dtype on the execution device.
++    """One global LRU across layers, budgeted in bytes of what it keeps on the execution device: the execution dtype,
++    or the GGUF's own bytes (e.g. Q8_0) when the experts come from a GGUF, dequantized on each use.
 +
 +    A miss evicts before loading. One active expert plus conversion/staging memory may exceed the cache
 +    budget. Eviction never overwrites a tensor used by queued work; PyTorch owns tensor lifetimes.
 +    The store is synchronous and intended for one inference request at a time.
 +    """
 +
-+    def __init__(self, reader, cache_bytes, device, dtype):
++    def __init__(self, reader, cache_bytes, device, dtype, gguf=None):
 +        if cache_bytes < 0:
 +            raise ValueError("cache_bytes must be nonnegative")
 +        self.reader = reader
++        self.gguf = gguf
 +        self.cache_bytes = cache_bytes
 +        self.device = torch.device(device)
 +        self.dtype = dtype
@@ -466,6 +596,26 @@ index 0000000000..592a8793f8
 +            if name not in self.reader.tensors or self.reader.shape(name) != shape:
 +                raise ValueError(f"Missing or incompatible expert tensor {name}; expected {shape}")
 +        self.layouts[prefix] = (packed, 3 * module.intermediate_dim * module.hidden_dim)
++        if self.gguf is not None:
++            match = re.search(r"\.layers\.(\d+)\.", f".{prefix}.")
++            if match is None:
++                raise ValueError(f"Cannot find the layer index of {prefix}")
++            layer = int(match.group(1))
++            expected = {
++                "gate": (module.intermediate_dim, module.hidden_dim),
++                "up": (module.intermediate_dim, module.hidden_dim),
++                "down": (module.hidden_dim, module.intermediate_dim),
++            }
++            layouts = {}
++            for projection, shape in expected.items():
++                kind, rows, columns, experts, _, size = self.gguf.layout(layer, projection)
++                if (rows, columns) != shape or experts != module.num_experts:
++                    raise ValueError(
++                        f"GGUF layer {layer} {projection} is {experts}x{rows}x{columns}; expected {shape}"
++                    )
++                layouts[projection] = (kind, rows, columns, size)
++            # The safetensors expert banks are deliberately not read: they count as consumed.
++            self.layouts[prefix] = ("gguf", layer, layouts)
 +        return set(names)
 +
 +    def get(self, prefix, expert):
@@ -473,15 +623,24 @@ index 0000000000..592a8793f8
 +        if key in self.cache:
 +            self.hits += 1
 +            self.cache.move_to_end(key)
-+            return self.cache[key]
++            return self._materialize(prefix, self.cache[key])
 +        self.misses += 1
-+        packed, elements = self.layouts[prefix]
-+        size = elements * torch.empty((), dtype=self.dtype).element_size()
++        layout = self.layouts[prefix]
++        if layout[0] == "gguf":
++            _, layer, layouts = layout
++            size = sum(entry[3] for entry in layouts.values())
++        else:
++            packed, elements = layout
++            size = elements * torch.empty((), dtype=self.dtype).element_size()
 +        while self.cache and self.resident_bytes + size > self.cache_bytes:
 +            _, (_, _, old_size) = self.cache.popitem(last=False)
 +            self.resident_bytes -= old_size
 +            self.evictions += 1
-+        if packed:
++        if layout[0] == "gguf":
++            # Keep the GGUF bytes on the device; dequantize each time the expert runs.
++            gate_up = tuple(self.gguf.read(layer, p, expert).to(self.device) for p in ("gate", "up"))
++            down = self.gguf.read(layer, "down", expert).to(self.device)
++        elif packed:
 +            gate_up = self.reader.read(f"{prefix}.gate_up_proj", expert).to(self.device, self.dtype)
 +            down = self.reader.read(f"{prefix}.down_proj", expert).to(self.device, self.dtype)
 +        else:
@@ -495,7 +654,18 @@ index 0000000000..592a8793f8
 +            self.cache[key] = result
 +            self.resident_bytes += size
 +            self.peak_cache_bytes = max(self.peak_cache_bytes, self.resident_bytes)
-+        return result
++        return self._materialize(prefix, result)
++
++    def _materialize(self, prefix, entry):
++        gate_up, down, size = entry
++        layout = self.layouts[prefix]
++        if layout[0] != "gguf":
++            return entry
++        layouts = layout[2]
++        gate_up = torch.cat(
++            [dequantize_gguf(raw, *layouts[p][:3], self.dtype) for raw, p in zip(gate_up, ("gate", "up"))]
++        )
++        return gate_up, dequantize_gguf(down, *layouts["down"][:3], self.dtype), size
 +
 +    def stats(self):
 +        return {
@@ -504,8 +674,8 @@ index 0000000000..592a8793f8
 +            "evictions": self.evictions,
 +            "resident_bytes": self.resident_bytes,
 +            "peak_cache_bytes": self.peak_cache_bytes,
-+            "read_bytes": self.reader.read_bytes,
-+            "read_calls": self.reader.read_calls,
++            "read_bytes": self.reader.read_bytes + (self.gguf.read_bytes if self.gguf else 0),
++            "read_calls": self.reader.read_calls + (self.gguf.read_calls if self.gguf else 0),
 +        }
 +
 +
@@ -538,8 +708,13 @@ index 0000000000..592a8793f8
 +    return result
 +
 +
-+def load_moe_from_ssd(directory, *, device="cpu", dtype=torch.float32, cache_bytes=0, token_chunk_size=256):
++def load_moe_from_ssd(
++    directory, *, device="cpu", dtype=torch.float32, cache_bytes=0, token_chunk_size=256, experts_gguf=None
++):
 +    """Load a local, unquantized Qwen MoE checkpoint without allocating resident expert banks.
++
++    With ``experts_gguf`` (a llama.cpp GGUF of the same model), the experts are streamed from that file instead, in its
++    own quantization (Q8_0 is dequantized on the device at each use); ``cache_bytes`` then counts the GGUF's bytes.
 +
 +    Supports ``qwen3_moe`` (original per-expert or packed experts) and the text model of ``qwen3_5_moe``.
 +    Does not require Accelerate, checkpoint conversion, kernels, or a second copy of the weights.
@@ -560,7 +735,7 @@ index 0000000000..592a8793f8
 +    # Resolve cuda -> cuda:0 and analogous device aliases for forward validation.
 +    device = torch.empty(0, device=device).device
 +    reader = SafetensorsReader(directory)
-+    store = ExpertStore(reader, cache_bytes, device, dtype)
++    store = ExpertStore(reader, cache_bytes, device, dtype, GGUFExpertReader(experts_gguf) if experts_gguf else None)
 +
 +    def checkpoint_name(name):
 +        return prefix + name.removeprefix("model.") if name.startswith("model.") else name
@@ -601,6 +776,8 @@ index 0000000000..592a8793f8
 +    model.ssd_store = store
 +    # Exclude dense startup I/O from expert runtime counters.
 +    reader.read_bytes = reader.read_calls = 0
++    if store.gguf is not None:
++        store.gguf.read_bytes = store.gguf.read_calls = 0
 +    return model
 +
 +
@@ -608,10 +785,10 @@ index 0000000000..592a8793f8
 +load_qwen3_moe_from_ssd = load_moe_from_ssd
 diff --git a/tests/integrations/test_ssd_moe.py b/tests/integrations/test_ssd_moe.py
 new file mode 100644
-index 0000000000..b001bb255b
+index 0000000000..8f4f5260b5
 --- /dev/null
 +++ b/tests/integrations/test_ssd_moe.py
-@@ -0,0 +1,220 @@
+@@ -0,0 +1,296 @@
 +# Copyright 2026 The HuggingFace Team. All rights reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -832,3 +1009,79 @@ index 0000000000..b001bb255b
 +                torch.testing.assert_close(actual, expected)
 +                torch.testing.assert_close(streamed(ids).logits, reference(ids).logits, atol=1e-6, rtol=1e-5)
 +            self.assertGreater(streamed.ssd_store.evictions, 0)
++
++
++def quantize_q8_0(weight):
++    """A (rows, columns) float tensor -> (raw Q8_0 bytes, the weight those bytes dequantize to)."""
++    blocks = weight.float().reshape(weight.shape[0], -1, 32)
++    scales = (blocks.abs().amax(-1, keepdim=True) / 127).to(torch.float16)
++    values = torch.where(scales == 0, 0, torch.round(blocks / scales.float())).clamp(-127, 127).to(torch.int8)
++    raw = torch.cat((scales.view(torch.uint8), values.view(torch.uint8)), dim=-1)
++    return raw.reshape(-1), (values.float() * scales.float()).reshape(weight.shape)
++
++
++def write_gguf(path, tensors):
++    """Minimal GGUF v3 with no metadata: tensors maps a name to (ggml dims, ggml type, raw bytes)."""
++    import struct
++
++    header = bytearray(b"GGUF" + struct.pack("<IQQ", 3, len(tensors), 0))
++    offset = 0
++    for name, (dims, kind, raw) in tensors.items():
++        encoded = name.encode()
++        header += struct.pack("<Q", len(encoded)) + encoded + struct.pack("<I", len(dims))
++        header += struct.pack(f"<{len(dims)}Q", *dims) + struct.pack("<IQ", kind, offset)
++        offset += -(-raw.numel() // 32) * 32
++    header += bytes(-len(header) % 32)
++    with open(path, "wb") as handle:
++        handle.write(header)
++        for _, _, raw in tensors.values():
++            handle.write(raw.numpy().tobytes() + bytes(-raw.numel() % 32))
++
++
++class SSDGGUFExpertsTest(unittest.TestCase):
++    def test_q8_0_experts_from_gguf_match_dequantized_reference(self):
++        torch.manual_seed(5)
++        config = Qwen3MoeConfig(
++            vocab_size=64,
++            hidden_size=32,
++            intermediate_size=64,
++            moe_intermediate_size=32,
++            num_hidden_layers=2,
++            num_attention_heads=2,
++            num_key_value_heads=1,
++            head_dim=16,
++            num_experts=4,
++            num_experts_per_tok=2,
++        )
++        config._experts_implementation = "eager"
++        config._attn_implementation = "eager"
++        reference = Qwen3MoeForCausalLM(config).eval()
++        tensors = {}
++        for layer_index, layer in enumerate(reference.model.layers):
++            experts = layer.mlp.experts
++            gate, up = experts.gate_up_proj.data.chunk(2, dim=1)
++            for projection, bank in (("gate", gate), ("up", up), ("down", experts.down_proj.data)):
++                raws, dequantized = zip(*(quantize_q8_0(matrix) for matrix in bank))
++                rows, columns = bank.shape[1:]
++                tensors[f"blk.{layer_index}.ffn_{projection}_exps.weight"] = (
++                    [columns, rows, bank.shape[0]],
++                    8,
++                    torch.cat(raws),
++                )
++                bank.copy_(torch.stack(dequantized))
++        with tempfile.TemporaryDirectory() as directory:
++            path = Path(directory)
++            config.save_pretrained(path)
++            save_file(reference.state_dict(), path / "model.safetensors")
++            write_gguf(path / "experts.gguf", tensors)
++            # One Q8_0 expert is 3 * 32 * (32 / 32) * 34 = 3264 bytes: room for one, so every switch evicts.
++            streamed = load_moe_from_ssd(path, cache_bytes=3264, experts_gguf=path / "experts.gguf")
++            ids = torch.tensor([[1, 7, 3, 9, 2]])
++            with torch.no_grad():
++                torch.testing.assert_close(streamed(ids).logits, reference(ids).logits, atol=1e-5, rtol=1e-5)
++                expected = reference.generate(ids, max_new_tokens=4, do_sample=False, pad_token_id=0)
++                actual = streamed.generate(ids, max_new_tokens=4, do_sample=False, pad_token_id=0)
++            torch.testing.assert_close(actual, expected)
++            stats = streamed.ssd_store.stats()
++            self.assertGreater(stats["evictions"], 0)
++            self.assertEqual(stats["read_bytes"] % 1088, 0)  # whole Q8_0 matrices only, never BF16 banks

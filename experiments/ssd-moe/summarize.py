@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 ORDER = [
+    "transformers-streaming-q8_0",
     "transformers-streaming",
     "transformers-offload",
     "vllm",
@@ -13,6 +14,7 @@ ORDER = [
     "strata",
 ]
 WEIGHTS = {
+    "transformers-streaming-q8_0": "Q8_0 GGUF experts (Unsloth) + BF16 dense",
     "llamacpp-q8_0": "Q8_0 GGUF (Unsloth)",
     "strata": "Q8_0 GGUF (Unsloth)",
     "llamacpp-bf16": "BF16 GGUF (converted)",
@@ -62,15 +64,16 @@ def common_prefix(a, b):
 def main():
     root = Path(sys.argv[1])
     results = {engine: load(root, engine) for engine in ORDER}
-    reference = (results.get("transformers-streaming") or {"runs": [{"text": ""}]})[
-        "runs"
-    ][0]["text"]
+    present = [engine for engine in ORDER if results[engine] and results[engine]["runs"]]
+    reference = results[present[0]]["runs"][0]["text"] if present else ""
     lines = [
-        "| Engine | Weights | Run | TTFT s | Decode tok/s | Tokens | Storage read GiB | GPU peak GiB | Same text as Transformers streaming |",
+        "| Engine | Weights | Run | TTFT s | Decode tok/s | Tokens | Storage read GiB | GPU peak GiB | Same text as the first row |",
         "|---|---|---|---:|---:|---:|---:|---:|---|",
     ]
     for engine in ORDER:
         result = results[engine]
+        if result is None and not (root / engine).exists():
+            continue  # not requested in this run
         if result is None:
             lines.append(
                 f"| {engine} | {WEIGHTS.get(engine, 'BF16 safetensors')} | - | failed or missing | | | | | |"
