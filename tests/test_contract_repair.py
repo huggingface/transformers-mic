@@ -128,7 +128,8 @@ def test_repair_budget_survives_failed_proposals(setup):
     s.plan["usage"] = "invalid syntax"
     assert propose(s) is None
     assert propose(s) is None
-    assert len(s.contexts) == 1 and len(s.state["repairs"]) == 1
+    # One attempt, shown its rejection once.
+    assert len(s.contexts) == repair.REPAIR_TURNS and len(s.state["repairs"]) == 1
 
 
 def test_explicit_assertions_and_gradient_checks_are_preserved():
@@ -212,6 +213,36 @@ def test_missing_backend_is_not_repairable(setup):
     setup.log.write_text(
         "the contract fails on the random fixture:\nTraceback (most recent call last):\n"
         "ImportError:\nPixtralProcessor requires the Torchvision library but it was not found in your environment.\n"
+    )
+    assert not repair.eligible(setup.workspace, "build", setup.log)
+
+
+@pytest.mark.requires_runtime
+def test_unchanged_repair_is_shown_its_rejection_once(setup, monkeypatch):
+    # vitpose (2026-11-07): the rationale named the fix, the usage came back unchanged,
+    # and the attempt was spent without the model ever hearing why.
+    s = setup
+    fixed = s.plan["usage"]
+    replies = iter([s.workspace.contract_root.joinpath(
+        s.workspace.manifest["integrations"]["transformers"]["entry_point"]).read_text(), fixed])
+
+    def propose_once(context, **kw):
+        s.contexts.append(context)
+        return {**copy.deepcopy(s.plan), "usage": next(replies)}, {"model": "test"}
+
+    monkeypatch.setattr(repair.planner, "propose", propose_once)
+    attempt = propose(s)
+    assert attempt["status"] == "proposed"
+    assert len(s.contexts) == 2
+    assert "did not change the failing usage" in s.contexts[1]["validation_error"]
+    assert s.contexts[1]["previous_draft"]["rationale"]
+
+
+def test_missing_input_perturbation_is_not_repairable(setup):
+    setup.log.write_text(
+        'MIC_PROGRESS {"phase": "Check random-weight input sensitivity", "detail": ""}\n'
+        "org/m-mic: no input perturbation is defined for the contract's inputs ['x']; "
+        "add them to PERTURBATIONS (a tmic gap, not a contract error)\nthe contract fails\n"
     )
     assert not repair.eligible(setup.workspace, "build", setup.log)
 

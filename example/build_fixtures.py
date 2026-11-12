@@ -1003,6 +1003,13 @@ def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out,
     weights, training = ("real" if real else "random"), None
     report_phase(f"Check {weights}-weight input sensitivity")
     gate = {weights: sensitivity(called_module(model, captured), as_dtype(batch, dtype), threshold, accepted)}
+    unmeasured = gate[weights]["no_perturbation_defined"]
+    if unmeasured and not keep_random and not any(v is not None for v in gate[weights]["deltas"].values()):
+        # Overfitting cannot help a gate that perturbs nothing, nor can a usage edit.
+        raise SystemExit(
+            f"{name}: no input perturbation is defined for the contract's inputs {unmeasured}; "
+            "add them to PERTURBATIONS in example/perturb.py (a tmic gap, not a contract error)"
+        )
     diagnosis = [] if gate[weights]["pass"] else input_diagnosis(model.config, batch)
     if diagnosis:
         raise SystemExit(

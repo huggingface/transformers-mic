@@ -329,6 +329,25 @@ def test_sensitivity_perturbs_list_contexts_and_never_the_forecast_target():
     assert result["no_perturbation_defined"] == []
 
 
+def test_sensitivity_perturbs_video_inputs():
+    # V-JEPA 2 (2026-11-07): pixel_values_videos had no perturbation, so the gate
+    # measured nothing and the build overfit for 20 minutes before failing.
+    import perturb
+
+    class Video(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.weights = torch.nn.Parameter(torch.arange(6.0))
+
+        def forward(self, pixel_values_videos):
+            return {"logits": (pixel_values_videos * self.weights).mean(dim=(1, 2, 3))}
+
+    videos = torch.rand(2, 4, 3, 5, 6)
+    result = perturb.sensitivity(Video(), {"pixel_values_videos": videos}, threshold=1e-3)
+    assert result["pass"] and result["no_perturbation_defined"] == []
+    assert set(result["deltas"]) == {f"pixel_values_videos:{p}" for p in ("roll_batch", "reverse", "halve")}
+
+
 def test_sensitivity_skips_inputs_only_absorbed_by_kwargs():
     import perturb
 
