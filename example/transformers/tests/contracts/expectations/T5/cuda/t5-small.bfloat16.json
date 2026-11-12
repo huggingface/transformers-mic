@@ -9,11 +9,12 @@
   "kind": "checkpoint",
   "revision": "df1b051c49625cf57a3d0d8d3863ed4d13564fe4",
   "environment": {
-   "python": "3.11.17",
-   "transformers": "5.19.0.dev0",
-   "torch": "2.11.0+cu128",
-   "torchvision": "0.26.0+cu128",
-   "torchaudio": "2.11.0+cu128",
+   "python": "3.11.18",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0+cu132",
+   "torchvision": "0.29.2+cu132",
+   "torchaudio": "2.11.1+cu132",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
    "pillow": "12.2.0",
@@ -31,11 +32,9 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 8.93,
-  "environment_differs": {
-   "python": "3.11.17 (pinned 3.10)"
-  },
-  "platform": "cuda"
+  "seconds": 8.12,
+  "platform": "cuda",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {

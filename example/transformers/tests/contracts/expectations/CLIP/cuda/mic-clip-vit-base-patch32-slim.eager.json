@@ -1,18 +1,23 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/CLIP-integration",
-  "contract_revision": "cb2e2abc4c4c992c316ab40d4a3360b1e748fcfe",
+  "contract_name": "CLIP",
+  "contract_revision": "423a026e65fe49bdc292fb25d0a67f8467f6f004",
   "framework": "transformers",
   "variant": "eager",
   "target": "mic-clip-vit-base-patch32-slim",
   "kind": "fixture",
   "revision": "adad0f30de071148ab0b55bb2263ac909e58cc5b",
+  "source_model": "openai/clip-vit-base-patch32",
+  "weights": "random",
+  "fixture_repo": "hf-internal-testing/mic-clip-vit-base-patch32-slim",
   "environment": {
-   "python": "3.10.12",
-   "transformers": "5.19.0.dev0",
-   "torch": "2.11.0+cu128",
-   "torchvision": "0.26.0+cu128",
-   "torchaudio": "2.11.0+cu128",
+   "python": "3.11.18",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0+cu132",
+   "torchvision": "0.29.2+cu132",
+   "torchaudio": "2.11.1+cu132",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
    "pillow": "12.2.0",
@@ -30,8 +35,9 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 7.55,
-  "platform": "cuda"
+  "seconds": 7.54,
+  "platform": "cuda",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {
@@ -53,28 +59,28 @@
   ],
   "logits_per_image": [
    [
-    -2.637207269668579,
-    -2.2477309703826904,
-    -2.503983736038208,
-    -2.7232158184051514
+    -2.636889696121216,
+    -2.2474372386932373,
+    -2.5036959648132324,
+    -2.7229273319244385
    ],
    [
-    4.143322944641113,
-    4.256857395172119,
-    4.226873397827148,
-    3.778785228729248
+    4.142627716064453,
+    4.256189346313477,
+    4.226197719573975,
+    3.7780885696411133
    ],
    [
-    1.5251175165176392,
-    1.605304479598999,
-    1.2278834581375122,
-    1.193720817565918
+    1.5253466367721558,
+    1.6054904460906982,
+    1.228113055229187,
+    1.193971037864685
    ],
    [
-    -0.4373661279678345,
-    -0.29582053422927856,
-    -0.10970576852560043,
-    -0.4732407331466675
+    -0.4384934604167938,
+    -0.2969169318675995,
+    -0.1108640506863594,
+    -0.47429358959198
    ]
   ],
   "text_kwargs_input_ids": [
@@ -131,7 +137,7 @@
    "size"
   ],
   "training": {
-   "loss": 2.525594711303711,
+   "loss": 2.5254127979278564,
    "gradients": {
     "visual_projection.weight": true,
     "text_projection.weight": true

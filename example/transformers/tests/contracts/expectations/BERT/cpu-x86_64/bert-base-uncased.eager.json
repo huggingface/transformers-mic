@@ -1,18 +1,20 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/BERT-integration",
-  "contract_revision": "e8e23b07e9e13bebf6f1f4ba20298157333f279d",
+  "contract_name": "BERT",
+  "contract_revision": "6a667eafaa05f8ff3c07e7698ce768d6271b1a79",
   "framework": "transformers",
   "variant": "eager",
   "target": "bert-base-uncased",
   "kind": "checkpoint",
   "revision": "86b5e0934494bd15c9632b12f734a8a67f723594",
   "environment": {
-   "python": "3.10.22",
-   "transformers": "5.19.0.dev0",
-   "torch": "2.11.0+cpu",
-   "torchvision": "0.26.0+cpu",
-   "torchaudio": "2.11.0+cpu",
+   "python": "3.11.18",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0+cpu",
+   "torchvision": "0.29.2+cpu",
+   "torchaudio": "2.11.1+cpu",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
    "pillow": "12.2.0",
@@ -30,8 +32,9 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 6.06,
-  "platform": "cpu-x86_64"
+  "seconds": 16.09,
+  "platform": "cpu-x86_64",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {
@@ -53,32 +56,32 @@
   ],
   "answer_logits": [
    [
-    12.346078872680664,
-    1.9429855346679688,
-    6.547842979431152,
-    3.6329293251037598
+    12.346076011657715,
+    1.9429785013198853,
+    6.54783821105957,
+    3.6329264640808105
    ],
    [
-    6.064363479614258,
-    12.208372116088867,
-    6.488170146942139,
-    6.152787208557129
+    6.064367294311523,
+    12.20838451385498,
+    6.488175868988037,
+    6.152791500091553
    ],
    [
-    6.255681991577148,
-    4.637124061584473,
+    6.255678176879883,
+    4.6371235847473145,
     12.204490661621094,
-    4.724185466766357
+    4.724184989929199
    ],
    [
-    5.909882545471191,
-    3.585036277770996,
-    4.629805088043213,
-    12.290727615356445
+    5.909886837005615,
+    3.585038185119629,
+    4.62980842590332,
+    12.290732383728027
    ]
   ],
   "training": {
-   "loss": 1.6517943143844604,
+   "loss": 1.6517921686172485,
    "gradients": {
     "bert.encoder.layer.0.attention.self.query.weight": true,
     "bert.encoder.layer.0.intermediate.dense.weight": true

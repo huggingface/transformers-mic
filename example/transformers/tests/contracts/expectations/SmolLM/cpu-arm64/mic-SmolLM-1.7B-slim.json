@@ -1,19 +1,43 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/SmolLM-integration",
-  "target": "mic-SmolLM-1.7B-slim",
-  "variant": "default",
-  "revision": "unpublished",
+  "contract_name": "SmolLM",
+  "contract_revision": "d52a4cb53b22c728c547919e9a3549ce6e620aac",
   "framework": "transformers",
-  "contract_revision": "unpublished",
+  "variant": "default",
+  "target": "mic-SmolLM-1.7B-slim",
+  "kind": "fixture",
+  "revision": "58a736e869e5f9f59984b467b84e42f1aaa14d08",
+  "source_model": "HuggingFaceTB/SmolLM-1.7B",
+  "weights": "unknown",
+  "fixture_repo": "hf-internal-testing/mic-SmolLM-1.7B-slim",
   "environment": {
-   "python": "3.10.19",
-   "transformers": "5.19.0.dev0",
-   "torch": "2.11.0",
+   "python": "3.11.14",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0",
+   "torchvision": "0.29.2",
+   "torchaudio": "2.11.1",
    "tokenizers": "0.23.1",
-   "numpy": "1.26.4"
+   "numpy": "1.26.4",
+   "pillow": "12.2.0",
+   "accelerate": "1.13.0",
+   "safetensors": "0.8.0",
+   "huggingface-hub": "1.32.0",
+   "sentencepiece": "0.2.1",
+   "protobuf": "6.33.6",
+   "librosa": "0.11.0",
+   "soundfile": "0.13.1",
+   "scipy": "1.15.3",
+   "local_patches": [
+    "config-field-generation-params",
+    "masked-spec-embed-init",
+    "whisper-decode-tensor-batch"
+   ]
   },
-  "seconds": 2.89
+  "seconds": 2.23,
+  "platform": "cpu-arm64",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {
@@ -48,27 +72,27 @@
   "next_token_logits": [
    [
     11.496546745300293,
-    3.7785961627960205,
-    3.678328514099121,
-    2.3241655826568604
+    3.7785959243774414,
+    3.678328275680542,
+    2.3241660594940186
    ],
    [
     4.130675792694092,
     11.438634872436523,
-    3.982353687286377,
+    3.982353448867798,
     3.7624101638793945
    ],
    [
-    3.700596332550049,
+    3.7005960941314697,
     4.0406107902526855,
     11.780450820922852,
     4.69478702545166
    ],
    [
-    2.179891347885132,
-    3.8335728645324707,
-    4.667820453643799,
-    11.490459442138672
+    2.179892063140869,
+    3.8335726261138916,
+    4.667819499969482,
+    11.490461349487305
    ]
   ],
   "training": {

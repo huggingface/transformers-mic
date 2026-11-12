@@ -1,18 +1,20 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/SmolLM-integration",
-  "contract_revision": "ea5b7a6908a88f30679815d8343dde713778eb86",
+  "contract_name": "SmolLM",
+  "contract_revision": "d52a4cb53b22c728c547919e9a3549ce6e620aac",
   "framework": "transformers",
   "variant": "eager",
   "target": "SmolLM-1.7B",
   "kind": "checkpoint",
   "revision": "d7449ff7241c863f3e8accc475155f0f97afa011",
   "environment": {
-   "python": "3.10.12",
-   "transformers": "5.19.0.dev0",
-   "torch": "2.11.0+cu128",
-   "torchvision": "0.26.0+cu128",
-   "torchaudio": "2.11.0+cu128",
+   "python": "3.11.18",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0+cu132",
+   "torchvision": "0.29.2+cu132",
+   "torchaudio": "2.11.1+cu132",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
    "pillow": "12.2.0",
@@ -30,8 +32,9 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 27.1,
-  "platform": "cuda"
+  "seconds": 9.35,
+  "platform": "cuda",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {
