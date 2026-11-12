@@ -185,6 +185,7 @@
   "conclusion": "success",
   "dispatched_at": "2026-11-11T09:04:25Z",
   "run_id": 42992084030,
+  "shrink": "shrink/42992084030/shrink-nemotron3-8b-mic.html",
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/42992084030"
  },
@@ -201,6 +202,7 @@
   "conclusion": "success",
   "dispatched_at": "2026-11-11T09:04:25Z",
   "run_id": 42992087355,
+  "shrink": "shrink/42992087355/shrink-pegasus-x-base-mic.html",
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/42992087355"
  },
