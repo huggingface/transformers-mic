@@ -9,9 +9,15 @@ name: Nightly checkpoints
 # Results are appended to the shadow-results branch (runs/nightly/), separate
 # from the fixture-only shadow runs.
 #
-# mode=record writes cuda candidates instead of checking (each rerun in a fresh
-# process), uploaded for review; used to re-record baselines when the pinned
-# environment changes.
+# Checks run what the project ships: the Hub control fleet at the dataset revision
+# pinned in example/transformers/tests/contracts.lock, in that fleet's environment,
+# against its Hub baselines; then the in-tree catalog's contracts the control fleet
+# lacks (MusicgenMelody, WhisperSpeech) against the in-tree baselines
+# (.github/scripts/control_locks.py).
+#
+# mode=record writes cuda candidates for the in-tree catalog instead of checking
+# (each rerun in a fresh process), in the catalog lock's environment, uploaded for
+# review; used to re-record baselines when the pinned environment changes.
 #
 #   gh workflow run nightly.yml --repo huggingface/model-integration-contracts
 #   gh workflow run nightly.yml --repo huggingface/model-integration-contracts -f mode=record -f transformers_ref=8625785e7e3e138a328ec2e678dc198e356e7c6c
@@ -68,7 +74,13 @@ jobs:
           sha=$(git ls-remote https://github.com/huggingface/transformers "$REF" | cut -f1 | head -1)
           sha=${sha:-$REF}
           echo "SHA=$sha" >> "$GITHUB_ENV"
-          PY=python3 FETCH="$sha" TORCH_INDEX=cu128 .github/scripts/install_pinned.sh
+          if [[ "$MODE" == check ]]; then
+            PYTHONPATH=src python3 .github/scripts/control_locks.py --out "$GITHUB_WORKSPACE/out" > "$GITHUB_WORKSPACE/out/locks.env"
+            tee -a "$GITHUB_ENV" < "$GITHUB_WORKSPACE/out/locks.env"
+            LOCK=$(sed -n 's/^CONTROL_LOCK=//p' "$GITHUB_WORKSPACE/out/locks.env")
+            export LOCK
+          fi
+          PY=python3 FETCH="$sha" TORCH_INDEX=cu132 .github/scripts/install_pinned.sh
           python3 -m pip freeze > "$GITHUB_WORKSPACE/out/pip-freeze.txt"
           nvidia-smi --query-gpu=name,driver_version --format=csv,noheader | tee "$GITHUB_WORKSPACE/out/gpu.txt"
           python3 -c "import torch; print(torch.__version__, torch.cuda.is_available())"
@@ -81,6 +93,13 @@ jobs:
               > /dev/null 2> "$OUT/$1.log" || true
             echo "$1: $(tail -1 "$OUT/$1.log")"
           }
+          check() {  # <label> <run.py options...>: the control fleet, then the catalog's rest
+            run "$1" --lock "$CONTROL_LOCK" "${@:2}"
+            if [[ -n "$CATALOG_ONLY" ]]; then
+              read -ra rest <<< "$CATALOG_ONLY"
+              run "$1-catalog" "${rest[@]/#/--contract=}" "${@:2}"
+            fi
+          }
           if [[ "$MODE" == record ]]; then
             for variant in default eager bfloat16; do run record-cuda-$variant --variant $variant --record --isolate; done
             mkdir -p "$OUT/candidates"
@@ -88,8 +107,8 @@ jobs:
               | while read -r f; do mkdir -p "$OUT/candidates/$(dirname "$f")"; cp "$f" "$OUT/candidates/$f"; done
             exit 0
           fi
-          for variant in default eager; do CUDA_VISIBLE_DEVICES="" run cpu-$variant --variant $variant --require-all --skip-wrong-hardware; done
-          for variant in default eager bfloat16; do CUDA_VISIBLE_DEVICES=0 run cuda-$variant --variant $variant --require-all; done
+          for variant in default eager; do CUDA_VISIBLE_DEVICES="" check cpu-$variant --variant $variant --require-all --skip-wrong-hardware; done
+          for variant in default eager bfloat16; do CUDA_VISIBLE_DEVICES=0 check cuda-$variant --variant $variant --require-all; done
 
       - name: Annotate results
         if: env.MODE == 'check'
@@ -99,6 +118,7 @@ jobs:
           out = pathlib.Path(os.environ["OUT"])
           cpu = subprocess.run("lscpu | sed -n 's/^Model name: *//p'", shell=True, capture_output=True, text=True).stdout.strip()
           meta = {"transformers_ref": os.environ["REF"], "transformers_sha": os.environ["SHA"], "event": os.environ["EVENT"],
+                  "control_fleet_revision": os.environ.get("CONTROL_REVISION"),
                   "run_id": os.environ["GITHUB_RUN_ID"], "runner": "aws-g5-4xlarge-cache", "arch": platform.machine(),
                   "cpu": cpu, "gpu": (out / "gpu.txt").read_text().strip()}
           rows = []

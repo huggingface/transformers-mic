@@ -121,6 +121,13 @@ doc-builder comes from Git because its PyPI release lacks the runnable-Markdown
 collector. To work on tmic itself, install a checkout instead:
 `pip install -e '.[runtime,dev]'`.
 
+`tmic run` measures baselines in the cloud by default, on a Transformers commit
+from `main`. Its local factory check first requires the same Transformers, so
+install `main` too:
+`pip install "transformers @ git+https://github.com/huggingface/transformers"`
+(the check names the exact command when it stops). `--local-only` runs need no
+such install.
+
 ## Dashboard authentication
 
 ```sh
@@ -366,6 +373,20 @@ variant against the built fixture locally, without comparing numeric baselines.
 Failures enter the bounded, reviewed contract-repair flow before GPU dispatch.
 This catches errors such as floating inputs left in float32 for bfloat16 weights;
 it does not replace measurement and validation on the cloud CPU/CUDA environments.
+Before it runs (`tmic auto --match-cloud`), tmic compares this Python with the
+cloud runners' and stops with the exact `pip install` command when:
+
+- a package of the `runtime` extra is missing or at an excluded version. The cloud
+  images get the same list from Transformers' `testing` extra, which installs
+  `transformers-mic[runtime]`;
+- Transformers is a release, or an install with no commit to trace (a `git+`
+  install records its commit; a local source tree is asked with `git`). The cloud
+  measures a `main` commit, resolved at dispatch.
+
+A Transformers commit other than the current `main`, or a source tree with
+uncommitted changes, only prints a note: `main` moves several times a day, and
+the dispatch resolves it again anyway. Set `TMIC_ALLOW_ENVIRONMENT_DRIFT=1` to
+continue past a stop and see the factory check's own result.
 The display distinguishes waiting for a runner, dependency installation,
 measurement and completion, with a run link, a small animation and elapsed timer.
 Animation is rendered in the parent CLI so carriage returns survive the child
@@ -950,7 +971,12 @@ to and from the JSON lock the runners read, and refuses a lock the tables cannot
 hold exactly. Revisions from before the tables are read from their JSON lock
 (`fleet-lock.json`, `prototype-fleet.lock`); a revision with both fails if they
 disagree, which means a tmic from before the tables updated only the JSON. Exports preserve other entries and strip local paths. Environment changes must
-be reviewed separately. `tmic retire NAME --fleet prototypes --reason "..."` previews
+be reviewed separately: export refuses a workspace whose lock environment differs
+from the fleet's. `tmic environment --set torch=2.15.0 --set torchvision=0.29.2 --set torchaudio=2.11.1`
+previews moving the environment of both fleets (they must stay equal; `--fleet`
+moves one) in one dataset commit; `--execute` uploads it. It changes only
+`environment.csv`: re-measure the contracts on the new environment first, and copy
+the new block into each workspace lock before its next export. `tmic retire NAME --fleet prototypes --reason "..."` previews
 removing one contract (and its known failures), for example one replaced by a
 build from a trained checkpoint; `--execute` uploads it. Preview first, then use `--execute` to upload. A concurrent
 Hub update rejects the commit; rerun to review the new state.
@@ -1088,7 +1114,30 @@ Each integration owns its usage, assertions and baselines under
 `integrations/<name>/`. An integration's optional `outputs` map replaces the
 manifest-level output map for that integration. Existing Transformers assertions
 stay unchanged. Publication requires successful checks of every declared
-integration and variant, and uploads their reviewed baselines together.
+variant of the Transformers integration (the only integration, when there is no
+Transformers one), and of every other integration this workspace changed.
+
+Another integration is unchanged, and carried over, when every local file under
+`integrations/<name>/` (usage and reviewed expectations), its `integration.json`
+section, the output rules it inherits, the checkpoints and fixtures, and the
+fixture weights (`build.json`) are identical to the Hub revision the workspace's
+lock pins. The Hub's `main` must also still have the same section and usage;
+expectations another fleet added there since are kept. A carried integration
+needs no check here: `tmic publish` neither uploads nor deletes its files, so the
+Hub keeps them byte for byte, and the Sentence Transformers fleet and its nightly
+go on checking it. The preview says so per integration:
+
+```json
+"integrations": {
+  "transformers": "checked",
+  "sentence_transformers": "unchanged since aba894c888d7, carried over; checked by its own fleet"
+}
+```
+
+Any difference, a first publish, or an unreachable Hub requires that
+integration's own check (`tmic check --integration all --all-variants`), and the
+error names the integration and the difference. A checked integration is then
+uploaded from the workspace with the rest.
 
 Sentence Transformers also loads the module directories named in `modules.json`.
 New fixture builds copy their non-weight assets and include them in the fixture

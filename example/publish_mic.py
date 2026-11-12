@@ -17,6 +17,12 @@ HERE = Path(__file__).parent
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--private", action="store_true")
+    parser.add_argument(
+        "--carry", action="append", default=[], metavar="INTEGRATION",
+        help="leave this integration's files on the Hub as they are: neither "
+        "uploaded nor deleted (tmic publish passes it for an unchanged integration "
+        "another fleet checks)",
+    )
     args = parser.parse_args()
     lock_path = HERE / "transformers/tests/contracts/fleet.lock"
     lock = run.load(lock_path, "fleet-lock")
@@ -50,6 +56,7 @@ def main():
         raise ValueError(problem)
     files = run.contract_files(root)
     contract_hash = run.digest(files)
+    carried = tuple(f"integrations/{name}/" for name in args.carry)
     with tempfile.TemporaryDirectory(prefix="mic-publish-") as tmp:
         staging = Path(tmp)
         build = run.load(fixture / "build.json", "fixture-build")
@@ -60,6 +67,8 @@ def main():
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(source, target)
         for path in files:
+            if path.startswith(carried):
+                continue
             target = staging / path
             target.parent.mkdir(parents=True, exist_ok=True)
             source = root / path
@@ -72,6 +81,8 @@ def main():
             shutil.copy2(source, target)
         manifest = run.load(root / "integration.json", "integration")
         for framework in manifest["integrations"]:
+            if framework in args.carry:
+                continue
             expectations = root / "integrations" / framework / "expectations"
             if not expectations.exists():
                 raise ValueError(f"No reviewed {framework} expectations to publish")
@@ -108,7 +119,11 @@ def main():
             owned = set(previous_layout["contract_files"]) | set(
                 previous_build["sha256"]
             )
-            stale = sorted(name for name in owned if not (staging / name).exists())
+            stale = sorted(
+                name
+                for name in owned
+                if not (staging / name).exists() and not name.startswith(carried)
+            )
         api.create_repo(repo, private=args.private, exist_ok=True)
         commit = api.upload_folder(
             repo_id=repo,

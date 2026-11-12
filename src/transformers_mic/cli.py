@@ -537,6 +537,27 @@ No Git commit or framework PR is created automatically.""",
     retire.add_argument(
         "--execute", action="store_true", help="Upload the previewed removal"
     )
+    environment = sub.add_parser(
+        "environment",
+        help="Preview or move every fleet's pinned environment (e.g. a new torch) in one dataset commit",
+    )
+    environment.add_argument(
+        "--set",
+        dest="packages",
+        action="append",
+        required=True,
+        metavar="PACKAGE=VERSION",
+        help="A package the environment already pins and its new version (repeatable)",
+    )
+    environment.add_argument(
+        "--fleet",
+        choices=("all", *fleet.FILES),
+        default="all",
+        help="Fleets to move together (default all: their environments must stay equal)",
+    )
+    environment.add_argument(
+        "--execute", action="store_true", help="Upload the previewed environment change"
+    )
     pin = sub.add_parser(
         "pin", help="Pin a dataset revision in a Transformers checkout"
     )
@@ -551,9 +572,15 @@ No Git commit or framework PR is created automatically.""",
     report.add_argument("results", type=Path)
     report.add_argument("--log", type=Path)
     report.add_argument("--lock", type=Path)
-    sub.add_parser(
+    auto = sub.add_parser(
         "auto",
         help="Check AutoConfig and Auto-model factory mappings for the built slim",
+    )
+    auto.add_argument(
+        "--match-cloud",
+        action="store_true",
+        help="First require the cloud runners' environment: every `runtime` extra "
+        "package, and Transformers from a main commit (not a release)",
     )
     sub.add_parser(
         "status", help="Show project provenance, weight choice and check receipts"
@@ -741,6 +768,10 @@ def main(argv=None):
             return backend.invoke("report", Path.cwd(), options).returncode
         if args.command == "auto":
             project = Workspace(args.workspace)
+            if args.match_cloud:
+                from .cloud_environment import require_cloud_match
+
+                require_cloud_match()
             return backend.invoke("auto-stage", project.root).returncode
         if args.command == "fixture":
             from .fixture_review import run

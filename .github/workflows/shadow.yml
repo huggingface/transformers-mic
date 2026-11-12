@@ -12,6 +12,10 @@ name: Shadow contracts
 #
 # Scheduled runs test Transformers main; their changed files are those since the
 # previous scheduled run (shadow-results: last-main.txt), else the head commit's.
+#
+# The fixtures are the Hub control fleet's, at the dataset revision pinned in
+# example/transformers/tests/contracts.lock and in its environment, plus the
+# in-tree catalog's contracts the control fleet lacks (.github/scripts/control_locks.py).
 
 on:
   schedule:
@@ -98,7 +102,10 @@ jobs:
 
       - name: Install
         run: |
-          PY=python .github/scripts/install_pinned.sh
+          python -m pip install --quiet huggingface_hub
+          PYTHONPATH=src python .github/scripts/control_locks.py --out "$OUT" > "$OUT/locks.env"
+          tee -a "$GITHUB_ENV" < "$OUT/locks.env"
+          LOCK=$(sed -n 's/^CONTROL_LOCK=//p' "$OUT/locks.env") PY=python .github/scripts/install_pinned.sh
           if [[ -n "$PIP_OVERRIDES" ]]; then
             read -ra overrides <<< "$PIP_OVERRIDES"
             python -m pip install --quiet "${overrides[@]}"
@@ -108,16 +115,25 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/huggingface/hub
-          key: hf-fixtures-${{ hashFiles('example/transformers/tests/contracts/fleet.lock') }}
+          key: hf-fixtures-${{ hashFiles('example/transformers/tests/contracts/fleet.lock', 'example/transformers/tests/contracts.lock') }}
 
       - name: Run fixture contracts
         id: run
         run: |
           set +e
-          python example/run.py --framework transformers --fixtures-only \
-            --changed-files "$OUT/changed-files.txt" --run-all --require-all --skip-wrong-hardware --output "$OUT/raw.jsonl" \
+          options=(--framework transformers --fixtures-only --changed-files "$OUT/changed-files.txt"
+                   --run-all --require-all --skip-wrong-hardware)
+          python example/run.py "${options[@]}" --lock "$CONTROL_LOCK" --output "$OUT/raw-control.jsonl" \
             > "$OUT/run.log" 2> "$OUT/run.err"
-          echo "exit=$?" >> "$GITHUB_OUTPUT"
+          status=$?
+          if [[ -n "$CATALOG_ONLY" ]]; then
+            read -ra rest <<< "$CATALOG_ONLY"
+            python example/run.py "${options[@]}" "${rest[@]/#/--contract=}" --output "$OUT/raw-catalog.jsonl" \
+              >> "$OUT/run.log" 2>> "$OUT/run.err"
+            status=$(( status || $? ))
+          fi
+          cat "$OUT"/raw-*.jsonl > "$OUT/raw.jsonl"
+          echo "exit=$status" >> "$GITHUB_OUTPUT"
           tail -3 "$OUT/run.err"
           grep '^{"selection"' "$OUT/run.err" > "$OUT/selection.json" || true
 
@@ -129,10 +145,10 @@ jobs:
             --arg arch "$(uname -m)" --arg cpu "$(lscpu | sed -n 's/^Model name: *//p')" \
             --arg flags "$(grep -o -w -E 'avx2|avx512f|avx512_bf16|amx_bf16|amx_tile' /proc/cpuinfo | sort -u | tr '\n' ' ')" --arg source "$CHANGED_SOURCE" \
             --argjson count "$CHANGED_COUNT" --argjson truncated "$CHANGED_TRUNCATED" \
-            --arg overrides "$PIP_OVERRIDES" \
+            --arg overrides "$PIP_OVERRIDES" --arg control "$CONTROL_REVISION" \
             '{transformers_ref: $ref, transformers_sha: $sha, event: $event, run_id: $run, run_attempt: $attempt,
               runner: "github-ubuntu-latest", arch: $arch, cpu: $cpu, cpu_flags: $flags, changed_files_source: $source,
-              changed_files: $count, changed_files_truncated: $truncated, pip_overrides: $overrides,
+              changed_files: $count, changed_files_truncated: $truncated, pip_overrides: $overrides, control_fleet_revision: $control,
               date: (now | todate)}')
           touch "$OUT/raw.jsonl"
           jq -c --argjson meta "$meta" '. + {shadow: $meta}' "$OUT/raw.jsonl" > "$OUT/results.jsonl"

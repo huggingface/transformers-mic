@@ -1,18 +1,23 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/Whisper-integration",
-  "contract_revision": "local",
+  "contract_name": "Whisper",
+  "contract_revision": "d5f035b6fb3376d502de523606c5cef5305d294e",
   "framework": "transformers",
   "variant": "eager",
   "target": "mic-whisper-tiny-slim",
   "kind": "fixture",
   "revision": "7acfb01aa91f05eb0a1507e00878c3e42901e2cc",
+  "source_model": "openai/whisper-tiny",
+  "weights": "overfit",
+  "fixture_repo": "hf-internal-testing/mic-whisper-tiny-slim",
   "environment": {
-   "python": "3.10.19",
-   "transformers": "5.16.0.dev0",
-   "torch": "2.11.0",
-   "torchvision": "0.26.0",
-   "torchaudio": "2.11.0",
+   "python": "3.11.14",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0",
+   "torchvision": "0.29.2",
+   "torchaudio": "2.11.1",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
    "pillow": "12.2.0",
@@ -30,8 +35,9 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 1.18,
-  "platform": "cpu-arm64"
+  "seconds": 2.69,
+  "platform": "cpu-arm64",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {
@@ -71,21 +77,21 @@
     -0.0006119524477981031,
     -0.0004924515378661454,
     -0.000598251644987613,
-    -0.009474551305174828,
+    -0.009474433027207851,
     -0.0011297041783109307
    ],
    [
     -0.0004782725009135902,
     -0.0003327769518364221,
     -0.0003234816831536591,
-    -0.016753101721405983,
+    -0.016753219068050385,
     -0.0007658647373318672
    ],
    [
     -0.0035306992940604687,
     -0.002205798402428627,
     -0.0036348719149827957,
-    -0.008426468819379807,
+    -0.008426232263445854,
     -0.0031932813581079245
    ]
   ],
@@ -217,7 +223,7 @@
    ]
   ],
   "training": {
-   "loss": 0.004144709091633558,
+   "loss": 0.004144696984440088,
    "gradients": {
     "model.encoder.conv1.weight": true,
     "model.decoder.layers.0.encoder_attn.q_proj.weight": true

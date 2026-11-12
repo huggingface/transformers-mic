@@ -13,7 +13,16 @@ import tempfile
 from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download
 import jsonschema
 
-from . import backend, fleet, history, planner, policy, references, resources
+from . import (
+    backend,
+    carryover,
+    fleet,
+    history,
+    planner,
+    policy,
+    references,
+    resources,
+)
 from .hub import (
     DEFAULT_NAMESPACE,
     canonical_references,
@@ -316,6 +325,27 @@ def check_encoder_decoder_calls(plan, config):
                 "decoder_input_ids starting from config.decoder_start_token_id, or labels="
                 + (" (the processor's audio features carry neither)" if spread else "")
             )
+
+
+# Sub-configs that resolve an attention implementation of their own (not quantization or rope).
+ATTENTION_SUB_CONFIGS = ("text_config", "vision_config", "audio_config", "speech_config", "encoder_config", "decoder_config",
+                         "qformer_config", "perceiver_config", "thinker_config", "talker_config", "llm_config")
+
+
+def check_sub_config_attention(plan, config):
+    """A model with sub-configs records the attention each resolved to in runtime.attn_implementations.
+
+    The top level can say sdpa while a tower silently runs eager: transformers#49404 made Gemma4's
+    audio tower eager-only and the gemma4 contract, recording only the top level, stayed green.
+    Drafts copy the closest approved contract's runtime block, so the prompt alone does not do it.
+    """
+    subs = sorted(k for k in ATTENTION_SUB_CONFIGS if isinstance(config.get(k), dict))
+    if subs and "attn_implementations" not in plan["usage"]:
+        raise ValueError(
+            f"the config has sub-configs ({', '.join(subs)}): runtime must also record "
+            '"attn_implementations": {n: getattr(model.config, n)._attn_implementation for n in sorted(model.config.sub_configs) '
+            "if getattr(getattr(model.config, n, None), '_attn_implementation', None)}, written exactly so"
+        )
 
 
 def audio_only_inputs(tree, needed):
@@ -758,10 +788,15 @@ def check_undefined_names(plan):
             for s in top.get_symbols()
             if s.is_assigned() or s.is_imported() or s.is_namespace()
         }
-        tables = [top]
+        tables, every = [top], []
         while tables:
             table = tables.pop()
             tables += table.get_children()
+            every.append(table)
+        # A walrus inside a comprehension, {n: c for n in subs if (c := f(n))}, binds c in the
+        # enclosing scope, but symtable marks it assigned only in the comprehension's table.
+        known |= {s.get_name() for t in every if t is not top for s in t.get_symbols() if s.is_global() and s.is_assigned()}
+        for table in every:
             for symbol in table.get_symbols():
                 read = symbol.is_referenced() and (
                     symbol.is_global()
@@ -1295,6 +1330,7 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
                     lambda: check_label_arguments(plan, config),
                     lambda: check_parameter_names(plan, config),
                     lambda: check_encoder_decoder_calls(plan, config),
+                    lambda: check_sub_config_attention(plan, config),
                     lambda: check_image_tokens_in_text(plan, config),
                     lambda: check_zero_query_gradients(plan, config),
                     lambda: check_trainable_selection(plan, config, parameters),
@@ -1976,6 +2012,9 @@ def publication_ready(workspace):
             "Unreviewed candidate baselines remain; run tmic review before publishing"
         )
     fingerprint = workspace.validation_fingerprint()
+    # Another fleet's integration (Sentence Transformers) that this workspace did not
+    # change is carried over from the Hub and needs no check here.
+    plan = carryover.plan(workspace)
     for framework, integration in workspace.manifest["integrations"].items():
         if list(
             (
@@ -1983,25 +2022,37 @@ def publication_ready(workspace):
             ).rglob("*.candidate.json")
         ):
             raise ValueError(f"Unreviewed {framework} candidate baselines remain")
+        if framework in plan and plan[framework] is None:
+            continue
         for variant in integration.get("variants", {"default": {}}):
             key = variant if framework == "transformers" else f"{framework}:{variant}"
             if (
                 state.get("validations", {}).get(key, {}).get("fingerprint")
                 != fingerprint
             ):
+                why = plan.get(framework)
                 raise ValueError(
                     "Every declared variant and integration needs a successful check; use tmic check --integration all --all-variants"
+                    + (f" ({framework}: {why})" if why not in (None, "primary") else "")
                 )
+    return plan
 
 
 def publish(args):
     workspace = Workspace(args.workspace)
-    publication_ready(workspace)
+    plan = publication_ready(workspace)
+    revision = workspace.lock["contracts"][workspace.state["contract"]][
+        "integration"
+    ]["revision"]
     print(
         json.dumps(
             {
                 "contract": workspace.state["contract"],
                 "fixture": workspace.fixture,
+                "integrations": {
+                    name: carryover.describe(name, why, revision)
+                    for name, why in plan.items()
+                },
                 "execute": args.execute,
                 "next": "tmic publish --execute, then tmic export --transformers-checkout PATH",
             }
@@ -2009,9 +2060,11 @@ def publish(args):
     )
     if not args.execute:
         return 0
-    result = backend.invoke(
-        "publish_mic", workspace.root, ["--private"] if args.private else []
-    )
+    options = ["--private"] if args.private else []
+    for name, why in plan.items():
+        if why is None:
+            options += ["--carry", name]
+    result = backend.invoke("publish_mic", workspace.root, options)
     workspace.save_state(validated=False)
     print("Run tmic check --all-variants on the published pins before export.")
     return result.returncode
@@ -2050,6 +2103,80 @@ def retire(args):
                 "revision": revision,
                 "execute": args.execute,
                 "next": "Done." if args.execute else "Review, then repeat with --execute to upload.",
+            },
+            indent=2,
+        )
+    )
+    return 0
+
+
+def environment(args):
+    """Move the fleets' pinned environment in one dataset commit; preview unless --execute.
+
+    Export refuses a model whose lock environment differs from its fleet, so a new
+    torch can only reach the fleets this way. Contracts and their baselines are left
+    as they are: re-measure them on the new environment, then copy it into each
+    workspace lock before the next export.
+    """
+    changes = {}
+    for item in args.packages:
+        package, sep, version = item.partition("=")
+        if not sep or not package or not version or "=" in version:
+            raise ValueError(f"--set takes PACKAGE=VERSION, got {item!r}")
+        if package in changes and changes[package] != version:
+            raise ValueError(f"{package} is set twice")
+        changes[package] = version
+    names = list(fleet.FILES) if args.fleet == "all" else [args.fleet]
+    revision = fleet.resolve()
+    locks = {name: read(fleet.download(name, revision)[0]) for name in names}
+    before = {name: dict(lock["environment"]) for name, lock in locks.items()}
+    if len({json.dumps(env, sort_keys=True) for env in before.values()}) > 1:
+        raise ValueError(
+            "The fleets pin different environments; move each with --fleet first"
+        )
+    current = next(iter(before.values()))
+    unknown = sorted(set(changes) - set(current))
+    if unknown:
+        raise ValueError(
+            f"Not pinned by the fleet environment: {', '.join(unknown)}; only pinned packages can move"
+        )
+    moved = {
+        package: {"from": current[package], "to": version}
+        for package, version in changes.items()
+        if current[package] != version
+    }
+    if not moved:
+        raise ValueError(f"The fleet environment already pins these versions at {revision}")
+    for lock in locks.values():
+        lock["environment"].update(changes)
+    if args.execute:
+        operations = {}
+        for name, lock in locks.items():
+            operations.update(fleet.operations(name, lock))
+        commit = HfApi().create_commit(
+            repo_id=fleet.REPOSITORY,
+            repo_type="dataset",
+            parent_commit=revision,
+            operations=[
+                CommitOperationAdd(path_in_repo=p, path_or_fileobj=text.encode())
+                for p, text in operations.items()
+            ],
+            commit_message="Fleet environment: "
+            + ", ".join(f"{p} {m['from']} -> {m['to']}" for p, m in moved.items()),
+        )
+        revision = commit.oid
+    print(
+        json.dumps(
+            {
+                "repository": fleet.REPOSITORY,
+                "fleets": names,
+                "changes": moved,
+                "environment": next(iter(locks.values()))["environment"],
+                "revision": revision,
+                "execute": args.execute,
+                "next": "Copy this environment into each workspace lock before its next export."
+                if args.execute
+                else "Review, then repeat with --execute to upload.",
             },
             indent=2,
         )

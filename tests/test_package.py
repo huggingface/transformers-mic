@@ -392,6 +392,85 @@ def test_retire_removes_one_contract_after_a_preview(workspace, dataset):
         commands.retire(SimpleNamespace(fleet="prototypes", contract="Missing", reason="x", execute=False))
 
 
+def test_environment_moves_both_fleets_in_one_commit_after_a_preview(
+    workspace, dataset, monkeypatch, capsys
+):
+    from transformers_mic import fleet
+
+    monkeypatch.setattr(fleet, "resolve", lambda revision="main": "a" * 40)
+    old = read(dataset[0])
+    old["environment"].update(torch="2.14.0", torchvision="0.29.1", torchaudio="2.11.0")
+    write(dataset[0], old)
+    args = SimpleNamespace(
+        packages=["torch=2.15.0", "torchvision=0.29.2", "torchaudio=2.11.1"],
+        fleet="all",
+        execute=False,
+    )
+    commands.environment(args)
+    preview = json.loads(capsys.readouterr().out)
+    assert dataset[1] == []
+    assert preview["changes"]["torch"] == {"from": "2.14.0", "to": "2.15.0"}
+    assert preview["fleets"] == ["control", "prototypes"]
+    args.execute = True
+    commands.environment(args)
+    call = dataset[1][0]
+    assert call["parent_commit"] == "a" * 40
+    assert "torch 2.14.0 -> 2.15.0" in call["commit_message"]
+    for name in ("control", "prototypes"):
+        own = [op for op in call["operations"] if op.path_in_repo.startswith(name + "/")]
+        lock = exported({"operations": own}, name)
+        assert lock["environment"]["torch"] == "2.15.0"
+        assert lock["environment"]["torchaudio"] == "2.11.1"
+        assert lock["environment"]["python"] == old["environment"]["python"]
+        assert set(lock["contracts"]) == set(old["contracts"])
+
+
+def test_environment_refuses_unpinned_unchanged_or_malformed_packages(
+    workspace, dataset, monkeypatch
+):
+    from transformers_mic import fleet
+
+    monkeypatch.setattr(fleet, "resolve", lambda revision="main": "a" * 40)
+    torch = read(dataset[0])["environment"]["torch"]
+
+    def run(*packages):
+        commands.environment(
+            SimpleNamespace(packages=list(packages), fleet="prototypes", execute=True)
+        )
+
+    with pytest.raises(ValueError, match="Not pinned"):
+        run("jax=0.5")
+    with pytest.raises(ValueError, match="already pins"):
+        run(f"torch={torch}")
+    with pytest.raises(ValueError, match="PACKAGE=VERSION"):
+        run("torch")
+    with pytest.raises(ValueError, match="set twice"):
+        run("torch=2.15.0", "torch=2.16.0")
+    assert dataset[1] == []
+
+
+def test_environment_refuses_fleets_that_already_differ(
+    workspace, dataset, monkeypatch, tmp_path
+):
+    from transformers_mic import fleet
+
+    other = tmp_path / "other-fleet.json"
+    lock = read(dataset[0])
+    lock["environment"]["torch"] = "0.0.1"
+    write(other, lock)
+    monkeypatch.setattr(fleet, "resolve", lambda revision="main": "a" * 40)
+    monkeypatch.setattr(
+        fleet,
+        "download",
+        lambda name, revision: (other if name == "control" else dataset[0], revision),
+    )
+    with pytest.raises(ValueError, match="different environments"):
+        commands.environment(
+            SimpleNamespace(packages=["torch=2.15.0"], fleet="all", execute=True)
+        )
+    assert dataset[1] == []
+
+
 def test_export_rejects_case_collision_and_allows_explicit_name(workspace, dataset):
     approve_receipts(workspace)
     old = read(dataset[0])
@@ -1127,6 +1206,119 @@ def test_umbrella_publish_uploads_one_snapshot_and_pins_both_roles(
         == "c" * 40
     )
     assert calls == ["huggingface-mic/bert-mic"]
+
+
+def test_umbrella_publish_leaves_a_carried_integration_on_the_hub(
+    tmp_path, monkeypatch
+):
+    import importlib.util
+    import sys
+
+    example = Path(__file__).resolve().parents[1] / "example"
+    monkeypatch.syspath_prepend(str(example))
+    spec = importlib.util.spec_from_file_location(
+        "publish_mic_carry_test", example / "publish_mic.py"
+    )
+    publisher = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(publisher)
+    path = tmp_path / "umbrella"
+    assert (
+        main(
+            [
+                "create",
+                "google-bert/bert-base-uncased",
+                "--regenerate",
+                "--name",
+                "bert",
+                "--out",
+                str(path),
+            ]
+        )
+        == 0
+    )
+    project = Workspace(path)
+    # A second integration another fleet owns; the workspace has its usage but not
+    # its expectations, which live only on the Hub.
+    manifest = project.manifest
+    manifest["integrations"]["sentence_transformers"] = {
+        **manifest["integrations"]["transformers"],
+        "entry_point": "integrations/sentence_transformers/usage.md",
+    }
+    write(project.contract_root / "integration.json", manifest)
+    st_usage = project.contract_root / "integrations/sentence_transformers/usage.md"
+    st_usage.parent.mkdir(parents=True)
+    st_usage.write_text("ST usage")
+    project.update_layout()
+    fixture = tmp_path / "fixture"
+    fixture.mkdir()
+    (fixture / "model.safetensors").write_bytes(b"weights")
+    write(fixture / "build.json", {"sha256": {"model.safetensors": "hash"}})
+    write(project.expectations / "cpu-test/bert-mic.json", {"reviewed": True})
+    lock = project.lock
+    pin = lock["contracts"]["bert"]["fixtures"][project.fixture]
+    pin.update(path=str(fixture), files_sha256="hash")
+    write(project.lock_path, lock)
+    monkeypatch.setattr(publisher, "HERE", project.root / "example")
+    monkeypatch.setattr(publisher.run, "load", lambda path, schema: read(path))
+    monkeypatch.setattr(publisher.run, "fixture_problem", lambda *a: None)
+    previous = tmp_path / "previous"
+    write(
+        previous / ".mic-repo.json",
+        {
+            "format": "mic-umbrella-v1",
+            "contract_files": read(project.contract_root / ".mic-repo.json")[
+                "contract_files"
+            ],
+        },
+    )
+    write(previous / "build.json", {"sha256": {"model.safetensors": "hash"}})
+    monkeypatch.setattr(
+        publisher, "hf_hub_download", lambda repo, name: str(previous / name)
+    )
+    uploads = []
+
+    class API:
+        def repo_exists(self, repo):
+            return True
+
+        def list_repo_files(self, repo):
+            return [
+                ".mic-repo.json",
+                "build.json",
+                "integrations/sentence_transformers/usage.md",
+                "integrations/sentence_transformers/expectations/cpu-x86_64/bert-mic.json",
+            ]
+
+        def create_repo(self, repo, **kwargs):
+            pass
+
+        def upload_folder(self, repo_id, folder_path, delete_patterns, **kwargs):
+            staged = {
+                p.relative_to(folder_path).as_posix()
+                for p in folder_path.rglob("*")
+                if p.is_file()
+            }
+            uploads.append((staged, delete_patterns))
+            return SimpleNamespace(oid="c" * 40)
+
+    monkeypatch.setattr(publisher, "HfApi", API)
+    # Without --carry the expectations missing locally stop the publish, as before.
+    monkeypatch.setattr(sys, "argv", ["publish_mic"])
+    with pytest.raises(ValueError, match="No reviewed sentence_transformers"):
+        publisher.main()
+    monkeypatch.setattr(
+        sys, "argv", ["publish_mic", "--carry", "sentence_transformers"]
+    )
+    assert publisher.main() == 0
+    ((staged, deleted),) = uploads
+    # Nothing under the carried integration is uploaded or deleted: the Hub keeps it.
+    assert not [p for p in staged if p.startswith("integrations/sentence_transformers/")]
+    assert not [p for p in deleted if p.startswith("integrations/sentence_transformers/")]
+    assert "integrations/transformers/expectations/cpu-test/bert-mic.json" in staged
+    # The layout still lists its usage, which stays in the repository.
+    assert "integrations/sentence_transformers/usage.md" in read(
+        project.contract_root / ".mic-repo.json"
+    )["contract_files"]
 
 
 def test_merged_hub_card_keeps_both_descriptions(monkeypatch):
@@ -1956,6 +2148,22 @@ def test_media_inputs_follow_the_model_dtype():
     full = {"integrations": {"transformers": {"variants": {"default": {}}}}}
     commands.check_half_precision_inputs({"usage": bad, "manifest": full})
 
+
+
+def test_a_walrus_in_a_comprehension_defines_its_name():
+    usage = "```py runnable:t\nx = {n: c for n in model.config.sub_configs if (c := getattr(model.config, n, None))}\nmodel = 1\n```\n"
+    commands.check_undefined_names({"usage": usage})
+
+
+def test_a_composite_model_records_each_sub_config_attention():
+    gemma4 = {"model_type": "gemma4", "text_config": {}, "vision_config": {}, "audio_config": {}}
+    usage = '```py runnable:t\nresult = {"runtime": {"attn_implementation": model.config._attn_implementation}}\n```\n'
+    with pytest.raises(ValueError, match="audio_config, text_config, vision_config"):
+        commands.check_sub_config_attention({"usage": usage}, gemma4)
+    ok = usage.replace("}}", ', "attn_implementations": {}}}')
+    commands.check_sub_config_attention({"usage": ok}, gemma4)
+    # No attention sub-config: nothing to record.
+    commands.check_sub_config_attention({"usage": usage}, {"model_type": "llama", "quantization_config": {}, "rope_scaling": {}})
 
 
 def test_vlm_training_text_must_carry_image_tokens():

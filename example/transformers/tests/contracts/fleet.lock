@@ -160,6 +160,46 @@
       }
     }
   },
+  "known_failures": {
+    "MusicgenMelody/musicgen-melody": {
+      "issue": "https://github.com/huggingface/transformers-mic/pull/247: torch 2.15 bfloat16 drift (cu132 on A10G, CPU on Apple M5) changes greedy codes (cuda: 26/64 codes, 45/64 text_only_codes; cpu-arm64: 19/64, 31/64) and the two torch-2.15 candidates disagree with each other (15/64 codes), so no reviewed reference; torch 2.11 baseline kept",
+      "variants": [
+        "bfloat16"
+      ],
+      "platforms": [
+        "cuda",
+        "cpu-arm64"
+      ]
+    },
+    "MusicgenMelody/mic-musicgen-melody-slim": {
+      "issue": "https://github.com/huggingface/transformers-mic/pull/247: torch 2.15 bfloat16 drift on Apple M5 changes 1/64 greedy codes (floats within 0.085 rel), a likely near-tie not shown; torch 2.11 baseline kept",
+      "variants": [
+        "bfloat16"
+      ],
+      "platforms": [
+        "cpu-arm64"
+      ]
+    },
+    "SmolLM/SmolLM-135M": {
+      "issue": "https://github.com/huggingface/transformers-mic/pull/247: torch 2.15 bfloat16 drift on Apple M5 (bfloat16 is the checkpoint's default dtype) turns ' Paris. It is' into ' Paris, the capital' (next_token_logits 0.058 rel), with no independent torch-2.15 reference; torch 2.11 baseline kept",
+      "variants": [
+        "default"
+      ],
+      "platforms": [
+        "cpu-arm64"
+      ]
+    },
+    "WhisperSpeech/whisper-tiny": {
+      "issue": "https://github.com/huggingface/transformers-mic/pull/247: torch 2.15 cu132 bfloat16 drift on A10G: assisted generation no longer matches greedy, so the candidate cannot be recorded (failed assertions never are); torch 2.11 baseline kept",
+      "match": "assisted_matches_greedy",
+      "variants": [
+        "bfloat16"
+      ],
+      "platforms": [
+        "cuda"
+      ]
+    }
+  },
   "local_patches": {
     "masked-spec-embed-init": "https://github.com/huggingface/transformers/issues/49385: masked_spec_embed is left uninitialized when a checkpoint lacks it (wav2vec2-base-960h does), so SpecAugment training reads garbage; initialize it with init.uniform_ like HuBERT. Remove and re-record the Wav2Vec2 baselines once fixed upstream.",
     "whisper-decode-tensor-batch": "https://github.com/huggingface/transformers/issues/49403: WhisperTokenizer.decode only batches a list of lists, so processor.batch_decode(model.generate(..., return_timestamps=True), decode_with_timestamps=True) merges the rows of the generated tensor into one string or raises; #47997 fixed lists only. Convert a 2-D tensor to a list first. Remove once fixed upstream.",
@@ -167,9 +207,9 @@
   },
   "environment": {
     "python": "3.11",
-    "torch": "2.11.0",
-    "torchvision": "0.26.0",
-    "torchaudio": "2.11.0",
+    "torch": "2.15.0",
+    "torchvision": "0.29.2",
+    "torchaudio": "2.11.1",
     "tokenizers": "0.23.1",
     "numpy": "1.26.4",
     "pillow": "12.2.0",

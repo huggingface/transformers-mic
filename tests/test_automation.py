@@ -92,6 +92,7 @@ def test_full_workflow_uploads_only_after_decisions_and_resumes_without_reupload
         "export",
         "pin",
     ]
+    assert dict(workflow.calls)["auto"][-1] == "auto"
     assert (target / "tests/contracts.lock").read_text() == SHA + "\n"
     state = read(workflow.root / ".mic/automation.json")
     assert state["status"] == "complete" and state["dataset_revision"] == SHA
@@ -735,6 +736,8 @@ def test_cloud_run_checks_all_fixture_variants_before_dispatch(workflow, monkeyp
         if "--no-baseline" in command
     ]
     assert len(smoke) == 1
+    auto = [command for name, command in workflow.calls if name == "auto"]
+    assert auto[0][-2:] == ["auto", "--match-cloud"]
     index, command = smoke[0]
     assert (
         "--all-variants" in command and "--target" in command and "--isolate" in command
