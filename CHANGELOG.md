@@ -12,6 +12,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - The default planner model is `deepseek-ai/DeepSeek-V4-Pro-0813` (was `deepseek-ai/DeepSeek-V4.1-Flash-1017`):
   as many drafts build, more are accepted, and fewer planner calls are made.
 - The `runtime` extra installs `sacremoses`, which the FSMT and XLM tokenizers need.
+- The `runtime` extra installs `num2words`, which the SmolVLM processor needs.
+- Before a cloud run's local factory check, `tmic run` (`tmic auto --match-cloud`) stops with the
+  exact `pip install` command when a `runtime` extra package is missing or Transformers is a release
+  rather than a `main` commit, as the cloud runners measure. It printed an `ImportError` or a
+  checkpoint size mismatch the cloud would not have.
 
 ### Added
 

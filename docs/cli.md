@@ -121,6 +121,13 @@ doc-builder comes from Git because its PyPI release lacks the runnable-Markdown
 collector. To work on tmic itself, install a checkout instead:
 `pip install -e '.[runtime,dev]'`.
 
+`tmic run` measures baselines in the cloud by default, on a Transformers commit
+from `main`. Its local factory check first requires the same Transformers, so
+install `main` too:
+`pip install "transformers @ git+https://github.com/huggingface/transformers"`
+(the check names the exact command when it stops). `--local-only` runs need no
+such install.
+
 ## Dashboard authentication
 
 ```sh
@@ -366,6 +373,20 @@ variant against the built fixture locally, without comparing numeric baselines.
 Failures enter the bounded, reviewed contract-repair flow before GPU dispatch.
 This catches errors such as floating inputs left in float32 for bfloat16 weights;
 it does not replace measurement and validation on the cloud CPU/CUDA environments.
+Before it runs (`tmic auto --match-cloud`), tmic compares this Python with the
+cloud runners' and stops with the exact `pip install` command when:
+
+- a package of the `runtime` extra is missing or at an excluded version. The cloud
+  images get the same list from Transformers' `testing` extra, which installs
+  `transformers-mic[runtime]`;
+- Transformers is a release, or an install with no commit to trace (a `git+`
+  install records its commit; a local source tree is asked with `git`). The cloud
+  measures a `main` commit, resolved at dispatch.
+
+A Transformers commit other than the current `main`, or a source tree with
+uncommitted changes, only prints a note: `main` moves several times a day, and
+the dispatch resolves it again anyway. Set `TMIC_ALLOW_ENVIRONMENT_DRIFT=1` to
+continue past a stop and see the factory check's own result.
 The display distinguishes waiting for a runner, dependency installation,
 measurement and completion, with a run link, a small animation and elapsed timer.
 Animation is rendered in the parent CLI so carriage returns survive the child
