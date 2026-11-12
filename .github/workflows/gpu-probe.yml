@@ -41,7 +41,7 @@ jobs:
           git -C framework apply ../experiments/ssd-moe/transformers.patch
           python3 -m pip install -q -e framework
           nvidia-smi > out/nvidia-smi.txt
-          df -h /mnt/cache > out/storage.txt
+          df -h /mnt/cache /tmp / > out/storage.txt
           cat /proc/meminfo > out/meminfo.txt
           python3 -m pip freeze > out/packages.txt
           git -c safe.directory="$PWD" rev-parse HEAD > out/mic-sha.txt
@@ -66,6 +66,21 @@ jobs:
           ]:
               print('Downloading', repo, revision, flush=True)
               paths[key] = snapshot_download(repo, revision=revision, allow_patterns=['*.json', '*.safetensors', 'merges.txt', 'vocab.json'])
+          source = paths['checkpoint']
+          size = sum(os.path.getsize(os.path.join(source, name)) for name in os.listdir(source) if os.path.isfile(os.path.join(source, name)))
+          local = '/tmp/ssd-moe-checkpoint'
+          storage = {'source': source, 'checkpoint_bytes': size, 'local_scratch_free_bytes': shutil.disk_usage('/tmp').free}
+          if storage['local_scratch_free_bytes'] > size + 10 * 1024**3:
+              print('Staging checkpoint on local scratch', local, flush=True)
+              shutil.copytree(source, local, symlinks=False)
+              paths['checkpoint'] = local
+              storage['measurement_path'] = local
+              storage['location'] = 'container local scratch; see filesystem diagnostics'
+          else:
+              storage['measurement_path'] = source
+              storage['location'] = 'shared NFS cache; not an SSD throughput measurement'
+          with open('out/storage-location.json', 'w') as f:
+              json.dump(storage, f, indent=2)
           with open('out/paths.json', 'w') as f:
               json.dump(paths, f, indent=2)
           PY
