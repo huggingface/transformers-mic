@@ -22,8 +22,10 @@ field() { "$PY" -c "import json,sys; print(json.load(open('$PATHS'))[sys.argv[1]
 cp "$PATHS" "$OUT/paths.json"
 echo "memory limit: ${MEMORY_LIMIT:-none}" | tee "$OUT/memory-limit.txt"
 cgroup_after() {  # peak RAM of this container (anon + page cache) and whether the OOM killer fired
-  for f in memory.max memory.peak memory.events; do echo "== $f"; cat /sys/fs/cgroup/$f 2>/dev/null || echo n/a; done > "$OUT/cgroup-after.txt"
+  { echo "balloon alive: $([ -n "${BALLOON_PID:-}" ] && kill -0 "$BALLOON_PID" 2>/dev/null && echo yes || echo no)"
+    for f in memory.max memory.peak memory.events; do echo "== $f"; cat /sys/fs/cgroup/$f 2>/dev/null || echo n/a; done; } > "$OUT/cgroup-after.txt"
   grep -E "^(anon|file) " /sys/fs/cgroup/memory.stat >> "$OUT/cgroup-after.txt" 2>/dev/null || true
+  [ -z "${BALLOON_PID:-}" ] || kill "$BALLOON_PID" 2>/dev/null || true
 }
 trap cgroup_after EXIT
 
@@ -49,11 +51,25 @@ bench() {  # bench STARTED_AT EXTRA_JSON API_KEY EVICT_PATHS...
 
 stop_server() { kill "$SERVER_PID" 2>/dev/null || true; wait "$SERVER_PID" 2>/dev/null || true; cgroup_after; }
 
+limit_memory() {  # with MEMORY_LIMIT (e.g. 12g), leave the engine and the page cache only that much RAM; call after staging
+  [ -n "${MEMORY_LIMIT:-}" ] || return 0
+  local bytes
+  bytes=$("$1" -c "import sys; v=sys.argv[1].lower(); u={'k':1<<10,'m':1<<20,'g':1<<30}; print(int(float(v[:-1])*u[v[-1]]) if v[-1] in u else int(v))" "$MEMORY_LIMIT")
+  rm -f /tmp/balloon.ready
+  "$1" "$HERE/balloon.py" "$bytes" /tmp/balloon.ready &
+  BALLOON_PID=$!
+  for _ in $(seq 600); do [ -s /tmp/balloon.ready ] && break; kill -0 "$BALLOON_PID" || { echo "balloon died" >&2; exit 1; }; sleep 1; done
+  [ -s /tmp/balloon.ready ] || { echo "balloon not ready" >&2; exit 1; }
+  { cat /tmp/balloon.ready; cat /proc/swaps; grep -E "^(anon|file) " /sys/fs/cgroup/memory.stat; } | tee -a "$OUT/memory-limit.txt"
+  echo 1000 > /proc/self/oom_score_adj  # the engine, not the balloon, is what the OOM killer takes
+}
+
 case "$ENGINE" in
   transformers-streaming | transformers-offload)
     CKPT=/tmp/qwen36-bf16
     stage "$(field safetensors)" "$CKPT"
     disk_probe "$(ls "$CKPT"/*.safetensors | head -1)"
+    limit_memory "$PY"
     git -C framework apply "$HERE/transformers.patch"
     "$PY" -m pip install -q -e framework
     "$PY" -m pip freeze > "$OUT/packages.txt"
@@ -77,6 +93,7 @@ PY
     CKPT=/tmp/qwen36-bf16
     stage "$(field safetensors)" "$CKPT"
     disk_probe "$(ls "$CKPT"/*.safetensors | head -1)"
+    limit_memory "$PY"
     "$PY" -m pip freeze > "$OUT/packages.txt"
     started=$(date +%s.%N)
     vllm serve "$CKPT" --served-model-name model --port 8080 --host 127.0.0.1 --dtype bfloat16 --seed 0 \
@@ -89,6 +106,7 @@ PY
     if [ "$ENGINE" = llamacpp-bf16 ]; then GGUF=/tmp/gguf/model-bf16.gguf; stage "$(field gguf_bf16)" "$GGUF";
     else GGUF=/tmp/gguf/model-q8_0.gguf; stage "$(field gguf_q8_0)" "$GGUF"; fi
     disk_probe "$GGUF"
+    limit_memory "$PY"
     # The runner's container hook does not keep the image's library path; the shared libraries live next to the binaries.
     export LD_LIBRARY_PATH=/app${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
     /app/llama-server --version > "$OUT/packages.txt" 2>&1 || true
@@ -104,6 +122,7 @@ PY
     MODELDIR=/tmp/strata-models/Qwen3.6-35B-A3B-Q8_0
     stage "$(field gguf_q8_0)" "$MODELDIR/Qwen3.6-35B-A3B-Q8_0.gguf"
     disk_probe "$MODELDIR/Qwen3.6-35B-A3B-Q8_0.gguf"
+    limit_memory "$PY"
     export XDG_STATE_HOME=/data/state XDG_CONFIG_HOME=/data/config HOME=/data/home STRATA_INSTALL_DIR=/data/install
     export STRATA_COMPONENTS_DIR=/opt/strata/components STRATA_IN_DOCKER=1
     mkdir -p /data/state /data/config /data/home /data/install /data/Strata-data
