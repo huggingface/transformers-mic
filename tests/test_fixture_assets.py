@@ -1115,3 +1115,32 @@ def test_input_diagnosis_names_inputs_that_cannot_move_the_outputs():
     assert "no image token" in build_fixtures.input_diagnosis(blip2, batch)[0]
     batch["input_ids"] = torch.tensor([[7, 2, 3], [7, 4, 3]])
     assert build_fixtures.input_diagnosis(blip2, batch) == []
+
+
+def test_sensitivity_perturbs_codec_latents():
+    import perturb
+
+    class Decoder(torch.nn.Module):  # MimiDecoderModel: MimiModel.decode calls it with latents
+        def __init__(self):
+            super().__init__()
+            self.scale = torch.nn.Parameter(torch.tensor(2.0))
+
+        def forward(self, latents):
+            return {"audio_values": torch.tanh(self.scale * latents).cumsum(-1)}
+
+    result = perturb.sensitivity(Decoder(), {"latents": torch.randn(2, 4, 6)}, threshold=1e-3)
+    assert result["pass"] and result["no_perturbation_defined"] == []
+    assert set(result["deltas"]) == {"latents:roll_batch", "latents:reverse", "latents:halve"}
+
+
+def test_a_contract_failure_names_the_contract_line(tmp_path):
+    entry = tmp_path / "usage.md"
+    code = "inputs = processor(audio)\nloss = model(**inputs, labels=labels).loss\nprobe = model(**inputs).logits\n"
+    stderr = (
+        "Traceback (most recent call last):\n"
+        f'  File "{entry}", line 3, in <module>\n'
+        '  File "/site-packages/transformers/models/x/modeling_x.py", line 819, in forward\n'
+        "ValueError: You must specify exactly one of input_ids or inputs_embeds\n"
+    )
+    assert build_fixtures.contract_lines(stderr, code, entry) == "contract line 3: probe = model(**inputs).logits\n"
+    assert build_fixtures.contract_lines("ValueError: x\n", code, entry) == ""

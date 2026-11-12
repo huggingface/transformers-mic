@@ -544,6 +544,25 @@ def captured_calls(model_class=PreTrainedModel, method="__call__"):
         yield calls
 
 
+def contract_lines(stderr, code, entry):
+    """The contract lines a failing traceback passed through, as the code ran them.
+
+    The traceback's tail is all library frames when the error is raised deep in a model
+    (moonshine-ai/moonshine-streaming-tiny: "You must specify exactly one of input_ids or
+    inputs_embeds" from the decoder), so neither a reader nor a contract repair could tell
+    which call was wrong; the repair returned the usage unchanged. The code is compiled
+    under the entry's file name, so a frame's line number indexes the executed code, not
+    the Markdown file.
+    """
+    lines = code.splitlines()
+    found = []
+    for match in re.finditer(r'File "' + re.escape(str(entry)) + r'", line (\d+)', stderr):
+        number = int(match.group(1))
+        if 0 < number <= len(lines):
+            found.append(f"contract line {number}: {lines[number - 1].strip()}")
+    return "".join(f"{line}\n" for line in dict.fromkeys(found))
+
+
 def contract_batch(entry, fixture_dir, *, model_class=PreTrainedModel, method="__call__"):
     """Run the contract on the fixture; return the training step's model inputs by name."""
     code = run.contract_code(entry)
@@ -551,7 +570,7 @@ def contract_batch(entry, fixture_dir, *, model_class=PreTrainedModel, method="_
     with captured_calls(model_class, method) as calls, run.chdir(entry.parent):
         ok, _, stderr = run.execute_inline(code, str(entry), env)
     if not ok:
-        raise SystemExit(f"the contract fails on the random fixture:\n{stderr[-1500:]}")
+        raise SystemExit(f"the contract fails on the random fixture:\n{contract_lines(stderr, code, entry)}{stderr[-1500:]}")
     training = [c for c in calls if c["training"]]
     chosen = training[0] if training else calls[0]
     # Fixtures are built on the CPU; the contract may have put its inputs on a GPU.

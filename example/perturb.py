@@ -50,6 +50,9 @@ PERTURBATIONS = {
     # Time-series forecasters (TimesFM): one context series per row, possibly a
     # list of 1-D tensors of different lengths.
     "past_values": (roll_batch, reverse, halve),
+    # Continuous latents of a codec's decoder half (MimiDecoderModel, reached through
+    # MimiModel.decode): (batch, latent_dim, frames), so reverse flips the frames.
+    "latents": (roll_batch, reverse, halve),
 }
 # Training targets are never perturbed; future_values is the forecasting target.
 NEVER = {"labels", "actions", "return_loss", "future_values"}
