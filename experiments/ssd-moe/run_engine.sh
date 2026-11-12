@@ -147,9 +147,16 @@ PY
     KEY=$(head -c 24 /dev/urandom | od -An -tx1 | tr -d ' \n')
     export STRATA_LAUNCH_KEY=$KEY
     ls /opt/strata/components/engine > "$OUT/packages.txt"
-    # Under a RAM cap, Strata's mapped mode: experts are read in place from the GGUF through the page cache (its SSD mode).
-    # It sizes itself from /proc/meminfo (the host's RAM), so a container cap does not switch it on by itself.
-    strata_set=(); [ -n "${MEMORY_LIMIT:-}" ] && strata_set=(--set mmap-experts=on)
+    # Under a RAM cap, Strata's RAM-budget mode: the hottest N GiB of experts the GPU does not hold are copied into RAM, the
+    # rest are read in place from the GGUF (its SSD mode). It sizes itself from /proc/meminfo (the host's RAM, hundreds of
+    # GiB), so without an explicit budget its automatic RAM copy outgrows the cap and the pod is OOM-killed.
+    strata_set=()
+    if [ -n "${MEMORY_LIMIT:-}" ]; then
+      strata_set=(--set "resident-budget-gib=${STRATA_RAM_BUDGET_GIB:-4}" --set "memory-limit-mib=$(( $(bytes_of "$MEMORY_LIMIT") / 1048576 ))")
+    fi
+    # Follow the engine log in the job log: an OOM kill takes the container, and the uploaded artifact, with it.
+    tail -n +1 -F "$OUT/engine.log" 2>/dev/null &
+    TAIL_PID=$!
     started=$(date +%s.%N)
     # One request at a time, no MTP/drafting, no pictures, no tuning: plain greedy decoding like the other engines.
     /opt/strata/terminal/bin/strata launch --no-tui --yes --access local --port 8080 --data-dir /data/Strata-data \
@@ -158,6 +165,7 @@ PY
     bench "$started" '{"ignore_eos": true}' "$KEY" "$MODELDIR" /data/Strata-data
     /opt/strata/terminal/bin/strata launch --status --output json > "$OUT/strata-status.json" 2>&1 || true
     /opt/strata/terminal/bin/strata launch --stop >> "$OUT/engine.log" 2>&1 || true
+    kill "$TAIL_PID" 2>/dev/null || true
     ;;
   *) echo "unknown engine $ENGINE" >&2; exit 2 ;;
 esac
