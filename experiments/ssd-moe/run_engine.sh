@@ -13,7 +13,8 @@ PY=${PY:-python3}
 mkdir -p "$OUT"
 field() { "$PY" -c "import json,sys; print(json.load(open('$PATHS'))[sys.argv[1]])" "$1"; }
 
-{ nvidia-smi || true; df -h / /tmp || true; cat /proc/meminfo; nproc; } > "$OUT/environment.txt" 2>&1
+{ nvidia-smi || true; df -h / /tmp || true; cat /proc/meminfo; nproc
+  for f in memory.max memory.high cpu.max; do echo "cgroup $f: $(cat /sys/fs/cgroup/$f 2>/dev/null || echo n/a)"; done; } > "$OUT/environment.txt" 2>&1
 cp "$PATHS" "$OUT/paths.json"
 
 stage() {  # stage SRC DST: copy (dereferencing HF cache symlinks) to container-local scratch, report throughput

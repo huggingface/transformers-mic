@@ -1,6 +1,6 @@
 diff --git a/examples/generate/ssd_moe.py b/examples/generate/ssd_moe.py
 new file mode 100644
-index 0000000000..e9b8cb7f17
+index 0000000000..3f8ef0b8f3
 --- /dev/null
 +++ b/examples/generate/ssd_moe.py
 @@ -0,0 +1,261 @@
@@ -198,7 +198,7 @@ index 0000000000..e9b8cb7f17
 +    if inputs.numel() == 0:
 +        parser.error("Prompt must tokenize to at least one token")
 +    start = time.perf_counter()
-+    if args.mode != "eager":
++    if args.mode in ("streaming", "layerwise"):
 +        model = load_moe_from_ssd(
 +            args.checkpoint,
 +            device=device,
