@@ -12,6 +12,9 @@ on:
         type: choice
         options: [aws-g5-4xlarge-cache]
         default: aws-g5-4xlarge-cache
+      engines:
+        description: JSON list of engines to run
+        default: '["transformers-streaming", "transformers-offload", "vllm", "llamacpp-bf16", "llamacpp-q8_0", "strata"]'
       max_tokens:
         description: Generated tokens per request (greedy, same prompt for every engine)
         default: '32'
@@ -48,25 +51,19 @@ jobs:
       fail-fast: false
       max-parallel: 3
       matrix:
-        include:
-          - engine: transformers-streaming
-            image: huggingface/transformers-all-latest-gpu
-          - engine: transformers-offload
-            image: huggingface/transformers-all-latest-gpu
-          - engine: vllm
-            image: vllm/vllm-openai:v0.32.0
-          - engine: llamacpp-bf16
-            image: ghcr.io/ggml-org/llama.cpp:full-cuda-b11977
-          - engine: llamacpp-q8_0
-            image: ghcr.io/ggml-org/llama.cpp:full-cuda-b11977
-          - engine: strata
-            image: ghcr.io/niko1221/strata:0.2.12-cuda13
+        engine: ${{ fromJSON(inputs.engines) }}
     name: ${{ matrix.engine }}
     runs-on:
       group: '${{ inputs.machine_type }}'
     timeout-minutes: 150
     container:
-      image: ${{ matrix.image }}
+      image: >-
+        ${{ fromJSON('{"transformers-streaming": "huggingface/transformers-all-latest-gpu",
+        "transformers-offload": "huggingface/transformers-all-latest-gpu",
+        "vllm": "vllm/vllm-openai:v0.32.0",
+        "llamacpp-bf16": "ghcr.io/ggml-org/llama.cpp:full-cuda-b11977",
+        "llamacpp-q8_0": "ghcr.io/ggml-org/llama.cpp:full-cuda-b11977",
+        "strata": "ghcr.io/niko1221/strata:0.2.12-cuda13"}')[matrix.engine] }}
       options: >-
         --gpus all --shm-size "16gb" --ipc host --ulimit memlock=-1:-1
         -e NVIDIA_DRIVER_CAPABILITIES=compute,utility

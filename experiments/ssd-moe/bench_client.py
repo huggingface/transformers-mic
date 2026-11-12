@@ -104,9 +104,11 @@ def evict(paths):
     return total
 
 
-def wait_ready(base, timeout, api_key=None):
+def wait_ready(base, timeout, api_key=None, server_pid=None):
     deadline = time.time() + timeout
     while time.time() < deadline:
+        if server_pid is not None and not Path(f"/proc/{server_pid}").exists():
+            raise RuntimeError(f"server process {server_pid} exited before it was ready; see engine.log")
         for path in ("/health", "/v1/models"):
             try:
                 headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
@@ -201,6 +203,7 @@ def main():
         "--meta", default="{}", help="JSON provenance merged into the report"
     )
     parser.add_argument("--api-key", default=None)
+    parser.add_argument("--server-pid", type=int, help="fail as soon as this process exits")
     parser.add_argument(
         "--evict",
         nargs="*",
@@ -209,7 +212,7 @@ def main():
     )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    wait_ready(args.base, args.ready_timeout, args.api_key)
+    wait_ready(args.base, args.ready_timeout, args.api_key, args.server_pid)
     report = {
         "engine": args.engine,
         "ready_after_launch_s": None

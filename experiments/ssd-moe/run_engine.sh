@@ -32,7 +32,7 @@ disk_probe() {  # direct-I/O sequential read of 4 GiB of a staged file: the scra
 bench() {  # bench STARTED_AT EXTRA_JSON API_KEY EVICT_PATHS...
   local started=$1 extra=$2 key=$3; shift 3
   "$PY" "$HERE/bench_client.py" --engine "$ENGINE" --prompt-file "$HERE/prompt.txt" --max-tokens "$MAX_TOKENS" \
-    --started-at "$started" --extra "$extra" ${key:+--api-key "$key"} --evict "$@" \
+    --started-at "$started" --extra "$extra" ${key:+--api-key "$key"} ${SERVER_PID:+--server-pid "$SERVER_PID"} --evict "$@" \
     --meta "{\"paths\": $(cat "$PATHS")}" --output "$OUT/result.json"
 }
 
@@ -78,6 +78,8 @@ PY
     if [ "$ENGINE" = llamacpp-bf16 ]; then GGUF=/tmp/gguf/model-bf16.gguf; stage "$(field gguf_bf16)" "$GGUF";
     else GGUF=/tmp/gguf/model-q8_0.gguf; stage "$(field gguf_q8_0)" "$GGUF"; fi
     disk_probe "$GGUF"
+    # The runner's container hook does not keep the image's library path; the shared libraries live next to the binaries.
+    export LD_LIBRARY_PATH=/app${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
     /app/llama-server --version > "$OUT/packages.txt" 2>&1 || true
     started=$(date +%s.%N)
     # --fit on: llama.cpp's own placement of layers/experts into the 24 GB GPU, rest of the experts on the CPU (mmap).
