@@ -1,22 +1,13 @@
-name: GPU probe
-
-# Checks that this repo can reach the transformers GPU runner groups (the ARC
-# scale sets the slow-test verify loop and run-slow use) and reports the environment
-# contract checks would run in. Same image and node-local cache mount as
-# transformers-ci's serge-verify-slow.yml.
+name: Qwen MoE SSD streaming POC
 
 on:
   workflow_dispatch:
     inputs:
       machine_type:
-        description: "Runner group: aws-g5-4xlarge-cache (single) / aws-g5-12xlarge-cache (multi)"
-        required: false
-        type: string
+        description: Approved single GPU MIC runner
+        type: choice
+        options: [aws-g5-4xlarge-cache]
         default: aws-g5-4xlarge-cache
-      docker:
-        required: false
-        type: string
-        default: huggingface/transformers-all-latest-gpu
 
 permissions:
   contents: read
@@ -27,16 +18,90 @@ jobs:
       group: '${{ inputs.machine_type }}'
     timeout-minutes: 60
     container:
-      image: ${{ inputs.docker }}
+      image: huggingface/transformers-all-latest-gpu
       options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
     env:
       HF_HOME: /mnt/cache
+      HF_HUB_DISABLE_PROGRESS_BARS: '1'
+      CUDA_VISIBLE_DEVICES: '0'
+      PYTHONUNBUFFERED: '1'
+      TOKENIZERS_PARALLELISM: 'false'
     steps:
-      - name: Environment
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: huggingface/transformers
+          ref: 158f872ebb33a59f992f69a3abccc6472c548c3f
+          path: framework
+      - name: Apply the reviewed POC and install existing dependencies
+        shell: bash
         run: |
-          nvidia-smi
-          python3 --version
-          python3 -c "import torch, transformers; print('torch', torch.__version__, 'cuda', torch.version.cuda, torch.cuda.is_available(), torch.cuda.device_count(), torch.cuda.get_device_name(0)); print('transformers', transformers.__version__, transformers.__file__)"
-          python3 -m pip list 2>/dev/null | grep -iE "^(torch|tokenizers|numpy|pillow|accelerate|kernels|flash|safetensors|huggingface)" || true
-          git -C /transformers log -1 --format='%H %cd' || true
-          ls /mnt/cache/hub 2>/dev/null | head -50 || true
+          set -euo pipefail
+          mkdir -p out
+          git -C framework apply ../experiments/ssd-moe/transformers.patch
+          python3 -m pip install -q -e framework
+          nvidia-smi > out/nvidia-smi.txt
+          df -h /mnt/cache > out/storage.txt
+          cat /proc/meminfo > out/meminfo.txt
+          python3 -m pip freeze > out/packages.txt
+          git rev-parse HEAD > out/mic-sha.txt
+          sha256sum experiments/ssd-moe/transformers.patch > out/patch-sha256.txt
+      - name: Run correctness tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd framework
+          PYTHONPATH=src python3 -m unittest discover -s tests/integrations -p test_ssd_moe.py -v 2>&1 | tee ../out/tests.log
+      - name: Download pinned fixture and checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, shutil
+          from huggingface_hub import snapshot_download
+          paths = {}
+          for key, repo, revision in [
+              ('fixture', 'huggingface-mic/Qwen3-30B-A3B-mic', '02a209fca46248ff0b3da72e3b190428138b2449'),
+              ('checkpoint', 'Qwen/Qwen3-30B-A3B', 'ad44e777bcd18fa416d9da3bd8f70d33ebb85d39'),
+          ]:
+              print('Downloading', repo, revision, flush=True)
+              paths[key] = snapshot_download(repo, revision=revision, allow_patterns=['*.json', '*.safetensors', 'merges.txt', 'vocab.json'])
+          with open('out/paths.json', 'w') as f:
+              json.dump(paths, f, indent=2)
+          PY
+      - name: Compare CUDA fixture output with resident eager execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          fixture=$(python3 -c 'import json; print(json.load(open("out/paths.json"))["fixture"])')
+          for mode in eager streaming layerwise; do
+            PYTHONPATH=framework/src python3 framework/examples/generate/ssd_moe.py "$fixture" \
+              --mode "$mode" --device cuda --dtype bfloat16 --cache-mib 0.012 --max-new-tokens 16 \
+              --output "out/fixture-$mode.json" > "out/fixture-$mode.log" 2>&1
+          done
+          python3 experiments/ssd-moe/compare.py out/fixture-eager.json out/fixture-streaming.json out/fixture-layerwise.json
+      - name: Compare full Qwen checkpoint with whole-bank loading
+        shell: bash
+        run: |
+          set -euo pipefail
+          checkpoint=$(python3 -c 'import json; print(json.load(open("out/paths.json"))["checkpoint"])')
+          for mode in streaming layerwise; do
+            PYTHONPATH=framework/src python3 framework/examples/generate/ssd_moe.py "$checkpoint" \
+              --mode "$mode" --device cuda --dtype bfloat16 --cache-mib 4096 --max-new-tokens 4 \
+              --output "out/checkpoint-$mode.json" > "out/checkpoint-$mode.log" 2>&1
+          done
+          python3 experiments/ssd-moe/compare.py out/checkpoint-streaming.json out/checkpoint-layerwise.json
+      - name: Generate a longer answer with streaming
+        shell: bash
+        run: |
+          set -euo pipefail
+          checkpoint=$(python3 -c 'import json; print(json.load(open("out/paths.json"))["checkpoint"])')
+          PYTHONPATH=framework/src python3 framework/examples/generate/ssd_moe.py "$checkpoint" \
+            --device cuda --dtype bfloat16 --cache-mib 4096 --max-new-tokens 32 --runs 1 \
+            --output out/checkpoint-streaming-32.json > out/checkpoint-streaming-32.log 2>&1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: qwen-ssd-moe-poc
+          path: out/
+          retention-days: 14
