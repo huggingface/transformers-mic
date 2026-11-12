@@ -11,6 +11,13 @@ PATHS=${PATHS_JSON:-/mnt/cache/ssd-moe/paths.json}
 MAX_TOKENS=${MAX_TOKENS:-32}
 PY=${PY:-python3}
 mkdir -p "$OUT"
+# PROMPT_SET=sizes: 256/1000/4096-token prompts x 3 repeats, each request once; otherwise prompt.txt twice (run 1 / run 2).
+if [ "${PROMPT_SET:-}" = sizes ]; then
+  python3 "$HERE/make_prompts.py" "$OUT/prompts" 2>/dev/null || "${PY}" "$HERE/make_prompts.py" "$OUT/prompts"
+  PROMPT_ARGS=(); for f in "$OUT"/prompts/*.txt; do PROMPT_ARGS+=(--prompt-file "$f"); done; RUNS=1
+else
+  PROMPT_ARGS=(--prompt-file "$HERE/prompt.txt"); RUNS=2
+fi
 # CPUs this pod may use: the cgroup quota, not nproc (the node has 96 CPUs, the pod about 22).
 CPUS=$(awk '$1 != "max" {n = int($1 / $2)} END {print (n > 0 ? n : 0)}' /sys/fs/cgroup/cpu.max 2>/dev/null || echo 0)
 [ "$CPUS" -gt 0 ] || CPUS=$(nproc)
@@ -44,7 +51,7 @@ disk_probe() {  # direct-I/O sequential read of 4 GiB of a staged file: the scra
 
 bench() {  # bench STARTED_AT EXTRA_JSON API_KEY EVICT_PATHS...
   local started=$1 extra=$2 key=$3; shift 3
-  "$PY" "$HERE/bench_client.py" --engine "$ENGINE" --prompt-file "$HERE/prompt.txt" --max-tokens "$MAX_TOKENS" \
+  "$PY" "$HERE/bench_client.py" --engine "$ENGINE" "${PROMPT_ARGS[@]}" --runs "$RUNS" --max-tokens "$MAX_TOKENS" \
     --started-at "$started" --extra "$extra" ${key:+--api-key "$key"} ${SERVER_PID:+--server-pid "$SERVER_PID"} --evict "$@" \
     --meta "{\"paths\": $(cat "$PATHS")}" --output "$OUT/result.json"
 }
@@ -104,8 +111,8 @@ PY
     fi
     # Hub kernels (Qwen3.6 linear attention, causal conv, RMSNorm) are fetched from the Hub, so this step is online.
     HF_HUB_OFFLINE=0 PYTHONPATH=framework/src "$PY" framework/examples/generate/ssd_moe.py "$CKPT" "${mode_args[@]}" --use-kernels \
-      --chat --prompt-file "$HERE/prompt.txt" --device cuda --dtype bfloat16 --threads "$CPUS" \
-      --max-new-tokens "$MAX_TOKENS" --runs 2 --output "$OUT/result.json" > "$OUT/engine.log" 2>&1
+      --chat "${PROMPT_ARGS[@]}" --device cuda --dtype bfloat16 --threads "$CPUS" --prefill-chunk-size "${PREFILL_CHUNK:-4096}" \
+      --max-new-tokens "$MAX_TOKENS" --runs "$RUNS" --output "$OUT/result.json" > "$OUT/engine.log" 2>&1
     ;;
   vllm)
     CKPT=/tmp/qwen36-bf16
@@ -120,7 +127,7 @@ PY
     SERVER_PID=$!; trap stop_server EXIT
     bench "$started" '{"ignore_eos": true}' "" "$CKPT"
     ;;
-  llamacpp-bf16 | llamacpp-q8_0)
+  llamacpp-bf16 | llamacpp-q8_0 | llamacpp-q8_0-cache)
     if [ "$ENGINE" = llamacpp-bf16 ]; then GGUF=/tmp/gguf/model-bf16.gguf; stage "$(field gguf_bf16)" "$GGUF";
     else GGUF=/tmp/gguf/model-q8_0.gguf; stage "$(field gguf_q8_0)" "$GGUF"; fi
     disk_probe "$GGUF"
@@ -130,7 +137,10 @@ PY
     /app/llama-server --version > "$OUT/packages.txt" 2>&1 || true
     started=$(date +%s.%N)
     # --fit on: llama.cpp's own placement of layers/experts into the 24 GB GPU, rest of the experts on the CPU (mmap).
-    /app/llama-server -m "$GGUF" --host 127.0.0.1 --port 8080 --alias model --fit on -c 4096 -np 1 \
+    # llamacpp-q8_0-cache: every expert stays in host memory (-cmoe, mmap) and the GPU keeps an LRU cache of experts
+    # (--moe-cache-mib, PR #29887): only misses are uploaded, like the Transformers streaming cache, same budget.
+    llama_extra=(); [ "$ENGINE" = llamacpp-q8_0-cache ] && llama_extra=(-cmoe --moe-cache-mib "${MOE_CACHE_MIB:-5632}")
+    /app/llama-server -m "$GGUF" --host 127.0.0.1 --port 8080 --alias model --fit on -c 8192 -np 1 ${llama_extra[@]+"${llama_extra[@]}"} \
       --jinja --seed 0 -t "$CPUS" -tb "$CPUS" > "$OUT/engine.log" 2>&1 &
     SERVER_PID=$!; trap stop_server EXIT
     bench "$started" '{"ignore_eos": true}' "" "$GGUF"

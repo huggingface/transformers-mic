@@ -186,7 +186,7 @@ def main():
     parser.add_argument("--engine", required=True)
     parser.add_argument("--base", default="http://127.0.0.1:8080")
     parser.add_argument("--model", default="model")
-    parser.add_argument("--prompt-file", type=Path, required=True)
+    parser.add_argument("--prompt-file", type=Path, action="append", required=True, help="repeat for several prompts")
     parser.add_argument("--max-tokens", type=int, default=64)
     parser.add_argument("--runs", type=int, default=2)
     parser.add_argument("--ready-timeout", type=int, default=3600)
@@ -222,22 +222,23 @@ def main():
         "gpu_used_bytes_idle": gpu_used_bytes(),
         "evicted_bytes_after_ready": evict(args.evict),
         "meminfo_idle": meminfo(),
-        "prompt": args.prompt_file.read_text(encoding="utf-8"),
+        "prompts": [str(path) for path in args.prompt_file],
         "max_tokens": args.max_tokens,
         **json.loads(args.meta),
         "runs": [],
     }
-    for _ in range(args.runs):
-        report["runs"].append(
-            request(
+    for path in args.prompt_file:
+        for _ in range(args.runs):
+            result = request(
                 args.base,
                 args.model,
-                report["prompt"],
+                path.read_text(encoding="utf-8"),
                 args.max_tokens,
                 json.loads(args.extra),
                 args.api_key,
             )
-        )
+            result["prompt_file"] = str(path)
+            report["runs"].append(result)
         args.output.write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, indent=2))
 

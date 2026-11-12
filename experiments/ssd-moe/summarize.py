@@ -11,11 +11,13 @@ ORDER = [
     "vllm",
     "llamacpp-bf16",
     "llamacpp-q8_0",
+    "llamacpp-q8_0-cache",
     "strata",
 ]
 WEIGHTS = {
     "transformers-streaming-q8_0": "Q8_0 GGUF experts (Unsloth) + BF16 dense",
     "llamacpp-q8_0": "Q8_0 GGUF (Unsloth)",
+    "llamacpp-q8_0-cache": "Q8_0 GGUF (Unsloth), -cmoe + GPU expert cache",
     "strata": "Q8_0 GGUF (Unsloth)",
     "llamacpp-bf16": "BF16 GGUF (converted)",
 }
@@ -47,6 +49,8 @@ def load(root, engine):
                     "gpu_used_peak_bytes", report.get("device_peak_allocated_bytes")
                 ),
                 "text": run.get("generated_text", ""),
+                "prompt_file": run.get("prompt_file"),
+                "prompt_tokens": run.get("prompt_tokens"),
             }
         )
     return {"report": report, "runs": rows}
@@ -59,6 +63,41 @@ def common_prefix(a, b):
             break
         n += 1
     return n
+
+
+def median(values):
+    values = sorted(v for v in values if v is not None)
+    if not values:
+        return None
+    middle = len(values) // 2
+    return values[middle] if len(values) % 2 else (values[middle - 1] + values[middle]) / 2
+
+
+def sizes_table(results):
+    """Per prompt size (pNNNN-rK.txt files): medians over the repeats, and the storage read summed over them."""
+    lines = [
+        "| Engine | Prompt | Prompt tokens | TTFT s | Prompt tok/s | Decode tok/s | Storage read GiB (all repeats) |",
+        "|---|---|---:|---:|---:|---:|---:|",
+    ]
+    for engine in ORDER:
+        result = results[engine]
+        if not result:
+            continue
+        groups = {}
+        for run in result["runs"]:
+            name = Path(run["prompt_file"] or "").name
+            if name.startswith("p") and "-r" in name:
+                groups.setdefault(name.split("-r")[0], []).append(run)
+        for size, runs in sorted(groups.items()):
+            tokens = median([r["prompt_tokens"] for r in runs])
+            ttft = median([r["ttft"] for r in runs])
+            reads = [r["read"] for r in runs if r["read"] is not None]
+            lines.append(
+                f"| {engine} | {size} x{len(runs)} | {num(tokens, 0)} | {num(ttft)} | "
+                f"{num(tokens / ttft if tokens and ttft else None, 0)} | {num(median([r['decode'] for r in runs]), 2)} | "
+                f"{gib(sum(reads) if reads else None)} |"
+            )
+    return lines if len(lines) > 2 else []
 
 
 def main():
@@ -91,6 +130,10 @@ def main():
                 f"{num(run['decode'], 3)} | {run['tokens']} | {gib(run['read'])} | {gib(run['gpu'])} | {same} |"
             )
     print("\n".join(lines))
+    by_size = sizes_table(results)
+    if by_size:
+        print("\n### Per prompt size (medians over repeats)\n")
+        print("\n".join(by_size))
     print(
         "\nStorage read: Transformers = this process's /proc/self/io read_bytes; servers = system-wide pgpgin."
     )

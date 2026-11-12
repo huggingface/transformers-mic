@@ -21,6 +21,9 @@ on:
       memory_limit:
         description: RAM left to each engine (e.g. 12g), simulated with a locked-memory balloon; empty = the pod's limit
         default: ''
+      prompt_set:
+        description: "'sizes' = 256/1000/4096-token prompts x 3 repeats; empty = prompt.txt twice"
+        default: ''
       gpu_limit:
         description: GPU memory left to each engine (e.g. 12g), simulated with a CUDA allocation; empty = the whole GPU
         default: ''
@@ -70,6 +73,7 @@ jobs:
         "vllm": "vllm/vllm-openai:v0.32.0",
         "llamacpp-bf16": "ghcr.io/ggml-org/llama.cpp:full-cuda-b11977",
         "llamacpp-q8_0": "ghcr.io/ggml-org/llama.cpp:full-cuda-b11977",
+        "llamacpp-q8_0-cache": "ghcr.io/ggml-org/llama.cpp:full-cuda-b11977",
         "strata": "ghcr.io/niko1221/strata:0.2.12-cuda13"}')[matrix.engine] }}
       options: >-
         --gpus all --shm-size "16gb" --ipc host --ulimit memlock=-1:-1
@@ -80,6 +84,7 @@ jobs:
       HF_HUB_OFFLINE: '1'
       MEMORY_LIMIT: ${{ inputs.memory_limit }}
       GPU_LIMIT: ${{ inputs.gpu_limit }}
+      PROMPT_SET: ${{ inputs.prompt_set }}
       CUDA_VISIBLE_DEVICES: '0'
       PYTHONUNBUFFERED: '1'
       TOKENIZERS_PARALLELISM: 'false'

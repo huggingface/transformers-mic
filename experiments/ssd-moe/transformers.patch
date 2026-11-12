@@ -1,9 +1,9 @@
 diff --git a/examples/generate/ssd_moe.py b/examples/generate/ssd_moe.py
 new file mode 100644
-index 0000000000..13d380c1c0
+index 0000000000..06ce9153c5
 --- /dev/null
 +++ b/examples/generate/ssd_moe.py
-@@ -0,0 +1,279 @@
+@@ -0,0 +1,292 @@
 +# Copyright 2026 The HuggingFace Team. All rights reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -177,7 +177,12 @@ index 0000000000..13d380c1c0
 +    parser.add_argument("--runs", type=int, default=2)
 +    parser.add_argument("--threads", type=int, default=4, help="PyTorch CPU intra-op threads")
 +    parser.add_argument("--prompt", default="The capital of France is")
-+    parser.add_argument("--prompt-file", type=Path, help="Read the prompt from a file (overrides --prompt)")
++    parser.add_argument(
++        "--prompt-file",
++        type=Path,
++        action="append",
++        help="Read a prompt from a file (overrides --prompt); repeat to run several prompts, each --runs times",
++    )
 +    parser.add_argument(
 +        "--chat",
 +        action="store_true",
@@ -195,19 +200,25 @@ index 0000000000..13d380c1c0
 +    device = torch.device(args.device)
 +    dtype = getattr(torch, args.dtype)
 +    tokenizer = AutoTokenizer.from_pretrained(args.checkpoint, local_files_only=True)
-+    if args.prompt_file:
-+        args.prompt = args.prompt_file.read_text()
-+    if args.chat:
-+        inputs = tokenizer.apply_chat_template(
-+            [{"role": "user", "content": args.prompt}],
-+            add_generation_prompt=True,
-+            enable_thinking=False,
-+            return_dict=True,
-+            return_tensors="pt",
-+        )["input_ids"].to(device)
-+    else:
-+        inputs = tokenizer(args.prompt, return_tensors="pt").input_ids.to(device)
-+    if inputs.numel() == 0:
++    prompts = (
++        [(str(path), path.read_text()) for path in args.prompt_file]
++        if args.prompt_file
++        else [("--prompt", args.prompt)]
++    )
++
++    def encode(prompt):
++        if args.chat:
++            return tokenizer.apply_chat_template(
++                [{"role": "user", "content": prompt}],
++                add_generation_prompt=True,
++                enable_thinking=False,
++                return_dict=True,
++                return_tensors="pt",
++            )["input_ids"].to(device)
++        return tokenizer(prompt, return_tensors="pt").input_ids.to(device)
++
++    encoded = [(name, encode(prompt)) for name, prompt in prompts]
++    if any(inputs.numel() == 0 for _, inputs in encoded):
 +        parser.error("Prompt must tokenize to at least one token")
 +    start = time.perf_counter()
 +    if args.mode in ("streaming", "layerwise"):
@@ -251,7 +262,7 @@ index 0000000000..13d380c1c0
 +        "torch": torch.__version__,
 +        "platform": platform.platform(),
 +        "threads": args.threads,
-+        "prompt": args.prompt,
++        "prompts": [name for name, _ in prompts],
 +        "chat_template": args.chat,
 +        "experts_gguf": str(args.experts_gguf.resolve()) if args.experts_gguf else None,
 +        "use_kernels": args.use_kernels,
@@ -264,10 +275,12 @@ index 0000000000..13d380c1c0
 +        "io_note": "Logical requested file bytes, not physical SSD traffic; OS page cache is not controlled.",
 +        "runs": [],
 +    }
-+    for _ in range(args.runs):
-+        result = run(model, inputs, args.max_new_tokens, args.prefill_chunk_size)
-+        result["generated_text"] = tokenizer.decode(result["generated_token_ids"])
-+        report["runs"].append(result)
++    for name, inputs in encoded:
++        for _ in range(args.runs):
++            result = run(model, inputs, args.max_new_tokens, args.prefill_chunk_size)
++            result["prompt_file"] = name
++            result["generated_text"] = tokenizer.decode(result["generated_token_ids"])
++            report["runs"].append(result)
 +    rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 +    report["process_peak_rss_bytes"] = rss if platform.system() == "Darwin" else rss * 1024
 +    if device.type == "cuda":
