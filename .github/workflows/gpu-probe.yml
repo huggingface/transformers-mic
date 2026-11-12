@@ -1,4 +1,8 @@
-name: Qwen MoE SSD streaming POC
+name: Qwen3.6 MoE SSD side-by-side
+
+# Task-branch experiment: the same pinned Qwen3.6-35B-A3B weights on one A10G (24 GB) per engine.
+# Transformers (SSD streaming POC), vanilla Transformers (Accelerate offload) and vLLM read the BF16 safetensors;
+# llama.cpp reads a BF16 GGUF converted from those safetensors, and the Unsloth Q8_0 GGUF that Strata requires.
 
 on:
   workflow_dispatch:
@@ -8,115 +12,105 @@ on:
         type: choice
         options: [aws-g5-4xlarge-cache]
         default: aws-g5-4xlarge-cache
+      max_tokens:
+        description: Generated tokens per request (greedy, same prompt for every engine)
+        default: '32'
 
 permissions:
   contents: read
 
 jobs:
-  probe:
+  prepare:
     runs-on:
       group: '${{ inputs.machine_type }}'
-    timeout-minutes: 60
+    timeout-minutes: 150
     container:
       image: huggingface/transformers-all-latest-gpu
-      options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+      options: --shm-size "16gb" -v /mnt/cache/.cache/huggingface:/mnt/cache/
     env:
       HF_HOME: /mnt/cache
       HF_HUB_DISABLE_PROGRESS_BARS: '1'
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Download pinned weights and convert the BF16 GGUF
+        run: bash experiments/ssd-moe/prepare.sh
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: qwen36-prepare
+          path: out/
+          retention-days: 14
+
+  engine:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - engine: transformers-streaming
+            image: huggingface/transformers-all-latest-gpu
+          - engine: transformers-offload
+            image: huggingface/transformers-all-latest-gpu
+          - engine: vllm
+            image: vllm/vllm-openai:v0.32.0
+          - engine: llamacpp-bf16
+            image: ghcr.io/ggml-org/llama.cpp:full-cuda-b11977
+          - engine: llamacpp-q8_0
+            image: ghcr.io/ggml-org/llama.cpp:full-cuda-b11977
+          - engine: strata
+            image: ghcr.io/niko1221/strata:0.2.12-cuda13
+    name: ${{ matrix.engine }}
+    runs-on:
+      group: '${{ inputs.machine_type }}'
+    timeout-minutes: 150
+    container:
+      image: ${{ matrix.image }}
+      options: >-
+        --gpus all --shm-size "16gb" --ipc host --ulimit memlock=-1:-1
+        -e NVIDIA_DRIVER_CAPABILITIES=compute,utility
+        -v /mnt/cache/.cache/huggingface:/mnt/cache/
+    env:
+      HF_HOME: /mnt/cache
+      HF_HUB_OFFLINE: '1'
       CUDA_VISIBLE_DEVICES: '0'
       PYTHONUNBUFFERED: '1'
       TOKENIZERS_PARALLELISM: 'false'
+      MAX_TOKENS: ${{ inputs.max_tokens }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        if: startsWith(matrix.engine, 'transformers')
         with:
           repository: huggingface/transformers
           ref: 158f872ebb33a59f992f69a3abccc6472c548c3f
           path: framework
-      - name: Apply the reviewed POC and install existing dependencies
+      - name: Run ${{ matrix.engine }}
         shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p out
-          git -C framework apply ../experiments/ssd-moe/transformers.patch
-          python3 -m pip install -q -e framework
-          nvidia-smi > out/nvidia-smi.txt
-          df -h /mnt/cache /tmp / > out/storage.txt
-          cat /proc/meminfo > out/meminfo.txt
-          python3 -m pip freeze > out/packages.txt
-          git -c safe.directory="$PWD" rev-parse HEAD > out/mic-sha.txt
-          sha256sum experiments/ssd-moe/transformers.patch > out/patch-sha256.txt
-      - name: Run correctness tests
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd framework
-          PYTHONPATH=src python3 -m unittest discover -s tests/integrations -p test_ssd_moe.py -v 2>&1 | tee ../out/tests.log
-      - name: Download pinned fixture and checkpoint
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import json, os, shutil
-          from huggingface_hub import snapshot_download
-          paths = {}
-          for key, repo, revision in [
-              ('fixture', 'huggingface-mic/Qwen3-30B-A3B-mic', '02a209fca46248ff0b3da72e3b190428138b2449'),
-              ('checkpoint', 'Qwen/Qwen3-30B-A3B', 'ad44e777bcd18fa416d9da3bd8f70d33ebb85d39'),
-          ]:
-              print('Downloading', repo, revision, flush=True)
-              paths[key] = snapshot_download(repo, revision=revision, allow_patterns=['*.json', '*.safetensors', 'merges.txt', 'vocab.json'])
-          source = paths['checkpoint']
-          size = sum(os.path.getsize(os.path.join(source, name)) for name in os.listdir(source) if os.path.isfile(os.path.join(source, name)))
-          local = '/tmp/ssd-moe-checkpoint'
-          storage = {'source': source, 'checkpoint_bytes': size, 'local_scratch_free_bytes': shutil.disk_usage('/tmp').free}
-          if storage['local_scratch_free_bytes'] > size + 10 * 1024**3:
-              print('Staging checkpoint on local scratch', local, flush=True)
-              shutil.copytree(source, local, symlinks=False)
-              paths['checkpoint'] = local
-              storage['measurement_path'] = local
-              storage['location'] = 'container local scratch; see filesystem diagnostics'
-          else:
-              storage['measurement_path'] = source
-              storage['location'] = 'shared NFS cache; not an SSD throughput measurement'
-          with open('out/storage-location.json', 'w') as f:
-              json.dump(storage, f, indent=2)
-          with open('out/paths.json', 'w') as f:
-              json.dump(paths, f, indent=2)
-          PY
-      - name: Compare CUDA fixture output with resident eager execution
-        shell: bash
-        run: |
-          set -euo pipefail
-          fixture=$(python3 -c 'import json; print(json.load(open("out/paths.json"))["fixture"])')
-          for mode in eager streaming layerwise; do
-            PYTHONPATH=framework/src python3 framework/examples/generate/ssd_moe.py "$fixture" \
-              --mode "$mode" --device cuda --dtype bfloat16 --cache-mib 0.012 --max-new-tokens 16 \
-              --output "out/fixture-$mode.json" > "out/fixture-$mode.log" 2>&1
-          done
-          python3 experiments/ssd-moe/compare.py out/fixture-eager.json out/fixture-streaming.json out/fixture-layerwise.json
-      - name: Compare full Qwen checkpoint with whole-bank loading
-        shell: bash
-        run: |
-          set -euo pipefail
-          checkpoint=$(python3 -c 'import json; print(json.load(open("out/paths.json"))["checkpoint"])')
-          for mode in streaming layerwise; do
-            PYTHONPATH=framework/src python3 framework/examples/generate/ssd_moe.py "$checkpoint" \
-              --mode "$mode" --device cuda --dtype bfloat16 --cache-mib 4096 --max-new-tokens 4 \
-              --output "out/checkpoint-$mode.json" > "out/checkpoint-$mode.log" 2>&1
-          done
-          python3 experiments/ssd-moe/compare.py out/checkpoint-streaming.json out/checkpoint-layerwise.json
-      - name: Generate a longer answer with streaming
-        shell: bash
-        run: |
-          set -euo pipefail
-          checkpoint=$(python3 -c 'import json; print(json.load(open("out/paths.json"))["checkpoint"])')
-          PYTHONPATH=framework/src python3 framework/examples/generate/ssd_moe.py "$checkpoint" \
-            --device cuda --dtype bfloat16 --cache-mib 4096 --max-new-tokens 32 --runs 1 \
-            --output out/checkpoint-streaming-32.json > out/checkpoint-streaming-32.log 2>&1
+        run: bash experiments/ssd-moe/run_engine.sh '${{ matrix.engine }}'
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         if: always()
         with:
-          name: qwen-ssd-moe-poc
+          name: qwen36-${{ matrix.engine }}
           path: out/
+          retention-days: 14
+
+  summary:
+    needs: engine
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          pattern: qwen36-*
+          path: results
+          merge-multiple: true
+      - name: Build the comparison table
+        run: python3 experiments/ssd-moe/summarize.py results | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: qwen36-side-by-side
+          path: results/
           retention-days: 14

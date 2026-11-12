@@ -1,9 +1,9 @@
 diff --git a/examples/generate/ssd_moe.py b/examples/generate/ssd_moe.py
 new file mode 100644
-index 0000000000..734d3f4643
+index 0000000000..e9b8cb7f17
 --- /dev/null
 +++ b/examples/generate/ssd_moe.py
-@@ -0,0 +1,230 @@
+@@ -0,0 +1,261 @@
 +# Copyright 2026 The HuggingFace Team. All rights reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,18 +17,19 @@ index 0000000000..734d3f4643
 +# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 +# See the License for the specific language governing permissions and
 +# limitations under the License.
-+"""Run Qwen3 MoE with routed SSD reads and no additional runtime dependencies.
++"""Run Qwen MoE (qwen3_moe, Qwen3.5/3.6 qwen3_5_moe text) with routed SSD reads and no added runtime dependencies.
 +
 +From the repository root, with a local, complete, unquantized safetensors checkpoint:
 +
 +    PYTHONPATH=src python examples/generate/ssd_moe.py /path/to/Qwen3-30B-A3B \
 +        --device mps --dtype bfloat16 --cache-mib 4096 --max-new-tokens 32
 +
-+For a comparison, run a separate process with --mode eager (only if the full model fits).
++For a comparison, run a separate process with --mode eager (only if the full model fits), or
++--mode offload for vanilla from_pretrained(device_map="auto") with Accelerate CPU/disk offload.
 +Use --runs 2 to observe first-pass versus reused expert-cache behavior. Neither is guaranteed to
 +be storage-cold: the OS page cache is intentionally left alone. read_bytes is logical file I/O.
 +The CLI generates a fixed number of greedy tokens, ignoring EOS, for comparable timings.
-+No checkpoint download, conversion, Accelerate, vLLM, llama.cpp, or kernels package is required.
++Streaming needs no checkpoint download, conversion, Accelerate, vLLM, llama.cpp, or kernels package.
 +"""
 +
 +import argparse
@@ -41,10 +42,9 @@ index 0000000000..734d3f4643
 +
 +import torch
 +
-+from transformers import AutoTokenizer, Qwen3MoeForCausalLM
++from transformers import AutoTokenizer
 +from transformers.integrations.moe import ExpertsInterface
-+from transformers.integrations.ssd_moe import load_qwen3_moe_from_ssd
-+from transformers.models.qwen3_moe.modeling_qwen3_moe import Qwen3MoeExperts
++from transformers.integrations.ssd_moe import _ARCHITECTURES, load_moe_from_ssd
 +
 +
 +def layerwise_experts_forward(module, hidden_states, top_k_index, top_k_weights):
@@ -71,7 +71,7 @@ index 0000000000..734d3f4643
 +        gate_up_proj=gate_up.to(device, dtype),
 +        down_proj=down.to(device, dtype),
 +    )
-+    return Qwen3MoeExperts.forward.__wrapped__(bank, hidden_states, top_k_index, top_k_weights)
++    return type(module).forward.__wrapped__(bank, hidden_states, top_k_index, top_k_weights)
 +
 +
 +def storage_read_bytes():
@@ -147,7 +147,15 @@ index 0000000000..734d3f4643
 +def main():
 +    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 +    parser.add_argument("checkpoint", type=Path, help="Local directory containing config, tokenizer and all shards")
-+    parser.add_argument("--mode", choices=("streaming", "eager", "layerwise"), default="streaming")
++    parser.add_argument(
++        "--mode",
++        choices=("streaming", "eager", "layerwise", "offload"),
++        default="streaming",
++        help="offload = vanilla from_pretrained(device_map='auto') with Accelerate CPU/disk offload",
++    )
++    parser.add_argument("--offload-gpu-mib", type=int, default=18 * 1024, help="offload mode: GPU memory budget")
++    parser.add_argument("--offload-cpu-mib", type=int, default=8 * 1024, help="offload mode: CPU memory budget")
++    parser.add_argument("--offload-folder", type=Path, help="offload mode: folder for weights offloaded to disk")
 +    parser.add_argument("--device", default="cpu", help="cpu, mps, cuda, or cuda:N")
 +    parser.add_argument("--dtype", choices=("float32", "float16", "bfloat16"), default="float32")
 +    parser.add_argument(
@@ -159,6 +167,12 @@ index 0000000000..734d3f4643
 +    parser.add_argument("--runs", type=int, default=2)
 +    parser.add_argument("--threads", type=int, default=4, help="PyTorch CPU intra-op threads")
 +    parser.add_argument("--prompt", default="The capital of France is")
++    parser.add_argument("--prompt-file", type=Path, help="Read the prompt from a file (overrides --prompt)")
++    parser.add_argument(
++        "--chat",
++        action="store_true",
++        help="Apply the chat template (thinking disabled), as an OpenAI chat server would",
++    )
 +    parser.add_argument("--output", type=Path, help="Optional path for the JSON report")
 +    args = parser.parse_args()
 +    if min(args.max_new_tokens, args.runs, args.prefill_chunk_size, args.threads, args.expert_token_chunk_size) < 1:
@@ -169,12 +183,23 @@ index 0000000000..734d3f4643
 +    device = torch.device(args.device)
 +    dtype = getattr(torch, args.dtype)
 +    tokenizer = AutoTokenizer.from_pretrained(args.checkpoint, local_files_only=True)
-+    inputs = tokenizer(args.prompt, return_tensors="pt").input_ids.to(device)
++    if args.prompt_file:
++        args.prompt = args.prompt_file.read_text()
++    if args.chat:
++        inputs = tokenizer.apply_chat_template(
++            [{"role": "user", "content": args.prompt}],
++            add_generation_prompt=True,
++            enable_thinking=False,
++            return_dict=True,
++            return_tensors="pt",
++        )["input_ids"].to(device)
++    else:
++        inputs = tokenizer(args.prompt, return_tensors="pt").input_ids.to(device)
 +    if inputs.numel() == 0:
 +        parser.error("Prompt must tokenize to at least one token")
 +    start = time.perf_counter()
 +    if args.mode != "eager":
-+        model = load_qwen3_moe_from_ssd(
++        model = load_moe_from_ssd(
 +            args.checkpoint,
 +            device=device,
 +            dtype=dtype,
@@ -185,17 +210,22 @@ index 0000000000..734d3f4643
 +            ExpertsInterface.register("ssd_layerwise", layerwise_experts_forward)
 +            model.set_experts_implementation("ssd_layerwise")
 +    else:
-+        model = (
-+            Qwen3MoeForCausalLM.from_pretrained(
++        model_type = json.loads((args.checkpoint / "config.json").read_text())["model_type"]
++        model_class = _ARCHITECTURES[model_type][1]
++        kwargs = {"local_files_only": True, "dtype": dtype, "attn_implementation": "eager"}
++        if args.mode == "eager":
++            model = model_class.from_pretrained(args.checkpoint, experts_implementation="eager", **kwargs).to(device)
++        else:
++            if device.type != "cuda" or args.offload_folder is None:
++                parser.error("offload mode needs --device cuda[:N] and --offload-folder")
++            model = model_class.from_pretrained(
 +                args.checkpoint,
-+                local_files_only=True,
-+                dtype=dtype,
-+                attn_implementation="eager",
-+                experts_implementation="eager",
++                device_map="auto",
++                max_memory={device.index or 0: f"{args.offload_gpu_mib}MiB", "cpu": f"{args.offload_cpu_mib}MiB"},
++                offload_folder=str(args.offload_folder),
++                **kwargs,
 +            )
-+            .to(device)
-+            .eval()
-+        )
++        model.eval()
 +    synchronize(device)
 +    report = {
 +        "checkpoint": str(args.checkpoint.resolve()),
@@ -206,6 +236,7 @@ index 0000000000..734d3f4643
 +        "platform": platform.platform(),
 +        "threads": args.threads,
 +        "prompt": args.prompt,
++        "chat_template": args.chat,
 +        "cache_budget_bytes": int(args.cache_mib * 1024**2) if args.mode == "streaming" else None,
 +        "prefill_chunk_size": args.prefill_chunk_size,
 +        "expert_token_chunk_size": args.expert_token_chunk_size,
@@ -236,10 +267,10 @@ index 0000000000..734d3f4643
 +    main()
 diff --git a/src/transformers/integrations/ssd_moe.py b/src/transformers/integrations/ssd_moe.py
 new file mode 100644
-index 0000000000..4a43e30ad9
+index 0000000000..592a8793f8
 --- /dev/null
 +++ b/src/transformers/integrations/ssd_moe.py
-@@ -0,0 +1,281 @@
+@@ -0,0 +1,335 @@
 +# Copyright 2026 The HuggingFace Team. All rights reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -253,7 +284,9 @@ index 0000000000..4a43e30ad9
 +# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 +# See the License for the specific language governing permissions and
 +# limitations under the License.
-+"""Experimental, inference-only Qwen3 MoE expert streaming, without Accelerate or native I/O dependencies.
++"""Experimental, inference-only Qwen MoE expert streaming, without Accelerate or native I/O dependencies.
++
++Supported checkpoints: ``qwen3_moe`` and the text model of ``qwen3_5_moe`` (Qwen3.5/3.6 MoE), unquantized.
 +
 +This is a single-device proof of concept, not a general replacement for ``from_pretrained``.
 +The checkpoint remains on disk; dense parameters and a byte-bounded expert LRU live on the device.
@@ -268,6 +301,12 @@ index 0000000000..4a43e30ad9
 +import torch
 +from safetensors import safe_open
 +
++from ..models.qwen3_5_moe.configuration_qwen3_5_moe import Qwen3_5MoeConfig, Qwen3_5MoeTextConfig
++from ..models.qwen3_5_moe.modeling_qwen3_5_moe import (
++    Qwen3_5MoeExperts,
++    Qwen3_5MoeForCausalLM,
++    Qwen3_5MoeTextRotaryEmbedding,
++)
 +from ..models.qwen3_moe.configuration_qwen3_moe import Qwen3MoeConfig
 +from ..models.qwen3_moe.modeling_qwen3_moe import (
 +    Qwen3MoeExperts,
@@ -278,6 +317,41 @@ index 0000000000..4a43e30ad9
 +
 +
 +_DTYPES = {"F32": torch.float32, "F16": torch.float16, "BF16": torch.bfloat16}
++
++
++def _qwen3_5_moe_text_config(directory):
++    return Qwen3_5MoeConfig.from_pretrained(directory, local_files_only=True).text_config
++
++
++# model_type -> (text config loader, causal LM class, experts class, rotary class,
++#                checkpoint prefix of the text model, checkpoint prefixes that are deliberately not loaded)
++_ARCHITECTURES = {
++    "qwen3_moe": (
++        lambda directory: Qwen3MoeConfig.from_pretrained(directory, local_files_only=True),
++        Qwen3MoeForCausalLM,
++        Qwen3MoeExperts,
++        Qwen3MoeRotaryEmbedding,
++        "model.",
++        (),
++    ),
++    # Multimodal Qwen3.5/3.6 MoE checkpoint: load only the text model; skip the vision tower and the MTP head.
++    "qwen3_5_moe": (
++        _qwen3_5_moe_text_config,
++        Qwen3_5MoeForCausalLM,
++        Qwen3_5MoeExperts,
++        Qwen3_5MoeTextRotaryEmbedding,
++        "model.language_model.",
++        ("model.visual.", "mtp."),
++    ),
++    "qwen3_5_moe_text": (
++        lambda directory: Qwen3_5MoeTextConfig.from_pretrained(directory, local_files_only=True),
++        Qwen3_5MoeForCausalLM,
++        Qwen3_5MoeExperts,
++        Qwen3_5MoeTextRotaryEmbedding,
++        "model.",
++        ("model.visual.", "mtp."),
++    ),
++}
 +
 +
 +class SafetensorsReader:
@@ -464,10 +538,10 @@ index 0000000000..4a43e30ad9
 +    return result
 +
 +
-+def load_qwen3_moe_from_ssd(directory, *, device="cpu", dtype=torch.float32, cache_bytes=0, token_chunk_size=256):
-+    """Load a local, unquantized Qwen3 MoE checkpoint without allocating resident expert banks.
++def load_moe_from_ssd(directory, *, device="cpu", dtype=torch.float32, cache_bytes=0, token_chunk_size=256):
++    """Load a local, unquantized Qwen MoE checkpoint without allocating resident expert banks.
 +
-+    Supports original per-expert Qwen checkpoints and Transformers' packed expert checkpoints.
++    Supports ``qwen3_moe`` (original per-expert or packed experts) and the text model of ``qwen3_5_moe``.
 +    Does not require Accelerate, checkpoint conversion, kernels, or a second copy of the weights.
 +    The returned model is inference-only: do not train, move/cast, save_pretrained, compile, or change
 +    its experts implementation. Reload the original checkpoint to obtain an ordinary model.
@@ -475,9 +549,11 @@ index 0000000000..4a43e30ad9
 +    if dtype not in _DTYPES.values() or token_chunk_size <= 0:
 +        raise ValueError("Use a floating dtype (float32/float16/bfloat16) and positive token_chunk_size")
 +    raw_config = json.loads((Path(directory) / "config.json").read_text())
-+    if raw_config.get("model_type") != "qwen3_moe" or raw_config.get("quantization_config"):
-+        raise ValueError("This prototype supports only unquantized qwen3_moe checkpoints")
-+    config = Qwen3MoeConfig.from_pretrained(directory, local_files_only=True)
++    model_type = raw_config.get("model_type")
++    if model_type not in _ARCHITECTURES or raw_config.get("quantization_config"):
++        raise ValueError(f"This prototype supports only unquantized {sorted(_ARCHITECTURES)} checkpoints")
++    load_config, model_class, experts_class, rotary_class, prefix, skipped = _ARCHITECTURES[model_type]
++    config = load_config(directory)
 +    config._attn_implementation = "eager"
 +    config._experts_implementation = "ssd_streaming"
 +    ExpertsInterface.register("ssd_streaming", streamed_experts_forward)
@@ -485,23 +561,27 @@ index 0000000000..4a43e30ad9
 +    device = torch.empty(0, device=device).device
 +    reader = SafetensorsReader(directory)
 +    store = ExpertStore(reader, cache_bytes, device, dtype)
++
++    def checkpoint_name(name):
++        return prefix + name.removeprefix("model.") if name.startswith("model.") else name
++
 +    with torch.device("meta"):
-+        model = Qwen3MoeForCausalLM(config)
-+    consumed = set()
-+    for prefix, module in model.named_modules():
-+        if isinstance(module, Qwen3MoeExperts):
-+            consumed.update(store.register(prefix, module))
++        model = model_class(config)
++    consumed = {name for name in reader.tensors if name.startswith(skipped)} if skipped else set()
++    for name, module in model.named_modules():
++        if isinstance(module, experts_class):
++            consumed.update(store.register(checkpoint_name(name), module))
 +            # Keep no meta Parameters that an offload hook could materialize as whole banks.
 +            module.register_parameter("gate_up_proj", None)
 +            module.register_parameter("down_proj", None)
 +            module.ssd_store = store
-+            module.ssd_prefix = prefix
++            module.ssd_prefix = checkpoint_name(name)
 +            module.ssd_token_chunk_size = token_chunk_size
 +    # Load dense weights individually; peak host staging is one dense tensor, not one shard.
 +    for name, parameter in list(model.named_parameters()):
-+        source = name
++        source = checkpoint_name(name)
 +        if config.tie_word_embeddings and name == "lm_head.weight" and name not in reader.tensors:
-+            source = "model.embed_tokens.weight"
++            source = checkpoint_name("model.embed_tokens.weight")
 +        if source not in reader.tensors or reader.shape(source) != tuple(parameter.shape):
 +            raise ValueError(f"Missing or incompatible dense tensor: {source}")
 +        value = reader.read(source).to(device=device, dtype=dtype)
@@ -513,20 +593,25 @@ index 0000000000..4a43e30ad9
 +        raise ValueError(f"Unsupported checkpoint tensors: {sorted(unexpected)[:10]}")
 +    model.tie_weights()
 +    # RoPE has nonpersistent buffers, so checkpoint loading cannot materialize them.
-+    model.model.rotary_emb = Qwen3MoeRotaryEmbedding(config).to(device)
-+    if any(t.is_meta for t in list(model.parameters()) + list(model.buffers())):
-+        raise RuntimeError("Unmaterialized model state after streaming load")
++    model.model.rotary_emb = rotary_class(config).to(device)
++    meta = [n for n, t in list(model.named_parameters()) + list(model.named_buffers()) if t.is_meta]
++    if meta:
++        raise RuntimeError(f"Unmaterialized model state after streaming load: {meta[:10]}")
 +    model.eval()
 +    model.ssd_store = store
 +    # Exclude dense startup I/O from expert runtime counters.
 +    reader.read_bytes = reader.read_calls = 0
 +    return model
++
++
++# Backward-compatible name used by the first version of this prototype.
++load_qwen3_moe_from_ssd = load_moe_from_ssd
 diff --git a/tests/integrations/test_ssd_moe.py b/tests/integrations/test_ssd_moe.py
 new file mode 100644
-index 0000000000..e77359a271
+index 0000000000..b001bb255b
 --- /dev/null
 +++ b/tests/integrations/test_ssd_moe.py
-@@ -0,0 +1,170 @@
+@@ -0,0 +1,220 @@
 +# Copyright 2026 The HuggingFace Team. All rights reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -549,8 +634,8 @@ index 0000000000..e77359a271
 +import torch
 +from safetensors.torch import load_file, save_file
 +
-+from transformers import Qwen3MoeConfig, Qwen3MoeForCausalLM
-+from transformers.integrations.ssd_moe import load_qwen3_moe_from_ssd
++from transformers import Qwen3_5MoeConfig, Qwen3_5MoeForCausalLM, Qwen3MoeConfig, Qwen3MoeForCausalLM
++from transformers.integrations.ssd_moe import load_moe_from_ssd, load_qwen3_moe_from_ssd
 +
 +
 +class SSDMoETest(unittest.TestCase):
@@ -697,3 +782,53 @@ index 0000000000..e77359a271
 +            handle.truncate(0)
 +        with torch.inference_mode(), self.assertRaisesRegex(OSError, "Short checkpoint read"):
 +            model(torch.tensor([[1, 2, 3]]))
++
++
++class SSDQwen3_5MoeTest(unittest.TestCase):
++    """Qwen3.5/3.6 MoE: hybrid linear attention, shared expert, multimodal checkpoint naming."""
++
++    def test_multimodal_checkpoint_streams_text_model(self):
++        torch.manual_seed(17)
++        text_config = {
++            "vocab_size": 64,
++            "hidden_size": 16,
++            "num_hidden_layers": 4,
++            "num_attention_heads": 2,
++            "num_key_value_heads": 1,
++            "head_dim": 8,
++            "linear_key_head_dim": 8,
++            "linear_value_head_dim": 8,
++            "linear_num_key_heads": 2,
++            "linear_num_value_heads": 2,
++            "moe_intermediate_size": 8,
++            "shared_expert_intermediate_size": 8,
++            "num_experts": 4,
++            "num_experts_per_tok": 2,
++        }
++        config = Qwen3_5MoeConfig(text_config=text_config, vision_config={"depth": 1})
++        reference_config = config.text_config
++        reference_config._experts_implementation = "eager"
++        reference_config._attn_implementation = "eager"
++        reference = Qwen3_5MoeForCausalLM(reference_config).eval()
++        self.assertIn("linear_attention", reference_config.layer_types)
++        with tempfile.TemporaryDirectory() as directory:
++            path = Path(directory)
++            config.save_pretrained(path)
++            # Same naming as the published Qwen3.6 checkpoints, including tensors the text model must skip.
++            state = {
++                (f"model.language_model.{name[6:]}" if name.startswith("model.") else name): value
++                for name, value in reference.state_dict().items()
++            }
++            state["model.visual.patch_embed.proj.weight"] = torch.zeros(2, 2)
++            state["mtp.fc.weight"] = torch.zeros(2, 2)
++            save_file(state, path / "model.safetensors")
++            # One expert is 3 * 8 * 16 * 4 = 1536 bytes in float32: force evictions.
++            streamed = load_moe_from_ssd(path, cache_bytes=1536)
++            self.assertFalse(any(".experts." in name for name, _ in streamed.named_parameters()))
++            ids = torch.tensor([[1, 2, 3, 4, 5]])
++            with torch.inference_mode():
++                expected = reference.generate(ids, max_new_tokens=4, do_sample=False, pad_token_id=0)
++                actual = streamed.generate(ids, max_new_tokens=4, do_sample=False, pad_token_id=0)
++                torch.testing.assert_close(actual, expected)
++                torch.testing.assert_close(streamed(ids).logits, reference(ids).logits, atol=1e-6, rtol=1e-5)
++            self.assertGreater(streamed.ssd_store.evictions, 0)
