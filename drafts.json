@@ -110,6 +110,18 @@
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/42192485403"
  },
+ "higgs_audio_v2": {
+  "checkpoint": "eustlb/higgs-audio-v2-generation-3B-base",
+  "conclusion": null,
+  "dispatched_at": "2026-11-12T09:04:52Z",
+  "status": "queued"
+ },
+ "hyperclovax_vision_v2": {
+  "checkpoint": "naver-hyperclovax/HyperCLOVAX-SEED-Think-32B",
+  "conclusion": null,
+  "dispatched_at": "2026-11-12T09:04:52Z",
+  "status": "queued"
+ },
  "jetmoe": {
   "checkpoint": "jetmoe/jetmoe-8b",
   "conclusion": "failure",
@@ -170,9 +182,11 @@
  },
  "nemotron": {
   "checkpoint": "thhaus/nemotron3-8b",
-  "conclusion": null,
+  "conclusion": "success",
   "dispatched_at": "2026-11-11T09:04:25Z",
-  "status": "queued"
+  "run_id": 42992084030,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/42992084030"
  },
  "oneformer": {
   "checkpoint": "shi-labs/oneformer_ade20k_swin_tiny",
@@ -184,9 +198,11 @@
  },
  "pegasus_x": {
   "checkpoint": "google/pegasus-x-base",
-  "conclusion": null,
+  "conclusion": "success",
   "dispatched_at": "2026-11-11T09:04:25Z",
-  "status": "queued"
+  "run_id": 42992087355,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/42992087355"
  },
  "pocket_tts": {
   "checkpoint": "eustlb/pocket-tts",

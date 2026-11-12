@@ -464,6 +464,18 @@
   ],
   "unlimited_ocr": [
    {
+    "date": "2026-11-11",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/unlimited_ocr/test_modeling_unlimited_ocr.py::UnlimitedOcrModelTest::test_openvino_export_dynamic"
+   },
+   {
+    "date": "2026-11-11",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/unlimited_ocr/test_modeling_unlimited_ocr.py::UnlimitedOcrModelTest::test_openvino_export_static"
+   },
+   {
     "date": "2026-11-08",
     "gpu_only": true,
     "integration": false,
@@ -594,6 +606,29 @@
    ]
   },
   {
+   "checkpoint": "eustlb/higgs-audio-v2-generation-3B-base",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "higgs_audio_v2",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/higgs_audio_v2/test_modeling_higgs_audio_v2.py::HiggsAudioV2ModelTest::test_static_cache_no_recompile_with_smaller_length"
+   ]
+  },
+  {
+   "checkpoint": "naver-hyperclovax/HyperCLOVAX-SEED-Think-32B",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "hyperclovax_vision_v2",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/hyperclovax_vision_v2/test_modeling_hyperclovax_vision_v2.py::HyperCLOVAXVisionV2ModelTest::test_openvino_export_generate_dynamic_static_cache",
+    "tests/models/hyperclovax_vision_v2/test_modeling_hyperclovax_vision_v2.py::HyperCLOVAXVisionV2ModelTest::test_openvino_export_generate_static_static_cache"
+   ]
+  },
+  {
    "checkpoint": null,
    "checkpoint_source": null,
    "integration": 0,
@@ -614,31 +649,6 @@
    "tests": [
     "tests/models/mvp/test_modeling_mvp.py::MvpModelTest::test_torch_export_generate_dynamic",
     "tests/models/mvp/test_modeling_mvp.py::MvpModelTest::test_torch_export_generate_static"
-   ]
-  },
-  {
-   "checkpoint": "thhaus/nemotron3-8b",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "nemotron",
-   "other": 1,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/nemotron/test_modeling_nemotron.py::NemotronModelTest::test_flash_attn_2_equivalence"
-   ]
-  },
-  {
-   "checkpoint": "google/pegasus-x-base",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "pegasus_x",
-   "other": 1,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/pegasus_x/test_modeling_pegasus_x.py::PegasusXModelTest::test_torch_export_generate_dynamic",
-    "tests/models/pegasus_x/test_modeling_pegasus_x.py::PegasusXModelTest::test_torch_export_generate_dynamic_static_cache",
-    "tests/models/pegasus_x/test_modeling_pegasus_x.py::PegasusXModelTest::test_torch_export_generate_static",
-    "tests/models/pegasus_x/test_modeling_pegasus_x.py::PegasusXModelTest::test_torch_export_generate_static_static_cache"
    ]
   },
   {
@@ -809,6 +819,19 @@
    ]
   },
   {
+   "checkpoint": null,
+   "checkpoint_source": null,
+   "integration": 0,
+   "model": "utils",
+   "other": 4,
+   "shrinkable": false,
+   "tests": [
+    "tests/utils/test_modeling_utils.py::GradientCheckpointingOffloadTest::test_frees_exactly_the_saved_activations",
+    "tests/utils/test_image_utils.py::LoadImageTester::test_load_img_url_timeout",
+    "tests/utils/test_modeling_utils.py::ModelOnTheFlyConversionTester::test_safetensors_on_the_fly_sharded_conversion_private"
+   ]
+  },
+  {
    "checkpoint": "facebook/w2v-bert-2.0",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -902,18 +925,6 @@
    "tests": [
     "tests/models/udop/test_modeling_udop.py::UdopModelTest::test_flex_attention_with_grads",
     "tests/models/udop/test_modeling_udop.py::UdopEncoderOnlyModelTest::test_flex_attention_with_grads"
-   ]
-  },
-  {
-   "checkpoint": null,
-   "checkpoint_source": null,
-   "integration": 0,
-   "model": "utils",
-   "other": 2,
-   "shrinkable": false,
-   "tests": [
-    "tests/utils/test_modeling_utils.py::GradientCheckpointingOffloadTest::test_frees_exactly_the_saved_activations",
-    "tests/utils/test_image_utils.py::LoadImageTester::test_load_img_url_timeout"
    ]
   },
   {
@@ -1101,10 +1112,12 @@
   "test_flash_attn_2_equivalence": [
    "axk1",
    "ernie4_5_moe",
+   "flex_olmo",
    "glm4",
    "granitemoe",
    "hy_v3",
    "jetmoe",
+   "kolibri1",
    "minimax_m2",
    "mixtral"
   ],

@@ -5790,6 +5790,18 @@
    "tests/models/flex_olmo/test_modeling_flex_olmo.py::FlexOlmoModelTest::test_flash_attn_2_equivalence"
   ]
  },
+ "sticky#flex_olmo#2026-10-19": {
+  "date": "2026-10-19",
+  "day": 20745,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "flex_olmo",
+  "run_id": "43141047926",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/flex_olmo/test_modeling_flex_olmo.py::FlexOlmoModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
  "sticky#flex_olmo#2026-10-24": {
   "date": "2026-10-24",
   "day": 20750,
@@ -6167,6 +6179,18 @@
    "tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_inference_object_detection_head_equivalence_cpu_accelerator"
   ]
  },
+ "sticky#higgs_audio_v2#2026-11-11": {
+  "date": "2026-11-11",
+  "day": 20768,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "higgs_audio_v2",
+  "run_id": "43141102375",
+  "signal": "torch.AcceleratorError",
+  "tests": [
+   "tests/models/higgs_audio_v2/test_modeling_higgs_audio_v2.py::HiggsAudioV2ModelTest::test_static_cache_no_recompile_with_smaller_length"
+  ]
+ },
  "sticky#hunyuan_v1_moe#2026-10-10": {
   "date": "2026-10-10",
   "day": 20736,
@@ -6228,6 +6252,31 @@
   "signal": "AssertionError",
   "tests": [
    "tests/models/hy_v3/test_modeling_hy_v3.py::HYV3ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#hy_v3#2026-11-06": {
+  "date": "2026-11-06",
+  "day": 20763,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "hy_v3",
+  "run_id": "42945457057",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/hy_v3/test_modeling_hy_v3.py::HYV3ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#hyperclovax_vision_v2#2026-11-11": {
+  "date": "2026-11-11",
+  "day": 20768,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "hyperclovax_vision_v2",
+  "run_id": "43141102375",
+  "signal": "IndexError",
+  "tests": [
+   "tests/models/hyperclovax_vision_v2/test_modeling_hyperclovax_vision_v2.py::HyperCLOVAXVisionV2ModelTest::test_openvino_export_generate_dynamic_static_cache",
+   "tests/models/hyperclovax_vision_v2/test_modeling_hyperclovax_vision_v2.py::HyperCLOVAXVisionV2ModelTest::test_openvino_export_generate_static_static_cache"
   ]
  },
  "sticky#idefics#2026-10-07": {
@@ -6323,6 +6372,18 @@
   "mic": "not-covered",
   "model": "kolibri1",
   "run_id": "41954951296",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/kolibri1/test_modeling_kolibri1.py::Kolibri1ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#kolibri1#2026-11-03": {
+  "date": "2026-11-03",
+  "day": 20760,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "kolibri1",
+  "run_id": "42945457057",
   "signal": "AssertionError",
   "tests": [
    "tests/models/kolibri1/test_modeling_kolibri1.py::Kolibri1ModelTest::test_flash_attn_2_equivalence"
@@ -7246,6 +7307,19 @@
    "tests/models/unlimited_ocr/test_modeling_unlimited_ocr.py::UnlimitedOcrModelTest::test_sdpa_can_compile_dynamic"
   ]
  },
+ "sticky#unlimited_ocr#2026-11-11": {
+  "date": "2026-11-11",
+  "day": 20768,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "unlimited_ocr",
+  "run_id": "43141102375",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/unlimited_ocr/test_modeling_unlimited_ocr.py::UnlimitedOcrModelTest::test_openvino_export_dynamic",
+   "tests/models/unlimited_ocr/test_modeling_unlimited_ocr.py::UnlimitedOcrModelTest::test_openvino_export_static"
+  ]
+ },
  "sticky#utils#2026-10-14": {
   "date": "2026-10-14",
   "day": 20740,
@@ -7268,6 +7342,30 @@
   "signal": "httpx2.ReadTimeout",
   "tests": [
    "tests/utils/test_image_utils.py::LoadImageTester::test_load_img_url_timeout"
+  ]
+ },
+ "sticky#utils#2026-10-21": {
+  "date": "2026-10-21",
+  "day": 20747,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "utils",
+  "run_id": "43141102375",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/utils/test_modeling_utils.py::GradientCheckpointingOffloadTest::test_frees_exactly_the_saved_activations"
+  ]
+ },
+ "sticky#utils#2026-11-12": {
+  "date": "2026-11-12",
+  "day": 20769,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "utils",
+  "run_id": "43141102375",
+  "signal": "OSError",
+  "tests": [
+   "tests/utils/test_modeling_utils.py::ModelOnTheFlyConversionTester::test_safetensors_on_the_fly_sharded_conversion_private"
   ]
  },
  "sticky#vipllava#2026-11-07": {

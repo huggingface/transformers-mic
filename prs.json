@@ -149,6 +149,11 @@
   "merged_at": null,
   "state": "open"
  },
+ "49609": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
  "49613": {
   "closed_at": null,
   "merged_at": null,
@@ -854,6 +859,11 @@
   "merged_at": null,
   "state": "open"
  },
+ "50537": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
  "50544": {
   "closed_at": null,
   "merged_at": null,
@@ -885,11 +895,16 @@
   "state": "open"
  },
  "50580": {
+  "closed_at": "2026-11-11T13:53:45Z",
+  "merged_at": null,
+  "state": "closed"
+ },
+ "50583": {
   "closed_at": null,
   "merged_at": null,
   "state": "open"
  },
- "50583": {
+ "50585": {
   "closed_at": null,
   "merged_at": null,
   "state": "open"
@@ -900,6 +915,31 @@
   "state": "open"
  },
  "50595": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50610": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50614": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50619": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50624": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50643": {
   "closed_at": null,
   "merged_at": null,
   "state": "open"

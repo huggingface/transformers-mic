@@ -1481,6 +1481,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#flex_olmo#2026-10-19": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#flex_olmo#2026-10-24": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1613,6 +1617,10 @@
   "verdict": "already-failing",
   "version": 9
  },
+ "sticky#higgs_audio_v2#2026-11-11": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#hunyuan_v1_moe#2026-10-10": {
   "verdict": "not-covered",
   "version": 9
@@ -1631,6 +1639,14 @@
  },
  "sticky#hy_v3#2026-10-14": {
   "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#hy_v3#2026-11-06": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#hyperclovax_vision_v2#2026-11-11": {
+  "verdict": "not-covered",
   "version": 9
  },
  "sticky#idefics#2026-10-07": {
@@ -1666,6 +1682,10 @@
   "version": 9
  },
  "sticky#kolibri1#2026-10-14": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#kolibri1#2026-11-03": {
   "verdict": "out-of-scope",
   "version": 9
  },
@@ -1974,11 +1994,23 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#unlimited_ocr#2026-11-11": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#utils#2026-10-14": {
   "verdict": "not-covered",
   "version": 9
  },
  "sticky#utils#2026-10-17": {
+  "verdict": "not-covered",
+  "version": 9
+ },
+ "sticky#utils#2026-10-21": {
+  "verdict": "not-covered",
+  "version": 9
+ },
+ "sticky#utils#2026-11-12": {
   "verdict": "not-covered",
   "version": 9
  },
