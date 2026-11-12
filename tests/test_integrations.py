@@ -320,6 +320,200 @@ def test_publication_requires_every_integration(workspace):
     commands.publication_ready(workspace)
 
 
+def published_st_workspace(workspace, tmp_path, monkeypatch):
+    """A workspace based on a published revision whose ST integration is on the Hub.
+
+    Returns the Hub snapshots ({revision: folder}) that carryover.published serves."""
+    import hashlib
+    import shutil
+
+    from transformers_mic import carryover
+    from transformers_mic.workspace import digest
+
+    integrations.generate(
+        SimpleNamespace(
+            workspace=workspace.root, integration=["transformers", integrations.NAME]
+        )
+    )
+    st = workspace.contract_root / f"integrations/{integrations.NAME}"
+    write(st / "expectations/cpu-x86_64/embeddinggemma-2-mic.json", {"outputs": {}})
+    build = {"sha256": {"model.safetensors": "f" * 64}}
+    lock = workspace.lock
+    contract = lock["contracts"]["EmbeddingGemma"]
+    contract["integration"]["revision"] = "b" * 40
+    contract["fixtures"] = {
+        "huggingface-mic/embeddinggemma-2-mic": {
+            "revision": "b" * 40,
+            "files_sha256": digest(build["sha256"]),
+        }
+    }
+    write(workspace.lock_path, lock)
+    hub = {}
+    for revision in ("b" * 40, "main"):
+        folder = tmp_path / "hub" / revision
+        shutil.copytree(workspace.contract_root, folder)
+        write(folder / "build.json", build)
+        hub[revision] = folder
+    calls = []
+
+    def published(repo, revision, frameworks):
+        calls.append((repo, revision, frameworks))
+        return hub[revision]
+
+    monkeypatch.setattr(carryover, "published", published)
+    # The Transformers integration is re-measured: its usage changes and is checked.
+    usage = workspace.contract_root / "integrations/transformers/usage.md"
+    usage.write_text("Re-aligned usage")
+    fingerprint = workspace.validation_fingerprint()
+    workspace.save_state(
+        validated=True,
+        validation={
+            "lock_sha256": hashlib.sha256(workspace.lock_path.read_bytes()).hexdigest(),
+            "manifest_sha256": hashlib.sha256(
+                (workspace.contract_root / "integration.json").read_bytes()
+            ).hexdigest(),
+            "usage_sha256": hashlib.sha256(usage.read_bytes()).hexdigest(),
+        },
+        validations={"default": {"fingerprint": fingerprint}},
+    )
+    return hub, calls
+
+
+def test_publication_carries_unchanged_st_integration(
+    workspace, tmp_path, monkeypatch, capsys
+):
+    hub, calls = published_st_workspace(workspace, tmp_path, monkeypatch)
+    plan = commands.publication_ready(workspace)
+    assert plan == {"transformers": "primary", integrations.NAME: None}
+    assert calls[0] == (
+        "huggingface-mic/embeddinggemma-2-mic",
+        "b" * 40,
+        [integrations.NAME],
+    )
+    assert calls[1][1] == "main"
+    # Expectations another fleet added on main since are kept, not a change.
+    write(
+        hub["main"] / f"integrations/{integrations.NAME}/expectations/cpu-arm64/x.json",
+        {},
+    )
+    assert commands.publication_ready(workspace)[integrations.NAME] is None
+    assert (
+        commands.publish(
+            SimpleNamespace(workspace=workspace.root, execute=False, private=False)
+        )
+        == 0
+    )
+    preview = json.loads(capsys.readouterr().out.splitlines()[-1])
+    assert preview["integrations"] == {
+        "transformers": "checked",
+        integrations.NAME: f"unchanged since {'b' * 12}, carried over; checked by its own fleet",
+    }
+
+
+def test_publication_carries_st_to_publisher(workspace, tmp_path, monkeypatch):
+    published_st_workspace(workspace, tmp_path, monkeypatch)
+    invoked = []
+    monkeypatch.setattr(
+        commands.backend,
+        "invoke",
+        lambda tool, root, args: invoked.append((tool, args))
+        or SimpleNamespace(returncode=0),
+    )
+    commands.publish(
+        SimpleNamespace(workspace=workspace.root, execute=True, private=False)
+    )
+    assert invoked == [("publish_mic", ["--carry", integrations.NAME])]
+
+
+@pytest.mark.parametrize(
+    "edit, reason",
+    [
+        (
+            lambda root: (root / "integrations/sentence_transformers/usage.md").write_text(
+                "Edited ST usage"
+            ),
+            "files differ: integrations/sentence_transformers/usage.md",
+        ),
+        (
+            lambda root: write(
+                root
+                / "integrations/sentence_transformers/expectations/cpu-x86_64/embeddinggemma-2-mic.json",
+                {"outputs": {"scores": [1]}},
+            ),
+            "files differ: integrations/sentence_transformers/expectations",
+        ),
+        (
+            lambda root: write(
+                root / "integrations/sentence_transformers/expectations/cuda/new.json",
+                {},
+            ),
+            "files differ: integrations/sentence_transformers/expectations/cuda/new.json",
+        ),
+        (
+            lambda root: write(
+                root / "integration.json",
+                {
+                    **json.loads((root / "integration.json").read_text()),
+                    "fixtures": {"huggingface-mic/other-mic": {}},
+                },
+            ),
+            "integration.json differs",
+        ),
+    ],
+)
+def test_publication_requires_a_changed_st_integration(
+    workspace, tmp_path, monkeypatch, edit, reason
+):
+    published_st_workspace(workspace, tmp_path, monkeypatch)
+    edit(workspace.contract_root)
+    workspace.save_state(
+        validated=True,
+        validation={
+            **workspace.state["validation"],
+            "manifest_sha256": __import__("hashlib")
+            .sha256((workspace.contract_root / "integration.json").read_bytes())
+            .hexdigest(),
+        },
+        validations={"default": {"fingerprint": workspace.validation_fingerprint()}},
+    )
+    with pytest.raises(ValueError, match="Every declared") as error:
+        commands.publication_ready(workspace)
+    assert f"{integrations.NAME}: {reason}" in str(error.value)
+    # Its own check satisfies it, as before.
+    fingerprint = workspace.validation_fingerprint()
+    workspace.save_state(
+        validations={
+            key: {"fingerprint": fingerprint}
+            for key in ("default", f"{integrations.NAME}:default")
+        }
+    )
+    assert commands.publication_ready(workspace)[integrations.NAME].startswith(reason)
+
+
+def test_publication_requires_st_when_main_or_fixture_moved(
+    workspace, tmp_path, monkeypatch
+):
+    from transformers_mic import carryover
+
+    hub, _ = published_st_workspace(workspace, tmp_path, monkeypatch)
+    (hub["main"] / "integrations/sentence_transformers/usage.md").write_text("Newer")
+    with pytest.raises(ValueError, match="base the workspace on main"):
+        commands.publication_ready(workspace)
+    (hub["main"] / "integrations/sentence_transformers/usage.md").write_bytes(
+        (workspace.contract_root / "integrations/sentence_transformers/usage.md").read_bytes()
+    )
+    write(hub["b" * 40] / "build.json", {"sha256": {"model.safetensors": "0" * 64}})
+    with pytest.raises(ValueError, match="fixture weights differ"):
+        commands.publication_ready(workspace)
+
+    def offline(*args):
+        raise OSError("offline")
+
+    monkeypatch.setattr(carryover, "published", offline)
+    with pytest.raises(ValueError, match="published revision unavailable"):
+        commands.publication_ready(workspace)
+
+
 def test_nightly_selects_st_fleet_and_advertised_contracts(tmp_path, monkeypatch):
     source = (
         Path(__file__).parents[1] / ".github/scripts/sentence_transformers_nightly.py"

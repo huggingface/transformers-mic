@@ -1208,6 +1208,119 @@ def test_umbrella_publish_uploads_one_snapshot_and_pins_both_roles(
     assert calls == ["huggingface-mic/bert-mic"]
 
 
+def test_umbrella_publish_leaves_a_carried_integration_on_the_hub(
+    tmp_path, monkeypatch
+):
+    import importlib.util
+    import sys
+
+    example = Path(__file__).resolve().parents[1] / "example"
+    monkeypatch.syspath_prepend(str(example))
+    spec = importlib.util.spec_from_file_location(
+        "publish_mic_carry_test", example / "publish_mic.py"
+    )
+    publisher = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(publisher)
+    path = tmp_path / "umbrella"
+    assert (
+        main(
+            [
+                "create",
+                "google-bert/bert-base-uncased",
+                "--regenerate",
+                "--name",
+                "bert",
+                "--out",
+                str(path),
+            ]
+        )
+        == 0
+    )
+    project = Workspace(path)
+    # A second integration another fleet owns; the workspace has its usage but not
+    # its expectations, which live only on the Hub.
+    manifest = project.manifest
+    manifest["integrations"]["sentence_transformers"] = {
+        **manifest["integrations"]["transformers"],
+        "entry_point": "integrations/sentence_transformers/usage.md",
+    }
+    write(project.contract_root / "integration.json", manifest)
+    st_usage = project.contract_root / "integrations/sentence_transformers/usage.md"
+    st_usage.parent.mkdir(parents=True)
+    st_usage.write_text("ST usage")
+    project.update_layout()
+    fixture = tmp_path / "fixture"
+    fixture.mkdir()
+    (fixture / "model.safetensors").write_bytes(b"weights")
+    write(fixture / "build.json", {"sha256": {"model.safetensors": "hash"}})
+    write(project.expectations / "cpu-test/bert-mic.json", {"reviewed": True})
+    lock = project.lock
+    pin = lock["contracts"]["bert"]["fixtures"][project.fixture]
+    pin.update(path=str(fixture), files_sha256="hash")
+    write(project.lock_path, lock)
+    monkeypatch.setattr(publisher, "HERE", project.root / "example")
+    monkeypatch.setattr(publisher.run, "load", lambda path, schema: read(path))
+    monkeypatch.setattr(publisher.run, "fixture_problem", lambda *a: None)
+    previous = tmp_path / "previous"
+    write(
+        previous / ".mic-repo.json",
+        {
+            "format": "mic-umbrella-v1",
+            "contract_files": read(project.contract_root / ".mic-repo.json")[
+                "contract_files"
+            ],
+        },
+    )
+    write(previous / "build.json", {"sha256": {"model.safetensors": "hash"}})
+    monkeypatch.setattr(
+        publisher, "hf_hub_download", lambda repo, name: str(previous / name)
+    )
+    uploads = []
+
+    class API:
+        def repo_exists(self, repo):
+            return True
+
+        def list_repo_files(self, repo):
+            return [
+                ".mic-repo.json",
+                "build.json",
+                "integrations/sentence_transformers/usage.md",
+                "integrations/sentence_transformers/expectations/cpu-x86_64/bert-mic.json",
+            ]
+
+        def create_repo(self, repo, **kwargs):
+            pass
+
+        def upload_folder(self, repo_id, folder_path, delete_patterns, **kwargs):
+            staged = {
+                p.relative_to(folder_path).as_posix()
+                for p in folder_path.rglob("*")
+                if p.is_file()
+            }
+            uploads.append((staged, delete_patterns))
+            return SimpleNamespace(oid="c" * 40)
+
+    monkeypatch.setattr(publisher, "HfApi", API)
+    # Without --carry the expectations missing locally stop the publish, as before.
+    monkeypatch.setattr(sys, "argv", ["publish_mic"])
+    with pytest.raises(ValueError, match="No reviewed sentence_transformers"):
+        publisher.main()
+    monkeypatch.setattr(
+        sys, "argv", ["publish_mic", "--carry", "sentence_transformers"]
+    )
+    assert publisher.main() == 0
+    ((staged, deleted),) = uploads
+    # Nothing under the carried integration is uploaded or deleted: the Hub keeps it.
+    assert not [p for p in staged if p.startswith("integrations/sentence_transformers/")]
+    assert not [p for p in deleted if p.startswith("integrations/sentence_transformers/")]
+    assert "integrations/transformers/expectations/cpu-test/bert-mic.json" in staged
+    # The layout still lists its usage, which stays in the repository.
+    assert "integrations/sentence_transformers/usage.md" in read(
+        project.contract_root / ".mic-repo.json"
+    )["contract_files"]
+
+
 def test_merged_hub_card_keeps_both_descriptions(monkeypatch):
     from pathlib import Path
 

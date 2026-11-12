@@ -1114,7 +1114,30 @@ Each integration owns its usage, assertions and baselines under
 `integrations/<name>/`. An integration's optional `outputs` map replaces the
 manifest-level output map for that integration. Existing Transformers assertions
 stay unchanged. Publication requires successful checks of every declared
-integration and variant, and uploads their reviewed baselines together.
+variant of the Transformers integration (the only integration, when there is no
+Transformers one), and of every other integration this workspace changed.
+
+Another integration is unchanged, and carried over, when every local file under
+`integrations/<name>/` (usage and reviewed expectations), its `integration.json`
+section, the output rules it inherits, the checkpoints and fixtures, and the
+fixture weights (`build.json`) are identical to the Hub revision the workspace's
+lock pins. The Hub's `main` must also still have the same section and usage;
+expectations another fleet added there since are kept. A carried integration
+needs no check here: `tmic publish` neither uploads nor deletes its files, so the
+Hub keeps them byte for byte, and the Sentence Transformers fleet and its nightly
+go on checking it. The preview says so per integration:
+
+```json
+"integrations": {
+  "transformers": "checked",
+  "sentence_transformers": "unchanged since aba894c888d7, carried over; checked by its own fleet"
+}
+```
+
+Any difference, a first publish, or an unreachable Hub requires that
+integration's own check (`tmic check --integration all --all-variants`), and the
+error names the integration and the difference. A checked integration is then
+uploaded from the workspace with the rest.
 
 Sentence Transformers also loads the module directories named in `modules.json`.
 New fixture builds copy their non-weight assets and include them in the fixture

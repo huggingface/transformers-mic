@@ -13,7 +13,16 @@ import tempfile
 from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download
 import jsonschema
 
-from . import backend, fleet, history, planner, policy, references, resources
+from . import (
+    backend,
+    carryover,
+    fleet,
+    history,
+    planner,
+    policy,
+    references,
+    resources,
+)
 from .hub import (
     DEFAULT_NAMESPACE,
     canonical_references,
@@ -1872,6 +1881,9 @@ def publication_ready(workspace):
             "Unreviewed candidate baselines remain; run tmic review before publishing"
         )
     fingerprint = workspace.validation_fingerprint()
+    # Another fleet's integration (Sentence Transformers) that this workspace did not
+    # change is carried over from the Hub and needs no check here.
+    plan = carryover.plan(workspace)
     for framework, integration in workspace.manifest["integrations"].items():
         if list(
             (
@@ -1879,25 +1891,37 @@ def publication_ready(workspace):
             ).rglob("*.candidate.json")
         ):
             raise ValueError(f"Unreviewed {framework} candidate baselines remain")
+        if framework in plan and plan[framework] is None:
+            continue
         for variant in integration.get("variants", {"default": {}}):
             key = variant if framework == "transformers" else f"{framework}:{variant}"
             if (
                 state.get("validations", {}).get(key, {}).get("fingerprint")
                 != fingerprint
             ):
+                why = plan.get(framework)
                 raise ValueError(
                     "Every declared variant and integration needs a successful check; use tmic check --integration all --all-variants"
+                    + (f" ({framework}: {why})" if why not in (None, "primary") else "")
                 )
+    return plan
 
 
 def publish(args):
     workspace = Workspace(args.workspace)
-    publication_ready(workspace)
+    plan = publication_ready(workspace)
+    revision = workspace.lock["contracts"][workspace.state["contract"]][
+        "integration"
+    ]["revision"]
     print(
         json.dumps(
             {
                 "contract": workspace.state["contract"],
                 "fixture": workspace.fixture,
+                "integrations": {
+                    name: carryover.describe(name, why, revision)
+                    for name, why in plan.items()
+                },
                 "execute": args.execute,
                 "next": "tmic publish --execute, then tmic export --transformers-checkout PATH",
             }
@@ -1905,9 +1929,11 @@ def publish(args):
     )
     if not args.execute:
         return 0
-    result = backend.invoke(
-        "publish_mic", workspace.root, ["--private"] if args.private else []
-    )
+    options = ["--private"] if args.private else []
+    for name, why in plan.items():
+        if why is None:
+            options += ["--carry", name]
+    result = backend.invoke("publish_mic", workspace.root, options)
     workspace.save_state(validated=False)
     print("Run tmic check --all-variants on the published pins before export.")
     return result.returncode
