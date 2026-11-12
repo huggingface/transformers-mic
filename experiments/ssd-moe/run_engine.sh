@@ -20,6 +20,12 @@ field() { "$PY" -c "import json,sys; print(json.load(open('$PATHS'))[sys.argv[1]
 { nvidia-smi || true; df -h / /tmp || true; cat /proc/meminfo; nproc
   for f in memory.max memory.high cpu.max; do echo "cgroup $f: $(cat /sys/fs/cgroup/$f 2>/dev/null || echo n/a)"; done; } > "$OUT/environment.txt" 2>&1
 cp "$PATHS" "$OUT/paths.json"
+echo "memory limit: ${MEMORY_LIMIT:-none}" | tee "$OUT/memory-limit.txt"
+cgroup_after() {  # peak RAM of this container (anon + page cache) and whether the OOM killer fired
+  for f in memory.max memory.peak memory.events; do echo "== $f"; cat /sys/fs/cgroup/$f 2>/dev/null || echo n/a; done > "$OUT/cgroup-after.txt"
+  grep -E "^(anon|file) " /sys/fs/cgroup/memory.stat >> "$OUT/cgroup-after.txt" 2>/dev/null || true
+}
+trap cgroup_after EXIT
 
 stage() {  # stage SRC DST: copy (dereferencing HF cache symlinks) to container-local scratch, report throughput
   local src=$1 dst=$2 t0
@@ -41,7 +47,7 @@ bench() {  # bench STARTED_AT EXTRA_JSON API_KEY EVICT_PATHS...
     --meta "{\"paths\": $(cat "$PATHS")}" --output "$OUT/result.json"
 }
 
-stop_server() { kill "$SERVER_PID" 2>/dev/null || true; wait "$SERVER_PID" 2>/dev/null || true; }
+stop_server() { kill "$SERVER_PID" 2>/dev/null || true; wait "$SERVER_PID" 2>/dev/null || true; cgroup_after; }
 
 case "$ENGINE" in
   transformers-streaming | transformers-offload)
@@ -61,7 +67,7 @@ PY
     if [ "$ENGINE" = transformers-streaming ]; then
       mode_args=(--mode streaming --cache-mib "${CACHE_MIB:-16384}")
     else
-      mode_args=(--mode offload --offload-gpu-mib 18432 --offload-cpu-mib 40960 --offload-folder /tmp/offload)
+      mode_args=(--mode offload --offload-gpu-mib 18432 --offload-cpu-mib "${OFFLOAD_CPU_MIB:-$([ -n "${MEMORY_LIMIT:-}" ] && echo 2048 || echo 40960)}" --offload-folder /tmp/offload)
     fi
     PYTHONPATH=framework/src "$PY" framework/examples/generate/ssd_moe.py "$CKPT" "${mode_args[@]}" \
       --chat --prompt-file "$HERE/prompt.txt" --device cuda --dtype bfloat16 --threads "$CPUS" \
@@ -104,11 +110,14 @@ PY
     KEY=$(head -c 24 /dev/urandom | od -An -tx1 | tr -d ' \n')
     export STRATA_LAUNCH_KEY=$KEY
     ls /opt/strata/components/engine > "$OUT/packages.txt"
+    # Under a RAM cap, Strata's mapped mode: experts are read in place from the GGUF through the page cache (its SSD mode).
+    # It sizes itself from /proc/meminfo (the host's RAM), so a container cap does not switch it on by itself.
+    strata_set=(); [ -n "${MEMORY_LIMIT:-}" ] && strata_set=(--set mmap-experts=on)
     started=$(date +%s.%N)
     # One request at a time, no MTP/drafting, no pictures, no tuning: plain greedy decoding like the other engines.
     /opt/strata/terminal/bin/strata launch --no-tui --yes --access local --port 8080 --data-dir /data/Strata-data \
       --family qwen36 --model Q8_0 --model-path "$MODELDIR" --context 4096 --parallel 1 --vision off \
-      --mtp off --drafting off --tune skip --api-key-env STRATA_LAUNCH_KEY > "$OUT/engine.log" 2>&1
+      --mtp off --drafting off --tune skip --api-key-env STRATA_LAUNCH_KEY ${strata_set[@]+"${strata_set[@]}"} > "$OUT/engine.log" 2>&1
     bench "$started" '{"ignore_eos": true}' "$KEY" "$MODELDIR" /data/Strata-data
     /opt/strata/terminal/bin/strata launch --status --output json > "$OUT/strata-status.json" 2>&1 || true
     /opt/strata/terminal/bin/strata launch --stop >> "$OUT/engine.log" 2>&1 || true
