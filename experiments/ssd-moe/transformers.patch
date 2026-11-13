@@ -1,9 +1,9 @@
 diff --git a/examples/generate/ssd_moe.py b/examples/generate/ssd_moe.py
 new file mode 100644
-index 0000000000..06ce9153c5
+index 0000000000..4846a027e0
 --- /dev/null
 +++ b/examples/generate/ssd_moe.py
-@@ -0,0 +1,292 @@
+@@ -0,0 +1,366 @@
 +# Copyright 2026 The HuggingFace Team. All rights reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,6 +36,7 @@ index 0000000000..06ce9153c5
 +import json
 +import platform
 +import resource
++import threading
 +import time
 +from pathlib import Path
 +from types import SimpleNamespace
@@ -82,6 +83,35 @@ index 0000000000..06ce9153c5
 +    return None
 +
 +
++class DevicePeak:
++    """Sample the device allocator while the model loads and runs: MPS has no max_memory_allocated."""
++
++    def __init__(self, device, interval=0.05):
++        self.device, self.interval, self.peak = device, interval, 0
++        self._stop = threading.Event()
++        self._thread = threading.Thread(target=self._sample, daemon=True)
++
++    def current(self):
++        if self.device.type == "mps":
++            return torch.mps.driver_allocated_memory()
++        if self.device.type == "cuda":
++            return torch.cuda.memory_reserved(self.device)
++        return 0
++
++    def _sample(self):
++        while not self._stop.wait(self.interval):
++            self.peak = max(self.peak, self.current())
++
++    def __enter__(self):
++        self._thread.start()
++        return self
++
++    def __exit__(self, *exc):
++        self._stop.set()
++        self._thread.join()
++        self.peak = max(self.peak, self.current())
++
++
 +def synchronize(device):
 +    if device.type == "cuda":
 +        torch.cuda.synchronize(device)
@@ -95,7 +125,7 @@ index 0000000000..06ce9153c5
 +
 +def counter_delta(before, after):
 +    return {
-+        key: value if key in ("resident_bytes", "peak_cache_bytes") else value - before[key]
++        key: value if key in ("resident_bytes", "peak_cache_bytes") or isinstance(value, str) else value - before[key]
 +        for key, value in after.items()
 +    }
 +
@@ -167,6 +197,33 @@ index 0000000000..06ce9153c5
 +        help="streaming mode: read the experts from this llama.cpp GGUF of the same model (e.g. Q8_0) instead",
 +    )
 +    parser.add_argument(
++        "--cache-policy",
++        choices=("lru", "lfu"),
++        default="lru",
++        help="streaming mode: expert cache eviction (lfu keeps the most used experts instead of cycling through them)",
++    )
++    parser.add_argument(
++        "--bypass-page-cache",
++        action="store_true",
++        help="streaming mode: keep streamed bytes out of the OS page cache, so every miss reads the storage",
++    )
++    parser.add_argument(
++        "--experts-implementation",
++        help="experts kernel: from_pretrained's experts_implementation in eager mode (default: the library default); "
++        "grouped_mm (default) or batched_mm for the cached experts in streaming mode",
++    )
++    parser.add_argument(
++        "--io-threads",
++        type=int,
++        default=4,
++        help="streaming mode: threads reading experts (a layer's misses in parallel, next layer ahead); 0 = synchronous",
++    )
++    parser.add_argument(
++        "--no-prefetch-next-layer",
++        action="store_true",
++        help="streaming mode: do not guess and prefetch the next layer's experts with its router",
++    )
++    parser.add_argument(
 +        "--use-kernels",
 +        action="store_true",
 +        help="Use Hub kernels (the `kernels` package) for supported layers, e.g. Qwen3.5/3.6 linear attention",
@@ -220,6 +277,7 @@ index 0000000000..06ce9153c5
 +    encoded = [(name, encode(prompt)) for name, prompt in prompts]
 +    if any(inputs.numel() == 0 for _, inputs in encoded):
 +        parser.error("Prompt must tokenize to at least one token")
++    device_peak = DevicePeak(device).__enter__()
 +    start = time.perf_counter()
 +    if args.mode in ("streaming", "layerwise"):
 +        model = load_moe_from_ssd(
@@ -229,6 +287,11 @@ index 0000000000..06ce9153c5
 +            cache_bytes=int(args.cache_mib * 1024**2) if args.mode == "streaming" else 0,
 +            token_chunk_size=args.expert_token_chunk_size,
 +            experts_gguf=args.experts_gguf,
++            bypass_page_cache=args.bypass_page_cache,
++            cache_policy=args.cache_policy,
++            experts_implementation=args.experts_implementation or "grouped_mm",
++            io_threads=args.io_threads,
++            prefetch_next_layer=not args.no_prefetch_next_layer,
 +        )
 +        if args.mode == "layerwise":
 +            ExpertsInterface.register("ssd_layerwise", layerwise_experts_forward)
@@ -238,7 +301,9 @@ index 0000000000..06ce9153c5
 +        model_class = _ARCHITECTURES[model_type][1]
 +        kwargs = {"local_files_only": True, "dtype": dtype, "attn_implementation": "eager"}
 +        if args.mode == "eager":
-+            model = model_class.from_pretrained(args.checkpoint, experts_implementation="eager", **kwargs).to(device)
++            if args.experts_implementation:
++                kwargs["experts_implementation"] = args.experts_implementation
++            model = model_class.from_pretrained(args.checkpoint, device_map=str(device), **kwargs)
 +        else:
 +            if device.type != "cuda" or args.offload_folder is None:
 +                parser.error("offload mode needs --device cuda[:N] and --offload-folder")
@@ -254,6 +319,7 @@ index 0000000000..06ce9153c5
 +        # Kernelize after loading: the streamed experts are not a kernelized layer, so they are left as they are.
 +        model.set_use_kernels(True)
 +    synchronize(device)
++    load_peak = max(device_peak.peak, device_peak.current())
 +    report = {
 +        "checkpoint": str(args.checkpoint.resolve()),
 +        "mode": args.mode,
@@ -281,6 +347,14 @@ index 0000000000..06ce9153c5
 +            result["prompt_file"] = name
 +            result["generated_text"] = tokenizer.decode(result["generated_token_ids"])
 +            report["runs"].append(result)
++    device_peak.__exit__(None, None, None)
++    report["device_after_load_bytes"] = load_peak
++    report["device_peak_sampled_bytes"] = device_peak.peak
++    report["bypass_page_cache"] = args.bypass_page_cache
++    report["cache_policy"] = args.cache_policy
++    report["experts_implementation"] = args.experts_implementation
++    report["io_threads"] = args.io_threads
++    report["prefetch_next_layer"] = not args.no_prefetch_next_layer
 +    rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 +    report["process_peak_rss_bytes"] = rss if platform.system() == "Darwin" else rss * 1024
 +    if device.type == "cuda":
@@ -298,10 +372,10 @@ index 0000000000..06ce9153c5
 +    main()
 diff --git a/src/transformers/integrations/ssd_moe.py b/src/transformers/integrations/ssd_moe.py
 new file mode 100644
-index 0000000000..41349891fb
+index 0000000000..80a419b783
 --- /dev/null
 +++ b/src/transformers/integrations/ssd_moe.py
-@@ -0,0 +1,494 @@
+@@ -0,0 +1,872 @@
 +# Copyright 2026 The HuggingFace Team. All rights reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -315,27 +389,97 @@ index 0000000000..41349891fb
 +# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 +# See the License for the specific language governing permissions and
 +# limitations under the License.
-+"""Experimental, inference-only Qwen MoE expert streaming, without Accelerate or native I/O dependencies.
++"""Experimental, inference-only Qwen MoE expert streaming from SSD, without Accelerate or native I/O dependencies.
 +
-+Supported checkpoints: ``qwen3_moe`` and the text model of ``qwen3_5_moe`` (Qwen3.5/3.6 MoE), unquantized.
++Supported checkpoints: ``qwen3_moe``, ``olmoe`` and the text model of ``qwen3_5_moe`` (Qwen3.5/3.6 MoE), unquantized.
 +The experts can instead come from a llama.cpp GGUF of the same model (Q8_0, F16, BF16 or F32 expert tensors), so that
 +the streamed bytes match what llama.cpp-based engines read; dense weights still come from the safetensors checkpoint.
 +
-+This is a single-device proof of concept, not a general replacement for ``from_pretrained``.
-+The checkpoint remains on disk; dense parameters and a byte-bounded expert LRU live on the device.
-+Reads use ordinary buffered file I/O, so read_bytes measures requested bytes, NOT physical SSD traffic.
++How it works
++============
++
++1. The hook Transformers already has.
++   In Qwen3 MoE and Qwen3.5/3.6 MoE, each layer's experts live in one ``Experts`` module as two packed tensors,
++   ``gate_up_proj`` ``[experts, 2 * intermediate, hidden]`` and ``down_proj`` ``[experts, hidden, intermediate]``.
++   The router produces ``top_k_index`` / ``top_k_weights``, then the experts module calls whatever function is
++   registered under ``config._experts_implementation`` through ``ExpertsInterface`` (the same kind of registry as
++   attention). No model code is patched: this module registers ``"ssd_streaming"`` and points the config at it.
++
++2. Loading without the experts in memory (``load_moe_from_ssd``).
++   - Build the model on the ``meta`` device: nothing is allocated.
++   - For every experts module, delete the two big parameters (``register_parameter(..., None)``) and attach the
++     shared ``ExpertStore`` plus the module's checkpoint prefix (e.g. ``model.language_model.layers.12.mlp.experts``).
++   - Load everything else (attention, linear attention, router, shared expert, embeddings, norms) one tensor at a
++     time, straight to the device.
++   - Check that every checkpoint tensor was either loaded, deliberately left on disk (experts), or skipped (vision
++     tower, MTP head).
++
++3. Reading one expert (``SafetensorsReader`` / ``GGUFExpertReader``).
++   - safetensors: the header gives each tensor's byte offset; in a packed bank expert ``e`` is one contiguous slice at
++     ``offset + e * prod(shape[1:]) * itemsize``. One ``readinto`` fills a buffer, ``torch.frombuffer`` wraps it
++     without a copy, ``.to(device)`` uploads it. A whole bank or shard is never read.
++   - GGUF: a small header parser finds ``blk.N.ffn_{gate,up,down}_exps``. ggml stores those as
++     ``[columns, rows, experts]``, so one expert is again a contiguous ``rows x columns`` matrix in the PyTorch
++     ``(out_features, in_features)`` orientation. A Q8_0 row is blocks of 34 bytes (one float16 scale and 32 int8
++     values), so a Qwen3.6 expert is 3.2 MiB instead of 6 MiB in BF16.
++
++4. The cache (``ExpertStore``).
++   One global LRU across all layers, keyed by ``(layer prefix, expert id)`` and budgeted in bytes. A miss evicts the
++   least recently used experts until the new one fits, reads it, uploads it and inserts it. In GGUF mode the cache
++   holds the GGUF's own bytes (e.g. Q8_0) and ``dequantize_gguf`` turns them into the execution dtype on the device
++   each time the expert runs, so the same budget holds about twice as many Q8_0 experts as BF16 ones.
++
++5. The forward pass (``streamed_experts_forward``)::
++
++       routing = top_k_index.cpu()                      # one small device-to-host copy per layer
++       for expert in unique(routing):
++           tokens, slots = where(routing == expert)
++           gate_up, down = store.get(layer, expert)     # cache hit, or read from the SSD
++           for each chunk of at most token_chunk_size tokens:   # bounds prefill memory
++               gate, up = linear(hidden[tokens], gate_up).chunk(2)
++               out = linear(act(gate) * up, down) * top_k_weights[tokens, slots]
++               result.index_add_(0, tokens, out)
++
++   This is the same math as the eager experts. The tests compare logits and greedy generations with the eager model
++   on tiny Qwen3 MoE and Qwen3.5 MoE checkpoints (packed and per-expert layouts, forced evictions, zero cache, and the
++   Q8_0 GGUF path).
++
++6. Where the time goes.
++   Measured on Qwen3.6-35B-A3B Q8_0 with an A10G limited to 12 GiB of GPU memory and 12 GiB of RAM: each decoded token
++   makes 40 layers x 8 = 320 expert lookups; with a 5.5 GiB cache and a 77% hit rate that is about 75 misses, about
++   250 MB read per token. At 2.2 tok/s that is about 0.55 GB/s, far below what the disk delivers (5 GB/s direct).
++   The limits are elsewhere: reads are synchronous (the GPU waits on every miss, nothing is prefetched), there is a
++   Python loop over experts in every layer, and Q8_0 is dequantized on every use. The next steps would be reading
++   layer N+1's experts while layer N computes, a grouped MoE kernel instead of the loop, and a Q8_0 matmul.
++
++7. What it deliberately is not.
++   Inference only, one request at a time, a single device, not wired into ``from_pretrained``. By default reads use
++   ordinary buffered file I/O, so the OS page cache can help and ``read_bytes`` counts requested bytes, NOT physical
++   SSD traffic; ``bypass_page_cache=True`` keeps read bytes out of the page cache, so every miss reads the storage. Dense weights stay in the execution dtype even when the experts come from a GGUF.
 +"""
 +
++import heapq
 +import json
 +import math
++import os
 +import re
 +import struct
++import threading
 +from collections import OrderedDict
++from concurrent.futures import ThreadPoolExecutor
 +from pathlib import Path
 +
 +import torch
 +from safetensors import safe_open
 +
++
++try:  # POSIX only; used to keep streamed bytes out of the page cache on macOS (F_NOCACHE)
++    import fcntl
++except ImportError:  # Windows
++    fcntl = None
++
++from ..models.olmoe.configuration_olmoe import OlmoeConfig
++from ..models.olmoe.modeling_olmoe import OlmoeExperts, OlmoeForCausalLM, OlmoeRotaryEmbedding
 +from ..models.qwen3_5_moe.configuration_qwen3_5_moe import Qwen3_5MoeConfig, Qwen3_5MoeTextConfig
 +from ..models.qwen3_5_moe.modeling_qwen3_5_moe import (
 +    Qwen3_5MoeExperts,
@@ -378,6 +522,14 @@ index 0000000000..41349891fb
 +        "model.language_model.",
 +        ("model.visual.", "mtp."),
 +    ),
++    "olmoe": (
++        lambda directory: OlmoeConfig.from_pretrained(directory, local_files_only=True),
++        OlmoeForCausalLM,
++        OlmoeExperts,
++        OlmoeRotaryEmbedding,
++        "model.",
++        (),
++    ),
 +    "qwen3_5_moe_text": (
 +        lambda directory: Qwen3_5MoeTextConfig.from_pretrained(directory, local_files_only=True),
 +        Qwen3_5MoeForCausalLM,
@@ -389,6 +541,30 @@ index 0000000000..41349891fb
 +}
 +
 +
++# Reads run on I/O threads (os reads release the GIL); their byte counters are shared.
++_COUNTER_LOCK = threading.Lock()
++
++
++def _read_exact(path, offset, size, bypass_page_cache, what):
++    """Read ``size`` bytes at ``offset``. With ``bypass_page_cache``, the bytes do not stay in the OS page cache
++    (macOS: F_NOCACHE; elsewhere: drop the range after reading), so every miss is a real storage read."""
++    data = bytearray(size)
++    with path.open("rb", buffering=0) as handle:
++        if bypass_page_cache and hasattr(fcntl, "F_NOCACHE"):
++            fcntl.fcntl(handle.fileno(), fcntl.F_NOCACHE, 1)
++        handle.seek(offset)
++        view = memoryview(data)
++        done = 0
++        while done < size:
++            count = handle.readinto(view[done:])
++            if not count:
++                raise OSError(f"Short checkpoint read: {path}, {what}")
++            done += count
++        if bypass_page_cache and hasattr(os, "posix_fadvise"):
++            os.posix_fadvise(handle.fileno(), offset, size, os.POSIX_FADV_DONTNEED)
++    return data
++
++
 +class SafetensorsReader:
 +    """Index validated safetensors headers, then read whole tensors or contiguous expert slices.
 +
@@ -396,8 +572,9 @@ index 0000000000..41349891fb
 +    packed expert tensor is loaded. Both sharded and single-file local checkpoints are supported.
 +    """
 +
-+    def __init__(self, directory):
++    def __init__(self, directory, bypass_page_cache=False):
 +        directory = Path(directory)
++        self.bypass_page_cache = bypass_page_cache
 +        index = directory / "model.safetensors.index.json"
 +        if index.exists():
 +            weight_map = json.loads(index.read_text())["weight_map"]
@@ -444,18 +621,10 @@ index 0000000000..41349891fb
 +            shape = shape[1:]
 +            offset += expert * math.prod(shape) * item_size
 +        size = math.prod(shape) * item_size
-+        data = bytearray(size)
-+        with path.open("rb", buffering=0) as handle:
-+            handle.seek(offset)
-+            view = memoryview(data)
-+            done = 0
-+            while done < size:
-+                count = handle.readinto(view[done:])
-+                if not count:
-+                    raise OSError(f"Short checkpoint read: {path}, tensor {name}")
-+                done += count
-+        self.read_bytes += size
-+        self.read_calls += 1
++        data = _read_exact(path, offset, size, self.bypass_page_cache, f"tensor {name}")
++        with _COUNTER_LOCK:
++            self.read_bytes += size
++            self.read_calls += 1
 +        return torch.frombuffer(data, dtype=dtype).reshape(shape)
 +
 +
@@ -514,8 +683,9 @@ index 0000000000..41349891fb
 +    float16 scale and 32 int8 values; they stay quantized until :func:`dequantize_gguf` runs on the execution device.
 +    """
 +
-+    def __init__(self, path):
++    def __init__(self, path, bypass_page_cache=False):
 +        self.path = Path(path).resolve()
++        self.bypass_page_cache = bypass_page_cache
 +        with self.path.open("rb") as handle:
 +            self.tensors = _read_gguf_index(handle)
 +        self.read_bytes = 0
@@ -539,18 +709,12 @@ index 0000000000..41349891fb
 +        kind, rows, columns, experts, offset, size = self.layout(layer, projection)
 +        if not 0 <= expert < experts:
 +            raise ValueError(f"Invalid expert {expert} for layer {layer}")
-+        data = bytearray(size)
-+        with self.path.open("rb", buffering=0) as handle:
-+            handle.seek(offset + expert * size)
-+            view = memoryview(data)
-+            done = 0
-+            while done < size:
-+                count = handle.readinto(view[done:])
-+                if not count:
-+                    raise OSError(f"Short GGUF read: {self.path}, layer {layer} {projection}")
-+                done += count
-+        self.read_bytes += size
-+        self.read_calls += 1
++        data = _read_exact(
++            self.path, offset + expert * size, size, self.bypass_page_cache, f"layer {layer} {projection}"
++        )
++        with _COUNTER_LOCK:
++            self.read_bytes += size
++            self.read_calls += 1
 +        return torch.frombuffer(data, dtype=torch.uint8)
 +
 +
@@ -566,17 +730,34 @@ index 0000000000..41349891fb
 +
 +
 +class ExpertStore:
-+    """One global LRU across layers, budgeted in bytes of what it keeps on the execution device: the execution dtype,
-+    or the GGUF's own bytes (e.g. Q8_0) when the experts come from a GGUF, dequantized on each use.
++    """One global expert cache across layers, budgeted in bytes of what it keeps on the execution device: the execution
++    dtype, or the GGUF's own bytes (e.g. Q8_0) when the experts come from a GGUF, dequantized on each use.
++
++    Policies:
++    - ``"lru"``: evict the least recently used expert. Decoding visits every layer in order, so when the experts used by
++      one token do not all fit, LRU evicts exactly the expert the next token needs first and the hit rate drops to 0.
++    - ``"lfu"``: keep a usage count per expert, halved every ``decay_every`` lookups so the set can follow the text.
++      When the cache is full, the least used resident expert is the victim, and a missing expert is admitted only when
++      it has been used more than that victim; otherwise it runs once without being cached. The cache settles on the
++      most used experts instead of cycling through all of them.
 +
 +    A miss evicts before loading. One active expert plus conversion/staging memory may exceed the cache
 +    budget. Eviction never overwrites a tensor used by queued work; PyTorch owns tensor lifetimes.
 +    The store is synchronous and intended for one inference request at a time.
 +    """
 +
-+    def __init__(self, reader, cache_bytes, device, dtype, gguf=None):
++    def __init__(self, reader, cache_bytes, device, dtype, gguf=None, policy="lru", decay_every=4096, io_threads=0):
 +        if cache_bytes < 0:
 +            raise ValueError("cache_bytes must be nonnegative")
++        if policy not in ("lru", "lfu"):
++            raise ValueError(f"Unknown cache policy {policy!r}; use 'lru' or 'lfu'")
++        self.policy = policy
++        self.decay_every = decay_every
++        self.counts = {}
++        self.heap = []  # (count, sequence, key) for resident experts; stale entries are skipped lazily
++        self.sequence = 0
++        self.lookups = 0
++        self.not_admitted = 0
 +        self.reader = reader
 +        self.gguf = gguf
 +        self.cache_bytes = cache_bytes
@@ -587,6 +768,22 @@ index 0000000000..41349891fb
 +        self.peak_cache_bytes = 0
 +        self.hits = self.misses = self.evictions = 0
 +        self.layouts = {}
++        # Unquantized experts live in one preallocated device pool of `cache_bytes // expert_bytes` slots, so a
++        # layer's resident experts are slices of a single bank that Transformers' grouped_mm / batched_mm kernels
++        # can index directly. Each layer keeps a device table expert -> slot (`num_slots` when not resident).
++        self.gate_up_pool = self.down_pool = None
++        self.num_slots = 0
++        self.free_slots = []
++        self.slot_tables = {}
++        self.total_experts = 0
++        self.compute = "grouped_mm"
++        # Reads of experts that are not resident run on `io_threads` threads: a layer's misses in parallel, and the
++        # predicted experts of the next layer in the background. They land in host memory and only enter the cache
++        # when a forward call actually uses them, so a wrong prediction costs storage bandwidth, never a cached expert.
++        self.executor = ThreadPoolExecutor(io_threads, thread_name_prefix="ssd-moe-io") if io_threads else None
++        self.pending = {}
++        self.window = 2 * io_threads
++        self.prefetched = self.prefetch_used = 0
 +
 +    def register(self, prefix, module):
 +        shapes = {
@@ -629,44 +826,192 @@ index 0000000000..41349891fb
 +                layouts[projection] = (kind, rows, columns, size)
 +            # The safetensors expert banks are deliberately not read: they count as consumed.
 +            self.layouts[prefix] = ("gguf", layer, layouts)
++        else:
++            self._register_slots(prefix, module)
 +        return set(names)
 +
-+    def get(self, prefix, expert):
++    def _register_slots(self, prefix, module):
++        gate_up_shape = (2 * module.intermediate_dim, module.hidden_dim)
++        down_shape = (module.hidden_dim, module.intermediate_dim)
++        if self.gate_up_pool is None:
++            expert_bytes = 3 * module.intermediate_dim * module.hidden_dim * self.dtype.itemsize
++            self.num_slots = self.cache_bytes // expert_bytes
++            self.gate_up_pool = torch.empty((self.num_slots, *gate_up_shape), device=self.device, dtype=self.dtype)
++            self.down_pool = torch.empty((self.num_slots, *down_shape), device=self.device, dtype=self.dtype)
++            self.free_slots = list(range(self.num_slots - 1, -1, -1))
++        elif self.gate_up_pool.shape[1:] != gate_up_shape or self.down_pool.shape[1:] != down_shape:
++            raise ValueError("All MoE layers must have the same expert shapes to share the expert pool")
++        self.slot_tables[prefix] = torch.full((module.num_experts,), self.num_slots, device=self.device)
++        self.total_experts += module.num_experts
++
++    @property
++    def pooled(self):
++        return self.gate_up_pool is not None
++
++    def all_resident(self):
++        """True when every expert of the model is cached: nothing can be evicted, no routing needs to reach the host."""
++        return self.pooled and len(self.cache) == self.total_experts
++
++    def _count(self, key):
++        self.lookups += 1
++        if self.policy != "lfu":
++            return
++        if self.decay_every and self.lookups % self.decay_every == 0:
++            self.counts = {k: v / 2 for k, v in self.counts.items() if v >= 0.25}
++            self.heap = []
++            for resident in self.cache:
++                self._push(resident)
++        self.counts[key] = self.counts.get(key, 0) + 1
++        if key in self.cache:
++            self._push(key)
++
++    def _push(self, key):
++        self.sequence += 1
++        heapq.heappush(self.heap, (self.counts.get(key, 0), self.sequence, key))
++
++    def _least_used(self):
++        while self.heap:
++            count, _, key = self.heap[0]
++            if key in self.cache and count == self.counts.get(key, 0):
++                return key, count
++            heapq.heappop(self.heap)
++        return None, None
++
++    def _evict(self, victim):
++        entry = self.cache.pop(victim)
++        self.resident_bytes -= entry[-1]
++        self.evictions += 1
++        if self.pooled:
++            self.free_slots.append(entry[0])
++            self.slot_tables[victim[0]][victim[1]] = self.num_slots
++
++    def _make_room(self, key, size, pinned=()):
++        """Evict until ``size`` fits; returns False when the policy declines to cache ``key``.
++
++        ``pinned`` experts are used by the forward call in progress and are never evicted for it.
++        """
++        if size > self.cache_bytes:
++            return False
++        if self.policy == "lfu":
++            while self.cache and self.resident_bytes + size > self.cache_bytes:
++                victim, count = self._least_used()
++                if victim is None or victim in pinned or self.counts.get(key, 0) <= count:
++                    self.not_admitted += 1
++                    return False
++                heapq.heappop(self.heap)
++                self._evict(victim)
++            return True
++        while self.cache and self.resident_bytes + size > self.cache_bytes:
++            victim = next((k for k in self.cache if k not in pinned), None)
++            if victim is None:
++                self.not_admitted += 1
++                return False
++            self._evict(victim)
++        return True
++
++    def _expert_bytes(self, prefix):
++        layout = self.layouts[prefix]
++        if layout[0] == "gguf":
++            return sum(entry[3] for entry in layout[2].values())
++        return layout[1] * self.dtype.itemsize
++
++    def _read_host(self, prefix, expert):
++        """Read one expert from storage into host memory (raw GGUF bytes, or gate_up and down in the execution dtype).
++
++        Runs on I/O threads: storage and host work only, no device calls.
++        """
++        layout = self.layouts[prefix]
++        if layout[0] == "gguf":
++            layer = layout[1]
++            return tuple(self.gguf.read(layer, p, expert) for p in ("gate", "up")), self.gguf.read(
++                layer, "down", expert
++            )
++        if layout[0]:
++            gate_up = self.reader.read(f"{prefix}.gate_up_proj", expert)
++        else:
++            gate_up = torch.cat([self.reader.read(f"{prefix}.{expert}.{p}_proj.weight") for p in ("gate", "up")])
++        down = self.reader.read(f"{prefix}.down_proj", expert) if layout[0] else None
++        if down is None:
++            down = self.reader.read(f"{prefix}.{expert}.down_proj.weight")
++        return gate_up.to(self.dtype), down.to(self.dtype)
++
++    def prefetch(self, prefix, experts):
++        """Start reading the experts of ``prefix`` that are neither resident nor already being read."""
++        if self.executor is None:
++            return
++        for expert in experts:
++            key = (prefix, expert)
++            if key not in self.cache and key not in self.pending:
++                self.pending[key] = self.executor.submit(self._read_host, prefix, expert)
++                self.prefetched += 1
++
++    def discard(self, prefix):
++        """Drop the reads started for ``prefix`` that its forward call did not use (wrong predictions)."""
++        for key in [key for key in self.pending if key[0] == prefix]:
++            self.pending.pop(key).cancel()
++
++    def _read(self, prefix, expert):
++        """One expert on the device: from a read already started by :meth:`prefetch`, else read now."""
++        future = self.pending.pop((prefix, expert), None)
++        if future is not None and not future.cancelled():
++            self.prefetch_used += 1
++            gate_up, down = future.result()
++        else:
++            gate_up, down = self._read_host(prefix, expert)
++        if isinstance(gate_up, tuple):
++            return tuple(t.to(self.device) for t in gate_up), down.to(self.device)
++        return gate_up.to(self.device), down.to(self.device)
++
++    def acquire(self, prefix, expert, pinned=()):
++        """Make an expert resident in the pool; returns its slot, or None when it runs once without being cached."""
 +        key = (prefix, expert)
++        self._count(key)
++        if key in self.cache:
++            self.hits += 1
++            self.cache.move_to_end(key)
++            return self.cache[key][0]
++        self.misses += 1
++        size = self._expert_bytes(prefix)
++        if not self._make_room(key, size, pinned):
++            return None
++        slot = self.free_slots.pop()
++        gate_up, down = self._read(prefix, expert)
++        # Queued on the device stream after any work still reading the slot's previous expert.
++        self.gate_up_pool[slot].copy_(gate_up)
++        self.down_pool[slot].copy_(down)
++        self.slot_tables[prefix][expert] = slot
++        self.cache[key] = (slot, size)
++        self.resident_bytes += size
++        self.peak_cache_bytes = max(self.peak_cache_bytes, self.resident_bytes)
++        if self.policy == "lfu":
++            self._push(key)
++        return slot
++
++    def get(self, prefix, expert):
++        """Return ``(gate_up, down, size)`` for one expert, cached or read for this use only."""
++        if self.pooled:
++            slot = self.acquire(prefix, expert)
++            if slot is None:
++                return (*self._read(prefix, expert), self._expert_bytes(prefix))
++            return self.gate_up_pool[slot], self.down_pool[slot], self._expert_bytes(prefix)
++        key = (prefix, expert)
++        self._count(key)
 +        if key in self.cache:
 +            self.hits += 1
 +            self.cache.move_to_end(key)
 +            return self._materialize(prefix, self.cache[key])
 +        self.misses += 1
-+        layout = self.layouts[prefix]
-+        if layout[0] == "gguf":
-+            _, layer, layouts = layout
-+            size = sum(entry[3] for entry in layouts.values())
-+        else:
-+            packed, elements = layout
-+            size = elements * torch.empty((), dtype=self.dtype).element_size()
-+        while self.cache and self.resident_bytes + size > self.cache_bytes:
-+            _, (_, _, old_size) = self.cache.popitem(last=False)
-+            self.resident_bytes -= old_size
-+            self.evictions += 1
-+        if layout[0] == "gguf":
-+            # Keep the GGUF bytes on the device; dequantize each time the expert runs.
-+            gate_up = tuple(self.gguf.read(layer, p, expert).to(self.device) for p in ("gate", "up"))
-+            down = self.gguf.read(layer, "down", expert).to(self.device)
-+        elif packed:
-+            gate_up = self.reader.read(f"{prefix}.gate_up_proj", expert).to(self.device, self.dtype)
-+            down = self.reader.read(f"{prefix}.down_proj", expert).to(self.device, self.dtype)
-+        else:
-+            gate = self.reader.read(f"{prefix}.{expert}.gate_proj.weight").to(self.device, self.dtype)
-+            up = self.reader.read(f"{prefix}.{expert}.up_proj.weight").to(self.device, self.dtype)
-+            gate_up = torch.cat((gate, up))
-+            del gate, up
-+            down = self.reader.read(f"{prefix}.{expert}.down_proj.weight").to(self.device, self.dtype)
++        size = self._expert_bytes(prefix)
++        admit = self._make_room(key, size)
++        # Keep the GGUF bytes on the device; dequantize each time the expert runs.
++        gate_up, down = self._read(prefix, expert)
 +        result = (gate_up, down, size)
-+        if size <= self.cache_bytes:
++        if admit:
 +            self.cache[key] = result
 +            self.resident_bytes += size
 +            self.peak_cache_bytes = max(self.peak_cache_bytes, self.resident_bytes)
++            if self.policy == "lfu":
++                self._push(key)
 +        return self._materialize(prefix, result)
 +
 +    def _materialize(self, prefix, entry):
@@ -685,11 +1030,50 @@ index 0000000000..41349891fb
 +            "hits": self.hits,
 +            "misses": self.misses,
 +            "evictions": self.evictions,
++            "not_admitted": self.not_admitted,
++            "policy": self.policy,
++            "slots": self.num_slots,
++            "prefetched": self.prefetched,
++            "prefetch_used": self.prefetch_used,
 +            "resident_bytes": self.resident_bytes,
 +            "peak_cache_bytes": self.peak_cache_bytes,
 +            "read_bytes": self.reader.read_bytes + (self.gguf.read_bytes if self.gguf else 0),
 +            "read_calls": self.reader.read_calls + (self.gguf.read_calls if self.gguf else 0),
 +        }
++
++
++class _PoolExperts:
++    """The attributes Transformers' experts kernels read from an experts module, with the shared pool as its banks.
++
++    Slot ``num_slots`` marks an expert that is not resident; the kernels' expert-parallel sentinel handling drops it.
++    """
++
++    def __init__(self, module, store):
++        self.module = module
++        self.num_experts = store.num_slots
++        self.gate_up_proj = store.gate_up_pool
++        self.down_proj = store.down_pool
++        self.act_fn = module.act_fn
++        self.has_gate = getattr(module, "has_gate", True)
++        self.has_bias = getattr(module, "has_bias", False)
++        self.is_transposed = getattr(module, "is_transposed", False)
++        self.has_post_expert_norm = getattr(module, "has_post_expert_norm", False)
++        self.post_expert_norm = getattr(module, "post_expert_norm", None)
++        self._is_expert_parallel = True
++
++    def _apply_gate(self, gate_up_out):
++        return self.module._apply_gate(gate_up_out)
++
++
++def _run_expert(module, result, hidden_states, top_k_weights, token, slot, gate_up, down):
++    # Bound the temporary activations during prefill, even when one expert serves many tokens.
++    for start in range(0, token.numel(), module.ssd_token_chunk_size):
++        indices = token[start : start + module.ssd_token_chunk_size]
++        slots = slot[start : start + module.ssd_token_chunk_size]
++        gate, up = torch.nn.functional.linear(hidden_states[indices], gate_up).chunk(2, dim=-1)
++        output = torch.nn.functional.linear(module.act_fn(gate) * up, down)
++        output = output * top_k_weights[indices, slots, None]
++        result.index_add_(0, indices, output.to(result.dtype))
 +
 +
 +def streamed_experts_forward(module, hidden_states, top_k_index, top_k_weights):
@@ -700,29 +1084,86 @@ index 0000000000..41349891fb
 +        raise ValueError(
 +            "Moving/casting a streamed model after loading is unsupported; reload on the target device/dtype"
 +        )
-+    result = torch.zeros_like(hidden_states)
-+    # Routing IDs are small; copy them once, rather than synchronizing for every expert.
-+    routing = top_k_index.cpu()
-+    for expert in torch.unique(routing).tolist():
-+        if not 0 <= expert < module.num_experts:
-+            raise ValueError("Expert parallelism and sentinel expert IDs are unsupported")
-+        token, slot = torch.where(routing == expert)
-+        token, slot = token.to(hidden_states.device), slot.to(hidden_states.device)
-+        gate_up, down, _ = store.get(module.ssd_prefix, expert)
-+        # Bound the temporary activations during prefill, even when one expert serves many tokens.
-+        for start in range(0, token.numel(), module.ssd_token_chunk_size):
-+            indices = token[start : start + module.ssd_token_chunk_size]
-+            slots = slot[start : start + module.ssd_token_chunk_size]
-+            gate, up = torch.nn.functional.linear(hidden_states[indices], gate_up).chunk(2, dim=-1)
-+            output = torch.nn.functional.linear(module.act_fn(gate) * up, down)
-+            output = output * top_k_weights[indices, slots, None]
-+            result.index_add_(0, indices, output.to(result.dtype))
-+        del gate_up, down
++    prefix = module.ssd_prefix
++    if store.pooled:
++        kernel = ExpertsInterface._global_mapping[store.compute]
++        table = store.slot_tables[prefix]
++        if store.all_resident():
++            # Nothing to load or evict: stay on the device, no host synchronization (counted as one hit per route).
++            store.hits += top_k_index.numel()
++            return kernel(_PoolExperts(module, store), hidden_states, table[top_k_index], top_k_weights)
++    # Routing IDs are small; copy them once per layer, rather than synchronizing for every expert. The next MoE layer's
++    # experts are guessed from this layer's hidden states with the next router (the residual stream changes little
++    # from one layer to the next), and the guess rides along in the same copy.
++    next_layer = getattr(module, "ssd_next", None)
++    predict = next_layer is not None and store.executor is not None
++    predict = predict and top_k_index.numel() <= module.ssd_predict_max_routes
++    if predict:
++        next_prefix, router = next_layer
++        guess = torch.nn.functional.linear(hidden_states, router.weight).topk(router.top_k, dim=-1).indices
++        routes = torch.cat((top_k_index.reshape(-1), guess.reshape(-1))).cpu()
++        routing = routes[: top_k_index.numel()].view(top_k_index.shape)
++    else:
++        routing = top_k_index.cpu()
++    experts = torch.unique(routing).tolist()
++    if experts and not (experts[0] >= 0 and experts[-1] < module.num_experts):
++        raise ValueError("Expert parallelism and sentinel expert IDs are unsupported")
++    # This layer's misses are read in parallel (a window ahead of use, bounding host memory); the guessed next-layer
++    # reads queue behind them.
++    store.prefetch(prefix, experts[: store.window])
++    if predict:
++        store.prefetch(next_prefix, torch.unique(routes[top_k_index.numel() :]).tolist())
++    try:
++        return _streamed_experts(module, store, prefix, hidden_states, top_k_index, top_k_weights, routing, experts)
++    finally:
++        store.discard(prefix)
++
++
++def _streamed_experts(module, store, prefix, hidden_states, top_k_index, top_k_weights, routing, experts):
++    if not store.pooled:
++        result = torch.zeros_like(hidden_states)
++        for position, expert in enumerate(experts):
++            store.prefetch(prefix, experts[position + 1 : position + 1 + store.window])
++            token, slot = (t.to(hidden_states.device) for t in torch.where(routing == expert))
++            gate_up, down, _ = store.get(prefix, expert)
++            _run_expert(module, result, hidden_states, top_k_weights, token, slot, gate_up, down)
++        return result
++    pinned, uncached = set(), []
++    for position, expert in enumerate(experts):
++        store.prefetch(prefix, experts[position + 1 : position + 1 + store.window])
++        if store.acquire(prefix, expert, pinned) is None:
++            uncached.append(expert)
++        else:
++            pinned.add((prefix, expert))
++    if pinned:
++        kernel = ExpertsInterface._global_mapping[store.compute]
++        table = store.slot_tables[prefix]
++        result = kernel(_PoolExperts(module, store), hidden_states, table[top_k_index], top_k_weights)
++    else:
++        result = torch.zeros_like(hidden_states)
++    # Experts the cache did not admit (budget smaller than one call's working set, or LFU declined) run once each.
++    for position, expert in enumerate(uncached):
++        store.prefetch(prefix, uncached[position + 1 : position + 1 + store.window])
++        token, slot = (t.to(hidden_states.device) for t in torch.where(routing == expert))
++        gate_up, down = store._read(prefix, expert)
++        _run_expert(module, result, hidden_states, top_k_weights, token, slot, gate_up, down)
 +    return result
 +
 +
 +def load_moe_from_ssd(
-+    directory, *, device="cpu", dtype=torch.float32, cache_bytes=0, token_chunk_size=256, experts_gguf=None
++    directory,
++    *,
++    device="cpu",
++    dtype=torch.float32,
++    cache_bytes=0,
++    token_chunk_size=256,
++    experts_gguf=None,
++    bypass_page_cache=False,
++    cache_policy="lru",
++    experts_implementation="grouped_mm",
++    io_threads=4,
++    prefetch_next_layer=True,
++    predict_max_routes=64,
 +):
 +    """Load a local, unquantized Qwen MoE checkpoint without allocating resident expert banks.
 +
@@ -747,14 +1188,19 @@ index 0000000000..41349891fb
 +    ExpertsInterface.register("ssd_streaming", streamed_experts_forward)
 +    # Resolve cuda -> cuda:0 and analogous device aliases for forward validation.
 +    device = torch.empty(0, device=device).device
-+    reader = SafetensorsReader(directory)
-+    store = ExpertStore(reader, cache_bytes, device, dtype, GGUFExpertReader(experts_gguf) if experts_gguf else None)
++    reader = SafetensorsReader(directory, bypass_page_cache)
++    gguf = GGUFExpertReader(experts_gguf, bypass_page_cache) if experts_gguf else None
++    store = ExpertStore(reader, cache_bytes, device, dtype, gguf, policy=cache_policy, io_threads=io_threads)
++    if experts_implementation not in ("grouped_mm", "batched_mm"):
++        raise ValueError("experts_implementation must be 'grouped_mm' or 'batched_mm'")
++    store.compute = experts_implementation
 +
 +    def checkpoint_name(name):
 +        return prefix + name.removeprefix("model.") if name.startswith("model.") else name
 +
 +    with torch.device("meta"):
 +        model = model_class(config)
++    experts_modules = []
 +    consumed = {name for name in reader.tensors if name.startswith(skipped)} if skipped else set()
 +    for name, module in model.named_modules():
 +        if isinstance(module, experts_class):
@@ -765,6 +1211,8 @@ index 0000000000..41349891fb
 +            module.ssd_store = store
 +            module.ssd_prefix = checkpoint_name(name)
 +            module.ssd_token_chunk_size = token_chunk_size
++            module.ssd_predict_max_routes = predict_max_routes
++            experts_modules.append((name, module))
 +    # Load dense weights individually; peak host staging is one dense tensor, not one shard.
 +    for name, parameter in list(model.named_parameters()):
 +        source = checkpoint_name(name)
@@ -776,6 +1224,10 @@ index 0000000000..41349891fb
 +        parent, _, attr = name.rpartition(".")
 +        model.get_submodule(parent).register_parameter(attr, torch.nn.Parameter(value, requires_grad=False))
 +        consumed.add(source)
++    # Each MoE layer knows the next one's router, to guess and prefetch its experts (decode-sized calls only).
++    for (name, module), (next_name, _) in zip(experts_modules, experts_modules[1:] + [(None, None)]):
++        router = model.get_submodule(next_name.rpartition(".")[0]).gate if next_name and prefetch_next_layer else None
++        module.ssd_next = (checkpoint_name(next_name), router) if router is not None else None
 +    unexpected = set(reader.tensors) - consumed
 +    if unexpected:
 +        raise ValueError(f"Unsupported checkpoint tensors: {sorted(unexpected)[:10]}")
@@ -798,10 +1250,10 @@ index 0000000000..41349891fb
 +load_qwen3_moe_from_ssd = load_moe_from_ssd
 diff --git a/tests/integrations/test_ssd_moe.py b/tests/integrations/test_ssd_moe.py
 new file mode 100644
-index 0000000000..8f4f5260b5
+index 0000000000..ef45295238
 --- /dev/null
 +++ b/tests/integrations/test_ssd_moe.py
-@@ -0,0 +1,296 @@
+@@ -0,0 +1,518 @@
 +# Copyright 2026 The HuggingFace Team. All rights reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -820,11 +1272,19 @@ index 0000000000..8f4f5260b5
 +import tempfile
 +import unittest
 +from pathlib import Path
++from unittest import mock
 +
 +import torch
 +from safetensors.torch import load_file, save_file
 +
-+from transformers import Qwen3_5MoeConfig, Qwen3_5MoeForCausalLM, Qwen3MoeConfig, Qwen3MoeForCausalLM
++from transformers import (
++    OlmoeConfig,
++    OlmoeForCausalLM,
++    Qwen3_5MoeConfig,
++    Qwen3_5MoeForCausalLM,
++    Qwen3MoeConfig,
++    Qwen3MoeForCausalLM,
++)
 +from transformers.integrations.ssd_moe import load_moe_from_ssd, load_qwen3_moe_from_ssd
 +
 +
@@ -903,7 +1363,8 @@ index 0000000000..8f4f5260b5
 +        self.save_checkpoint()
 +        for budget in (0, self.expert_bytes):
 +            with self.subTest(budget=budget):
-+                model = load_qwen3_moe_from_ssd(self.path, cache_bytes=budget)
++                # No I/O threads: no reads ahead, so the byte counts below are exact.
++                model = load_qwen3_moe_from_ssd(self.path, cache_bytes=budget, io_threads=0)
 +                module = model.model.layers[0].mlp.experts
 +                eager = self.reference.model.layers[0].mlp.experts
 +                hidden = torch.randn(2, 16)
@@ -1098,3 +1559,216 @@ index 0000000000..8f4f5260b5
 +            stats = streamed.ssd_store.stats()
 +            self.assertGreater(stats["evictions"], 0)
 +            self.assertEqual(stats["read_bytes"] % 1088, 0)  # whole Q8_0 matrices only, never BF16 banks
++
++
++class SSDOlmoeTest(unittest.TestCase):
++    def test_per_expert_checkpoint_without_page_cache_matches_eager(self):
++        torch.manual_seed(11)
++        config = OlmoeConfig(
++            vocab_size=64,
++            hidden_size=16,
++            intermediate_size=8,
++            num_hidden_layers=2,
++            num_attention_heads=2,
++            num_key_value_heads=2,
++            num_experts=4,
++            num_experts_per_tok=2,
++        )
++        config._experts_implementation = "eager"
++        config._attn_implementation = "eager"
++        reference = OlmoeForCausalLM(config).eval()
++        # The Hub checkpoints store one tensor per expert and projection, as the original OLMoE code did.
++        state = {}
++        for name, tensor in reference.state_dict().items():
++            if name.endswith("experts.gate_up_proj"):
++                prefix = name.removesuffix("gate_up_proj")
++                for expert in range(tensor.shape[0]):
++                    gate, up = tensor[expert].chunk(2)
++                    state[f"{prefix}{expert}.gate_proj.weight"] = gate.contiguous()
++                    state[f"{prefix}{expert}.up_proj.weight"] = up.contiguous()
++            elif name.endswith("experts.down_proj"):
++                prefix = name.removesuffix("down_proj")
++                for expert in range(tensor.shape[0]):
++                    state[f"{prefix}{expert}.down_proj.weight"] = tensor[expert].contiguous()
++            else:
++                state[name] = tensor
++        with tempfile.TemporaryDirectory() as directory:
++            path = Path(directory)
++            config.save_pretrained(path)
++            save_file(state, path / "model.safetensors")
++            # One float32 expert is 3 * 8 * 16 * 4 = 1536 bytes: room for one, so every switch evicts.
++            streamed = load_moe_from_ssd(path, cache_bytes=1536, bypass_page_cache=True)
++            ids = torch.tensor([[1, 7, 3, 9, 2]])
++            with torch.no_grad():
++                torch.testing.assert_close(streamed(ids).logits, reference(ids).logits, atol=1e-6, rtol=1e-5)
++                expected = reference.generate(ids, max_new_tokens=4, do_sample=False, pad_token_id=0)
++                actual = streamed.generate(ids, max_new_tokens=4, do_sample=False, pad_token_id=0)
++            torch.testing.assert_close(actual, expected)
++            self.assertGreater(streamed.ssd_store.evictions, 0)
++
++
++class ExpertStorePolicyTest(unittest.TestCase):
++    def make_store(self, policy, cache_experts):
++        from types import SimpleNamespace
++
++        from transformers.integrations.ssd_moe import ExpertStore
++
++        experts, intermediate, hidden = 6, 2, 4
++        banks = {
++            "layer.gate_up_proj": torch.arange(experts * 2 * intermediate * hidden, dtype=torch.float32).reshape(
++                experts, 2 * intermediate, hidden
++            ),
++            "layer.down_proj": -torch.arange(experts * hidden * intermediate, dtype=torch.float32).reshape(
++                experts, hidden, intermediate
++            ),
++        }
++        reader = SimpleNamespace(
++            tensors=banks,
++            shape=lambda name: tuple(banks[name].shape),
++            read=lambda name, expert=None: banks[name][expert].clone(),
++            read_bytes=0,
++            read_calls=0,
++        )
++        expert_bytes = 3 * intermediate * hidden * 4
++        store = ExpertStore(reader, cache_experts * expert_bytes, "cpu", torch.float32, policy=policy)
++        module = SimpleNamespace(num_experts=experts, intermediate_dim=intermediate, hidden_dim=hidden)
++        store.register("layer", module)
++        return store, banks
++
++    def test_lfu_keeps_a_hot_set_where_lru_thrashes(self):
++        # Decoding visits the same experts in the same order every token: a cycle longer than the cache.
++        pattern = [0, 1, 2, 3, 4] * 20
++        results = {}
++        for policy in ("lru", "lfu"):
++            store, banks = self.make_store(policy, cache_experts=3)
++            for expert in pattern:
++                gate_up, down, _ = store.get("layer", expert)
++                torch.testing.assert_close(gate_up, banks["layer.gate_up_proj"][expert])
++                torch.testing.assert_close(down, banks["layer.down_proj"][expert])
++            results[policy] = store.stats()
++            self.assertLessEqual(store.resident_bytes, store.cache_bytes)
++        self.assertEqual(results["lru"]["hits"], 0)
++        # LFU keeps 3 of the 5 experts resident after warm-up: about 3 hits per cycle of 5.
++        self.assertGreater(results["lfu"]["hits"], 0.5 * len(pattern))
++
++    def test_lfu_follows_a_new_hot_set(self):
++        store, _ = self.make_store("lfu", cache_experts=2)
++        store.decay_every = 8
++        for expert in [0, 1] * 20 + [4, 5] * 20:
++            store.get("layer", expert)
++        self.assertEqual({key[1] for key in store.cache}, {4, 5})
++
++    def test_lfu_streaming_matches_eager(self):
++        torch.manual_seed(3)
++        config = Qwen3MoeConfig(
++            vocab_size=64,
++            hidden_size=16,
++            intermediate_size=24,
++            moe_intermediate_size=8,
++            num_hidden_layers=2,
++            num_attention_heads=2,
++            num_key_value_heads=1,
++            head_dim=8,
++            num_experts=4,
++            num_experts_per_tok=2,
++        )
++        config._experts_implementation = "eager"
++        config._attn_implementation = "eager"
++        reference = Qwen3MoeForCausalLM(config).eval()
++        with tempfile.TemporaryDirectory() as directory:
++            path = Path(directory)
++            config.save_pretrained(path)
++            save_file(reference.state_dict(), path / "model.safetensors")
++            streamed = load_moe_from_ssd(path, cache_bytes=2 * 1536, cache_policy="lfu")
++            ids = torch.tensor([[1, 7, 3, 9, 2]])
++            with torch.no_grad():
++                expected = reference.generate(ids, max_new_tokens=6, do_sample=False, pad_token_id=0)
++                actual = streamed.generate(ids, max_new_tokens=6, do_sample=False, pad_token_id=0)
++            torch.testing.assert_close(actual, expected)
++
++
++class ExpertPoolTest(unittest.TestCase):
++    """Cached experts run through Transformers' grouped_mm / batched_mm kernels on a shared slot pool."""
++
++    def make_checkpoint(self, directory):
++        torch.manual_seed(5)
++        config = Qwen3MoeConfig(
++            vocab_size=64,
++            hidden_size=16,
++            intermediate_size=24,
++            moe_intermediate_size=8,
++            num_hidden_layers=2,
++            num_attention_heads=2,
++            num_key_value_heads=1,
++            head_dim=8,
++            num_experts=4,
++            num_experts_per_tok=2,
++        )
++        config._experts_implementation = "eager"
++        config._attn_implementation = "eager"
++        reference = Qwen3MoeForCausalLM(config).eval()
++        path = Path(directory)
++        config.save_pretrained(path)
++        save_file(reference.state_dict(), path / "model.safetensors")
++        return reference, path
++
++    def test_kernels_match_eager_for_every_cache_size(self):
++        expert_bytes = 3 * 8 * 16 * 4
++        ids = torch.tensor([[1, 7, 3, 9, 2, 11, 5]])
++        with tempfile.TemporaryDirectory() as directory:
++            reference, path = self.make_checkpoint(directory)
++            with torch.no_grad():
++                expected = reference.generate(ids, max_new_tokens=6, do_sample=False, pad_token_id=0)
++            # 1 slot: smaller than one call's working set, so most experts run uncached next to the pool.
++            # 8 slots: every expert of the model; decoding then never synchronizes with the host.
++            for implementation in ("grouped_mm", "batched_mm"):
++                for slots in (1, 3, 8):
++                    with self.subTest(implementation=implementation, slots=slots):
++                        streamed = load_moe_from_ssd(
++                            path, cache_bytes=slots * expert_bytes, experts_implementation=implementation
++                        )
++                        self.assertEqual(streamed.ssd_store.num_slots, slots)
++                        with torch.no_grad():
++                            actual = streamed.generate(ids, max_new_tokens=6, do_sample=False, pad_token_id=0)
++                        torch.testing.assert_close(actual, expected)
++                        self.assertLessEqual(streamed.ssd_store.resident_bytes, slots * expert_bytes)
++                        self.assertEqual(streamed.ssd_store.all_resident(), slots == 8)
++
++    def test_fully_resident_layers_skip_the_host_copy(self):
++        with tempfile.TemporaryDirectory() as directory:
++            _, path = self.make_checkpoint(directory)
++            streamed = load_moe_from_ssd(path, cache_bytes=8 * 3 * 8 * 16 * 4)
++            store = streamed.ssd_store
++            for prefix in store.slot_tables:
++                for expert in range(4):
++                    store.acquire(prefix, expert)
++            self.assertTrue(store.all_resident())
++            original = torch.Tensor.cpu
++            with mock.patch.object(torch.Tensor, "cpu", autospec=True, side_effect=original) as cpu:
++                with torch.no_grad():
++                    streamed(torch.tensor([[3, 4]]))
++            self.assertFalse(any(call.args[0].dtype == torch.long for call in cpu.call_args_list))
++
++    def test_parallel_reads_and_next_layer_prefetch_match_eager(self):
++        expert_bytes = 3 * 8 * 16 * 4
++        ids = torch.tensor([[1, 7, 3, 9, 2, 11, 5]])
++        with tempfile.TemporaryDirectory() as directory:
++            reference, path = self.make_checkpoint(directory)
++            with torch.no_grad():
++                expected = reference.generate(ids, max_new_tokens=8, do_sample=False, pad_token_id=0)
++            for io_threads in (0, 1, 4):
++                with self.subTest(io_threads=io_threads):
++                    streamed = load_moe_from_ssd(path, cache_bytes=3 * expert_bytes, io_threads=io_threads)
++                    layers = streamed.model.layers
++                    self.assertIs(layers[0].mlp.experts.ssd_next[1], layers[1].mlp.gate)
++                    self.assertIsNone(layers[1].mlp.experts.ssd_next)
++                    with torch.no_grad():
++                        actual = streamed.generate(ids, max_new_tokens=8, do_sample=False, pad_token_id=0)
++                    torch.testing.assert_close(actual, expected)
++                    store = streamed.ssd_store
++                    self.assertEqual(store.pending, {})
++                    if io_threads:
++                        self.assertGreater(store.prefetch_used, 0)
++                        self.assertLessEqual(store.prefetch_used, store.prefetched)
++                    else:
++                        self.assertEqual(store.prefetched, 0)
