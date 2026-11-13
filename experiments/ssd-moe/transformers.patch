@@ -372,10 +372,10 @@ index 0000000000..4846a027e0
 +    main()
 diff --git a/src/transformers/integrations/ssd_moe.py b/src/transformers/integrations/ssd_moe.py
 new file mode 100644
-index 0000000000..80a419b783
+index 0000000000..3a5be32886
 --- /dev/null
 +++ b/src/transformers/integrations/ssd_moe.py
-@@ -0,0 +1,872 @@
+@@ -0,0 +1,961 @@
 +# Copyright 2026 The HuggingFace Team. All rights reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -950,14 +950,17 @@ index 0000000000..80a419b783
 +        for key in [key for key in self.pending if key[0] == prefix]:
 +            self.pending.pop(key).cancel()
 +
-+    def _read(self, prefix, expert):
-+        """One expert on the device: from a read already started by :meth:`prefetch`, else read now."""
++    def _take_host(self, prefix, expert):
++        """One expert in host memory: from a read already started by :meth:`prefetch`, else read now."""
 +        future = self.pending.pop((prefix, expert), None)
 +        if future is not None and not future.cancelled():
 +            self.prefetch_used += 1
-+            gate_up, down = future.result()
-+        else:
-+            gate_up, down = self._read_host(prefix, expert)
++            return future.result()
++        return self._read_host(prefix, expert)
++
++    def _read(self, prefix, expert):
++        """One expert on the device, for a single use."""
++        gate_up, down = self._take_host(prefix, expert)
 +        if isinstance(gate_up, tuple):
 +            return tuple(t.to(self.device) for t in gate_up), down.to(self.device)
 +        return gate_up.to(self.device), down.to(self.device)
@@ -975,7 +978,8 @@ index 0000000000..80a419b783
 +        if not self._make_room(key, size, pinned):
 +            return None
 +        slot = self.free_slots.pop()
-+        gate_up, down = self._read(prefix, expert)
++        # Straight from host memory into the slot: one host-to-device copy.
++        gate_up, down = self._take_host(prefix, expert)
 +        # Queued on the device stream after any work still reading the slot's previous expert.
 +        self.gate_up_pool[slot].copy_(gate_up)
 +        self.down_pool[slot].copy_(down)
@@ -1248,12 +1252,156 @@ index 0000000000..80a419b783
 +
 +# Backward-compatible name used by the first version of this prototype.
 +load_qwen3_moe_from_ssd = load_moe_from_ssd
++
++
++def _checkpoint_prefix(reader, name):
++    """The checkpoint key prefix of the experts module ``name``: the same path, possibly under another root (e.g.
++    ``model.language_model.``), in the packed (``gate_up_proj``) or per-expert (``0.gate_proj.weight``) layout."""
++    suffix = name.split(".", 1)[1] if name.startswith("model.") else name
++    found = {
++        key.rsplit(".gate_up_proj", 1)[0] if key.endswith(".gate_up_proj") else key.rsplit(".0.gate_proj.weight", 1)[0]
++        for key in reader.tensors
++        if key.endswith((f"{suffix}.gate_up_proj", f"{suffix}.0.gate_proj.weight"))
++    }
++    if len(found) != 1:
++        raise ValueError(f"Cannot find the checkpoint experts of {name} (candidates: {sorted(found)})")
++    return found.pop()
++
++
++def prepare_experts_offload(model, checkpoint_files, *, dtype, device, options):
++    """Called by ``from_pretrained(..., experts_offload=...)`` on the meta-initialized model, before any weight loads.
++
++    Replaces every experts bank with the streaming store: the bank parameters are removed (so the loader never
++    materializes them), the experts dispatch to ``ssd_streaming``, and the expert tensors are reported as consumed so
++    the loader skips them. ``options`` are the keyword arguments of :func:`load_moe_from_ssd` that concern the store:
++    ``cache_bytes`` (required), ``cache_policy``, ``io_threads``, ``prefetch_next_layer``, ``experts_implementation``,
++    ``bypass_page_cache``, ``token_chunk_size``, ``predict_max_routes``.
++    """
++    options = dict(options)
++    unknown = set(options) - {
++        "cache_bytes",
++        "cache_policy",
++        "io_threads",
++        "prefetch_next_layer",
++        "experts_implementation",
++        "bypass_page_cache",
++        "token_chunk_size",
++        "predict_max_routes",
++    }
++    if unknown or "cache_bytes" not in options:
++        raise ValueError(f"experts_offload needs `cache_bytes`; unknown options: {sorted(unknown)}")
++    if not checkpoint_files or not all(str(f).endswith(".safetensors") for f in checkpoint_files):
++        raise ValueError("experts_offload streams experts from safetensors checkpoints only")
++    if dtype not in _DTYPES.values():
++        raise ValueError("experts_offload needs a floating dtype (float32/float16/bfloat16)")
++    ExpertsInterface.register("ssd_streaming", streamed_experts_forward)
++    device = torch.empty(0, device=device).device
++    reader = SafetensorsReader(Path(checkpoint_files[0]).parent, options.get("bypass_page_cache", False))
++    store = ExpertStore(
++        reader,
++        options["cache_bytes"],
++        device,
++        dtype,
++        policy=options.get("cache_policy", "lru"),
++        io_threads=options.get("io_threads", 4),
++    )
++    store.compute = options.get("experts_implementation", "grouped_mm")
++    experts = [
++        (name, module)
++        for name, module in model.named_modules()
++        if hasattr(module, "_apply_gate") and isinstance(getattr(module, "gate_up_proj", None), torch.nn.Parameter)
++    ]
++    if not experts:
++        raise ValueError(f"{type(model).__name__} has no experts module that can be offloaded")
++    consumed = set()
++    for name, module in experts:
++        if module.has_bias or module.is_transposed or not module.is_concatenated or module.has_post_expert_norm:
++            raise ValueError(
++                f"experts_offload supports gated, concatenated, untransposed experts without bias: {name}"
++            )
++        prefix = _checkpoint_prefix(reader, name)
++        consumed.update(store.register(prefix, module))
++        module.register_parameter("gate_up_proj", None)
++        module.register_parameter("down_proj", None)
++        module._is_hf_initialized = True  # nothing to initialize: the banks live in the checkpoint
++        module.config._experts_implementation = "ssd_streaming"
++        module.ssd_store = store
++        module.ssd_prefix = prefix
++        module.ssd_token_chunk_size = options.get("token_chunk_size", 256)
++        module.ssd_predict_max_routes = options.get("predict_max_routes", 64)
++        module.ssd_next = None
++    if options.get("prefetch_next_layer", True):
++        for (_, module), (next_name, next_module) in zip(experts, experts[1:]):
++            router = getattr(model.get_submodule(next_name.rpartition(".")[0]), "gate", None)
++            if router is not None and hasattr(router, "weight") and hasattr(router, "top_k"):
++                module.ssd_next = (next_module.ssd_prefix, router)
++    model.ssd_store = store
++    return consumed
+diff --git a/src/transformers/modeling_utils.py b/src/transformers/modeling_utils.py
+index ed410f9606..885174336c 100644
+--- a/src/transformers/modeling_utils.py
++++ b/src/transformers/modeling_utils.py
+@@ -187,6 +187,8 @@ class LoadStateDictConfig:
+     weights_only: bool = True
+     weight_mapping: list[WeightConverter | WeightRenaming] | None = None
+     disable_mmap: bool | None = None
++    # Checkpoint keys another component reads on its own (e.g. experts streamed by `experts_offload`).
++    skip_keys: set = field(default_factory=set)
+ 
+     @property
+     def is_quantized(self) -> bool:
+@@ -4166,6 +4168,7 @@ class PreTrainedModel(
+         use_kernels = kwargs.pop("use_kernels", False)
+         kernel_config = kwargs.pop("kernel_config", None)
+         key_mapping = kwargs.pop("key_mapping", None)
++        experts_offload = kwargs.pop("experts_offload", None)
+ 
+         # Not used anymore -- remove them from the kwargs
+         for name in ["mirror", "_fast_init", "low_cpu_mem_usage", "from_tf", "from_flax", "offload_state_dict"]:
+@@ -4394,6 +4397,19 @@ class PreTrainedModel(
+         if gguf_file:
+             state_dict = hf_quantizer.get_state_dict(checkpoint_files[0], model)
+ 
++        skip_keys = set()
++        if experts_offload is not None:
++            from .integrations.ssd_moe import prepare_experts_offload
++
++            devices = set(device_map.values()) if isinstance(device_map, dict) else {device_map or "cpu"}
++            if len(devices) != 1 or gguf_file or hf_quantizer is not None or state_dict is not None:
++                raise ValueError(
++                    "experts_offload needs a single-device device_map and an unquantized safetensors checkpoint"
++                )
++            skip_keys = prepare_experts_offload(
++                model, checkpoint_files, dtype=dtype, device=devices.pop(), options=experts_offload
++            )
++
+         # Create the dtype_plan to potentially use the `keep_in_fp32` flags (this needs to be called on the already
+         # instantiated model, as the flags can be modified by instances sometimes)
+         dtype_plan = model._get_dtype_plan(dtype)
+@@ -4425,6 +4441,7 @@ class PreTrainedModel(
+             use_safetensors=use_safetensors,
+             download_kwargs=download_kwargs,
+             disable_mmap=disable_mmap,
++            skip_keys=skip_keys,
+         )
+         if distributed_checkpoint_dir is not None:
+             loading_info = model._load_and_finalize_distributed_pretrained_model(
+@@ -4570,7 +4587,8 @@ class PreTrainedModel(
+                     file_pointer = safe_open(file, framework="pt", device=device, backend=backend)
+                     all_pointer.add(file_pointer)
+                     for k in file_pointer.keys():
+-                        merged_state_dict[k] = file_pointer.get_slice(k)  # don't materialize yet
++                        if k not in load_config.skip_keys:
++                            merged_state_dict[k] = file_pointer.get_slice(k)  # don't materialize yet
+             # Checkpoints are .bin
+             elif checkpoint_files is not None:
+                 merged_state_dict = {}
 diff --git a/tests/integrations/test_ssd_moe.py b/tests/integrations/test_ssd_moe.py
 new file mode 100644
-index 0000000000..ef45295238
+index 0000000000..af871ad87e
 --- /dev/null
 +++ b/tests/integrations/test_ssd_moe.py
-@@ -0,0 +1,518 @@
+@@ -0,0 +1,556 @@
 +# Copyright 2026 The HuggingFace Team. All rights reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -1772,3 +1920,41 @@ index 0000000000..ef45295238
 +                        self.assertLessEqual(store.prefetch_used, store.prefetched)
 +                    else:
 +                        self.assertEqual(store.prefetched, 0)
++
++
++class FromPretrainedExpertsOffloadTest(unittest.TestCase):
++    def test_from_pretrained_streams_experts_and_matches_eager(self):
++        torch.manual_seed(7)
++        config = Qwen3MoeConfig(
++            vocab_size=64,
++            hidden_size=16,
++            intermediate_size=24,
++            moe_intermediate_size=8,
++            num_hidden_layers=2,
++            num_attention_heads=2,
++            num_key_value_heads=1,
++            head_dim=8,
++            num_experts=4,
++            num_experts_per_tok=2,
++        )
++        config._attn_implementation = "eager"
++        reference = Qwen3MoeForCausalLM(config).eval()
++        ids = torch.tensor([[1, 7, 3, 9, 2]])
++        with tempfile.TemporaryDirectory() as directory:
++            reference.save_pretrained(directory)
++            model, info = Qwen3MoeForCausalLM.from_pretrained(
++                directory,
++                experts_offload={"cache_bytes": 3 * 3 * 8 * 16 * 4},
++                attn_implementation="eager",
++                output_loading_info=True,
++            )
++            self.assertEqual((info["missing_keys"], info["unexpected_keys"]), (set(), set()))
++            experts = model.model.layers[0].mlp.experts
++            self.assertIsNone(experts.gate_up_proj)
++            self.assertEqual(experts.config._experts_implementation, "ssd_streaming")
++            self.assertFalse(any(name.endswith(("gate_up_proj", "down_proj")) for name in model.state_dict()))
++            with torch.no_grad():
++                expected = reference.generate(ids, max_new_tokens=6, do_sample=False, pad_token_id=0)
++                actual = model.generate(ids, max_new_tokens=6, do_sample=False, pad_token_id=0)
++            torch.testing.assert_close(actual, expected)
++            self.assertGreater(model.ssd_store.misses, 0)
