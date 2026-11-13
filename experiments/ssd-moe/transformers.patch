@@ -396,12 +396,414 @@ index 0000000000..2a880c1f25
 +
 +if __name__ == "__main__":
 +    main()
+diff --git a/examples/generate/ssd_moe_qwen38/bench.py b/examples/generate/ssd_moe_qwen38/bench.py
+new file mode 100644
+index 0000000000..72f2ec7e2c
+--- /dev/null
++++ b/examples/generate/ssd_moe_qwen38/bench.py
+@@ -0,0 +1,164 @@
++"""Qwen3.8-Flash-Next on a 32 GB Mac with Transformers expert streaming, following Strata's Mac protocol.
++
++Strata's Mac guide reports decode tokens/s on a 200-token story answer and prefill tokens/s on a 4K-token prompt,
++with MTP off on 32 GB Macs. This script runs both on the checkpoint written by ``convert_fp8.py``:
++- story: a short story request, exactly 200 new tokens (``min_new_tokens``), greedy; decode tok/s excludes the first token;
++- prefill: a ~4,000-token prompt, time to first token and prefill tok/s.
++Normal use (OS page cache on) unless ``--bypass-page-cache``. Writes one JSON report.
++
++Usage: bench.py CONVERTED_DIR --cache-gib 6 --output report.json [--bits 3] [--runs 2]
++"""
++
++import argparse
++import json
++import platform
++import resource
++import threading
++import time
++from pathlib import Path
++
++import torch
++
++from transformers import AutoTokenizer, Qwen4ExpForCausalLM
++
++
++STORY = "Write a short story about a lighthouse keeper who finds a message in a bottle."
++
++
++class DevicePeak:
++    """Peak MPS driver memory, sampled every 20 ms (the allocator's own peak is not exposed on MPS)."""
++
++    def __init__(self):
++        self.peak, self.running = 0, True
++        self.thread = threading.Thread(target=self.run, daemon=True)
++        self.thread.start()
++
++    def run(self):
++        while self.running:
++            self.peak = max(self.peak, torch.mps.driver_allocated_memory())
++            time.sleep(0.02)
++
++    def stop(self):
++        self.running = False
++        self.thread.join()
++        return self.peak
++
++
++def long_prompt(tokenizer, target=4000):
++    notes = [
++        f"Note {i}: the harbour town kept records of ships, storms, cargo and the keepers who tended its light, "
++        f"and entry {i} describes one season in detail, with names, dates and the weather."
++        for i in range(1, 2000)
++    ]
++    text = []
++    for note in notes:
++        text.append(note)
++        if len(tokenizer("\n".join(text)).input_ids) >= target:
++            break
++    return "Read these records.\n" + "\n".join(text) + "\nSummarize the history of the harbour town."
++
++
++def generate(model, tokenizer, prompt, new_tokens):
++    messages = [{"role": "user", "content": prompt}]
++    try:
++        inputs = tokenizer.apply_chat_template(
++            messages, add_generation_prompt=True, return_tensors="pt", return_dict=True, enable_thinking=False
++        )
++    except TypeError:
++        inputs = tokenizer.apply_chat_template(messages, add_generation_prompt=True, return_tensors="pt", return_dict=True)
++    ids = inputs["input_ids"].to("mps")
++    first = {"calls": 0}
++
++    class FirstToken:
++        """`generate` calls `put` once with the prompt, then once per new token: the second call is the first token."""
++
++        def put(self, value):
++            first["calls"] += 1
++            if first["calls"] == 2:
++                first["t"] = time.perf_counter()
++
++        def end(self):
++            pass
++
++    stats_before = model.ssd_store.stats()
++    torch.mps.synchronize()
++    start = time.perf_counter()
++    with torch.no_grad():
++        out = model.generate(
++            ids, max_new_tokens=new_tokens, min_new_tokens=new_tokens, do_sample=False, streamer=FirstToken()
++        )
++    torch.mps.synchronize()
++    end = time.perf_counter()
++    stats = model.ssd_store.stats()
++    generated = out.shape[1] - ids.shape[1]
++    ttft = first.get("t", end) - start
++    delta = {k: v - stats_before[k] for k, v in stats.items() if isinstance(v, (int, float)) and k in stats_before}
++    return {
++        "prompt_tokens": ids.shape[1],
++        "new_tokens": generated,
++        "time_to_first_token_s": ttft,
++        "prefill_tokens_per_s": ids.shape[1] / ttft,
++        "decode_tokens_per_s": (generated - 1) / (end - start - ttft),
++        "total_s": end - start,
++        "store": delta,
++        "text": tokenizer.decode(out[0, ids.shape[1] :], skip_special_tokens=True),
++    }
++
++
++def main():
++    parser = argparse.ArgumentParser()
++    parser.add_argument("converted", type=Path)
++    parser.add_argument("--cache-gib", type=float, required=True)
++    parser.add_argument("--bits", type=int, default=3)
++    parser.add_argument("--io-threads", type=int, default=4)
++    parser.add_argument("--runs", type=int, default=2)
++    parser.add_argument("--bypass-page-cache", action="store_true")
++    parser.add_argument("--skip-prefill", action="store_true")
++    parser.add_argument("--output", type=Path, required=True)
++    args = parser.parse_args()
++    dense = args.converted / "dense"
++    tokenizer = AutoTokenizer.from_pretrained(dense)
++    peak = DevicePeak()
++    start = time.perf_counter()
++    model = Qwen4ExpForCausalLM.from_pretrained(
++        dense,
++        dtype=torch.bfloat16,
++        device_map="mps",
++        experts_offload={
++            "cache_bytes": int(args.cache_gib * 2**30),
++            "quantized_experts": args.converted / f"experts-q{args.bits}",
++            "disk_embeddings": {"model.layers.1.ple.ple_embedding.ngram_embedding": args.converted / "ngram"},
++            "io_threads": args.io_threads,
++            "bypass_page_cache": args.bypass_page_cache,
++        },
++    )
++    load_s = time.perf_counter() - start
++    after_load = torch.mps.driver_allocated_memory()
++    report = {
++        "model": "Qwen3.8-Flash-Next (from Qwen/Qwen3.8-Flash-Next-FP8)",
++        "experts": f"{args.bits}-bit MLX affine, group 64",
++        "cache_gib": args.cache_gib,
++        "io_threads": args.io_threads,
++        "page_cache": "bypassed" if args.bypass_page_cache else "on",
++        "torch": torch.__version__,
++        "platform": platform.platform(),
++        "load_s": load_s,
++        "device_after_load_bytes": after_load,
++        "runs": {"story": [], "prefill_4k": []},
++    }
++    for _ in range(args.runs):
++        report["runs"]["story"].append(generate(model, tokenizer, STORY, 200))
++        print(json.dumps({k: v for k, v in report["runs"]["story"][-1].items() if k != "text"}), flush=True)
++    if not args.skip_prefill:
++        prompt = long_prompt(tokenizer)
++        for _ in range(args.runs):
++            report["runs"]["prefill_4k"].append(generate(model, tokenizer, prompt, 32))
++            print(json.dumps({k: v for k, v in report["runs"]["prefill_4k"][-1].items() if k != "text"}), flush=True)
++    report["device_peak_sampled_bytes"] = peak.stop()
++    report["process_peak_rss_bytes"] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
++    args.output.write_text(json.dumps(report, indent=2))
++    print(report["runs"]["story"][-1]["text"][:400])
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/examples/generate/ssd_moe_qwen38/convert_fp8.py b/examples/generate/ssd_moe_qwen38/convert_fp8.py
+new file mode 100644
+index 0000000000..ffc36abdcc
+--- /dev/null
++++ b/examples/generate/ssd_moe_qwen38/convert_fp8.py
+@@ -0,0 +1,226 @@
++"""Convert Qwen/Qwen3.8-Flash-Next-FP8 for SSD streaming on a 32 GB Mac, one shard at a time (peak disk: one shard).
++
++Output, under OUT_DIR:
++- ``dense/``: the text model without experts and without the n-gram table, dequantized to BF16 (~9.9 GB), keys renamed
++  from ``model.language_model.*`` to ``model.*``, a text-only config, and the tokenizer files. Vision and MTP are skipped.
++- ``experts-q{bits}/``: every routed expert quantized with MLX affine quantization (``quantize`` from
++  kernels-community/mlx-quantization-metal-kernels on MPS), one contiguous row per expert, in the layout
++  ``transformers.integrations.ssd_moe.quantize_experts`` writes (``model.layers.N.mlp.experts.experts`` [512, bytes]).
++- ``ngram/``: the 51.2 GB hashed n-gram table, kept in FP8 E4M3 exactly as published, as one raw [rows, 160] file
++  plus its scalar scale, for a disk-backed embedding that reads only the rows each token needs.
++
++FP8 weights carry 128x128 block scales (``weight_scale_inv``): weight = fp8 * scale, per block.
++Usage: convert_fp8.py OUT_DIR [--bits 3] [--group-size 64] [--revision REV]
++"""
++
++import argparse
++import json
++import re
++import shutil
++import time
++from collections import defaultdict
++from pathlib import Path
++
++import torch
++from huggingface_hub import hf_hub_download
++from kernels import get_kernel
++from safetensors import safe_open
++from safetensors.torch import save_file
++
++
++REPO = "Qwen/Qwen3.8-Flash-Next-FP8"
++EXPERT = re.compile(r"^model\.language_model\.layers\.(\d+)\.mlp\.experts\.(\d+)\.(gate|up|down)_proj\.weight$")
++NGRAM = re.compile(r"^model\.language_model\.layers\.(\d+)\.ple\.ple_embedding\.ngram_embedding\.shard_(\d+)\.weight$")
++TOKENIZER_FILES = (
++    "tokenizer.json",
++    "tokenizer_config.json",
++    "chat_template.jinja",
++    "generation_config.json",
++    "vocab.json",
++    "merges.txt",
++    "special_tokens_map.json",
++)
++
++
++def main():
++    parser = argparse.ArgumentParser()
++    parser.add_argument("out", type=Path)
++    parser.add_argument("--bits", type=int, default=3)
++    parser.add_argument("--group-size", type=int, default=64)
++    parser.add_argument("--revision", default="main")
++    args = parser.parse_args()
++    out, device = args.out, torch.device("mps")
++    staging, dense_dir = out / "staging", out / "dense"
++    experts_dir, ngram_dir = out / f"experts-q{args.bits}", out / "ngram"
++    for directory in (staging, dense_dir, experts_dir, ngram_dir):
++        directory.mkdir(parents=True, exist_ok=True)
++    kernel = get_kernel("kernels-community/mlx-quantization-metal-kernels", version=2)
++    # FP8 E4M3 -> float32 for all 256 bit patterns, so dequantization is a gather on the GPU.
++    fp8_values = torch.arange(256, dtype=torch.uint8).view(torch.float8_e4m3fn).float().to(device)
++
++    def dequantize(raw, scale_inv):
++        weight = fp8_values[raw.to(device).view(torch.uint8).int()]
++        if scale_inv is not None:
++            rows, columns = weight.shape
++            scale = (
++                scale_inv.to(device).float().repeat_interleave(128, 0)[:rows].repeat_interleave(128, 1)[:, :columns]
++            )
++            weight = weight * scale
++        return weight
++
++    index = json.loads(
++        Path(hf_hub_download(REPO, "model.safetensors.index.json", revision=args.revision)).read_text(encoding="utf-8")
++    )
++    weight_map = index["weight_map"]
++    config = json.loads(Path(hf_hub_download(REPO, "config.json", revision=args.revision)).read_text(encoding="utf-8"))
++    text = dict(config["text_config"])
++    text.pop("quantization_config", None)
++    text["architectures"] = ["Qwen4ExpForCausalLM"]
++    num_experts, num_layers = text["num_experts"], text["num_hidden_layers"]
++    (dense_dir / "config.json").write_text(json.dumps(text, indent=2))
++    for name in TOKENIZER_FILES:
++        try:
++            shutil.copy(hf_hub_download(REPO, name, revision=args.revision), dense_dir / name)
++        except Exception as error:  # not every repo has every tokenizer file
++            print(f"skipping {name}: {type(error).__name__}")
++
++    # Resumable per file. Experts are buffered per layer until all of a layer's 512 are quantized (a layer spans two
++    # files), so a restart reprocesses every file holding experts of a layer that is not written yet.
++    progress_path = out / "progress.json"
++    progress = {"done": [], "layers_done": [], "dense_map": {}, "ngram_parts": []}
++    if progress_path.exists():
++        progress.update(json.loads(progress_path.read_text(encoding="utf-8")))
++    layers_done = set(progress["layers_done"])
++    layer_files = defaultdict(set)
++    for name, filename in weight_map.items():
++        if match := EXPERT.match(name):
++            layer_files[int(match[1])].add(filename)
++    redo = {f for layer, names in layer_files.items() if layer not in layers_done for f in names}
++    progress["done"] = [f for f in progress["done"] if f not in redo]
++    pending_experts = defaultdict(dict)  # layer -> expert -> {projection: bf16 weight on device}
++    expert_rows = defaultdict(dict)  # layer -> expert -> uint8 blob (CPU)
++    dense, dense_bytes, dense_map = {}, 0, progress["dense_map"]
++    dense_files = len(list(dense_dir.glob("dense-*.safetensors")))
++    ngram_rows = text["split_ngram_parts"] * 2500012  # checked against the first part below
++    ngram_shape, ngram_file = (ngram_rows, 160), ngram_dir / "ngram.fp8"
++
++    def flush_dense(final=False):
++        nonlocal dense, dense_bytes, dense_files
++        if dense and (final or dense_bytes > 2e9):
++            name = f"dense-{dense_files:05d}.safetensors"
++            save_file(dense, dense_dir / name, {"format": "pt"})
++            dense_map.update(dict.fromkeys(dense, name))
++            dense_files += 1
++            dense, dense_bytes = {}, 0
++
++    def finish_expert(layer, expert):
++        parts = pending_experts[layer].pop(expert)
++        blob = []
++        for weight in (torch.cat((parts["gate"], parts["up"])), parts["down"]):
++            packed, scales, biases = kernel.quantize(
++                weight.to(torch.bfloat16), group_size=args.group_size, bits=args.bits
++            )
++            blob += [packed, scales, biases]
++        expert_rows[layer][expert] = torch.cat([t.cpu().contiguous().view(torch.uint8).reshape(-1) for t in blob])
++        if len(expert_rows[layer]) == num_experts:
++            rows = expert_rows.pop(layer)
++            layers_done.add(layer)
++            name = f"experts-{layer:05d}.safetensors"
++            save_file(
++                {f"model.layers.{layer}.mlp.experts.experts": torch.stack([rows[e] for e in range(num_experts)])},
++                experts_dir / name,
++                {"format": "pt"},
++            )
++            print(f"  experts of layer {layer} written ({rows[0].numel() / 1e6:.2f} MB per expert)", flush=True)
++
++    files = sorted(set(weight_map.values()))
++    started = time.perf_counter()
++    for count, filename in enumerate(files, 1):
++        if filename in progress["done"]:
++            continue
++        if shutil.disk_usage(out).free < 8e9:
++            raise RuntimeError("Less than 8 GB free; stopping before the next shard")
++        path = Path(hf_hub_download(REPO, filename, revision=args.revision, local_dir=staging))
++        with safe_open(path, framework="pt") as handle:
++            names = list(handle.keys())
++            for name in names:
++                if name.endswith("weight_scale_inv") or name.startswith(("mtp.", "model.visual.")):
++                    continue
++                expert = EXPERT.match(name)
++                ngram = NGRAM.match(name)
++                if expert:
++                    layer, index_, projection = int(expert[1]), int(expert[2]), expert[3]
++                    if layer in layers_done:
++                        continue
++                    scale = handle.get_tensor(name + "_scale_inv") if name + "_scale_inv" in names else None
++                    weight = dequantize(handle.get_tensor(name), scale).to(torch.bfloat16)
++                    pending_experts[layer].setdefault(index_, {})[projection] = weight
++                    if len(pending_experts[layer][index_]) == 3:
++                        finish_expert(layer, index_)
++                elif ngram:
++                    tensor = handle.get_tensor(name)
++                    if tuple(tensor.shape) != (ngram_rows // text["split_ngram_parts"], ngram_shape[1]):
++                        raise ValueError(f"Unexpected n-gram part shape {tuple(tensor.shape)}")
++                    if not ngram_file.exists():
++                        with ngram_file.open("wb") as raw:
++                            raw.truncate(ngram_shape[0] * ngram_shape[1])
++                    with ngram_file.open("r+b") as raw:
++                        raw.seek(int(ngram[2]) * tensor.numel())
++                        raw.write(tensor.view(torch.uint8).numpy().tobytes())
++                    progress["ngram_parts"] = sorted(set(progress["ngram_parts"]) | {int(ngram[2])})
++                elif name.endswith("ngram_embedding.weight_scale"):
++                    (ngram_dir / "scale.json").write_text(
++                        json.dumps({"scale": handle.get_tensor(name).float().item()})
++                    )
++                else:
++                    tensor = handle.get_tensor(name)
++                    if tensor.dtype == torch.float8_e4m3fn:
++                        scale = handle.get_tensor(name + "_scale_inv") if name + "_scale_inv" in names else None
++                        tensor = dequantize(tensor, scale).to(torch.bfloat16).cpu()
++                    key = name.replace("model.language_model.", "model.", 1)
++                    dense[key] = tensor.contiguous()
++                    dense_bytes += tensor.numel() * tensor.element_size()
++                    flush_dense()
++        flush_dense(final=True)  # dense tensors of a done file are on disk before it is marked done
++        path.unlink()
++        progress["done"].append(filename)
++        progress["layers_done"] = sorted(layers_done)
++        progress_path.write_text(json.dumps(progress))
++        elapsed = time.perf_counter() - started
++        print(f"[{count}/{len(files)}] {filename} done, {elapsed / 60:.1f} min", flush=True)
++    if pending_experts or expert_rows or len(layers_done) != num_layers:
++        raise RuntimeError(f"Incomplete experts: {sorted(pending_experts)} {sorted(expert_rows)}")
++    if len(progress["ngram_parts"]) != text["split_ngram_parts"]:
++        raise RuntimeError(f"Missing n-gram parts: {len(progress['ngram_parts'])} of {text['split_ngram_parts']}")
++    (dense_dir / "model.safetensors.index.json").write_text(json.dumps({"metadata": {}, "weight_map": dense_map}))
++    expert_map = {
++        f"model.layers.{layer}.mlp.experts.experts": f"experts-{layer:05d}.safetensors" for layer in range(num_layers)
++    }
++    (experts_dir / "model.safetensors.index.json").write_text(json.dumps({"metadata": {}, "weight_map": expert_map}))
++    info = {
++        "format": "mlx-affine-expert-blob",
++        "bits": args.bits,
++        "group_size": args.group_size,
++        "quantizer": "mlx-quantization-metal-kernels",
++        "source": f"{REPO}@{args.revision}",
++    }
++    (experts_dir / "quantization.json").write_text(json.dumps(info, indent=2))
++    scale = json.loads((ngram_dir / "scale.json").read_text(encoding="utf-8"))["scale"]
++    (ngram_dir / "ngram.json").write_text(
++        json.dumps(
++            {
++                "rows": ngram_shape[0],
++                "dim": ngram_shape[1],
++                "dtype": "float8_e4m3fn",
++                "scale": scale,
++                "file": "ngram.fp8",
++            },
++            indent=2,
++        )
++    )
++    shutil.rmtree(staging, ignore_errors=True)
++    print("done")
++
++
++if __name__ == "__main__":
++    main()
 diff --git a/src/transformers/integrations/ssd_moe.py b/src/transformers/integrations/ssd_moe.py
 new file mode 100644
-index 0000000000..55ef80f7b7
+index 0000000000..9d507200a6
 --- /dev/null
 +++ b/src/transformers/integrations/ssd_moe.py
-@@ -0,0 +1,1316 @@
+@@ -0,0 +1,1375 @@
 +# Copyright 2026 The HuggingFace Team. All rights reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -633,8 +1035,6 @@ index 0000000000..55ef80f7b7
 +                info = header[name]
 +                if name in self.tensors:
 +                    raise ValueError(f"Duplicate checkpoint tensor: {name}")
-+                if info["dtype"] not in self.dtypes:
-+                    raise ValueError(f"Only unquantized F32/F16/BF16 checkpoints are supported: {name}")
 +                self.tensors[name] = (path, 8 + header_size + info["data_offsets"][0], info)
 +                if weight_map is not None and weight_map.get(name) != filename:
 +                    raise ValueError(f"Checkpoint index disagrees with shard for {name}")
@@ -647,6 +1047,8 @@ index 0000000000..55ef80f7b7
 +    def read(self, name, expert=None):
 +        path, offset, info = self.tensors[name]
 +        shape = tuple(info["shape"])
++        if info["dtype"] not in self.dtypes:
++            raise ValueError(f"Only F32/F16/BF16 (and packed) tensors can be read: {name} is {info['dtype']}")
 +        dtype = self.dtypes[info["dtype"]]
 +        item_size = torch.empty((), dtype=dtype).element_size()
 +        if expert is not None:
@@ -851,7 +1253,16 @@ index 0000000000..55ef80f7b7
 +            "gate_up_proj": (module.num_experts, 2 * module.intermediate_dim, module.hidden_dim),
 +            "down_proj": (module.num_experts, module.hidden_dim, module.intermediate_dim),
 +        }
-+        if f"{prefix}.gate_up_proj" in self.reader.tensors:
++        if self.quantized is not None and f"{prefix}.experts" in self.quantized[0].tensors:
++            # The quantized experts are what runs; a BF16 copy in the checkpoint (if any) is not read but consumed.
++            candidates = [f"{prefix}.gate_up_proj", f"{prefix}.down_proj"] + [
++                f"{prefix}.{expert}.{projection}.weight"
++                for expert in range(module.num_experts)
++                for projection in ("gate_proj", "up_proj", "down_proj")
++            ]
++            names = {name: None for name in candidates if name in self.reader.tensors}
++            packed = True
++        elif f"{prefix}.gate_up_proj" in self.reader.tensors:
 +            names = {f"{prefix}.{suffix}": shape for suffix, shape in shapes.items()}
 +            packed = True
 +        else:
@@ -864,6 +1275,8 @@ index 0000000000..55ef80f7b7
 +                    names[f"{prefix}.{expert}.{projection}.weight"] = shape
 +            packed = False
 +        for name, shape in names.items():
++            if shape is None:
++                continue
 +            if name not in self.reader.tensors or self.reader.shape(name) != shape:
 +                raise ValueError(f"Missing or incompatible expert tensor {name}; expected {shape}")
 +        self.layouts[prefix] = (packed, 3 * module.intermediate_dim * module.hidden_dim)
@@ -1569,18 +1982,55 @@ index 0000000000..55ef80f7b7
 +load_qwen3_moe_from_ssd = load_moe_from_ssd
 +
 +
-+def _checkpoint_prefix(reader, name):
++def _checkpoint_prefix(reader, name, quantized_reader=None):
 +    """The checkpoint key prefix of the experts module ``name``: the same path, possibly under another root (e.g.
-+    ``model.language_model.``), in the packed (``gate_up_proj``) or per-expert (``0.gate_proj.weight``) layout."""
++    ``model.language_model.``), in the packed (``gate_up_proj``) or per-expert (``0.gate_proj.weight``) layout, or
++    in the quantized experts (``experts``) when the checkpoint has no BF16 experts."""
 +    suffix = name.split(".", 1)[1] if name.startswith("model.") else name
-+    found = {
-+        key.rsplit(".gate_up_proj", 1)[0] if key.endswith(".gate_up_proj") else key.rsplit(".0.gate_proj.weight", 1)[0]
-+        for key in reader.tensors
-+        if key.endswith((f"{suffix}.gate_up_proj", f"{suffix}.0.gate_proj.weight"))
-+    }
++    found = set()
++    for key in reader.tensors:
++        if key.endswith(f"{suffix}.gate_up_proj"):
++            found.add(key.removesuffix(".gate_up_proj"))
++        elif key.endswith(f"{suffix}.0.gate_proj.weight"):
++            found.add(key.removesuffix(".0.gate_proj.weight"))
++    if not found and quantized_reader is not None:
++        found = {key.removesuffix(".experts") for key in quantized_reader.tensors if key.endswith(f"{suffix}.experts")}
 +    if len(found) != 1:
 +        raise ValueError(f"Cannot find the checkpoint experts of {name} (candidates: {sorted(found)})")
 +    return found.pop()
++
++
++class DiskEmbedding(torch.nn.Module):
++    """An embedding table that stays on disk; each lookup reads only the rows it needs (through the OS page cache).
++
++    For tables far larger than memory that are read a few rows per token, such as Qwen3.8-Flash-Next's 51 GB hashed
++    n-gram table. ``directory`` holds ``ngram.json`` (``rows``, ``dim``, ``dtype``: ``float8_e4m3fn``, ``bfloat16`` or
++    ``float32``, ``scale``, ``file``) and the raw row-major file. Rows are dequantized as ``row * scale``.
++    """
++
++    _DTYPES = {"float8_e4m3fn": torch.float8_e4m3fn, "bfloat16": torch.bfloat16, "float32": torch.float32}
++
++    def __init__(self, directory, device, dtype):
++        super().__init__()
++        import numpy as np
++
++        info = json.loads((Path(directory) / "ngram.json").read_text(encoding="utf-8"))
++        self.rows, self.dim = info["rows"], info["dim"]
++        self.stored_dtype = self._DTYPES[info["dtype"]]
++        self.scale = float(info.get("scale", 1.0))
++        row_bytes = self.dim * self.stored_dtype.itemsize
++        self.table = np.memmap(Path(directory) / info["file"], dtype=np.uint8, mode="r", shape=(self.rows, row_bytes))
++        self.dtype = dtype
++        self._is_hf_initialized = True
++        # Callers read `.weight.device` to place their indices.
++        self.register_buffer("weight", torch.empty(0, device=device, dtype=dtype), persistent=False)
++
++    def forward(self, ids):
++        flat = ids.reshape(-1).cpu().numpy()
++        rows = torch.from_numpy(self.table[flat]).view(self.stored_dtype).float()
++        if self.scale != 1.0:
++            rows = rows * self.scale
++        return rows.to(self.dtype).view(*ids.shape, self.dim).to(self.weight.device, non_blocking=True)
 +
 +
 +def prepare_experts_offload(model, checkpoint_files, *, dtype, device, options):
@@ -1603,6 +2053,7 @@ index 0000000000..55ef80f7b7
 +        "token_chunk_size",
 +        "predict_max_routes",
 +        "quantized_experts",
++        "disk_embeddings",
 +    }
 +    if unknown or "cache_bytes" not in options:
 +        raise ValueError(f"experts_offload needs `cache_bytes`; unknown options: {sorted(unknown)}")
@@ -1636,7 +2087,7 @@ index 0000000000..55ef80f7b7
 +            raise ValueError(
 +                f"experts_offload supports gated, concatenated, untransposed experts without bias: {name}"
 +            )
-+        prefix = _checkpoint_prefix(reader, name)
++        prefix = _checkpoint_prefix(reader, name, store.quantized[0] if store.quantized else None)
 +        consumed.update(store.register(prefix, module))
 +        module.register_parameter("gate_up_proj", None)
 +        module.register_parameter("down_proj", None)
@@ -1652,6 +2103,16 @@ index 0000000000..55ef80f7b7
 +            router = getattr(model.get_submodule(next_name.rpartition(".")[0]), "gate", None)
 +            if router is not None and hasattr(router, "weight") and hasattr(router, "top_k"):
 +                module.ssd_next = (next_module.ssd_prefix, router)
++    for name, directory in (options.get("disk_embeddings") or {}).items():
++        parent, _, child = name.rpartition(".")
++        embedding = DiskEmbedding(directory, device, dtype)
++        expected = getattr(model.get_submodule(name), "weight", None)
++        if expected is not None and tuple(expected.shape) != (embedding.rows, embedding.dim):
++            raise ValueError(f"{name} is {tuple(expected.shape)}; {directory} holds {(embedding.rows, embedding.dim)}")
++        setattr(model.get_submodule(parent), child, embedding)
++        consumed.update(
++            key for key in reader.tensors if key.startswith(name + ".") or key.endswith("." + name + ".weight")
++        )
 +    model.ssd_store = store
 +    return consumed
 +
@@ -1779,10 +2240,10 @@ index ed410f9606..885174336c 100644
                  merged_state_dict = {}
 diff --git a/tests/integrations/test_ssd_moe.py b/tests/integrations/test_ssd_moe.py
 new file mode 100644
-index 0000000000..26ac84675c
+index 0000000000..875556b4ef
 --- /dev/null
 +++ b/tests/integrations/test_ssd_moe.py
-@@ -0,0 +1,644 @@
+@@ -0,0 +1,726 @@
 +# Copyright 2026 The HuggingFace Team. All rights reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -2427,3 +2888,85 @@ index 0000000000..26ac84675c
 +        self.assertFalse(_sorted_kernel_applies(8, 1))  # decode: fewer than 16 rows
 +        self.assertFalse(_sorted_kernel_applies(63, 16))  # under 4 rows per expert
 +        self.assertTrue(_sorted_kernel_applies(64, 16))
++
++
++class Qwen4ExpConvertedCheckpointTest(unittest.TestCase):
++    """The layout written for Qwen3.8-Flash-Next: dense weights only, quantized experts, n-gram table as FP8 on disk."""
++
++    def test_dense_only_checkpoint_with_quantized_experts_and_disk_ngram_table(self):
++        from tests.models.qwen4_exp.test_modeling_qwen4_exp import Qwen4ExpTextModelTester
++        from transformers import Qwen4ExpForCausalLM
++        from transformers.integrations.metal_quantization import _affine_dequantize_tensor
++        from transformers.integrations.ssd_moe import _split_expert, quantize_experts
++
++        torch.manual_seed(13)
++        config = Qwen4ExpTextModelTester(self).get_config()
++        config.eos_token_id = config.vocab_size + 100000
++        config._attn_implementation = "eager"
++        model = Qwen4ExpForCausalLM(config).eval()
++        ngram_name = next(name for name, _ in model.named_modules() if name.endswith("ngram_embedding"))
++        ngram = model.get_submodule(ngram_name)
++        experts = [m for _, m in model.named_modules() if type(m).__name__ == "Qwen4ExpTextExperts"]
++        hidden, intermediate = experts[0].hidden_dim, experts[0].intermediate_dim
++        group = 8
++        with tempfile.TemporaryDirectory() as directory:
++            root = Path(directory)
++            model.save_pretrained(root / "full")
++            quantize_experts(root / "full", root / "experts", bits=8, group_size=group)
++            # The reference runs the same weights the streamed model sees: dequantized experts, FP8-rounded n-grams.
++            scale = ngram.weight.abs().max().item() / 448
++            fp8 = (ngram.weight.detach() / scale).to(torch.float8_e4m3fn)
++            (root / "ngram").mkdir()
++            (root / "ngram" / "ngram.fp8").write_bytes(fp8.view(torch.uint8).numpy().tobytes())
++            info = {
++                "rows": fp8.shape[0],
++                "dim": fp8.shape[1],
++                "dtype": "float8_e4m3fn",
++                "scale": scale,
++                "file": "ngram.fp8",
++            }
++            (root / "ngram" / "ngram.json").write_text(json.dumps(info))
++            shapes = [
++                ((2 * intermediate, hidden * 8 // 32), torch.uint32),
++                ((2 * intermediate, hidden // group), torch.float32),
++                ((2 * intermediate, hidden // group), torch.float32),
++                ((hidden, intermediate * 8 // 32), torch.uint32),
++                ((hidden, intermediate // group), torch.float32),
++                ((hidden, intermediate // group), torch.float32),
++            ]
++            with torch.no_grad():
++                ngram.weight.copy_(fp8.float() * scale)
++                for index, module in enumerate(experts):
++                    blobs = load_file(root / "experts" / f"experts-{index:05d}.safetensors")[
++                        f"model.layers.{index}.mlp.experts.experts"
++                    ]
++                    parts = [_split_expert(blob, shapes) for blob in blobs]
++                    for offset, projection in ((0, "gate_up_proj"), (3, "down_proj")):
++                        dequantized = [_affine_dequantize_tensor(*p[offset : offset + 3], group, 8) for p in parts]
++                        getattr(module, projection).copy_(torch.stack(dequantized))
++            # Dense-only checkpoint: no experts, no n-gram table.
++            dense = {
++                key: value
++                for key, value in load_file(root / "full" / "model.safetensors").items()
++                if ".mlp.experts." not in key and "ngram_embedding" not in key
++            }
++            (root / "dense").mkdir()
++            save_file(dense, root / "dense" / "model.safetensors", {"format": "pt"})
++            (root / "dense" / "config.json").write_text((root / "full" / "config.json").read_text())
++            streamed, info = Qwen4ExpForCausalLM.from_pretrained(
++                root / "dense",
++                experts_offload={
++                    "cache_bytes": 1 << 20,
++                    "quantized_experts": root / "experts",
++                    "disk_embeddings": {ngram_name: root / "ngram"},
++                },
++                attn_implementation="eager",
++                output_loading_info=True,
++            )
++            self.assertEqual((info["missing_keys"], info["unexpected_keys"]), (set(), set()))
++            ids = torch.tensor([[3, 17, 5, 9, 22, 4, 11]])
++            with torch.no_grad():
++                torch.testing.assert_close(streamed(ids).logits, model(ids).logits, atol=1e-4, rtol=1e-4)
++                expected = model.generate(ids, max_new_tokens=6, do_sample=False, pad_token_id=0)
++                actual = streamed.generate(ids, max_new_tokens=6, do_sample=False, pad_token_id=0)
++            torch.testing.assert_close(actual, expected)
