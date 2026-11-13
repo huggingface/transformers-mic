@@ -1,9 +1,9 @@
 diff --git a/examples/generate/ssd_moe.py b/examples/generate/ssd_moe.py
 new file mode 100644
-index 0000000000..c8c0446b45
+index 0000000000..2a880c1f25
 --- /dev/null
 +++ b/examples/generate/ssd_moe.py
-@@ -0,0 +1,374 @@
+@@ -0,0 +1,392 @@
 +# Copyright 2026 The HuggingFace Team. All rights reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -219,6 +219,17 @@ index 0000000000..c8c0446b45
 +        "run with the gather_qmm Metal kernel on MPS)",
 +    )
 +    parser.add_argument(
++        "--preload-experts",
++        action="store_true",
++        help="streaming mode: load every expert at startup (the cache must hold them all); no reads while generating",
++    )
++    parser.add_argument(
++        "--metal-bits",
++        type=int,
++        choices=(4, 8),
++        help="eager mode: quantize with Transformers' MetalConfig (MLX affine, group 64; nn.Linear layers only)",
++    )
++    parser.add_argument(
 +        "--io-threads",
 +        type=int,
 +        default=4,
@@ -298,6 +309,7 @@ index 0000000000..c8c0446b45
 +            experts_implementation=args.experts_implementation or "grouped_mm",
 +            io_threads=args.io_threads,
 +            quantized_experts=args.quantized_experts,
++            preload_experts=args.preload_experts,
 +            prefetch_next_layer=not args.no_prefetch_next_layer,
 +        )
 +        if args.mode == "layerwise":
@@ -310,6 +322,10 @@ index 0000000000..c8c0446b45
 +        if args.mode == "eager":
 +            if args.experts_implementation:
 +                kwargs["experts_implementation"] = args.experts_implementation
++            if args.metal_bits:
++                from transformers import MetalConfig
++
++                kwargs["quantization_config"] = MetalConfig(bits=args.metal_bits, group_size=64)
 +            model = model_class.from_pretrained(args.checkpoint, device_map=str(device), **kwargs)
 +        else:
 +            if device.type != "cuda" or args.offload_folder is None:
@@ -361,6 +377,8 @@ index 0000000000..c8c0446b45
 +    report["cache_policy"] = args.cache_policy
 +    report["experts_implementation"] = args.experts_implementation
 +    report["io_threads"] = args.io_threads
++    report["preload_experts"] = args.preload_experts
++    report["metal_bits"] = args.metal_bits
 +    report["quantized_experts"] = str(args.quantized_experts) if args.quantized_experts else None
 +    report["prefetch_next_layer"] = not args.no_prefetch_next_layer
 +    rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -380,10 +398,10 @@ index 0000000000..c8c0446b45
 +    main()
 diff --git a/src/transformers/integrations/ssd_moe.py b/src/transformers/integrations/ssd_moe.py
 new file mode 100644
-index 0000000000..fa1f04acc7
+index 0000000000..931cc36f35
 --- /dev/null
 +++ b/src/transformers/integrations/ssd_moe.py
-@@ -0,0 +1,1210 @@
+@@ -0,0 +1,1226 @@
 +# Copyright 2026 The HuggingFace Team. All rights reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -1127,6 +1145,19 @@ index 0000000000..fa1f04acc7
 +    def _readers(self):
 +        return [self.reader] + ([self.gguf] if self.gguf else []) + ([self.quantized[0]] if self.quantized else [])
 +
++    def preload(self):
++        """Load every expert now (reads in parallel), when the cache holds them all: no storage reads afterwards."""
++        if not self.pooled or self.num_slots < self.total_experts:
++            raise ValueError(
++                f"preload needs room for all {self.total_experts} experts; the cache has {self.num_slots} slots"
++            )
++        for prefix, table in self.slot_tables.items():
++            experts = list(range(table.numel()))
++            self.prefetch(prefix, experts)
++            for expert in experts:
++                self.acquire(prefix, expert)
++        self.hits = self.misses = 0
++
 +    def stats(self):
 +        return {
 +            "hits": self.hits,
@@ -1350,6 +1381,7 @@ index 0000000000..fa1f04acc7
 +    prefetch_next_layer=True,
 +    predict_max_routes=64,
 +    quantized_experts=None,
++    preload_experts=False,
 +):
 +    """Load a local, unquantized Qwen MoE checkpoint without allocating resident expert banks.
 +
@@ -1434,6 +1466,8 @@ index 0000000000..fa1f04acc7
 +        raise RuntimeError(f"Unmaterialized model state after streaming load: {meta[:10]}")
 +    model.eval()
 +    model.ssd_store = store
++    if preload_experts:
++        store.preload()
 +    # Exclude dense startup I/O from expert runtime counters.
 +    reader.read_bytes = reader.read_calls = 0
 +    if store.gguf is not None:
@@ -1655,10 +1689,10 @@ index ed410f9606..885174336c 100644
                  merged_state_dict = {}
 diff --git a/tests/integrations/test_ssd_moe.py b/tests/integrations/test_ssd_moe.py
 new file mode 100644
-index 0000000000..b88f183ed3
+index 0000000000..4e2fc8e513
 --- /dev/null
 +++ b/tests/integrations/test_ssd_moe.py
-@@ -0,0 +1,620 @@
+@@ -0,0 +1,636 @@
 +# Copyright 2026 The HuggingFace Team. All rights reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -2177,6 +2211,22 @@ index 0000000000..b88f183ed3
 +                        self.assertLessEqual(store.prefetch_used, store.prefetched)
 +                    else:
 +                        self.assertEqual(store.prefetched, 0)
++
++    def test_preload_reads_every_expert_once_up_front(self):
++        with tempfile.TemporaryDirectory() as directory:
++            reference, path = self.make_checkpoint(directory)
++            ids = torch.tensor([[1, 7, 3, 9, 2]])
++            with self.assertRaises(ValueError):
++                load_moe_from_ssd(path, cache_bytes=3 * 3 * 8 * 16 * 4, preload_experts=True)
++            streamed = load_moe_from_ssd(path, cache_bytes=8 * 3 * 8 * 16 * 4, preload_experts=True)
++            store = streamed.ssd_store
++            self.assertTrue(store.all_resident())
++            read_bytes = store.stats()["read_bytes"]
++            with torch.no_grad():
++                expected = reference.generate(ids, max_new_tokens=6, do_sample=False, pad_token_id=0)
++                actual = streamed.generate(ids, max_new_tokens=6, do_sample=False, pad_token_id=0)
++            torch.testing.assert_close(actual, expected)
++            self.assertEqual((store.misses, store.stats()["read_bytes"]), (0, read_bytes))
 +
 +
 +class FromPretrainedExpertsOffloadTest(unittest.TestCase):
