@@ -20,7 +20,7 @@
  },
  "missed": {
   "awaiting_verdict": 22,
-  "not_covered": 28,
+  "not_covered": 29,
   "real_checkpoint": 22
  },
  "next": [
@@ -134,25 +134,13 @@
   },
   {
    "checkpoint": "eustlb/higgs-audio-v2-generation-3B-base",
-   "draft": "queued",
+   "draft": "failure",
    "model": "higgs_audio_v2",
    "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
-   "run": "",
-   "shrink": "",
-   "shrinkable": true
-  },
-  {
-   "checkpoint": "naver-hyperclovax/HyperCLOVAX-SEED-Think-32B",
-   "draft": "queued",
-   "model": "hyperclovax_vision_v2",
-   "next_batch": false,
-   "other": 1,
-   "real_checkpoint": 0,
-   "regressions": 1,
-   "run": "",
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/43188275893",
    "shrink": "",
    "shrinkable": true
   },
@@ -182,9 +170,9 @@
   },
   {
    "checkpoint": "uclanlp/plbart-java-cs",
-   "draft": "",
+   "draft": "queued",
    "model": "plbart",
-   "next_batch": true,
+   "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -194,9 +182,9 @@
   },
   {
    "checkpoint": "microsoft/prophetnet-large-uncased-cnndm",
-   "draft": "",
+   "draft": "queued",
    "model": "prophetnet",
-   "next_batch": true,
+   "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -208,7 +196,7 @@
    "checkpoint": "google/shieldgemma-2-4b-it",
    "draft": "",
    "model": "shieldgemma2",
-   "next_batch": false,
+   "next_batch": true,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -220,7 +208,7 @@
    "checkpoint": "facebook/s2t-small-librispeech-asr",
    "draft": "",
    "model": "speech_to_text",
-   "next_batch": false,
+   "next_batch": true,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -323,6 +311,18 @@
    "run": "",
    "shrink": "",
    "shrinkable": false
+  },
+  {
+   "checkpoint": "thinkingmachines/Inkling-2-Small-MXFP8",
+   "draft": "not draftable",
+   "model": "inkling2",
+   "next_batch": false,
+   "other": 0,
+   "real_checkpoint": 1,
+   "regressions": 1,
+   "run": "",
+   "shrink": "",
+   "shrinkable": false
   }
  ],
  "regressions": [
@@ -335,6 +335,17 @@
    "pr": null,
    "run": "",
    "tests": 2,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-11",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "swin",
+   "pr": null,
+   "run": "",
+   "tests": 1,
    "verdict": "out-of-scope"
   },
   {
@@ -2680,14 +2691,14 @@
   "model-added": 4,
   "no-code-change": 1,
   "not-a-regression": 5,
-  "not-covered": 223,
+  "not-covered": 226,
   "not-reproduced": 7,
-  "out-of-scope": 154,
+  "out-of-scope": 155,
   "pending": 0,
   "unrelated-culprit": 15
  },
  "window": [
   "2026-10-20",
-  "2026-11-12"
+  "2026-11-13"
  ]
 }

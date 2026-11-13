@@ -5274,6 +5274,19 @@
    "tests/tensor_parallel/test_tensor_parallel.py::TestTensorParallelTiedWeights::test_checkpoint_with_both_tied_keys_matches_tp1_1_different"
   ]
  },
+ "50682#inkling2": {
+  "bad_commit": "109a7d19bf667168837f32929e00b791e195d14d",
+  "date": "2026-11-13",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/43351624337/job/131655623801",
+  "mic": "not-covered",
+  "model": "inkling2",
+  "pr": "50682",
+  "tests": [
+   "tests/models/inkling2/test_modeling_inkling2.py::Inkling2SmallModelIntegrationTest::test_small_model_integration_test_image",
+   "tests/models/inkling2/test_modeling_inkling2.py::Inkling2SmallModelIntegrationTest::test_small_model_integration_test_text"
+  ]
+ },
  "sticky#albert#2026-10-06": {
   "date": "2026-10-06",
   "day": 20732,
@@ -6210,6 +6223,18 @@
   "mic": "not-covered",
   "model": "hunyuan_v1_moe",
   "run_id": "42438326937",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/hunyuan_v1_moe/test_modeling_hunyuan_v1_moe.py::HunYuanMoEV1ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#hunyuan_v1_moe#2026-10-20": {
+  "date": "2026-10-20",
+  "day": 20746,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "hunyuan_v1_moe",
+  "run_id": "43351552924",
   "signal": "AssertionError",
   "tests": [
    "tests/models/hunyuan_v1_moe/test_modeling_hunyuan_v1_moe.py::HunYuanMoEV1ModelTest::test_flash_attn_2_equivalence"
@@ -7174,6 +7199,18 @@
    "tests/models/swin/test_modeling_swin.py::SwinModelTest::test_torch_export_dynamic"
   ]
  },
+ "sticky#swin#2026-11-11": {
+  "date": "2026-11-11",
+  "day": 20768,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "swin",
+  "run_id": "42945525063",
+  "signal": "Failed",
+  "tests": [
+   "tests/models/swin/test_modeling_swin.py::SwinModelTest::test_torch_export_dynamic"
+  ]
+ },
  "sticky#swinv2#2026-10-23": {
   "date": "2026-10-23",
   "day": 20749,
@@ -7413,6 +7450,18 @@
   "signal": "AssertionError",
   "tests": [
    "tests/models/wav2vec2_bert/test_modeling_wav2vec2_bert.py::Wav2Vec2BertModelTest::test_disk_offload_bin"
+  ]
+ },
+ "sticky#wav2vec2_bert#2026-10-22": {
+  "date": "2026-10-22",
+  "day": 20748,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "wav2vec2_bert",
+  "run_id": "43141102375",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/wav2vec2_bert/test_modeling_wav2vec2_bert.py::Wav2Vec2BertModelTest::test_disk_offload_safetensors"
   ]
  },
  "sticky#wav2vec2_conformer#2026-10-16": {

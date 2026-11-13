@@ -452,6 +452,12 @@
     "gpu_only": false,
     "integration": false,
     "test": "tests/models/swin/test_modeling_swin.py::SwinModelTest::test_torch_export_dynamic"
+   },
+   {
+    "date": "2026-11-11",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/swin/test_modeling_swin.py::SwinModelTest::test_torch_export_dynamic"
    }
   ],
   "swinv2": [
@@ -614,18 +620,6 @@
    "shrinkable": true,
    "tests": [
     "tests/models/higgs_audio_v2/test_modeling_higgs_audio_v2.py::HiggsAudioV2ModelTest::test_static_cache_no_recompile_with_smaller_length"
-   ]
-  },
-  {
-   "checkpoint": "naver-hyperclovax/HyperCLOVAX-SEED-Think-32B",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "hyperclovax_vision_v2",
-   "other": 1,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/hyperclovax_vision_v2/test_modeling_hyperclovax_vision_v2.py::HyperCLOVAXVisionV2ModelTest::test_openvino_export_generate_dynamic_static_cache",
-    "tests/models/hyperclovax_vision_v2/test_modeling_hyperclovax_vision_v2.py::HyperCLOVAXVisionV2ModelTest::test_openvino_export_generate_static_static_cache"
    ]
   },
   {
@@ -797,6 +791,18 @@
    ]
   },
   {
+   "checkpoint": "thinkingmachines/Inkling-2-Small-MXFP8",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "inkling2",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/inkling2/test_modeling_inkling2.py::Inkling2SmallModelIntegrationTest::test_small_model_integration_test_image",
+    "tests/models/inkling2/test_modeling_inkling2.py::Inkling2SmallModelIntegrationTest::test_small_model_integration_test_text"
+   ]
+  },
+  {
    "checkpoint": "openbmb/MiniCPM-V-4.7-1B",
    "checkpoint_source": "failing test",
    "integration": 1,
@@ -836,11 +842,22 @@
    "checkpoint_source": "failing test",
    "integration": 0,
    "model": "wav2vec2_bert",
-   "other": 3,
+   "other": 4,
    "shrinkable": false,
    "tests": [
     "tests/models/wav2vec2_bert/test_modeling_wav2vec2_bert.py::Wav2Vec2BertModelTest::test_disk_offload_safetensors",
     "tests/models/wav2vec2_bert/test_modeling_wav2vec2_bert.py::Wav2Vec2BertModelTest::test_disk_offload_bin"
+   ]
+  },
+  {
+   "checkpoint": "tencent/Hunyuan-A13B-Instruct",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "hunyuan_v1_moe",
+   "other": 3,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/hunyuan_v1_moe/test_modeling_hunyuan_v1_moe.py::HunYuanMoEV1ModelTest::test_flash_attn_2_equivalence"
    ]
   },
   {
@@ -865,17 +882,6 @@
    "tests": [
     "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_flash_attn_2_inference_equivalence",
     "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_flash_attn_2_inference_equivalence_right_padding"
-   ]
-  },
-  {
-   "checkpoint": "tencent/Hunyuan-A13B-Instruct",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "hunyuan_v1_moe",
-   "other": 2,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/hunyuan_v1_moe/test_modeling_hunyuan_v1_moe.py::HunYuanMoEV1ModelTest::test_flash_attn_2_equivalence"
    ]
   },
   {

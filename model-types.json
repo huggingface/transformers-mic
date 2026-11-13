@@ -22,6 +22,7 @@
  "huggingface-mic/Hunyuan-0.5B-Instruct-mic": "hunyuan_v1_dense",
  "huggingface-mic/HunyuanOCR-mic": "hunyuan_vl",
  "huggingface-mic/Hy-MT2-30B-A3B-mic": "hy_v3",
+ "huggingface-mic/HyperCLOVAX-SEED-Think-32B-mic": "hyperclovax_vision_v2",
  "huggingface-mic/Inkling-mic": "inkling_mm_model",
  "huggingface-mic/Jamba-tiny-dev-mic": "jamba",
  "huggingface-mic/Janus-Pro-1B-mic": "janus",
