@@ -123,6 +123,7 @@
   "conclusion": "success",
   "dispatched_at": "2026-11-12T09:04:52Z",
   "run_id": 43188280274,
+  "shrink": "shrink/43188280274/shrink-HyperCLOVAX-SEED-Think-32B-mic.html",
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/43188280274"
  },
