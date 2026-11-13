@@ -398,10 +398,10 @@ index 0000000000..2a880c1f25
 +    main()
 diff --git a/src/transformers/integrations/ssd_moe.py b/src/transformers/integrations/ssd_moe.py
 new file mode 100644
-index 0000000000..931cc36f35
+index 0000000000..55ef80f7b7
 --- /dev/null
 +++ b/src/transformers/integrations/ssd_moe.py
-@@ -0,0 +1,1226 @@
+@@ -0,0 +1,1316 @@
 +# Copyright 2026 The HuggingFace Team. All rights reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -841,7 +841,10 @@ index 0000000000..931cc36f35
 +        self.executor = ThreadPoolExecutor(io_threads, thread_name_prefix="ssd-moe-io") if io_threads else None
 +        self.pending = {}
 +        self.window = 2 * io_threads
-+        self.prefetched = self.prefetch_used = 0
++        self.prefetched = self.prefetch_used = self.installed_ahead = 0
++        # Host buffers of non-blocking host-to-device copies still queued on the device; the next host
++        # synchronization (each layer's routing copy) proves they are done, see `release_host_buffers`.
++        self.inflight = []
 +
 +    def register(self, prefix, module):
 +        shapes = {
@@ -1070,11 +1073,50 @@ index 0000000000..931cc36f35
 +    def _read(self, prefix, expert):
 +        """One expert on the device, for a single use."""
 +        tensors = self._take_host(prefix, expert)
++        self.inflight.append(tensors)
 +        if self.layouts[prefix][0] == "quantized":
-+            return _split_expert(tensors[0].to(self.device), self._pool_shapes)
++            return _split_expert(tensors[0].to(self.device, non_blocking=True), self._pool_shapes)
 +        if isinstance(tensors[0], tuple):  # GGUF: (gate, up) raw bytes, down raw bytes
-+            return tuple(t.to(self.device) for t in tensors[0]), tensors[1].to(self.device)
-+        return tuple(t.to(self.device) for t in tensors)
++            return tuple(t.to(self.device, non_blocking=True) for t in tensors[0]), tensors[1].to(
++                self.device, non_blocking=True
++            )
++        return tuple(t.to(self.device, non_blocking=True) for t in tensors)
++
++    def release_host_buffers(self):
++        """Called right after a host synchronization: every queued copy has read its host buffer."""
++        self.inflight.clear()
++
++    def install_ahead(self, prefix, experts):
++        """Make guessed experts resident before their layer runs: called once this layer's work is queued, so waiting
++        for their reads and queuing their copies overlaps device work instead of following the next routing copy.
++        Not counted as lookups; the layer's own `acquire` then counts a hit (and `installed_ahead` says how many)."""
++        for expert in experts:
++            key = (prefix, expert)
++            if key in self.cache or key not in self.pending:
++                continue
++            if self._install(key, self._expert_bytes(prefix)) is not None:
++                self.installed_ahead += 1
++
++    def _install(self, key, size, pinned=()):
++        if not self._make_room(key, size, pinned):
++            return None
++        slot = self.free_slots.pop()
++        # Non-blocking: a blocking copy waits for the whole device queue each time (1.6 ms vs 0.13 ms for a
++        # 3.5 MB expert on the M5). The host buffer stays referenced until the next host synchronization.
++        tensors = self._take_host(*key)
++        self.inflight.append(tensors)
++        if self.quantized is not None:
++            self.slot_buffer[slot].copy_(tensors[0], non_blocking=True)
++        else:
++            for pool, tensor in zip(self.pools, tensors):
++                pool[slot].copy_(tensor, non_blocking=True)
++        self.slot_tables[key[0]][key[1]] = slot
++        self.cache[key] = (slot, size)
++        self.resident_bytes += size
++        self.peak_cache_bytes = max(self.peak_cache_bytes, self.resident_bytes)
++        if self.policy == "lfu":
++            self._push(key)
++        return slot
 +
 +    def acquire(self, prefix, expert, pinned=()):
 +        """Make an expert resident in the pool; returns its slot, or None when it runs once without being cached."""
@@ -1085,25 +1127,7 @@ index 0000000000..931cc36f35
 +            self.cache.move_to_end(key)
 +            return self.cache[key][0]
 +        self.misses += 1
-+        size = self._expert_bytes(prefix)
-+        if not self._make_room(key, size, pinned):
-+            return None
-+        slot = self.free_slots.pop()
-+        # Straight from host memory into the slot: one host-to-device copy.
-+        # Queued on the device stream after any work still reading the slot's previous expert.
-+        tensors = self._take_host(prefix, expert)
-+        if self.quantized is not None:
-+            self.slot_buffer[slot].copy_(tensors[0])
-+        else:
-+            for pool, tensor in zip(self.pools, tensors):
-+                pool[slot].copy_(tensor)
-+        self.slot_tables[prefix][expert] = slot
-+        self.cache[key] = (slot, size)
-+        self.resident_bytes += size
-+        self.peak_cache_bytes = max(self.peak_cache_bytes, self.resident_bytes)
-+        if self.policy == "lfu":
-+            self._push(key)
-+        return slot
++        return self._install(key, self._expert_bytes(prefix), pinned)
 +
 +    def get(self, prefix, expert):
 +        """Return ``(gate_up, down, size)`` for one expert, cached or read for this use only."""
@@ -1156,6 +1180,11 @@ index 0000000000..931cc36f35
 +            self.prefetch(prefix, experts)
 +            for expert in experts:
 +                self.acquire(prefix, expert)
++            if self.device.type == "mps":
++                torch.mps.synchronize()
++            elif self.device.type == "cuda":
++                torch.cuda.synchronize(self.device)
++            self.release_host_buffers()
 +        self.hits = self.misses = 0
 +
 +    def stats(self):
@@ -1168,6 +1197,7 @@ index 0000000000..931cc36f35
 +            "slots": self.num_slots,
 +            "prefetched": self.prefetched,
 +            "prefetch_used": self.prefetch_used,
++            "installed_ahead": self.installed_ahead,
 +            "resident_bytes": self.resident_bytes,
 +            "peak_cache_bytes": self.peak_cache_bytes,
 +            "read_bytes": sum(reader.read_bytes for reader in self._readers()),
@@ -1271,6 +1301,48 @@ index 0000000000..931cc36f35
 +    return matmul(module._apply_gate(matmul(x, *banks[:3])), *banks[3:])
 +
 +
++def _sorted_kernel_applies(rows, experts):
++    """Whether `gather_qmm(sorted_indices=True)` takes MLX's batched `gather_qmm_rhs` path: M == 1, at least 16 rows
++    and 4 rows per expert of the bank. That path is several times faster for prefill."""
++    return rows >= 16 and rows >= 4 * experts
++
++
++def _quantized_sorted_forward(module, store, hidden_states, top_k_index, top_k_weights, experts, banks):
++    """Prefill: rows sorted by expert through the sorted `gather_qmm`, over ``banks`` holding only ``experts``.
++
++    Runs in float32: in mlx-quantization-metal-kernels v2 the sorted (NAX) kernel returns wrong results for bfloat16
++    and float16 inputs on the M5, but is correct, and still 4-6x faster than the unsorted path, in float32. Only this
++    call's scales and biases are converted.
++    """
++    _, bits, group_size = store.quantized
++    num_tokens, top_k = top_k_index.shape
++    lookup = torch.zeros(module.num_experts, dtype=torch.long, device=hidden_states.device)
++    lookup[torch.tensor(experts, device=hidden_states.device)] = torch.arange(
++        len(experts), device=hidden_states.device
++    )
++    rhs, order = torch.sort(lookup[top_k_index.reshape(-1)], stable=True)
++    banks = [bank.float() if bank.is_floating_point() else bank for bank in banks]
++
++    def matmul(inputs, weight, scales, biases):
++        return store.gather_qmm(
++            inputs[:, None, :],
++            weight,
++            scales,
++            biases,
++            rhs_indices=rhs,
++            transpose=True,
++            group_size=group_size,
++            bits=bits,
++            sorted_indices=True,
++        ).squeeze(1)
++
++    x = hidden_states.float()[order // top_k]
++    output = matmul(module._apply_gate(matmul(x, *banks[:3])), *banks[3:])
++    output = output * top_k_weights.reshape(-1)[order, None].float()
++    routed = torch.zeros_like(output).index_copy_(0, order, output)
++    return routed.view(num_tokens, top_k, -1).sum(dim=1).to(hidden_states.dtype)
++
++
 +def _quantized_pool_forward(module, store, hidden_states, slots, top_k_weights):
 +    """Resident quantized experts through `gather_qmm`; non-resident routes (slot ``num_slots``) contribute zero."""
 +    num_tokens, top_k = slots.shape
@@ -1312,18 +1384,25 @@ index 0000000000..931cc36f35
 +        routing = routes[: top_k_index.numel()].view(top_k_index.shape)
 +    else:
 +        routing = top_k_index.cpu()
++    # That copy waited for all queued device work, including earlier host-to-device expert copies.
++    store.release_host_buffers()
 +    experts = torch.unique(routing).tolist()
 +    if experts and not (experts[0] >= 0 and experts[-1] < module.num_experts):
 +        raise ValueError("Expert parallelism and sentinel expert IDs are unsupported")
 +    # This layer's misses are read in parallel (a window ahead of use, bounding host memory); the guessed next-layer
 +    # reads queue behind them.
 +    store.prefetch(prefix, experts[: store.window])
++    guessed = torch.unique(routes[top_k_index.numel() :]).tolist() if predict else []
 +    if predict:
-+        store.prefetch(next_prefix, torch.unique(routes[top_k_index.numel() :]).tolist())
++        store.prefetch(next_prefix, guessed)
 +    try:
-+        return _streamed_experts(module, store, prefix, hidden_states, top_k_index, top_k_weights, routing, experts)
++        result = _streamed_experts(module, store, prefix, hidden_states, top_k_index, top_k_weights, routing, experts)
 +    finally:
 +        store.discard(prefix)
++    if guessed and store.pooled:
++        # This layer's experts are queued on the device: install the next layer's guesses while it computes.
++        store.install_ahead(next_prefix, guessed)
++    return result
 +
 +
 +def _streamed_experts(module, store, prefix, hidden_states, top_k_index, top_k_weights, routing, experts):
@@ -1342,6 +1421,17 @@ index 0000000000..931cc36f35
 +            uncached.append(expert)
 +        else:
 +            pinned.add((prefix, expert))
++    if store.quantized is not None and _sorted_kernel_applies(top_k_index.numel(), len(experts)):
++        # Prefill-sized call: one sorted gather_qmm over a compact bank of this call's experts, cached or not.
++        per_expert = []
++        for expert in experts:
++            if (prefix, expert) in pinned:
++                slot = store.cache[(prefix, expert)][0]
++                per_expert.append([pool[slot] for pool in store.pools])
++            else:
++                per_expert.append(store._read(prefix, expert))
++        banks = [torch.stack(parts) for parts in zip(*per_expert)]
++        return _quantized_sorted_forward(module, store, hidden_states, top_k_index, top_k_weights, experts, banks)
 +    if pinned and store.quantized is not None:
 +        slots = store.slot_tables[prefix][top_k_index]
 +        result = _quantized_pool_forward(module, store, hidden_states, slots, top_k_weights)
@@ -1689,10 +1779,10 @@ index ed410f9606..885174336c 100644
                  merged_state_dict = {}
 diff --git a/tests/integrations/test_ssd_moe.py b/tests/integrations/test_ssd_moe.py
 new file mode 100644
-index 0000000000..4e2fc8e513
+index 0000000000..26ac84675c
 --- /dev/null
 +++ b/tests/integrations/test_ssd_moe.py
-@@ -0,0 +1,636 @@
+@@ -0,0 +1,644 @@
 +# Copyright 2026 The HuggingFace Team. All rights reserved.
 +#
 +# Licensed under the Apache License, Version 2.0 (the "License");
@@ -2290,7 +2380,8 @@ index 0000000000..4e2fc8e513
 +        config._experts_implementation = "eager"
 +        config._attn_implementation = "eager"
 +        model = Qwen3MoeForCausalLM(config).eval()
-+        ids = torch.tensor([[1, 7, 3, 9, 2, 11, 5]])
++        # 12 tokens x top-2 over 4 experts: prefill takes the sorted (compact bank) path, decode the pool path.
++        ids = torch.tensor([[1, 7, 3, 9, 2, 11, 5, 13, 4, 8, 6, 10]])
 +        with tempfile.TemporaryDirectory() as directory:
 +            path, quantized = Path(directory) / "model", Path(directory) / "experts-q8"
 +            model.save_pretrained(path)
@@ -2329,3 +2420,10 @@ index 0000000000..4e2fc8e513
 +                        torch.testing.assert_close(streamed(ids).logits, expected_logits, atol=1e-5, rtol=1e-4)
 +                        actual = streamed.generate(ids, max_new_tokens=6, do_sample=False, pad_token_id=0)
 +                    torch.testing.assert_close(actual, expected)
++
++    def test_sorted_kernel_condition(self):
++        from transformers.integrations.ssd_moe import _sorted_kernel_applies
++
++        self.assertFalse(_sorted_kernel_applies(8, 1))  # decode: fewer than 16 rows
++        self.assertFalse(_sorted_kernel_applies(63, 16))  # under 4 rows per expert
++        self.assertTrue(_sorted_kernel_applies(64, 16))
