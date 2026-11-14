@@ -1,12 +1,12 @@
 #!/bin/bash
 # Qwen3.8-Flash-Next with moe-expert-streaming on one A10G: convert once into the shared cache, then benchmark.
-# Inputs (env): STEPS (comma list: convert,decode,decode-bypass,prefill,ppl), CACHE_GIB, PREFILL_CACHE_GIB, IO_THREADS
+# Inputs (env): STEPS (comma list: convert,kernel,decode,decode-bypass,prefill,ppl), CACHE_GIB, PREFILL_CACHE_GIB, IO_THREADS
 set -euo pipefail
 MODEL=/mnt/cache/moe-expert-streaming/qwen38
 OUT=$PWD/out
 mkdir -p "$OUT"
 has() { [[ ",$STEPS," == *",$1,"* ]]; }
-run() { echo "::group::$1"; shift; "$@" 2>&1 | tee -a "$OUT/log.txt"; echo "::endgroup::"; }
+run() { echo "::group::$1"; shift; set -o pipefail; "$@" 2>&1 | tee -a "$OUT/log.txt"; echo "::endgroup::"; }
 
 if has convert; then
   if [ -f "$MODEL/experts-q3/quantization.json" ] && [ -f "$MODEL/ngram/ngram.json" ]; then
@@ -15,6 +15,9 @@ if has convert; then
     run convert python pkg/scripts/convert_fp8.py "$MODEL" --bits 3 --device cuda
   fi
   du -sh "$MODEL"/* | tee "$OUT/model-size.txt"
+fi
+if has kernel; then
+  run kernel python pkg/scripts/check_cuda_kernel.py
 fi
 common=(--io-threads "$IO_THREADS" --device cuda)
 if has decode; then

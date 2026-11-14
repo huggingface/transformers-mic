@@ -13,8 +13,8 @@ on:
         options: [aws-g5-4xlarge-cache]
         default: aws-g5-4xlarge-cache
       steps:
-        description: "Comma list: convert,decode,decode-bypass,prefill,ppl"
-        default: convert,decode,decode-bypass,prefill,ppl
+        description: "Comma list: convert,kernel,decode,decode-bypass,prefill,ppl"
+        default: convert,kernel,decode,decode-bypass,prefill,ppl
       package_ref:
         description: tarekziade/moe-expert-streaming ref
         default: main
@@ -53,6 +53,7 @@ jobs:
       HF_HOME: /mnt/cache
       HF_HUB_DISABLE_PROGRESS_BARS: '1'
       PYTHONUNBUFFERED: '1'
+      PYTORCH_CUDA_ALLOC_CONF: expandable_segments:True
       STEPS: ${{ inputs.steps }}
       CACHE_GIB: ${{ inputs.cache_gib }}
       PREFILL_CACHE_GIB: ${{ inputs.prefill_cache_gib }}
