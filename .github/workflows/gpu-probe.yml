@@ -13,8 +13,8 @@ on:
         options: [aws-g5-4xlarge-cache]
         default: aws-g5-4xlarge-cache
       steps:
-        description: "Comma list: convert,kernel,decode,decode-bypass,prefill,ppl"
-        default: convert,kernel,decode,decode-bypass,prefill,ppl
+        description: "Comma list: convert,kernel,decode,decode-bypass,decode-host,prefill,prefill-host,ppl"
+        default: kernel,decode,decode-host,prefill-host,ppl
       package_ref:
         description: tarekziade/moe-expert-streaming ref
         default: main
@@ -27,6 +27,9 @@ on:
       prefill_cache_gib:
         description: Device expert cache for the 4K prefill (GiB)
         default: '6'
+      host_cache_gib:
+        description: Pinned host tier for decode-host / prefill-host (GiB; the 3-bit experts are 49 GB)
+        default: '60'
       io_threads:
         description: Expert read threads
         default: '8'
@@ -58,6 +61,7 @@ jobs:
       CACHE_GIB: ${{ inputs.cache_gib }}
       PREFILL_CACHE_GIB: ${{ inputs.prefill_cache_gib }}
       IO_THREADS: ${{ inputs.io_threads }}
+      HOST_CACHE_GIB: ${{ inputs.host_cache_gib }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -74,7 +78,12 @@ jobs:
           TRANSFORMERS_REF: ${{ inputs.transformers_ref }}
           INSTALL_FLA: ${{ inputs.install_fla }}
         run: |
-          python -m pip install -q "transformers @ git+https://github.com/huggingface/transformers@${TRANSFORMERS_REF}"
+          # The PR branch plus experiments/moe-expert-streaming/transformers.patch (changes not pushed to the PR yet).
+          git clone -q --depth 1 -b "${TRANSFORMERS_REF}" https://github.com/huggingface/transformers.git tf
+          if [ -s experiments/moe-expert-streaming/transformers.patch ]; then git -C tf apply "$PWD/experiments/moe-expert-streaming/transformers.patch"; fi
+          git -C tf log --oneline -1 | tee -a out/machine.txt
+          git -C tf diff --stat | tail -1 | tee -a out/machine.txt
+          python -m pip install -q ./tf
           python -m pip install -q --no-deps -e pkg
           if [ "$INSTALL_FLA" = "true" ]; then python -m pip install -q flash-linear-attention || echo "fla install failed"; fi
           python -c "import torch, transformers, moe_expert_streaming as m; print(torch.__version__, torch.version.cuda, transformers.__version__, m.__version__)" | tee -a out/machine.txt

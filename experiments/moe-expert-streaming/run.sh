@@ -1,6 +1,6 @@
 #!/bin/bash
 # Qwen3.8-Flash-Next with moe-expert-streaming on one A10G: convert once into the shared cache, then benchmark.
-# Inputs (env): STEPS (comma list: convert,kernel,decode,decode-bypass,prefill,ppl), CACHE_GIB, PREFILL_CACHE_GIB, IO_THREADS
+# Inputs (env): STEPS (comma list: convert,kernel,decode,decode-bypass,decode-host,prefill,prefill-host,ppl), CACHE_GIB, PREFILL_CACHE_GIB, HOST_CACHE_GIB, IO_THREADS
 set -euo pipefail
 MODEL=/mnt/cache/moe-expert-streaming/qwen38
 OUT=$PWD/out
@@ -27,6 +27,15 @@ fi
 if has decode-bypass; then
   run decode-bypass python pkg/scripts/bench.py "$MODEL" --cache-gib "$CACHE_GIB" --skip-prefill --bypass-page-cache \
     "${common[@]}" --output "$OUT/decode-bypass.json"
+fi
+if has decode-host; then
+  run decode-host python pkg/scripts/bench.py "$MODEL" --cache-gib "$CACHE_GIB" --skip-prefill \
+    --host-cache-gib "$HOST_CACHE_GIB" --host-preload "${common[@]}" --output "$OUT/decode-host.json"
+fi
+if has prefill-host; then
+  run prefill-host python pkg/scripts/bench.py "$MODEL" --cache-gib "$PREFILL_CACHE_GIB" --skip-story \
+    --prefill-chunk-size 1024 --host-cache-gib "$HOST_CACHE_GIB" --host-preload "${common[@]}" \
+    --output "$OUT/prefill-host.json"
 fi
 if has prefill; then
   run prefill python pkg/scripts/bench.py "$MODEL" --cache-gib "$PREFILL_CACHE_GIB" --skip-story \
