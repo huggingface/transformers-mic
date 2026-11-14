@@ -213,9 +213,11 @@
  },
  "plbart": {
   "checkpoint": "uclanlp/plbart-java-cs",
-  "conclusion": null,
+  "conclusion": "success",
   "dispatched_at": "2026-11-13T09:05:35Z",
-  "status": "queued"
+  "run_id": 43398429913,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/43398429913"
  },
  "pocket_tts": {
   "checkpoint": "eustlb/pocket-tts",
@@ -236,9 +238,11 @@
  },
  "prophetnet": {
   "checkpoint": "microsoft/prophetnet-large-uncased-cnndm",
-  "conclusion": null,
+  "conclusion": "success",
   "dispatched_at": "2026-11-13T09:05:35Z",
-  "status": "queued"
+  "run_id": 43398433481,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/43398433481"
  },
  "qianfan_ocr": {
   "checkpoint": "bairongz/QianfanOCR",
@@ -265,6 +269,18 @@
   "run_id": 42787725811,
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/42787725811"
+ },
+ "shieldgemma2": {
+  "checkpoint": "google/shieldgemma-2-4b-it",
+  "conclusion": null,
+  "dispatched_at": "2026-11-14T09:03:32Z",
+  "status": "queued"
+ },
+ "speech_to_text": {
+  "checkpoint": "facebook/s2t-small-librispeech-asr",
+  "conclusion": null,
+  "dispatched_at": "2026-11-14T09:03:32Z",
+  "status": "queued"
  },
  "switch_transformers": {
   "checkpoint": "google/switch-base-8",

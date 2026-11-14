@@ -1353,6 +1353,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#bert#2026-11-13": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#bigbird_pegasus#2026-10-30": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1413,6 +1417,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#csm#2026-11-13": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#cwm#2026-10-09": {
   "verdict": "not-covered",
   "version": 9
@@ -1441,12 +1449,20 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#deepseek_v3#2026-10-19": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#deepseek_v32#2026-11-08": {
   "verdict": "out-of-scope",
   "version": 9
  },
  "sticky#dia#2026-10-30": {
   "verdict": "not-covered",
+  "version": 9
+ },
+ "sticky#distilbert#2026-11-11": {
+  "verdict": "out-of-scope",
   "version": 9
  },
  "sticky#electra#2026-10-09": {
@@ -1523,6 +1539,10 @@
   "verdict": "not-reproduced",
   "version": 9
  },
+ "sticky#gemma3#2026-11-13": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#gemma3n#2026-10-09": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1534,6 +1554,10 @@
  "sticky#gemma3n#2026-11-02": {
   "reason": "the daily CI did not fail it",
   "verdict": "not-reproduced",
+  "version": 9
+ },
+ "sticky#gemma3n#2026-11-13": {
+  "verdict": "out-of-scope",
   "version": 9
  },
  "sticky#gemma4#2026-10-10": {
@@ -1588,6 +1612,18 @@
   "version": 9
  },
  "sticky#got_ocr2#2026-10-20": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#got_ocr2#2026-11-13": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#gpt2#2026-11-13": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#gpt_oss#2026-11-13": {
   "verdict": "out-of-scope",
   "version": 9
  },
@@ -1665,9 +1701,17 @@
   "verdict": "not-covered",
   "version": 9
  },
+ "sticky#inkling2#2026-11-13": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#internvl#2026-11-02": {
   "reason": "the daily CI did not fail it",
   "verdict": "not-reproduced",
+  "version": 9
+ },
+ "sticky#internvl#2026-11-13": {
+  "verdict": "out-of-scope",
   "version": 9
  },
  "sticky#janus#2026-11-08": {
@@ -1718,7 +1762,15 @@
   "verdict": "not-reproduced",
   "version": 9
  },
+ "sticky#llama#2026-11-13": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#llava#2026-11-02": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#llava#2026-11-13": {
   "verdict": "out-of-scope",
   "version": 9
  },
@@ -1797,6 +1849,10 @@
  "sticky#mistral3#2026-10-19": {
   "reason": "the daily CI did not fail it",
   "verdict": "not-reproduced",
+  "version": 9
+ },
+ "sticky#mistral3#2026-11-13": {
+  "verdict": "out-of-scope",
   "version": 9
  },
  "sticky#mixtral#2026-10-07": {
@@ -1897,6 +1953,22 @@
   "verdict": "duplicate",
   "version": 9
  },
+ "sticky#qwen2#2026-11-13": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#qwen2_5_omni#2026-11-13": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#qwen2_5_vl#2026-11-13": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#qwen2_audio#2026-11-13": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#qwen3_5#2026-10-12": {
   "bad": "d203390173fc074638e2268c6becd140fca5d92b",
   "commits": 386,
@@ -1941,6 +2013,10 @@
   "verdict": "not-covered",
   "version": 9
  },
+ "sticky#seamless_m4t#2026-10-22": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#shieldgemma2#2026-10-07": {
   "verdict": "not-covered",
   "version": 9
@@ -1948,6 +2024,10 @@
  "sticky#smolvlm#2026-11-02": {
   "reason": "the daily CI did not fail it",
   "verdict": "not-reproduced",
+  "version": 9
+ },
+ "sticky#smolvlm#2026-11-13": {
+  "verdict": "out-of-scope",
   "version": 9
  },
  "sticky#speech_to_text#2026-10-30": {
@@ -1979,6 +2059,10 @@
   "version": 9
  },
  "sticky#t5#2026-10-29": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#t5#2026-11-13": {
   "verdict": "out-of-scope",
   "version": 9
  },
@@ -2059,6 +2143,10 @@
   "version": 9
  },
  "sticky#whisper#2026-11-08": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#whisper#2026-11-13": {
   "verdict": "out-of-scope",
   "version": 9
  },

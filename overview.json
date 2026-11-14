@@ -1,5 +1,5 @@
 {
- "awaiting_verdict": 28,
+ "awaiting_verdict": 29,
  "block_merges": {
   "ready": false,
   "unmet": [
@@ -16,12 +16,12 @@
  "drafts_per_day": 2,
  "false_alarms": {
   "prs_not_their_fault": 165,
-  "prs_with_failure": 197
+  "prs_with_failure": 198
  },
  "missed": {
-  "awaiting_verdict": 22,
-  "not_covered": 29,
-  "real_checkpoint": 22
+  "awaiting_verdict": 23,
+  "not_covered": 30,
+  "real_checkpoint": 23
  },
  "next": [
   {
@@ -73,6 +73,18 @@
    "shrinkable": true
   },
   {
+   "checkpoint": "facebook/hf-seamless-m4t-medium",
+   "draft": "failure",
+   "model": "seamless_m4t",
+   "next_batch": false,
+   "other": 3,
+   "real_checkpoint": 0,
+   "regressions": 3,
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42787725811",
+   "shrink": "",
+   "shrinkable": true
+  },
+  {
    "checkpoint": "microsoft/layoutlmv3-base",
    "draft": "failure",
    "model": "layoutlmv3",
@@ -81,18 +93,6 @@
    "real_checkpoint": 0,
    "regressions": 2,
    "run": "https://github.com/huggingface/transformers-mic/actions/runs/42590668418",
-   "shrink": "",
-   "shrinkable": true
-  },
-  {
-   "checkpoint": "facebook/hf-seamless-m4t-medium",
-   "draft": "failure",
-   "model": "seamless_m4t",
-   "next_batch": false,
-   "other": 2,
-   "real_checkpoint": 0,
-   "regressions": 2,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42787725811",
    "shrink": "",
    "shrinkable": true
   },
@@ -169,34 +169,10 @@
    "shrinkable": true
   },
   {
-   "checkpoint": "uclanlp/plbart-java-cs",
-   "draft": "queued",
-   "model": "plbart",
-   "next_batch": false,
-   "other": 1,
-   "real_checkpoint": 0,
-   "regressions": 1,
-   "run": "",
-   "shrink": "",
-   "shrinkable": true
-  },
-  {
-   "checkpoint": "microsoft/prophetnet-large-uncased-cnndm",
-   "draft": "queued",
-   "model": "prophetnet",
-   "next_batch": false,
-   "other": 1,
-   "real_checkpoint": 0,
-   "regressions": 1,
-   "run": "",
-   "shrink": "",
-   "shrinkable": true
-  },
-  {
    "checkpoint": "google/shieldgemma-2-4b-it",
-   "draft": "",
+   "draft": "queued",
    "model": "shieldgemma2",
-   "next_batch": true,
+   "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -206,9 +182,9 @@
   },
   {
    "checkpoint": "facebook/s2t-small-librispeech-asr",
-   "draft": "",
+   "draft": "queued",
    "model": "speech_to_text",
-   "next_batch": true,
+   "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -220,7 +196,7 @@
    "checkpoint": "google/t5gemma-2-270m-270m",
    "draft": "",
    "model": "t5gemma2",
-   "next_batch": false,
+   "next_batch": true,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -256,6 +232,18 @@
    "checkpoint": "tue-mps/eomt-dinov3-coco-panoptic-large-640",
    "draft": "not draftable",
    "model": "eomt_dinov3",
+   "next_batch": false,
+   "other": 0,
+   "real_checkpoint": 2,
+   "regressions": 2,
+   "run": "",
+   "shrink": "",
+   "shrinkable": false
+  },
+  {
+   "checkpoint": "thinkingmachines/Inkling-2-Small-MXFP8",
+   "draft": "not draftable",
+   "model": "inkling2",
    "next_batch": false,
    "other": 0,
    "real_checkpoint": 2,
@@ -313,9 +301,21 @@
    "shrinkable": false
   },
   {
-   "checkpoint": "thinkingmachines/Inkling-2-Small-MXFP8",
+   "checkpoint": "openbmb/MiniCPM-V-4.7-1B",
    "draft": "not draftable",
-   "model": "inkling2",
+   "model": "minicpmv4_7",
+   "next_batch": false,
+   "other": 0,
+   "real_checkpoint": 1,
+   "regressions": 1,
+   "run": "",
+   "shrink": "",
+   "shrinkable": false
+  },
+  {
+   "checkpoint": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+   "draft": "not draftable",
+   "model": "qwen3_omni_moe",
    "next_batch": false,
    "other": 0,
    "real_checkpoint": 1,
@@ -326,6 +326,204 @@
   }
  ],
  "regressions": [
+  {
+   "date": "2026-11-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "whisper",
+   "pr": null,
+   "run": "",
+   "tests": 4,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "t5",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "smolvlm",
+   "pr": null,
+   "run": "",
+   "tests": 3,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "qwen2_audio",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "qwen2_5_vl",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "qwen2_5_omni",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "qwen2",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "mistral3",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "llava",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "llama",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "internvl",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "gpt_oss",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "gpt2",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "got_ocr2",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "gemma3n",
+   "pr": null,
+   "run": "",
+   "tests": 4,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "gemma3",
+   "pr": null,
+   "run": "",
+   "tests": 4,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "csm",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "bert",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "out-of-scope"
+  },
   {
    "date": "2026-11-11",
    "detail": "",
@@ -343,6 +541,17 @@
    "integration": false,
    "job": "",
    "model": "swin",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-11",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "distilbert",
    "pr": null,
    "run": "",
    "tests": 1,
@@ -1080,6 +1289,17 @@
    "integration": false,
    "job": "",
    "model": "flex_olmo",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-10-19",
+   "detail": "",
+   "integration": true,
+   "job": "",
+   "model": "deepseek_v3",
    "pr": null,
    "run": "",
    "tests": 1,
@@ -2691,14 +2911,14 @@
   "model-added": 4,
   "no-code-change": 1,
   "not-a-regression": 5,
-  "not-covered": 226,
+  "not-covered": 228,
   "not-reproduced": 7,
-  "out-of-scope": 155,
+  "out-of-scope": 175,
   "pending": 0,
   "unrelated-culprit": 15
  },
  "window": [
   "2026-10-20",
-  "2026-11-13"
+  "2026-11-14"
  ]
 }

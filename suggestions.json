@@ -36,6 +36,12 @@
     "gpu_only": true,
     "integration": true,
     "test": "tests/models/deepseek_v3/test_modeling_deepseek_v3.py::DeepseekV3IntegrationTest::test_compile_static_cache"
+   },
+   {
+    "date": "2026-10-19",
+    "gpu_only": true,
+    "integration": true,
+    "test": "tests/models/deepseek_v3/test_modeling_deepseek_v3.py::DeepseekV3IntegrationTest::test_compile_static_cache"
    }
   ],
   "deepseek_v32": [
@@ -556,6 +562,17 @@
    ]
   },
   {
+   "checkpoint": "facebook/hf-seamless-m4t-medium",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "seamless_m4t",
+   "other": 3,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/seamless_m4t/test_modeling_seamless_m4t.py::SeamlessM4TModelWithSpeechInputTest::test_model_parallelism"
+   ]
+  },
+  {
    "checkpoint": "microsoft/layoutlmv3-base",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -564,17 +581,6 @@
    "shrinkable": true,
    "tests": [
     "tests/models/layoutlmv3/test_modeling_layoutlmv3.py::LayoutLMv3ModelTest::test_inputs_embeds_matches_input_ids"
-   ]
-  },
-  {
-   "checkpoint": "facebook/hf-seamless-m4t-medium",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "seamless_m4t",
-   "other": 2,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/seamless_m4t/test_modeling_seamless_m4t.py::SeamlessM4TModelWithSpeechInputTest::test_model_parallelism"
    ]
   },
   {
@@ -643,30 +649,6 @@
    "tests": [
     "tests/models/mvp/test_modeling_mvp.py::MvpModelTest::test_torch_export_generate_dynamic",
     "tests/models/mvp/test_modeling_mvp.py::MvpModelTest::test_torch_export_generate_static"
-   ]
-  },
-  {
-   "checkpoint": "uclanlp/plbart-java-cs",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "plbart",
-   "other": 1,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/plbart/test_modeling_plbart.py::PLBartModelTest::test_torch_export_generate_dynamic",
-    "tests/models/plbart/test_modeling_plbart.py::PLBartModelTest::test_torch_export_generate_static"
-   ]
-  },
-  {
-   "checkpoint": "microsoft/prophetnet-large-uncased-cnndm",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "prophetnet",
-   "other": 1,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/prophetnet/test_modeling_prophetnet.py::ProphetNetModelTest::test_torch_export_generate_dynamic",
-    "tests/models/prophetnet/test_modeling_prophetnet.py::ProphetNetModelTest::test_torch_export_generate_static"
    ]
   },
   {
@@ -743,6 +725,18 @@
    ]
   },
   {
+   "checkpoint": "thinkingmachines/Inkling-2-Small-MXFP8",
+   "checkpoint_source": "failing test",
+   "integration": 2,
+   "model": "inkling2",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/inkling2/test_modeling_inkling2.py::Inkling2SmallModelIntegrationTest::test_small_model_integration_test_image",
+    "tests/models/inkling2/test_modeling_inkling2.py::Inkling2SmallModelIntegrationTest::test_small_model_integration_test_text"
+   ]
+  },
+  {
    "checkpoint": null,
    "checkpoint_source": null,
    "integration": 2,
@@ -788,18 +782,6 @@
    "tests": [
     "tests/models/granite_speech_plus/test_modeling_granite_speech_plus.py::GraniteSpeechPlusForConditionalGenerationIntegrationTest::test_small_model_integration_test_batch",
     "tests/models/granite_speech_plus/test_modeling_granite_speech_plus.py::GraniteSpeechPlusForConditionalGenerationIntegrationTest::test_small_model_integration_test_single"
-   ]
-  },
-  {
-   "checkpoint": "thinkingmachines/Inkling-2-Small-MXFP8",
-   "checkpoint_source": "failing test",
-   "integration": 1,
-   "model": "inkling2",
-   "other": 0,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/inkling2/test_modeling_inkling2.py::Inkling2SmallModelIntegrationTest::test_small_model_integration_test_image",
-    "tests/models/inkling2/test_modeling_inkling2.py::Inkling2SmallModelIntegrationTest::test_small_model_integration_test_text"
    ]
   },
   {
@@ -1105,6 +1087,46 @@
   }
  ],
  "shared": {
+  "test_bc_cache_name_forward": [
+   "bert",
+   "csm",
+   "gemma3",
+   "gemma3n",
+   "got_ocr2",
+   "gpt2",
+   "gpt_oss",
+   "internvl",
+   "llama",
+   "llava",
+   "mistral3",
+   "qwen2",
+   "qwen2_5_omni",
+   "qwen2_5_vl",
+   "qwen2_audio",
+   "smolvlm",
+   "t5",
+   "whisper"
+  ],
+  "test_bc_cache_name_generate": [
+   "bert",
+   "csm",
+   "gemma3",
+   "gemma3n",
+   "got_ocr2",
+   "gpt2",
+   "gpt_oss",
+   "internvl",
+   "llama",
+   "llava",
+   "mistral3",
+   "qwen2",
+   "qwen2_5_omni",
+   "qwen2_5_vl",
+   "qwen2_audio",
+   "smolvlm",
+   "t5",
+   "whisper"
+  ],
   "test_flash_attention_2_padding_matches_padding_free_with_position_ids": [
    "gemma4",
    "gemma4_unified",
@@ -1131,6 +1153,7 @@
    "albert",
    "bert",
    "clipseg",
+   "distilbert",
    "electra",
    "ernie",
    "owlv2",

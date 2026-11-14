@@ -1,0 +1,30 @@
+{
+ "date": "2026-11-14",
+ "main": {
+  "failed": 632,
+  "now": {
+   "cases": 232,
+   "failing": 2,
+   "rate": 0.8620689655172413
+  },
+  "rate": 2.845436945657557,
+  "total": 22211
+ },
+ "prs": {
+  "failed": 576,
+  "now": {
+   "cases": 9718,
+   "failing": 233,
+   "rate": 2.3976126775056597
+  },
+  "rate": 3.717808042341703,
+  "total": 15493
+ },
+ "truncated": {
+  "main": [],
+  "prs": [
+   "Runtime traceback"
+  ]
+ },
+ "window_days": 1
+}
