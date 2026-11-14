@@ -28,8 +28,8 @@ on:
         description: Device expert cache for the 4K prefill (GiB)
         default: '6'
       host_cache_gib:
-        description: Pinned host tier for decode-host / prefill-host (GiB; the 3-bit experts are 49 GB)
-        default: '60'
+        description: Pinned host tier for decode-host / prefill-host (GiB; all 3-bit experts need 49.2 GiB; pods have ~83 GiB)
+        default: '50'
       io_threads:
         description: Expert read threads
         default: '8'
@@ -72,7 +72,10 @@ jobs:
       - name: Machine
         run: |
           mkdir -p out
-          { nvidia-smi; nproc; free -g; df -h /mnt/cache; python --version; } 2>&1 | tee out/machine.txt
+          { nvidia-smi; nproc; df -h /mnt/cache; python --version
+            # free shows the host; the pod's own limit is the cgroup's.
+            echo "cgroup memory.max: $(cat /sys/fs/cgroup/memory.max 2>/dev/null || cat /sys/fs/cgroup/memory/memory.limit_in_bytes)"
+            echo "cgroup cpu.max: $(cat /sys/fs/cgroup/cpu.max 2>/dev/null)"; } 2>&1 | tee out/machine.txt
       - name: Install transformers (experts_offload) and the package
         env:
           TRANSFORMERS_REF: ${{ inputs.transformers_ref }}
