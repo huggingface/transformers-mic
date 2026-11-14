@@ -1,42 +1,88 @@
-name: GPU probe
+name: moe-expert-streaming CUDA
 
-# Checks that this repo can reach the transformers GPU runner groups (the ARC
-# scale sets the slow-test verify loop and run-slow use) and reports the environment
-# contract checks would run in. Same image and node-local cache mount as
-# transformers-ci's serge-verify-slow.yml.
+# Task-branch experiment: Qwen3.8-Flash-Next (121 GB of FP8 experts) on one A10G (24 GB) with
+# https://github.com/tarekziade/moe-expert-streaming on top of huggingface/transformers#50717 (experts_offload).
+# The 3-bit converted model is written once to the shared /mnt/cache and reused by later runs.
 
 on:
   workflow_dispatch:
     inputs:
       machine_type:
-        description: "Runner group: aws-g5-4xlarge-cache (single) / aws-g5-12xlarge-cache (multi)"
-        required: false
-        type: string
+        description: Approved single GPU MIC runner
+        type: choice
+        options: [aws-g5-4xlarge-cache]
         default: aws-g5-4xlarge-cache
-      docker:
-        required: false
-        type: string
-        default: huggingface/transformers-all-latest-gpu
+      steps:
+        description: "Comma list: convert,decode,decode-bypass,prefill,ppl"
+        default: convert,decode,decode-bypass,prefill,ppl
+      package_ref:
+        description: tarekziade/moe-expert-streaming ref
+        default: main
+      transformers_ref:
+        description: huggingface/transformers ref with experts_offload (PR 50717)
+        default: experts-offload
+      cache_gib:
+        description: Device expert cache for decode (GiB)
+        default: '8'
+      prefill_cache_gib:
+        description: Device expert cache for the 4K prefill (GiB)
+        default: '6'
+      io_threads:
+        description: Expert read threads
+        default: '8'
+      install_fla:
+        description: Install flash-linear-attention (Triton gated delta rule kernels)
+        type: boolean
+        default: true
 
 permissions:
   contents: read
 
 jobs:
-  probe:
+  run:
     runs-on:
       group: '${{ inputs.machine_type }}'
-    timeout-minutes: 60
+    timeout-minutes: 360
     container:
-      image: ${{ inputs.docker }}
-      options: --gpus all --shm-size "16gb" --ipc host -v /mnt/cache/.cache/huggingface:/mnt/cache/
+      image: huggingface/transformers-all-latest-gpu
+      options: >-
+        --gpus all --shm-size "16gb" --ipc host --ulimit memlock=-1:-1
+        -e NVIDIA_DRIVER_CAPABILITIES=compute,utility
+        -v /mnt/cache/.cache/huggingface:/mnt/cache/
     env:
       HF_HOME: /mnt/cache
+      HF_HUB_DISABLE_PROGRESS_BARS: '1'
+      PYTHONUNBUFFERED: '1'
+      STEPS: ${{ inputs.steps }}
+      CACHE_GIB: ${{ inputs.cache_gib }}
+      PREFILL_CACHE_GIB: ${{ inputs.prefill_cache_gib }}
+      IO_THREADS: ${{ inputs.io_threads }}
     steps:
-      - name: Environment
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: tarekziade/moe-expert-streaming
+          ref: ${{ inputs.package_ref }}
+          path: pkg
+      - name: Machine
         run: |
-          nvidia-smi
-          python3 --version
-          python3 -c "import torch, transformers; print('torch', torch.__version__, 'cuda', torch.version.cuda, torch.cuda.is_available(), torch.cuda.device_count(), torch.cuda.get_device_name(0)); print('transformers', transformers.__version__, transformers.__file__)"
-          python3 -m pip list 2>/dev/null | grep -iE "^(torch|tokenizers|numpy|pillow|accelerate|kernels|flash|safetensors|huggingface)" || true
-          git -C /transformers log -1 --format='%H %cd' || true
-          ls /mnt/cache/hub 2>/dev/null | head -50 || true
+          mkdir -p out
+          { nvidia-smi; nproc; free -g; df -h /mnt/cache; python --version; } 2>&1 | tee out/machine.txt
+      - name: Install transformers (experts_offload) and the package
+        env:
+          TRANSFORMERS_REF: ${{ inputs.transformers_ref }}
+          INSTALL_FLA: ${{ inputs.install_fla }}
+        run: |
+          python -m pip install -q "transformers @ git+https://github.com/huggingface/transformers@${TRANSFORMERS_REF}"
+          python -m pip install -q --no-deps -e pkg
+          if [ "$INSTALL_FLA" = "true" ]; then python -m pip install -q flash-linear-attention || echo "fla install failed"; fi
+          python -c "import torch, transformers, moe_expert_streaming as m; print(torch.__version__, torch.version.cuda, transformers.__version__, m.__version__)" | tee -a out/machine.txt
+          python -m pip list 2>/dev/null | grep -iE "^(torch|triton|transformers|flash-linear|fla|causal|kernels) " | tee -a out/machine.txt
+      - name: Run
+        run: bash experiments/moe-expert-streaming/run.sh
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: moe-expert-streaming-cuda
+          path: out/
+          retention-days: 14
