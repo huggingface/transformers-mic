@@ -1,6 +1,6 @@
 #!/bin/bash
 # Qwen3.8-Flash-Next with moe-expert-streaming on one A10G: convert once into the shared cache, then benchmark.
-# Inputs (env): STEPS (comma list: convert,kernel,decode,decode-bypass,decode-host,prefill,prefill-host,ppl), CACHE_GIB, PREFILL_CACHE_GIB, HOST_CACHE_GIB, IO_THREADS
+# Inputs (env): STEPS (comma list: convert,kernel,decode,decode-bypass,decode-host,decode-host2,decode-host-lazy,prefill,prefill-host,ppl), CACHE_GIB, PREFILL_CACHE_GIB, HOST_CACHE_GIB, IO_THREADS
 set -euo pipefail
 MODEL=/mnt/cache/moe-expert-streaming/qwen38
 OUT=$PWD/out
@@ -31,6 +31,14 @@ fi
 if has decode-host; then
   run decode-host python pkg/scripts/bench.py "$MODEL" --cache-gib "$CACHE_GIB" --skip-prefill \
     --host-cache-gib "$HOST_CACHE_GIB" --host-preload "${common[@]}" --output "$OUT/decode-host.json"
+fi
+if has decode-host2; then  # repeat: is the host-tier run deterministic?
+  run decode-host2 python pkg/scripts/bench.py "$MODEL" --cache-gib "$CACHE_GIB" --skip-prefill \
+    --host-cache-gib "$HOST_CACHE_GIB" --host-preload "${common[@]}" --output "$OUT/decode-host2.json"
+fi
+if has decode-host-lazy; then  # host tier filled on demand instead of preloaded
+  run decode-host-lazy python pkg/scripts/bench.py "$MODEL" --cache-gib "$CACHE_GIB" --skip-prefill \
+    --host-cache-gib "$HOST_CACHE_GIB" "${common[@]}" --output "$OUT/decode-host-lazy.json"
 fi
 if has prefill-host; then
   run prefill-host python pkg/scripts/bench.py "$MODEL" --cache-gib "$PREFILL_CACHE_GIB" --skip-story \
