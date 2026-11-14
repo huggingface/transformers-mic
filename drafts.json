@@ -216,6 +216,7 @@
   "conclusion": "success",
   "dispatched_at": "2026-11-13T09:05:35Z",
   "run_id": 43398429913,
+  "shrink": "shrink/43398429913/shrink-plbart-java-cs-mic.html",
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/43398429913"
  },
@@ -241,6 +242,7 @@
   "conclusion": "success",
   "dispatched_at": "2026-11-13T09:05:35Z",
   "run_id": 43398433481,
+  "shrink": "shrink/43398433481/shrink-prophetnet-large-uncased-cnndm-mic.html",
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/43398433481"
  },
