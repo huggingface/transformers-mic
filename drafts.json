@@ -285,6 +285,7 @@
   "conclusion": "success",
   "dispatched_at": "2026-11-14T09:03:32Z",
   "run_id": 43578718541,
+  "shrink": "shrink/43578718541/shrink-s2t-small-librispeech-asr-mic.html",
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/43578718541"
  },
