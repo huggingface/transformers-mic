@@ -274,15 +274,19 @@
  },
  "shieldgemma2": {
   "checkpoint": "google/shieldgemma-2-4b-it",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-14T09:03:32Z",
-  "status": "queued"
+  "run_id": 43578716605,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/43578716605"
  },
  "speech_to_text": {
   "checkpoint": "facebook/s2t-small-librispeech-asr",
-  "conclusion": null,
+  "conclusion": "success",
   "dispatched_at": "2026-11-14T09:03:32Z",
-  "status": "queued"
+  "run_id": 43578718541,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/43578718541"
  },
  "switch_transformers": {
   "checkpoint": "google/switch-base-8",
@@ -291,6 +295,12 @@
   "run_id": 41804368657,
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/41804368657"
+ },
+ "t5gemma2": {
+  "checkpoint": "google/t5gemma-2-270m-270m",
+  "conclusion": null,
+  "dispatched_at": "2026-11-15T09:03:03Z",
+  "status": "queued"
  },
  "vaultgemma": {
   "checkpoint": "google/vaultgemma-1b",

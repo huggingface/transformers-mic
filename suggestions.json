@@ -663,18 +663,6 @@
    ]
   },
   {
-   "checkpoint": "facebook/s2t-small-librispeech-asr",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "speech_to_text",
-   "other": 1,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/speech_to_text/test_modeling_speech_to_text.py::Speech2TextModelTest::test_torch_export_generate_dynamic",
-    "tests/models/speech_to_text/test_modeling_speech_to_text.py::Speech2TextModelTest::test_torch_export_generate_static"
-   ]
-  },
-  {
    "checkpoint": "google/t5gemma-2-270m-270m",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -811,12 +799,14 @@
    "checkpoint_source": null,
    "integration": 0,
    "model": "utils",
-   "other": 4,
+   "other": 5,
    "shrinkable": false,
    "tests": [
     "tests/utils/test_modeling_utils.py::GradientCheckpointingOffloadTest::test_frees_exactly_the_saved_activations",
     "tests/utils/test_image_utils.py::LoadImageTester::test_load_img_url_timeout",
-    "tests/utils/test_modeling_utils.py::ModelOnTheFlyConversionTester::test_safetensors_on_the_fly_sharded_conversion_private"
+    "tests/utils/test_modeling_utils.py::ModelOnTheFlyConversionTester::test_safetensors_on_the_fly_sharded_conversion_private",
+    "tests/utils/test_modeling_utils.py::ModelOnTheFlyConversionTester::test_safetensors_on_the_fly_conversion_private",
+    "tests/utils/test_modeling_utils.py::ModelOnTheFlyConversionTester::test_safetensors_on_the_fly_sharded_conversion"
    ]
   },
   {
@@ -1084,6 +1074,18 @@
     "tests/tensor_parallel/test_tensor_parallel.py::TestTensorParallelTiedWeights::test_checkpoint_with_both_tied_keys_matches_tp1_0_equal",
     "tests/tensor_parallel/test_tensor_parallel.py::TestTensorParallelTiedWeights::test_checkpoint_with_both_tied_keys_matches_tp1_1_different"
    ]
+  },
+  {
+   "checkpoint": "NX-AI/xLSTM-7b",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "xlstm",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/xlstm/test_modeling_xlstm.py::xLSTMModelTest::test_openvino_export_generate_dynamic",
+    "tests/models/xlstm/test_modeling_xlstm.py::xLSTMModelTest::test_openvino_export_generate_static"
+   ]
   }
  ],
  "shared": {
@@ -1139,6 +1141,7 @@
   ],
   "test_flash_attn_2_equivalence": [
    "axk1",
+   "beam",
    "ernie4_5_moe",
    "flex_olmo",
    "glm4",

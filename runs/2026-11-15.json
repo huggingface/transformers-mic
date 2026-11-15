@@ -1,0 +1,28 @@
+{
+ "date": "2026-11-15",
+ "main": {
+  "failed": 628,
+  "now": {
+   "cases": 233,
+   "failing": 2,
+   "rate": 0.8583690987124464
+  },
+  "rate": 2.82539254060377,
+  "total": 22227
+ },
+ "prs": {
+  "failed": 1,
+  "now": {
+   "cases": 0,
+   "failing": 0,
+   "rate": null
+  },
+  "rate": 0.007423353871279044,
+  "total": 13471
+ },
+ "truncated": {
+  "main": [],
+  "prs": []
+ },
+ "window_days": 1
+}

@@ -191,6 +191,7 @@
  "huggingface-mic/resnet-18-mic": "resnet",
  "huggingface-mic/roberta-base-mic": "roberta",
  "huggingface-mic/rtdetr_r50vd-mic": "rt_detr",
+ "huggingface-mic/s2t-small-librispeech-asr-mic": "speech_to_text",
  "huggingface-mic/sam2.1-hiera-tiny-mic": "sam2",
  "huggingface-mic/seamless-m4t-v2-large-mic": "seamless_m4t_v2",
  "huggingface-mic/segformer-b0-finetuned-ade-512-512-mic": "segformer",

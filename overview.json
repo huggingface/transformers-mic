@@ -1,5 +1,5 @@
 {
- "awaiting_verdict": 29,
+ "awaiting_verdict": 32,
  "block_merges": {
   "ready": false,
   "unmet": [
@@ -170,33 +170,21 @@
   },
   {
    "checkpoint": "google/shieldgemma-2-4b-it",
-   "draft": "queued",
+   "draft": "failure",
    "model": "shieldgemma2",
    "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
-   "run": "",
-   "shrink": "",
-   "shrinkable": true
-  },
-  {
-   "checkpoint": "facebook/s2t-small-librispeech-asr",
-   "draft": "queued",
-   "model": "speech_to_text",
-   "next_batch": false,
-   "other": 1,
-   "real_checkpoint": 0,
-   "regressions": 1,
-   "run": "",
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/43578716605",
    "shrink": "",
    "shrinkable": true
   },
   {
    "checkpoint": "google/t5gemma-2-270m-270m",
-   "draft": "",
+   "draft": "queued",
    "model": "t5gemma2",
-   "next_batch": true,
+   "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
@@ -320,6 +308,18 @@
    "other": 0,
    "real_checkpoint": 1,
    "regressions": 1,
+   "run": "",
+   "shrink": "",
+   "shrinkable": false
+  },
+  {
+   "checkpoint": null,
+   "draft": "not draftable",
+   "model": "utils",
+   "next_batch": false,
+   "other": 5,
+   "real_checkpoint": 0,
+   "regressions": 5,
    "run": "",
    "shrink": "",
    "shrinkable": false
@@ -1061,6 +1061,28 @@
    "pr": null,
    "run": "",
    "tests": 4,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-10-28",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "mixtral",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-10-27",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "beam",
+   "pr": null,
+   "run": "",
+   "tests": 1,
    "verdict": "out-of-scope"
   },
   {
@@ -2911,9 +2933,9 @@
   "model-added": 4,
   "no-code-change": 1,
   "not-a-regression": 5,
-  "not-covered": 228,
+  "not-covered": 230,
   "not-reproduced": 7,
-  "out-of-scope": 175,
+  "out-of-scope": 177,
   "pending": 0,
   "unrelated-culprit": 15
  },
