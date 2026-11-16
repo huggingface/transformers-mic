@@ -384,6 +384,20 @@
     "test": "tests/models/mm_grounding_dino/test_modeling_mm_grounding_dino.py::MMGroundingDinoModelIntegrationTests::test_mm_grounding_dino_loss"
    }
   ],
+  "oneformer": [
+   {
+    "date": "2026-10-20",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_no_head"
+   },
+   {
+    "date": "2026-10-20",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_universal_segmentation_head"
+   }
+  ],
   "phi4_multimodal": [
    {
     "date": "2026-11-06",

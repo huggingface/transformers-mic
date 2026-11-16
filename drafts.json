@@ -299,9 +299,11 @@
  },
  "t5gemma2": {
   "checkpoint": "google/t5gemma-2-270m-270m",
-  "conclusion": null,
+  "conclusion": "failure",
   "dispatched_at": "2026-11-15T09:03:03Z",
-  "status": "queued"
+  "run_id": 43697338172,
+  "status": "completed",
+  "url": "https://github.com/huggingface/transformers-mic/actions/runs/43697338172"
  },
  "vaultgemma": {
   "checkpoint": "google/vaultgemma-1b",

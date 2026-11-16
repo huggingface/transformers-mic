@@ -1,0 +1,43 @@
+{
+ "date": "2026-11-16",
+ "rows": [
+  {
+   "class": "pr-only",
+   "commit_sha": "d9cda602201d3ee083410ecf4f1dc1d60edda1a7",
+   "contract": "huggingface-mic/csm-1b-mic",
+   "failure": "training.gradients: ['backbone_model.layers.0.self_attn.q_proj.weight', 'backbone_model.layers.0.mlp.down_proj.weight'] false",
+   "failure_kind": "Baseline assertion",
+   "kind": "fixture",
+   "known_failure": "",
+   "latest": "fail",
+   "platform": "cpu-x86_64-bf16",
+   "pr": "45586",
+   "pr_title": "Add Audio-Visual Flamingo model",
+   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43744664621%3A2&var-pr=45586&var-gh_run_id=43744664621",
+   "selected_by": "shared code (src/transformers/generation/utils.py)",
+   "target": "csm-1b-mic",
+   "trace_url": "/d/pytest-test/test?var-trace_id=276dc39f08244a9f0afc9273833ee29b&var-test_nodeid=tests%2Fcontracts%3A%3ACSM%3A%3Acsm-1b-mic%5Bbfloat16%5D&var-run_id=43744664621%3A2&var-pr=45586&var-gh_run_id=43744664621&from=now-1d&to=now",
+   "variant": "bfloat16",
+   "weights": "random"
+  },
+  {
+   "class": "pr-only",
+   "commit_sha": "612728f445694bd70647259f061fb1f69a8424b5",
+   "contract": "huggingface-mic/csm-1b-mic",
+   "failure": "training.gradients: ['backbone_model.layers.0.self_attn.q_proj.weight', 'backbone_model.layers.0.mlp.down_proj.weight'] false",
+   "failure_kind": "Baseline assertion",
+   "kind": "fixture",
+   "known_failure": "",
+   "latest": "pass",
+   "platform": "cpu-x86_64-bf16",
+   "pr": "50251",
+   "pr_title": "Exporters: run multimodal exports (`ExportedMultimodalModel`)",
+   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43757093859%3A1&var-pr=50251&var-gh_run_id=43757093859",
+   "selected_by": "shared code (src/transformers/exporters/__init__.py)",
+   "target": "csm-1b-mic",
+   "trace_url": "/d/pytest-test/test?var-trace_id=e34f831697df9af21f324c6a347daf87&var-test_nodeid=tests%2Fcontracts%3A%3ACSM%3A%3Acsm-1b-mic%5Bbfloat16%5D&var-run_id=43757093859%3A1&var-pr=50251&var-gh_run_id=43757093859&from=now-1d&to=now",
+   "variant": "bfloat16",
+   "weights": "random"
+  }
+ ]
+}

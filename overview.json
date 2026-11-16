@@ -1,5 +1,5 @@
 {
- "awaiting_verdict": 32,
+ "awaiting_verdict": 33,
  "block_merges": {
   "ready": false,
   "unmet": [
@@ -8,7 +8,7 @@
   ]
  },
  "caught": {
-  "fixed_by_push": 13,
+  "fixed_by_push": 14,
   "labelled_real_bug": 0,
   "merged_then_main_failed": 3,
   "real_checkpoint": 2
@@ -16,12 +16,12 @@
  "drafts_per_day": 2,
  "false_alarms": {
   "prs_not_their_fault": 165,
-  "prs_with_failure": 198
+  "prs_with_failure": 199
  },
  "missed": {
-  "awaiting_verdict": 23,
+  "awaiting_verdict": 24,
   "not_covered": 30,
-  "real_checkpoint": 23
+  "real_checkpoint": 24
  },
  "next": [
   {
@@ -182,13 +182,13 @@
   },
   {
    "checkpoint": "google/t5gemma-2-270m-270m",
-   "draft": "queued",
+   "draft": "failure",
    "model": "t5gemma2",
    "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
-   "run": "",
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/43697338172",
    "shrink": "",
    "shrinkable": true
   },
@@ -1152,6 +1152,17 @@
    "verdict": "out-of-scope"
   },
   {
+   "date": "2026-10-23",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "axk1",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
    "date": "2026-10-22",
    "detail": "same regression as 49811#gemma2",
    "integration": true,
@@ -1205,6 +1216,17 @@
    "run": "",
    "tests": 1,
    "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-10-20",
+   "detail": "the daily CI failed it the day before too",
+   "integration": true,
+   "job": "",
+   "model": "oneformer",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "already-failing"
   },
   {
    "date": "2026-10-20",
@@ -2924,7 +2946,7 @@
   }
  ],
  "replay": {
-  "already-failing": 3,
+  "already-failing": 4,
   "already-red": 10,
   "broken": 0,
   "caught": 10,
@@ -2935,12 +2957,12 @@
   "not-a-regression": 5,
   "not-covered": 230,
   "not-reproduced": 7,
-  "out-of-scope": 177,
+  "out-of-scope": 178,
   "pending": 0,
   "unrelated-culprit": 15
  },
  "window": [
   "2026-10-20",
-  "2026-11-14"
+  "2026-11-16"
  ]
 }

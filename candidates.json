@@ -1,4 +1,24 @@
 {
+ "45586#huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "d9cda602201d3ee083410ecf4f1dc1d60edda1a7"
+  ],
+  "failure": "training.gradients: ['backbone_model.layers.0.self_attn.q_proj.weight', 'backbone_model.layers.0.mlp.down_proj.weight'] false",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794765970.918775,
+  "first_seen": "2026-11-16",
+  "key": "45586#huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20773,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "45586",
+  "pr_state": "open",
+  "pr_title": "Add Audio-Visual Flamingo model",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43744664621%3A2&var-pr=45586&var-gh_run_id=43744664621",
+  "weights": "random"
+ },
  "47773#huggingface-mic/A.X-K1-mic|A.X-K1-mic|bfloat16|": {
   "case": "huggingface-mic/A.X-K1-mic|A.X-K1-mic|bfloat16|",
   "commits": [
@@ -7156,6 +7176,27 @@
   "pr_title": "\ud83d\udea8 Exporters: export multimodal models per component (`export_multimodal`)",
   "recovered": "after-push",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41441192894%3A1&var-pr=50249&var-gh_run_id=41441192894",
+  "weights": "random"
+ },
+ "50251#huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "612728f445694bd70647259f061fb1f69a8424b5"
+  ],
+  "failure": "training.gradients: ['backbone_model.layers.0.self_attn.q_proj.weight', 'backbone_model.layers.0.mlp.down_proj.weight'] false",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794774197.60567,
+  "first_seen": "2026-11-16",
+  "key": "50251#huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20773,
+  "merged_at": null,
+  "outcome": "fixed-by-push",
+  "pr": "50251",
+  "pr_state": "open",
+  "pr_title": "Exporters: run multimodal exports (`ExportedMultimodalModel`)",
+  "recovered": "after-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43757093859%3A1&var-pr=50251&var-gh_run_id=43757093859",
   "weights": "random"
  },
  "50251#huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|bfloat16|cpu-x86_64-bf16": {

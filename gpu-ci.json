@@ -5344,6 +5344,18 @@
    "tests/models/axk1/test_modeling_axk1.py::AXK1ModelTest::test_flash_attn_2_equivalence"
   ]
  },
+ "sticky#axk1#2026-10-23": {
+  "date": "2026-10-23",
+  "day": 20749,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "axk1",
+  "run_id": "43792136115",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/axk1/test_modeling_axk1.py::AXK1ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
  "sticky#bart#2026-10-30": {
   "date": "2026-10-30",
   "day": 20756,
@@ -7075,6 +7087,19 @@
   "mic": "not-covered",
   "model": "oneformer",
   "run_id": "41760365698",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_no_head",
+   "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_universal_segmentation_head"
+  ]
+ },
+ "sticky#oneformer#2026-10-20": {
+  "date": "2026-10-20",
+  "day": 20746,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "oneformer",
+  "run_id": "43667655478",
   "signal": "AssertionError",
   "tests": [
    "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_no_head",
