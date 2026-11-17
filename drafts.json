@@ -42,6 +42,12 @@
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/42590665006"
  },
+ "cohere_compass": {
+  "checkpoint": "CohereLabs/North-Micro-Vision-Instruct",
+  "conclusion": null,
+  "dispatched_at": "2026-11-17T09:04:11Z",
+  "status": "queued"
+ },
  "colpali": {
   "checkpoint": "vidore/colpali-v1.2-hf",
   "conclusion": "failure",

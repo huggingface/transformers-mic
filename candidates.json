@@ -6444,6 +6444,27 @@
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41716541598%3A2&var-pr=48378&var-gh_run_id=41716541598",
   "weights": "random"
  },
+ "48918#huggingface-mic/Florence-2-base-mic|Florence-2-base-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/Florence-2-base-mic|Florence-2-base-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "b1f17c7173432f9963cadc0235897cf357532ae7"
+  ],
+  "failure": "training.loss: max delta 0.000637 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794844740.450897,
+  "first_seen": "2026-11-17",
+  "key": "48918#huggingface-mic/Florence-2-base-mic|Florence-2-base-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "recovered-no-push",
+  "pr": "48918",
+  "pr_state": "open",
+  "pr_title": "Use unique request IDs for continuous batching",
+  "recovered": "no-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265",
+  "weights": "overfit"
+ },
  "48918#huggingface-mic/Janus-Pro-1B-mic|Janus-Pro-1B-mic|bfloat16|": {
   "case": "huggingface-mic/Janus-Pro-1B-mic|Janus-Pro-1B-mic|bfloat16|",
   "commits": [
@@ -6484,6 +6505,90 @@
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=39961916235%3A2&var-pr=48918&var-gh_run_id=39961916235",
   "weights": "random"
  },
+ "48918#huggingface-mic/MiniMax-M3-MXFP8-mic|MiniMax-M3-MXFP8-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/MiniMax-M3-MXFP8-mic|MiniMax-M3-MXFP8-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "b1f17c7173432f9963cadc0235897cf357532ae7"
+  ],
+  "failure": "logits_probe: max delta 0.00195 over tolerance\nposition_norms: max delta 0.139 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794844740.450897,
+  "first_seen": "2026-11-17",
+  "key": "48918#huggingface-mic/MiniMax-M3-MXFP8-mic|MiniMax-M3-MXFP8-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "recovered-no-push",
+  "pr": "48918",
+  "pr_state": "open",
+  "pr_title": "Use unique request IDs for continuous batching",
+  "recovered": "no-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265",
+  "weights": "random"
+ },
+ "48918#huggingface-mic/bart-base-mic|bart-base-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/bart-base-mic|bart-base-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "b1f17c7173432f9963cadc0235897cf357532ae7"
+  ],
+  "failure": "training.loss: max delta 0.00195 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794844740.450897,
+  "first_seen": "2026-11-17",
+  "key": "48918#huggingface-mic/bart-base-mic|bart-base-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "recovered-no-push",
+  "pr": "48918",
+  "pr_state": "open",
+  "pr_title": "Use unique request IDs for continuous batching",
+  "recovered": "no-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265",
+  "weights": "overfit"
+ },
+ "48918#huggingface-mic/bigbird-pegasus-large-arxiv-mic|bigbird-pegasus-large-arxiv-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/bigbird-pegasus-large-arxiv-mic|bigbird-pegasus-large-arxiv-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "b1f17c7173432f9963cadc0235897cf357532ae7"
+  ],
+  "failure": "training.loss: max delta 0.0625 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794844740.450897,
+  "first_seen": "2026-11-17",
+  "key": "48918#huggingface-mic/bigbird-pegasus-large-arxiv-mic|bigbird-pegasus-large-arxiv-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "recovered-no-push",
+  "pr": "48918",
+  "pr_state": "open",
+  "pr_title": "Use unique request IDs for continuous batching",
+  "recovered": "no-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265",
+  "weights": "random"
+ },
+ "48918#huggingface-mic/blip2-opt-2.7b-mic|blip2-opt-2.7b-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/blip2-opt-2.7b-mic|blip2-opt-2.7b-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "b1f17c7173432f9963cadc0235897cf357532ae7"
+  ],
+  "failure": "training.loss: max delta 0.0209 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794844740.450897,
+  "first_seen": "2026-11-17",
+  "key": "48918#huggingface-mic/blip2-opt-2.7b-mic|blip2-opt-2.7b-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "recovered-no-push",
+  "pr": "48918",
+  "pr_state": "open",
+  "pr_title": "Use unique request IDs for continuous batching",
+  "recovered": "no-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265",
+  "weights": "random"
+ },
  "48918#huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|": {
   "case": "huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|",
   "commits": [
@@ -6504,10 +6609,221 @@
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=39961916235%3A2&var-pr=48918&var-gh_run_id=39961916235",
   "weights": "random"
  },
+ "48918#huggingface-mic/grounding-dino-tiny-mic|grounding-dino-tiny-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/grounding-dino-tiny-mic|grounding-dino-tiny-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "b1f17c7173432f9963cadc0235897cf357532ae7"
+  ],
+  "failure": "class_scores: max delta 9.17 over tolerance\nbox_preds: max delta 0.441 over tolerance\ntraining.loss: max delta 605 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794844740.450897,
+  "first_seen": "2026-11-17",
+  "key": "48918#huggingface-mic/grounding-dino-tiny-mic|grounding-dino-tiny-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "recovered-no-push",
+  "pr": "48918",
+  "pr_state": "open",
+  "pr_title": "Use unique request IDs for continuous batching",
+  "recovered": "no-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265",
+  "weights": "random"
+ },
+ "48918#huggingface-mic/hubert-large-ls960-ft-mic|hubert-large-ls960-ft-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/hubert-large-ls960-ft-mic|hubert-large-ls960-ft-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "b1f17c7173432f9963cadc0235897cf357532ae7"
+  ],
+  "failure": "training.loss: max delta 23.5 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794844740.450897,
+  "first_seen": "2026-11-17",
+  "key": "48918#huggingface-mic/hubert-large-ls960-ft-mic|hubert-large-ls960-ft-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "recovered-no-push",
+  "pr": "48918",
+  "pr_state": "open",
+  "pr_title": "Use unique request IDs for continuous batching",
+  "recovered": "no-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265",
+  "weights": "overfit"
+ },
+ "48918#huggingface-mic/mask2former-swin-tiny-coco-instance-mic|mask2former-swin-tiny-coco-instance-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/mask2former-swin-tiny-coco-instance-mic|mask2former-swin-tiny-coco-instance-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "b1f17c7173432f9963cadc0235897cf357532ae7"
+  ],
+  "failure": "training.loss: max delta 0.0548 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794844740.450897,
+  "first_seen": "2026-11-17",
+  "key": "48918#huggingface-mic/mask2former-swin-tiny-coco-instance-mic|mask2former-swin-tiny-coco-instance-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "recovered-no-push",
+  "pr": "48918",
+  "pr_state": "open",
+  "pr_title": "Use unique request IDs for continuous batching",
+  "recovered": "no-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265",
+  "weights": "random"
+ },
+ "48918#huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "b1f17c7173432f9963cadc0235897cf357532ae7"
+  ],
+  "failure": "logits_probe: max delta 1.28 over tolerance\nboxes_probe: max delta 0.788 over tolerance\ntraining.loss: max delta 0.00627 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794844740.450897,
+  "first_seen": "2026-11-17",
+  "key": "48918#huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "recovered-no-push",
+  "pr": "48918",
+  "pr_state": "open",
+  "pr_title": "Use unique request IDs for continuous batching",
+  "recovered": "no-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265",
+  "weights": "random"
+ },
+ "48918#huggingface-mic/opt-125m-mic|opt-125m-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/opt-125m-mic|opt-125m-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "b1f17c7173432f9963cadc0235897cf357532ae7"
+  ],
+  "failure": "training.loss: max delta 0.00194 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794844740.450897,
+  "first_seen": "2026-11-17",
+  "key": "48918#huggingface-mic/opt-125m-mic|opt-125m-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "recovered-no-push",
+  "pr": "48918",
+  "pr_state": "open",
+  "pr_title": "Use unique request IDs for continuous batching",
+  "recovered": "no-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265",
+  "weights": "random"
+ },
+ "48918#huggingface-mic/opus-mt-fr-en-mic|opus-mt-fr-en-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/opus-mt-fr-en-mic|opus-mt-fr-en-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "b1f17c7173432f9963cadc0235897cf357532ae7"
+  ],
+  "failure": "training.loss: max delta 0.0114 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794844740.450897,
+  "first_seen": "2026-11-17",
+  "key": "48918#huggingface-mic/opus-mt-fr-en-mic|opus-mt-fr-en-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "recovered-no-push",
+  "pr": "48918",
+  "pr_state": "open",
+  "pr_title": "Use unique request IDs for continuous batching",
+  "recovered": "no-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265",
+  "weights": "overfit"
+ },
+ "48918#huggingface-mic/pegasus-x-base-mic|pegasus-x-base-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/pegasus-x-base-mic|pegasus-x-base-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "b1f17c7173432f9963cadc0235897cf357532ae7"
+  ],
+  "failure": "logits.probe: max delta 0.128 over tolerance\ntraining.loss: max delta 0.125 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794844740.450897,
+  "first_seen": "2026-11-17",
+  "key": "48918#huggingface-mic/pegasus-x-base-mic|pegasus-x-base-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "recovered-no-push",
+  "pr": "48918",
+  "pr_state": "open",
+  "pr_title": "Use unique request IDs for continuous batching",
+  "recovered": "no-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265",
+  "weights": "random"
+ },
+ "48918#huggingface-mic/pegasus-xsum-mic|pegasus-xsum-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/pegasus-xsum-mic|pegasus-xsum-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "b1f17c7173432f9963cadc0235897cf357532ae7"
+  ],
+  "failure": "training.loss: max delta 0.0625 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794844740.450897,
+  "first_seen": "2026-11-17",
+  "key": "48918#huggingface-mic/pegasus-xsum-mic|pegasus-xsum-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "recovered-no-push",
+  "pr": "48918",
+  "pr_state": "open",
+  "pr_title": "Use unique request IDs for continuous batching",
+  "recovered": "no-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265",
+  "weights": "random"
+ },
+ "48918#huggingface-mic/s2t-small-librispeech-asr-mic|s2t-small-librispeech-asr-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/s2t-small-librispeech-asr-mic|s2t-small-librispeech-asr-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "b1f17c7173432f9963cadc0235897cf357532ae7"
+  ],
+  "failure": "training.loss: max delta 0.0625 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794844740.450897,
+  "first_seen": "2026-11-17",
+  "key": "48918#huggingface-mic/s2t-small-librispeech-asr-mic|s2t-small-librispeech-asr-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "recovered-no-push",
+  "pr": "48918",
+  "pr_state": "open",
+  "pr_title": "Use unique request IDs for continuous batching",
+  "recovered": "no-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265",
+  "weights": "random"
+ },
+ "48918#huggingface-mic/table_transformer-mic|table_transformer-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/table_transformer-mic|table_transformer-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "b1f17c7173432f9963cadc0235897cf357532ae7"
+  ],
+  "failure": "training.loss: max delta 0.00256 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794844740.450897,
+  "first_seen": "2026-11-17",
+  "key": "48918#huggingface-mic/table_transformer-mic|table_transformer-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "recovered-no-push",
+  "pr": "48918",
+  "pr_state": "open",
+  "pr_title": "Use unique request IDs for continuous batching",
+  "recovered": "no-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265",
+  "weights": "random"
+ },
  "48918#huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|bfloat16|cpu-x86_64-bf16": {
   "case": "huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|bfloat16|cpu-x86_64-bf16",
   "commits": [
-   "4d0ab5f974437f9d99bf9bac2fe4b133776f4ae3"
+   "4d0ab5f974437f9d99bf9bac2fe4b133776f4ae3",
+   "b1f17c7173432f9963cadc0235897cf357532ae7"
   ],
   "failure": "training.loss: non-finite values\ntraining.gradients: ['wav2vec2.feature_extractor.conv_layers.0.conv.weight', 'lm_head.weight'] false",
   "failure_kind": "Baseline assertion",
@@ -6515,19 +6831,21 @@
   "first_seen": "2026-11-07",
   "key": "48918#huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|bfloat16|cpu-x86_64-bf16",
   "kind": "fixture",
-  "last_seen": 20764,
+  "last_seen": 20774,
   "merged_at": null,
-  "outcome": "open",
+  "outcome": "fixed-by-push",
   "pr": "48918",
   "pr_state": "open",
   "pr_title": "Use unique request IDs for continuous batching",
+  "recovered": "after-push",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=39961916235%3A2&var-pr=48918&var-gh_run_id=39961916235",
   "weights": "random"
  },
  "48918#huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|default|cpu-x86_64": {
   "case": "huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|default|cpu-x86_64",
   "commits": [
-   "4d0ab5f974437f9d99bf9bac2fe4b133776f4ae3"
+   "4d0ab5f974437f9d99bf9bac2fe4b133776f4ae3",
+   "b1f17c7173432f9963cadc0235897cf357532ae7"
   ],
   "failure": "training.loss: non-finite values\ntraining.gradients: ['wav2vec2.feature_extractor.conv_layers.0.conv.weight', 'lm_head.weight'] false",
   "failure_kind": "Baseline assertion",
@@ -6535,13 +6853,56 @@
   "first_seen": "2026-11-07",
   "key": "48918#huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|default|cpu-x86_64",
   "kind": "fixture",
-  "last_seen": 20764,
+  "last_seen": 20774,
   "merged_at": null,
-  "outcome": "open",
+  "outcome": "fixed-by-push",
   "pr": "48918",
   "pr_state": "open",
   "pr_title": "Use unique request IDs for continuous batching",
+  "recovered": "after-push",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=39961916235%3A2&var-pr=48918&var-gh_run_id=39961916235",
+  "weights": "random"
+ },
+ "48918#huggingface-mic/wav2vec2-conformer-rope-large-960h-ft-mic|wav2vec2-conformer-rope-large-960h-ft-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/wav2vec2-conformer-rope-large-960h-ft-mic|wav2vec2-conformer-rope-large-960h-ft-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "b1f17c7173432f9963cadc0235897cf357532ae7"
+  ],
+  "failure": "training.loss: max delta 0.63 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794844740.450897,
+  "first_seen": "2026-11-17",
+  "key": "48918#huggingface-mic/wav2vec2-conformer-rope-large-960h-ft-mic|wav2vec2-conformer-rope-large-960h-ft-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "recovered-no-push",
+  "pr": "48918",
+  "pr_state": "open",
+  "pr_title": "Use unique request IDs for continuous batching",
+  "recovered": "no-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265",
+  "weights": "random"
+ },
+ "48918#huggingface-mic/wavlm-base-plus-mic|wavlm-base-plus-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/wavlm-base-plus-mic|wavlm-base-plus-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "b1f17c7173432f9963cadc0235897cf357532ae7"
+  ],
+  "failure": "training.loss: max delta 0.0583 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794844740.450897,
+  "first_seen": "2026-11-17",
+  "key": "48918#huggingface-mic/wavlm-base-plus-mic|wavlm-base-plus-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "recovered-no-push",
+  "pr": "48918",
+  "pr_state": "open",
+  "pr_title": "Use unique request IDs for continuous batching",
+  "recovered": "no-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265",
   "weights": "random"
  },
  "49012#huggingface-mic/Janus-Pro-1B-mic|Janus-Pro-1B-mic|bfloat16|": {
@@ -7325,6 +7686,26 @@
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42619916726%3A1&var-pr=50379&var-gh_run_id=42619916726",
   "weights": "random"
  },
+ "50379#huggingface-mic/LLaVA-NeXT-Video-7B-hf-mic|LLaVA-NeXT-Video-7B-hf-mic|bfloat16|": {
+  "case": "huggingface-mic/LLaVA-NeXT-Video-7B-hf-mic|LLaVA-NeXT-Video-7B-hf-mic|bfloat16|",
+  "commits": [
+   "6e392b1a1c2358b565f7abd643eb3442a28c07f7"
+  ],
+  "failure": " filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--LLaVA-NeXT-Video-7B-hf-mic/snapshots/1bf620a771274041b8633a6e25a1137a988f1736/integrations/transformers/usage.md\", line 42, in <module>\n    if inputs[k].is_floating_point():\n              ^^^^^^^^^^^^^^^\n  File \"/usr/lo",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1794824867.677559,
+  "first_seen": "2026-11-17",
+  "key": "50379#huggingface-mic/LLaVA-NeXT-Video-7B-hf-mic|LLaVA-NeXT-Video-7B-hf-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50379",
+  "pr_state": "open",
+  "pr_title": "Multimodal Model Output for generative LMs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43848906473%3A1&var-pr=50379&var-gh_run_id=43848906473",
+  "weights": "random"
+ },
  "50379#huggingface-mic/Llama-3.2-11B-Vision-Instruct-mic|Llama-3.2-11B-Vision-Instruct-mic|bfloat16|": {
   "case": "huggingface-mic/Llama-3.2-11B-Vision-Instruct-mic|Llama-3.2-11B-Vision-Instruct-mic|bfloat16|",
   "commits": [
@@ -7351,7 +7732,8 @@
    "6b3609ff2a8a6a3e677bea4502254150e256f59c",
    "7fed521c67239c53af35b63759e06bc94053b5b7",
    "609b827051bd20e2ffde98a0b578e946fa26b2dd",
-   "28a35c6932a62acad667784b9610874827ae21c2"
+   "28a35c6932a62acad667784b9610874827ae21c2",
+   "ca9641cabb674ef6b89778a8fd752faf46c61f56"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/18ed0f7",
   "failure_kind": "Runtime traceback",
@@ -7359,7 +7741,7 @@
   "first_seen": "2026-11-05",
   "key": "50379#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20771,
+  "last_seen": 20774,
   "merged_at": null,
   "outcome": "open",
   "pr": "50379",
@@ -7426,6 +7808,46 @@
   "pr_state": "open",
   "pr_title": "Multimodal Model Output for generative LMs",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42619916726%3A1&var-pr=50379&var-gh_run_id=42619916726",
+  "weights": "random"
+ },
+ "50379#huggingface-mic/gemma-4-12B-it-mic|gemma-4-12B-it-mic|bfloat16|": {
+  "case": "huggingface-mic/gemma-4-12B-it-mic|gemma-4-12B-it-mic|bfloat16|",
+  "commits": [
+   "6e392b1a1c2358b565f7abd643eb3442a28c07f7"
+  ],
+  "failure": "ied/modeling_gemma4_unified.py\", line 1184, in forward\n    outputs = self.language_model(\n              ^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py\", line 1787, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ^^^^^^^^^^",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1794824867.677559,
+  "first_seen": "2026-11-17",
+  "key": "50379#huggingface-mic/gemma-4-12B-it-mic|gemma-4-12B-it-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50379",
+  "pr_state": "open",
+  "pr_title": "Multimodal Model Output for generative LMs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43848906473%3A1&var-pr=50379&var-gh_run_id=43848906473",
+  "weights": "random"
+ },
+ "50379#huggingface-mic/gemma-4-E2B-it-mic|gemma-4-E2B-it-mic|bfloat16|": {
+  "case": "huggingface-mic/gemma-4-E2B-it-mic|gemma-4-E2B-it-mic|bfloat16|",
+  "commits": [
+   "6e392b1a1c2358b565f7abd643eb3442a28c07f7"
+  ],
+  "failure": "nsformers/src/transformers/models/gemma4/modeling_gemma4.py\", line 2491, in forward\n    outputs = self.language_model(\n              ^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py\", line 1787, in _wrapped_call_impl\n    return self._call_impl(*args, **",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1794824867.677559,
+  "first_seen": "2026-11-17",
+  "key": "50379#huggingface-mic/gemma-4-E2B-it-mic|gemma-4-E2B-it-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50379",
+  "pr_state": "open",
+  "pr_title": "Multimodal Model Output for generative LMs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43848906473%3A1&var-pr=50379&var-gh_run_id=43848906473",
   "weights": "random"
  },
  "50384#huggingface-mic/tibetan-ocr-mic|tibetan-ocr-mic|bfloat16|cpu-x86_64-bf16": {
@@ -7656,6 +8078,26 @@
   "pr_state": "open",
   "pr_title": "fix(generation): sort sampled beam candidates before finalization",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43575282361%3A2&var-pr=50754&var-gh_run_id=43575282361",
+  "weights": "random"
+ },
+ "50821#huggingface-mic/tibetan-ocr-mic|tibetan-ocr-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/tibetan-ocr-mic|tibetan-ocr-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "ee3add25fd6183ddc6dff33d071e49cc9a43eb64"
+  ],
+  "failure": "logits.probe: max delta 0.00391 over tolerance\nlogits.position_norms: max delta 0.0137 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1794887075.870838,
+  "first_seen": "2026-11-17",
+  "key": "50821#huggingface-mic/tibetan-ocr-mic|tibetan-ocr-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20774,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50821",
+  "pr_state": "open",
+  "pr_title": "Processors return 3D RoPE `position_ids`",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44012178765%3A1&var-pr=50821&var-gh_run_id=44012178765",
   "weights": "random"
  },
  "gh-readonly-queue/main/pr-49886-a4f362742ba4846882fd0bc9636461ef3a5e3f34#huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16": {

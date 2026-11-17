@@ -5422,6 +5422,19 @@
    "tests/models/bert/test_modeling_bert.py::BertModelTest::test_bc_cache_name_generate"
   ]
  },
+ "sticky#bert#2026-11-16": {
+  "date": "2026-11-16",
+  "day": 20773,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "bert",
+  "run_id": "44002825235",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/bert/test_modeling_bert.py::BertModelTest::test_sdpa_padding_matches_padding_free_with_position_ids",
+   "tests/models/bert/test_modeling_bert.py::BertModelTest::test_eager_padding_matches_padding_free_with_position_ids"
+  ]
+ },
  "sticky#bigbird_pegasus#2026-10-30": {
   "date": "2026-10-30",
   "day": 20756,
@@ -5569,6 +5582,18 @@
    "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_dynamic_static_cache",
    "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_static",
    "tests/models/cohere_asr/test_modeling_cohere_asr.py::CohereAsrModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#cohere_compass#2026-11-17": {
+  "date": "2026-11-17",
+  "day": 20774,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "cohere_compass",
+  "run_id": "44002743824",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/cohere_compass/test_modeling_cohere_compass.py::CohereCompassTextModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids"
   ]
  },
  "sticky#colpali#2026-10-10": {
@@ -5731,6 +5756,18 @@
    "tests/models/deepseek_v3/test_modeling_deepseek_v3.py::DeepseekV3IntegrationTest::test_compile_static_cache"
   ]
  },
+ "sticky#deepseek_v3#2026-10-22": {
+  "date": "2026-10-22",
+  "day": 20748,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "deepseek_v3",
+  "run_id": "44002825235",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/deepseek_v3/test_modeling_deepseek_v3.py::DeepseekV3IntegrationTest::test_compile_static_cache"
+  ]
+ },
  "sticky#deepseek_v32#2026-11-08": {
   "date": "2026-11-08",
   "day": 20765,
@@ -5780,6 +5817,18 @@
   "signal": "AssertionError",
   "tests": [
    "tests/models/electra/test_modeling_electra.py::ElectraModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
+ "sticky#electra#2026-10-28": {
+  "date": "2026-10-28",
+  "day": 20754,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "electra",
+  "run_id": "44002825235",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/electra/test_modeling_electra.py::ElectraModelTest::test_eager_padding_matches_padding_free_with_position_ids"
   ]
  },
  "sticky#eomt_dinov3#2026-11-08": {
@@ -5889,6 +5938,18 @@
    "tests/models/flex_olmo/test_modeling_flex_olmo.py::FlexOlmoModelTest::test_flash_attn_2_equivalence"
   ]
  },
+ "sticky#flex_olmo#2026-10-23": {
+  "date": "2026-10-23",
+  "day": 20749,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "flex_olmo",
+  "run_id": "43545981251",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/flex_olmo/test_modeling_flex_olmo.py::FlexOlmoModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
  "sticky#flex_olmo#2026-10-24": {
   "date": "2026-10-24",
   "day": 20750,
@@ -5978,6 +6039,18 @@
    "tests/models/gemma3/test_modeling_gemma3.py::Gemma3TextModelTest::test_bc_cache_name_generate",
    "tests/models/gemma3/test_modeling_gemma3.py::Gemma3Vision2TextModelTest::test_bc_cache_name_forward",
    "tests/models/gemma3/test_modeling_gemma3.py::Gemma3Vision2TextModelTest::test_bc_cache_name_generate"
+  ]
+ },
+ "sticky#gemma3#2026-11-16": {
+  "date": "2026-11-16",
+  "day": 20773,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "gemma3",
+  "run_id": "44002743824",
+  "signal": "ValueError",
+  "tests": [
+   "tests/models/gemma3/test_modeling_gemma3.py::Gemma3Vision2TextModelTest::test_flash_attn_2_can_dispatch_composite_models"
   ]
  },
  "sticky#gemma3n#2026-10-09": {
@@ -6151,6 +6224,18 @@
    "tests/models/glm4/test_modeling_glm4.py::Glm4ModelTest::test_flash_attn_2_equivalence"
   ]
  },
+ "sticky#glm4#2026-10-21": {
+  "date": "2026-10-21",
+  "day": 20747,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "glm4",
+  "run_id": "44002743824",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/glm4/test_modeling_glm4.py::Glm4ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
  "sticky#glm4_moe_lite#2026-10-06": {
   "date": "2026-10-06",
   "day": 20732,
@@ -6288,6 +6373,18 @@
   "mic": "green-on-main",
   "model": "granitemoe",
   "run_id": "42550772023",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/granitemoe/test_modeling_granitemoe.py::GraniteMoeModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#granitemoe#2026-11-01": {
+  "date": "2026-11-01",
+  "day": 20758,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "granitemoe",
+  "run_id": "43792136115",
   "signal": "AssertionError",
   "tests": [
    "tests/models/granitemoe/test_modeling_granitemoe.py::GraniteMoeModelTest::test_flash_attn_2_equivalence"
@@ -6617,6 +6714,18 @@
   "mic": "not-covered",
   "model": "layoutlmv3",
   "run_id": "42945525063",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/layoutlmv3/test_modeling_layoutlmv3.py::LayoutLMv3ModelTest::test_inputs_embeds_matches_input_ids"
+  ]
+ },
+ "sticky#layoutlmv3#2026-11-06": {
+  "date": "2026-11-06",
+  "day": 20763,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "layoutlmv3",
+  "run_id": "43792172797",
   "signal": "AssertionError",
   "tests": [
    "tests/models/layoutlmv3/test_modeling_layoutlmv3.py::LayoutLMv3ModelTest::test_inputs_embeds_matches_input_ids"

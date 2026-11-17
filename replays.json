@@ -1365,6 +1365,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#bert#2026-11-16": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#bigbird_pegasus#2026-10-30": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1407,6 +1411,10 @@
  },
  "sticky#cohere_asr#2026-10-30": {
   "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#cohere_compass#2026-11-17": {
+  "verdict": "not-covered",
   "version": 9
  },
  "sticky#colpali#2026-10-10": {
@@ -1461,6 +1469,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#deepseek_v3#2026-10-22": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#deepseek_v32#2026-11-08": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1474,6 +1486,10 @@
   "version": 9
  },
  "sticky#electra#2026-10-09": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#electra#2026-10-28": {
   "verdict": "out-of-scope",
   "version": 9
  },
@@ -1513,6 +1529,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#flex_olmo#2026-10-23": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#flex_olmo#2026-10-24": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1548,6 +1568,10 @@
   "version": 9
  },
  "sticky#gemma3#2026-11-13": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#gemma3#2026-11-16": {
   "verdict": "out-of-scope",
   "version": 9
  },
@@ -1607,6 +1631,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#glm4#2026-10-21": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#glm4_moe_lite#2026-10-06": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1648,6 +1676,10 @@
   "version": 9
  },
  "sticky#granitemoe#2026-10-19": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#granitemoe#2026-11-01": {
   "verdict": "out-of-scope",
   "version": 9
  },
@@ -1758,6 +1790,10 @@
   "version": 9
  },
  "sticky#layoutlmv3#2026-10-19": {
+  "verdict": "not-covered",
+  "version": 9
+ },
+ "sticky#layoutlmv3#2026-11-06": {
   "verdict": "not-covered",
   "version": 9
  },

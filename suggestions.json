@@ -42,6 +42,12 @@
     "gpu_only": true,
     "integration": true,
     "test": "tests/models/deepseek_v3/test_modeling_deepseek_v3.py::DeepseekV3IntegrationTest::test_compile_static_cache"
+   },
+   {
+    "date": "2026-10-22",
+    "gpu_only": true,
+    "integration": true,
+    "test": "tests/models/deepseek_v3/test_modeling_deepseek_v3.py::DeepseekV3IntegrationTest::test_compile_static_cache"
    }
   ],
   "deepseek_v32": [
@@ -84,6 +90,12 @@
     "gpu_only": false,
     "integration": true,
     "test": "tests/models/gemma3/test_modeling_gemma3.py::Gemma3IntegrationTest::test_model_4b_multiimage"
+   },
+   {
+    "date": "2026-11-16",
+    "gpu_only": true,
+    "integration": false,
+    "test": "tests/models/gemma3/test_modeling_gemma3.py::Gemma3Vision2TextModelTest::test_flash_attn_2_can_dispatch_composite_models"
    }
   ],
   "gemma3n": [
@@ -342,14 +354,6 @@
     "test": "tests/models/m2m_100/test_modeling_m2m_100.py::M2M100ModelIntegrationTests::test_seq_to_seq_generation"
    }
   ],
-  "minicpm3": [
-   {
-    "date": "2026-10-06",
-    "gpu_only": false,
-    "integration": false,
-    "test": "tests/models/minicpm3/test_modeling_minicpm3.py::MiniCPM3ModelTest::test_eager_padding_matches_padding_free_with_position_ids"
-   }
-  ],
   "mistral3": [
    {
     "date": "2026-10-19",
@@ -564,6 +568,17 @@
    ]
   },
   {
+   "checkpoint": "microsoft/layoutlmv3-base",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "layoutlmv3",
+   "other": 3,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/layoutlmv3/test_modeling_layoutlmv3.py::LayoutLMv3ModelTest::test_inputs_embeds_matches_input_ids"
+   ]
+  },
+  {
    "checkpoint": "kmhf/hf-moshika",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -587,17 +602,6 @@
    ]
   },
   {
-   "checkpoint": "microsoft/layoutlmv3-base",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "layoutlmv3",
-   "other": 2,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/layoutlmv3/test_modeling_layoutlmv3.py::LayoutLMv3ModelTest::test_inputs_embeds_matches_input_ids"
-   ]
-  },
-  {
    "checkpoint": "regisss/bridgetower-newyorker-a100-8x",
    "checkpoint_source": "shrink sweep",
    "integration": 0,
@@ -606,6 +610,17 @@
    "shrinkable": true,
    "tests": [
     "tests/models/bridgetower/test_image_processing_bridgetower.py::BridgeTowerImageProcessingTest::test_backends_equivalence_batched"
+   ]
+  },
+  {
+   "checkpoint": "CohereLabs/North-Micro-Vision-Instruct",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "cohere_compass",
+   "other": 1,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/cohere_compass/test_modeling_cohere_compass.py::CohereCompassTextModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids"
    ]
   },
   {
@@ -1143,6 +1158,11 @@
    "t5",
    "whisper"
   ],
+  "test_eager_padding_matches_padding_free_with_position_ids": [
+   "bert",
+   "electra",
+   "minicpm3"
+  ],
   "test_flash_attention_2_padding_matches_padding_free_with_position_ids": [
    "gemma4",
    "gemma4_unified",
@@ -1177,6 +1197,7 @@
    "owlvit"
   ],
   "test_sdpa_padding_matches_padding_free_with_position_ids": [
+   "bert",
    "glm4_moe_lite",
    "minicpm3",
    "minimax_m2"
