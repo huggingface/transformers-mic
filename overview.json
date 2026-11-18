@@ -19,9 +19,9 @@
   "prs_with_failure": 200
  },
  "missed": {
-  "awaiting_verdict": 25,
+  "awaiting_verdict": 26,
   "not_covered": 30,
-  "real_checkpoint": 25
+  "real_checkpoint": 26
  },
  "next": [
   {
@@ -110,13 +110,13 @@
   },
   {
    "checkpoint": "CohereLabs/North-Micro-Vision-Instruct",
-   "draft": "queued",
+   "draft": "failure",
    "model": "cohere_compass",
    "next_batch": false,
    "other": 1,
    "real_checkpoint": 0,
    "regressions": 1,
-   "run": "",
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/44052163204",
    "shrink": "",
    "shrinkable": true
   },
@@ -326,6 +326,28 @@
   }
  ],
  "regressions": [
+  {
+   "date": "2026-11-17",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "paligemma",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-17",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "gemma4",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
   {
    "date": "2026-11-16",
    "detail": "",
@@ -1150,6 +1172,17 @@
    "run": "https://github.com/huggingface/transformers-mic/actions/runs/42796431187",
    "tests": 3,
    "verdict": "model-added"
+  },
+  {
+   "date": "2026-10-24",
+   "detail": "the daily CI failed it the day before too",
+   "integration": true,
+   "job": "",
+   "model": "oneformer",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "already-failing"
   },
   {
    "date": "2026-10-24",
@@ -3023,7 +3056,7 @@
   }
  ],
  "replay": {
-  "already-failing": 4,
+  "already-failing": 5,
   "already-red": 10,
   "broken": 0,
   "caught": 10,
@@ -3032,14 +3065,14 @@
   "model-added": 4,
   "no-code-change": 1,
   "not-a-regression": 5,
-  "not-covered": 232,
+  "not-covered": 235,
   "not-reproduced": 7,
-  "out-of-scope": 185,
+  "out-of-scope": 187,
   "pending": 0,
   "unrelated-culprit": 15
  },
  "window": [
   "2026-10-20",
-  "2026-11-17"
+  "2026-11-18"
  ]
 }

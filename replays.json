@@ -1321,6 +1321,10 @@
   "verdict": "not-covered",
   "version": 9
  },
+ "50813#shared": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#albert#2026-10-06": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1615,6 +1619,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#gemma4#2026-11-17": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#gemma4_unified#2026-11-07": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1710,6 +1718,10 @@
   "version": 9
  },
  "sticky#hunyuan_v1_moe#2026-10-20": {
+  "verdict": "not-covered",
+  "version": 9
+ },
+ "sticky#hunyuan_v1_moe#2026-10-22": {
   "verdict": "not-covered",
   "version": 9
  },
@@ -1916,6 +1928,10 @@
   "verdict": "already-failing",
   "version": 9
  },
+ "sticky#molmo2#2026-11-17": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#moshi#2026-10-06": {
   "verdict": "not-covered",
   "version": 9
@@ -1961,11 +1977,20 @@
   "verdict": "already-failing",
   "version": 9
  },
+ "sticky#oneformer#2026-10-24": {
+  "reason": "the daily CI failed it the day before too",
+  "verdict": "already-failing",
+  "version": 9
+ },
  "sticky#owlv2#2026-11-09": {
   "verdict": "out-of-scope",
   "version": 9
  },
  "sticky#owlvit#2026-11-08": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#paligemma#2026-11-17": {
   "verdict": "out-of-scope",
   "version": 9
  },

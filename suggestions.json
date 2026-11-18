@@ -90,12 +90,6 @@
     "gpu_only": false,
     "integration": true,
     "test": "tests/models/gemma3/test_modeling_gemma3.py::Gemma3IntegrationTest::test_model_4b_multiimage"
-   },
-   {
-    "date": "2026-11-16",
-    "gpu_only": true,
-    "integration": false,
-    "test": "tests/models/gemma3/test_modeling_gemma3.py::Gemma3Vision2TextModelTest::test_flash_attn_2_can_dispatch_composite_models"
    }
   ],
   "gemma3n": [
@@ -396,7 +390,19 @@
     "test": "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_no_head"
    },
    {
+    "date": "2026-10-24",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_no_head"
+   },
+   {
     "date": "2026-10-20",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_universal_segmentation_head"
+   },
+   {
+    "date": "2026-10-24",
     "gpu_only": false,
     "integration": true,
     "test": "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_universal_segmentation_head"
@@ -839,6 +845,17 @@
    ]
   },
   {
+   "checkpoint": "tencent/Hunyuan-A13B-Instruct",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "hunyuan_v1_moe",
+   "other": 4,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/hunyuan_v1_moe/test_modeling_hunyuan_v1_moe.py::HunYuanMoEV1ModelTest::test_flash_attn_2_equivalence"
+   ]
+  },
+  {
    "checkpoint": "facebook/w2v-bert-2.0",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -848,17 +865,6 @@
    "tests": [
     "tests/models/wav2vec2_bert/test_modeling_wav2vec2_bert.py::Wav2Vec2BertModelTest::test_disk_offload_safetensors",
     "tests/models/wav2vec2_bert/test_modeling_wav2vec2_bert.py::Wav2Vec2BertModelTest::test_disk_offload_bin"
-   ]
-  },
-  {
-   "checkpoint": "tencent/Hunyuan-A13B-Instruct",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "hunyuan_v1_moe",
-   "other": 3,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/hunyuan_v1_moe/test_modeling_hunyuan_v1_moe.py::HunYuanMoEV1ModelTest::test_flash_attn_2_equivalence"
    ]
   },
   {
@@ -894,6 +900,18 @@
    "shrinkable": false,
    "tests": [
     "tests/models/idefics/test_modeling_idefics.py::IdeficsForVisionText2TextTest::test_generate_continue_from_inputs_embeds"
+   ]
+  },
+  {
+   "checkpoint": "allenai/Molmo2-4B",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "molmo2",
+   "other": 2,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/molmo2/test_modeling_molmo2.py::Molmo2ModelTest::test_flex_attention_with_grads",
+    "tests/models/molmo2/test_modeling_molmo2.py::Molmo2ModelTest::test_flash_attn_2_can_dispatch_composite_models"
    ]
   },
   {
@@ -1034,17 +1052,6 @@
    ]
   },
   {
-   "checkpoint": "allenai/Molmo2-4B",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "molmo2",
-   "other": 1,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/molmo2/test_modeling_molmo2.py::Molmo2ModelTest::test_flex_attention_with_grads"
-   ]
-  },
-  {
    "checkpoint": "omlab/omdet-turbo-swin-tiny-hf",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -1172,6 +1179,11 @@
    "gemma4",
    "gemma4_unified",
    "minicpm3"
+  ],
+  "test_flash_attn_2_can_dispatch_composite_models": [
+   "gemma3",
+   "gemma4",
+   "paligemma"
   ],
   "test_flash_attn_2_equivalence": [
    "axk1",

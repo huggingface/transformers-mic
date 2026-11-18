@@ -5287,6 +5287,26 @@
    "tests/models/inkling2/test_modeling_inkling2.py::Inkling2SmallModelIntegrationTest::test_small_model_integration_test_text"
   ]
  },
+ "50813#shared": {
+  "bad_commit": "b16f9dbdcc1b9d198bd919462d762769c81da570",
+  "date": "2026-11-17",
+  "integration": false,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/44002825235/job/133835629878",
+  "mic": "not-covered",
+  "model": null,
+  "pr": "50813",
+  "tests": [
+   "tests/exporters/test_runtime.py::ExportedModelTest::test_onnx_non_tensor_outputs",
+   "tests/exporters/test_runtime.py::ExportedModelTest::test_onnx_runner_options",
+   "tests/exporters/test_runtime.py::ExportedModelTest::test_openvino_non_tensor_outputs",
+   "tests/exporters/test_save_load.py::OnnxSaveLoadTest::test_bfloat16_saves_and_loads",
+   "tests/exporters/test_save_load.py::OnnxSaveLoadTest::test_loaded_through_symlinks_runs_and_saves",
+   "tests/exporters/test_save_load.py::OnnxSaveLoadTest::test_past_2gb_saves_and_loads",
+   "tests/exporters/test_save_load.py::OnnxSaveLoadTest::test_quantized_saves_and_loads",
+   "tests/exporters/test_save_load.py::OnnxSaveLoadTest::test_saved_program_runs",
+   "tests/exporters/test_save_load.py::OpenVINOSaveLoadTest::test_loaded_model_saves_in_place"
+  ]
+ },
  "sticky#albert#2026-10-06": {
   "date": "2026-10-06",
   "day": 20732,
@@ -6175,6 +6195,18 @@
    "tests/models/gemma4/test_modeling_gemma4.py::Gemma4Vision2TextModelTest::test_flash_attn_2_from_config"
   ]
  },
+ "sticky#gemma4#2026-11-17": {
+  "date": "2026-11-17",
+  "day": 20774,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "gemma4",
+  "run_id": "44223064481",
+  "signal": "ValueError",
+  "tests": [
+   "tests/models/gemma4/test_modeling_gemma4.py::Gemma4Vision2TextModelTest::test_flash_attn_2_can_dispatch_composite_models"
+  ]
+ },
  "sticky#gemma4_unified#2026-11-07": {
   "date": "2026-11-07",
   "day": 20764,
@@ -6475,6 +6507,18 @@
   "mic": "not-covered",
   "model": "hunyuan_v1_moe",
   "run_id": "43351552924",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/hunyuan_v1_moe/test_modeling_hunyuan_v1_moe.py::HunYuanMoEV1ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#hunyuan_v1_moe#2026-10-22": {
+  "date": "2026-10-22",
+  "day": 20748,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "hunyuan_v1_moe",
+  "run_id": "44002743824",
   "signal": "AssertionError",
   "tests": [
    "tests/models/hunyuan_v1_moe/test_modeling_hunyuan_v1_moe.py::HunYuanMoEV1ModelTest::test_flash_attn_2_equivalence"
@@ -7072,6 +7116,18 @@
    "tests/models/mm_grounding_dino/test_modeling_mm_grounding_dino.py::MMGroundingDinoModelIntegrationTests::test_mm_grounding_dino_loss"
   ]
  },
+ "sticky#molmo2#2026-11-17": {
+  "date": "2026-11-17",
+  "day": 20774,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "molmo2",
+  "run_id": "44223064481",
+  "signal": "ValueError",
+  "tests": [
+   "tests/models/molmo2/test_modeling_molmo2.py::Molmo2ModelTest::test_flash_attn_2_can_dispatch_composite_models"
+  ]
+ },
  "sticky#moshi#2026-10-06": {
   "date": "2026-10-06",
   "day": 20732,
@@ -7215,6 +7271,19 @@
    "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_universal_segmentation_head"
   ]
  },
+ "sticky#oneformer#2026-10-24": {
+  "date": "2026-10-24",
+  "day": 20750,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "oneformer",
+  "run_id": "44002825235",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_no_head",
+   "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_universal_segmentation_head"
+  ]
+ },
  "sticky#owlv2#2026-11-09": {
   "date": "2026-11-09",
   "day": 20766,
@@ -7237,6 +7306,18 @@
   "signal": "AssertionError",
   "tests": [
    "tests/models/owlvit/test_modeling_owlvit.py::OwlViTForObjectDetectionTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
+ "sticky#paligemma#2026-11-17": {
+  "date": "2026-11-17",
+  "day": 20774,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "paligemma",
+  "run_id": "44223064481",
+  "signal": "ValueError",
+  "tests": [
+   "tests/models/paligemma/test_modeling_paligemma.py::PaliGemmaForConditionalGenerationModelTest::test_flash_attn_2_can_dispatch_composite_models"
   ]
  },
  "sticky#pegasus#2026-10-30": {
