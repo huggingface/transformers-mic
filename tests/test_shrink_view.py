@@ -79,6 +79,88 @@ def test_a_barely_shrunk_fixture_and_a_test_checkpoint_source_are_findings():
     assert any("is a test checkpoint" in f for f in shrink_view.verdict(result))
 
 
+def test_model_tester_static_small_config(monkeypatch):
+    """transformers#50462: literal `small_config_overrides` over the bases' `defaults` chain."""
+    from transformers_mic import tester
+
+    files = {
+        "tests/model_tester_config.py": """
+_TEXT = {"hidden_size": 32, "num_attention_heads": 2, "num_hidden_layers": 2, "seq_length": 7, "batch_size": 13}
+class ModelTesterConfigMixin:
+    defaults = _TEXT
+    small_config_overrides = {}
+""",
+        "tests/multimodal_tester.py": """
+class MultiModalModelTester(ModelTesterConfigMixin):
+    defaults = {**ModelTesterConfigMixin.defaults, "batch_size": 3, "scope": None}
+    def __init__(self, parent, **kwargs):
+        for key, value in self.get_small_config_defaults(**kwargs).items():
+            setattr(self, key, value)
+""",
+        "tests/vlm_tester.py": """
+class VLMModelTester(MultiModalModelTester):
+    defaults = {**MultiModalModelTester.defaults, "image_size": 8, "patch_size": 4, "num_channels": 3}
+""",
+    }
+    monkeypatch.setattr(tester, "fetch", lambda url, timeout=20: files[url.split("/main/")[1]])
+    code = """
+class FooTester(VLMModelTester):
+    small_config_overrides = {"image_size": 16, "kv_lora_rank": 16, "no_rope_layers": [1, 0, 1, 0], "hidden_size": 64}
+"""
+    found, own, static = tester.gather(code)
+    assert static and own == {"image_size": 16, "kv_lora_rank": 16, "no_rope_layers": [1, 0, 1, 0], "hidden_size": 64}
+    assert found["batch_size"] == 3 and found["num_channels"] == 3 and found["scope"] is None
+    # Derived as get_small_config_defaults() derives them.
+    assert found["num_image_tokens"] == 16 and found["seq_length"] == 23 and found["head_dim"] == 32
+    # What __init__ still sets wins over the class overrides, as at runtime.
+    legacy = code + """
+    def __init__(self, parent, **kwargs):
+        kwargs.setdefault("kv_lora_rank", 8)
+        super().__init__(parent, **kwargs)
+"""
+    assert tester.gather(legacy)[0]["kv_lora_rank"] == 8
+
+
+def test_model_tester_own_defaults_derivations_and_classes(monkeypatch):
+    """transformers#50916 shapes: a class's own `defaults`, simple derivations in its own
+    `get_small_config_defaults()`, and per-class precedence in a file of several testers."""
+    from transformers_mic import tester
+
+    mixin = """
+class ModelTesterConfigMixin:
+    defaults = {"hidden_size": 32, "num_experts": 8}
+    small_config_overrides = {}
+"""
+    monkeypatch.setattr(tester, "fetch", lambda url, timeout=20: mixin)
+    code = """
+class BertModelTester(ModelTesterConfigMixin):
+    defaults = {}
+    small_config_overrides = {"hidden_size": 48, "num_attention_heads": 4, "image_size": 16, "patch_size": 4}
+
+    @classmethod
+    def get_small_config_defaults(cls, **kwargs):
+        values = super().get_small_config_defaults(**kwargs)
+        values["out_hidden_size"] = values["hidden_size"]
+        values.setdefault("head_dim", values["hidden_size"] // values["num_attention_heads"])
+        if "grid" not in values:
+            values["grid"] = values["image_size"] // values["patch_size"]
+        values["layers"] = {i: i for i in range(2)}  # not evaluated
+        values["missing"] = values["nope"]  # skipped
+        return values
+
+class BertVisionTester:
+    def __init__(self, parent, hidden_size=99, depth=3):
+        self.parent = parent
+"""
+    found, own, static = tester.gather(code)
+    assert static and "num_experts" not in found  # the class's own defaults replace the mixin's
+    assert found["out_hidden_size"] == 48 and found["head_dim"] == 12 and found["grid"] == 4
+    assert "layers" not in found and "missing" not in found
+    # The first class wins across classes; the second still adds what the first lacks.
+    assert found["hidden_size"] == 48 and found["depth"] == 3
+    assert tester.gather(code, only="BertVisionTester")[0] == {"hidden_size": 99, "depth": 3}
+
+
 def test_model_tester_values_and_advisory_findings():
     from transformers_mic import tester
 

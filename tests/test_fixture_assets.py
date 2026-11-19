@@ -655,8 +655,12 @@ def test_shrink_keeps_every_block_kind_of_an_index_derived_pattern():
     from transformers import RecurrentGemmaConfig
 
     # As in google/recurrentgemma-2b: 26 layers cycling (recurrent, recurrent, attention).
+    # Transformers 5.23 names the kinds as layer_types do (linear_attention,
+    # sliding_attention), so compare with the checkpoint's own first cycle.
+    original = RecurrentGemmaConfig(num_hidden_layers=26).layers_block_type
     config = shrink(RecurrentGemmaConfig(num_hidden_layers=26))
-    assert config.layers_block_type == ["recurrent", "recurrent", "attention"]
+    assert config.layers_block_type == original[:3]
+    assert set(config.layers_block_type) == set(original) and len(set(original)) == 2
 
 
 def test_shrink_keeps_attention_layers_a_period_places():
