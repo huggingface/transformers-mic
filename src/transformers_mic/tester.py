@@ -281,57 +281,200 @@ OPS = {
     ast.Mod: lambda a, b: a % b,
     ast.Pow: lambda a, b: a**b,
 }
+COMPARE = {
+    ast.Eq: lambda a, b: a == b,
+    ast.NotEq: lambda a, b: a != b,
+    ast.Lt: lambda a, b: a < b,
+    ast.LtE: lambda a, b: a <= b,
+    ast.Gt: lambda a, b: a > b,
+    ast.GtE: lambda a, b: a >= b,
+    ast.In: lambda a, b: a in b,
+    ast.NotIn: lambda a, b: a not in b,
+    ast.Is: lambda a, b: a is b,
+    ast.IsNot: lambda a, b: a is not b,
+}
+# The only functions an override may call: pure builtins over plain values.
+FUNCTIONS = {
+    "len": len, "list": list, "tuple": tuple, "dict": dict, "set": set, "sorted": sorted, "min": min,
+    "max": max, "sum": sum, "abs": abs, "int": int, "float": float, "str": str, "bool": bool,
+    "range": range, "enumerate": enumerate, "zip": zip,
+}
+# Methods on the plain dicts and lists the override works with.
+METHODS = {"get", "setdefault", "copy", "keys", "values", "items", "index", "count"}
 
 
-def evaluate(node, values):
-    """An expression over `values[...]`, constants and arithmetic; anything else raises."""
+class Unknown(Exception):
+    """The override does something a static reader does not follow; skip the statement."""
+
+
+def evaluate(node, scope):
+    """An expression over the override's own names (`values`, `kwargs`, `cls`, its locals),
+    plain literals and displays, arithmetic, comparisons, comprehensions and whitelisted
+    builtins. Anything else (an import, an attribute of a module, torch_device) raises Unknown."""
     if isinstance(node, ast.Constant):
         return node.value
-    if isinstance(node, ast.Subscript) and isinstance(node.value, ast.Name) and node.value.id == "values":
-        return values[evaluate(node.slice, values)]
+    if isinstance(node, ast.Name):
+        if node.id in scope:
+            return scope[node.id]
+        if node.id in ("True", "False", "None"):
+            return {"True": True, "False": False, "None": None}[node.id]
+        raise Unknown(node.id)
+    if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name) and node.value.id == "cls":
+        if node.attr in scope["cls"]:
+            return scope["cls"][node.attr]
+        raise Unknown(f"cls.{node.attr}")
+    if isinstance(node, ast.Subscript):
+        container = evaluate(node.value, scope)
+        if isinstance(node.slice, ast.Slice):
+            parts = [evaluate(x, scope) if x is not None else None for x in (node.slice.lower, node.slice.upper, node.slice.step)]
+            return container[slice(*parts)]
+        return container[evaluate(node.slice, scope)]
     if isinstance(node, ast.BinOp) and type(node.op) in OPS:
-        return OPS[type(node.op)](evaluate(node.left, values), evaluate(node.right, values))
-    if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
-        return -evaluate(node.operand, values)
-    if isinstance(node, ast.Compare) and len(node.ops) == 1 and isinstance(node.ops[0], (ast.In, ast.NotIn)):
-        right = node.comparators[0]
-        if not (isinstance(right, ast.Name) and right.id == "values"):
-            raise ValueError("membership outside values")
-        inside = evaluate(node.left, values) in values
-        return inside if isinstance(node.ops[0], ast.In) else not inside
-    raise ValueError(ast.unparse(node))
+        return OPS[type(node.op)](evaluate(node.left, scope), evaluate(node.right, scope))
+    if isinstance(node, ast.UnaryOp):
+        operand = evaluate(node.operand, scope)
+        if isinstance(node.op, ast.USub):
+            return -operand
+        if isinstance(node.op, ast.Not):
+            return not operand
+        raise Unknown(ast.unparse(node))
+    if isinstance(node, ast.BoolOp):
+        result = None
+        for value in node.values:
+            result = evaluate(value, scope)
+            if isinstance(node.op, ast.And) and not result or isinstance(node.op, ast.Or) and result:
+                return result
+        return result
+    if isinstance(node, ast.Compare):
+        left = evaluate(node.left, scope)
+        for op, right_node in zip(node.ops, node.comparators):
+            right = evaluate(right_node, scope)
+            if type(op) not in COMPARE:
+                raise Unknown(ast.unparse(node))
+            if not COMPARE[type(op)](left, right):
+                return False
+            left = right
+        return True
+    if isinstance(node, ast.IfExp):
+        return evaluate(node.body if evaluate(node.test, scope) else node.orelse, scope)
+    if isinstance(node, (ast.List, ast.Tuple, ast.Set)):
+        items = []
+        for elt in node.elts:
+            if isinstance(elt, ast.Starred):
+                items.extend(evaluate(elt.value, scope))
+            else:
+                items.append(evaluate(elt, scope))
+        return {ast.List: list, ast.Tuple: tuple, ast.Set: set}[type(node)](items)
+    if isinstance(node, ast.Dict):
+        result = {}
+        for key, value in zip(node.keys, node.values):
+            if key is None:
+                result.update(evaluate(value, scope))
+            else:
+                result[evaluate(key, scope)] = evaluate(value, scope)
+        return result
+    if isinstance(node, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
+        return comprehension(node, scope)
+    if isinstance(node, ast.Call) and not any(isinstance(a, ast.Starred) for a in node.args):
+        args = [evaluate(a, scope) for a in node.args]
+        kwargs = {k.arg: evaluate(k.value, scope) for k in node.keywords if k.arg}
+        if isinstance(node.func, ast.Name) and node.func.id in FUNCTIONS and node.func.id not in scope:
+            return FUNCTIONS[node.func.id](*args, **kwargs)
+        if isinstance(node.func, ast.Attribute) and node.func.attr in METHODS:
+            target = evaluate(node.func.value, scope)
+            if isinstance(target, (dict, list, tuple)):
+                return getattr(target, node.func.attr)(*args, **kwargs)
+    raise Unknown(ast.unparse(node))
 
 
-def run_derivations(body, values):
-    """A model's own `get_small_config_defaults()` override, statement by statement: only
-    `values[k] = expr`, `values.setdefault(k, expr)` and `if` on those; the rest is skipped."""
+def comprehension(node, scope):
+    def walk(generators, local):
+        if not generators:
+            if isinstance(node, ast.DictComp):
+                yield evaluate(node.key, local), evaluate(node.value, local)
+            else:
+                yield evaluate(node.elt, local)
+            return
+        first, rest = generators[0], generators[1:]
+        if first.is_async:
+            raise Unknown("async comprehension")
+        for item in evaluate(first.iter, local):
+            inner = dict(local)
+            bind(first.target, item, inner)
+            if all(evaluate(cond, inner) for cond in first.ifs):
+                yield from walk(rest, inner)
+
+    items = list(walk(node.generators, dict(scope)))
+    if isinstance(node, ast.DictComp):
+        return dict(items)
+    return set(items) if isinstance(node, ast.SetComp) else list(items)
+
+
+def bind(target, value, scope):
+    if isinstance(target, ast.Name):
+        scope[target.id] = value
+    elif isinstance(target, (ast.Tuple, ast.List)):
+        value = list(value)
+        if len(value) != len(target.elts):
+            raise Unknown("unpack")
+        for elt, item in zip(target.elts, value):
+            bind(elt, item, scope)
+    else:
+        raise Unknown(ast.unparse(target))
+
+
+def is_super_call(node):
+    """`super().get_small_config_defaults(**kwargs)`."""
+    return (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "get_small_config_defaults"
+        and isinstance(node.func.value, ast.Call)
+        and isinstance(node.func.value.func, ast.Name)
+        and node.func.value.func.id == "super"
+    )
+
+
+def split_override(method):
+    """(statements before the super() call, statements after it) of an override."""
+    for index, stmt in enumerate(method.body):
+        value = getattr(stmt, "value", None)
+        if is_super_call(value):
+            return method.body[:index], method.body[index + 1:]
+    return [], method.body  # no super() call: treat the whole body as derivations
+
+
+def run_derivations(body, scope):
+    """A model's own `get_small_config_defaults()` override, statement by statement: name and
+    item assignments, `values`/`kwargs` mutations, `if`/`for`; a statement it cannot follow
+    is skipped, and a `return` ends the walk."""
     for stmt in body:
         try:
-            if (
-                isinstance(stmt, ast.Assign)
-                and len(stmt.targets) == 1
-                and isinstance(stmt.targets[0], ast.Subscript)
-                and isinstance(stmt.targets[0].value, ast.Name)
-                and stmt.targets[0].value.id == "values"
-            ):
-                values[evaluate(stmt.targets[0].slice, values)] = evaluate(stmt.value, values)
-            elif (
-                isinstance(stmt, ast.Expr)
-                and isinstance(stmt.value, ast.Call)
-                and isinstance(stmt.value.func, ast.Attribute)
-                and stmt.value.func.attr == "setdefault"
-                and isinstance(stmt.value.func.value, ast.Name)
-                and stmt.value.func.value.id == "values"
-                and len(stmt.value.args) == 2
-            ):
-                key = evaluate(stmt.value.args[0], values)
-                if key not in values:
-                    values[key] = evaluate(stmt.value.args[1], values)
+            if isinstance(stmt, ast.Return):
+                return scope
+            if isinstance(stmt, ast.Assign):
+                value = evaluate(stmt.value, scope)
+                for target in stmt.targets:  # a = b = value
+                    if isinstance(target, ast.Subscript):
+                        container = evaluate(target.value, scope)
+                        if not isinstance(container, (dict, list)):
+                            raise Unknown(ast.unparse(target))
+                        container[evaluate(target.slice, scope)] = value
+                    else:
+                        if isinstance(target, ast.Name) and target.id in ("values", "kwargs", "cls"):
+                            raise Unknown(f"rebinding {target.id}")
+                        bind(target, value, scope)
+            elif isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call):
+                evaluate(stmt.value, scope)  # values.setdefault / kwargs.setdefault
             elif isinstance(stmt, ast.If):
-                run_derivations(stmt.body if evaluate(stmt.test, values) else stmt.orelse, values)
-        except (KeyError, ValueError, TypeError, ZeroDivisionError, ArithmeticError):
+                run_derivations(stmt.body if evaluate(stmt.test, scope) else stmt.orelse, scope)
+            elif isinstance(stmt, ast.For) and not stmt.orelse:
+                for item in list(evaluate(stmt.iter, scope)):
+                    bind(stmt.target, item, scope)
+                    run_derivations(stmt.body, scope)
+        except (Unknown, KeyError, IndexError, ValueError, TypeError, AttributeError, ArithmeticError):
             continue
-    return values
+    return scope
 
 
 def class_values(cls, tree, ref):
@@ -340,6 +483,8 @@ def class_values(cls, tree, ref):
     Precedence is the runtime's: what `__init__` still sets (kwargs.setdefault, self.x)
     > the class's `small_config_overrides` > its `defaults` (its own, else its base's);
     then the fields the bases' and the class's own `get_small_config_defaults()` derive.
+    An override that fills `kwargs` before calling `super()` (llava_next, hunyuan_vl) is
+    followed as a caller would be: those values win and feed the bases' derivations.
     A base from before transformers#50462 has no `defaults`; its `__init__` is parsed instead.
     """
     legacy = init_values(cls)
@@ -357,14 +502,17 @@ def class_values(cls, tree, ref):
             for key, value in values(fetch(BASE.format(ref=ref, path=BASES[name]))).items():
                 defaults.setdefault(key, value)
     own = {**overrides, **legacy}
-    found = {**defaults, **own}
-    if static:
-        derive(found, lines, set(own))
-        method = next(
-            (f for f in cls.body if isinstance(f, ast.FunctionDef) and f.name == "get_small_config_defaults"), None
-        )
-        if method is not None:
-            run_derivations(method.body, found)
+    if not static:
+        return {**defaults, **own}, own, static
+    method = next((f for f in cls.body if isinstance(f, ast.FunctionDef) and f.name == "get_small_config_defaults"), None)
+    before, after = split_override(method) if method is not None else ([], [])
+    passed = {}  # what the override hands super() in kwargs; the caller passes nothing
+    scope = {"kwargs": passed, "cls": {"small_config_overrides": dict(overrides), "defaults": dict(defaults)}}
+    run_derivations(before, scope)
+    found = {**defaults, **own, **passed}
+    derive(found, lines, set(own) | set(passed))
+    scope["values"] = found
+    run_derivations(after, scope)
     return found, own, static
 
 

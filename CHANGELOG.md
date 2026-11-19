@@ -13,6 +13,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   `small_config_overrides` and base-tester `defaults` dicts (transformers#50462), merged and derived as
   `get_small_config_defaults()` does, including a model's own arithmetic derivations there
   (transformers#50916). Testers not yet migrated are still parsed from `__init__`.
+- A tester's own `get_small_config_defaults()` is followed further: locals, `kwargs` filled before `super()`
+  (llava_next, hunyuan_vl), displays, comprehensions and pure builtins such as `len` (transformers#50944).
+  Nothing is imported or run; a statement it cannot follow is skipped.
 
 ## [0.1.2] - 2026-11-12
 

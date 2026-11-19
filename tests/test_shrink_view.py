@@ -144,7 +144,7 @@ class BertModelTester(ModelTesterConfigMixin):
         values.setdefault("head_dim", values["hidden_size"] // values["num_attention_heads"])
         if "grid" not in values:
             values["grid"] = values["image_size"] // values["patch_size"]
-        values["layers"] = {i: i for i in range(2)}  # not evaluated
+        values["layers"] = {i: i for i in range(2)}
         values["missing"] = values["nope"]  # skipped
         return values
 
@@ -155,10 +155,53 @@ class BertVisionTester:
     found, own, static = tester.gather(code)
     assert static and "num_experts" not in found  # the class's own defaults replace the mixin's
     assert found["out_hidden_size"] == 48 and found["head_dim"] == 12 and found["grid"] == 4
-    assert "layers" not in found and "missing" not in found
+    assert found["layers"] == {0: 0, 1: 1} and "missing" not in found
     # The first class wins across classes; the second still adds what the first lacks.
     assert found["hidden_size"] == 48 and found["depth"] == 3
     assert tester.gather(code, only="BertVisionTester")[0] == {"hidden_size": 99, "depth": 3}
+
+
+def test_model_tester_override_forms_from_transformers_50944(monkeypatch):
+    """Overrides that fill kwargs before super(), use locals, len(), displays and comprehensions."""
+    from transformers_mic import tester
+
+    files = {
+        "tests/model_tester_config.py": """
+class ModelTesterConfigMixin:
+    defaults = {"hidden_size": 32, "num_attention_heads": 2, "seq_length": 7}
+""",
+        "tests/vlm_tester.py": """
+class VLMModelTester(ModelTesterConfigMixin):
+    defaults = {**ModelTesterConfigMixin.defaults, "image_size": 8, "patch_size": 4}
+""",
+    }
+    monkeypatch.setattr(tester, "fetch", lambda url, timeout=20: files[url.split("/main/")[1]])
+    code = """
+class LlavaLikeTester(VLMModelTester):
+    small_config_overrides = {"layer_types": ["full", "sliding", "full"], "num_hidden_layers": 2}
+
+    @classmethod
+    def get_small_config_defaults(cls, **kwargs):
+        image_size = kwargs.get("image_size", cls.defaults["image_size"])
+        height = width = image_size // 4
+        kwargs.setdefault("num_image_tokens", height * (width + 1))
+        values = super().get_small_config_defaults(**kwargs)
+        values["num_hidden_layers"] = len(values["layer_types"])
+        values["per_layer"] = {i: {"head_dim": 2 * values["head_dim"]} for i, t in enumerate(values["layer_types"]) if t == "full"}
+        values["sub_config"] = {"hidden_size": values["hidden_size"] * 2, **{"depth": 1}}
+        values["device"] = torch_device  # a runtime value: skipped
+        __import__("os").system("false")  # never run
+        if "seq_length" not in kwargs:
+            values["seq_length"] = 7 + 4 * values["num_image_tokens"]
+        return values
+"""
+    found, _, _ = tester.gather(code)
+    # kwargs filled before super() win and feed the bases' derivations.
+    assert found["num_image_tokens"] == 6 and found["seq_length"] == 31
+    assert found["num_hidden_layers"] == 3 and found["head_dim"] == 16
+    assert found["per_layer"] == {0: {"head_dim": 32}, 2: {"head_dim": 32}}
+    assert found["sub_config"] == {"hidden_size": 64, "depth": 1}
+    assert "device" not in found
 
 
 def test_model_tester_values_and_advisory_findings():
