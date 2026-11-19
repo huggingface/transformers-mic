@@ -31,7 +31,9 @@ def masked_spec_embed_init():
 
     patched = []
     for model_type, class_name in MASKED_SPEC_EMBED_MODELS.items():
-        module_name = f"transformers.models.{model_type}.modeling_{'data2vec_audio' if model_type == 'data2vec' else model_type}"
+        module_name = (
+            f"transformers.models.{model_type}.modeling_{'data2vec_audio' if model_type == 'data2vec' else model_type}"
+        )
         try:
             cls = getattr(importlib.import_module(module_name), class_name)
         except (ImportError, AttributeError):
@@ -105,6 +107,7 @@ def config_field_generation_params():
     _get_generation_parameters._mic_patched = True
     PreTrainedConfig._get_generation_parameters = _get_generation_parameters
     return ["PreTrainedConfig"]
+
 
 PATCHES = {
     "masked-spec-embed-init": masked_spec_embed_init,

@@ -38,7 +38,11 @@ def main():
     parser.add_argument("--lock", help="the --lock passed to the runner, repeated in repro commands")
     args = parser.parse_args()
 
-    records = [json.loads(line) for line in args.results.read_text().splitlines() if line.strip()] if args.results.exists() else []
+    records = (
+        [json.loads(line) for line in args.results.read_text().splitlines() if line.strip()]
+        if args.results.exists()
+        else []
+    )
     selection = None
     if args.log and args.log.exists():
         for line in args.log.read_text().splitlines():
@@ -54,12 +58,21 @@ def main():
         chosen = selection["selection"]
         everything = sorted(selection["code_dirs"])
         if not chosen:
-            out.append(f"No contract selected: the changed files touch none of the code the {len(everything)} contracts use.")
+            out.append(
+                f"No contract selected: the changed files touch none of the code the {len(everything)} contracts use."
+            )
         else:
             reasons = sorted({reason for reason in chosen.values()})
-            why = reasons[0] if len(reasons) == 1 else "; ".join(f"{name}: {reason}" for name, reason in sorted(chosen.items()))
+            why = (
+                reasons[0]
+                if len(reasons) == 1
+                else "; ".join(f"{name}: {reason}" for name, reason in sorted(chosen.items()))
+            )
             skipped = [name for name in everything if name not in chosen]
-            out.append(f"Selected {len(chosen)} of {len(everything)} contracts ({why})." + (f" Not selected: {', '.join(skipped)}." if skipped else ""))
+            out.append(
+                f"Selected {len(chosen)} of {len(everything)} contracts ({why})."
+                + (f" Not selected: {', '.join(skipped)}." if skipped else "")
+            )
         out.append("")
     if records:
         out.append(" · ".join(f"{ICON.get(s, '')} {n} {s}" for s, n in sorted(counts.items())))
@@ -73,7 +86,9 @@ def main():
                 detail = f"not compared (known failure): {', '.join(r['skipped_outputs'])}"
             else:
                 detail = first_line(r.get("failures"))
-            out.append(f"| {ICON.get(r['status'], r['status'])} | {r.get('contract_name', short(r['contract']))} | `{r['target']}` | {r.get('platform', '')} | {detail} |")
+            out.append(
+                f"| {ICON.get(r['status'], r['status'])} | {r.get('contract_name', short(r['contract']))} | `{r['target']}` | {r.get('platform', '')} | {detail} |"
+            )
     bad = [r for r in records if r["status"] in ("fail", "error")]
     if bad:
         out += ["", "#### Failures", ""]
@@ -82,11 +97,21 @@ def main():
             command = f"{args.runner}{framework} --fixtures-only{lock} --contract {r.get('contract_name', short(r['contract']))} --target {r['target']}"
             if r.get("variant", "default") != "default":
                 command += f" --variant {r['variant']}"
-            out += [f"**{r.get('contract_name', short(r['contract']))} / `{r['target']}`** ({r['status']}; baseline `{r.get('baseline', 'none')}`)", "",
-                    "```", *(f.rstrip() for f in r.get("failures", [])[:5]), "```", "",
-                    f"Reproduce: `{command}`", ""]
-        out += ["Is it a regression or an intended change? A regression: fix it in this PR (the fixture runs the contract's real usage code). "
-                f"An intended change: re-record the baseline with `--record` and have it reviewed ([how]({UPDATE})).", ""]
+            out += [
+                f"**{r.get('contract_name', short(r['contract']))} / `{r['target']}`** ({r['status']}; baseline `{r.get('baseline', 'none')}`)",
+                "",
+                "```",
+                *(f.rstrip() for f in r.get("failures", [])[:5]),
+                "```",
+                "",
+                f"Reproduce: `{command}`",
+                "",
+            ]
+        out += [
+            "Is it a regression or an intended change? A regression: fix it in this PR (the fixture runs the contract's real usage code). "
+            f"An intended change: re-record the baseline with `--record` and have it reviewed ([how]({UPDATE})).",
+            "",
+        ]
     if not records and selection is None:
         out.append("No result: the run produced no records (see the job log).")
     print("\n".join(out))

@@ -42,7 +42,9 @@ def test_reads_the_pinned_control_fleet_and_names_the_catalogs_rest(tmp_path, ca
     pin = tmp_path / "contracts.lock"
     pin.write_text(SHA + "\n")
     catalog = tmp_path / "fleet.lock"
-    catalog.write_text(json.dumps({"contracts": {"BERT": {}, "Whisper": {}, "WhisperSpeech": {}, "MusicgenMelody": {}}}))
+    catalog.write_text(
+        json.dumps({"contracts": {"BERT": {}, "Whisper": {}, "WhisperSpeech": {}, "MusicgenMelody": {}}})
+    )
     calls = []
     out = tmp_path / "out"
     download = fake_download(tmp_path, ["BERT", "Whisper", "CLIP"], calls)
@@ -68,7 +70,9 @@ def test_refuses_an_empty_control_fleet(tmp_path, control_locks):
     pin = tmp_path / "contracts.lock"
     pin.write_text(SHA + "\n")
     with pytest.raises(ValueError, match="not a Transformers lock"):
-        control_locks.main(["--out", str(tmp_path / "out"), "--pin", str(pin)], download=fake_download(tmp_path, [], []))
+        control_locks.main(
+            ["--out", str(tmp_path / "out"), "--pin", str(pin)], download=fake_download(tmp_path, [], [])
+        )
 
 
 def test_the_repository_pin_is_an_immutable_dataset_revision(control_locks):

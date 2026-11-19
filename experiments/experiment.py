@@ -51,7 +51,6 @@ from transformers.models.llama import modeling_llama
 from transformers.models.t5 import modeling_t5
 from transformers.models.whisper import modeling_whisper
 
-
 SOURCES = {
     "text": (
         "HuggingFaceTB/SmolLM-135M",
@@ -136,25 +135,16 @@ class TextTask:
         self.processor.pad_token = self.processor.eos_token
         self.processor.padding_side = "left"
         self.prompts = [
-            f"The capital of {country} is"
-            for country in ("France", "Germany", "Italy", "the United Kingdom")
+            f"The capital of {country} is" for country in ("France", "Germany", "Italy", "the United Kingdom")
         ]
         self.answers = [" Paris", " Berlin", " Rome", " London"]
-        self.inference_batch = dict(
-            self.processor(self.prompts, padding=True, return_tensors="pt")
-        )
-        prefixes = [
-            self.processor.encode(p, add_special_tokens=False) for p in self.prompts
-        ]
+        self.inference_batch = dict(self.processor(self.prompts, padding=True, return_tensors="pt"))
+        prefixes = [self.processor.encode(p, add_special_tokens=False) for p in self.prompts]
         self.gold = [
-            self.processor.encode(a, add_special_tokens=False)
-            + [self.processor.eos_token_id]
-            for a in self.answers
+            self.processor.encode(a, add_special_tokens=False) + [self.processor.eos_token_id] for a in self.answers
         ]
         rows = [p + a for p, a in zip(prefixes, self.gold)]
-        self.training_batch = dict(
-            self.processor.pad({"input_ids": rows}, return_tensors="pt")
-        )
+        self.training_batch = dict(self.processor.pad({"input_ids": rows}, return_tensors="pt"))
         labels = torch.full_like(self.training_batch["input_ids"], -100)
         for index, answer in enumerate(self.gold):
             labels[index, -len(answer) :] = torch.tensor(answer)
@@ -178,9 +168,7 @@ class TextTask:
         config.num_key_value_heads = 2
         config.head_dim = 16
         config.pad_token_id = self.processor.pad_token_id
-        return AutoModelForCausalLM.from_config(
-            config, attn_implementation="eager", dtype=torch.float32
-        ).to(DEVICE)
+        return AutoModelForCausalLM.from_config(config, attn_implementation="eager", dtype=torch.float32).to(DEVICE)
 
     def load_model(self, path, attn="eager"):
         return AutoModelForCausalLM.from_pretrained(
@@ -194,12 +182,8 @@ class TextTask:
         return model(**batch, use_cache=False).loss
 
     def observe(self, model, train_batch, infer_batch):
-        output = model(
-            **{k: v for k, v in train_batch.items() if k != "labels"}, use_cache=False
-        )
-        logits = output.logits[:, :, self.sample_ids][
-            self.training_batch["attention_mask"].bool()
-        ]
+        output = model(**{k: v for k, v in train_batch.items() if k != "labels"}, use_cache=False)
+        logits = output.logits[:, :, self.sample_ids][self.training_batch["attention_mask"].bool()]
         generated = model.generate(
             **infer_batch,
             max_new_tokens=4,
@@ -229,9 +213,7 @@ class TextTask:
             for batch in (train, infer):
                 batch["attention_mask"] = torch.ones_like(batch["attention_mask"])
         elif name == "remove_causal_mask":
-            stack.enter_context(
-                patch.object(modeling_llama, "create_causal_mask", return_value=None)
-            )
+            stack.enter_context(patch.object(modeling_llama, "create_causal_mask", return_value=None))
         elif name == "disable_rope":
             stack.enter_context(
                 patch.object(
@@ -241,17 +223,9 @@ class TextTask:
                 )
             )
         elif name == "zero_attention":
-            stack.callback(
-                model.model.layers[0]
-                .self_attn.register_forward_hook(zero_attention)
-                .remove
-            )
+            stack.callback(model.model.layers[0].self_attn.register_forward_hook(zero_attention).remove)
         elif name in ("zero_mlp", "detach_mlp"):
-            hook = (
-                (lambda m, a, out: torch.zeros_like(out))
-                if name == "zero_mlp"
-                else (lambda m, a, out: out.detach())
-            )
+            hook = (lambda m, a, out: torch.zeros_like(out)) if name == "zero_mlp" else (lambda m, a, out: out.detach())
             stack.callback(model.model.layers[0].mlp.register_forward_hook(hook).remove)
 
 
@@ -270,17 +244,12 @@ class ClipTask:
     def __init__(self, path):
         self.path = path
         self.processor = CLIPProcessor.from_pretrained(path, local_files_only=True)
-        self.texts = [
-            f"a {color} square" for color in ("red", "green", "blue", "yellow")
-        ]
+        self.texts = [f"a {color} square" for color in ("red", "green", "blue", "yellow")]
         self.images = [
-            Image.new("RGB", (256, 256), color)
-            for color in ((255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0))
+            Image.new("RGB", (256, 256), color) for color in ((255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0))
         ]
         self.inference_batch = dict(
-            self.processor(
-                text=self.texts, images=self.images, padding=True, return_tensors="pt"
-            )
+            self.processor(text=self.texts, images=self.images, padding=True, return_tensors="pt")
         )
         self.training_batch = self.inference_batch
         place(self)
@@ -325,34 +294,22 @@ class ClipTask:
             if name == "swap_red_blue":
                 batch["pixel_values"] = batch["pixel_values"][:, [2, 1, 0]]
             elif name == "repeat_first_image":
-                batch["pixel_values"] = batch["pixel_values"][:1].expand_as(
-                    batch["pixel_values"]
-                )
+                batch["pixel_values"] = batch["pixel_values"][:1].expand_as(batch["pixel_values"])
             elif name == "repeat_first_text":
                 for key in ("input_ids", "attention_mask"):
                     batch[key] = batch[key][:1].expand_as(batch[key])
             elif name == "scale_pixels":
                 batch["pixel_values"] = batch["pixel_values"] / 255
         if name == "zero_attention":
-            stack.callback(
-                model.vision_model.encoder.layers[0]
-                .self_attn.register_forward_hook(zero_attention)
-                .remove
-            )
+            stack.callback(model.vision_model.encoder.layers[0].self_attn.register_forward_hook(zero_attention).remove)
         elif name == "detach_visual_projection":
-            stack.callback(
-                model.visual_projection.register_forward_hook(
-                    lambda m, a, out: out.detach()
-                ).remove
-            )
+            stack.callback(model.visual_projection.register_forward_hook(lambda m, a, out: out.detach()).remove)
 
 
 def no_dropout(config):
     """Training probes compare losses, so fixtures must train deterministically."""
     for key, value in config.to_dict().items():
-        if isinstance(value, float) and (
-            "dropout" in key or "layerdrop" in key or key.startswith("mask_")
-        ):
+        if isinstance(value, float) and ("dropout" in key or "layerdrop" in key or key.startswith("mask_")):
             setattr(config, key, 0.0)
     return config
 
@@ -368,10 +325,7 @@ def detach_last_hidden_state(module, args, output):
 
 def sample_ids(vocab_size, gold):
     return sorted(
-        set(
-            torch.linspace(0, vocab_size - 1, 32).long().tolist()
-            + [token for answer in gold for token in answer]
-        )
+        set(torch.linspace(0, vocab_size - 1, 32).long().tolist() + [token for answer in gold for token in answer])
     )
 
 
@@ -380,9 +334,7 @@ def two_tone_clips(sampling_rate=16000):
     pairs = ((220, 880), (440, 1320), (660, 330), (990, 550))
     half = torch.arange(sampling_rate // 2) / sampling_rate
     return [
-        torch.cat([torch.sin(2 * math.pi * a * half), torch.sin(2 * math.pi * b * half)])
-        .mul(0.5)
-        .numpy()
+        torch.cat([torch.sin(2 * math.pi * a * half), torch.sin(2 * math.pi * b * half)]).mul(0.5).numpy()
         for a, b in pairs
     ]
 
@@ -408,16 +360,10 @@ class BertTask:
         self.processor = AutoTokenizer.from_pretrained(path, local_files_only=True)
         mask = self.processor.mask_token
         self.prompts = [
-            f"the capital of {country} is {mask}."
-            for country in ("france", "germany", "italy", "the united kingdom")
+            f"the capital of {country} is {mask}." for country in ("france", "germany", "italy", "the united kingdom")
         ]
-        self.gold = [
-            self.processor.encode(a, add_special_tokens=False)
-            for a in ("paris", "berlin", "rome", "london")
-        ]
-        self.inference_batch = dict(
-            self.processor(self.prompts, padding=True, return_tensors="pt")
-        )
+        self.gold = [self.processor.encode(a, add_special_tokens=False) for a in ("paris", "berlin", "rome", "london")]
+        self.inference_batch = dict(self.processor(self.prompts, padding=True, return_tensors="pt"))
         self.masked = self.inference_batch["input_ids"] == self.processor.mask_token_id
         labels = torch.full_like(self.inference_batch["input_ids"], -100)
         labels[self.masked] = torch.tensor([a[0] for a in self.gold])
@@ -433,14 +379,12 @@ class BertTask:
         config.intermediate_size = 128
         config.num_hidden_layers = 2
         config.num_attention_heads = 4
-        return BertForMaskedLM._from_config(
-            config, attn_implementation="eager", dtype=torch.float32
-        ).to(DEVICE)
+        return BertForMaskedLM._from_config(config, attn_implementation="eager", dtype=torch.float32).to(DEVICE)
 
     def load_model(self, path, attn="eager"):
-        return BertForMaskedLM.from_pretrained(
-            path, local_files_only=True, attn_implementation=attn, dtype=DTYPE
-        ).to(DEVICE)
+        return BertForMaskedLM.from_pretrained(path, local_files_only=True, attn_implementation=attn, dtype=DTYPE).to(
+            DEVICE
+        )
 
     def loss(self, model, batch):
         return model(**batch).loss
@@ -449,9 +393,7 @@ class BertTask:
         logits = model(**infer_batch).logits
         tokens = [[t] for t in logits[self.masked].argmax(-1).tolist()]
         return {
-            "numerical": logits[:, :, self.sample_ids][
-                self.inference_batch["attention_mask"].bool()
-            ]
+            "numerical": logits[:, :, self.sample_ids][self.inference_batch["attention_mask"].bool()]
             .flatten()
             .tolist(),
             "outputs": tokens,
@@ -473,15 +415,9 @@ class BertTask:
             hook = model.bert.embeddings.position_embeddings.register_forward_hook(zeros)
             stack.callback(hook.remove)
         elif name == "zero_attention":
-            stack.callback(
-                layer.attention.self.register_forward_hook(zero_attention).remove
-            )
+            stack.callback(layer.attention.self.register_forward_hook(zero_attention).remove)
         elif name == "detach_mlp":
-            stack.callback(
-                layer.intermediate.register_forward_hook(
-                    lambda m, a, out: out.detach()
-                ).remove
-            )
+            stack.callback(layer.intermediate.register_forward_hook(lambda m, a, out: out.detach()).remove)
 
 
 class T5Task:
@@ -505,16 +441,9 @@ class T5Task:
     def __init__(self, path):
         self.path = path
         self.processor = AutoTokenizer.from_pretrained(path, local_files_only=True)
-        self.prompts = [
-            f"capital of {country}:"
-            for country in ("France", "Germany", "Italy", "the United Kingdom")
-        ]
-        self.gold = [
-            self.processor.encode(a) for a in ("Paris", "Berlin", "Rome", "London")
-        ]
-        self.inference_batch = dict(
-            self.processor(self.prompts, padding=True, return_tensors="pt")
-        )
+        self.prompts = [f"capital of {country}:" for country in ("France", "Germany", "Italy", "the United Kingdom")]
+        self.gold = [self.processor.encode(a) for a in ("Paris", "Berlin", "Rome", "London")]
+        self.inference_batch = dict(self.processor(self.prompts, padding=True, return_tensors="pt"))
         labels = self.processor.pad({"input_ids": self.gold}, return_tensors="pt")
         labels = labels["input_ids"].masked_fill(labels["attention_mask"] == 0, -100)
         self.training_batch = {**self.inference_batch, "labels": labels}
@@ -530,14 +459,12 @@ class T5Task:
         config.d_kv = 16
         config.num_layers = config.num_decoder_layers = 2
         config.num_heads = 4
-        return self.model_cls._from_config(
-            config, attn_implementation="eager", dtype=torch.float32
-        ).to(DEVICE)
+        return self.model_cls._from_config(config, attn_implementation="eager", dtype=torch.float32).to(DEVICE)
 
     def load_model(self, path, attn="eager"):
-        return self.model_cls.from_pretrained(
-            path, local_files_only=True, attn_implementation=attn, dtype=DTYPE
-        ).to(DEVICE)
+        return self.model_cls.from_pretrained(path, local_files_only=True, attn_implementation=attn, dtype=DTYPE).to(
+            DEVICE
+        )
 
     def loss(self, model, batch):
         return model(**batch).loss
@@ -550,9 +477,7 @@ class T5Task:
             attention_mask=train_batch["attention_mask"],
             decoder_input_ids=model._shift_right(labels),
         ).logits
-        generated = model.generate(
-            **infer_batch, max_new_tokens=4, do_sample=False, num_beams=1
-        )[:, 1:].tolist()
+        generated = model.generate(**infer_batch, max_new_tokens=4, do_sample=False, num_beams=1)[:, 1:].tolist()
         eos = self.processor.eos_token_id
         tokens = [row[: row.index(eos) + 1] if eos in row else row for row in generated]
         return {
@@ -573,22 +498,16 @@ class T5Task:
             bias = model.encoder.block[0].layer[0].SelfAttention.relative_attention_bias
             stack.callback(bias.register_forward_hook(zeros).remove)
         elif name == "remove_causal_mask":
-            stack.enter_context(
-                patch.object(modeling_t5, "create_causal_mask", return_value=None)
-            )
+            stack.enter_context(patch.object(modeling_t5, "create_causal_mask", return_value=None))
         elif name == "zero_cross_attention":
             stack.callback(
                 model.decoder.block[0]
                 .layer[1]
-                .EncDecAttention.register_forward_hook(
-                    lambda m, a, out: (torch.zeros_like(out[0]), *out[1:])
-                )
+                .EncDecAttention.register_forward_hook(lambda m, a, out: (torch.zeros_like(out[0]), *out[1:]))
                 .remove
             )
         elif name == "detach_encoder":
-            stack.callback(
-                model.encoder.register_forward_hook(detach_last_hidden_state).remove
-            )
+            stack.callback(model.encoder.register_forward_hook(detach_last_hidden_state).remove)
 
 
 class WhisperTask:
@@ -617,12 +536,11 @@ class WhisperTask:
         )
         eot = tokenizer.eos_token_id
         self.gold = [
-            tokenizer.encode(w, add_special_tokens=False) + [eot]
-            for w in (" red", " green", " blue", " yellow")
+            tokenizer.encode(w, add_special_tokens=False) + [eot] for w in (" red", " green", " blue", " yellow")
         ]
-        features = self.processor.feature_extractor(
-            two_tone_clips(), sampling_rate=16000, return_tensors="pt"
-        )["input_features"]
+        features = self.processor.feature_extractor(two_tone_clips(), sampling_rate=16000, return_tensors="pt")[
+            "input_features"
+        ]
         self.inference_batch = {"input_features": features}
         full = torch.tensor([self.prefix + answer for answer in self.gold])
         labels = full[:, 1:].clone()
@@ -691,21 +609,11 @@ class WhisperTask:
             positions = model.model.encoder.embed_positions
             stack.callback(positions.register_forward_hook(zeros).remove)
         elif name == "remove_causal_mask":
-            stack.enter_context(
-                patch.object(modeling_whisper, "create_causal_mask", return_value=None)
-            )
+            stack.enter_context(patch.object(modeling_whisper, "create_causal_mask", return_value=None))
         elif name == "zero_cross_attention":
-            stack.callback(
-                model.model.decoder.layers[0]
-                .encoder_attn.register_forward_hook(zero_attention)
-                .remove
-            )
+            stack.callback(model.model.decoder.layers[0].encoder_attn.register_forward_hook(zero_attention).remove)
         elif name == "detach_encoder":
-            stack.callback(
-                model.model.encoder.register_forward_hook(
-                    detach_last_hidden_state
-                ).remove
-            )
+            stack.callback(model.model.encoder.register_forward_hook(detach_last_hidden_state).remove)
 
 
 class Wav2Vec2Task:
@@ -727,13 +635,9 @@ class Wav2Vec2Task:
         self.path = path
         self.processor = Wav2Vec2Processor.from_pretrained(path, local_files_only=True)
         self.words = ["RED", "GREEN", "BLUE", "YELLOW"]
-        self.inference_batch = dict(
-            self.processor(two_tone_clips(), sampling_rate=16000, return_tensors="pt")
-        )
+        self.inference_batch = dict(self.processor(two_tone_clips(), sampling_rate=16000, return_tensors="pt"))
         labels = self.processor(text=self.words, padding=True, return_tensors="pt")
-        labels = labels["input_ids"].masked_fill(
-            labels["input_ids"] == self.processor.tokenizer.pad_token_id, -100
-        )
+        labels = labels["input_ids"].masked_fill(labels["input_ids"] == self.processor.tokenizer.pad_token_id, -100)
         self.training_batch = {**self.inference_batch, "labels": labels}
         place(self)
 
@@ -746,14 +650,12 @@ class Wav2Vec2Task:
         config.conv_dim = (32,) * len(config.conv_dim)
         config.num_conv_pos_embeddings = 16
         config.num_conv_pos_embedding_groups = 4
-        return Wav2Vec2ForCTC._from_config(
-            config, attn_implementation="eager", dtype=torch.float32
-        ).to(DEVICE)
+        return Wav2Vec2ForCTC._from_config(config, attn_implementation="eager", dtype=torch.float32).to(DEVICE)
 
     def load_model(self, path, attn="eager"):
-        return Wav2Vec2ForCTC.from_pretrained(
-            path, local_files_only=True, attn_implementation=attn, dtype=DTYPE
-        ).to(DEVICE)
+        return Wav2Vec2ForCTC.from_pretrained(path, local_files_only=True, attn_implementation=attn, dtype=DTYPE).to(
+            DEVICE
+        )
 
     def loss(self, model, batch):
         return model(**batch).loss
@@ -780,11 +682,7 @@ class Wav2Vec2Task:
             positions = model.wav2vec2.encoder.pos_conv_embed
             stack.callback(positions.register_forward_hook(zeros).remove)
         elif name == "zero_attention":
-            stack.callback(
-                model.wav2vec2.encoder.layers[0]
-                .attention.register_forward_hook(zero_attention)
-                .remove
-            )
+            stack.callback(model.wav2vec2.encoder.layers[0].attention.register_forward_hook(zero_attention).remove)
         elif name == "detach_feature_projection":
             stack.callback(
                 model.wav2vec2.feature_projection.register_forward_hook(
@@ -804,10 +702,7 @@ class OlmoTask(TextTask):
 
 
 TASKS = {
-    task.name: task
-    for task in (
-        TextTask, ClipTask, BertTask, T5Task, WhisperTask, Wav2Vec2Task, UMT5Task, OlmoTask
-    )
+    task.name: task for task in (TextTask, ClipTask, BertTask, T5Task, WhisperTask, Wav2Vec2Task, UMT5Task, OlmoTask)
 }
 # Hub sources for the added families; only configs and processors are used.
 SOURCES.update(
@@ -846,15 +741,10 @@ def observe(task, model, fault="none"):
 def compare(actual, baseline):
     a, b = torch.tensor(actual["numerical"]), torch.tensor(baseline["numerical"])
     return {
-        "numerical_detected": a.shape != b.shape
-        or not torch.allclose(a, b, atol=ATOL, rtol=RTOL),
+        "numerical_detected": a.shape != b.shape or not torch.allclose(a, b, atol=ATOL, rtol=RTOL),
         "recorded_output_detected": actual["outputs"] != baseline["outputs"],
-        "semantic_detected": (
-            not actual["semantic_pass"] if baseline["semantic_pass"] else None
-        ),
-        "max_absolute_delta": float((a - b).abs().max())
-        if a.shape == b.shape
-        else None,
+        "semantic_detected": (not actual["semantic_pass"] if baseline["semantic_pass"] else None),
+        "max_absolute_delta": float((a - b).abs().max()) if a.shape == b.shape else None,
     }
 
 
@@ -870,14 +760,9 @@ def training_probe(task, model, fault="none"):
             loss.backward()
         params = dict(model.named_parameters())
         active = [p for p in params.values() if p.grad is not None]
-        finite = (
-            bool(torch.isfinite(loss))
-            and bool(active)
-            and all(bool(torch.isfinite(p.grad).all()) for p in active)
-        )
+        finite = bool(torch.isfinite(loss)) and bool(active) and all(bool(torch.isfinite(p.grad).all()) for p in active)
         required = all(
-            params[name].grad is not None
-            and bool(torch.count_nonzero(params[name].grad))
+            params[name].grad is not None and bool(torch.count_nonzero(params[name].grad))
             for name in task.required_gradients
         )
         optimizer.step()
@@ -972,9 +857,7 @@ def evaluate(task, model, fixture_path=None, gradients=True, source_path=None):
         row = compare(actual, baseline)
         if gradients:
             probe = training_probe(control_task, control_model)
-            row.update(
-                training_detected=not probe["pass"], loss_detected=loss_changed(probe)
-            )
+            row.update(training_detected=not probe["pass"], loss_detected=loss_changed(probe))
         return row
 
     latencies = []
@@ -989,9 +872,7 @@ def evaluate(task, model, fixture_path=None, gradients=True, source_path=None):
     sdpa_path = fixture_path or source_path
     if sdpa_path:
         sdpa_model = task.load_model(sdpa_path, attn="sdpa")
-        result["controls"].append(
-            {"name": "sdpa", **control(observe(task, sdpa_model), task, sdpa_model)}
-        )
+        result["controls"].append({"name": "sdpa", **control(observe(task, sdpa_model), task, sdpa_model)})
         del sdpa_model
     if fixture_path:
         reloaded = task.load_model(fixture_path)
@@ -1039,23 +920,16 @@ def summarize(fixtures):
     for weights in ("random", "overfit"):
         selected = [f for f in fixtures if f["weights"] == weights]
         faults = [fault for f in selected for fault in f["evaluation"]["faults"]]
-        controls = [
-            control for f in selected for control in f["evaluation"]["controls"]
-        ]
+        controls = [control for f in selected for control in f["evaluation"]["controls"]]
         result[weights] = {
             "fixture_count": len(selected),
             "fault_seed_cases": len(faults),
             "smoke_detected": sum(f["smoke_detected"] for f in faults),
             "numerical_detected": sum(f["numerical_detected"] for f in faults),
-            "recorded_output_detected": sum(
-                f["recorded_output_detected"] for f in faults
-            ),
-            "numerical_or_training_detected": sum(
-                f["numerical_detected"] or f["training_detected"] for f in faults
-            ),
+            "recorded_output_detected": sum(f["recorded_output_detected"] for f in faults),
+            "numerical_or_training_detected": sum(f["numerical_detected"] or f["training_detected"] for f in faults),
             "numerical_or_training_or_loss_detected": sum(
-                f["numerical_detected"] or f["training_detected"] or f["loss_detected"]
-                for f in faults
+                f["numerical_detected"] or f["training_detected"] or f["loss_detected"] for f in faults
             ),
             "control_cases": len(controls),
             "control_false_alarms": sum(
@@ -1072,15 +946,11 @@ def summarize(fixtures):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--seeds", type=int, nargs="+", default=[17, 29, 43])
-    parser.add_argument(
-        "--families", nargs="+", choices=list(TASKS), default=["text", "clip"]
-    )
+    parser.add_argument("--families", nargs="+", choices=list(TASKS), default=["text", "clip"])
     parser.add_argument("--threads", type=int, default=2)
     parser.add_argument("--max-steps", type=int, default=250)
     parser.add_argument("--real-checkpoints", action="store_true")
-    parser.add_argument(
-        "--output", type=Path, default=Path(__file__).parent / "results" / "smollm_clip.json"
-    )
+    parser.add_argument("--output", type=Path, default=Path(__file__).parent / "results" / "smollm_clip.json")
     parser.add_argument(
         "--artifacts",
         type=Path,
@@ -1092,9 +962,7 @@ def main():
     torch.use_deterministic_algorithms(True)
     transformers.logging.set_verbosity_error()
     source_dir = Path(transformers.__file__).resolve().parents[2]
-    commit = subprocess.check_output(
-        ["git", "-C", str(source_dir), "rev-parse", "HEAD"], text=True
-    ).strip()
+    commit = subprocess.check_output(["git", "-C", str(source_dir), "rev-parse", "HEAD"], text=True).strip()
     tracked_changes = subprocess.check_output(
         ["git", "-C", str(source_dir), "diff", "HEAD", "--", "src/transformers"],
         text=True,
@@ -1107,9 +975,7 @@ def main():
             "torch": torch.__version__,
             "transformers": transformers.__version__,
             "transformers_commit": commit,
-            "transformers_source_diff_sha256": hashlib.sha256(
-                tracked_changes.encode()
-            ).hexdigest(),
+            "transformers_source_diff_sha256": hashlib.sha256(tracked_changes.encode()).hexdigest(),
             "transformers_source_dirty": bool(tracked_changes),
             "threads": args.threads,
             "device": str(DEVICE),
@@ -1118,10 +984,7 @@ def main():
             "rtol": RTOL,
         },
         "script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-        "arguments": {
-            key: str(value) if isinstance(value, Path) else value
-            for key, value in vars(args).items()
-        },
+        "arguments": {key: str(value) if isinstance(value, Path) else value for key, value in vars(args).items()},
         "fixtures": [],
         "real_checkpoints": [],
     }
@@ -1194,9 +1057,7 @@ def main():
                     "family": family,
                     "source": source,
                     "parameters": sum(p.numel() for p in model.parameters()),
-                    "evaluation": evaluate(
-                        reference_task, model, gradients=False, source_path=snapshot(source)
-                    ),
+                    "evaluation": evaluate(reference_task, model, gradients=False, source_path=snapshot(source)),
                 }
             )
             write_report()

@@ -2,14 +2,13 @@ import io
 import json
 import subprocess
 import sys
+
 import pytest
 
 from transformers_mic import batch, cloud_progress
 
 
-def test_relay_preserves_carriage_returns_instead_of_appending_lines(
-    tmp_path, monkeypatch
-):
+def test_relay_preserves_carriage_returns_instead_of_appending_lines(tmp_path, monkeypatch):
     real_popen = subprocess.Popen
 
     def popen(command, **kwargs):
@@ -61,16 +60,10 @@ def test_child_sends_only_changed_state_and_never_animation_frames(monkeypatch, 
     assert capsys.readouterr().err == ""
 
 
-def test_progress_events_are_rendered_and_saved_without_animation(
-    tmp_path, monkeypatch
-):
+def test_progress_events_are_rendered_and_saved_without_animation(tmp_path, monkeypatch):
     real_popen = subprocess.Popen
     view = {"status": "queued", "jobs": [], "progress": []}
-    script = (
-        "import sys; print("
-        + repr("MIC_CLOUD_VIEW " + json.dumps(view))
-        + ", file=sys.stderr)"
-    )
+    script = "import sys; print(" + repr("MIC_CLOUD_VIEW " + json.dumps(view)) + ", file=sys.stderr)"
 
     def popen(command, **kwargs):
         return real_popen([sys.executable, "-c", script], **kwargs)
@@ -86,11 +79,9 @@ def test_progress_events_are_rendered_and_saved_without_animation(
     assert "MIC_CLOUD_VIEW" in log and "\x1b" not in log
 
 
-def test_interrupt_requests_cancellation_only_after_explicit_yes(
-    tmp_path, monkeypatch, capsys
-):
+def test_interrupt_requests_cancellation_only_after_explicit_yes(tmp_path, monkeypatch, capsys):
     from transformers_mic import github_baselines as github
-    from transformers_mic.workspace import write, read
+    from transformers_mic.workspace import read, write
 
     write(
         tmp_path / "cloud.json",
@@ -122,9 +113,7 @@ def test_interrupt_requests_cancellation_only_after_explicit_yes(
     assert "Cancellation requested" in capsys.readouterr().err
 
 
-def test_interrupt_no_or_noninteractive_leaves_remote_running(
-    tmp_path, monkeypatch, capsys
-):
+def test_interrupt_no_or_noninteractive_leaves_remote_running(tmp_path, monkeypatch, capsys):
     from transformers_mic import github_baselines as github
     from transformers_mic.workspace import write
 
@@ -159,19 +148,14 @@ def test_interrupt_finished_run_does_not_prompt(tmp_path, monkeypatch):
 
     write(tmp_path / "cloud.json", {"transport": "github-test", "job": {"run_id": 123}})
     monkeypatch.setattr(github, "api", lambda path: {"status": "completed"})
-    monkeypatch.setattr(
-        "builtins.input", lambda: pytest.fail("must not prompt for finished run")
-    )
+    monkeypatch.setattr("builtins.input", lambda: pytest.fail("must not prompt for finished run"))
     github.interrupt(tmp_path)
 
 
-@pytest.mark.parametrize(
-    ("conclusion", "kept"), [("cancelled", "cancelled"), ("failure", "failed")]
-)
-def test_ended_collection_is_archived_before_fresh_submission(
-    tmp_path, monkeypatch, conclusion, kept
-):
+@pytest.mark.parametrize(("conclusion", "kept"), [("cancelled", "cancelled"), ("failure", "failed")])
+def test_ended_collection_is_archived_before_fresh_submission(tmp_path, monkeypatch, conclusion, kept):
     from types import SimpleNamespace
+
     from transformers_mic import github_baselines as github
     from transformers_mic.workspace import write
 
@@ -192,9 +176,7 @@ def test_ended_collection_is_archived_before_fresh_submission(
     )
     (tmp_path / "partial.txt").write_text("preserve evidence")
     (tmp_path / ".cloud.lock").touch()
-    monkeypatch.setattr(
-        github, "api", lambda path: {"status": "completed", "conclusion": conclusion}
-    )
+    monkeypatch.setattr(github, "api", lambda path: {"status": "completed", "conclusion": conclusion})
     run_locked = github.run_locked
 
     def fresh(args, root):
@@ -226,14 +208,9 @@ def test_cloud_failure_reports_worker_cause(tmp_path):
                     "status": "failed",
                     "variant": "bfloat16",
                     "target": "fixture",
-                    "record": {
-                        "failures": ["traceback tail\nRuntimeError: dtype mismatch"]
-                    },
+                    "record": {"failures": ["traceback tail\nRuntimeError: dtype mismatch"]},
                 }
             ]
         },
     )
-    assert (
-        failure_summary(tmp_path)
-        == "cpu/bfloat16/fixture: RuntimeError: dtype mismatch"
-    )
+    assert failure_summary(tmp_path) == "cpu/bfloat16/fixture: RuntimeError: dtype mismatch"

@@ -2,9 +2,9 @@
 
 import json
 import os
-from pathlib import Path
 import re
 import sys
+from pathlib import Path
 
 from transformers_mic import cloud_inputs
 from transformers_mic.baselines import upload
@@ -15,9 +15,9 @@ from transformers_mic.workspace import read, write
 def main(root):
     root = Path(root).resolve()
     repo = os.environ["UPLOAD_REPO"]
-    if not re.fullmatch(
-        r"[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*", repo
-    ) or repo.split("/")[0] not in os.environ["UPLOAD_NAMESPACES"].split(","):
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*", repo) or repo.split("/")[
+        0
+    ] not in os.environ["UPLOAD_NAMESPACES"].split(","):
         raise ValueError("Hub upload namespace not allowed")
     request = {
         "id": os.environ["JOB_ID"],
@@ -31,9 +31,7 @@ def main(root):
         request["exclude"] = exclude
     if workspace := cloud_inputs.from_env():
         request["workspace"] = workspace
-    write(
-        root / "cloud.json", {"job": request, "request": {"profiles": ["cpu", "cuda"]}}
-    )
+    write(root / "cloud.json", {"job": request, "request": {"profiles": ["cpu", "cuda"]}})
     progress = Progress(request["id"], "publish")
     progress.emit("uploading", 0, 1, repo)
     upload(root, repo, True)

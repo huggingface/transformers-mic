@@ -66,19 +66,13 @@ def per_row(perturb, rows):
 
 
 def tensor_list(value):
-    return (
-        isinstance(value, (list, tuple))
-        and bool(value)
-        and all(isinstance(v, torch.Tensor) for v in value)
-    )
+    return isinstance(value, (list, tuple)) and bool(value) and all(isinstance(v, torch.Tensor) for v in value)
 
 
 def same(a, b):
     if isinstance(a, torch.Tensor):
         return torch.equal(a, b)
-    return len(a) == len(b) and all(
-        x.shape == y.shape and torch.equal(x, y) for x, y in zip(a, b)
-    )
+    return len(a) == len(b) and all(x.shape == y.shape and torch.equal(x, y) for x, y in zip(a, b))
 
 
 def logits_of(output):
@@ -121,7 +115,12 @@ def sensitivity(model, batch, threshold, accepted=None):
         batch = {k: v for k, v in batch.items() if k != "labels"}
     model.eval()
     parameter = next(model.parameters())
-    with torch.no_grad(), torch.autocast(parameter.device.type, dtype=parameter.dtype, enabled=parameter.dtype in (torch.float16, torch.bfloat16)):
+    with (
+        torch.no_grad(),
+        torch.autocast(
+            parameter.device.type, dtype=parameter.dtype, enabled=parameter.dtype in (torch.float16, torch.bfloat16)
+        ),
+    ):
         base = logits_of(model(**batch))
         rows, undefined, ignored = {}, [], []
         # A tokenizer can return an input the model only absorbs in **kwargs

@@ -1,12 +1,12 @@
 """Inspect parameter names from headers/indexes, or a binary checkpoint's pickle."""
 
 import collections
-from concurrent.futures import ThreadPoolExecutor
 import json
-from pathlib import Path
 import pickle
 import re
 import zipfile
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 from huggingface_hub import HfApi, HfFileSystem
 
@@ -34,11 +34,7 @@ def explicit_weights(source):
 
 def explicit_keys(api, repo, revision, source, name):
     if not name.endswith(".index.json"):
-        return set(
-            api.parse_safetensors_file_metadata(
-                repo, name, revision=revision, timeout=60
-            ).tensors
-        )
+        return set(api.parse_safetensors_file_metadata(repo, name, revision=revision, timeout=60).tensors)
     index = Path(source) / name
     if not index.exists():
         from huggingface_hub import hf_hub_download
@@ -49,9 +45,7 @@ def explicit_keys(api, repo, revision, source, name):
     try:
         with ThreadPoolExecutor(8) as pool:
             headers = pool.map(
-                lambda shard: api.parse_safetensors_file_metadata(
-                    repo, shard, revision=revision, timeout=60
-                ),
+                lambda shard: api.parse_safetensors_file_metadata(repo, shard, revision=revision, timeout=60),
                 sorted(set(weight_map.values())),
             )
             return {key for header in headers for key in header.tensors}
@@ -74,17 +68,13 @@ def explicit_parameter_count(repo, revision):
         return None
     api = HfApi()
     if name.endswith(".index.json"):
-        index = json.loads(
-            Path(hf_hub_download(repo, name, revision=revision)).read_text()
-        )
+        index = json.loads(Path(hf_hub_download(repo, name, revision=revision)).read_text())
         files = sorted(set(index["weight_map"].values()))
     else:
         files = [name]
     with ThreadPoolExecutor(8) as pool:
         headers = pool.map(
-            lambda f: api.parse_safetensors_file_metadata(
-                repo, f, revision=revision, timeout=60
-            ),
+            lambda f: api.parse_safetensors_file_metadata(repo, f, revision=revision, timeout=60),
             files,
         )
         return sum(sum(h.parameter_count.values()) for h in headers)
@@ -126,11 +116,7 @@ def checkpoint_keys(repo, revision, source):
                 f"weight files: {weights[:8]}"
             )
         return binary_keys(repo, revision)
-    return set(
-        api.parse_safetensors_file_metadata(
-            repo, "model.safetensors", revision=revision, timeout=60
-        ).tensors
-    )
+    return set(api.parse_safetensors_file_metadata(repo, "model.safetensors", revision=revision, timeout=60).tensors)
 
 
 class _Names(pickle.Unpickler):
@@ -183,11 +169,7 @@ def conversion_pr_keys(api, repo):
         discussion_status="open",
     ):
         if discussion.title == "Adding `safetensors` variant of this model":
-            return set(
-                api.get_safetensors_metadata(
-                    repo, revision=f"refs/pr/{discussion.num}"
-                ).weight_map
-            )
+            return set(api.get_safetensors_metadata(repo, revision=f"refs/pr/{discussion.num}").weight_map)
     return None
 
 
@@ -205,9 +187,7 @@ def missing_from_keys(model, keys):
     }
     prefix = getattr(model, "base_model_prefix", "")
     if prefix:
-        keys |= {
-            prefix + "." + name for name in keys if prefix + "." + name in expected
-        }
+        keys |= {prefix + "." + name for name in keys if prefix + "." + name in expected}
     # A tied parameter is present if any of its aliases is serialized.
     groups = {}
     for name, parameter in model.named_parameters(remove_duplicate=False):
@@ -260,9 +240,7 @@ def inspect_checkpoint(cls, source, repo, revision):
         if key in state:
             converted.add(key)
             continue
-        renamed, matched = rename_source_key(
-            key, renamings, converters, model.base_model_prefix, state
-        )
+        renamed, matched = rename_source_key(key, renamings, converters, model.base_model_prefix, state)
         converted.add(renamed)
         if matched:
             for converter in converters:
@@ -273,16 +251,13 @@ def inspect_checkpoint(cls, source, repo, revision):
                 if scope and f"{scope}." not in renamed:
                     continue
                 _, source_pattern = converter.rename_source_key(key)
-                if (
-                    source_pattern == matched or matched in converter.source_patterns
-                ) and len(converter.target_patterns) > 1:
+                if (source_pattern == matched or matched in converter.source_patterns) and len(
+                    converter.target_patterns
+                ) > 1:
                     # Expand the fully renamed key: the converter alone skips
                     # renamings such as encoder.layers -> layers.
                     first = converter.target_patterns[0]
-                    converted.update(
-                        renamed.replace(first, target)
-                        for target in converter.target_patterns
-                    )
+                    converted.update(renamed.replace(first, target) for target in converter.target_patterns)
     return missing_from_keys(model, converted)
 
 
@@ -302,11 +277,7 @@ def logical_checkpoint_keys(config, keys):
     if config.model_type != "gpt_oss" or quantization.get("quant_method") != "mxfp4":
         raise ValueError("Quantized checkpoint needs a reviewed parameter-name adapter")
     logical = set(keys)
-    packed = [
-        key
-        for key in keys
-        if key.endswith((".gate_up_proj_blocks", ".down_proj_blocks"))
-    ]
+    packed = [key for key in keys if key.endswith((".gate_up_proj_blocks", ".down_proj_blocks"))]
     if not packed:
         raise ValueError("GPT-OSS MXFP4 index has no supported packed expert tensors")
     for key in packed:

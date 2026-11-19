@@ -11,12 +11,12 @@ not share. This module names the difference and the pip command that removes it.
 import importlib.metadata
 import json
 import os
-from pathlib import Path
 import re
 import shlex
 import subprocess
 import sys
 import tomllib
+from pathlib import Path
 from urllib.parse import unquote, urlparse
 
 from packaging.requirements import Requirement
@@ -37,14 +37,8 @@ def runtime_requirements():
     if pyproject.is_file():
         project = tomllib.loads(pyproject.read_text()).get("project", {})
         if project.get("name") == "transformers-mic":
-            return [
-                Requirement(text)
-                for text in project["optional-dependencies"]["runtime"]
-            ]
-    requirements = [
-        Requirement(text)
-        for text in importlib.metadata.requires("transformers-mic") or []
-    ]
+            return [Requirement(text) for text in project["optional-dependencies"]["runtime"]]
+    requirements = [Requirement(text) for text in importlib.metadata.requires("transformers-mic") or []]
     return [
         requirement
         for requirement in requirements
@@ -153,9 +147,7 @@ def compare(requirements, source, head, version=importlib.metadata.version):
     transformers, commit, dirty = source
     measured = f"huggingface/transformers main ({head or 'not resolved'})"
     if transformers is None:
-        problems.append(
-            f"Transformers is not installed; the cloud runners measure {measured}."
-        )
+        problems.append(f"Transformers is not installed; the cloud runners measure {measured}.")
         install.append(framework)
     elif commit is None:
         problems.append(
@@ -164,27 +156,20 @@ def compare(requirements, source, head, version=importlib.metadata.version):
         )
         install.append(framework)
     elif head is None:
-        notes.append(
-            f"Could not resolve Transformers main; Transformers here is {commit}."
-        )
+        notes.append(f"Could not resolve Transformers main; Transformers here is {commit}.")
     elif commit != head:
         notes.append(
             f"Transformers here is {commit[:12]}, main is {head[:12]}; the cloud "
-            "measures main at dispatch. To match: python -m pip install "
-            + shlex.quote(framework)
+            "measures main at dispatch. To match: python -m pip install " + shlex.quote(framework)
         )
     if dirty:
-        notes.append(
-            f"Transformers at {dirty} has uncommitted changes the cloud runners do not have."
-        )
+        notes.append(f"Transformers at {dirty} has uncommitted changes the cloud runners do not have.")
     return problems, notes, install
 
 
 def require_cloud_match():
     """Stop before the local factory check when this Python differs from the cloud's."""
-    problems, notes, install = compare(
-        runtime_requirements(), transformers_source(), main_commit()
-    )
+    problems, notes, install = compare(runtime_requirements(), transformers_source(), main_commit())
     for note in notes:
         print(f"tmic: note: {note}", file=sys.stderr, flush=True)
     if not problems:

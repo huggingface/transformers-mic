@@ -3,10 +3,10 @@
 import copy
 import hashlib
 import importlib
-from pathlib import Path
 import shutil
 import sys
 import tempfile
+from pathlib import Path
 
 from huggingface_hub import HfApi
 
@@ -25,20 +25,14 @@ def inputs(workspace):
     if lock.get("local_patches") or len(lock["contracts"]) != 1:
         raise ValueError("Cloud model baselines require one unpatched contract")
     contract = lock["contracts"][workspace.state["contract"]]
-    if set(contract.get("fixtures", {})) != {
-        workspace.fixture
-    } or not workspace.fixture.endswith("-mic"):
-        raise ValueError(
-            "Migrate this model to its single <name>-mic repository before cloud measurement"
-        )
+    if set(contract.get("fixtures", {})) != {workspace.fixture} or not workspace.fixture.endswith("-mic"):
+        raise ValueError("Migrate this model to its single <name>-mic repository before cloud measurement")
     fixture = runner.source_folder(
         workspace.lock_path.parent,
         workspace.fixture,
         contract["fixtures"][workspace.fixture],
     )
-    if problem := runner.fixture_problem(
-        fixture, contract["fixtures"][workspace.fixture]
-    ):
+    if problem := runner.fixture_problem(fixture, contract["fixtures"][workspace.fixture]):
         raise ValueError(problem)
     files = runner.contract_files(workspace.contract_root)
     build = read(fixture / "build.json")
@@ -50,10 +44,7 @@ def inputs(workspace):
         "build": hashlib.sha256((fixture / "build.json").read_bytes()).hexdigest(),
         "checkpoints": contract["checkpoints"],
         "environment": lock["environment"],
-        "targets": {
-            k: v.get("target", k.split("/")[-1])
-            for k, v in contract["fixtures"].items()
-        },
+        "targets": {k: v.get("target", k.split("/")[-1]) for k, v in contract["fixtures"].items()},
     }
     return digest(source), fixture, files
 
@@ -65,9 +56,7 @@ def stage(workspace, root):
     if metadata.exists():
         previous = read(metadata)
         if previous["source"] != source:
-            raise ValueError(
-                "Model inputs changed; use a new baseline collection directory"
-            )
+            raise ValueError("Model inputs changed; use a new baseline collection directory")
         return previous["workspace"]
     repo = workspace.fixture
     api = HfApi()
@@ -104,9 +93,7 @@ def stage(workspace, root):
         lock = copy.deepcopy(workspace.lock)
         lock.pop("known_failures", None)
         contract = lock["contracts"][workspace.state["contract"]]
-        contract["integration"].update(
-            repo=repo, revision="unpublished", files_sha256=digest(files)
-        )
+        contract["integration"].update(repo=repo, revision="unpublished", files_sha256=digest(files))
         pin = contract["fixtures"][repo]
         pin.update(
             revision="unpublished",
@@ -153,9 +140,7 @@ def require_cpu_coverage(manifest, reports):
         for case in report["cases"]:
             if case["status"] != "validated":
                 continue
-            dtype = measured_dtype(folder, case) or variants[case["variant"]].get(
-                "dtype", "float32"
-            )
+            dtype = measured_dtype(folder, case) or variants[case["variant"]].get("dtype", "float32")
             required = {
                 "bfloat16": "cpu-x86_64-bf16",
                 "float16": "cpu-x86_64-fp16",
@@ -211,9 +196,7 @@ def import_candidates(workspace, root):
             target = workspace.expectations / relative
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(content)
-            candidates[str(relative).replace(".candidate.json", ".json")] = (
-                hashlib.sha256(content).hexdigest()
-            )
+            candidates[str(relative).replace(".candidate.json", ".json")] = hashlib.sha256(content).hexdigest()
     write(root / "model-candidates.json", {"source": source, "files": candidates})
     workspace.save_state(validated=False, validation=None, validations={})
 
@@ -224,13 +207,8 @@ def verify(workspace, root, *, save=True):
     state, reports = collection(root)
     require_coverage_or_set_aside(workspace.manifest, reports, root)
     metadata = read(root / "model-input.json")
-    if (
-        state["request"]["profiles"] != ["cpu", "cuda"]
-        or state["job"].get("workspace") != metadata["workspace"]
-    ):
-        raise ValueError(
-            "Model validation needs both CPU/CUDA profiles for the staged input"
-        )
+    if state["request"]["profiles"] != ["cpu", "cuda"] or state["job"].get("workspace") != metadata["workspace"]:
+        raise ValueError("Model validation needs both CPU/CUDA profiles for the staged input")
     proof = read(root / "model-candidates.json")
     if proof["source"] != inputs(workspace)[0] or not proof["files"]:
         raise ValueError("Cloud evidence does not match the current model inputs")
@@ -238,10 +216,7 @@ def verify(workspace, root, *, save=True):
         raise ValueError("Review every cloud candidate before validation")
     for name, expected in proof["files"].items():
         path = workspace.expectations / name
-        if (
-            not path.is_file()
-            or hashlib.sha256(path.read_bytes()).hexdigest() != expected
-        ):
+        if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
             raise ValueError("Reviewed expectations differ from the cloud measurements")
     # Re-derive the receipt from the verified artifact, rather than trusting an
     # editable receipt to enlarge or reduce the required hardware matrix.
@@ -253,12 +228,9 @@ def verify(workspace, root, *, save=True):
             if case["status"] != "validated":
                 continue
             candidate = folder / case["candidate"]
-            expected_files[
-                str(
-                    Path(candidate.parent.name)
-                    / candidate.name.replace(".candidate.json", ".json")
-                )
-            ] = hashlib.sha256(candidate.read_bytes()).hexdigest()
+            expected_files[str(Path(candidate.parent.name) / candidate.name.replace(".candidate.json", ".json"))] = (
+                hashlib.sha256(candidate.read_bytes()).hexdigest()
+            )
             variants.add(case["variant"])
     if expected_files != proof["files"]:
         raise ValueError("Cloud candidate receipt does not cover the measured matrix")
@@ -266,14 +238,9 @@ def verify(workspace, root, *, save=True):
         manifest = workspace.manifest
         evidence = {
             "lock_sha256": hashlib.sha256(workspace.lock_path.read_bytes()).hexdigest(),
-            "manifest_sha256": hashlib.sha256(
-                (workspace.contract_root / "integration.json").read_bytes()
-            ).hexdigest(),
+            "manifest_sha256": hashlib.sha256((workspace.contract_root / "integration.json").read_bytes()).hexdigest(),
             "usage_sha256": hashlib.sha256(
-                (
-                    workspace.contract_root
-                    / manifest["integrations"]["transformers"]["entry_point"]
-                ).read_bytes()
+                (workspace.contract_root / manifest["integrations"]["transformers"]["entry_point"]).read_bytes()
             ).hexdigest(),
             "cloud_collection": str(root),
         }
@@ -284,8 +251,7 @@ def verify(workspace, root, *, save=True):
             validated=True,
             validation=evidence,
             validations={
-                variant: {**evidence, "fingerprint": workspace.validation_fingerprint()}
-                for variant in variants
+                variant: {**evidence, "fingerprint": workspace.validation_fingerprint()} for variant in variants
             },
         )
     return 0

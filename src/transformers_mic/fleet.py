@@ -61,9 +61,7 @@ def _csv(table, rows):
 def _rows(table, text):
     reader = csv.DictReader(io.StringIO(text))
     if tuple(reader.fieldnames or ()) != COLUMNS[table]:
-        raise ValueError(
-            f"{table}.csv must have the columns {', '.join(COLUMNS[table])}"
-        )
+        raise ValueError(f"{table}.csv must have the columns {', '.join(COLUMNS[table])}")
     return list(reader)
 
 
@@ -84,20 +82,14 @@ def to_tables(lock, framework=FRAMEWORK):
             "integrations",
         }
         if extra:
-            raise ValueError(
-                f"{name}: fleet tables cannot hold {', '.join(sorted(extra))}"
-            )
+            raise ValueError(f"{name}: fleet tables cannot hold {', '.join(sorted(extra))}")
         integration = contract["integration"]
         fixtures = contract.get("fixtures") or {}
         if set(integration) != {"repo", "revision", "files_sha256"}:
-            raise ValueError(
-                f"{name}: a fleet contract needs a published repo, revision and files_sha256"
-            )
+            raise ValueError(f"{name}: a fleet contract needs a published repo, revision and files_sha256")
         owner = fixtures.get(integration["repo"])
         if not owner or owner["revision"] != integration["revision"]:
-            raise ValueError(
-                f"{name}: the contract must be pinned in one of its fixture snapshots"
-            )
+            raise ValueError(f"{name}: the contract must be pinned in one of its fixture snapshots")
         for repo, fixture in fixtures.items():
             if set(fixture) - {"target"} != {"revision", "files_sha256"}:
                 raise ValueError(
@@ -115,8 +107,7 @@ def to_tables(lock, framework=FRAMEWORK):
                     "contract_sha256": integration["files_sha256"] if carries else "",
                     "fixture_sha256": fixture["files_sha256"],
                     "checkpoints": "; ".join(
-                        f"{model}@{revision}"
-                        for model, revision in contract.get("checkpoints", {}).items()
+                        f"{model}@{revision}" for model, revision in contract.get("checkpoints", {}).items()
                     )
                     if carries
                     else "",
@@ -127,9 +118,7 @@ def to_tables(lock, framework=FRAMEWORK):
         contract, _, target = key.partition("/")
         entry = {"issue": entry} if isinstance(entry, str) else entry
         if not target or set(entry) - {"issue", "match", "skip_outputs"}:
-            raise ValueError(
-                f"known_failures[{key}] cannot be stored in the fleet tables"
-            )
+            raise ValueError(f"known_failures[{key}] cannot be stored in the fleet tables")
         known.append(
             {
                 "contract": contract,
@@ -139,10 +128,7 @@ def to_tables(lock, framework=FRAMEWORK):
                 "skip_outputs": "; ".join(entry.get("skip_outputs", [])),
             }
         )
-    environment = [
-        {"package": package, "version": version}
-        for package, version in lock["environment"].items()
-    ]
+    environment = [{"package": package, "version": version} for package, version in lock["environment"].items()]
     tables = {
         "contracts": _csv("contracts", contracts),
         "environment": _csv("environment", environment),
@@ -174,21 +160,15 @@ def from_tables(tables, framework=FRAMEWORK):
         contract["fixtures"][row["mic_repo"]] = fixture
         if row["contract_sha256"]:
             if "integration" in contract:
-                raise ValueError(
-                    f"{row['contract']}: more than one row carries the contract"
-                )
+                raise ValueError(f"{row['contract']}: more than one row carries the contract")
             contract["integration"] = {
                 "repo": row["mic_repo"],
                 "revision": row["revision"],
                 "files_sha256": row["contract_sha256"],
             }
-            contract["checkpoints"] = dict(
-                pin.rsplit("@", 1) for pin in _split(row["checkpoints"])
-            )
+            contract["checkpoints"] = dict(pin.rsplit("@", 1) for pin in _split(row["checkpoints"]))
         elif row["checkpoints"]:
-            raise ValueError(
-                f"{row['contract']}: checkpoints belong on the row carrying the contract"
-            )
+            raise ValueError(f"{row['contract']}: checkpoints belong on the row carrying the contract")
     for name, contract in contracts.items():
         if "integration" not in contract:
             raise ValueError(f"{name}: no row carries the contract (contract_sha256)")
@@ -213,15 +193,10 @@ def from_tables(tables, framework=FRAMEWORK):
             entry["match"] = row["match"]
         if row["skip_outputs"]:
             entry["skip_outputs"] = _split(row["skip_outputs"])
-        known[f"{row['contract']}/{row['target']}"] = (
-            entry["issue"] if len(entry) == 1 else entry
-        )
+        known[f"{row['contract']}/{row['target']}"] = entry["issue"] if len(entry) == 1 else entry
     lock = {
         "framework": framework,
-        "environment": {
-            row["package"]: row["version"]
-            for row in _rows("environment", tables["environment"])
-        },
+        "environment": {row["package"]: row["version"] for row in _rows("environment", tables["environment"])},
         "contracts": contracts,
     }
     if known:
@@ -231,10 +206,7 @@ def from_tables(tables, framework=FRAMEWORK):
 
 def operations(name, lock, framework=FRAMEWORK):
     """Dataset files for one fleet: its tables."""
-    return {
-        table_path(name, table): text
-        for table, text in to_tables(lock, framework).items()
-    }
+    return {table_path(name, table): text for table, text in to_tables(lock, framework).items()}
 
 
 def resolve(revision="main", repository=REPOSITORY):
@@ -276,16 +248,10 @@ def download(name="control", revision="main"):
     revision = resolve(revision)
 
     def fetch(filename):
-        return Path(
-            hf_hub_download(
-                REPOSITORY, filename, repo_type="dataset", revision=revision
-            )
-        )
+        return Path(hf_hub_download(REPOSITORY, filename, repo_type="dataset", revision=revision))
 
     try:
-        tables = {
-            table: fetch(table_path(name, table)).read_text() for table in COLUMNS
-        }
+        tables = {table: fetch(table_path(name, table)).read_text() for table in COLUMNS}
     except EntryNotFoundError:  # a revision from before the tables
         return fetch(FILES[name]), revision
     try:
@@ -303,11 +269,7 @@ def download(name="control", revision="main"):
         comparable = {
             **lock,
             "contracts": {
-                name: {
-                    key: value
-                    for key, value in contract.items()
-                    if key != "integrations"
-                }
+                name: {key: value for key, value in contract.items() if key != "integrations"}
                 for name, contract in lock["contracts"].items()
             },
         }
@@ -321,9 +283,7 @@ def download(name="control", revision="main"):
     # One temporary file per call: concurrent downloads (a batch of `tmic create`)
     # shared one .partial, lost the rename race, and fell back to the catalog's
     # stale environment, which export then refused after the whole cloud run.
-    with tempfile.NamedTemporaryFile(
-        "w", dir=path.parent, suffix=".partial", delete=False
-    ) as partial:
+    with tempfile.NamedTemporaryFile("w", dir=path.parent, suffix=".partial", delete=False) as partial:
         partial.write(json.dumps(lock, indent=2) + "\n")
     Path(partial.name).replace(path)
     return path, revision

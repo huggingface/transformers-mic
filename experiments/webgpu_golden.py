@@ -21,8 +21,12 @@ CONTRACT = ROOT / "example/hub/SmolLM-integration/integrations/transformers.js"
 LOCK = json.loads((ROOT / "example/transformers.js/tests/contracts/fleet.lock").read_text())
 ARTIFACTS = LOCK["contracts"]["SmolLM"]["artifacts"]
 CONFIGS = [
-    ("cpu", "fp32"), ("cpu", "fp16"), ("cpu", "q4f16"),
-    ("webgpu", "fp32"), ("webgpu", "fp16"), ("webgpu", "q4f16"),
+    ("cpu", "fp32"),
+    ("cpu", "fp16"),
+    ("cpu", "q4f16"),
+    ("webgpu", "fp32"),
+    ("webgpu", "fp16"),
+    ("webgpu", "q4f16"),
 ]
 
 
@@ -33,9 +37,7 @@ def run_contract(artifact, revision, device, dtype):
         "MIC_MODEL_REVISION": revision,
         "MIC_MODEL_KWARGS": json.dumps({"dtype": dtype, "device": device}),
     }
-    proc = subprocess.run(
-        ["node", "integration.js"], cwd=CONTRACT, env=env, capture_output=True, text=True
-    )
+    proc = subprocess.run(["node", "integration.js"], cwd=CONTRACT, env=env, capture_output=True, text=True)
     lines = [line for line in proc.stdout.splitlines() if line.startswith("{")]
     if proc.returncode or not lines:
         return {"error": proc.stderr.strip()[-500:]}
@@ -50,9 +52,7 @@ def max_delta(a, b):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runs", type=int, default=3)
-    parser.add_argument(
-        "--output", type=Path, default=ROOT / "experiments/results/webgpu_golden.json"
-    )
+    parser.add_argument("--output", type=Path, default=ROOT / "experiments/results/webgpu_golden.json")
     args = parser.parse_args()
     package = json.loads((CONTRACT / "node_modules/@huggingface/transformers/package.json").read_text())
     ort = json.loads((CONTRACT / "node_modules/onnxruntime-node/package.json").read_text())
@@ -86,8 +86,7 @@ def main():
                     ),
                     generated_text=ok[0]["generated_text"],
                     timing_median_ms={
-                        key: round(statistics.median(r["timing"][key] for r in ok), 1)
-                        for key in ok[0]["timing"]
+                        key: round(statistics.median(r["timing"][key] for r in ok), 1) for key in ok[0]["timing"]
                     },
                 )
             report["rows"].append(row)

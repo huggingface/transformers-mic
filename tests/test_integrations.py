@@ -42,11 +42,7 @@ def workspace(tmp_path):
         "mic": "0.3",
         "name": "EmbeddingGemma",
         "usage": "Embeddings",
-        "checkpoints": {
-            "google/embeddinggemma-2": {
-                "fixture": "huggingface-mic/embeddinggemma-2-mic"
-            }
-        },
+        "checkpoints": {"google/embeddinggemma-2": {"fixture": "huggingface-mic/embeddinggemma-2-mic"}},
         "fixtures": {},
         "integrations": {
             "transformers": {
@@ -83,16 +79,8 @@ def test_generate_both_preserves_transformers_and_is_idempotent(workspace):
     ]
     assert main(args) == 0
     assert workspace.manifest["outputs"] == original["outputs"]
-    assert (
-        workspace.manifest["integrations"]["transformers"]
-        == original["integrations"]["transformers"]
-    )
-    assert (
-        workspace.manifest["integrations"][integrations.NAME]["outputs"]["scores"][
-            "compare"
-        ]
-        == "allclose"
-    )
+    assert workspace.manifest["integrations"]["transformers"] == original["integrations"]["transformers"]
+    assert workspace.manifest["integrations"][integrations.NAME]["outputs"]["scores"]["compare"] == "allclose"
     path = workspace.contract_root / f"integrations/{integrations.NAME}/usage.md"
     path.write_text(path.read_text() + "\nReviewed extra text\n")
     assert main(args) == 0
@@ -117,9 +105,7 @@ def test_generation_refuses_other_models_before_writing(workspace):
     workspace.save_state(model="org/unreviewed")
     original = workspace.manifest
     with pytest.raises(ValueError, match="currently supports"):
-        integrations.generate(
-            SimpleNamespace(workspace=workspace.root, integration=[integrations.NAME])
-        )
+        integrations.generate(SimpleNamespace(workspace=workspace.root, integration=[integrations.NAME]))
     assert workspace.manifest == original
 
 
@@ -133,27 +119,17 @@ def test_fleet_optional_metadata_keeps_legacy_tables_unchanged():
     assert all(tables[key] == fleet.to_tables(LOCK)[key] for key in fleet.COLUMNS)
     assert fleet.from_tables(tables) == lock
     assert fleet.from_tables({key: tables[key] for key in fleet.COLUMNS}) == LOCK
-    tables["integrations"] = tables["integrations"].replace(
-        contract["integration"]["revision"], "0" * 40
-    )
+    tables["integrations"] = tables["integrations"].replace(contract["integration"]["revision"], "0" * 40)
     assert fleet.from_tables(tables) == LOCK
 
 
 @pytest.mark.requires_runtime
-def test_runner_uses_only_selected_outputs_and_checks_numeric_shape(
-    workspace, monkeypatch
-):
-    integrations.generate(
-        SimpleNamespace(
-            workspace=workspace.root, integration=["transformers", integrations.NAME]
-        )
-    )
+def test_runner_uses_only_selected_outputs_and_checks_numeric_shape(workspace, monkeypatch):
+    integrations.generate(SimpleNamespace(workspace=workspace.root, integration=["transformers", integrations.NAME]))
     sys.path.insert(0, str(resources.backend()))
     import run
 
-    monkeypatch.setattr(
-        run, "contract_folder", lambda *a: (workspace.contract_root, "local")
-    )
+    monkeypatch.setattr(run, "contract_folder", lambda *a: (workspace.contract_root, "local"))
     monkeypatch.setattr(
         run,
         "targets",
@@ -210,9 +186,7 @@ def test_runner_uses_only_selected_outputs_and_checks_numeric_shape(
         ],
     )
     monkeypatch.setattr(
-        run.template_date
-        if hasattr(run, "template_date")
-        else __import__("template_date"),
+        run.template_date if hasattr(run, "template_date") else __import__("template_date"),
         "freeze",
         lambda *a: None,
     )
@@ -220,20 +194,12 @@ def test_runner_uses_only_selected_outputs_and_checks_numeric_shape(
 
 
 @pytest.mark.requires_runtime
-def test_allow_missing_baseline_validates_outputs_without_comparing(
-    workspace, monkeypatch, capsys
-):
-    integrations.generate(
-        SimpleNamespace(
-            workspace=workspace.root, integration=["transformers", integrations.NAME]
-        )
-    )
+def test_allow_missing_baseline_validates_outputs_without_comparing(workspace, monkeypatch, capsys):
+    integrations.generate(SimpleNamespace(workspace=workspace.root, integration=["transformers", integrations.NAME]))
     sys.path.insert(0, str(resources.backend()))
     import run
 
-    monkeypatch.setattr(
-        run, "contract_folder", lambda *a: (workspace.contract_root, "local")
-    )
+    monkeypatch.setattr(run, "contract_folder", lambda *a: (workspace.contract_root, "local"))
     monkeypatch.setattr(
         run,
         "targets",
@@ -264,11 +230,7 @@ def test_allow_missing_baseline_validates_outputs_without_comparing(
     ]
 
     def records():
-        return [
-            json.loads(line)
-            for line in capsys.readouterr().out.splitlines()
-            if line.startswith('{"contract"')
-        ]
+        return [json.loads(line) for line in capsys.readouterr().out.splitlines() if line.startswith('{"contract"')]
 
     # No baseline has been recorded: a plain check fails on it ...
     monkeypatch.setattr(sys, "argv", options)
@@ -287,20 +249,12 @@ def test_allow_missing_baseline_validates_outputs_without_comparing(
 def test_publication_requires_every_integration(workspace):
     import hashlib
 
-    integrations.generate(
-        SimpleNamespace(
-            workspace=workspace.root, integration=["transformers", integrations.NAME]
-        )
-    )
+    integrations.generate(SimpleNamespace(workspace=workspace.root, integration=["transformers", integrations.NAME]))
     proof = {
         "lock_sha256": hashlib.sha256(workspace.lock_path.read_bytes()).hexdigest(),
-        "manifest_sha256": hashlib.sha256(
-            (workspace.contract_root / "integration.json").read_bytes()
-        ).hexdigest(),
+        "manifest_sha256": hashlib.sha256((workspace.contract_root / "integration.json").read_bytes()).hexdigest(),
         "usage_sha256": hashlib.sha256(
-            (
-                workspace.contract_root / "integrations/transformers/usage.md"
-            ).read_bytes()
+            (workspace.contract_root / "integrations/transformers/usage.md").read_bytes()
         ).hexdigest(),
     }
     fingerprint = workspace.validation_fingerprint()
@@ -312,10 +266,7 @@ def test_publication_requires_every_integration(workspace):
     with pytest.raises(ValueError, match="Every declared"):
         commands.publication_ready(workspace)
     workspace.save_state(
-        validations={
-            key: {"fingerprint": fingerprint}
-            for key in ("default", "sentence_transformers:default")
-        }
+        validations={key: {"fingerprint": fingerprint} for key in ("default", "sentence_transformers:default")}
     )
     commands.publication_ready(workspace)
 
@@ -330,11 +281,7 @@ def published_st_workspace(workspace, tmp_path, monkeypatch):
     from transformers_mic import carryover
     from transformers_mic.workspace import digest
 
-    integrations.generate(
-        SimpleNamespace(
-            workspace=workspace.root, integration=["transformers", integrations.NAME]
-        )
-    )
+    integrations.generate(SimpleNamespace(workspace=workspace.root, integration=["transformers", integrations.NAME]))
     st = workspace.contract_root / f"integrations/{integrations.NAME}"
     write(st / "expectations/cpu-x86_64/embeddinggemma-2-mic.json", {"outputs": {}})
     build = {"sha256": {"model.safetensors": "f" * 64}}
@@ -369,9 +316,7 @@ def published_st_workspace(workspace, tmp_path, monkeypatch):
         validated=True,
         validation={
             "lock_sha256": hashlib.sha256(workspace.lock_path.read_bytes()).hexdigest(),
-            "manifest_sha256": hashlib.sha256(
-                (workspace.contract_root / "integration.json").read_bytes()
-            ).hexdigest(),
+            "manifest_sha256": hashlib.sha256((workspace.contract_root / "integration.json").read_bytes()).hexdigest(),
             "usage_sha256": hashlib.sha256(usage.read_bytes()).hexdigest(),
         },
         validations={"default": {"fingerprint": fingerprint}},
@@ -379,9 +324,7 @@ def published_st_workspace(workspace, tmp_path, monkeypatch):
     return hub, calls
 
 
-def test_publication_carries_unchanged_st_integration(
-    workspace, tmp_path, monkeypatch, capsys
-):
+def test_publication_carries_unchanged_st_integration(workspace, tmp_path, monkeypatch, capsys):
     hub, calls = published_st_workspace(workspace, tmp_path, monkeypatch)
     plan = commands.publication_ready(workspace)
     assert plan == {"transformers": "primary", integrations.NAME: None}
@@ -397,12 +340,7 @@ def test_publication_carries_unchanged_st_integration(
         {},
     )
     assert commands.publication_ready(workspace)[integrations.NAME] is None
-    assert (
-        commands.publish(
-            SimpleNamespace(workspace=workspace.root, execute=False, private=False)
-        )
-        == 0
-    )
+    assert commands.publish(SimpleNamespace(workspace=workspace.root, execute=False, private=False)) == 0
     preview = json.loads(capsys.readouterr().out.splitlines()[-1])
     assert preview["integrations"] == {
         "transformers": "checked",
@@ -416,12 +354,9 @@ def test_publication_carries_st_to_publisher(workspace, tmp_path, monkeypatch):
     monkeypatch.setattr(
         commands.backend,
         "invoke",
-        lambda tool, root, args: invoked.append((tool, args))
-        or SimpleNamespace(returncode=0),
+        lambda tool, root, args: invoked.append((tool, args)) or SimpleNamespace(returncode=0),
     )
-    commands.publish(
-        SimpleNamespace(workspace=workspace.root, execute=True, private=False)
-    )
+    commands.publish(SimpleNamespace(workspace=workspace.root, execute=True, private=False))
     assert invoked == [("publish_mic", ["--carry", integrations.NAME])]
 
 
@@ -429,15 +364,12 @@ def test_publication_carries_st_to_publisher(workspace, tmp_path, monkeypatch):
     "edit, reason",
     [
         (
-            lambda root: (root / "integrations/sentence_transformers/usage.md").write_text(
-                "Edited ST usage"
-            ),
+            lambda root: (root / "integrations/sentence_transformers/usage.md").write_text("Edited ST usage"),
             "files differ: integrations/sentence_transformers/usage.md",
         ),
         (
             lambda root: write(
-                root
-                / "integrations/sentence_transformers/expectations/cpu-x86_64/embeddinggemma-2-mic.json",
+                root / "integrations/sentence_transformers/expectations/cpu-x86_64/embeddinggemma-2-mic.json",
                 {"outputs": {"scores": [1]}},
             ),
             "files differ: integrations/sentence_transformers/expectations",
@@ -461,9 +393,7 @@ def test_publication_carries_st_to_publisher(workspace, tmp_path, monkeypatch):
         ),
     ],
 )
-def test_publication_requires_a_changed_st_integration(
-    workspace, tmp_path, monkeypatch, edit, reason
-):
+def test_publication_requires_a_changed_st_integration(workspace, tmp_path, monkeypatch, edit, reason):
     published_st_workspace(workspace, tmp_path, monkeypatch)
     edit(workspace.contract_root)
     workspace.save_state(
@@ -482,17 +412,12 @@ def test_publication_requires_a_changed_st_integration(
     # Its own check satisfies it, as before.
     fingerprint = workspace.validation_fingerprint()
     workspace.save_state(
-        validations={
-            key: {"fingerprint": fingerprint}
-            for key in ("default", f"{integrations.NAME}:default")
-        }
+        validations={key: {"fingerprint": fingerprint} for key in ("default", f"{integrations.NAME}:default")}
     )
     assert commands.publication_ready(workspace)[integrations.NAME].startswith(reason)
 
 
-def test_publication_requires_st_when_main_or_fixture_moved(
-    workspace, tmp_path, monkeypatch
-):
+def test_publication_requires_st_when_main_or_fixture_moved(workspace, tmp_path, monkeypatch):
     from transformers_mic import carryover
 
     hub, _ = published_st_workspace(workspace, tmp_path, monkeypatch)
@@ -515,9 +440,7 @@ def test_publication_requires_st_when_main_or_fixture_moved(
 
 
 def test_nightly_selects_st_fleet_and_advertised_contracts(tmp_path, monkeypatch):
-    source = (
-        Path(__file__).parents[1] / ".github/scripts/sentence_transformers_nightly.py"
-    )
+    source = Path(__file__).parents[1] / ".github/scripts/sentence_transformers_nightly.py"
     spec = importlib.util.spec_from_file_location("st_nightly", source)
     nightly = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(nightly)
@@ -539,15 +462,11 @@ def test_nightly_selects_st_fleet_and_advertised_contracts(tmp_path, monkeypatch
             {
                 "framework": "transformers",
                 "contracts": {
-                    "Selected": contract(
-                        "org/selected-mic", "transformers", integrations.NAME
-                    ),
+                    "Selected": contract("org/selected-mic", "transformers", integrations.NAME),
                     "Legacy": contract("org/legacy-mic"),
                     "Other": contract("org/other-mic", "transformers"),
                     # Also in the ST fleet: checked once.
-                    "Twice": contract(
-                        "org/st-a-mic", "transformers", integrations.NAME
-                    ),
+                    "Twice": contract("org/st-a-mic", "transformers", integrations.NAME),
                 },
                 "environment": {
                     "transformers": "old",
@@ -579,10 +498,7 @@ def test_nightly_selects_st_fleet_and_advertised_contracts(tmp_path, monkeypatch
     def invoke(tool, cwd, options):
         lock = json.loads(Path(options[options.index("--lock") + 1]).read_text())
         assert "known_failures" not in lock and "local_patches" not in lock
-        assert (
-            not {"transformers", "sentence-transformers", "sentence_transformers"}
-            & lock["environment"].keys()
-        )
+        assert not {"transformers", "sentence-transformers", "sentence_transformers"} & lock["environment"].keys()
         if "Selected" in lock["contracts"]:
             assert lock["environment"]["torch"] == "2.14.0"
         assert options[options.index("--framework") + 1] == integrations.NAME
@@ -631,9 +547,7 @@ def test_scenario_uses_query_and_passages_and_returns_numpy_vector(monkeypatch):
         "sentence_transformers",
         types.SimpleNamespace(SentenceTransformer=Model),
     )
-    monkeypatch.setitem(
-        sys.modules, "transformers", types.SimpleNamespace(set_seed=lambda seed: None)
-    )
+    monkeypatch.setitem(sys.modules, "transformers", types.SimpleNamespace(set_seed=lambda seed: None))
     code = integrations.USAGE.split("```py runnable:similarity\n")[1].split("```")[0]
     namespace = {}
     exec(compile(code, "usage.md", "exec"), namespace)
@@ -643,9 +557,7 @@ def test_scenario_uses_query_and_passages_and_returns_numpy_vector(monkeypatch):
 
 
 def test_preview_requires_an_immutable_pin():
-    source = (
-        Path(__file__).parents[1] / ".github/scripts/sentence_transformers_nightly.py"
-    )
+    source = Path(__file__).parents[1] / ".github/scripts/sentence_transformers_nightly.py"
     spec = importlib.util.spec_from_file_location("st_preview", source)
     nightly = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(nightly)

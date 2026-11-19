@@ -74,9 +74,7 @@ def test_a_failed_or_empty_recording_is_not_ready(tmp_path, cases):
 def test_a_draft_stopped_before_record_is_not_ready(tmp_path):
     ok, reason = auto_mic.readiness(stopped_at("build"), tmp_path)
     assert not ok and "build" in reason
-    assert not auto_mic.readiness(
-        {"status": "needs-input", "pending_question": {"kind": "source"}}, tmp_path
-    )[0]
+    assert not auto_mic.readiness({"status": "needs-input", "pending_question": {"kind": "source"}}, tmp_path)[0]
 
 
 class Fleet:
@@ -85,9 +83,7 @@ class Fleet:
 
     def download(self, name):
         path = Path(self.dir) / f"{name}.json"
-        path.write_text(
-            json.dumps({"contracts": self.contracts if name == "prototypes" else {}})
-        )
+        path.write_text(json.dumps({"contracts": self.contracts if name == "prototypes" else {}}))
         return path, "rev0"
 
     def resolve(self, ref):
@@ -99,9 +95,7 @@ def workspace(repo="huggingface-mic/a-mic", revision="r1"):
         root=Path("."),
         fixture=repo,
         state={"contract": "A"},
-        lock={
-            "contracts": {"A": {"integration": {"repo": repo, "revision": revision}}}
-        },
+        lock={"contracts": {"A": {"integration": {"repo": repo, "revision": revision}}}},
     )
 
 
@@ -128,16 +122,12 @@ def test_export_adds_a_new_contract_against_the_previewed_revision(fleet):
 
 
 def test_export_is_a_no_op_when_an_earlier_attempt_landed(fleet):
-    fleet.contracts["A"] = {
-        "integration": {"repo": "huggingface-mic/a-mic", "revision": "r1"}
-    }
+    fleet.contracts["A"] = {"integration": {"repo": "huggingface-mic/a-mic", "revision": "r1"}}
     assert auto_mic.export_new(workspace()) == "rev0" and fleet.exports == []
 
 
 def test_export_never_overwrites_another_pin(fleet):
-    fleet.contracts["A"] = {
-        "integration": {"repo": "huggingface-mic/a-mic", "revision": "other"}
-    }
+    fleet.contracts["A"] = {"integration": {"repo": "huggingface-mic/a-mic", "revision": "other"}}
     with pytest.raises(ValueError, match="refusing to overwrite"):
         auto_mic.export_new(workspace())
 
@@ -150,18 +140,14 @@ def test_export_retries_when_another_export_landed_first(fleet, monkeypatch):
     def export(options):
         calls.append(options.expected_revision)
         if len(calls) == 1:
-            raise ValueError(
-                "Dataset changed since preview; review the current fleet before exporting"
-            )
+            raise ValueError("Dataset changed since preview; review the current fleet before exporting")
 
     monkeypatch.setattr(commands, "export", export)
     monkeypatch.setattr(auto_mic.time, "sleep", lambda seconds: None)
     assert auto_mic.export_new(workspace()) == "rev1" and len(calls) == 2
 
 
-def test_publication_refuses_a_contract_already_in_a_fleet_or_on_the_hub(
-    fleet, monkeypatch
-):
+def test_publication_refuses_a_contract_already_in_a_fleet_or_on_the_hub(fleet, monkeypatch):
     import huggingface_hub
 
     files = ["README.md", ".gitattributes"]
@@ -194,9 +180,7 @@ def test_a_taken_name_can_be_published_under_another_contract_name(fleet, monkey
     exported = []
     from transformers_mic import commands
 
-    monkeypatch.setattr(
-        commands, "export", lambda options: exported.append(options.contract_name)
-    )
+    monkeypatch.setattr(commands, "export", lambda options: exported.append(options.contract_name))
     auto_mic.export_new(workspace(), "A_VL")
     assert exported == ["A_VL"]
 
@@ -237,9 +221,7 @@ def test_overwriting_clears_every_old_expectations_folder(monkeypatch):
         delete_folder=lambda folder, **kwargs: deleted.append(folder),
     )
     monkeypatch.setattr(huggingface_hub, "HfApi", lambda: api)
-    assert auto_mic.clear_expectations("o/a-mic") == [
-        "integrations/transformers/expectations"
-    ]
+    assert auto_mic.clear_expectations("o/a-mic") == ["integrations/transformers/expectations"]
     assert deleted == ["integrations/transformers/expectations"]
 
 
@@ -264,9 +246,14 @@ def test_only_a_checkpoint_failure_falls_back_to_the_fixtures(tmp_path):
 
 
 def test_fixtures_only_keeps_the_rest_of_the_manifest(tmp_path):
-    (tmp_path / "integration.json").write_text(json.dumps(
-        {"checkpoints": {"o/m": {}}, "integrations": {"transformers": {"targets": ["fixtures", "checkpoints"], "variants": {"default": {}}}}}
-    ))
+    (tmp_path / "integration.json").write_text(
+        json.dumps(
+            {
+                "checkpoints": {"o/m": {}},
+                "integrations": {"transformers": {"targets": ["fixtures", "checkpoints"], "variants": {"default": {}}}},
+            }
+        )
+    )
     auto_mic.fixtures_only(SimpleNamespace(contract_root=tmp_path))
     manifest = json.loads((tmp_path / "integration.json").read_text())
     assert manifest["integrations"]["transformers"] == {"targets": ["fixtures"], "variants": {"default": {}}}

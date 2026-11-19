@@ -55,8 +55,8 @@ import argparse
 import contextlib
 import hashlib
 import importlib.metadata
-import io
 import inspect
+import io
 import json
 import os
 import platform
@@ -64,7 +64,6 @@ import re
 import shutil
 import subprocess
 import sys
-
 import time
 from pathlib import Path
 from unittest.mock import patch
@@ -87,7 +86,23 @@ import run  # noqa: E402
 from perturb import logits_of, sensitivity  # noqa: E402
 from sweep import fit_rope_everywhere, shrink  # noqa: E402
 
-WEIGHTS = (".safetensors", ".bin", ".pt", ".pth", ".msgpack", ".h5", ".ot", ".onnx", ".tflite", ".ckpt", ".gguf", ".npz", ".pdparams", ".pkl", ".nemo")  # .nemo: NVIDIA NeMo archives beside the HF weights (Parakeet)
+WEIGHTS = (
+    ".safetensors",
+    ".bin",
+    ".pt",
+    ".pth",
+    ".msgpack",
+    ".h5",
+    ".ot",
+    ".onnx",
+    ".tflite",
+    ".ckpt",
+    ".gguf",
+    ".npz",
+    ".pdparams",
+    ".pkl",
+    ".nemo",
+)  # .nemo: NVIDIA NeMo archives beside the HF weights (Parakeet)
 # Processor files are a few MB; anything this large is weights in a format WEIGHTS
 # misses (gemma-2b ships a 9.5 GB .gguf, pegasus-xsum a 2.3 GB .pkl, which inflated the fixture and every
 # CUDA baseline artifact carrying it).
@@ -119,6 +134,7 @@ def config_insensitive(config, batch):
         )
     return inert
 
+
 # Two uint8 images of different colours differ by units after normalization; float images
 # in [0, 1] that the processor rescales by 1/255 again differ by at most 1/255/std (~0.017:
 # VideoMAE's torch.full(0.2) and torch.full(0.8) clips became -1.983 and -1.972).
@@ -133,8 +149,13 @@ def input_diagnosis(config, batch):
     """
     problems = []
     for name, value in batch.items():
-        if not (name.startswith("pixel_values") and isinstance(value, torch.Tensor)
-                and value.is_floating_point() and value.dim() > 1 and len(value) > 1):
+        if not (
+            name.startswith("pixel_values")
+            and isinstance(value, torch.Tensor)
+            and value.is_floating_point()
+            and value.dim() > 1
+            and len(value) > 1
+        ):
             continue
         rows = value.float()
         difference = float((rows[1:] - rows[:1]).abs().max())
@@ -145,8 +166,14 @@ def input_diagnosis(config, batch):
                 "rescaled by 1/255 again. Build each image or frame as an (H, W, 3) uint8 array with "
                 "texture and a different colour per example"
             )
-    token = next((getattr(config, k) for k in ("image_token_index", "image_token_id")
-                  if isinstance(getattr(config, k, None), int)), None)
+    token = next(
+        (
+            getattr(config, k)
+            for k in ("image_token_index", "image_token_id")
+            if isinstance(getattr(config, k, None), int)
+        ),
+        None,
+    )
     ids = batch.get("input_ids")
     if token is not None and isinstance(ids, torch.Tensor) and isinstance(batch.get("pixel_values"), torch.Tensor):
         if not (ids == token).any():
@@ -170,6 +197,7 @@ def source_snapshot(repo, revision, recipe=None):
         if json.loads((source / "config.json").read_text()).get("model_type") == "qwen2_5_omni":
             # The full Omni loader needs this small speaker asset, even for text.
             from huggingface_hub import HfApi, hf_hub_download
+
             info = HfApi().model_info(repo, revision=revision, files_metadata=True)
             asset = next(file for file in info.siblings if file.rfilename == "spk_dict.pt")
             if asset.size is None or asset.size > 1024**2:
@@ -186,6 +214,7 @@ def source_snapshot(repo, revision, recipe=None):
             raise ValueError(f"Invalid processor asset name: {name}")
         if not (source / name).exists():
             from huggingface_hub import hf_hub_download
+
             hf_hub_download(repo, name, revision=revision)
         if not (source / name).is_file():
             raise ValueError(f"Pinned processor asset is unavailable: {name}")
@@ -219,6 +248,7 @@ def model_class(source, recipe):
     # Legacy cards can name removed classes (e.g. PI0Policy) or a head for a
     # different config family (Idefics3 on SmolVLM). Resolve the actual config.
     from sweep import primary_head
+
     _, name = primary_head(config)
     if not name:
         raise ValueError(f"No supported model head for {config.model_type}")
@@ -305,7 +335,10 @@ def adopt_tester_sizes(cls, original, config):
         with torch.device("meta"):
             cls._from_config(candidate)
     except Exception as error:
-        print(f"tmic: model-tester sizes {sorted('.'.join(p) for p in adopted)} do not build ({type(error).__name__}); keeping the rule's", flush=True)
+        print(
+            f"tmic: model-tester sizes {sorted('.'.join(p) for p in adopted)} do not build ({type(error).__name__}); keeping the rule's",
+            flush=True,
+        )
         return config
     candidate._mic_tester_sizes = {"source": url, "fields": {".".join(p): v for p, v in adopted.items()}}
     return candidate
@@ -334,8 +367,12 @@ def source_dtype(source):
 def builder_revision():
     """The transformers-mic commit whose shrink rule built the fixture ("+dirty" if edited)."""
     try:
-        head = subprocess.check_output(["git", "-C", str(HERE), "rev-parse", "HEAD"], text=True, stderr=subprocess.DEVNULL).strip()
-        dirty = subprocess.run(["git", "-C", str(HERE), "diff", "--quiet", "HEAD", "--", "."], stderr=subprocess.DEVNULL).returncode
+        head = subprocess.check_output(
+            ["git", "-C", str(HERE), "rev-parse", "HEAD"], text=True, stderr=subprocess.DEVNULL
+        ).strip()
+        dirty = subprocess.run(
+            ["git", "-C", str(HERE), "diff", "--quiet", "HEAD", "--", "."], stderr=subprocess.DEVNULL
+        ).returncode
     except (OSError, subprocess.CalledProcessError):
         return None
     return head + ("+dirty" if dirty else "")
@@ -347,14 +384,19 @@ def recorded_config(out, fixture):
     if not path.exists():
         return None
     previous = json.loads(path.read_text())
-    if previous.get("recipe") != fixture["build"] or previous.get("built_from", {}).get("repo") != fixture["built_from"]:
+    if (
+        previous.get("recipe") != fixture["build"]
+        or previous.get("built_from", {}).get("repo") != fixture["built_from"]
+    ):
         return None  # an edited recipe (or a pre-provenance record) re-shrinks with the current rule
     return previous.get("key_fields")
 
 
 def fixture_key(source, cls, missing, recipe=None, frozen_hashes=None):
     config = {k: v for k, v in shrunk_config(source, cls, recipe).to_dict().items() if k not in VOLATILE}
-    processor = {name: hashlib.sha256((source / name).read_bytes()).hexdigest() for name in copied_files(source, recipe)}
+    processor = {
+        name: hashlib.sha256((source / name).read_bytes()).hexdigest() for name in copied_files(source, recipe)
+    }
     fields = {"config": config, "processor": processor, "missing": missing}
     if frozen_hashes is not None:
         fields["frozen_parameters"] = frozen_hashes
@@ -415,9 +457,13 @@ def restore_frozen(model, source, repo, revision, recipe):
                     raise ValueError(f"Pinned checkpoint lacks fixed tensor {name}")
                 tensor = checkpoint.get_tensor(name)
                 if tensor.shape != parameter.shape:
-                    raise ValueError(f"Fixed tensor {name} has shape {tuple(tensor.shape)}, expected {tuple(parameter.shape)}")
+                    raise ValueError(
+                        f"Fixed tensor {name} has shape {tuple(tensor.shape)}, expected {tuple(parameter.shape)}"
+                    )
                 parameter.copy_(tensor)
-                hashes[name] = hashlib.sha256(tensor.contiguous().reshape(-1).view(torch.uint8).numpy().tobytes()).hexdigest()
+                hashes[name] = hashlib.sha256(
+                    tensor.contiguous().reshape(-1).view(torch.uint8).numpy().tobytes()
+                ).hexdigest()
     return hashes
 
 
@@ -451,6 +497,7 @@ def in_fixture(missing, names):
     layer 2's fc2, which the two kept layers have). Any other absent name means the
     fixture cannot mirror the checkpoint.
     """
+
     def pattern(name):
         return re.sub(r"\.\d+(?=\.)", ".*", name)
 
@@ -486,9 +533,13 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
     weights = out / "model.safetensors"
     tensors = load_file(weights)
     prefix = f"{model.base_model_prefix}." if model.base_model_prefix else None
-    if (checkpoint and prefix and checkpoint["keys"]
-            and all(k.startswith(prefix) for k in checkpoint["keys"])
-            and not any(k.startswith(prefix) for k in tensors)):
+    if (
+        checkpoint
+        and prefix
+        and checkpoint["keys"]
+        and all(k.startswith(prefix) for k in checkpoint["keys"])
+        and not any(k.startswith(prefix) for k in tensors)
+    ):
         # A base model loaded from a head checkpoint (Jina's roberta.*): the loader strips the prefix.
         tensors = {prefix + k: v for k, v in tensors.items()}
     tied = getattr(model, "all_tied_weights_keys", None) or {}
@@ -496,7 +547,12 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
         for alias, kept in tied.items():
             # A tied pair is serialized once; keep the name the source uses
             # (OPT's .bin stores lm_head.weight, save_pretrained keeps embed_tokens).
-            if kept in tensors and kept not in checkpoint["keys"] and alias in checkpoint["keys"] and alias not in tensors:
+            if (
+                kept in tensors
+                and kept not in checkpoint["keys"]
+                and alias in checkpoint["keys"]
+                and alias not in tensors
+            ):
                 tensors[alias] = tensors.pop(kept)
     save_file(tensors, weights, metadata={"format": "pt"})
     copied = copied_files(source, recipe)
@@ -570,13 +626,22 @@ def contract_batch(entry, fixture_dir, *, model_class=PreTrainedModel, method="_
     with captured_calls(model_class, method) as calls, run.chdir(entry.parent):
         ok, _, stderr = run.execute_inline(code, str(entry), env)
     if not ok:
-        raise SystemExit(f"the contract fails on the random fixture:\n{contract_lines(stderr, code, entry)}{stderr[-1500:]}")
+        raise SystemExit(
+            f"the contract fails on the random fixture:\n{contract_lines(stderr, code, entry)}{stderr[-1500:]}"
+        )
     training = [c for c in calls if c["training"]]
     chosen = training[0] if training else calls[0]
     # Fixtures are built on the CPU; the contract may have put its inputs on a GPU.
-    batch = {k: tensor_tree(v, lambda tensor: tensor.detach().cpu().clone()) for k, v in chosen["kwargs"].items()
-             if isinstance(v, (torch.Tensor, bool, list, tuple, dict))}
-    return batch, {"call": "training step" if training else "first inference call", "inputs": sorted(batch), "class": chosen["class"]}
+    batch = {
+        k: tensor_tree(v, lambda tensor: tensor.detach().cpu().clone())
+        for k, v in chosen["kwargs"].items()
+        if isinstance(v, (torch.Tensor, bool, list, tuple, dict))
+    }
+    return batch, {
+        "call": "training step" if training else "first inference call",
+        "inputs": sorted(batch),
+        "class": chosen["class"],
+    }
 
 
 def overfit(model, batch, max_steps, target_loss=0.05):
@@ -614,7 +679,12 @@ def overfit(model, batch, max_steps, target_loss=0.05):
                 break
     model.zero_grad(set_to_none=True)
     model.eval()
-    return {"seconds": round(time.perf_counter() - start, 2), "steps": step, "loss": loss.item(), "converged": stable == 2}
+    return {
+        "seconds": round(time.perf_counter() - start, 2),
+        "steps": step,
+        "loss": loss.item(),
+        "converged": stable == 2,
+    }
 
 
 def unit_batch_norm(model):
@@ -624,9 +694,13 @@ def unit_batch_norm(model):
     scales activations and gradients by ~0.02: outputs sit at sigmoid(0) and 500
     overfit steps cannot move them. Used only before overfitting a failing fixture.
     """
-    norms = [module for module in model.modules()
-             if isinstance(module, torch.nn.modules.batchnorm._BatchNorm)
-             and module.affine and module.weight.abs().mean() < 0.1]
+    norms = [
+        module
+        for module in model.modules()
+        if isinstance(module, torch.nn.modules.batchnorm._BatchNorm)
+        and module.affine
+        and module.weight.abs().mean() < 0.1
+    ]
     with torch.no_grad():
         for module in norms:
             module.weight.fill_(1.0)
@@ -642,9 +716,11 @@ def calibrate_batch_norm(model, batch):
     batch's measured statistics, with dropout disabled, before evaluating gates.
     This updates buffers only; all sensitivity thresholds remain unchanged.
     """
-    norms = [module for module in model.modules()
-             if isinstance(module, torch.nn.modules.batchnorm._BatchNorm)
-             and module.track_running_stats]
+    norms = [
+        module
+        for module in model.modules()
+        if isinstance(module, torch.nn.modules.batchnorm._BatchNorm) and module.track_running_stats
+    ]
     if not norms:
         return 0
     model.eval()
@@ -770,25 +846,26 @@ def readme(name, contract, build, cls, config, contract_repo=None):
     preserved = build.get("preserved_frozen_sha256", {})
     fixed = (
         f"- **Fixed tensors preserved** from the pinned checkpoint: {', '.join(f'`{n}`' for n in preserved)}.\n"
-        if preserved else ""
+        if preserved
+        else ""
     )
     return f"""---
 tags:
   - mic
   - test-artifact
-base_model: {build['built_from']['repo']}
+base_model: {build["built_from"]["repo"]}
 ---
 
 # Slim fixture: {short(name)}
 
-A {build['parameters'] / 1e6:.1f}M-parameter fixture for the [{contract} MIC](https://huggingface.co/{contract_repo}), covering {covers}. It is a test artifact, not a usable model, tagged `test-artifact` to keep it out of candidate-model search.
+A {build["parameters"] / 1e6:.1f}M-parameter fixture for the [{contract} MIC](https://huggingface.co/{contract_repo}), covering {covers}. It is a test artifact, not a usable model, tagged `test-artifact` to keep it out of candidate-model search.
 
-- **Fixture key `{build['key'][:12]}`.** It covers every checkpoint whose processor files are byte-identical and whose config matches after shrinking.
+- **Fixture key `{build["key"][:12]}`.** It covers every checkpoint whose processor files are byte-identical and whose config matches after shrinking.
 - {shape}
-- **Processor files copied byte for byte** from `{build['built_from']['repo']}`: {', '.join(f'`{f}`' for f in build['copied_unchanged'])}.
+- **Processor files copied byte for byte** from `{build["built_from"]["repo"]}`: {", ".join(f"`{f}`" for f in build["copied_unchanged"])}.
 - {weights}
 - **Same tensor names as the real checkpoint.** {mirror}
-{fixed}- **Saved in {build['dtype']}**, the dtype `{build['built_from']['repo']}` loads in by default.
+{fixed}- **Saved in {build["dtype"]}**, the dtype `{build["built_from"]["repo"]}` loads in by default.
 - **Finite in float32, bfloat16, and float16** (forward, loss, gradients).
 
 Built by [`build_fixtures.py`](https://github.com/huggingface/transformers-mic/blob/main/example/build_fixtures.py); [`build.json`](build.json) records the pinned sources, gate results, and file hashes. The source repository commits only `README.md` and `build.json`; rebuild the other files with `python example/build_fixtures.py --fixture {short(name)}`.
@@ -835,7 +912,9 @@ def missing_package(error):
     if seen is None and not MISSING_PACKAGE.search(text):
         return None
     lines = [line.strip() for line in text.splitlines() if line.strip()]
-    return next((line for line in reversed(lines) if "No module named" in line), lines[-1] if lines else type(error).__name__)
+    return next(
+        (line for line in reversed(lines) if "No module named" in line), lines[-1] if lines else type(error).__name__
+    )
 
 
 def build_fixture(*args, **kwargs):
@@ -848,11 +927,15 @@ def build_fixture(*args, **kwargs):
         if missing:
             # Other sizes would fail the same way: say what to install instead of retrying.
             print(error, file=sys.stderr, flush=True)
-            raise SystemExit(f"ImportError: {missing} Install it and rerun; this is the environment, not the fixture.") from None
+            raise SystemExit(
+                f"ImportError: {missing} Install it and rerun; this is the environment, not the fixture."
+            ) from None
         if not adopted:
             raise
         reason = (str(error).strip().splitlines() or [type(error).__name__])[-1][:300]
-        print(f"tmic: the build failed with model-tester sizes ({reason}); rebuilding with the shrink rule's", flush=True)
+        print(
+            f"tmic: the build failed with model-tester sizes ({reason}); rebuilding with the shrink rule's", flush=True
+        )
         for source in adopted:
             TESTER_OFF[source] = {"fields": TESTER_SIZES.pop(source)["fields"], "build_failed": reason}
         return _build_fixture(*args, **kwargs)
@@ -902,8 +985,11 @@ def review_fixture(name, fixture, revisions, out, artifact=None, inspect_checkpo
 
     source_keys = sorted(inspection.checkpoint_keys(source_repo, revision, source))
     if artifact is None:
-        lacks = (inspect_checkpoint(cls, source, source_repo, revision) if inspect_checkpoint
-                 else missing_parameters(cls, run.checkpoint_path(source_repo, revision)))
+        lacks = (
+            inspect_checkpoint(cls, source, source_repo, revision)
+            if inspect_checkpoint
+            else missing_parameters(cls, run.checkpoint_path(source_repo, revision))
+        )
         checkpoint = {"keys": set(source_keys), "binary": inspection.loads_binary(source_repo, revision, source)}
         source_file = source_weights_file(source, checkpoint["binary"])
         dtype = getattr(torch, source_dtype(source))
@@ -930,13 +1016,15 @@ def review_fixture(name, fixture, revisions, out, artifact=None, inspect_checkpo
     report_phase("Compare with the source checkpoint")
     from transformers_mic import shrink_view
 
-    report = shrink_view.analyze({
-        "fixture": name,
-        "source": f"{source_repo}@{revision}",
-        "build": build,
-        "original": shrink_view.config_dict(source),
-        "shrunk": shrink_view.config_dict(out, cls.config_class.model_type),
-    })
+    report = shrink_view.analyze(
+        {
+            "fixture": name,
+            "source": f"{source_repo}@{revision}",
+            "build": build,
+            "original": shrink_view.config_dict(source),
+            "shrunk": shrink_view.config_dict(out, cls.config_class.model_type),
+        }
+    )
     keys, weights_file = saved_keys(out)
     return {
         "fixture": name,
@@ -959,12 +1047,31 @@ def review_fixture(name, fixture, revisions, out, artifact=None, inspect_checkpo
     }
 
 
-def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out, keep_random=False, inspect_checkpoint=None, contract_repo=None, reshrink=False):
+def _build_fixture(
+    name,
+    fixture,
+    contract_name,
+    manifest,
+    root,
+    revisions,
+    out,
+    keep_random=False,
+    inspect_checkpoint=None,
+    contract_repo=None,
+    reshrink=False,
+):
     if fixture["build"].get("sentence_transformers_class"):
         from transformers_mic import sentence_transformers
 
         return sentence_transformers.build(
-            sys.modules[__name__], name, fixture, contract_name, manifest, root, revisions, out,
+            sys.modules[__name__],
+            name,
+            fixture,
+            contract_name,
+            manifest,
+            root,
+            revisions,
+            out,
             keep_random=keep_random,
         )
     recorded = None if reshrink else recorded_config(out, fixture)
@@ -977,8 +1084,11 @@ def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out,
         report_phase("Inspect checkpoint", repo)
         source = source_snapshot(repo, revisions[repo], recipe)
         cls = model_class(source, recipe)
-        missing[repo] = (inspect_checkpoint(cls, source, repo, revisions[repo]) if inspect_checkpoint
-                         else missing_parameters(cls, run.checkpoint_path(repo, revisions[repo])))
+        missing[repo] = (
+            inspect_checkpoint(cls, source, repo, revisions[repo])
+            if inspect_checkpoint
+            else missing_parameters(cls, run.checkpoint_path(repo, revisions[repo]))
+        )
         frozen_hashes = None
         if recipe.get("preserve_frozen_prefixes"):
             frozen_model = cls._from_config(shrunk_config(source, cls, recipe))
@@ -986,12 +1096,15 @@ def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out,
             del frozen_model
         keys[repo] = fixture_key(source, cls, missing[repo], recipe, frozen_hashes)
     if len({key for key, _ in keys.values()}) != 1:
-        raise SystemExit(f"{name}: covered checkpoints have different fixture keys: { {r: k[:12] for r, (k, _) in keys.items()} }")
+        raise SystemExit(
+            f"{name}: covered checkpoints have different fixture keys: { {r: k[:12] for r, (k, _) in keys.items()} }"
+        )
     key, config = next(iter(keys.values()))
     source_repo = fixture["built_from"]
     lacks = missing[source_repo]
     source = source_snapshot(source_repo, revisions[source_repo], recipe)
     from transformers_mic import inspection
+
     checkpoint = {
         "keys": inspection.checkpoint_keys(source_repo, revisions[source_repo], source),
         "binary": inspection.loads_binary(source_repo, revisions[source_repo], source),
@@ -1033,7 +1146,8 @@ def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out,
     if diagnosis:
         raise SystemExit(
             f"{name}: the contract's inputs cannot move the outputs, and overfitting cannot fix that: "
-            + " ".join(f"({n}) {p}." for n, p in enumerate(diagnosis, 1)) + f" Gate: {gate[weights]}"
+            + " ".join(f"({n}) {p}." for n, p in enumerate(diagnosis, 1))
+            + f" Gate: {gate[weights]}"
         )
     if real and not gate["real"]["pass"]:
         raise SystemExit(f"{name}: the trained weights are insensitive to the contract's inputs: {gate['real']}")
@@ -1041,7 +1155,12 @@ def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out,
         torch.manual_seed(recipe["seed"])  # dropout and SpecAugment stay on while training
         model = model.float()  # trained in float32, saved in the source dtype
         unit_scales = unit_batch_norm(model)
-        training = overfit(called_module(model, captured), as_dtype(batch, torch.float32), recipe.get("max_steps", 500), recipe.get("target_loss", 0.05))
+        training = overfit(
+            called_module(model, captured),
+            as_dtype(batch, torch.float32),
+            recipe.get("max_steps", 500),
+            recipe.get("target_loss", 0.05),
+        )
         report_phase("Calibrate BatchNorm statistics")
         calibrated = calibrate_batch_norm(called_module(model, captured), as_dtype(batch, torch.float32))
         if calibrated:
@@ -1055,9 +1174,15 @@ def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out,
             # Zero-initialized gates (Mllama) give 0.0 at random weights; still 0.0 after
             # training means the contract's call never routes that input to the outputs.
             unrouted = sorted(k for k, v in gate["overfit"]["deltas"].items() if v == 0.0 and k not in accepted)
-            hint = (f" {', '.join(unrouted)} moved nothing even after training: the contract's model call does "
-                    "not route that input to the outputs." if unrouted else "")
-            raise SystemExit(f"{name}: random weights fail the gate and overfitting did not fix it:{hint} {training}, {gate}")
+            hint = (
+                f" {', '.join(unrouted)} moved nothing even after training: the contract's model call does "
+                "not route that input to the outputs."
+                if unrouted
+                else ""
+            )
+            raise SystemExit(
+                f"{name}: random weights fail the gate and overfitting did not fix it:{hint} {training}, {gate}"
+            )
         weights = "overfit"
         save(model, out, source, lacks, recipe, checkpoint)
     mirrored = missing_parameters(cls, out)
@@ -1072,9 +1197,11 @@ def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out,
         raise SystemExit(f"{name}: numeric health check failed: {health}")
     # Widths taken from the model's tester; a rebuild from the recorded config keeps the record.
     shrunk_config(source, cls, recipe)  # records TESTER_SIZES for this source
-    tester_sizes = (TESTER_SIZES.get(str(source))
-                    or ({"rejected": TESTER_OFF[str(source)]} if str(source) in TESTER_OFF else None)
-                    or previous_tester)
+    tester_sizes = (
+        TESTER_SIZES.get(str(source))
+        or ({"rejected": TESTER_OFF[str(source)]} if str(source) in TESTER_OFF else None)
+        or previous_tester
+    )
     build = {
         "fixture": name,
         "key": key,
@@ -1100,7 +1227,9 @@ def _build_fixture(name, fixture, contract_name, manifest, root, revisions, out,
         },
         **({"preserved_frozen_sha256": frozen_hashes} if frozen_hashes is not None else {}),
         **({"tester_sizes": tester_sizes} if tester_sizes else {}),
-        "checkpoint_inspection": "parameter headers/indexes; bounded binary fallback" if inspect_checkpoint else "full checkpoint load",
+        "checkpoint_inspection": "parameter headers/indexes; bounded binary fallback"
+        if inspect_checkpoint
+        else "full checkpoint load",
         "numeric_health_scope": "CPU float32/bfloat16/float16; autocast for low-precision losses",
         "captured": captured,
         "weights": weights,
@@ -1123,9 +1252,21 @@ def main():
     parser.add_argument("--framework", default="transformers", help="whose fleet lock pins the sources")
     parser.add_argument("--fixture", action="append", help="build only this fixture (short name, repeatable)")
     parser.add_argument("--keys-only", action="store_true", help="check that covered checkpoints share a key")
-    parser.add_argument("--out", type=Path, help="build into this directory instead, leaving the fixtures and lock untouched (reproducibility checks)")
-    parser.add_argument("--keep-random", action="store_true", help="with --out: keep the random weights even where the recipe overfits (random-vs-overfit experiments)")
-    parser.add_argument("--reshrink", action="store_true", help="apply today's shrink rule instead of the config a matching build.json recorded")
+    parser.add_argument(
+        "--out",
+        type=Path,
+        help="build into this directory instead, leaving the fixtures and lock untouched (reproducibility checks)",
+    )
+    parser.add_argument(
+        "--keep-random",
+        action="store_true",
+        help="with --out: keep the random weights even where the recipe overfits (random-vs-overfit experiments)",
+    )
+    parser.add_argument(
+        "--reshrink",
+        action="store_true",
+        help="apply today's shrink rule instead of the config a matching build.json recorded",
+    )
     parser.add_argument("--threads", type=int, default=2)
     args = parser.parse_args()
     if args.keep_random and not args.out:
@@ -1157,19 +1298,46 @@ def main():
                     frozen_hashes = None
                     if fixture["build"].get("preserve_frozen_prefixes"):
                         model = cls._from_config(shrunk_config(source, cls, fixture["build"]))
-                        frozen_hashes = restore_frozen(model, source, repo, contract["checkpoints"][repo], fixture["build"])
+                        frozen_hashes = restore_frozen(
+                            model, source, repo, contract["checkpoints"][repo], fixture["build"]
+                        )
                         del model
                     keys[repo] = fixture_key(source, cls, lacks, fixture["build"], frozen_hashes)[0][:12]
                 print(json.dumps({"fixture": name, "keys": keys, "shared": len(set(keys.values())) == 1}))
                 continue
             start = time.perf_counter()
             out = args.out / short(name) if args.out else (lock_dir / pin["path"]).resolve()
-            build = build_fixture(name, fixture, contract_name, manifest, root, contract["checkpoints"], out, args.keep_random, contract_repo=contract["integration"]["repo"], reshrink=args.reshrink)
+            build = build_fixture(
+                name,
+                fixture,
+                contract_name,
+                manifest,
+                root,
+                contract["checkpoints"],
+                out,
+                args.keep_random,
+                contract_repo=contract["integration"]["repo"],
+                reshrink=args.reshrink,
+            )
             if args.out:
                 same = run.digest(build["sha256"]) == pin.get("files_sha256")
-                print(json.dumps({"fixture": name, "matches_pin": same, "differs": [] if same else sorted(
-                    f for f, h in build["sha256"].items()
-                    if h != json.loads(((lock_dir / pin["path"]) / "build.json").read_text())["sha256"].get(f))}), flush=True)
+                print(
+                    json.dumps(
+                        {
+                            "fixture": name,
+                            "matches_pin": same,
+                            "differs": []
+                            if same
+                            else sorted(
+                                f
+                                for f, h in build["sha256"].items()
+                                if h
+                                != json.loads(((lock_dir / pin["path"]) / "build.json").read_text())["sha256"].get(f)
+                            ),
+                        }
+                    ),
+                    flush=True,
+                )
                 continue
             pin["files_sha256"] = run.digest(build["sha256"])
             lock_path.write_text(json.dumps(lock, indent=2) + "\n")
@@ -1181,8 +1349,16 @@ def main():
                         "key": build["key"][:12],
                         "weights": build["weights"],
                         "parameters": build["parameters"],
-                        "random_weakest": [gate["random"]["weakest"], gate["random"]["deltas"].get(gate["random"]["weakest"])],
-                        "overfit_weakest": [gate["overfit"]["weakest"], gate["overfit"]["deltas"].get(gate["overfit"]["weakest"])] if "overfit" in gate else None,
+                        "random_weakest": [
+                            gate["random"]["weakest"],
+                            gate["random"]["deltas"].get(gate["random"]["weakest"]),
+                        ],
+                        "overfit_weakest": [
+                            gate["overfit"]["weakest"],
+                            gate["overfit"]["deltas"].get(gate["overfit"]["weakest"]),
+                        ]
+                        if "overfit" in gate
+                        else None,
                         "steps": build.get("training", {}).get("steps"),
                         "seconds": round(time.perf_counter() - start, 1),
                     }

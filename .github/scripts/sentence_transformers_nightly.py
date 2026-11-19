@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 from huggingface_hub import snapshot_download
+
 from transformers_mic import backend, fleet, resources
 
 
@@ -75,10 +76,7 @@ def main():
         selected = {
             key: value
             for key, value in lock["contracts"].items()
-            if (
-                lock.get("framework") == fleet.ST_FRAMEWORK
-                or "sentence_transformers" in value.get("integrations", [])
-            )
+            if (lock.get("framework") == fleet.ST_FRAMEWORK or "sentence_transformers" in value.get("integrations", []))
             and value["integration"]["repo"] not in seen
         }
         seen.update(value["integration"]["repo"] for value in selected.values())
@@ -91,8 +89,7 @@ def main():
         lock["environment"] = {
             package: version
             for package, version in lock.get("environment", {}).items()
-            if package.lower().replace("_", "-")
-            not in {"transformers", "sentence-transformers"}
+            if package.lower().replace("_", "-") not in {"transformers", "sentence-transformers"}
         }
         # Transformers known failures do not apply to this integration.
         lock.pop("known_failures", None)

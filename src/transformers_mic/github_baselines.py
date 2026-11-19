@@ -6,7 +6,6 @@ tests the workflow directly; it does not exercise dashboard/Serge authorization.
 
 import argparse
 import json
-from pathlib import Path, PurePosixPath
 import re
 import shutil
 import subprocess
@@ -14,11 +13,12 @@ import sys
 import tempfile
 import time
 import uuid
+from pathlib import Path, PurePosixPath
 
 from filelock import FileLock
 from huggingface_hub import hf_hub_download
 
-from transformers_mic import baselines, fleet, model_baselines, cloud_progress
+from transformers_mic import baselines, cloud_progress, fleet, model_baselines
 from transformers_mic.workspace import Workspace, read, write
 
 REPO = "huggingface/transformers-mic"
@@ -36,17 +36,9 @@ def failure_summary(root):
         for case in read(path).get("cases", []):
             if case.get("status") != "failed":
                 continue
-            failures = case.get("record", {}).get("failures", []) or case.get(
-                "check", {}
-            ).get("failures", [])
-            reason = (
-                str(failures[0]).strip().splitlines()[-1]
-                if failures
-                else "case failed; see worker logs"
-            )
-            details.append(
-                f"{profile}/{case.get('variant')}/{case.get('target')}: {reason}"
-            )
+            failures = case.get("record", {}).get("failures", []) or case.get("check", {}).get("failures", [])
+            reason = str(failures[0]).strip().splitlines()[-1] if failures else "case failed; see worker logs"
+            details.append(f"{profile}/{case.get('variant')}/{case.get('target')}: {reason}")
     return "; ".join(details[:4]) or "inspect the Actions URL and partial artifacts"
 
 
@@ -66,9 +58,7 @@ def restore_hidden_sources(root):
                     continue
                 repo, revision = source["repo"], source["revision"]
                 if not re.fullmatch(r"[a-f0-9]{40}", revision):
-                    raise ValueError(
-                        "Source recovery requires an immutable Hub revision"
-                    )
+                    raise ValueError("Source recovery requires an immutable Hub revision")
                 prefix = PurePosixPath(kind, repo.replace("/", "--"), revision)
                 for name, expected in source["files"].items():
                     path = PurePosixPath(name)
@@ -76,17 +66,11 @@ def restore_hidden_sources(root):
                         raise ValueError("Unsafe source artifact path")
                     relative = path.relative_to(prefix)
                     target = folder / path
-                    if target.exists() or not any(
-                        part.startswith(".") for part in relative.parts
-                    ):
+                    if target.exists() or not any(part.startswith(".") for part in relative.parts):
                         continue
-                    recovered = Path(
-                        hf_hub_download(repo, relative.as_posix(), revision=revision)
-                    )
+                    recovered = Path(hf_hub_download(repo, relative.as_posix(), revision=revision))
                     if baselines.sha256(recovered) != expected:
-                        raise ValueError(
-                            "Recovered source differs from the measured artifact"
-                        )
+                        raise ValueError("Recovered source differs from the measured artifact")
                     target.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copyfile(recovered, target)
 
@@ -113,10 +97,9 @@ def sha(repository, ref):
 
 
 def find_run(job_id):
-    runs = api(
-        f"repos/{REPO}/actions/workflows/{WORKFLOW}/runs"
-        "?event=workflow_dispatch&branch=main&per_page=100"
-    )["workflow_runs"]
+    runs = api(f"repos/{REPO}/actions/workflows/{WORKFLOW}/runs?event=workflow_dispatch&branch=main&per_page=100")[
+        "workflow_runs"
+    ]
     matches = [r for r in runs if r["display_title"] == "MIC baselines · " + job_id]
     if len(matches) > 1:
         raise ValueError("Multiple matching runs; inspect Actions before continuing")
@@ -127,34 +110,22 @@ def watch(run_id):
     previous = None
     while True:
         remote = api(f"repos/{REPO}/actions/runs/{run_id}")
-        jobs = api(f"repos/{REPO}/actions/runs/{run_id}/jobs?per_page=100").get(
-            "jobs", []
-        )
+        jobs = api(f"repos/{REPO}/actions/runs/{run_id}/jobs?per_page=100").get("jobs", [])
         view = {
             "run_url": remote.get("html_url"),
-            "status": remote["conclusion"]
-            if remote["status"] == "completed"
-            else remote["status"],
+            "status": remote["conclusion"] if remote["status"] == "completed" else remote["status"],
             "workflow_jobs": [
                 {
                     "name": job["name"],
-                    "status": "failed"
-                    if job.get("conclusion") == "failure"
-                    else job["status"],
+                    "status": "failed" if job.get("conclusion") == "failure" else job["status"],
                     "queued_at": (job.get("created_at") or job.get("started_at"))
                     if job["status"] == "queued"
                     else None,
                     "step": next(
-                        (
-                            step["name"]
-                            for step in job.get("steps", [])
-                            if step["status"] == "in_progress"
-                        ),
+                        (step["name"] for step in job.get("steps", []) if step["status"] == "in_progress"),
                         "",
                     ),
-                    "completed_steps": sum(
-                        step["status"] == "completed" for step in job.get("steps", [])
-                    ),
+                    "completed_steps": sum(step["status"] == "completed" for step in job.get("steps", [])),
                     "total_steps": len(job.get("steps", [])),
                 }
                 for job in jobs
@@ -189,11 +160,7 @@ def interrupt(root, *, interactive=True):
         if state.get("transport") != "github-test":
             return
         job = state["job"]
-        remote = (
-            api(f"repos/{REPO}/actions/runs/{job['run_id']}")
-            if job.get("run_id")
-            else find_run(job["id"])
-        )
+        remote = api(f"repos/{REPO}/actions/runs/{job['run_id']}") if job.get("run_id") else find_run(job["id"])
         if not remote:
             print(
                 "\nRemote dispatch unresolved; resume to locate the same run.",
@@ -296,15 +263,11 @@ def run_locked(args, root):
         api(f"repos/{REPO}")
         model = Workspace(args.model_workspace)
         if args.fleet == "all" or not args.include_checkpoints:
-            raise ValueError(
-                "Model measurement requires one fleet and all declared targets"
-            )
+            raise ValueError("Model measurement requires one fleet and all declared targets")
         options["workspace"] = model_baselines.stage(model, root)
     if state_path.exists():
         state = read(state_path)
-        if state.get("transport") != "github-test" or any(
-            state["request"].get(k) != v for k, v in options.items()
-        ):
+        if state.get("transport") != "github-test" or any(state["request"].get(k) != v for k, v in options.items()):
             raise ValueError("Different collection/options; use another --out")
     else:
         job_id = uuid.uuid4().hex
@@ -324,14 +287,8 @@ def run_locked(args, root):
         state = {"transport": "github-test", "request": request, "job": job}
         write(state_path, state)
     job = state["job"]
-    remote = (
-        api(f"repos/{REPO}/actions/runs/{job['run_id']}")
-        if job.get("run_id")
-        else find_run(job["id"])
-    )
-    ended = (
-        remote.get("conclusion") if remote and remote["status"] == "completed" else None
-    )
+    remote = api(f"repos/{REPO}/actions/runs/{job['run_id']}") if job.get("run_id") else find_run(job["id"])
+    ended = remote.get("conclusion") if remote and remote["status"] == "completed" else None
     # A retry after a cancelled or failed run must measure again, not re-read the
     # old run; its artifacts were already downloaded and are kept in the archive.
     if ended in ("cancelled", "failure", "timed_out"):
@@ -348,9 +305,7 @@ def run_locked(args, root):
         # another GPU runner automatically on the next invocation.
         state["dispatch_attempted"] = True
         write(state_path, state)
-        inputs = {
-            key: job[key] for key in ("fleet_revision", "mic_sha", "transformers_sha")
-        }
+        inputs = {key: job[key] for key in ("fleet_revision", "mic_sha", "transformers_sha")}
         inputs.update(
             job_id=job["id"],
             fleets=",".join(job["fleets"]),
@@ -430,9 +385,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", required=True)
     parser.add_argument("--model-workspace")
-    parser.add_argument(
-        "--fleet", choices=("control", "prototypes", "all"), default="control"
-    )
+    parser.add_argument("--fleet", choices=("control", "prototypes", "all"), default="control")
     parser.add_argument("--include-checkpoints", action="store_true")
     parser.add_argument("--transformers-ref", default="main")
     parser.add_argument("--upload-repo", default="")

@@ -6,11 +6,11 @@ from the approved contract whose checkpoint shares the most structure makes draf
 both better and more repeatable.
 """
 
-from concurrent.futures import ThreadPoolExecutor
 import json
 import os
-from pathlib import Path
 import re
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 from huggingface_hub import hf_hub_download
 
@@ -57,10 +57,12 @@ def similarity(a, b):
     score = 10 * len(shared) + (9 if same_family else 0) + (8 if same_input else 0) + (5 if same_head else 0)
     if not shared and not same_head and not same_family:
         return 0, ""
-    parts = ([f"shares {', '.join(shared)}"] if shared else []) + (
-        [f"same {a['family']} family"] if same_family else []) + (
-        [f"same {a['main_input']} input"] if same_input else []) + (
-        [f"same {a['head']} head"] if same_head else [])
+    parts = (
+        ([f"shares {', '.join(shared)}"] if shared else [])
+        + ([f"same {a['family']} family"] if same_family else [])
+        + ([f"same {a['main_input']} input"] if same_input else [])
+        + ([f"same {a['head']} head"] if same_head else [])
+    )
     return score, " and ".join(parts)
 
 
@@ -80,9 +82,7 @@ def _load(row):
         repo, revision = next(iter(checkpoints.items()))
         config = json.loads(Path(hf_hub_download(repo, "config.json", revision=revision)).read_text())
         manifest = json.loads(
-            Path(
-                hf_hub_download(integration["repo"], "integration.json", revision=integration["revision"])
-            ).read_text()
+            Path(hf_hub_download(integration["repo"], "integration.json", revision=integration["revision"])).read_text()
         )
     except Exception:  # gated or removed checkpoints are not examples
         return None
@@ -112,9 +112,7 @@ def nearest_contract(config, rows=None, threads=16, model=None):
         return None
     _, contract, integration, manifest, reason = best
     entry = manifest["integrations"]["transformers"]["entry_point"]
-    usage = Path(
-        hf_hub_download(integration["repo"], entry, revision=integration["revision"])
-    ).read_text()
+    usage = Path(hf_hub_download(integration["repo"], entry, revision=integration["revision"])).read_text()
     plan = {
         "name": contract,
         "manifest": manifest,

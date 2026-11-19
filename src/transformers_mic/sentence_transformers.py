@@ -80,9 +80,7 @@ def environment():
         try:
             result[name] = metadata.version(name)
         except metadata.PackageNotFoundError as error:
-            raise ValueError(
-                "ST contracts require transformers-mic[runtime,sentence-transformers]"
-            ) from error
+            raise ValueError("ST contracts require transformers-mic[runtime,sentence-transformers]") from error
     return result
 
 
@@ -197,13 +195,7 @@ def usage(repo, kind, images=False, image_documents=False, left_padding=False):
     ]
     title = f"# {kind}: encoding and scoring\n\n"
     description = "Run the public Sentence Transformers API with a small, fixed retrieval example.\n\n"
-    return (
-        title
-        + description
-        + "```py runnable:retrieval\n"
-        + "\n".join(setup)
-        + "\n```\n"
-    )
+    return title + description + "```py runnable:retrieval\n" + "\n".join(setup) + "\n```\n"
 
 
 def validate(plan, model, fixture):
@@ -245,9 +237,7 @@ def create(args):
     source = source_files(args.model, info.sha)
     kind = model_kind(source, args.sentence_transformers)
     config = json.loads((source / "config.json").read_text())
-    slug = args.name or "st-" + re.sub(
-        r"[^A-Za-z0-9_-]", "-", args.model.split("/")[-1]
-    )
+    slug = args.name or "st-" + re.sub(r"[^A-Za-z0-9_-]", "-", args.model.split("/")[-1])
     fixture = f"{args.namespace}/{slug}-mic"
     images = config["model_type"] in ("clip", "embedding_gemma2")
     image_documents = kind == "MultiVectorEncoder" and config["model_type"] == "colpali"
@@ -287,9 +277,7 @@ def create(args):
                     "torch",
                     "pillow",
                 ],
-                "targets": ["fixtures"]
-                if args.fixtures_only
-                else ["fixtures", "checkpoints"],
+                "targets": ["fixtures"] if args.fixtures_only else ["fixtures", "checkpoints"],
                 "variants": {
                     "default": {},
                     "eager": {"attn_implementation": "eager"},
@@ -381,9 +369,7 @@ def initialize(source, kind, seed, builder):
 
     def random_weights(cls, model_name_or_path, model=None, **kwargs):
         if model is None:
-            raise ValueError(
-                "ST fixture cannot infer the shape of unnamed module weights"
-            )
+            raise ValueError("ST fixture cannot infer the shape of unnamed module weights")
         return model
 
     torch.manual_seed(seed)
@@ -391,9 +377,7 @@ def initialize(source, kind, seed, builder):
         patch.object(Transformer, "_load_model", load_backbone),
         patch.object(Module, "load_torch_weights", classmethod(random_weights)),
     ):
-        model = getattr(st, kind)(
-            str(source), device="cpu", local_files_only=True, trust_remote_code=False
-        )
+        model = getattr(st, kind)(str(source), device="cpu", local_files_only=True, trust_remote_code=False)
     if len(backbones) != 1:
         raise ValueError(f"Expected one ST backbone, got {len(backbones)}")
     dimension = model[0].get_embedding_dimension()
@@ -402,12 +386,8 @@ def initialize(source, kind, seed, builder):
             old = module.embedding_dimension
             module.embedding_dimension = dimension
             modes = module.pooling_mode
-            module.pooling_output_dimension = dimension * (
-                len(modes) if isinstance(modes, (tuple, list)) else 1
-            )
-            changes.append(
-                {"module": type(module).__name__, "from": old, "to": dimension}
-            )
+            module.pooling_output_dimension = dimension * (len(modes) if isinstance(modes, (tuple, list)) else 1)
+            changes.append({"module": type(module).__name__, "from": old, "to": dimension})
         elif isinstance(module, Dense):
             old = (module.in_features, module.out_features)
             output = min(module.out_features, 64)
@@ -467,13 +447,9 @@ def build(
 
     copied = save()
     entry = root / manifest["integrations"][NAME]["entry_point"]
-    batch, captured = builder.contract_batch(
-        entry, out, model_class=type(backbone), method="forward"
-    )
+    batch, captured = builder.contract_batch(entry, out, model_class=type(backbone), method="forward")
     threshold = builder.GATE_FACTOR * max(
-        rule["atol"]
-        for rule in manifest["outputs"].values()
-        if rule["compare"] == "allclose"
+        rule["atol"] for rule in manifest["outputs"].values() if rule["compare"] == "allclose"
     )
     gate = {
         "random": builder.sensitivity(
@@ -517,11 +493,7 @@ def build(
         and not {"onnx", "openvino"}.intersection(p.relative_to(source).parts)
     }
     fields = {
-        "config": {
-            key: value
-            for key, value in backbone.config.to_dict().items()
-            if key not in builder.VOLATILE
-        },
+        "config": {key: value for key, value in backbone.config.to_dict().items() if key not in builder.VOLATILE},
         "dtype": str(next(model.parameters()).dtype).removeprefix("torch."),
         "source_files": source_hashes,
         "st_class": kind,

@@ -1,16 +1,15 @@
-from io import BytesIO
-from pathlib import Path
 import json
 import stat
-from types import SimpleNamespace
 import zipfile
+from io import BytesIO
+from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
-from transformers_mic import baselines, baseline_worker, dashboard_auth, cloud_progress
+from transformers_mic import baseline_worker, baselines, cloud_progress, dashboard_auth
 from transformers_mic.cli import parser
 from transformers_mic.workspace import read, write
-
 
 JOB = {
     "id": "a" * 32,
@@ -40,9 +39,7 @@ def make_collection(root, *, changed=False):
     for profile, platform in (("cpu", "cpu-x86_64"), ("cuda", "cuda")):
         folder = root / "artifacts" / profile
         base = folder / "control/Demo"
-        manifest = {
-            "outputs": {"answer": {"compare": "allclose", "atol": 0.01, "rtol": 0.01}}
-        }
+        manifest = {"outputs": {"answer": {"compare": "allclose", "atol": 0.01, "rtol": 0.01}}}
         write(base / "integration.json", manifest)
         value = {
             "recorded_with": {
@@ -135,9 +132,7 @@ def test_complete_collection_upload_is_previewed_and_idempotent(tmp_path, monkey
         "unpinned-source",
     ],
 )
-def test_incomplete_or_modified_measurements_cannot_be_uploaded(
-    tmp_path, monkeypatch, problem
-):
+def test_incomplete_or_modified_measurements_cannot_be_uploaded(tmp_path, monkeypatch, problem):
     make_collection(tmp_path)
     lock = tmp_path / "fleet.lock"
     write(
@@ -187,9 +182,7 @@ def test_incomplete_or_modified_measurements_cannot_be_uploaded(
         baselines.collection(tmp_path)
 
 
-@pytest.mark.parametrize(
-    "name", ["../outside", "/outside", "folder/../../outside", "folder\\outside"]
-)
+@pytest.mark.parametrize("name", ["../outside", "/outside", "folder/../../outside", "folder\\outside"])
 def test_artifact_extraction_rejects_unsafe_paths(tmp_path, name):
     stream = BytesIO()
     with zipfile.ZipFile(stream, "w") as archive:
@@ -228,15 +221,10 @@ def test_review_binds_approval_to_measurements_and_changed_values_need_reason(tm
     )
     receipt = read(tmp_path / "reviews.json")
     assert len(receipt["approved"]) == 2
-    assert all(
-        value["reason"] == "Reviewed the framework change"
-        for value in receipt["approved"].values()
-    )
+    assert all(value["reason"] == "Reviewed the framework change" for value in receipt["approved"].values())
 
 
-def test_publishing_opens_hub_prs_and_never_writes_unreviewed_values(
-    tmp_path, monkeypatch
-):
+def test_publishing_opens_hub_prs_and_never_writes_unreviewed_values(tmp_path, monkeypatch):
     make_collection(tmp_path)
     write(
         tmp_path / "reviews.json",
@@ -256,9 +244,7 @@ def test_publishing_opens_hub_prs_and_never_writes_unreviewed_values(
 
         def create_commit(self, **kwargs):
             commits.append(kwargs)
-            return SimpleNamespace(
-                oid="1" * 40, pr_url="https://huggingface.co/example/discussions/1"
-            )
+            return SimpleNamespace(oid="1" * 40, pr_url="https://huggingface.co/example/discussions/1")
 
     monkeypatch.setattr(baselines, "HfApi", Api)
     assert baselines.publish(tmp_path, False) == 0
@@ -286,9 +272,7 @@ def test_publishing_adopts_a_pr_opened_by_a_stalled_call(tmp_path, monkeypatch):
 
         def get_discussion_details(self, repo, num):
             assert num == 3
-            return SimpleNamespace(
-                events=[SimpleNamespace(type="commit", oid="2" * 40)]
-            )
+            return SimpleNamespace(events=[SimpleNamespace(type="commit", oid="2" * 40)])
 
         def create_commit(self, **kwargs):
             raise AssertionError("opened a duplicate PR")
@@ -347,9 +331,7 @@ def test_cli_submission_download_resume_and_upload_receipt(tmp_path, monkeypatch
         baselines.run(args)
 
 
-def test_cli_can_leave_models_in_cloud_and_return_only_hub_revision(
-    tmp_path, monkeypatch
-):
+def test_cli_can_leave_models_in_cloud_and_return_only_hub_revision(tmp_path, monkeypatch):
     job = {
         **JOB,
         "upload_repo": "huggingface-mic/candidates",
@@ -400,25 +382,14 @@ def test_case_accounting_rejects_missing_duplicate_and_hardware_skips():
         "platform": "cuda",
     }
     checked = {**recorded, "status": "pass"}
-    assert (
-        baseline_worker.assess(["demo"], "default", [recorded], [checked], "cuda")[0][
-            "status"
-        ]
-        == "validated"
-    )
+    assert baseline_worker.assess(["demo"], "default", [recorded], [checked], "cuda")[0]["status"] == "validated"
     for rows in ([], [recorded, recorded]):
         with pytest.raises(ValueError):
             baseline_worker.assess(["demo"], "default", rows, [checked], "cuda")
     hardware = {**recorded, "status": "unsupported", "skip": "hardware"}
-    assert (
-        baseline_worker.assess(["demo"], "default", [hardware], [], "cuda")[0]["status"]
-        == "failed"
-    )
+    assert baseline_worker.assess(["demo"], "default", [hardware], [], "cuda")[0]["status"] == "failed"
     declared = {**hardware, "skip": "declared"}
-    assert (
-        baseline_worker.assess(["demo"], "default", [declared], [], "cuda")[0]["status"]
-        == "declared-unsupported"
-    )
+    assert baseline_worker.assess(["demo"], "default", [declared], [], "cuda")[0]["status"] == "declared-unsupported"
 
 
 def test_manifest_target_matrix_includes_checkpoints_unless_explicitly_excluded():
@@ -436,33 +407,17 @@ def test_manifest_target_matrix_includes_checkpoints_unless_explicitly_excluded(
         "full",
     ]
     assert baseline_worker.expected_targets(contract, manifest, True) == ["tiny"]
-    manifest["integrations"]["transformers"]["resources"] = {
-        "org/full": {"devices": ["cuda"], "gpu_memory_gb": 48}
-    }
-    assert baseline_worker.profile_exclusions(contract, manifest, "default", "cpu") == {
-        "full"
-    }
-    assert (
-        baseline_worker.profile_exclusions(contract, manifest, "default", "cuda")
-        == set()
-    )
+    manifest["integrations"]["transformers"]["resources"] = {"org/full": {"devices": ["cuda"], "gpu_memory_gb": 48}}
+    assert baseline_worker.profile_exclusions(contract, manifest, "default", "cpu") == {"full"}
+    assert baseline_worker.profile_exclusions(contract, manifest, "default", "cuda") == set()
     # A checkpoint above 1B is measured on GPU in bfloat16 only.
-    manifest["integrations"]["transformers"]["resources"]["org/full"]["variants"] = {
-        "default": {"devices": []}
-    }
-    assert baseline_worker.profile_exclusions(
-        contract, manifest, "default", "cuda"
-    ) == {"full"}
-    assert (
-        baseline_worker.profile_exclusions(contract, manifest, "bfloat16", "cuda")
-        == set()
-    )
+    manifest["integrations"]["transformers"]["resources"]["org/full"]["variants"] = {"default": {"devices": []}}
+    assert baseline_worker.profile_exclusions(contract, manifest, "default", "cuda") == {"full"}
+    assert baseline_worker.profile_exclusions(contract, manifest, "bfloat16", "cuda") == set()
 
 
 @pytest.mark.parametrize("omit_case,runner_code", [(False, 0), (True, 0), (False, 2)])
-def test_worker_records_verifies_and_accounts_for_the_whole_matrix(
-    tmp_path, monkeypatch, omit_case, runner_code
-):
+def test_worker_records_verifies_and_accounts_for_the_whole_matrix(tmp_path, monkeypatch, omit_case, runner_code):
     import sys
 
     model = tmp_path / "hub"
@@ -482,9 +437,7 @@ def test_worker_records_verifies_and_accounts_for_the_whole_matrix(
     write(model / "integration.json", manifest)
     contract = {
         "integration": {"repo": "huggingface-mic/demo-mic", "revision": "f" * 40},
-        "fixtures": {
-            "huggingface-mic/demo-mic": {"revision": "f" * 40, "target": "tiny"}
-        },
+        "fixtures": {"huggingface-mic/demo-mic": {"revision": "f" * 40, "target": "tiny"}},
         "checkpoints": {"org/full": "f" * 40},
     }
     lock = tmp_path / "fleet.lock"
@@ -497,9 +450,7 @@ def test_worker_records_verifies_and_accounts_for_the_whole_matrix(
         "transformers",
         SimpleNamespace(__file__=str(checkout / "src/transformers/__init__.py")),
     )
-    monkeypatch.setattr(
-        baseline_worker, "runtime", lambda profile: {"profile": profile}
-    )
+    monkeypatch.setattr(baseline_worker, "runtime", lambda profile: {"profile": profile})
     # The host check reads this machine's /proc/cpuinfo, and GitHub's hosted x86
     # runners lack native bf16; its own test covers it:
     # test_cpu_host_without_native_bfloat16_is_refused_before_measuring.
@@ -509,12 +460,8 @@ def test_worker_records_verifies_and_accounts_for_the_whole_matrix(
         "check_output",
         lambda *a, **kw: JOB["transformers_sha"],
     )
-    monkeypatch.setattr(
-        baseline_worker.fleet, "download", lambda *a: (lock, JOB["fleet_revision"])
-    )
-    monkeypatch.setattr(
-        baseline_worker, "hf_hub_download", lambda *a, **kw: model / "integration.json"
-    )
+    monkeypatch.setattr(baseline_worker.fleet, "download", lambda *a: (lock, JOB["fleet_revision"]))
+    monkeypatch.setattr(baseline_worker, "hf_hub_download", lambda *a, **kw: model / "integration.json")
     monkeypatch.setattr(baseline_worker, "snapshot_download", lambda *a, **kw: model)
     current_profile = "cpu"
     stages = []
@@ -639,18 +586,13 @@ def test_terminal_progress_refreshes_same_block_and_explains_runner_queue(monkey
     )
     second = cloud_progress.display(job, first)
     assert "\x1b[2A\r\x1b[J" in output.getvalue()[offset:]
-    assert (
-        "2/7" in output.getvalue()[offset:]
-        and "Install fleet environment" in output.getvalue()[offset:]
-    )
+    assert "2/7" in output.getvalue()[offset:] and "Install fleet environment" in output.getvalue()[offset:]
     offset = output.tell()
     assert cloud_progress.display(job, second) == second
     assert output.tell() == offset
 
 
-def test_redirected_progress_is_plain_and_only_changed_rows_are_printed(
-    monkeypatch, capsys
-):
+def test_redirected_progress_is_plain_and_only_changed_rows_are_printed(monkeypatch, capsys):
     monkeypatch.delenv("TMIC_LIVE_PROGRESS", raising=False)
     job = {
         "status": "running",
@@ -672,9 +614,7 @@ def test_redirected_progress_is_plain_and_only_changed_rows_are_printed(
     assert "CUDA" not in text and "[cloud]" not in text and "\x1b" not in text
 
 
-def test_progress_uses_cached_short_lived_oidc_and_never_forwards_hub_credentials(
-    monkeypatch, capsys
-):
+def test_progress_uses_cached_short_lived_oidc_and_never_forwards_hub_credentials(monkeypatch, capsys):
     monkeypatch.setenv("MIC_PROGRESS_URL", "https://serge.test/dashboard/mic-progress")
     monkeypatch.setenv("ACTIONS_ID_TOKEN_REQUEST_URL", "https://oidc.test/token?job=1")
     monkeypatch.setenv("ACTIONS_ID_TOKEN_REQUEST_TOKEN", "runner-oidc-secret")
@@ -698,9 +638,7 @@ def test_progress_uses_cached_short_lived_oidc_and_never_forwards_hub_credential
         def open(self, request, timeout):
             calls.append(request)
             return Response(
-                b'{"value":"short-oidc-token"}'
-                if request.full_url.startswith("https://oidc.test")
-                else b"{}"
+                b'{"value":"short-oidc-token"}' if request.full_url.startswith("https://oidc.test") else b"{}"
             )
 
     monkeypatch.setattr(cloud_progress, "build_opener", lambda *a: Opener())
@@ -745,9 +683,7 @@ def test_worker_leaves_excluded_contracts_out_of_the_matrix(tmp_path, monkeypatc
         {
             "fixtures": {"huggingface-mic/demo-mic": {}},
             "checkpoints": {},
-            "integrations": {
-                "transformers": {"targets": ["fixtures"], "variants": {"default": {}}}
-            },
+            "integrations": {"transformers": {"targets": ["fixtures"], "variants": {"default": {}}}},
             "outputs": {"answer": {"compare": "allclose", "atol": 0.01, "rtol": 0.01}},
         },
     )
@@ -783,12 +719,8 @@ def test_worker_leaves_excluded_contracts_out_of_the_matrix(tmp_path, monkeypatc
         "check_output",
         lambda *a, **kw: JOB["transformers_sha"],
     )
-    monkeypatch.setattr(
-        baseline_worker.fleet, "download", lambda *a: (lock, JOB["fleet_revision"])
-    )
-    monkeypatch.setattr(
-        baseline_worker, "hf_hub_download", lambda *a, **kw: model / "integration.json"
-    )
+    monkeypatch.setattr(baseline_worker.fleet, "download", lambda *a: (lock, JOB["fleet_revision"]))
+    monkeypatch.setattr(baseline_worker, "hf_hub_download", lambda *a, **kw: model / "integration.json")
     monkeypatch.setattr(baseline_worker, "snapshot_download", lambda *a, **kw: model)
     measured = []
 
@@ -815,9 +747,7 @@ def test_worker_leaves_excluded_contracts_out_of_the_matrix(tmp_path, monkeypatc
     assert measured and not any("broken" in " ".join(map(str, c)) for c in measured)
 
 
-def test_cpu_host_without_native_bfloat16_is_refused_before_measuring(
-    tmp_path, monkeypatch
-):
+def test_cpu_host_without_native_bfloat16_is_refused_before_measuring(tmp_path, monkeypatch):
     monkeypatch.setattr(baseline_worker.platform, "machine", lambda: "x86_64")
     ice_lake = tmp_path / "ice_lake"
     ice_lake.write_text("flags : fpu avx2 avx512f avx512_vnni\n")
@@ -828,9 +758,7 @@ def test_cpu_host_without_native_bfloat16_is_refused_before_measuring(
     assert baseline_worker.missing_native_support({"bfloat16"}, granite) is None
     # float32-only collections run anywhere.
     assert baseline_worker.missing_native_support(set(), ice_lake) is None
-    assert "cpu-x86_64-fp16" in baseline_worker.missing_native_support(
-        {"float16"}, granite
-    )
+    assert "cpu-x86_64-fp16" in baseline_worker.missing_native_support({"float16"}, granite)
     monkeypatch.setattr(baseline_worker.platform, "machine", lambda: "arm64")
     assert baseline_worker.missing_native_support({"bfloat16"}, ice_lake) is None
 
@@ -842,6 +770,4 @@ def test_failure_summary_reports_the_host_error(tmp_path):
         tmp_path / "artifacts/cpu/collection.json",
         {"cases": [], "host_error": "This CPU runner cannot record bfloat16"},
     )
-    assert "cpu: This CPU runner cannot record bfloat16" in (
-        github_baselines.failure_summary(tmp_path)
-    )
+    assert "cpu: This CPU runner cannot record bfloat16" in (github_baselines.failure_summary(tmp_path))

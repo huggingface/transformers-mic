@@ -36,9 +36,7 @@ def test_credentials_require_an_https_origin(url):
         auth.dashboard_url(url)
 
 
-def test_login_handles_pending_and_slow_down_saves_private_credential(
-    monkeypatch, capsys
-):
+def test_login_handles_pending_and_slow_down_saves_private_credential(monkeypatch, capsys):
     calls, sleeps = [], []
     replies = iter(
         [
@@ -99,9 +97,7 @@ def test_logout_revokes_only_the_selected_dashboard(monkeypatch):
     calls = []
     monkeypatch.setattr(auth, "request", lambda *a, **kw: calls.append((a, kw)))
     assert auth.run(args("logout")) == 0
-    assert calls == [
-        (("https://dashboard.test", "/auth/revoke"), {"body": {}, "token": "secret"})
-    ]
+    assert calls == [(("https://dashboard.test", "/auth/revoke"), {"body": {}, "token": "secret"})]
     assert "https://dashboard.test" not in auth.credentials()
     assert "https://another.test" in auth.credentials()
 
@@ -147,9 +143,7 @@ def test_login_cannot_open_a_different_origin(monkeypatch):
 
 
 def test_cli_auth_does_not_open_a_mic_workspace(monkeypatch, capsys):
-    parsed = parser().parse_args(
-        ["auth", "login", "--dashboard", "https://dashboard.test", "--no-browser"]
-    )
+    parsed = parser().parse_args(["auth", "login", "--dashboard", "https://dashboard.test", "--no-browser"])
     assert parsed.no_browser and parsed.auth_command == "login"
     assert main(["auth", "status", "--dashboard", "https://dashboard.test"]) == 2
     assert "login required" in capsys.readouterr().err

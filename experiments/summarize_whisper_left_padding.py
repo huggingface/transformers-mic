@@ -6,6 +6,7 @@ python experiments/summarize_whisper_left_padding.py <artifact-dir> --output <js
 import argparse
 import json
 from pathlib import Path
+
 import numpy as np
 
 parser = argparse.ArgumentParser(description=__doc__)
@@ -23,9 +24,7 @@ records = {
 comparisons = []
 repeats = []
 for kind in ["checkpoint", "overfit", "random"]:
-    fix, bad, repeat = [
-        records[f"{kind}-{stage}"] for stage in ["fix", "bad", "repeat"]
-    ]
+    fix, bad, repeat = [records[f"{kind}-{stage}"] for stage in ["fix", "bad", "repeat"]]
     assert fix["weight_sha256"] == bad["weight_sha256"] == repeat["weight_sha256"]
     assert fix["probe_token_ids"] == bad["probe_token_ids"] == repeat["probe_token_ids"]
     for x, y, z in zip(fix["rows"], bad["rows"], repeat["rows"]):
@@ -64,17 +63,13 @@ for kind in ["checkpoint", "overfit", "random"]:
             assert all(a[0] == b[0] for a, b in zip(x["segments"], y["segments"]))
             assert len(x["segments"]) == len(y["segments"]) == 2
             entry["first_segments_identical"] = True
-            entry["later_segment_rows_changed"] = [
-                a[1:] != b[1:] for a, b in zip(x["segments"], y["segments"])
-            ]
+            entry["later_segment_rows_changed"] = [a[1:] != b[1:] for a, b in zip(x["segments"], y["segments"])]
         comparisons.append(entry)
 
         def clean(r):
             return {k: v for k, v in r.items() if k != "seconds"}
 
-        repeats.append(
-            dict(model=kind, case=x["case"], fixed_repeat_exact=clean(x) == clean(z))
-        )
+        repeats.append(dict(model=kind, case=x["case"], fixed_repeat_exact=clean(x) == clean(z)))
         print(
             kind,
             x["case"],
@@ -96,9 +91,7 @@ output = dict(
     comparisons=comparisons,
     fixed_repeats=repeats,
     records=records,
-    random_build=json.loads(
-        (root / "random/proto-whisper-tiny-slim/build.json").read_text()
-    ),
+    random_build=json.loads((root / "random/proto-whisper-tiny-slim/build.json").read_text()),
 )
 args.output.parent.mkdir(parents=True, exist_ok=True)
 args.output.write_text(json.dumps(output, indent=1) + "\n")

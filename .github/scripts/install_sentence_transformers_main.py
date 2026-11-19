@@ -3,10 +3,10 @@
 import argparse
 import importlib.metadata
 import json
-from pathlib import Path
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 PROJECTS = {
     "transformers": "https://github.com/huggingface/transformers.git",
@@ -24,11 +24,7 @@ def resolve_heads():
             text=True,
         )
         fields = result.stdout.split()
-        if (
-            len(fields) != 2
-            or fields[1] != "refs/heads/main"
-            or not re.fullmatch(r"[0-9a-f]{40}", fields[0])
-        ):
+        if len(fields) != 2 or fields[1] != "refs/heads/main" or not re.fullmatch(r"[0-9a-f]{40}", fields[0]):
             raise ValueError(f"Could not resolve {package} main to one commit")
         heads[package] = {"url": url, "commit": fields[0]}
     return heads
@@ -42,19 +38,14 @@ def verify_installed(heads):
             provenance.get("url") != expected["url"]
             or provenance.get("vcs_info", {}).get("commit_id") != expected["commit"]
         ):
-            raise ValueError(
-                f"Installed {package} is not the resolved main commit {expected['commit']}"
-            )
+            raise ValueError(f"Installed {package} is not the resolved main commit {expected['commit']}")
 
 
 def install(out):
     heads = resolve_heads()
     out.mkdir(parents=True, exist_ok=True)
     (out / "upstream-commits.json").write_text(json.dumps(heads, indent=2) + "\n")
-    requirements = [
-        f"{package} @ git+{pin['url']}@{pin['commit']}"
-        for package, pin in heads.items()
-    ]
+    requirements = [f"{package} @ git+{pin['url']}@{pin['commit']}" for package, pin in heads.items()]
     # Explicit immutable refs avoid a cached/image copy of the same dev version.
     # Upgrade dependencies only when required; retain the image's torch stack.
     subprocess.run(

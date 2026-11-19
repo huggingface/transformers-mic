@@ -2,10 +2,9 @@
 
 import json
 import os
-from pathlib import Path
 import subprocess
 import sys
-
+from pathlib import Path
 
 root = Path(sys.argv[1]).resolve()
 spec = json.loads((root / "models.json").read_text())
@@ -43,9 +42,7 @@ for item in spec["models"]:
                 stderr=subprocess.STDOUT,
             )
         row[stage] = result.returncode
-        (root / "validation-report.json").write_text(
-            json.dumps(report, indent=2) + "\n"
-        )
+        (root / "validation-report.json").write_text(json.dumps(report, indent=2) + "\n")
         if result.returncode:
             print("\n".join(log.read_text().splitlines()[-30:]), flush=True)
             break

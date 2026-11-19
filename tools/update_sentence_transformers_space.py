@@ -1,11 +1,11 @@
 """Build the static ST results Space; --execute publishes the prepared files."""
 
 import argparse
-from datetime import datetime, timezone
 import json
 import os
-from pathlib import Path
 import shutil
+from datetime import UTC, datetime
+from pathlib import Path
 
 from huggingface_hub import HfApi, hf_hub_download
 from huggingface_hub.errors import EntryNotFoundError, RepositoryNotFoundError
@@ -51,11 +51,7 @@ def result_run(folder, *, run_id, attempt, conclusion, mode, repository, now=Non
     }
     if counts["fail"]:
         status = "fail"
-    elif (
-        conclusion != "success"
-        or counts["error"]
-        or not counts["recorded" if mode == "record" else "pass"]
-    ):
+    elif conclusion != "success" or counts["error"] or not counts["recorded" if mode == "record" else "pass"]:
         status = "error"
     elif mode == "record":
         status = "recorded"
@@ -86,18 +82,11 @@ def result_run(folder, *, run_id, attempt, conclusion, mode, repository, now=Non
     started = folder / "started-at.txt"
     model_input = folder / "model-input.json"
     return {
-        "model_input": json.loads(model_input.read_text())
-        if model_input.exists()
-        else None,
+        "model_input": json.loads(model_input.read_text()) if model_input.exists() else None,
         "id": f"{run_id}-{attempt}",
         "run_id": str(run_id),
         "attempt": str(attempt),
-        "time": now
-        or (
-            started.read_text().strip()
-            if started.exists()
-            else datetime.now(timezone.utc).isoformat()
-        ),
+        "time": now or (started.read_text().strip() if started.exists() else datetime.now(UTC).isoformat()),
         "mode": mode,
         "status": status,
         "conclusion": conclusion,
@@ -122,9 +111,7 @@ def history(previous, latest):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--results", type=Path, required=True)
-    parser.add_argument(
-        "--out", type=Path, default=Path("out/sentence-transformers-space")
-    )
+    parser.add_argument("--out", type=Path, default=Path("out/sentence-transformers-space"))
     parser.add_argument(
         "--history",
         type=Path,
@@ -154,11 +141,7 @@ def main():
         previous = json.loads(args.history.read_text())
     else:
         try:
-            previous = json.loads(
-                Path(
-                    hf_hub_download(args.space, "data.json", repo_type="space")
-                ).read_text()
-            )
+            previous = json.loads(Path(hf_hub_download(args.space, "data.json", repo_type="space")).read_text())
         except (EntryNotFoundError, RepositoryNotFoundError):
             pass
     latest = result_run(
@@ -172,9 +155,7 @@ def main():
     args.out.mkdir(parents=True, exist_ok=True)
     for name in ("README.md", "index.html"):
         shutil.copyfile(ASSETS / name, args.out / name)
-    (args.out / "data.json").write_text(
-        json.dumps(history(previous, latest), indent=2) + "\n"
-    )
+    (args.out / "data.json").write_text(json.dumps(history(previous, latest), indent=2) + "\n")
     print(
         json.dumps(
             {
@@ -187,9 +168,7 @@ def main():
     )
     if args.execute:
         api = HfApi()
-        api.create_repo(
-            args.space, repo_type="space", space_sdk="static", exist_ok=True
-        )
+        api.create_repo(args.space, repo_type="space", space_sdk="static", exist_ok=True)
         api.upload_folder(
             repo_id=args.space,
             repo_type="space",

@@ -11,9 +11,7 @@ from transformers_mic.workspace import Workspace
 
 MAIN = "a72a1c385297bfaf1c8a07b5f4e689a315b90b77"
 OLDER = "1" * 40
-RUNTIME = [
-    Requirement(text) for text in ("transformers>=5", "torch>=2.11", "num2words")
-]
+RUNTIME = [Requirement(text) for text in ("transformers>=5", "torch>=2.11", "num2words")]
 
 
 class Distribution:
@@ -70,9 +68,7 @@ def test_release_stops_with_the_install_command_for_main():
         installed(transformers="5.22.1", torch="2.15.0", num2words="0.5.14"),
     )
     assert "5.22.1 is a release" in problems[0] and MAIN in problems[0]
-    assert install == [
-        f"transformers @ git+https://github.com/huggingface/transformers@{MAIN}"
-    ]
+    assert install == [f"transformers @ git+https://github.com/huggingface/transformers@{MAIN}"]
     assert notes == []
 
 
@@ -84,26 +80,18 @@ def test_missing_runtime_package_stops_and_is_named():
         MAIN,
         installed(transformers="5.23.0.dev0", torch="2.10.0"),
     )
-    assert (
-        "num2words" in problems[0] and "torch>=2.11 (installed 2.10.0)" in problems[0]
-    )
+    assert "num2words" in problems[0] and "torch>=2.11 (installed 2.10.0)" in problems[0]
     assert install == ["torch>=2.11", "num2words"]
 
 
 def test_other_commit_only_notes_the_difference():
-    problems, notes, install = cloud_environment.compare(
-        RUNTIME, ("5.23.0.dev0", OLDER, None), MAIN, EVERYTHING
-    )
+    problems, notes, install = cloud_environment.compare(RUNTIME, ("5.23.0.dev0", OLDER, None), MAIN, EVERYTHING)
     assert problems == [] and install == []
-    assert (
-        OLDER[:12] in notes[0] and MAIN[:12] in notes[0] and "pip install" in notes[0]
-    )
+    assert OLDER[:12] in notes[0] and MAIN[:12] in notes[0] and "pip install" in notes[0]
 
 
 def test_unreachable_main_does_not_stop_a_commit():
-    problems, notes, _ = cloud_environment.compare(
-        RUNTIME, ("5.23.0.dev0", OLDER, None), None, EVERYTHING
-    )
+    problems, notes, _ = cloud_environment.compare(RUNTIME, ("5.23.0.dev0", OLDER, None), None, EVERYTHING)
     assert problems == [] and "Could not resolve" in notes[0]
 
 
@@ -115,18 +103,11 @@ def test_local_source_tree_is_traced_with_git(tmp_path):
     (tree / "setup.py").write_text("")
     subprocess.run([*git, "add", "."], check=True)
     subprocess.run([*git, "commit", "-qm", "c"], check=True)
-    head = subprocess.run(
-        [*git, "rev-parse", "HEAD"], check=True, capture_output=True, text=True
-    ).stdout.strip()
+    head = subprocess.run([*git, "rev-parse", "HEAD"], check=True, capture_output=True, text=True).stdout.strip()
     origin = {"url": tree.as_uri(), "dir_info": {"editable": True}}
-    assert cloud_environment.transformers_source(
-        Distribution("5.23.0.dev0", origin)
-    ) == ("5.23.0.dev0", head, None)
+    assert cloud_environment.transformers_source(Distribution("5.23.0.dev0", origin)) == ("5.23.0.dev0", head, None)
     (tree / "setup.py").write_text("changed")
-    assert (
-        cloud_environment.transformers_source(Distribution("5.23.0.dev0", origin))[2]
-        == tree
-    )
+    assert cloud_environment.transformers_source(Distribution("5.23.0.dev0", origin))[2] == tree
 
 
 @pytest.fixture
@@ -137,18 +118,12 @@ def auto_workspace(tmp_path, monkeypatch):
     monkeypatch.setattr(
         backend,
         "invoke",
-        lambda *args, **kwargs: (
-            calls.append(args) or subprocess.CompletedProcess(args, 0)
-        ),
+        lambda *args, **kwargs: calls.append(args) or subprocess.CompletedProcess(args, 0),
     )
     monkeypatch.setattr(cloud_environment, "runtime_requirements", lambda: RUNTIME)
     monkeypatch.setattr(cloud_environment, "main_commit", lambda: MAIN)
-    monkeypatch.setattr(
-        cloud_environment, "transformers_source", lambda: ("5.22.1", None, None)
-    )
-    monkeypatch.setattr(
-        cloud_environment, "missing", lambda requirements, version: [(RUNTIME[2], None)]
-    )
+    monkeypatch.setattr(cloud_environment, "transformers_source", lambda: ("5.22.1", None, None))
+    monkeypatch.setattr(cloud_environment, "missing", lambda requirements, version: [(RUNTIME[2], None)])
     return project, calls
 
 
@@ -164,9 +139,7 @@ def test_auto_match_cloud_stops_before_the_factory_check(auto_workspace, capsys)
     assert "Traceback" not in "\n".join(err)  # never mistaken for a contract failure
 
 
-def test_auto_without_match_cloud_and_with_override_runs(
-    auto_workspace, monkeypatch, capsys
-):
+def test_auto_without_match_cloud_and_with_override_runs(auto_workspace, monkeypatch, capsys):
     project, calls = auto_workspace
     assert main(["--workspace", str(project.root), "auto"]) == 0
     monkeypatch.setenv(cloud_environment.ALLOW_DRIFT, "1")

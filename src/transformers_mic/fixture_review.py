@@ -43,10 +43,7 @@ def recipe_key(workspace):
             "fixture": workspace.fixture,
             "build": fixture.get("build"),
             "built_from": fixture.get("built_from"),
-            "pins": {
-                repo: contract["checkpoints"].get(repo)
-                for repo in fixture.get("covers", [])
-            },
+            "pins": {repo: contract["checkpoints"].get(repo) for repo in fixture.get("covers", [])},
         }
     )
 
@@ -58,9 +55,7 @@ def needed(workspace):
         return False
     if not (manifest["fixtures"].get(workspace.fixture) or {}).get("build"):
         return False
-    pin = workspace.lock["contracts"][workspace.state["contract"]]["fixtures"][
-        workspace.fixture
-    ]
+    pin = workspace.lock["contracts"][workspace.state["contract"]]["fixtures"][workspace.fixture]
     return pin.get("revision") == "unpublished"
 
 
@@ -88,9 +83,7 @@ def review_sha256(data):
 def fresh(workspace):
     data = record(workspace)
     return bool(
-        data
-        and data.get("recipe_key") == recipe_key(workspace)
-        and (folder(workspace) / "config.json").exists()
+        data and data.get("recipe_key") == recipe_key(workspace) and (folder(workspace) / "config.json").exists()
     )
 
 
@@ -115,9 +108,7 @@ def edits(workspace):
         raise ValueError(f"{path} is not valid JSON: {error}") from None
     before = flatten(comparable(data["config"]))
     after = flatten(comparable(edited))
-    return {
-        key: value for key, value in after.items() if before.get(key, object()) != value
-    }
+    return {key: value for key, value in after.items() if before.get(key, object()) != value}
 
 
 def apply_edits(workspace, changes):
@@ -130,21 +121,15 @@ def apply_edits(workspace, changes):
 
 
 def merge_edits(recipe, changes):
-    overrides = recipe.setdefault(
-        "config_overrides", {"fields": {}, "reason": EDIT_REASON}
-    )
+    overrides = recipe.setdefault("config_overrides", {"fields": {}, "reason": EDIT_REASON})
     overrides.setdefault("fields", {}).update(changes)
     if EDIT_REASON not in overrides.get("reason", ""):
-        overrides["reason"] = (
-            overrides.get("reason", "").rstrip(". ") + ". " + EDIT_REASON
-        ).lstrip(". ")
+        overrides["reason"] = (overrides.get("reason", "").rstrip(". ") + ". " + EDIT_REASON).lstrip(". ")
 
 
 def artifact(workspace):
     """The built fixture for the current recipe, if the build already made one."""
-    pin = workspace.lock["contracts"][workspace.state["contract"]]["fixtures"][
-        workspace.fixture
-    ]
+    pin = workspace.lock["contracts"][workspace.state["contract"]]["fixtures"][workspace.fixture]
     if not pin.get("path") or not pin.get("files_sha256"):
         return None
     path = (workspace.lock_path.parent / pin["path"]).resolve()
@@ -158,9 +143,9 @@ def artifact(workspace):
         # it changes the weight values, never the config or the names.
         return {k: v for k, v in (recipe or {}).items() if k != "overfit"}
 
-    if shape(built.get("recipe")) != shape(fixture.get("build")) or built.get(
-        "built_from", {}
-    ).get("repo") != fixture.get("built_from"):
+    if shape(built.get("recipe")) != shape(fixture.get("build")) or built.get("built_from", {}).get(
+        "repo"
+    ) != fixture.get("built_from"):
         return None
     return path
 
@@ -266,10 +251,8 @@ def experts_line(names):
     if not source and not fixture:
         return None
     same = (source or {}).get("layout") == (fixture or {}).get("layout")
-    return (
-        f"Experts: {describe_experts(fixture)} in the tiny model, "
-        f"{describe_experts(source)} in the source"
-        + ("" if same else "  ← DIFFERENT LAYOUT")
+    return f"Experts: {describe_experts(fixture)} in the tiny model, {describe_experts(source)} in the source" + (
+        "" if same else "  ← DIFFERENT LAYOUT"
     )
 
 
@@ -284,15 +267,9 @@ def headline(data):
     """Four short lines for the prompt; details() has everything."""
     names = weight_names(data)
     p = data.get("parameters") or {}
-    size = (
-        f"{human(p['original'])} → {human(p['fixture'])} parameters"
-        if p.get("original")
-        else ""
-    )
+    size = f"{human(p['original'])} → {human(p['fixture'])} parameters" if p.get("original") else ""
     changes = data["config_changes"]
-    shown = ", ".join(
-        f"{c['field']} {c['original']}→{c['fixture']}" for c in changes[:3]
-    )
+    shown = ", ".join(f"{c['field']} {c['original']}→{c['fixture']}" for c in changes[:3])
     more = f", +{len(changes) - 3} more" if len(changes) > 3 else ""
     if names["only_source"] and not names["only_fixture"]:
         weights = (
@@ -305,17 +282,14 @@ def headline(data):
             f"{len(names['only_fixture'])} only in the tiny model, {len(names['matching'])} match"
         )
     else:
-        weights = (
-            f"Weight names: all {len(names['matching'])} patterns match the source"
-        )
+        weights = f"Weight names: all {len(names['matching'])} patterns match the source"
     findings = data["findings"]
     # Absolute: this is part of the question's context, which must not depend on
     # the directory a run resumes from. The terminal shortens it for display.
     return [
         f"Folder: {data['folder']}  (config.json, {data['weights_file']})",
         " · ".join(x for x in (data["model_class"], size) if x),
-        f"Config: {len(changes)} values differ from the source"
-        + (f" ({shown}{more})" if changes else ""),
+        f"Config: {len(changes)} values differ from the source" + (f" ({shown}{more})" if changes else ""),
         weights,
         *([line] if (line := experts_line(names)) else []),
         "Findings: " + ("; ".join(findings) if findings else "none"),
@@ -338,8 +312,7 @@ def details(data, page=None, again="continue"):
         f"Weights: {data['weights']} · file {data['weights_file']}"
         + (
             f" (the source has {data['source_weights_file']}; the tensor names are what loading reads)"
-            if data.get("source_weights_file")
-            and data["source_weights_file"] != data["weights_file"]
+            if data.get("source_weights_file") and data["source_weights_file"] != data["weights_file"]
             else ""
         )
     )
@@ -350,10 +323,7 @@ def details(data, page=None, again="continue"):
         f"Config: {len(data['config_changes'])} values differ from the source ({data['config_unchanged']} unchanged)",
     ]
     width = max((len(c["field"]) for c in data["config_changes"]), default=0)
-    lines += [
-        f"  {c['field']:<{width}}  {c['original']} → {c['fixture']}"
-        for c in data["config_changes"]
-    ]
+    lines += [f"  {c['field']:<{width}}  {c['original']} → {c['fixture']}" for c in data["config_changes"]]
     lines += [
         "",
         (
@@ -377,9 +347,7 @@ def details(data, page=None, again="continue"):
     lines.append(f"  Matching the source ({len(names['matching'])}):")
     lines += [f"    {name}" for name in names["matching"]]
     if data.get("missing_parameters"):
-        lines.append(
-            f"  Not serialized, as in the source: {', '.join(data['missing_parameters'])}"
-        )
+        lines.append(f"  Not serialized, as in the source: {', '.join(data['missing_parameters'])}")
     lines += ["", "Findings: " + ("none" if not data["findings"] else "")]
     lines += [f"  - {f}" for f in data["findings"]]
     if data.get("tester_notes"):
@@ -415,15 +383,10 @@ def run(args):
         return run_source(args)
     workspace = Workspace(args.workspace)
     if not (workspace.manifest["fixtures"].get(workspace.fixture) or {}).get("build"):
-        raise ValueError(
-            "This fixture has no build recipe, so there is nothing to shrink"
-        )
+        raise ValueError("This fixture has no build recipe, so there is nothing to shrink")
     changes = edits(workspace)
     if changes:
-        print(
-            "Applying your config.json edits as config_overrides: "
-            + ", ".join(apply_edits(workspace, changes))
-        )
+        print("Applying your config.json edits as config_overrides: " + ", ".join(apply_edits(workspace, changes)))
     data, _ = refresh(workspace, force=args.force)
     return show(data, Path(workspace.root) / PAGE, args)
 
@@ -476,9 +439,7 @@ def run_source(args):
     path = root / RECIPE
     recipe = read(path) if path.exists() else None
     if recipe and recipe["built_from"] != repo:
-        raise ValueError(
-            f"{root} holds the fixture of {recipe['built_from']}; choose another --out"
-        )
+        raise ValueError(f"{root} holds the fixture of {recipe['built_from']}; choose another --out")
     if recipe is None or revision:
         sha = pin(repo, revision)
         if recipe is None:
@@ -488,20 +449,12 @@ def run_source(args):
     changes = edits(space)
     if changes:
         merge_edits(recipe["build"], changes)
-        print(
-            "Applying your config.json edits as config_overrides: "
-            + ", ".join(sorted(changes))
-        )
+        print("Applying your config.json edits as config_overrides: " + ", ".join(sorted(changes)))
     (root / ".mic").mkdir(parents=True, exist_ok=True)
     write(path, recipe)
     key = digest(recipe)
     data = record(space)
-    if (
-        args.force
-        or not data
-        or data.get("recipe_key") != key
-        or not (folder(space) / "config.json").exists()
-    ):
+    if args.force or not data or data.get("recipe_key") != key or not (folder(space) / "config.json").exists():
         data = shrink_source(root, path)
         data.update(recipe_key=key, artifact=None, folder=str(folder(space)))
         data["review_sha256"] = review_sha256(data)

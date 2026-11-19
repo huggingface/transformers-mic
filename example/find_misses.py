@@ -70,14 +70,18 @@ def main():
     lock = run.load(lock_dir / "fleet.lock", "fleet-lock")
     dirs = {
         contract["integration"]["repo"]: {
-            d for repo, pin in contract.get("fixtures", {}).items()
+            d
+            for repo, pin in contract.get("fixtures", {}).items()
             for d in select_contracts.code_dirs(run.fixture_folder(lock_dir, repo, pin, False))
         }
         for contract in lock["contracts"].values()
     }
     outcome = defaultdict(dict)  # contract -> sha -> {target: (status, failures)}
     for (sha, contract, target), r in records.items():
-        outcome[contract].setdefault(sha, {})[target] = (r["status"], tuple(f.split(":")[0] for f in r.get("failures", [])))
+        outcome[contract].setdefault(sha, {})[target] = (
+            r["status"],
+            tuple(f.split(":")[0] for f in r.get("failures", [])),
+        )
 
     found = {}
     for previous, sha in zip(order, order[1:]):
@@ -93,7 +97,17 @@ def main():
                 continue
             if outcome[contract].get(sha) == outcome[contract].get(previous):
                 found[tier] = found.get(tier, 0) + 1
-                print(json.dumps({"tier": tier, "contract": contract.split("/")[-1], "commit": sha[:10], "subject": subject, "files": (model or shared)[:6]}))
+                print(
+                    json.dumps(
+                        {
+                            "tier": tier,
+                            "contract": contract.split("/")[-1],
+                            "commit": sha[:10],
+                            "subject": subject,
+                            "files": (model or shared)[:6],
+                        }
+                    )
+                )
     print(json.dumps({"miss_candidates": found, "commits": len(order)}), file=sys.stderr)
 
 
