@@ -16,6 +16,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - A tester's own `get_small_config_defaults()` is followed further: locals, `kwargs` filled before `super()`
   (llava_next, hunyuan_vl), displays, comprehensions and pure builtins such as `len` (transformers#50944).
   Nothing is imported or run; a statement it cannot follow is skipped.
+- The static tester reader follows the older-style testers moved onto the mixin (transformers#50972, #50976):
+  parent testers in the same or another test module (cohere2 on cohere, `pocket_tts.PocketTTSModelTester`)
+  with their inherited `small_config_overrides`, `defaults` and overrides chained as `super()` runs them;
+  `X.defaults` / `X.small_config_overrides` of any such tester; a sibling tester's
+  `get_small_config_defaults(**text_kwargs)`; an override's own parameters; `math` functions, `+=`,
+  `dict.pop`, plain class attributes (`cls.base`) and constant arithmetic in a dict. A value a skipped
+  statement would have set is now left unknown instead of keeping the value from before it (NeoMME's
+  `layer_types` read as `None`).
 - `position_embedding_size` is kept at the checkpoint's value: it is a table of positions (Gemma 4's
   vision tower), not a width, so the tester's 128 is no longer adopted.
 

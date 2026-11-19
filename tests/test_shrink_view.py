@@ -240,3 +240,75 @@ def test_position_tables_are_not_shrunk():
     original = {"vision_config": {"position_embedding_size": 10240, "hidden_size": 768}}
     shrunk = {"vision_config": {"position_embedding_size": 10240, "hidden_size": 768}}
     assert tester.unshrunk_sizes(found, original, shrunk) == {("vision_config", "hidden_size"): 32}
+
+
+def test_model_tester_forms_from_transformers_50972(monkeypatch):
+    """Older-style testers moved onto the mixin (transformers#50972, #50976): parents in this or
+    another test module, sibling testers' defaults, `math`, loops, `pop`, class attributes."""
+    from transformers_mic import tester
+
+    files = {
+        "tests/model_tester_config.py": """
+class ModelTesterConfigMixin:
+    defaults = {}
+    small_config_overrides = {}
+""",
+        "tests/models/cohere/test_modeling_cohere.py": """
+class CohereModelTester(ModelTesterConfigMixin):
+    small_config_overrides = {"vocab_size": 99, "hidden_size": 32, "seq_length": 7}
+    @classmethod
+    def get_small_config_defaults(cls, **kwargs):
+        values = super().get_small_config_defaults(**kwargs)
+        values["pad_token_id"] = values["vocab_size"] - 1
+        return values
+""",
+        "tests/models/pocket_tts/test_modeling_pocket_tts.py": """
+class PocketTTSModelTester(ModelTesterConfigMixin):
+    small_config_overrides = {"latent_dim": 8, "audio_prompt_dim": 4}
+""",
+    }
+    monkeypatch.setattr(tester, "fetch", lambda url, timeout=20: files[url.split("/main/")[1]])
+
+    # A parent tester imported from another test module: its values and its override.
+    code = """
+from ...models.cohere.test_modeling_cohere import CohereModelTester
+from ..pocket_tts import test_modeling_pocket_tts as pocket_tts
+class Cohere2ModelTester(CohereModelTester):
+    pass
+class GradiumModelTester(pocket_tts.PocketTTSModelTester):
+    defaults = {**pocket_tts.PocketTTSModelTester.defaults, **pocket_tts.PocketTTSModelTester.small_config_overrides}
+    small_config_overrides = {"audio_prompt_dim": 12}
+"""
+    assert tester.gather(code, only="Cohere2ModelTester")[0] == {
+        "vocab_size": 99, "hidden_size": 32, "seq_length": 7, "pad_token_id": 98}
+    assert tester.gather(code, only="GradiumModelTester")[0] == {"latent_dim": 8, "audio_prompt_dim": 12}
+
+    code = """
+import math
+class TextTester(ModelTesterConfigMixin):
+    defaults = {}
+    small_config_overrides = {"batch_size": 12, "seq_length": 7, "min_size": 32 * 4}
+class ModelTester(ModelTesterConfigMixin):
+    defaults = {}
+    small_config_overrides = {"is_training": True, "seq_length": 16, "conv_stride": [4, 4], "mask_ratio": 0.5, "layer_types": None}
+    base = False
+    @classmethod
+    def get_small_config_defaults(cls, text_kwargs=None, **kwargs):
+        values = super().get_small_config_defaults(**kwargs)
+        values["batch_size"] = TextTester.get_small_config_defaults(**(text_kwargs or {}))["batch_size"]
+        length = values["seq_length"]
+        for stride in values["conv_stride"]:
+            length = math.ceil(length / stride)
+        values["output_seq_length"] = length
+        values["num_masks"] = int(values.pop("mask_ratio") * values["seq_length"])
+        values["seq_length"] += 1
+        if not cls.base:
+            values["expected_num_hidden_layers"] = 4
+        values["layer_types"] = values.get("layer_types") or helper(values["seq_length"])
+        return values
+"""
+    found = tester.gather(code, only="ModelTester")[0]
+    assert found["batch_size"] == 12 and found["output_seq_length"] == 1 and found["num_masks"] == 8
+    assert found["seq_length"] == 17 and found["expected_num_hidden_layers"] == 4 and "mask_ratio" not in found
+    assert "layer_types" not in found  # a helper it cannot follow leaves the value unknown, not stale
+    assert tester.gather(code, only="TextTester")[0]["min_size"] == 128  # constant arithmetic
