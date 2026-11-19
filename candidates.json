@@ -7747,6 +7747,26 @@
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42993081831%3A1&var-pr=50245&var-gh_run_id=42993081831",
   "weights": "random"
  },
+ "50249#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
+  "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "commits": [
+   "a970ad1afbcfb3c283f3861c5a347aee5192dfdf"
+  ],
+  "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795042671.233441,
+  "first_seen": "2026-11-19",
+  "key": "50249#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20776,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50249",
+  "pr_state": "open",
+  "pr_title": "\ud83d\udea8 Exporters: export multimodal models per component (`export_multimodal`)",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44415210351%3A1&var-pr=50249&var-gh_run_id=44415210351",
+  "weights": "random"
+ },
  "50249#huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|bfloat16|cpu-x86_64-bf16": {
   "case": "huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|bfloat16|cpu-x86_64-bf16",
   "commits": [
@@ -7787,6 +7807,26 @@
   "pr_title": "\ud83d\udea8 Exporters: export multimodal models per component (`export_multimodal`)",
   "recovered": "after-push",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41441192894%3A1&var-pr=50249&var-gh_run_id=41441192894",
+  "weights": "random"
+ },
+ "50251#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
+  "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "commits": [
+   "0124677f14ccad5164b067bfc58541db70fd77e0"
+  ],
+  "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795042644.755453,
+  "first_seen": "2026-11-19",
+  "key": "50251#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20776,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50251",
+  "pr_state": "open",
+  "pr_title": "Exporters: run multimodal exports (`ExportedMultimodalModel`)",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44415217936%3A1&var-pr=50251&var-gh_run_id=44415217936",
   "weights": "random"
  },
  "50251#huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16": {
@@ -7850,6 +7890,66 @@
   "pr_title": "Exporters: run multimodal exports (`ExportedMultimodalModel`, `AutoExportedModel`)",
   "recovered": "after-push",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41448886713%3A1&var-pr=50251&var-gh_run_id=41448886713",
+  "weights": "random"
+ },
+ "50252#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
+  "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "commits": [
+   "84aeed684a0d36c19a3821136c289b99434e3c46"
+  ],
+  "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795042790.76597,
+  "first_seen": "2026-11-19",
+  "key": "50252#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20776,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50252",
+  "pr_state": "open",
+  "pr_title": "\ud83d\udea8 Exporters: decompose generative models into one decode graph",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44415224458%3A1&var-pr=50252&var-gh_run_id=44415224458",
+  "weights": "random"
+ },
+ "50254#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
+  "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "commits": [
+   "aa3e41640ac0dde21803d87731dedea8d1dc2ab2"
+  ],
+  "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795042252.164666,
+  "first_seen": "2026-11-19",
+  "key": "50254#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20776,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50254",
+  "pr_state": "open",
+  "pr_title": "Exporters: run generation exports through `generate` (`ExportedModelForCausalLM`, `ExportedMultimodalModelForCausalLM`, `ExportedModelForSeq2SeqLM`)",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44415231743%3A1&var-pr=50254&var-gh_run_id=44415231743",
+  "weights": "random"
+ },
+ "50269#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
+  "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "commits": [
+   "51095f9f1fe2214079073809d30d186c2fdc21e5"
+  ],
+  "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795042705.73008,
+  "first_seen": "2026-11-19",
+  "key": "50269#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20776,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50269",
+  "pr_state": "open",
+  "pr_title": "Exporters: load optimum-intel, optimum-onnx and optimum-executorch exports",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44415237312%3A1&var-pr=50269&var-gh_run_id=44415237312",
   "weights": "random"
  },
  "50290#huggingface-mic/granite-4.0-1b-speech-mic|granite-4.0-1b-speech-mic|bfloat16|cpu-x86_64-bf16": {
@@ -7983,7 +8083,8 @@
    "7fed521c67239c53af35b63759e06bc94053b5b7",
    "609b827051bd20e2ffde98a0b578e946fa26b2dd",
    "28a35c6932a62acad667784b9610874827ae21c2",
-   "ca9641cabb674ef6b89778a8fd752faf46c61f56"
+   "ca9641cabb674ef6b89778a8fd752faf46c61f56",
+   "2dc5766eb6fe242ded94924bc385e349bc5ae90e"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/18ed0f7",
   "failure_kind": "Runtime traceback",
@@ -7991,7 +8092,7 @@
   "first_seen": "2026-11-05",
   "key": "50379#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20774,
+  "last_seen": 20776,
   "merged_at": null,
   "outcome": "open",
   "pr": "50379",
@@ -8310,6 +8411,46 @@
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43041319580%3A1&var-pr=50610&var-gh_run_id=43041319580",
   "weights": "random"
  },
+ "50643#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
+  "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "commits": [
+   "63dbab899707de28d44b3e876076166d0d763211"
+  ],
+  "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795042743.522764,
+  "first_seen": "2026-11-19",
+  "key": "50643#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20776,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50643",
+  "pr_state": "open",
+  "pr_title": "Exporters: ModelOpt quantizer for the converted ONNX model",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44415213523%3A1&var-pr=50643&var-gh_run_id=44415213523",
+  "weights": "random"
+ },
+ "50733#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
+  "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "commits": [
+   "600e879d2dd455f9e6f2a65cc6c898dc0b52ec81"
+  ],
+  "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795042156.14124,
+  "first_seen": "2026-11-19",
+  "key": "50733#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20776,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50733",
+  "pr_state": "open",
+  "pr_title": "Vision getters: a flat level (`get_image_embeddings` / `get_video_embeddings`) under the per-item ones",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44415017435%3A1&var-pr=50733&var-gh_run_id=44415017435",
+  "weights": "random"
+ },
  "50754#huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16": {
   "case": "huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16",
   "commits": [
@@ -8330,6 +8471,26 @@
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43575282361%3A2&var-pr=50754&var-gh_run_id=43575282361",
   "weights": "random"
  },
+ "50785#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
+  "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "commits": [
+   "38c1c88536696c0597cd554a3cb799de82e6f25f"
+  ],
+  "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795042592.301847,
+  "first_seen": "2026-11-19",
+  "key": "50785#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20776,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50785",
+  "pr_state": "open",
+  "pr_title": "Exporters: fixes to the export path, checked on inputs the exports never saw",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44415201688%3A1&var-pr=50785&var-gh_run_id=44415201688",
+  "weights": "random"
+ },
  "50821#huggingface-mic/tibetan-ocr-mic|tibetan-ocr-mic|bfloat16|cpu-x86_64-bf16": {
   "case": "huggingface-mic/tibetan-ocr-mic|tibetan-ocr-mic|bfloat16|cpu-x86_64-bf16",
   "commits": [
@@ -8348,6 +8509,46 @@
   "pr_state": "open",
   "pr_title": "Processors return 3D RoPE `position_ids`",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44012178765%3A1&var-pr=50821&var-gh_run_id=44012178765",
+  "weights": "random"
+ },
+ "50887#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
+  "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "commits": [
+   "6bf1f9588858d382325e8b1a32361870b952c9b0"
+  ],
+  "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795042635.292301,
+  "first_seen": "2026-11-19",
+  "key": "50887#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20776,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50887",
+  "pr_state": "open",
+  "pr_title": "Add `get_data_dependent_inputs`: compute a forward's data-dependent inputs outside it",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44415202439%3A1&var-pr=50887&var-gh_run_id=44415202439",
+  "weights": "random"
+ },
+ "50947#huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|": {
+  "case": "huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|",
+  "commits": [
+   "cbdacbb0a3057131cfdc621fbfd3e646e5d0751b"
+  ],
+  "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--vip-llava-7b-hf-mic/snapshots/2c201806b2666d6748446",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795074817.378972,
+  "first_seen": "2026-11-19",
+  "key": "50947#huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20776,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50947",
+  "pr_state": "open",
+  "pr_title": "[serge] Fix 2 integration tests regressed by commit c5bd76ec51a7 (PR #49594)",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44481867815%3A1&var-pr=50947&var-gh_run_id=44481867815",
   "weights": "random"
  },
  "gh-readonly-queue/main/pr-49886-a4f362742ba4846882fd0bc9636461ef3a5e3f34#huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16": {

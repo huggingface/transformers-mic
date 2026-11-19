@@ -3756,6 +3756,19 @@
    "tests/models/dac/test_modeling_dac.py::DacModelTest::test_disk_offload_safetensors"
   ]
  },
+ "47662#apertus1p5": {
+  "bad_commit": "65c782bca338234ea3aff31d3084277b9604969f",
+  "date": "2026-11-18",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/44223104843/job/134611189787",
+  "mic": "not-covered",
+  "model": "apertus1p5",
+  "pr": "47662",
+  "tests": [
+   "tests/models/apertus1p5/test_modeling_apertus1p5.py::Apertus1p5IntegrationTest::test_audio_generation",
+   "tests/models/apertus1p5/test_modeling_apertus1p5.py::Apertus1p5IntegrationTest::test_batch_generation"
+  ]
+ },
  "47725#moshi": {
   "bad_commit": "f831d9c53ee612c1beee6db9e98ce5b20ce616b6",
   "date": "2026-08-05",
@@ -5287,6 +5300,23 @@
    "tests/models/inkling2/test_modeling_inkling2.py::Inkling2SmallModelIntegrationTest::test_small_model_integration_test_text"
   ]
  },
+ "50736#lfm2_vl": {
+  "bad_commit": "ac948488384dde725e57ee679e223ab3f9767a38",
+  "culprit_files": [
+   "src/transformers/models/siglip2/modeling_siglip2.py",
+   "src/transformers/models/siglip2/modular_siglip2.py"
+  ],
+  "date": "2026-11-18",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/44223104843/job/134611200579",
+  "mic": "not-selected",
+  "model": "lfm2_vl",
+  "pr": "50736",
+  "tests": [
+   "tests/models/lfm2_vl/test_modeling_lfm2_vl.py::Lfm2VlForConditionalGenerationIntegrationTest::test_integration_test",
+   "tests/models/lfm2_vl/test_modeling_lfm2_vl.py::Lfm2_5VlForConditionalGenerationIntegrationTest::test_integration_test_high_resolution"
+  ]
+ },
  "50813#shared": {
   "bad_commit": "b16f9dbdcc1b9d198bd919462d762769c81da570",
   "date": "2026-11-17",
@@ -5934,6 +5964,18 @@
    "tests/models/ernie4_5_moe/test_modeling_ernie4_5_moe.py::Ernie4_5_MoeModelTest::test_flash_attn_2_equivalence"
   ]
  },
+ "sticky#ernie4_5_moe#2026-10-23": {
+  "date": "2026-10-23",
+  "day": 20749,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "ernie4_5_moe",
+  "run_id": "44223064481",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/ernie4_5_moe/test_modeling_ernie4_5_moe.py::Ernie4_5_MoeModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
  "sticky#flex_olmo#2026-10-14": {
   "date": "2026-10-14",
   "day": 20740,
@@ -6263,6 +6305,18 @@
   "mic": "green-on-main",
   "model": "glm4",
   "run_id": "44002743824",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/glm4/test_modeling_glm4.py::Glm4ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#glm4#2026-11-01": {
+  "date": "2026-11-01",
+  "day": 20758,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "glm4",
+  "run_id": "44444074525",
   "signal": "AssertionError",
   "tests": [
    "tests/models/glm4/test_modeling_glm4.py::Glm4ModelTest::test_flash_attn_2_equivalence"
@@ -6611,6 +6665,18 @@
    "tests/models/idefics/test_modeling_idefics.py::IdeficsForVisionText2TextTest::test_generate_continue_from_inputs_embeds"
   ]
  },
+ "sticky#idefics#2026-10-24": {
+  "date": "2026-10-24",
+  "day": 20750,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "idefics",
+  "run_id": "44444117290",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/idefics/test_modeling_idefics.py::IdeficsForVisionText2TextTest::test_generate_continue_from_inputs_embeds"
+  ]
+ },
  "sticky#inkling2#2026-11-13": {
   "date": "2026-11-13",
   "day": 20770,
@@ -6698,6 +6764,18 @@
    "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_deciders",
    "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_jev_35b",
    "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_jev_9b"
+  ]
+ },
+ "sticky#kimi_k25#2026-11-17": {
+  "date": "2026-11-17",
+  "day": 20774,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "kimi_k25",
+  "run_id": "44444117290",
+  "signal": "RuntimeError",
+  "tests": [
+   "tests/models/kimi_k25/test_modeling_kimi_k25.py::KimiK25IntegrationTest::test_model_video"
   ]
  },
  "sticky#kolibri1#2026-10-14": {
@@ -7163,6 +7241,18 @@
    "tests/models/moshi/test_modeling_moshi.py::MoshiTest::test_model_parallelism"
   ]
  },
+ "sticky#moshi#2026-10-22": {
+  "date": "2026-10-22",
+  "day": 20748,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "moshi",
+  "run_id": "44444074525",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/moshi/test_modeling_moshi.py::MoshiDecoderTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids"
+  ]
+ },
  "sticky#mt5#2026-10-30": {
   "date": "2026-10-30",
   "day": 20756,
@@ -7566,6 +7656,18 @@
    "tests/models/reformer/test_modeling_reformer.py::ReformerLocalAttnModelTest::test_resize_tokens_embeddings"
   ]
  },
+ "sticky#roberta#2026-11-18": {
+  "date": "2026-11-18",
+  "day": 20775,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "roberta",
+  "run_id": "44444117290",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/roberta/test_modeling_roberta.py::RobertaModelTest::test_eager_padding_matches_padding_free_with_position_ids"
+  ]
+ },
  "sticky#roberta_prelayernorm#2026-10-07": {
   "date": "2026-10-07",
   "day": 20733,
@@ -7587,6 +7689,18 @@
   "signal": "AssertionError",
   "tests": [
    "tests/models/roberta_prelayernorm/test_modeling_roberta_prelayernorm.py::RobertaPreLayerNormModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
+ "sticky#roberta_prelayernorm#2026-11-18": {
+  "date": "2026-11-18",
+  "day": 20775,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "roberta_prelayernorm",
+  "run_id": "44444117290",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/roberta_prelayernorm/test_modeling_roberta_prelayernorm.py::RobertaPreLayerNormModelTest::test_eager_padding_matches_padding_free_with_position_ids"
   ]
  },
  "sticky#seamless_m4t#2026-10-12": {
@@ -7902,6 +8016,18 @@
   "mic": "not-covered",
   "model": "utils",
   "run_id": "43141102375",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/utils/test_modeling_utils.py::GradientCheckpointingOffloadTest::test_frees_exactly_the_saved_activations"
+  ]
+ },
+ "sticky#utils#2026-11-08": {
+  "date": "2026-11-08",
+  "day": 20765,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "utils",
+  "run_id": "44444117290",
   "signal": "AssertionError",
   "tests": [
    "tests/utils/test_modeling_utils.py::GradientCheckpointingOffloadTest::test_frees_exactly_the_saved_activations"

@@ -15,13 +15,13 @@
  },
  "drafts_per_day": 2,
  "false_alarms": {
-  "prs_not_their_fault": 165,
-  "prs_with_failure": 200
+  "prs_not_their_fault": 163,
+  "prs_with_failure": 206
  },
  "missed": {
-  "awaiting_verdict": 26,
-  "not_covered": 30,
-  "real_checkpoint": 26
+  "awaiting_verdict": 27,
+  "not_covered": 31,
+  "real_checkpoint": 27
  },
  "next": [
   {
@@ -61,6 +61,18 @@
    "shrinkable": true
   },
   {
+   "checkpoint": "kmhf/hf-moshika",
+   "draft": "failure",
+   "model": "moshi",
+   "next_batch": false,
+   "other": 4,
+   "real_checkpoint": 0,
+   "regressions": 4,
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41999673429",
+   "shrink": "",
+   "shrinkable": true
+  },
+  {
    "checkpoint": "microsoft/layoutlmv3-base",
    "draft": "failure",
    "model": "layoutlmv3",
@@ -69,18 +81,6 @@
    "real_checkpoint": 0,
    "regressions": 3,
    "run": "https://github.com/huggingface/transformers-mic/actions/runs/42590668418",
-   "shrink": "",
-   "shrinkable": true
-  },
-  {
-   "checkpoint": "kmhf/hf-moshika",
-   "draft": "failure",
-   "model": "moshi",
-   "next_batch": false,
-   "other": 3,
-   "real_checkpoint": 0,
-   "regressions": 3,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41999673429",
    "shrink": "",
    "shrinkable": true
   },
@@ -265,6 +265,18 @@
    "shrinkable": false
   },
   {
+   "checkpoint": "swiss-ai/Apertus-v1.5-8B",
+   "draft": "not draftable",
+   "model": "apertus1p5",
+   "next_batch": false,
+   "other": 0,
+   "real_checkpoint": 1,
+   "regressions": 1,
+   "run": "",
+   "shrink": "",
+   "shrinkable": false
+  },
+  {
    "checkpoint": "tue-mps/coco_panoptic_eomt_large_640",
    "draft": "not draftable",
    "model": "eomt",
@@ -311,27 +323,48 @@
    "run": "",
    "shrink": "",
    "shrinkable": false
-  },
-  {
-   "checkpoint": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
-   "draft": "not draftable",
-   "model": "qwen3_omni_moe",
-   "next_batch": false,
-   "other": 0,
-   "real_checkpoint": 1,
-   "regressions": 1,
-   "run": "",
-   "shrink": "",
-   "shrinkable": false
   }
  ],
  "regressions": [
+  {
+   "date": "2026-11-18",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "roberta",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-18",
+   "detail": "the bisected commit does not touch the model or shared code",
+   "integration": true,
+   "job": "https://github.com/huggingface/transformers/actions/runs/44223104843/job/134611200579",
+   "model": "lfm2_vl",
+   "pr": "50736",
+   "run": "",
+   "tests": 2,
+   "verdict": "unrelated-culprit"
+  },
   {
    "date": "2026-11-17",
    "detail": "",
    "integration": false,
    "job": "",
    "model": "paligemma",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-17",
+   "detail": "",
+   "integration": true,
+   "job": "",
+   "model": "kimi_k25",
    "pr": null,
    "run": "",
    "tests": 1,
@@ -910,6 +943,17 @@
    "verdict": "out-of-scope"
   },
   {
+   "date": "2026-11-01",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "glm4",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
    "date": "2026-10-30",
    "detail": "",
    "integration": false,
@@ -1234,6 +1278,17 @@
    "integration": false,
    "job": "",
    "model": "flex_olmo",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-10-23",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "ernie4_5_moe",
    "pr": null,
    "run": "",
    "tests": 1,
@@ -3065,14 +3120,14 @@
   "model-added": 4,
   "no-code-change": 1,
   "not-a-regression": 5,
-  "not-covered": 235,
+  "not-covered": 240,
   "not-reproduced": 7,
-  "out-of-scope": 187,
+  "out-of-scope": 191,
   "pending": 0,
-  "unrelated-culprit": 15
+  "unrelated-culprit": 16
  },
  "window": [
   "2026-10-20",
-  "2026-11-18"
+  "2026-11-19"
  ]
 }

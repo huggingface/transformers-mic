@@ -326,6 +326,14 @@
     "test": "tests/models/janus/test_modeling_janus.py::JanusIntegrationTest::test_model_text_generation"
    }
   ],
+  "kimi_k25": [
+   {
+    "date": "2026-11-17",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/kimi_k25/test_modeling_kimi_k25.py::KimiK25IntegrationTest::test_model_video"
+   }
+  ],
   "llama": [
    {
     "date": "2026-11-02",
@@ -574,6 +582,18 @@
    ]
   },
   {
+   "checkpoint": "kmhf/hf-moshika",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "moshi",
+   "other": 4,
+   "shrinkable": true,
+   "tests": [
+    "tests/models/moshi/test_modeling_moshi.py::MoshiDecoderTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids",
+    "tests/models/moshi/test_modeling_moshi.py::MoshiTest::test_model_parallelism"
+   ]
+  },
+  {
    "checkpoint": "microsoft/layoutlmv3-base",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -582,18 +602,6 @@
    "shrinkable": true,
    "tests": [
     "tests/models/layoutlmv3/test_modeling_layoutlmv3.py::LayoutLMv3ModelTest::test_inputs_embeds_matches_input_ids"
-   ]
-  },
-  {
-   "checkpoint": "kmhf/hf-moshika",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "moshi",
-   "other": 3,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/moshi/test_modeling_moshi.py::MoshiDecoderTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids",
-    "tests/models/moshi/test_modeling_moshi.py::MoshiTest::test_model_parallelism"
    ]
   },
   {
@@ -773,6 +781,18 @@
    ]
   },
   {
+   "checkpoint": "swiss-ai/Apertus-v1.5-8B",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "apertus1p5",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/apertus1p5/test_modeling_apertus1p5.py::Apertus1p5IntegrationTest::test_audio_generation",
+    "tests/models/apertus1p5/test_modeling_apertus1p5.py::Apertus1p5IntegrationTest::test_batch_generation"
+   ]
+  },
+  {
    "checkpoint": "tue-mps/coco_panoptic_eomt_large_640",
    "checkpoint_source": "failing test",
    "integration": 1,
@@ -834,7 +854,7 @@
    "checkpoint_source": null,
    "integration": 0,
    "model": "utils",
-   "other": 5,
+   "other": 6,
    "shrinkable": false,
    "tests": [
     "tests/utils/test_modeling_utils.py::GradientCheckpointingOffloadTest::test_frees_exactly_the_saved_activations",
@@ -868,6 +888,30 @@
    ]
   },
   {
+   "checkpoint": "HuggingFaceM4/idefics-9b",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "idefics",
+   "other": 3,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/idefics/test_modeling_idefics.py::IdeficsForVisionText2TextTest::test_generate_continue_from_inputs_embeds"
+   ]
+  },
+  {
+   "checkpoint": "andreasmadsen/efficient_mlm_m0.40",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "roberta_prelayernorm",
+   "other": 3,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/roberta_prelayernorm/test_modeling_roberta_prelayernorm.py::RobertaPreLayerNormModelTest::test_flash_attn_2_inference_equivalence",
+    "tests/models/roberta_prelayernorm/test_modeling_roberta_prelayernorm.py::RobertaPreLayerNormModelTest::test_flash_attn_2_inference_equivalence_right_padding",
+    "tests/models/roberta_prelayernorm/test_modeling_roberta_prelayernorm.py::RobertaPreLayerNormModelTest::test_eager_padding_matches_padding_free_with_position_ids"
+   ]
+  },
+  {
    "checkpoint": "facebook/xmod-base",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -889,17 +933,6 @@
    "tests": [
     "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_flash_attn_2_inference_equivalence",
     "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_flash_attn_2_inference_equivalence_right_padding"
-   ]
-  },
-  {
-   "checkpoint": "HuggingFaceM4/idefics-9b",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "idefics",
-   "other": 2,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/idefics/test_modeling_idefics.py::IdeficsForVisionText2TextTest::test_generate_continue_from_inputs_embeds"
    ]
   },
   {
@@ -926,18 +959,6 @@
     "tests/models/nemotron3_5_transcribe/test_modeling_nemotron3_5_transcribe.py::Nemotron3_5TranscribeForConditionalGenerationModelTest::test_eager_matches_fa2_generate",
     "tests/models/nemotron3_5_transcribe/test_modeling_nemotron3_5_transcribe.py::Nemotron3_5TranscribeForConditionalGenerationModelTest::test_flash_attn_2_inference_equivalence",
     "tests/models/nemotron3_5_transcribe/test_modeling_nemotron3_5_transcribe.py::Nemotron3_5TranscribeForConditionalGenerationModelTest::test_flash_attn_2_inference_equivalence_right_padding"
-   ]
-  },
-  {
-   "checkpoint": "andreasmadsen/efficient_mlm_m0.40",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "roberta_prelayernorm",
-   "other": 2,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/roberta_prelayernorm/test_modeling_roberta_prelayernorm.py::RobertaPreLayerNormModelTest::test_flash_attn_2_inference_equivalence",
-    "tests/models/roberta_prelayernorm/test_modeling_roberta_prelayernorm.py::RobertaPreLayerNormModelTest::test_flash_attn_2_inference_equivalence_right_padding"
    ]
   },
   {
@@ -1168,7 +1189,8 @@
   "test_eager_padding_matches_padding_free_with_position_ids": [
    "bert",
    "electra",
-   "minicpm3"
+   "minicpm3",
+   "roberta"
   ],
   "test_flash_attention_2_padding_matches_padding_free_with_position_ids": [
    "gemma4",
