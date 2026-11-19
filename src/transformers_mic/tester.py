@@ -7,7 +7,12 @@ indexers and an `index_topk` below the test sequence length). A core maintainer'
 caveat: when a model was added quickly the tester can be thin or unrepresentative, so
 these findings are advisory, never a source of fixture values.
 
-The tester file is read and parsed, never imported or run.
+The tester file is read and parsed, never imported or run. Since transformers#50462 a
+tester declares its small values in a literal `small_config_overrides` dict and the shared
+bases in `defaults` dicts (`{**Parent.defaults, ...}`): those are read statically, merged
+as `Tester.get_small_config_defaults()` merges them, derived fields included. Testers that
+still set values in `__init__` (`kwargs.setdefault`, `self.x = ...`) are parsed as before,
+and those values win, as they do at runtime.
 """
 
 import ast
@@ -19,7 +24,13 @@ RAW = "https://raw.githubusercontent.com/huggingface/transformers/{ref}/tests/mo
 BASE = "https://raw.githubusercontent.com/huggingface/transformers/{ref}/{path}"
 # Shared testers a model's tester may only subclass (SmolLM3 sets nothing itself):
 # their defaults are generic, so they rank below the model's own values.
-BASES = {"CausalLMModelTester": "tests/causal_lm_tester.py", "VLMModelTester": "tests/vlm_tester.py"}
+BASES = {
+    "ModelTesterConfigMixin": "tests/model_tester_config.py",
+    "CausalLMModelTester": "tests/causal_lm_tester.py",
+    "MultiModalModelTester": "tests/multimodal_tester.py",
+    "VLMModelTester": "tests/vlm_tester.py",
+    "ALMModelTester": "tests/alm_tester.py",
+}
 
 # Fields the recipe keeps on purpose: the fixture must load the real tokenizer and
 # processor files, so vocabulary, special tokens and input geometry stay real.
@@ -182,15 +193,116 @@ def unshrunk_sizes(tester, original, shrunk):
     return adopted
 
 
+def class_node(code, name):
+    tree = ast.parse(code)
+    return tree, next((c for c in ast.walk(tree) if isinstance(c, ast.ClassDef) and c.name == name), None)
+
+
+def resolve(node, tree, ref, seen=()):
+    """A dict literal's values, following `**X.defaults` into the shared bases and
+    `**NAME` into the module's own assignments; values that are not literals are left out."""
+    if isinstance(node, ast.Dict):
+        found = {}
+        for key, value in zip(node.keys, node.values):
+            if key is None:
+                found.update(resolve(value, tree, ref, seen))
+            elif isinstance(key, ast.Constant):
+                literal_value = literal(value)
+                if literal_value is not None or (isinstance(value, ast.Constant) and value.value is None):
+                    found[key.value] = literal_value
+        return found
+    if isinstance(node, ast.Name):
+        for stmt in tree.body:
+            if isinstance(stmt, ast.Assign) and any(isinstance(t, ast.Name) and t.id == node.id for t in stmt.targets):
+                return resolve(stmt.value, tree, ref, seen)
+    if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name) and node.value.id in BASES:
+        return base_attr(node.value.id, node.attr, ref, seen)
+    return {}
+
+
+def class_attr(cls, attr, tree, ref, seen=()):
+    """A class-level dict (`defaults`, `small_config_overrides`), inherited from a shared base."""
+    for stmt in cls.body:
+        if isinstance(stmt, ast.Assign) and any(isinstance(t, ast.Name) and t.id == attr for t in stmt.targets):
+            return resolve(stmt.value, tree, ref, seen)
+    for base in cls.bases:
+        name = ast.unparse(base).split(".")[-1]
+        if name in BASES:
+            return base_attr(name, attr, ref, seen)
+    return {}
+
+
+def base_attr(name, attr, ref, seen=()):
+    if (name, attr) in seen:
+        return {}
+    tree, cls = class_node(fetch(BASE.format(ref=ref, path=BASES[name])), name)
+    return class_attr(cls, attr, tree, ref, (*seen, (name, attr))) if cls else {}
+
+
+def lineage(name, ref, seen=()):
+    """The shared base and every shared base above it."""
+    if name in seen or name not in BASES:
+        return set()
+    _, cls = class_node(fetch(BASE.format(ref=ref, path=BASES[name])), name)
+    names = {name}
+    for base in cls.bases if cls else ():
+        names |= lineage(ast.unparse(base).split(".")[-1], ref, (*seen, name))
+    return names
+
+
+def derive(values, lineage, explicit):
+    """The fields `get_small_config_defaults()` derives (CausalLMModelTester, VLMModelTester)."""
+    if "VLMModelTester" in lineage and {"image_size", "patch_size"} <= values.keys():
+        values.setdefault("num_image_tokens", (values["image_size"] // values["patch_size"]) ** 2)
+        if "seq_length" not in explicit:
+            values["seq_length"] = 7 + values["num_image_tokens"]
+    if lineage & {"CausalLMModelTester", "VLMModelTester"} and values.get("num_attention_heads"):
+        values.setdefault("head_dim", values["hidden_size"] // values["num_attention_heads"])
+    return values
+
+
+def gather(code, ref="main"):
+    """(merged values, the model's own values, static): the tester's small config.
+
+    Precedence is the runtime's: what `__init__` still sets (kwargs.setdefault, self.x)
+    > the class's `small_config_overrides` > its base's `defaults`. A base from before
+    transformers#50462 has no `defaults`; its `__init__` is parsed instead.
+    """
+    tree = ast.parse(code)
+    legacy = values(code)
+    overrides, defaults, lines = {}, {}, set()
+    for cls in ast.walk(tree):
+        if not (isinstance(cls, ast.ClassDef) and "Tester" in cls.name):
+            continue
+        for stmt in cls.body:
+            if isinstance(stmt, ast.Assign) and any(
+                isinstance(t, ast.Name) and t.id == "small_config_overrides" for t in stmt.targets
+            ):
+                for key, value in resolve(stmt.value, tree, ref).items():
+                    overrides.setdefault(key, value)
+        for base in cls.bases:
+            name = ast.unparse(base).split(".")[-1]
+            if name in BASES:
+                lines |= lineage(name, ref)
+                for key, value in base_attr(name, "defaults", ref).items():
+                    defaults.setdefault(key, value)
+    static = bool(overrides or defaults)
+    if not defaults:  # a ref from before the static defaults
+        for base in bases(code):
+            for key, value in values(fetch(BASE.format(ref=ref, path=BASES[base]))).items():
+                defaults.setdefault(key, value)
+    own = {**overrides, **legacy}
+    found = {**defaults, **own}
+    if static:
+        derive(found, lines, set(own))
+    return found, own, static
+
+
 def tester_values(model_type, ref="main"):
     """(url, merged literal values) or (None, {}): the model's tester, then its base tester."""
     try:
         url, code = source(model_type, ref)
-        found = values(code)
-        for base in bases(code):
-            for key, value in values(fetch(BASE.format(ref=ref, path=BASES[base]))).items():
-                found.setdefault(key, value)
-        return url, found
+        return url, gather(code, ref)[0]
     except Exception:  # no tester, renamed folder, offline
         return None, {}
 
@@ -199,11 +311,13 @@ def check(original, shrunk, ref="main", kept_whole=False):
     """{'url', 'values', 'findings'} or {'error'}: never raises."""
     try:
         url, code = source(shrunk.get("model_type") or original["model_type"], ref)
-        found = values(code)
-        own = len(found)
-        for base in bases(code):
-            for key, value in values(fetch(BASE.format(ref=ref, path=BASES[base]))).items():
-                found.setdefault(key, value)
+        found, own, static = gather(code, ref)
     except Exception as error:  # no tester, renamed folder, offline
         return {"error": f"{type(error).__name__}: {error}"[:200]}
-    return {"url": url, "values": len(found), "own_values": own, "findings": compare(found, original, shrunk, kept_whole)}
+    return {
+        "url": url,
+        "values": len(found),
+        "own_values": len(own),
+        "static": static,
+        "findings": compare(found, original, shrunk, kept_whole),
+    }

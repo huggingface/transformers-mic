@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- Fixture builds and `shrink_view` read a model's small test config from the literal
+  `small_config_overrides` and base-tester `defaults` dicts (transformers#50462), merged and derived as
+  `get_small_config_defaults()` does. Testers not yet migrated are still parsed from `__init__`.
+
 ## [0.1.2] - 2026-11-12
 
 ### Added

@@ -579,7 +579,9 @@ def render(report):
             '<section class="findings"><h2>Model tester (advisory)</h2><p class="note">'
             f'The model\'s own small test config in <a href="{e(check["url"])}">its ModelTester</a> '
             f"({check['values']} literal values, {check.get('own_values', check['values'])} set by the model's own tester, "
-            "the rest generic base-tester defaults). Testers are usually representative but not always, "
+            "the rest generic base-tester defaults"
+            + (", read from its static <code>small_config_overrides</code>" if check.get("static") else "")
+            + "). Testers are usually representative but not always, "
             "so these notes are for review, not rules.</p>"
             + ("<ul>" + "".join(f"<li>{e(n)}</li>" for n in notes) + "</ul>" if notes
                else "<p>The fixture covers every per-layer kind the tester sets, and shrinks every size it does.</p>")
