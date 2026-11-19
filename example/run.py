@@ -677,7 +677,9 @@ def rules_for(manifest, platform_dir):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument(
-        "--framework", choices=("transformers", "transformers.js", "sentence_transformers"), required=True
+        "--framework",
+        choices=("transformers", "transformers.js", "sentence_transformers", "vllm", "sglang"),
+        required=True,
     )
     parser.add_argument("--contract", action="append", help="run only this contract (repeatable)")
     parser.add_argument(

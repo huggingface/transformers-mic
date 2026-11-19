@@ -383,7 +383,7 @@ No Git commit or framework PR is created automatically.""",
         )
         run.add_argument(
             "--integration",
-            choices=("transformers", "sentence_transformers", "all"),
+            choices=("transformers", "sentence_transformers", "vllm", "sglang", "all"),
             help="Defaults to transformers, or the contract's only integration",
         )
         run.add_argument("--variant", default="default")
@@ -437,7 +437,7 @@ No Git commit or framework PR is created automatically.""",
     review = sub.add_parser("review", help="Compare measured candidates with approved expectations")
     review.add_argument(
         "--integration",
-        choices=("transformers", "sentence_transformers", "all"),
+        choices=("transformers", "sentence_transformers", "vllm", "sglang", "all"),
         help="Defaults to transformers, or the contract's only integration",
     )
     review.add_argument("--platform")
