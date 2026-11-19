@@ -113,13 +113,23 @@ HERE = Path(__file__).parent
 CODE = HERE  # this file's folder, with template_date.py and patches.py; tmic re-points HERE, not CODE
 SCHEMAS = HERE / "schemas"
 _DECORATOR = re.compile(r"^\s*#\s*pytest-decorator:.*$", re.MULTILINE)
-WEIGHT_PATTERNS = ["*.msgpack", "*.h5", "*.ot", "*.onnx", "onnx/*", "*.tflite", "flax_model*", "tf_model*", "rust_model*"]
+WEIGHT_PATTERNS = [
+    "*.msgpack",
+    "*.h5",
+    "*.ot",
+    "*.onnx",
+    "onnx/*",
+    "*.tflite",
+    "flax_model*",
+    "tf_model*",
+    "rust_model*",
+]
 
 
 def canonical_repo(repo):
     """Resolve pre-migration MIC ids without modifying immutable manifests."""
     prefix = "hf-internal-testing/mic-"
-    return "huggingface-mic/mic-" + repo[len(prefix):] if repo.startswith(prefix) else repo
+    return "huggingface-mic/mic-" + repo[len(prefix) :] if repo.startswith(prefix) else repo
 
 
 @cache
@@ -191,7 +201,9 @@ def fixture_problem(folder, pin):
         return f"build.json does not match the fleet lock pin ({hint})"
     actual = file_hashes(folder)
     if actual != build["sha256"]:
-        changed = sorted(set(actual) ^ set(build["sha256"]) | {k for k in actual if actual[k] != build["sha256"].get(k)})
+        changed = sorted(
+            set(actual) ^ set(build["sha256"]) | {k for k in actual if actual[k] != build["sha256"].get(k)}
+        )
         return f"fixture files differ from build.json: {changed} ({hint})"
     return None
 
@@ -207,7 +219,8 @@ def contract_files(folder):
     return {
         f.relative_to(folder).as_posix(): hashlib.sha256(f.read_bytes()).hexdigest()
         for f in sorted(folder.rglob("*"))
-        if f.is_file() and f.name not in ("README.md", ".gitattributes")
+        if f.is_file()
+        and f.name not in ("README.md", ".gitattributes")
         and not {"node_modules", ".cache", ".git"} & set(f.relative_to(folder).parts)
     }
 
@@ -267,7 +280,13 @@ def targets(lock_dir, contract, manifest, framework, fixtures_only=False, local_
             yield pin.get("target", short(repo)), "fixture", str(folder), pin["revision"], fixture_problem(folder, pin)
     elif "fixtures" in unsupported:
         for repo in manifest["fixtures"]:
-            yield contract.get("fixtures", {}).get(repo, {}).get("target", short(repo)), "fixture", None, None, unsupported["fixtures"]
+            yield (
+                contract.get("fixtures", {}).get(repo, {}).get("target", short(repo)),
+                "fixture",
+                None,
+                None,
+                unsupported["fixtures"],
+            )
     if fixtures_only or "checkpoints" not in integration["targets"]:
         return
     for repo in manifest["checkpoints"]:
@@ -396,10 +415,14 @@ class Executor:
 
 def environment_differs(pinned, actual):
     """{package: "installed (pinned)"} for every package not at the fleet lock's version."""
+
     def same(want, have):
         # "2.11.0" pins 2.11.0+cpu too; "3.11" pins any 3.11.x.
         return have is not None and (have == want or have.split("+")[0] == want or have.startswith(want + "."))
-    return {name: f"{actual.get(name)} (pinned {want})" for name, want in pinned.items() if not same(want, actual.get(name))}
+
+    return {
+        name: f"{actual.get(name)} (pinned {want})" for name, want in pinned.items() if not same(want, actual.get(name))
+    }
 
 
 def lookup(outputs, dotted):
@@ -653,36 +676,73 @@ def rules_for(manifest, platform_dir):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--framework", choices=("transformers", "transformers.js", "sentence_transformers"), required=True)
+    parser.add_argument(
+        "--framework", choices=("transformers", "transformers.js", "sentence_transformers"), required=True
+    )
     parser.add_argument("--contract", action="append", help="run only this contract (repeatable)")
-    parser.add_argument("--target", action="append", help="run only this target, fixture or checkpoint name (repeatable)")
+    parser.add_argument(
+        "--target", action="append", help="run only this target, fixture or checkpoint name (repeatable)"
+    )
     parser.add_argument("--fixtures-only", action="store_true", help="skip real checkpoints")
-    parser.add_argument("--local-fixtures", action="store_true", help="use the local build folders instead of the pinned Hub revisions")
-    parser.add_argument("--local-contracts", action="store_true",
-                        help="run the contracts in example/hub instead of their pinned Hub revisions (records contract_revision 'local' if they differ)")
-    parser.add_argument("--lock", type=Path, help="fleet lock to run (default <framework>/tests/contracts/fleet.lock next to this script); expectations/ sits next to it")
+    parser.add_argument(
+        "--local-fixtures", action="store_true", help="use the local build folders instead of the pinned Hub revisions"
+    )
+    parser.add_argument(
+        "--local-contracts",
+        action="store_true",
+        help="run the contracts in example/hub instead of their pinned Hub revisions (records contract_revision 'local' if they differ)",
+    )
+    parser.add_argument(
+        "--lock",
+        type=Path,
+        help="fleet lock to run (default <framework>/tests/contracts/fleet.lock next to this script); expectations/ sits next to it",
+    )
     parser.add_argument("--expectations", type=Path, help="override baseline directory")
     parser.add_argument("--variant", default="default")
-    parser.add_argument("--run-declared", action="store_true",
-                        help="also run variants the manifest declares unmeasured (reproduce the bug behind the declaration, or check its fix)")
+    parser.add_argument(
+        "--run-declared",
+        action="store_true",
+        help="also run variants the manifest declares unmeasured (reproduce the bug behind the declaration, or check its fix)",
+    )
     parser.add_argument("--isolate", action="store_true", help="run each target in its own process")
     parser.add_argument("--record", action="store_true", help="write candidate baselines for review")
     parser.add_argument("--golden", metavar="PLATFORM", help="check discrete outputs against this platform's baseline")
     parser.add_argument("--output", type=Path, help="append result records to this JSON lines file")
-    parser.add_argument("--changed-files", type=Path, metavar="FILE",
-                        help="run only the contracts these changed Transformers files can affect (one path per line; - for stdin)")
-    parser.add_argument("--diff-base", help="base Git revision for recognizing registry-only model additions; used with --changed-files")
-    parser.add_argument("--run-all", action="store_true",
-                        help="with --changed-files: run every contract anyway, recording selected_by (null if not selected)")
-    parser.add_argument("--skip-wrong-hardware", action="store_true",
-                        help="report a bfloat16 case on an x86 CPU without native bfloat16 as unsupported (skip wrong-hardware) when its outputs are valid, instead of failing it; for hosts that can never be native-bfloat16, like the nightly's and the drafting runner's. --require-all accepts it.")
-    parser.add_argument("--require-all", action="store_true",
-                        help="fail on targets skipped for this host's hardware or an undefined variant; only skips the manifest declares are allowed")
-    parser.add_argument("--no-baseline", action="store_true",
-                        help="run contracts without comparing against reviewed baselines; pass when outputs are valid, skip the baseline check entirely")
-    parser.add_argument("--allow-missing-baseline", action="store_true",
-                        help="compare against reviewed baselines where this platform has one; a target without one passes when its outputs are valid "
-                             "and is marked baseline_missing (local runs on platforms CI does not record, e.g. cpu-arm64)")
+    parser.add_argument(
+        "--changed-files",
+        type=Path,
+        metavar="FILE",
+        help="run only the contracts these changed Transformers files can affect (one path per line; - for stdin)",
+    )
+    parser.add_argument(
+        "--diff-base", help="base Git revision for recognizing registry-only model additions; used with --changed-files"
+    )
+    parser.add_argument(
+        "--run-all",
+        action="store_true",
+        help="with --changed-files: run every contract anyway, recording selected_by (null if not selected)",
+    )
+    parser.add_argument(
+        "--skip-wrong-hardware",
+        action="store_true",
+        help="report a bfloat16 case on an x86 CPU without native bfloat16 as unsupported (skip wrong-hardware) when its outputs are valid, instead of failing it; for hosts that can never be native-bfloat16, like the nightly's and the drafting runner's. --require-all accepts it.",
+    )
+    parser.add_argument(
+        "--require-all",
+        action="store_true",
+        help="fail on targets skipped for this host's hardware or an undefined variant; only skips the manifest declares are allowed",
+    )
+    parser.add_argument(
+        "--no-baseline",
+        action="store_true",
+        help="run contracts without comparing against reviewed baselines; pass when outputs are valid, skip the baseline check entirely",
+    )
+    parser.add_argument(
+        "--allow-missing-baseline",
+        action="store_true",
+        help="compare against reviewed baselines where this platform has one; a target without one passes when its outputs are valid "
+        "and is marked baseline_missing (local runs on platforms CI does not record, e.g. cpu-arm64)",
+    )
     args = parser.parse_args()
     if args.golden:
         args.golden = platform_class(args.golden)
@@ -704,15 +764,22 @@ def main():
         lines = sys.stdin.read() if str(args.changed_files) == "-" else args.changed_files.read_text()
         changed_files = [line.strip() for line in lines.splitlines() if line.strip()]
         dirs = {
-            name: sorted({d for repo, pin in contract.get("fixtures", {}).items()
-                          for d in select_contracts.code_dirs(fixture_folder(lock_dir, repo, pin, args.local_fixtures))})
+            name: sorted(
+                {
+                    d
+                    for repo, pin in contract.get("fixtures", {}).items()
+                    for d in select_contracts.code_dirs(fixture_folder(lock_dir, repo, pin, args.local_fixtures))
+                }
+            )
             for name, contract in lock["contracts"].items()
         }
         sources = select_contracts.changed_sources(changed_files, args.diff_base) if args.diff_base else None
         resolve_model_type = None
         if sources:
             from transformers.models.auto.configuration_auto import model_type_to_module_name as resolve_model_type
-        selected_by = select_contracts.select(changed_files, dirs, sources=sources, model_type_to_module=resolve_model_type)
+        selected_by = select_contracts.select(
+            changed_files, dirs, sources=sources, model_type_to_module=resolve_model_type
+        )
         print(json.dumps({"selection": selected_by, "code_dirs": dirs}), file=sys.stderr, flush=True)
     known = {} if args.framework == "sentence_transformers" else lock.get("known_failures", {})
     import template_date
@@ -729,15 +796,24 @@ def main():
 
     def emit(record):
         nonlocal status
-        entry = known_entry(known, record.get("contract_name", record["contract"]), record["target"],
-                            record.get("variant"), record.get("platform"))
+        entry = known_entry(
+            known,
+            record.get("contract_name", record["contract"]),
+            record["target"],
+            record.get("variant"),
+            record.get("platform"),
+        )
         if entry and not args.record and not args.golden and ("match" in entry or "skip_outputs" not in entry):
             issue = entry["issue"]
             if record["status"] in ("fail", "error"):
                 if "match" not in entry or all(entry["match"] in f for f in record["failures"]):
                     record = {**record, "status": "xfail", "known_failure": issue}
             elif record["status"] == "pass":
-                record = {**record, "status": "fail", "failures": [f"listed in known_failures but passes; remove it: {issue}"]}
+                record = {
+                    **record,
+                    "status": "fail",
+                    "failures": [f"listed in known_failures but passes; remove it: {issue}"],
+                }
         validate(record, "result", f"result for {record['contract']}/{record['target']}")
         print(json.dumps(record), flush=True)
         if args.output:
@@ -746,7 +822,11 @@ def main():
         counts[record["status"]] = counts.get(record["status"], 0) + 1
         declared[0] += record["status"] == "unsupported" and record.get("skip") == "declared"
         status |= record["status"] in ("fail", "error")
-        status |= args.require_all and record["status"] == "unsupported" and record["skip"] not in ("declared", "wrong-hardware")
+        status |= (
+            args.require_all
+            and record["status"] == "unsupported"
+            and record["skip"] not in ("declared", "wrong-hardware")
+        )
 
     with tempfile.TemporaryDirectory() as tmp:
         for name, contract in lock["contracts"].items():
@@ -765,7 +845,9 @@ def main():
                 # Script contracts run where their packages are installed: the local folder, which must match the pin.
                 root, contract_revision = contract_folder(lock_dir, contract["integration"], True)
                 if contract_revision == "local":
-                    raise SystemExit(f"{root}: differs from the pinned {contract['integration']['repo']}; publish it or pass --local-contracts")
+                    raise SystemExit(
+                        f"{root}: differs from the pinned {contract['integration']['repo']}; publish it or pass --local-contracts"
+                    )
             base = {
                 "contract": contract["integration"]["repo"],
                 "contract_name": name,
@@ -776,14 +858,30 @@ def main():
             }
             variant = integration["variants"].get(args.variant)
             required = required_outputs(manifest["outputs"], integration)
-            executor = Executor(root / integration["entry_point"], integration["format"], args.isolate, Path(tmp), local_patches, lock.get("environment"))
+            executor = Executor(
+                root / integration["entry_point"],
+                integration["format"],
+                args.isolate,
+                Path(tmp),
+                local_patches,
+                lock.get("environment"),
+            )
             env_info = None
-            for target, kind, model, revision, problem in targets(lock_dir, contract, manifest, args.framework, args.fixtures_only, args.local_fixtures):
+            for target, kind, model, revision, problem in targets(
+                lock_dir, contract, manifest, args.framework, args.fixtures_only, args.local_fixtures
+            ):
                 if args.target and target not in args.target:
                     continue
                 record = {**base, "target": target, "kind": kind, "revision": revision}
                 if variant is None:
-                    emit({**record, "status": "unsupported", "skip": "variant", "failures": [f"variant {args.variant!r} not defined"]})
+                    emit(
+                        {
+                            **record,
+                            "status": "unsupported",
+                            "skip": "variant",
+                            "failures": [f"variant {args.variant!r} not defined"],
+                        }
+                    )
                     continue
                 if problem:
                     if model is None:  # the manifest's unsupported entry
@@ -794,8 +892,17 @@ def main():
                 resources = integration.get("resources", {})
                 short_names = {short(r): r for r in manifest["checkpoints"]}
                 spec = resources.get("fixture") if kind == "fixture" else resources.get(short_names.get(target))
-                if (spec or {}).get("variants", {}).get(args.variant, {}).get("devices") == [] and not args.run_declared:
-                    emit({**record, "status": "unsupported", "skip": "declared", "failures": [f"not measured in the {args.variant} variant (resources declare no devices)"]})
+                if (spec or {}).get("variants", {}).get(args.variant, {}).get(
+                    "devices"
+                ) == [] and not args.run_declared:
+                    emit(
+                        {
+                            **record,
+                            "status": "unsupported",
+                            "skip": "declared",
+                            "failures": [f"not measured in the {args.variant} variant (resources declare no devices)"],
+                        }
+                    )
                     continue
                 too_small = resource_problem(spec, args.variant)
                 if too_small:
@@ -812,7 +919,13 @@ def main():
                         record["source_model"] = source.get("repo", "") if isinstance(source, dict) else ""
                         record["weights"] = build.get("weights", "unknown")
                     record["fixture_repo"] = next(
-                        (repo for repo, pin in contract.get("fixtures", {}).items() if pin.get("target", short(repo)) == target), "")
+                        (
+                            repo
+                            for repo, pin in contract.get("fixtures", {}).items()
+                            if pin.get("target", short(repo)) == target
+                        ),
+                        "",
+                    )
                 env_info = env_info or executor.environment()
                 start = time.perf_counter()
                 env = {
@@ -825,7 +938,11 @@ def main():
                 ok, stdout, stderr = executor.run(env)
                 environment = {**env_info, "local_patches": local_patches} if local_patches else env_info
                 record.update(environment=environment, seconds=round(time.perf_counter() - start, 2))
-                differs = environment_differs(lock.get("environment", {}), env_info) if integration["format"] != "script" else {}
+                differs = (
+                    environment_differs(lock.get("environment", {}), env_info)
+                    if integration["format"] != "script"
+                    else {}
+                )
                 if differs:
                     record["environment_differs"] = differs
                 lines = [line for line in stdout.splitlines() if line.startswith("{")]
@@ -835,20 +952,32 @@ def main():
                 actual = json.loads(lines[-1])
                 platform = platform_class(actual["runtime"]["device"], actual["runtime"].get("dtype"))
                 record["platform"] = platform
-                entry = known_entry(known, record.get("contract_name", record["contract"]), target, args.variant, platform)
+                entry = known_entry(
+                    known, record.get("contract_name", record["contract"]), target, args.variant, platform
+                )
                 skipped = sorted(entry.get("skip_outputs", [])) if entry and not args.record else []
                 outputs = {k: r for k, r in manifest["outputs"].items() if k not in skipped}
                 checked = required - set(skipped)
                 if skipped:
                     record["skipped_outputs"] = skipped
                 suffix = "" if args.variant == "default" or args.golden else f".{args.variant}"
-                platform_dir = (args.expectations or (root / "integrations" / args.framework / "expectations" if (root / ".mic-repo.json").exists() else lock_dir / "expectations" / name)) / (args.golden or platform)
+                platform_dir = (
+                    args.expectations
+                    or (
+                        root / "integrations" / args.framework / "expectations"
+                        if (root / ".mic-repo.json").exists()
+                        else lock_dir / "expectations" / name
+                    )
+                ) / (args.golden or platform)
                 baseline = platform_dir / f"{target}{suffix}.json"
                 record["baseline"] = shown(baseline)
                 if (root / ".mic-repo.json").exists() and not args.expectations:
                     # The reviewed baseline as a Hub location, not a cache path.
-                    record.update(baseline_repo=contract["integration"]["repo"], baseline_revision=contract_revision,
-                                  baseline_path=baseline.relative_to(root).as_posix())
+                    record.update(
+                        baseline_repo=contract["integration"]["repo"],
+                        baseline_revision=contract_revision,
+                        baseline_path=baseline.relative_to(root).as_posix(),
+                    )
                 if args.golden:
                     if not baseline.exists():
                         emit({**record, "status": "error", "failures": [f"no golden baseline at {record['baseline']}"]})
@@ -861,7 +990,15 @@ def main():
                         for k, r in outputs.items()
                         if r["compare"] == "allclose" and lookup(actual, k) is not None
                     }
-                    emit({**record, "golden": args.golden, "status": "fail" if failures else "pass", "failures": failures, "max_delta": deltas})
+                    emit(
+                        {
+                            **record,
+                            "golden": args.golden,
+                            "status": "fail" if failures else "pass",
+                            "failures": failures,
+                            "max_delta": deltas,
+                        }
+                    )
                     continue
                 wrong = wrong_hardware(actual["runtime"], platform)
                 if wrong:
@@ -883,16 +1020,31 @@ def main():
                     ok2, stdout2, _ = executor.run(env, fresh_process=True)  # must reproduce outside this process
                     again = [line for line in stdout2.splitlines() if line.startswith("{")]
                     # Same rules as a check: exact outputs equal, numeric ones within this platform's tolerance.
-                    unstable = compare(rules_for(manifest, platform_dir), json.loads(again[-1]), actual, required) if again else ["no result record"]
+                    unstable = (
+                        compare(rules_for(manifest, platform_dir), json.loads(again[-1]), actual, required)
+                        if again
+                        else ["no result record"]
+                    )
                     if not ok2 or unstable:
-                        emit({**record, "status": "fail", "failures": [f"not recorded: a fresh-process rerun differs: {unstable}"]})
+                        emit(
+                            {
+                                **record,
+                                "status": "fail",
+                                "failures": [f"not recorded: a fresh-process rerun differs: {unstable}"],
+                            }
+                        )
                         continue
                     candidate = baseline.with_name(f"{target}{suffix}.candidate.json")
                     candidate.parent.mkdir(parents=True, exist_ok=True)
                     recorded = {k: v for k, v in record.items() if k != "baseline"}
                     if args.framework == "transformers":
                         recorded["template_date"] = template_date.TEMPLATE_DATE
-                    candidate.write_text(json.dumps(validate({"recorded_with": recorded, "outputs": actual}, "baseline", candidate), indent=1) + "\n")
+                    candidate.write_text(
+                        json.dumps(
+                            validate({"recorded_with": recorded, "outputs": actual}, "baseline", candidate), indent=1
+                        )
+                        + "\n"
+                    )
                     emit({**record, "status": "recorded", "baseline": shown(candidate)})
                     continue
                 if args.no_baseline:
@@ -930,7 +1082,10 @@ def main():
             # until an upstream fix): a reviewed decision, not a missing check.
             print(f"every target is declared unmeasured: {declared[0]}", file=sys.stderr)
         else:
-            print(f"no target ran: {counts['unsupported']} unsupported" if counts else "no target matched", file=sys.stderr)
+            print(
+                f"no target ran: {counts['unsupported']} unsupported" if counts else "no target matched",
+                file=sys.stderr,
+            )
             status = 1
     summary = {"summary": counts, "seconds": round(time.perf_counter() - started, 1), "isolate": args.isolate}
     print(json.dumps(summary), file=sys.stderr)

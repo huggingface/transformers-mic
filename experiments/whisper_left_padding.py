@@ -52,9 +52,7 @@ class FirstSegment(LogitsProcessor):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--model", choices=["checkpoint", "overfit", "random"], required=True
-    )
+    parser.add_argument("--model", choices=["checkpoint", "overfit", "random"], required=True)
     parser.add_argument("--random-fixture", type=Path)
     parser.add_argument("--build", required=True)
     parser.add_argument("--device", choices=["cpu", "cuda"], default="cpu")
@@ -66,19 +64,9 @@ def main():
     torch.set_num_threads(2)
     torch.use_deterministic_algorithms(True)
     set_seed(0)
-    lock = json.loads(
-        (ROOT / "example/transformers/tests/contracts/fleet.lock").read_text()
-    )["contracts"]["Whisper"]
-    repo = (
-        "openai/whisper-tiny"
-        if args.model == "checkpoint"
-        else "hf-internal-testing/proto-whisper-tiny-slim"
-    )
-    revision = (
-        lock["checkpoints"][repo]
-        if args.model == "checkpoint"
-        else lock["fixtures"][repo]["revision"]
-    )
+    lock = json.loads((ROOT / "example/transformers/tests/contracts/fleet.lock").read_text())["contracts"]["Whisper"]
+    repo = "openai/whisper-tiny" if args.model == "checkpoint" else "hf-internal-testing/proto-whisper-tiny-slim"
+    revision = lock["checkpoints"][repo] if args.model == "checkpoint" else lock["fixtures"][repo]["revision"]
     folder = (
         args.random_fixture
         if args.model == "random"
@@ -91,9 +79,7 @@ def main():
             )
         )
     )
-    weight_hash = hashlib.sha256(
-        (folder / "model.safetensors").read_bytes()
-    ).hexdigest()
+    weight_hash = hashlib.sha256((folder / "model.safetensors").read_bytes()).hexdigest()
     if args.model != "checkpoint":
         build = json.loads((folder / "build.json").read_text())
         assert build["weights"] == args.model
@@ -117,17 +103,10 @@ def main():
     )
     initial = [sot, tid("<|en|>"), tid("<|transcribe|>")]
     timestamp = tid("<|0.00|>")
-    words = [
-        tokenizer.encode(text, add_special_tokens=False)
-        for text in [" red", " green blue yellow"]
-    ]
+    words = [tokenizer.encode(text, add_special_tokens=False) for text in [" red", " green blue yellow"]]
     probe_ids = sorted(
         set(
-            list(range(256))
-            + sum(words, [])
-            + initial
-            + [previous, pad]
-            + list(range(timestamp, timestamp + 1501, 50))
+            list(range(256)) + sum(words, []) + initial + [previous, pad] + list(range(timestamp, timestamp + 1501, 50))
         )
     )
     traces = []
@@ -141,22 +120,10 @@ def main():
         traces.append(
             {
                 "decoder_input_ids": ids.detach().cpu().tolist(),
-                "decoder_attention_mask": None
-                if mask is None
-                else mask.detach().cpu().tolist(),
-                "decoder_position_ids": None
-                if positions is None
-                else positions.detach().cpu().tolist(),
-                "last_logits_probe": output.logits[:, -1, probe_ids]
-                .float()
-                .detach()
-                .cpu()
-                .tolist(),
-                "last_logits_argmax": output.logits[:, -1]
-                .argmax(-1)
-                .detach()
-                .cpu()
-                .tolist(),
+                "decoder_attention_mask": None if mask is None else mask.detach().cpu().tolist(),
+                "decoder_position_ids": None if positions is None else positions.detach().cpu().tolist(),
+                "last_logits_probe": output.logits[:, -1, probe_ids].float().detach().cpu().tolist(),
+                "last_logits_argmax": output.logits[:, -1].argmax(-1).detach().cpu().tolist(),
             }
         )
 
@@ -180,9 +147,7 @@ def main():
     # public generate(), and reaches the same preparation path as long-form.
     prompts = [[previous] + w + initial + [tid("<|notimestamps|>")] for w in words]
     width = max(map(len, prompts))
-    padded = torch.tensor(
-        [[pad] * (width - len(p)) + p for p in prompts], device=args.device
-    )
+    padded = torch.tensor([[pad] * (width - len(p)) + p for p in prompts], device=args.device)
     mask = padded.ne(pad)
     schedules = [[timestamp] + w + [timestamp + 1500, pad] for w in words]
     cases = ["short_unpadded", "short_left_padded", "long_unforced", "long_controlled"]
@@ -213,9 +178,7 @@ def main():
             kwargs["logits_processor"] = [control]
         start = time.perf_counter()
         with torch.no_grad():
-            result = model.generate(
-                **(long if case.startswith("long") else short), **kwargs
-            )
+            result = model.generate(**(long if case.startswith("long") else short), **kwargs)
         sequences = result["sequences"] if isinstance(result, dict) else result
         segments = None
         if isinstance(result, dict):
@@ -233,8 +196,7 @@ def main():
         left_padded = [
             t
             for t in traces
-            if t["decoder_attention_mask"] is not None
-            and any(not row[0] for row in t["decoder_attention_mask"])
+            if t["decoder_attention_mask"] is not None and any(not row[0] for row in t["decoder_attention_mask"])
         ]
         rows.append(
             dict(

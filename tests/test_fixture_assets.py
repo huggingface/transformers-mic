@@ -34,6 +34,7 @@ def test_checkpoint_formats_and_oversized_files_are_not_copied(tmp_path, monkeyp
     with pytest.raises(ValueError, match="tokenizer.json is too large"):
         build_fixtures.copied_files(tmp_path)
 
+
 def test_batch_norm_calibration_recovers_evaluation_sensitivity_without_changing_weights():
     model = torch.nn.Sequential(
         torch.nn.Linear(4, 4, bias=False),
@@ -43,20 +44,13 @@ def test_batch_norm_calibration_recovers_evaluation_sensitivity_without_changing
     with torch.no_grad():
         model[0].weight.copy_(torch.eye(4) * 0.001)
     batch = {"input": torch.tensor([[0.1, 0.2, 0.3, 0.4], [0.9, 0.8, 0.7, 0.6]])}
-    weights = {
-        name: parameter.detach().clone() for name, parameter in model.named_parameters()
-    }
+    weights = {name: parameter.detach().clone() for name, parameter in model.named_parameters()}
     before = model(**batch)
     assert build_fixtures.calibrate_batch_norm(model, batch) == 1
     after = model(**batch)
-    assert torch.max(torch.abs(after[0] - after[1])) > 100 * torch.max(
-        torch.abs(before[0] - before[1])
-    )
+    assert torch.max(torch.abs(after[0] - after[1])) > 100 * torch.max(torch.abs(before[0] - before[1]))
     assert torch.isfinite(after).all()
-    assert all(
-        torch.equal(weights[name], parameter)
-        for name, parameter in model.named_parameters()
-    )
+    assert all(torch.equal(weights[name], parameter) for name, parameter in model.named_parameters())
     assert not model[1].training and not model[2].training
     assert model[1].momentum == 0.1
     assert torch.equal(model(**batch), after)
@@ -104,17 +98,9 @@ def test_selected_fixed_tensors_survive_random_initialization(tmp_path, monkeypa
     assert model.geometry.tolist() == [2.0, 3.0]
     assert model.weights.tolist() == [0.0, 0.0]
     assert model.mesh_index.item() == 7
+    assert hashes["mesh_index"] == hashlib.sha256(torch.tensor([7]).view(torch.uint8).numpy().tobytes()).hexdigest()
     assert (
-        hashes["mesh_index"]
-        == hashlib.sha256(
-            torch.tensor([7]).view(torch.uint8).numpy().tobytes()
-        ).hexdigest()
-    )
-    assert (
-        hashes["geometry"]
-        == hashlib.sha256(
-            torch.tensor([2.0, 3.0]).view(torch.uint8).numpy().tobytes()
-        ).hexdigest()
+        hashes["geometry"] == hashlib.sha256(torch.tensor([2.0, 3.0]).view(torch.uint8).numpy().tobytes()).hexdigest()
     )
     with pytest.raises(ValueError, match="trainable"):
         build_fixtures.restore_frozen(
@@ -224,9 +210,7 @@ def test_shrink_keeps_stage_backbone_outputs_and_matches_encoder_channels():
     config = shrink(RTDetrConfig())
     backbone = config.backbone_config
     assert backbone.out_indices == [2, 3, 4]
-    assert config.encoder_in_channels == [
-        backbone.hidden_sizes[i - 1] for i in backbone.out_indices
-    ]
+    assert config.encoder_in_channels == [backbone.hidden_sizes[i - 1] for i in backbone.out_indices]
 
 
 def test_capture_names_positional_model_inputs():
@@ -270,9 +254,7 @@ def test_shrink_drops_the_checkpoint_quantization_config():
     from sweep import shrink
     from transformers import LlamaConfig
 
-    config = LlamaConfig(
-        quantization_config={"quant_method": "fp8", "weight_block_size": [128, 128]}
-    )
+    config = LlamaConfig(quantization_config={"quant_method": "fp8", "weight_block_size": [128, 128]})
     assert getattr(shrink(config), "quantization_config", None) is None
 
 
@@ -293,11 +275,7 @@ def test_shrink_resamples_longrope_factors_to_the_mla_rotary_width():
     )
     shrunk = shrink(config)
     rope = shrunk.rope_parameters
-    assert (
-        len(rope["short_factor"])
-        == len(rope["long_factor"])
-        == shrunk.qk_rope_head_dim // 2
-    )
+    assert len(rope["short_factor"]) == len(rope["long_factor"]) == shrunk.qk_rope_head_dim // 2
 
 
 def test_sensitivity_perturbs_list_contexts_and_never_the_forecast_target():
@@ -309,11 +287,7 @@ def test_sensitivity_perturbs_list_contexts_and_never_the_forecast_target():
             self.scale = torch.nn.Parameter(torch.tensor(2.0))
 
         def forward(self, past_values, future_values=None):
-            return {
-                "mean_predictions": torch.stack(
-                    [self.scale * row[-3:] for row in past_values]
-                )
-            }
+            return {"mean_predictions": torch.stack([self.scale * row[-3:] for row in past_values])}
 
     batch = {
         "past_values": [torch.arange(1.0, 9.0), torch.arange(10.0, 15.0)],
@@ -383,8 +357,22 @@ def _tiny_llava():
     from transformers import CLIPVisionConfig, LlamaConfig, LlavaConfig, LlavaForConditionalGeneration
 
     config = LlavaConfig(
-        vision_config=CLIPVisionConfig(hidden_size=16, intermediate_size=32, num_hidden_layers=1, num_attention_heads=2, image_size=28, patch_size=14),
-        text_config=LlamaConfig(hidden_size=16, intermediate_size=32, num_hidden_layers=1, num_attention_heads=2, num_key_value_heads=2, vocab_size=64),
+        vision_config=CLIPVisionConfig(
+            hidden_size=16,
+            intermediate_size=32,
+            num_hidden_layers=1,
+            num_attention_heads=2,
+            image_size=28,
+            patch_size=14,
+        ),
+        text_config=LlamaConfig(
+            hidden_size=16,
+            intermediate_size=32,
+            num_hidden_layers=1,
+            num_attention_heads=2,
+            num_key_value_heads=2,
+            vocab_size=64,
+        ),
         image_token_id=63,
     )
     torch.manual_seed(0)
@@ -394,8 +382,8 @@ def _tiny_llava():
 def test_fixture_keeps_the_checkpoint_legacy_names_and_reloads_exactly(tmp_path):
     from safetensors import safe_open
     from transformers import LlavaForConditionalGeneration
-    from transformers.core_model_loading import revert_weight_conversion
     from transformers.conversion_mapping import get_model_conversion_mapping
+    from transformers.core_model_loading import revert_weight_conversion
 
     model = _tiny_llava()
     model._weight_conversions = get_model_conversion_mapping(model)  # legacy layout
@@ -415,7 +403,9 @@ def test_fixture_keeps_a_head_checkpoint_prefix_and_writes_safetensors_for_a_bin
     from transformers import BertConfig, BertModel
 
     torch.manual_seed(0)
-    model = BertModel(BertConfig(hidden_size=16, intermediate_size=32, num_hidden_layers=1, num_attention_heads=2, vocab_size=64)).eval()
+    model = BertModel(
+        BertConfig(hidden_size=16, intermediate_size=32, num_hidden_layers=1, num_attention_heads=2, vocab_size=64)
+    ).eval()
     keys = {f"bert.{k}" for k in model.state_dict()}
     (tmp_path / "source").mkdir()
     build_fixtures.save(model, tmp_path / "out", tmp_path / "source", [], checkpoint={"keys": keys, "binary": True})
@@ -439,7 +429,9 @@ def test_shrink_renumbers_layer_indices_into_the_shrunk_depth():
     text = mllama.text_config
     assert text.cross_attention_layers and all(0 < i < text.num_hidden_layers for i in text.cross_attention_layers)
 
-    granite = Granite4VisionConfig(deepstack_layer_map=[(-19, 9), (-13, 6), (-7, 3), (-1, 0)], spatial_target_layers=[12, 15, 18, 21])
+    granite = Granite4VisionConfig(
+        deepstack_layer_map=[(-19, 9), (-13, 6), (-7, 3), (-1, 0)], spatial_target_layers=[12, 15, 18, 21]
+    )
     granite.vision_config.num_hidden_layers = 27  # granite-vision-4.1-4b
     granite = shrink(granite)
     states, layers = granite.vision_config.num_hidden_layers + 1, granite.text_config.num_hidden_layers
@@ -529,9 +521,7 @@ def test_shrink_keeps_per_stage_heads_dividing_per_stage_widths(model_type, head
     original = {"pvt": [1, 2, 5, 8], "swin": [3, 6, 12, 24]}[model_type]
     config = shrink(AutoConfig.for_model(model_type, **{heads_key: original}))
     heads = getattr(config, heads_key)
-    widths = getattr(config, "hidden_sizes", None) or [
-        config.embed_dim * 2**i for i in range(len(config.depths))
-    ]
+    widths = getattr(config, "hidden_sizes", None) or [config.embed_dim * 2**i for i in range(len(config.depths))]
     assert all(w % h == 0 for w, h in zip(widths, heads))
     assert all(1 <= h <= o for h, o in zip(heads, original))
 
@@ -570,9 +560,7 @@ def test_numeric_health_accepts_masked_logits_but_not_nan(tmp_path, fill, health
         def forward(self, x):
             logits = self.proj(x)
             loss = logits[:, :2].float().pow(2).mean()
-            logits = torch.cat(
-                [logits[:, :2], torch.full_like(logits[:, 2:], fill)], -1
-            )
+            logits = torch.cat([logits[:, :2], torch.full_like(logits[:, 2:], fill)], -1)
             return Output(logits=logits, loss=loss)
 
     rows = build_fixtures.numeric_health(Masked, tmp_path, {"x": torch.ones(2, 2)})
@@ -643,10 +631,7 @@ def test_shrink_keeps_blt_global_width_tied_to_the_local_models():
     assert config.encoder_config.hidden_size_global == width
     assert config.decoder_config.hidden_size_global == width
     assert config.global_config.encoder_cross_output_size is None
-    assert (
-        config.global_config.head_dim * config.global_config.num_attention_heads
-        == width
-    )
+    assert config.global_config.head_dim * config.global_config.num_attention_heads == width
 
 
 def test_shrink_keeps_every_block_kind_of_an_index_derived_pattern():
@@ -677,9 +662,14 @@ def test_config_without_token_types_accepts_their_perturbation():
     from transformers import BertConfig, DebertaV2Config
 
     batch = {"input_ids": torch.ones(1, 3, dtype=torch.long), "token_type_ids": torch.zeros(1, 3, dtype=torch.long)}
-    assert set(build_fixtures.config_insensitive(DebertaV2Config(type_vocab_size=0), batch)) == {"token_type_ids:all_ones"}
+    assert set(build_fixtures.config_insensitive(DebertaV2Config(type_vocab_size=0), batch)) == {
+        "token_type_ids:all_ones"
+    }
     assert build_fixtures.config_insensitive(BertConfig(type_vocab_size=2), batch) == {}
-    assert build_fixtures.config_insensitive(DebertaV2Config(type_vocab_size=0), {"input_ids": batch["input_ids"]}) == {}
+    assert (
+        build_fixtures.config_insensitive(DebertaV2Config(type_vocab_size=0), {"input_ids": batch["input_ids"]}) == {}
+    )
+
 
 def test_null_override_of_a_field_shrink_already_dropped_is_a_no_op(tmp_path):
     from transformers import BertConfig, BertModel
@@ -692,6 +682,7 @@ def test_null_override_of_a_field_shrink_already_dropped_is_a_no_op(tmp_path):
     with pytest.raises(SystemExit, match="not_a_field"):
         build_fixtures.shrunk_config(tmp_path, BertModel, {"config_overrides": {"fields": fields}})
 
+
 def test_shrink_keeps_siglip_text_projection_at_the_shared_width():
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
     from sweep import shrink
@@ -699,6 +690,7 @@ def test_shrink_keeps_siglip_text_projection_at_the_shared_width():
 
     config = shrink(SiglipConfig())  # text projection_size defaults to its hidden_size (768)
     assert config.text_config.projection_size == config.text_config.hidden_size == config.vision_config.hidden_size
+
 
 def test_shrink_keeps_an_audio_output_dim_at_the_text_width():
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
@@ -785,7 +777,9 @@ def test_shrink_keeps_one_dpt_layer_per_out_index():
 def test_save_accepts_a_missing_tied_alias(tmp_path):
     from transformers import BertConfig, BertForMaskedLM
 
-    model = BertForMaskedLM(BertConfig(vocab_size=50, hidden_size=16, num_hidden_layers=1, num_attention_heads=2, intermediate_size=32))
+    model = BertForMaskedLM(
+        BertConfig(vocab_size=50, hidden_size=16, num_hidden_layers=1, num_attention_heads=2, intermediate_size=32)
+    )
     model.config.save_pretrained(tmp_path / "src")
     build_fixtures.save(model, tmp_path / "out", tmp_path / "src", ["cls.predictions.decoder.bias"])
 
@@ -808,6 +802,7 @@ def test_shrink_keeps_one_moe_layer_after_leading_dense_layers():
     config = shrink(Lfm2MoeConfig(num_dense_layers=2, num_hidden_layers=24))
     assert config.num_dense_layers < config.num_hidden_layers
 
+
 def test_shrink_keeps_llama4_pixel_shuffle_and_projector_widths():
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
     from sweep import shrink
@@ -815,14 +810,23 @@ def test_shrink_keeps_llama4_pixel_shuffle_and_projector_widths():
 
     # As in Llama-4-Scout: the adapter MLP reads hidden_size / ratio**2 channels and
     # projects to the text width.
-    config = shrink(Llama4Config(
-        vision_config={"hidden_size": 768, "intermediate_size": 3072, "pixel_shuffle_ratio": 0.5,
-                       "projector_input_dim": 2048, "projector_output_dim": 2048, "vision_output_dim": 2048},
-        text_config={"hidden_size": 2048},
-    ))
+    config = shrink(
+        Llama4Config(
+            vision_config={
+                "hidden_size": 768,
+                "intermediate_size": 3072,
+                "pixel_shuffle_ratio": 0.5,
+                "projector_input_dim": 2048,
+                "projector_output_dim": 2048,
+                "vision_output_dim": 2048,
+            },
+            text_config={"hidden_size": 2048},
+        )
+    )
     vision, width = config.vision_config, config.text_config.hidden_size
     assert vision.intermediate_size == vision.hidden_size * 4
     assert vision.projector_input_dim == vision.projector_output_dim == vision.vision_output_dim == width
+
 
 def test_shrink_keeps_csm_depth_decoder_reading_the_backbone_width():
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
@@ -849,6 +853,7 @@ def test_shrink_keeps_layer_kinds_the_config_derives_from_the_index():
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
     from sweep import shrink
     from transformers import Llama4TextConfig
+
     from transformers_mic.shrink_view import kind_prefix
 
     # Scout: every layer MoE, every fourth without RoPE. moe_layers is an index list
@@ -874,13 +879,17 @@ def test_test_checkpoints_are_never_mic_sources():
 def test_a_small_source_is_kept_whole_and_a_large_one_is_shrunk(tmp_path):
     from transformers import LlamaConfig, LlamaForCausalLM
 
-    small = LlamaConfig(vocab_size=1000, hidden_size=64, intermediate_size=128, num_hidden_layers=4, num_attention_heads=4)
+    small = LlamaConfig(
+        vocab_size=1000, hidden_size=64, intermediate_size=128, num_hidden_layers=4, num_attention_heads=4
+    )
     small.save_pretrained(tmp_path / "small")
     config = build_fixtures.shrunk_config(tmp_path / "small", LlamaForCausalLM)
     assert config.num_hidden_layers == 4 and config.hidden_size == 64
     assert build_fixtures.keeps_source(tmp_path / "small", LlamaForCausalLM, config)
 
-    large = LlamaConfig(vocab_size=32000, hidden_size=1024, intermediate_size=4096, num_hidden_layers=8, num_attention_heads=16)
+    large = LlamaConfig(
+        vocab_size=32000, hidden_size=1024, intermediate_size=4096, num_hidden_layers=8, num_attention_heads=16
+    )
     large.save_pretrained(tmp_path / "large")
     config = build_fixtures.shrunk_config(tmp_path / "large", LlamaForCausalLM)
     assert config.num_hidden_layers < 8
@@ -894,7 +903,6 @@ def test_pixtral_vision_is_inert_to_pixel_scale():
     assert config.vision_config.model_type == "pixtral"
     assert "pixel_values:halve" in build_fixtures.config_insensitive(config, {"pixel_values": None})
     assert "pixel_values:halve" not in build_fixtures.config_insensitive(config, {"input_ids": None})
-
 
 
 def test_layer_pattern_keeps_every_flagged_layer_kind_and_its_kv_source():
@@ -928,18 +936,36 @@ def test_shrink_adopts_tester_sizes_the_rule_misses(monkeypatch):
     from transformers_mic import tester
 
     original = Qwen3NextConfig(num_hidden_layers=4, vocab_size=128)
-    shrunk = Qwen3NextConfig(**{**original.to_dict(), "hidden_size": 64, "intermediate_size": 128,
-                                "num_attention_heads": 4, "num_key_value_heads": 2, "head_dim": 16,
-                                "num_experts": 4, "moe_intermediate_size": 32, "shared_expert_intermediate_size": 128})
-    monkeypatch.setattr(tester, "tester_values", lambda model_type, ref="main": (
-        "tests/models/qwen3_next", {"linear_key_head_dim": 16, "linear_value_head_dim": 16, "vocab_size": 99}))
+    shrunk = Qwen3NextConfig(
+        **{
+            **original.to_dict(),
+            "hidden_size": 64,
+            "intermediate_size": 128,
+            "num_attention_heads": 4,
+            "num_key_value_heads": 2,
+            "head_dim": 16,
+            "num_experts": 4,
+            "moe_intermediate_size": 32,
+            "shared_expert_intermediate_size": 128,
+        }
+    )
+    monkeypatch.setattr(
+        tester,
+        "tester_values",
+        lambda model_type, ref="main": (
+            "tests/models/qwen3_next",
+            {"linear_key_head_dim": 16, "linear_value_head_dim": 16, "vocab_size": 99},
+        ),
+    )
     adopted = build_fixtures.adopt_tester_sizes(Qwen3NextForCausalLM, original.to_dict(), shrunk)
     assert adopted.linear_key_head_dim == 16 and adopted.linear_value_head_dim == 16
     assert adopted.vocab_size == 128  # preserved: the fixture loads the real tokenizer
     assert adopted._mic_tester_sizes["fields"] == {"linear_key_head_dim": 16, "linear_value_head_dim": 16}
     # A tester size that does not build is dropped, keeping the rule's config.
     monkeypatch.setattr(tester, "tester_values", lambda model_type, ref="main": ("t", {"linear_key_head_dim": 3}))
-    monkeypatch.setattr(Qwen3NextForCausalLM, "_from_config", classmethod(lambda cls, c: (_ for _ in ()).throw(ValueError("bad"))))
+    monkeypatch.setattr(
+        Qwen3NextForCausalLM, "_from_config", classmethod(lambda cls, c: (_ for _ in ()).throw(ValueError("bad")))
+    )
     assert build_fixtures.adopt_tester_sizes(Qwen3NextForCausalLM, original.to_dict(), shrunk) is shrunk
 
 
@@ -964,7 +990,6 @@ def test_tester_sizes_stay_out_of_the_config_and_fall_back_on_a_failed_build(mon
     monkeypatch.setattr(build_fixtures, "_build_fixture", lambda *a, **k: (_ for _ in ()).throw(SystemExit("boom")))
     with pytest.raises(SystemExit):
         build_fixtures.build_fixture()
-
 
 
 def test_a_missing_package_is_reported_not_retried_at_other_sizes(monkeypatch, capsys):
@@ -1018,7 +1043,16 @@ def test_tied_tensor_keeps_the_name_the_source_serializes(tmp_path):
     from transformers import OPTConfig, OPTForCausalLM
 
     torch.manual_seed(0)
-    model = OPTForCausalLM(OPTConfig(hidden_size=16, word_embed_proj_dim=16, ffn_dim=32, num_attention_heads=2, num_hidden_layers=1, vocab_size=64)).eval()
+    model = OPTForCausalLM(
+        OPTConfig(
+            hidden_size=16,
+            word_embed_proj_dim=16,
+            ffn_dim=32,
+            num_attention_heads=2,
+            num_hidden_layers=1,
+            vocab_size=64,
+        )
+    ).eval()
     # OPT-125m's pytorch_model.bin stores the tied embedding as lm_head.weight only.
     keys = {k for k in model.state_dict() if k != "model.decoder.embed_tokens.weight"}
     (tmp_path / "source").mkdir()
@@ -1054,9 +1088,7 @@ def test_a_missing_parameter_the_fixture_cannot_mirror_still_fails():
 
 
 def test_sentence_transformer_module_configs_are_copied_and_hashed(tmp_path):
-    (tmp_path / "modules.json").write_text(json.dumps([
-        {"path": ""}, {"path": "1_Pooling"}, {"path": "2_Normalize"}
-    ]))
+    (tmp_path / "modules.json").write_text(json.dumps([{"path": ""}, {"path": "1_Pooling"}, {"path": "2_Normalize"}]))
     pooling = tmp_path / "1_Pooling"
     pooling.mkdir()
     (pooling / "config.json").write_text('{"embedding_dimension": 768}')
@@ -1097,7 +1129,15 @@ def test_input_layouts_keep_the_first_layout_and_add_what_it_lacks():
     from sweep import input_layouts
     from transformers import VideoMAEConfig, VideoMAEModel
 
-    config = VideoMAEConfig(hidden_size=32, num_hidden_layers=1, num_attention_heads=2, intermediate_size=64, num_frames=4, image_size=32, patch_size=16)
+    config = VideoMAEConfig(
+        hidden_size=32,
+        num_hidden_layers=1,
+        num_attention_heads=2,
+        intermediate_size=64,
+        num_frames=4,
+        image_size=32,
+        patch_size=16,
+    )
     layouts = input_layouts(VideoMAEModel(config), config)
     assert layouts[0]["pixel_values"].shape == (2, 3, 32, 32)  # what the sweep sent before
     assert layouts[1]["pixel_values"].shape == (2, 4, 3, 32, 32)  # frames, as the processor sends

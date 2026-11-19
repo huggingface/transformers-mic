@@ -13,10 +13,10 @@ which gives the fixture a new files_sha256 and therefore a new fleet pin.
 import hashlib
 import importlib
 import json
-from pathlib import Path
 import shutil
 import sys
 import tempfile
+from pathlib import Path
 
 from huggingface_hub import (
     CommitOperationAdd,
@@ -106,10 +106,12 @@ def convert(folder, source_file=None):
         raise ValueError(f"{folder}: safetensors copy differs: {problems[:5]}")
     (folder / BINARY).unlink()
     digest = hashlib.sha256((folder / SAFETENSORS).read_bytes()).hexdigest()
-    build["sha256"] = dict(sorted(
-        (SAFETENSORS if name == BINARY else name, digest if name == BINARY else value)
-        for name, value in build["sha256"].items()
-    ))
+    build["sha256"] = dict(
+        sorted(
+            (SAFETENSORS if name == BINARY else name, digest if name == BINARY else value)
+            for name, value in build["sha256"].items()
+        )
+    )
     serialization = dict(build.get("serialization") or {})
     serialization.update(
         file=SAFETENSORS,
@@ -254,7 +256,13 @@ def run(args):
     head = api.model_info(repo).sha
     if BINARY not in api.list_repo_files(repo, revision=head):
         old_sha256, new_sha256, lagging = resume(repo, head, run_)
-        result = {"repo": repo, "head": head, "converted": "already", "lagging_fleets": lagging, "execute": args.execute}
+        result = {
+            "repo": repo,
+            "head": head,
+            "converted": "already",
+            "lagging_fleets": lagging,
+            "execute": args.execute,
+        }
         if args.execute and lagging:
             result["fleet_revisions"] = export(repo, old_sha256, head, new_sha256, lagging)
         print(json.dumps(result, indent=2))

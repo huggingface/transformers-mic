@@ -31,16 +31,12 @@ def test_phase_reads_only_current_attempt(tmp_path):
     offset = log.stat().st_size
     assert terminal.phase(log, offset) == ""
     with log.open("a") as handle:
-        handle.write(
-            'MIC_PROGRESS {"phase":"Fit fixture weights","detail":"step 20/500 max"}\n'
-        )
+        handle.write('MIC_PROGRESS {"phase":"Fit fixture weights","detail":"step 20/500 max"}\n')
     assert terminal.phase(log, offset) == "Fit fixture weights · step 20/500 max"
 
 
 def test_prompt_collapses_long_details_and_indents_question(capsys):
-    terminal.prompt(
-        "Long question", "\n".join(f"detail {n}" for n in range(20)), "confirmation", {}
-    )
+    terminal.prompt("Long question", "\n".join(f"detail {n}" for n in range(20)), "confirmation", {})
     output = capsys.readouterr().out
     assert "  ? Long question" in output and "    detail 0" in output
     assert "detail 19" not in output
@@ -66,9 +62,7 @@ def test_editor_falls_back_like_git(monkeypatch):
     assert terminal.editor_command() == ["code", "--wait"]
     monkeypatch.setenv("EDITOR", "true")  # what non-interactive tools export
     # No git core.editor configured.
-    monkeypatch.setattr(
-        subprocess, "run", lambda *a, **k: type("R", (), {"stdout": ""})()
-    )
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: type("R", (), {"stdout": ""})())
     monkeypatch.setattr(terminal.shutil, "which", lambda name: "/usr/bin/" + name if name == "vim" else None)
     assert terminal.editor_command() == ["vim"]
 
@@ -84,7 +78,7 @@ def test_edit_waits_for_enter_when_the_editor_fails(monkeypatch, tmp_path):
 def test_exception_whose_message_starts_on_the_next_line_is_not_empty():
     # transformers' requires_backends(): "ImportError: \nPixtralProcessor requires ..."
     text = (
-        "Traceback (most recent call last):\n  File \"usage.md\", line 12\n"
+        'Traceback (most recent call last):\n  File "usage.md", line 12\n'
         "ImportError: \nPixtralProcessor requires the Torchvision library but it was not found in your environment.\n"
         "Please note that you may need to restart your runtime after installation.\n"
     )

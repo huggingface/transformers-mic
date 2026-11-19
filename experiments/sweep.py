@@ -34,21 +34,49 @@ RESULTS = HERE / "results" / "sweep.json"
 
 # Generic width rule: field name -> fixture value, applied in every (sub-)config.
 WIDTHS = {
-    "hidden_size": 64, "intermediate_size": 128, "d_model": 64, "d_ff": 128,
-    "embed_dim": 64, "out_hidden_size": 64, "ffn_dim": 128, "encoder_ffn_dim": 128, "decoder_ffn_dim": 128,
-    "num_attention_heads": 4, "num_heads": 4, "encoder_attention_heads": 4,
-    "decoder_attention_heads": 4, "head_dim": 16, "d_kv": 16, "attention_head_dim": 16,
+    "hidden_size": 64,
+    "intermediate_size": 128,
+    "d_model": 64,
+    "d_ff": 128,
+    "embed_dim": 64,
+    "out_hidden_size": 64,
+    "ffn_dim": 128,
+    "encoder_ffn_dim": 128,
+    "decoder_ffn_dim": 128,
+    "num_attention_heads": 4,
+    "num_heads": 4,
+    "encoder_attention_heads": 4,
+    "decoder_attention_heads": 4,
+    "head_dim": 16,
+    "d_kv": 16,
+    "attention_head_dim": 16,
     # DeBERTa-v2 names its head size and pooler width explicitly.
-    "attention_head_size": 16, "pooler_hidden_size": 64,
+    "attention_head_size": 16,
+    "pooler_hidden_size": 64,
     # Per-layer embeddings (Qwen4-Exp) are vocab-sized: shrink their width too.
     "ple_embed_dim": 16,
-    "moe_intermediate_size": 32, "shared_intermediate_size": 128,
-    "shared_expert_intermediate_size": 128, "projection_dim": 32,
-    "kv_lora_rank": 16, "qk_nope_head_dim": 16, "qk_rope_head_dim": 8, "v_head_dim": 16,
-    "mamba_d_state": 16, "state_size": 16, "ssm_state_size": 16, "mamba_n_heads": 8,
-    "mamba_d_head": "auto", "mamba_chunk_size": 8, "chunk_size": 8,
+    "moe_intermediate_size": 32,
+    "shared_intermediate_size": 128,
+    "shared_expert_intermediate_size": 128,
+    "projection_dim": 32,
+    "kv_lora_rank": 16,
+    "qk_nope_head_dim": 16,
+    "qk_rope_head_dim": 8,
+    "v_head_dim": 16,
+    "mamba_d_state": 16,
+    "state_size": 16,
+    "ssm_state_size": 16,
+    "mamba_n_heads": 8,
+    "mamba_d_head": "auto",
+    "mamba_chunk_size": 8,
+    "chunk_size": 8,
     # GPT-2, XLM, DistilBERT, and others name the same widths differently.
-    "n_embd": 64, "n_inner": 128, "n_head": 4, "emb_dim": 64, "dim": 64, "hidden_dim": 128,
+    "n_embd": 64,
+    "n_inner": 128,
+    "n_head": 4,
+    "emb_dim": 64,
+    "dim": 64,
+    "hidden_dim": 128,
     "n_heads": 4,
 }
 # Fields that, when equal to hidden_size in the checkpoint, must stay equal to it.
@@ -78,8 +106,23 @@ HEADS = (
 )
 # Fast integration tests in transformers#49103.
 FAST_49103 = (
-    "bert", "clip", "detr", "internvl", "llama", "llava", "musicgen", "paligemma", "qwen2",
-    "qwen2_5_vl", "segformer", "smolvlm", "t5", "video_llama_3", "vit", "wav2vec2", "whisper",
+    "bert",
+    "clip",
+    "detr",
+    "internvl",
+    "llama",
+    "llava",
+    "musicgen",
+    "paligemma",
+    "qwen2",
+    "qwen2_5_vl",
+    "segformer",
+    "smolvlm",
+    "t5",
+    "video_llama_3",
+    "vit",
+    "wav2vec2",
+    "whisper",
 )
 
 
@@ -88,9 +131,7 @@ def doc_checkpoints(transformers_src):
 
     by_class = {name: model_type for model_type, name in CONFIG_MAPPING_NAMES.items()}
     found = {}
-    pattern = re.compile(
-        r'@auto_docstring\(\s*checkpoint="([^"]+)"[^)]*\)\s*(?:@[^\n]+\n\s*)*class (\w+)\('
-    )
+    pattern = re.compile(r'@auto_docstring\(\s*checkpoint="([^"]+)"[^)]*\)\s*(?:@[^\n]+\n\s*)*class (\w+)\(')
     for path in glob.glob(f"{transformers_src}/models/*/configuration_*.py"):
         for match in pattern.finditer(Path(path).read_text()):
             if match.group(2) in by_class:
@@ -135,9 +176,7 @@ def prefetch(args):
                 row["doc_status"] = "ok"
                 return model_type, row
             except Exception as exc:
-                row["doc_status"] = (
-                    "wrong_model_type" if isinstance(exc, ValueError) else type(exc).__name__
-                )
+                row["doc_status"] = "wrong_model_type" if isinstance(exc, ValueError) else type(exc).__name__
         # Fall back to the most downloaded ungated, trained Transformers model with this type.
         try:
             candidates = api.list_models(
@@ -176,7 +215,11 @@ def sub_configs(config):
 
 def subs_of(cfg):
     """The config's direct sub-configs by key."""
-    return {key: getattr(cfg, key, None) for key in getattr(cfg, "sub_configs", {}) or {} if getattr(cfg, key, None) is not None}
+    return {
+        key: getattr(cfg, key, None)
+        for key in getattr(cfg, "sub_configs", {}) or {}
+        if getattr(cfg, key, None) is not None
+    }
 
 
 def head_width(values):
@@ -214,13 +257,19 @@ def repair(cfg, values):
             values[key]["condition_dim"] = values["hidden_size"]
     # Fun-ASR-Nano's adaptor checks intermediate_size == text hidden_size // 4.
     adaptor, text = values.get("adaptor_config"), values.get("text_config")
-    if isinstance(adaptor, dict) and isinstance(text, dict) and cfg.adaptor_config.intermediate_size == cfg.text_config.hidden_size // 4:
+    if (
+        isinstance(adaptor, dict)
+        and isinstance(text, dict)
+        and cfg.adaptor_config.intermediate_size == cfg.text_config.hidden_size // 4
+    ):
         adaptor["intermediate_size"] = text["hidden_size"] // 4
     # Molmo2's adapter reads vision layers by index: keep one per entry within the shrunk tower.
     adapter, vision = values.get("adapter_config"), values.get("vision_config")
     if isinstance(adapter, dict) and isinstance(adapter.get("vision_feature_layer"), list) and isinstance(vision, dict):
         old, new = cfg.vision_config.num_hidden_layers, vision["num_hidden_layers"]
-        adapter["vision_feature_layer"] = [min(i * new // old, new - 1) if i >= 0 else i for i in adapter["vision_feature_layer"]]
+        adapter["vision_feature_layer"] = [
+            min(i * new // old, new - 1) if i >= 0 else i for i in adapter["vision_feature_layer"]
+        ]
 
 
 def layer_pattern(config):
@@ -244,17 +293,23 @@ def fit_rope(values, source=None):
     source_rope = (source or {}).get("rope_parameters")
     source_rope = source_rope if isinstance(source_rope, dict) else rope
     heads = values.get("num_attention_heads")
-    width = values.get("head_dim") or (values["hidden_size"] // heads if values.get("hidden_size") and isinstance(heads, int) and heads else None)
+    width = values.get("head_dim") or (
+        values["hidden_size"] // heads if values.get("hidden_size") and isinstance(heads, int) and heads else None
+    )
     # Multimodal RoPE partitions must still cover half the resized head.
     if isinstance(rope, dict) and rope.get("mrope_section") and width:
         sections = source_rope.get("mrope_section") or rope["mrope_section"]
         # GLM-4.1V splits only the rotated part (partial_rotary_factor) into sections, exactly;
         # Qwen3.5 interleaves them and keeps covering half the head.
-        partial = 1.0 if rope.get("mrope_interleaved") else rope.get("partial_rotary_factor", values.get("partial_rotary_factor", 1.0))
+        partial = (
+            1.0
+            if rope.get("mrope_interleaved")
+            else rope.get("partial_rotary_factor", values.get("partial_rotary_factor", 1.0))
+        )
         half_head = int(width * partial) // 2
         scaled = [size * half_head / sum(sections) for size in sections]
         kept = [int(size) for size in scaled]
-        for i in sorted(range(len(kept)), key=lambda i: scaled[i] - kept[i], reverse=True)[:half_head - sum(kept)]:
+        for i in sorted(range(len(kept)), key=lambda i: scaled[i] - kept[i], reverse=True)[: half_head - sum(kept)]:
             kept[i] += 1
         rope["mrope_section"] = kept
     # LongRoPE keeps one factor per rotary frequency; resample to the resized head.
@@ -341,7 +396,12 @@ def shrink(config):
                 values[key] = min(values[key], 2)
         # GPT-J and CodeGen rotate rotary_dim channels of a head they derive from the widths
         # (no head_dim): keep the rotated fraction of the shrunk head.
-        if isinstance(original.get("rotary_dim"), int) and "head_dim" not in original and head_width(original) and head_width(values):
+        if (
+            isinstance(original.get("rotary_dim"), int)
+            and "head_dim" not in original
+            and head_width(original)
+            and head_width(values)
+        ):
             values["rotary_dim"] = max(2, original["rotary_dim"] * head_width(values) // head_width(original) // 2 * 2)
         # MobileBERT's bottleneck widths are a fraction of hidden_size: keep the fraction.
         if isinstance(original.get("intra_bottleneck_size"), int):
@@ -355,7 +415,9 @@ def shrink(config):
             if isinstance(original.get(key), int) and original.get(key) == original.get("hidden_dim"):
                 values[key] = values["hidden_dim"]
         # LayoutLMv3 concatenates 4 coordinate and 2 shape embeddings into hidden_size.
-        if original.get("coordinate_size") and 4 * original["coordinate_size"] + 2 * original.get("shape_size", 0) == original.get("hidden_size"):
+        if original.get("coordinate_size") and 4 * original["coordinate_size"] + 2 * original.get(
+            "shape_size", 0
+        ) == original.get("hidden_size"):
             values["coordinate_size"] = values["hidden_size"] // 8
             values["shape_size"] = (values["hidden_size"] - 4 * values["coordinate_size"]) // 2
         for key in ("n_group", "topk_group"):
@@ -384,9 +446,17 @@ def shrink(config):
                 if values.get("projection_hidden_size") == cfg.hidden_size:
                     values["projection_hidden_size"] = values["hidden_size"]
         stages = values.get("hidden_sizes")
-        if not isinstance(stages, list) and isinstance(values.get("embed_dim"), int) and isinstance(values.get("depths"), list):
+        if (
+            not isinstance(stages, list)
+            and isinstance(values.get("embed_dim"), int)
+            and isinstance(values.get("depths"), list)
+        ):
             stages = [values["embed_dim"] * 2**i for i in range(len(values["depths"]))]
-        if not isinstance(stages, list) and isinstance(values.get("patch_embeds_hidden_size"), int) and isinstance(values.get("depths"), list):
+        if (
+            not isinstance(stages, list)
+            and isinstance(values.get("patch_embeds_hidden_size"), int)
+            and isinstance(values.get("depths"), list)
+        ):
             stages = [values["patch_embeds_hidden_size"] * 2**i for i in range(len(values["depths"]))]
         if isinstance(stages, list):
             for key in ("num_attention_heads", "num_heads"):
@@ -427,7 +497,9 @@ def shrink(config):
 
             reindex_references(values, cfg, kept)  # sources precede their layer, so a prefix holds them
             if getattr(cfg, "num_kv_shared_layers", None) is not None:
-                values["num_kv_shared_layers"] = sum(i >= cfg.num_hidden_layers - cfg.num_kv_shared_layers for i in kept)
+                values["num_kv_shared_layers"] = sum(
+                    i >= cfg.num_hidden_layers - cfg.num_kv_shared_layers for i in kept
+                )
             # Leading dense layers: keep at least one MoE layer, or the fixture has no
             # experts at all (LFM2-MoE: 2 dense of 24, 2 layers kept).
             for key in ("first_k_dense_replace", "num_dense_layers"):
@@ -436,14 +508,16 @@ def shrink(config):
             for key, value in cfg.to_dict().items():
                 # Sapiens2 lists KV heads per layer: group them like num_key_value_heads.
                 if key.startswith("num_key_value_heads_") and isinstance(values.get(key), list):
-                    heads, old_heads = values.get("num_attention_heads") or 4, cfg.to_dict().get("num_attention_heads") or max(value)
+                    heads, old_heads = (
+                        values.get("num_attention_heads") or 4,
+                        cfg.to_dict().get("num_attention_heads") or max(value),
+                    )
                     values[key] = [heads if kv >= old_heads else 1 if kv == 1 else 2 for kv in values[key]]
             per_layer = values.get("per_layer_config")
             if isinstance(per_layer, dict):
                 # Keys are layer indices, sometimes zero-padded (Gemma 4's "04").
                 values["per_layer_config"] = {
-                    str(n): value for n, i in enumerate(kept)
-                    for key, value in per_layer.items() if int(key) == i
+                    str(n): value for n, i in enumerate(kept) for key, value in per_layer.items() if int(key) == i
                 }
             if getattr(cfg, "mlp_only_layers", None):
                 values["mlp_only_layers"] = [n for n, i in enumerate(kept) if i in cfg.mlp_only_layers]
@@ -451,6 +525,7 @@ def shrink(config):
             # layer of the same kind (Qwen4-Exp's PLE layer must stay linear attention).
             kinds = getattr(cfg, "layer_types", None)
             if isinstance(kinds, list) and len(kinds) == cfg.num_hidden_layers:
+
                 def moved(ids):
                     same = {kinds[i]: n for n, i in reversed(list(enumerate(kept)))}
                     return sorted({kept.index(i) if i in kept else same[kinds[i]] for i in ids if kinds[i] in same})
@@ -470,9 +545,14 @@ def shrink(config):
         # CLIPSeg's decoder reads vision hidden states extract_layers (3, 6, 9): keep
         # one entry each, within the shrunk vision depth.
         vision = values.get("vision_config")
-        if isinstance(values.get("extract_layers"), list) and isinstance(vision, dict) and vision.get("num_hidden_layers"):
+        if (
+            isinstance(values.get("extract_layers"), list)
+            and isinstance(vision, dict)
+            and vision.get("num_hidden_layers")
+        ):
             depth, top = vision["num_hidden_layers"], max(values["extract_layers"]) + 1
             values["extract_layers"] = [min(i * depth // top, depth - 1) for i in values["extract_layers"]]
+
         # Fields that name layers of the original depth must name layers of the shrunk
         # one, in order (Mllama's vision intermediate_layers_indices and text
         # cross_attention_layers, Granite 4 Vision's deepstack_layer_map of
@@ -535,6 +615,7 @@ def shrink(config):
             values["intermediate_size"] = [min(size, 128) for size in values["intermediate_size"]]
         if values.get("upsample_groups") and values.get("hidden_size"):
             from math import gcd
+
             values["upsample_groups"] = gcd(values["upsample_groups"], values["hidden_size"])
         # These models need projection_dim == the text width (OWL's class head contracts
         # text query embeds against it); CLIP's projection is its own joint space.
@@ -544,7 +625,9 @@ def shrink(config):
         # frames into one token (reshape(-1, intermediate_size)): keep that factor.
         if values.get("model_type") == "voxtral" and isinstance(values.get("audio_config"), dict):
             audio = values["audio_config"]
-            audio["intermediate_size"] = audio["hidden_size"] * (cfg.audio_config.intermediate_size // cfg.audio_config.hidden_size)
+            audio["intermediate_size"] = audio["hidden_size"] * (
+                cfg.audio_config.intermediate_size // cfg.audio_config.hidden_size
+            )
         # Mllama's projector reads the vision tower's last state concatenated with
         # each intermediate one: vision_output_dim = hidden_size x (indices + 1).
         old_vision = getattr(cfg, "vision_config", None)
@@ -587,15 +670,17 @@ def shrink(config):
         for key in getattr(cfg, "sub_configs", {}) or {}:
             sub = getattr(cfg, key, None)
             ratio = getattr(sub, "pixel_shuffle_ratio", None)
-            if (
-                ratio
-                and isinstance(values.get(key), dict)
-                and sub.intermediate_size == sub.hidden_size / ratio**2
-            ):
+            if ratio and isinstance(values.get(key), dict) and sub.intermediate_size == sub.hidden_size / ratio**2:
                 # Llama 4's pixel shuffle turns hidden_size channels into
                 # hidden_size / ratio**2, which its adapter MLP reads as intermediate_size.
                 values[key]["intermediate_size"] = int(values[key]["hidden_size"] / ratio**2)
-            for field in ("projection_dim", "output_dim", "vision_output_dim", "projector_input_dim", "projector_output_dim"):
+            for field in (
+                "projection_dim",
+                "output_dim",
+                "vision_output_dim",
+                "projector_input_dim",
+                "projector_output_dim",
+            ):
                 if (
                     key != "text_config"
                     and isinstance(values.get(key), dict)
@@ -609,16 +694,26 @@ def shrink(config):
         for key, sub in subs_of(cfg).items():
             if not isinstance(values.get(key), dict):
                 continue
-            if getattr(sub, "mit_hidden_size", None) == getattr(cfg, "projection_dim", -1) and values.get("projection_dim"):
+            if getattr(sub, "mit_hidden_size", None) == getattr(cfg, "projection_dim", -1) and values.get(
+                "projection_dim"
+            ):
                 values[key]["mit_hidden_size"] = values["projection_dim"]
                 values[key]["mit_intermediate_size"] = 4 * values["projection_dim"]
             # SAM's vision neck outputs the prompt encoder's width.
             prompt = values.get("prompt_encoder_config")
-            if getattr(sub, "output_channels", None) and isinstance(prompt, dict) and sub.output_channels == cfg.prompt_encoder_config.hidden_size:
+            if (
+                getattr(sub, "output_channels", None)
+                and isinstance(prompt, dict)
+                and sub.output_channels == cfg.prompt_encoder_config.hidden_size
+            ):
                 values[key]["output_channels"] = prompt["hidden_size"]
         # Kimi K2.5's projector reads the vision tower's width (projection_hidden_size).
         vision_values = values.get("vision_config")
-        if isinstance(vision_values, dict) and getattr(cfg, "vision_config", None) is not None and isinstance(values.get("projection_hidden_size"), int):
+        if (
+            isinstance(vision_values, dict)
+            and getattr(cfg, "vision_config", None) is not None
+            and isinstance(values.get("projection_hidden_size"), int)
+        ):
             if cfg.to_dict()["projection_hidden_size"] == cfg.vision_config.to_dict().get("hidden_size"):
                 values["projection_hidden_size"] = vision_values["hidden_size"]
         # CSM's depth decoder projects the backbone's hidden states (backbone_hidden_size).
@@ -643,7 +738,9 @@ def shrink(config):
             and not isinstance(backbone.get("depths"), list)
         ):
             backbone["num_hidden_layers"] = max(backbone["num_hidden_layers"], len(outs))
-            backbone["out_indices"] = list(range(backbone["num_hidden_layers"] - len(outs) + 1, backbone["num_hidden_layers"] + 1))
+            backbone["out_indices"] = list(
+                range(backbone["num_hidden_layers"] - len(outs) + 1, backbone["num_hidden_layers"] + 1)
+            )
             backbone["out_features"] = [f"stage{i}" for i in backbone["out_indices"]]
         # A sub-config's channel list that ends at a sibling's width feeds that sibling
         # (Unlimited-OCR's SAM downsample_channels [512, 1024] are the CLIP encoder's
@@ -667,7 +764,12 @@ def shrink(config):
             repair(cfg, values)
             shrunk = type(cfg).from_dict(values)
         depth = getattr(cfg, "num_hidden_layers", None)
-        if through is None and isinstance(depth, int) and isinstance(values.get("num_hidden_layers"), int) and values["num_hidden_layers"] < depth:
+        if (
+            through is None
+            and isinstance(depth, int)
+            and isinstance(values.get("num_hidden_layers"), int)
+            and values["num_hidden_layers"] < depth
+        ):
             # Kinds the config derives from the layer index (DeepSeek-V4's hash-routed
             # layers, GLM-5.3's indexer every few MoE layers, Llama 4's moe_layers) are
             # lost by re-indexing: build both stacks on the meta device and, if a kind
@@ -938,7 +1040,9 @@ def run(args):
         try:
             proc = subprocess.run(
                 [sys.executable, __file__, "one", model_type],
-                capture_output=True, text=True, timeout=args.timeout,
+                capture_output=True,
+                text=True,
+                timeout=args.timeout,
             )
             line = proc.stdout.strip().splitlines()[-1] if proc.stdout.strip() else None
             if proc.returncode == 0 and line:

@@ -31,9 +31,7 @@ def workflow(tmp_path, monkeypatch):
             payload = {
                 "revision": "a" * 40,
                 "contract": "BERT",
-                "contracts": {
-                    "BERT": {"integration": {"repo": "huggingface-mic/bert-mic"}}
-                },
+                "contracts": {"BERT": {"integration": {"repo": "huggingface-mic/bert-mic"}}},
             }
         if name == "export" and not code:
             payload = {"revision": SHA}
@@ -70,9 +68,7 @@ def confirm(monkeypatch, replies):
     monkeypatch.setattr("builtins.input", lambda prompt: next(answers))
 
 
-def test_full_workflow_uploads_only_after_decisions_and_resumes_without_reupload(
-    workflow, monkeypatch
-):
+def test_full_workflow_uploads_only_after_decisions_and_resumes_without_reupload(workflow, monkeypatch):
     confirm(monkeypatch, ["yes", "yes", "yes"])
     target = workflow.root.parent / "transformers"
     args = [*workflow.argv, "--transformers-checkout", str(target)]
@@ -103,9 +99,7 @@ def test_full_workflow_uploads_only_after_decisions_and_resumes_without_reupload
     assert workflow.calls == before
 
 
-def test_noninteractive_stops_at_source_and_records_resumable_question(
-    workflow, monkeypatch, capsys
-):
+def test_noninteractive_stops_at_source_and_records_resumable_question(workflow, monkeypatch, capsys):
     monkeypatch.setattr("builtins.input", lambda _: pytest.fail("must not read stdin"))
     assert main([*workflow.argv, "--non-interactive"]) == 3
     state = read(workflow.root / ".mic/automation.json")
@@ -113,17 +107,11 @@ def test_noninteractive_stops_at_source_and_records_resumable_question(
     assert "contract code" in state["question"]
     assert "tmic run" in state["resume"]
     assert [name for name, _ in workflow.calls] == ["create"]
-    assert (
-        json.loads(capsys.readouterr().out.splitlines()[-1])["status"] == "needs-input"
-    )
+    assert json.loads(capsys.readouterr().out.splitlines()[-1])["status"] == "needs-input"
 
 
-def test_default_run_measures_its_model_in_cloud_before_publication(
-    workflow, monkeypatch
-):
-    monkeypatch.setattr(
-        automation.model_baselines, "inputs", lambda _: ("f" * 64, None, {})
-    )
+def test_default_run_measures_its_model_in_cloud_before_publication(workflow, monkeypatch):
+    monkeypatch.setattr(automation.model_baselines, "inputs", lambda _: ("f" * 64, None, {}))
     confirm(monkeypatch, ["yes", "yes", "yes", "yes"])
     argv = list(workflow.argv)
     argv.remove("--baseline-execution")
@@ -136,15 +124,10 @@ def test_default_run_measures_its_model_in_cloud_before_publication(
         assert command[command.index("--model-workspace") + 1] == str(workflow.root)
     assert "--transport" in commands["record"] and "github" in commands["record"]
     assert "--fixtures-only" not in commands["record"]
-    assert (
-        "--baseline-transport github"
-        in read(workflow.root / ".mic/automation.json")["resume"]
-    )
+    assert "--baseline-transport github" in read(workflow.root / ".mic/automation.json")["resume"]
 
 
-def test_dashboard_cloud_run_requires_login_before_any_stage(
-    workflow, monkeypatch, tmp_path, capsys
-):
+def test_dashboard_cloud_run_requires_login_before_any_stage(workflow, monkeypatch, tmp_path, capsys):
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
     argv = list(workflow.argv)
     argv.remove("--baseline-execution")
@@ -155,9 +138,7 @@ def test_dashboard_cloud_run_requires_login_before_any_stage(
     assert not (workflow.root / ".mic").exists()
 
 
-def test_local_only_checks_without_publication_and_can_resume_to_publish(
-    workflow, monkeypatch
-):
+def test_local_only_checks_without_publication_and_can_resume_to_publish(workflow, monkeypatch):
     confirm(monkeypatch, ["yes"])
     assert main([*workflow.argv, "--local-only"]) == 0
     assert [name for name, _ in workflow.calls][-1] == "check"
@@ -168,9 +149,7 @@ def test_local_only_checks_without_publication_and_can_resume_to_publish(
     assert len(workflow.exports) == 1
 
 
-def test_declining_upload_preserves_validation_and_resumes_from_upload(
-    workflow, monkeypatch
-):
+def test_declining_upload_preserves_validation_and_resumes_from_upload(workflow, monkeypatch):
     confirm(monkeypatch, ["yes", "no"])
     assert main(workflow.argv) == 3
     assert not workflow.exports
@@ -203,9 +182,7 @@ def test_check_failure_never_uploads_and_resumes_same_stage(workflow, monkeypatc
     assert [n for n, _ in workflow.calls].count("record") == 1
 
 
-def test_dataset_conflict_requires_fresh_preview_and_new_decision(
-    workflow, monkeypatch
-):
+def test_dataset_conflict_requires_fresh_preview_and_new_decision(workflow, monkeypatch):
     workflow.failures["export"] = [2]
     confirm(monkeypatch, ["yes", "yes", "yes", "yes", "yes"])
     assert main(workflow.argv) == 0
@@ -290,10 +267,7 @@ def test_edit_during_upload_question_restarts_validation(workflow, monkeypatch):
         current = read(workflow.root / ".mic/automation.json")["next_stage"]
         confirmations.append(current)
         if current == "publish" and not edited:
-            path = (
-                Workspace(workflow.root).contract_root
-                / "integrations/transformers/usage.md"
-            )
+            path = Workspace(workflow.root).contract_root / "integrations/transformers/usage.md"
             path.write_text(path.read_text() + "\n# corrected before publication\n")
             edited = True
         return "yes"
@@ -309,9 +283,7 @@ def test_destination_change_reuses_validated_published_model(workflow, monkeypat
     confirm(monkeypatch, ["yes", "yes", "yes"])
     assert main(workflow.argv) == 0
     confirm(monkeypatch, ["yes"])
-    assert (
-        main([*workflow.argv, "--fleet", "control", "--contract-name", "new-name"]) == 0
-    )
+    assert main([*workflow.argv, "--fleet", "control", "--contract-name", "new-name"]) == 0
     names = [n for n, _ in workflow.calls]
     assert names.count("publish") == 1 and names.count("check") == 1
     assert names.count("export") == 2
@@ -360,8 +332,7 @@ def repair_workflow(workflow, monkeypatch):
         if result["exit_code"]:
             log = out / result["log"]
             log.write_text(
-                log.read_text()
-                + "\nthe contract fails on the random fixture: KeyError: invented.parameter\n"
+                log.read_text() + "\nthe contract fails on the random fixture: KeyError: invented.parameter\n"
             )
         return result
 
@@ -382,9 +353,7 @@ def repair_workflow(workflow, monkeypatch):
 
 
 @pytest.mark.requires_runtime
-def test_reviewed_repair_rebuilds_fixture_before_measurements(
-    repair_workflow, monkeypatch
-):
+def test_reviewed_repair_rebuilds_fixture_before_measurements(repair_workflow, monkeypatch):
     workflow = repair_workflow
     confirm(monkeypatch, ["yes", "yes"])
     assert main([*workflow.argv, "--local-only"]) == 0
@@ -396,26 +365,16 @@ def test_reviewed_repair_rebuilds_fixture_before_measurements(
 
 
 @pytest.mark.requires_runtime
-def test_agent_repair_waits_for_exact_approval_and_reuses_saved_proposal(
-    repair_workflow, capsys
-):
+def test_agent_repair_waits_for_exact_approval_and_reuses_saved_proposal(repair_workflow, capsys):
     workflow = repair_workflow
     _, source, _ = agent_call(workflow, capsys, extra=["--local-only"])
-    code, proposed, _ = agent_call(
-        workflow, capsys, answer=approval(source), extra=["--local-only"]
-    )
+    code, proposed, _ = agent_call(workflow, capsys, answer=approval(source), extra=["--local-only"])
     assert code == 3 and proposed["pending_question"]["kind"] == "contract-repair"
     calls = list(workflow.calls)
     code, same, _ = agent_call(workflow, capsys, extra=["--local-only"])
-    assert (
-        code == 3
-        and same["pending_question"]["question_id"]
-        == proposed["pending_question"]["question_id"]
-    )
+    assert code == 3 and same["pending_question"]["question_id"] == proposed["pending_question"]["question_id"]
     assert workflow.calls == calls
-    code, done, _ = agent_call(
-        workflow, capsys, answer=approval(proposed), extra=["--local-only"]
-    )
+    code, done, _ = agent_call(workflow, capsys, answer=approval(proposed), extra=["--local-only"])
     assert code == 0 and done["status"] == "validated"
     assert len(read(workflow.root / ".mic/automation.json")["repairs"]) == 1
 
@@ -424,17 +383,11 @@ def test_agent_repair_waits_for_exact_approval_and_reuses_saved_proposal(
 def test_agent_can_reject_a_repair_without_changing_source(repair_workflow, capsys):
     workflow = repair_workflow
     _, source, _ = agent_call(workflow, capsys, extra=["--local-only"])
-    code, proposed, _ = agent_call(
-        workflow, capsys, answer=approval(source), extra=["--local-only"]
-    )
+    code, proposed, _ = agent_call(workflow, capsys, answer=approval(source), extra=["--local-only"])
     assert proposed["pending_question"]["choices"] == ["approve", "reject", "defer"]
-    usage = (
-        Workspace(workflow.root).contract_root / "integrations/transformers/usage.md"
-    )
+    usage = Workspace(workflow.root).contract_root / "integrations/transformers/usage.md"
     before = usage.read_text()
-    agent_call(
-        workflow, capsys, answer=approval(proposed, "reject"), extra=["--local-only"]
-    )
+    agent_call(workflow, capsys, answer=approval(proposed, "reject"), extra=["--local-only"])
     state = read(workflow.root / ".mic/automation.json")
     assert state["repairs"][0]["status"] == "rejected"
     assert usage.read_text() == before
@@ -450,9 +403,7 @@ def test_repair_budget_exhaustion_returns_to_retry(repair_workflow, monkeypatch)
     assert state["pending_question"]["kind"] == "retry"
 
 
-def test_human_always_completes_workflow_with_readable_summary(
-    workflow, monkeypatch, capsys
-):
+def test_human_always_completes_workflow_with_readable_summary(workflow, monkeypatch, capsys):
     prompts = []
 
     def always(prompt):
@@ -481,9 +432,7 @@ def test_human_always_stops_repeated_failed_builds(workflow, monkeypatch, capsys
     assert "Resume:" in output
 
 
-def test_resumed_build_starts_at_one_and_omits_unrequested_pin(
-    workflow, monkeypatch, capsys
-):
+def test_resumed_build_starts_at_one_and_omits_unrequested_pin(workflow, monkeypatch, capsys):
     workflow.failures["build"] = [1]
     confirm(monkeypatch, ["yes", "N"])
     assert main(workflow.argv) == 3
@@ -497,9 +446,7 @@ def test_resumed_build_starts_at_one_and_omits_unrequested_pin(
 
 
 def test_agent_drives_full_workflow_without_a_terminal(workflow, monkeypatch, capsys):
-    monkeypatch.setattr(
-        "builtins.input", lambda _: pytest.fail("agent must never read stdin")
-    )
+    monkeypatch.setattr("builtins.input", lambda _: pytest.fail("agent must never read stdin"))
     code, source, logs = agent_call(workflow, capsys)
     assert code == 3 and source["protocol_version"] == 1
     assert source["pending_question"]["kind"] == "source-review"
@@ -533,16 +480,11 @@ def test_agent_polling_keeps_question_id_and_does_no_work(workflow, capsys):
 
 def test_stale_answer_cannot_approve_edited_source(workflow, capsys):
     _, old, _ = agent_call(workflow, capsys)
-    usage = (
-        Workspace(workflow.root).contract_root / "integrations/transformers/usage.md"
-    )
+    usage = Workspace(workflow.root).contract_root / "integrations/transformers/usage.md"
     usage.write_text(usage.read_text() + "\n# changed after review\n")
     code, current, _ = agent_call(workflow, capsys, answer=approval(old))
     assert code == 3 and "does not match" in current["answer_error"]
-    assert (
-        current["pending_question"]["question_id"]
-        != old["pending_question"]["question_id"]
-    )
+    assert current["pending_question"]["question_id"] != old["pending_question"]["question_id"]
     assert not any(n == "build" for n, _ in workflow.calls)
 
 
@@ -584,9 +526,7 @@ def test_agent_can_retry_failed_creation(workflow, capsys):
 def test_agent_local_only_remains_local_when_resuming(workflow, capsys):
     _, source, _ = agent_call(workflow, capsys, extra=["--local-only"])
     assert "--local-only" in source["resume"]
-    code, result, _ = agent_call(
-        workflow, capsys, answer=approval(source), extra=["--local-only"]
-    )
+    code, result, _ = agent_call(workflow, capsys, answer=approval(source), extra=["--local-only"])
     assert code == 0 and result["status"] == "validated"
     assert not any(n == "publish" for n, _ in workflow.calls)
 
@@ -660,10 +600,7 @@ def test_agent_changed_baseline_poll_and_reason_do_not_repeat_work(workflow, cap
     )
     assert code == 3 and ready["pending_question"]["kind"] == "model-publication"
     assert not candidate.exists()
-    assert (
-        read(workflow.root / ".mic/automation-reviews.json")[-1]["reason"]
-        == "Measured reference correction"
-    )
+    assert read(workflow.root / ".mic/automation-reviews.json")[-1]["reason"] == "Measured reference correction"
 
 
 def test_source_edit_during_baseline_review_is_not_approved(workflow, monkeypatch):
@@ -705,46 +642,31 @@ def test_automatic_workspace_discovery(tmp_path, monkeypatch):
     assert automation.resolve_workspace(args) == existing
 
 
-def test_workspace_discovery_preserves_explicit_workspace_and_ignores_other_models(
-    tmp_path, monkeypatch
-):
+def test_workspace_discovery_preserves_explicit_workspace_and_ignores_other_models(tmp_path, monkeypatch):
     from transformers_mic.workspace import write
 
     monkeypatch.chdir(tmp_path)
     args = SimpleNamespace(model=MODEL, out=None, workspace=".")
     write(tmp_path / "work/other/.mic/project.json", {"model": "other/model"})
-    assert (
-        automation.resolve_workspace(args)
-        == tmp_path / "work/mic/google-bert--bert-base-uncased"
-    )
+    assert automation.resolve_workspace(args) == tmp_path / "work/mic/google-bert--bert-base-uncased"
     args.workspace = "custom"
     assert automation.resolve_workspace(args) == tmp_path / "custom"
 
 
 def test_cloud_run_checks_all_fixture_variants_before_dispatch(workflow, monkeypatch):
-    monkeypatch.setattr(
-        automation.model_baselines, "inputs", lambda _: ("f" * 64, None, {})
-    )
+    monkeypatch.setattr(automation.model_baselines, "inputs", lambda _: ("f" * 64, None, {}))
     confirm(monkeypatch, ["yes", "yes", "yes", "yes"])
     argv = list(workflow.argv)
     argv.remove("--baseline-execution")
     argv.remove("local")
     assert main([*argv, "--baseline-transport", "github"]) == 0
-    smoke = [
-        (i, command)
-        for i, (_, command) in enumerate(workflow.calls)
-        if "--no-baseline" in command
-    ]
+    smoke = [(i, command) for i, (_, command) in enumerate(workflow.calls) if "--no-baseline" in command]
     assert len(smoke) == 1
     auto = [command for name, command in workflow.calls if name == "auto"]
     assert auto[0][-2:] == ["auto", "--match-cloud"]
     index, command = smoke[0]
-    assert (
-        "--all-variants" in command and "--target" in command and "--isolate" in command
-    )
-    assert index < next(
-        i for i, (_, cmd) in enumerate(workflow.calls) if "baselines" in cmd
-    )
+    assert "--all-variants" in command and "--target" in command and "--isolate" in command
+    assert index < next(i for i, (_, cmd) in enumerate(workflow.calls) if "baselines" in cmd)
 
 
 def test_cloud_fixture_preflight_failure_prevents_dispatch(workflow, monkeypatch):
@@ -760,18 +682,12 @@ def test_cloud_fixture_preflight_failure_prevents_dispatch(workflow, monkeypatch
 def test_cloud_collection_is_never_shared_across_transports(tmp_path, monkeypatch):
     from transformers_mic.workspace import write
 
-    monkeypatch.setattr(
-        automation.model_baselines, "inputs", lambda workspace: ("abc", None)
-    )
+    monkeypatch.setattr(automation.model_baselines, "inputs", lambda workspace: ("abc", None))
     plain = tmp_path / "cloud/abc"
     assert automation.cloud_collection(tmp_path, None, "dashboard") == plain
     write(plain / "cloud.json", {"transport": "github-test", "job": {}})
     assert automation.cloud_collection(tmp_path, None, "github") == plain
-    assert automation.cloud_collection(tmp_path, None, "dashboard") == (
-        tmp_path / "cloud/abc-dashboard"
-    )
+    assert automation.cloud_collection(tmp_path, None, "dashboard") == (tmp_path / "cloud/abc-dashboard")
     write(plain / "cloud.json", {"dashboard": "https://d", "job": {}})
     assert automation.cloud_collection(tmp_path, None, "dashboard") == plain
-    assert automation.cloud_collection(tmp_path, None, "github") == (
-        tmp_path / "cloud/abc-github"
-    )
+    assert automation.cloud_collection(tmp_path, None, "github") == (tmp_path / "cloud/abc-github")

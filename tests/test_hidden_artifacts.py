@@ -54,13 +54,9 @@ def test_restore_rejects_changed_content(tmp_path, monkeypatch):
 
 
 @pytest.mark.parametrize("name", ["weights.safetensors", "../.secret"])
-def test_restore_does_not_repair_measurements_or_unsafe_paths(
-    tmp_path, monkeypatch, name
-):
+def test_restore_does_not_repair_measurements_or_unsafe_paths(tmp_path, monkeypatch, name):
     setup_collection(tmp_path, name)
-    monkeypatch.setattr(
-        github, "hf_hub_download", lambda *a, **kw: pytest.fail("unexpected fetch")
-    )
+    monkeypatch.setattr(github, "hf_hub_download", lambda *a, **kw: pytest.fail("unexpected fetch"))
     if ".." in Path(name).parts:
         with pytest.raises(ValueError, match="Unsafe"):
             github.restore_hidden_sources(tmp_path)

@@ -6,12 +6,12 @@ calls keep their native dispatch. Contracts, baselines and tolerances are frozen
 """
 
 import argparse
-from contextlib import contextmanager, nullcontext
 import json
 import os
-from pathlib import Path
 import subprocess
 import sys
+from contextlib import contextmanager, nullcontext
+from pathlib import Path
 from unittest.mock import patch
 
 import dependency_study
@@ -29,12 +29,9 @@ def previous_mask(position_bias, attention_mask, is_causal, query, key):
             return position_bias
         q_length, kv_length = query.shape[2], key.shape[2]
         causal = (
-            torch.arange(q_length, device=key.device)[:, None]
-            >= torch.arange(kv_length, device=key.device)[None, :]
+            torch.arange(q_length, device=key.device)[:, None] >= torch.arange(kv_length, device=key.device)[None, :]
         )
-        return torch.where(
-            causal.view(1, 1, q_length, kv_length), position_bias, minimum
-        )
+        return torch.where(causal.view(1, 1, q_length, kv_length), position_bias, minimum)
     if attention_mask.dtype == torch.bool:
         return torch.where(attention_mask, position_bias, minimum)
     return position_bias + attention_mask
@@ -53,17 +50,13 @@ def math_control():
     def mask(*args, **kwargs):
         old = previous_mask(*args, **kwargs)
         current = mask_function(*args, **kwargs)
-        assert torch.equal(old, current), (
-            "Mask values changed in addition to their layout"
-        )
+        assert torch.equal(old, current), "Mask values changed in addition to their layout"
         current._mic_previously_noncontiguous = old.stride(-1) != 1
         counts["masks_checked"] += 1
         return current
 
     def attention(*args, **kwargs):
-        affected = getattr(
-            kwargs.get("attn_mask"), "_mic_previously_noncontiguous", False
-        )
+        affected = getattr(kwargs.get("attn_mask"), "_mic_previously_noncontiguous", False)
         if affected:
             counts["math_calls"] += 1
         with sdpa_kernel(SDPBackend.MATH) if affected else nullcontext():
@@ -83,9 +76,7 @@ def observe(contract, variant, mode, out):
     with math_control() if mode == "math" else nullcontext({}) as counts:
         dependency_study.observe(variant, out, contract=contract)
     result = json.loads(out.read_text())
-    assert all(
-        o["outputs"]["runtime"]["device"] == "cuda" for o in result["observations"]
-    )
+    assert all(o["outputs"]["runtime"]["device"] == "cuda" for o in result["observations"])
     if mode == "math":
         assert counts["math_calls"] > 0, "The control intercepted no affected calls"
     result.update(control=counts, mode=mode)
@@ -133,15 +124,11 @@ def study(out):
                             stderr=log,
                             check=True,
                         )
-                    samples[contract, variant, mode, repeat] = json.loads(
-                        path.read_text()
-                    )
+                    samples[contract, variant, mode, repeat] = json.loads(path.read_text())
                     print(name, "completed", flush=True)
     rows, repeats = [], []
     for contract in ("T5", "MusicgenMelody"):
-        manifest = run.load(
-            ROOT / f"example/hub/{contract}-integration/integration.json", "integration"
-        )
+        manifest = run.load(ROOT / f"example/hub/{contract}-integration/integration.json", "integration")
         rules = run.rules_for(
             manifest,
             ROOT / f"example/transformers/tests/contracts/expectations/{contract}/cuda",
@@ -161,13 +148,9 @@ def study(out):
                                 "failures": record.get("failures", []),
                             }
                         )
-                assert [o["target"] for o in first["observations"]] == [
-                    o["target"] for o in second["observations"]
-                ]
+                assert [o["target"] for o in first["observations"]] == [o["target"] for o in second["observations"]]
                 for a, b in zip(first["observations"], second["observations"]):
-                    failures = run.compare(
-                        rules, a["outputs"], b["outputs"], manifest["outputs"]
-                    )
+                    failures = run.compare(rules, a["outputs"], b["outputs"], manifest["outputs"])
                     repeats.append(
                         {
                             "contract": contract,
@@ -182,9 +165,7 @@ def study(out):
     (out / "validation.json").write_text(json.dumps(report, indent=2) + "\n")
     assert dependency_study.frozen_hashes() == frozen, "Frozen files changed"
     assert len(rows) == 20, rows
-    assert all(
-        r["status"] == ("pass" if r["mode"] == "math" else "fail") for r in rows
-    ), rows
+    assert all(r["status"] == ("pass" if r["mode"] == "math" else "fail") for r in rows), rows
     assert all(not r["failures"] for r in repeats), repeats
     print(
         "All 10 native failures reproduced; selective MATH restores all 10 old references. Fresh-process repeats agree."

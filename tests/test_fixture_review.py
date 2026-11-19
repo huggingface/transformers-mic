@@ -50,11 +50,7 @@ def review_data(workspace, out, layers=2):
         "files": ["config.json", "model.safetensors"],
         "config": config,
         "source_keys": SOURCE_KEYS,
-        "fixture_keys": [
-            k
-            for k in SOURCE_KEYS
-            if ".layer." not in k or int(k.split(".")[3]) < layers
-        ],
+        "fixture_keys": [k for k in SOURCE_KEYS if ".layer." not in k or int(k.split(".")[3]) < layers],
         "missing_parameters": [],
         "parameters": {"original": 110_000_000, "fixture": 400_000},
         "config_changes": [
@@ -141,9 +137,7 @@ def agent(workflow, capsys, *extra):
     return code, json.loads(capsys.readouterr().out.strip().splitlines()[-1])
 
 
-def test_tiny_model_is_reviewed_before_the_contract_and_its_code_runs(
-    workflow, capsys, tmp_path
-):
+def test_tiny_model_is_reviewed_before_the_contract_and_its_code_runs(workflow, capsys, tmp_path):
     code, result = agent(workflow, capsys)
     assert code == 3
     question = result["pending_question"]
@@ -156,10 +150,7 @@ def test_tiny_model_is_reviewed_before_the_contract_and_its_code_runs(
     assert summary["folder"] == str(folder)
     assert summary["weight_names"]["only_source"] == []
     assert "bert.encoder.layer.{n}.attention.self.query.weight" in question["details"]
-    assert (
-        "hidden_size" in question["details"]
-        and "edit config.json" in question["details"]
-    )
+    assert "hidden_size" in question["details"] and "edit config.json" in question["details"]
 
     code, result = agent(workflow, capsys, "--answer", str(answer(tmp_path, result)))
     assert code == 3 and result["pending_question"]["kind"] == "source-review"
@@ -173,9 +164,7 @@ def test_tiny_model_is_reviewed_before_the_contract_and_its_code_runs(
     assert workflow.calls[3][1][-1] == "fixture"  # fixture/ now shows the built model
 
 
-def test_editing_config_json_reshrinks_with_the_values_as_overrides(
-    workflow, capsys, tmp_path
-):
+def test_editing_config_json_reshrinks_with_the_values_as_overrides(workflow, capsys, tmp_path):
     code, first = agent(workflow, capsys)
     config = workflow.root / "fixture/config.json"
     values = json.loads(config.read_text())
@@ -186,25 +175,16 @@ def test_editing_config_json_reshrinks_with_the_values_as_overrides(
     code, result = agent(workflow, capsys, "--answer", str(answer(tmp_path, first)))
     assert code == 3 and result["answer_error"]
     second = result["pending_question"]
-    assert (
-        second["kind"] == "fixture-review"
-        and second["question_id"] != first["pending_question"]["question_id"]
-    )
+    assert second["kind"] == "fixture-review" and second["question_id"] != first["pending_question"]["question_id"]
     workspace = Workspace(workflow.root)
-    overrides = workspace.manifest["fixtures"][workspace.fixture]["build"][
-        "config_overrides"
-    ]
+    overrides = workspace.manifest["fixtures"][workspace.fixture]["build"]["config_overrides"]
     assert overrides["fields"] == {"hidden_size": 64} and overrides["reason"]
     assert json.loads(config.read_text())["hidden_size"] == 64
     assert [name for name, _ in workflow.calls].count("shrink") == 2
-    assert not read(workflow.root / ".mic/automation.json").get(
-        "reviewed_fixture_sha256"
-    )
+    assert not read(workflow.root / ".mic/automation.json").get("reviewed_fixture_sha256")
 
 
-def test_an_edit_after_approval_sends_the_run_back_to_the_review(
-    workflow, capsys, tmp_path
-):
+def test_an_edit_after_approval_sends_the_run_back_to_the_review(workflow, capsys, tmp_path):
     _, result = agent(workflow, capsys)
     code, result = agent(workflow, capsys, "--answer", str(answer(tmp_path, result)))
     assert code == 3 and result["pending_question"]["kind"] == "source-review"
@@ -232,9 +212,7 @@ def test_human_presses_e_edits_then_approves(workflow, monkeypatch, capsys):
     kinds = [d["kind"] for d in state["decisions"]]
     assert kinds == ["fixture-review", "source-review"]  # E was not a decision
     workspace = Workspace(workflow.root)
-    fields = workspace.manifest["fixtures"][workspace.fixture]["build"][
-        "config_overrides"
-    ]["fields"]
+    fields = workspace.manifest["fixtures"][workspace.fixture]["build"]["config_overrides"]["fields"]
     assert fields == {"hidden_size": 128}
 
 
@@ -337,12 +315,7 @@ def test_edit_is_not_a_decision(monkeypatch, tmp_path):
     state = {}
     interaction = Interaction("human", state, lambda: None, dict)
     config = {"path": str(tmp_path / "config.json"), "sha256": "x"}
-    assert (
-        interaction.ask(
-            "Tiny model?", "d", kind="fixture-review", context={"config": config}
-        )
-        == "edit"
-    )
+    assert interaction.ask("Tiny model?", "d", kind="fixture-review", context={"config": config}) == "edit"
     assert edited == [config["path"]]
     assert not state.get("decisions") and "pending_question" not in state
 
@@ -369,9 +342,7 @@ def test_an_overfit_build_still_counts_as_the_current_fixture(tmp_path, fake_bac
     assert data["artifact"] == str(built.resolve())
 
 
-def test_question_id_does_not_depend_on_the_working_directory(
-    workflow, capsys, monkeypatch, tmp_path
-):
+def test_question_id_does_not_depend_on_the_working_directory(workflow, capsys, monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)  # the folder reads as project/fixture from here
     _, first = agent(workflow, capsys)
     elsewhere = tmp_path / "elsewhere"
@@ -383,9 +354,7 @@ def test_question_id_does_not_depend_on_the_working_directory(
 
 
 def test_experts_layout_is_named_for_both_sides():
-    per_expert = [f"layers.0.experts.{e}.w1.weight" for e in range(4)] + [
-        "layers.0.shared_experts.w1.weight"
-    ]
+    per_expert = [f"layers.0.experts.{e}.w1.weight" for e in range(4)] + ["layers.0.shared_experts.w1.weight"]
     fused = [
         "model.layers.0.mlp.experts.gate_up_proj",
         "model.layers.0.mlp.experts.down_proj",
@@ -393,9 +362,7 @@ def test_experts_layout_is_named_for_both_sides():
     assert fixture_review.experts(per_expert) == {"layout": "per-expert", "experts": 4}
     assert fixture_review.experts(fused) == {"layout": "fused", "experts": None}
     assert fixture_review.experts(["layers.0.shared_experts.w1.weight"]) is None
-    names = fixture_review.weight_names(
-        {"source_keys": per_expert, "fixture_keys": fused, "missing_parameters": []}
-    )
+    names = fixture_review.weight_names({"source_keys": per_expert, "fixture_keys": fused, "missing_parameters": []})
     assert "DIFFERENT LAYOUT" in fixture_review.experts_line(names)
     same = fixture_review.weight_names(
         {

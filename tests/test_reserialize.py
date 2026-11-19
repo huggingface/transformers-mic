@@ -22,7 +22,11 @@ def fixture_folder(tmp_path, state, indent=2):
         "built_from": {"repo": "org/x", "revision": "r"},
         "seed": 0,
         "missing_parameters": [],
-        "serialization": {"file": "pytorch_model.bin", "reverted_conversions": [], "migrated_from": "model.safetensors"},
+        "serialization": {
+            "file": "pytorch_model.bin",
+            "reverted_conversions": [],
+            "migrated_from": "model.safetensors",
+        },
         "sha256": runner.file_hashes(tmp_path),
     }
     (tmp_path / "build.json").write_text(json.dumps(build, indent=indent) + "\n")
@@ -97,7 +101,9 @@ def test_loaded_model_is_unchanged(tmp_path):
     model = BertForMaskedLM(config)
     config.save_pretrained(before)
     # A parameter the real checkpoint lacks is initialized at load time (LUKE's lm_head.decoder.weight)
-    fixture_folder(before, {k: v for k, v in model.state_dict().items() if k != "cls.predictions.transform.dense.weight"})
+    fixture_folder(
+        before, {k: v for k, v in model.state_dict().items() if k != "cls.predictions.transform.dense.weight"}
+    )
     (before / "config.json").write_text(config.to_json_string())
     runner = reserialize.runner()
     build = json.loads((before / "build.json").read_text())

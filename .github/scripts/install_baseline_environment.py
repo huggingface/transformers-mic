@@ -2,13 +2,13 @@
 
 import importlib.metadata
 import os
-from pathlib import Path
 import platform
 import re
 import subprocess
 import sys
+from pathlib import Path
 
-from transformers_mic import fleet, cloud_inputs
+from transformers_mic import cloud_inputs, fleet
 from transformers_mic.workspace import read
 
 
@@ -25,16 +25,12 @@ def main():
         for name in os.environ["FLEETS"].split(","):
             path, _ = fleet.download(name, revision)
             environments.append(read(path)["environment"])
-    if not environments or any(
-        environment != environments[0] for environment in environments
-    ):
-        raise ValueError(
-            "Selected fleets have different dependency environments; measure separately"
-        )
+    if not environments or any(environment != environments[0] for environment in environments):
+        raise ValueError("Selected fleets have different dependency environments; measure separately")
     environment = environments[0]
-    if platform.python_version() != environment[
-        "python"
-    ] and not platform.python_version().startswith(environment["python"] + "."):
+    if platform.python_version() != environment["python"] and not platform.python_version().startswith(
+        environment["python"] + "."
+    ):
         raise ValueError("Approved image Python does not match the fleet environment")
     checkout = Path(os.environ["MIC_TRANSFORMERS_CHECKOUT"])
     subprocess.run(["git", "init", str(checkout)], check=True)
@@ -51,9 +47,7 @@ def main():
         ],
         check=True,
     )
-    subprocess.run(
-        ["git", "-C", str(checkout), "checkout", "--detach", "FETCH_HEAD"], check=True
-    )
+    subprocess.run(["git", "-C", str(checkout), "checkout", "--detach", "FETCH_HEAD"], check=True)
     # Constrain every install to the image's own versions: missing tools are added,
     # nothing the image ships (numpy, torch, ...) is upgraded or downgraded.
     frozen = subprocess.run(
@@ -69,10 +63,7 @@ def main():
             for line in frozen
             # Packages installed by name below (the framework, the pinned doc-builder,
             # as Transformers CI installs them) are not held to the image's version.
-            if "==" in line
-            and not line.lower().startswith(
-                ("transformers==", "hf-doc-builder==", "-e")
-            )
+            if "==" in line and not line.lower().startswith(("transformers==", "hf-doc-builder==", "-e"))
         )
         + "\n"
     )
@@ -124,9 +115,7 @@ def transformers_torch_stack(checkout):
         # docker/torch-light.dockerfile: uv pip install 'torch<=X' 'torchaudio' ... --index-url .../cpu
         text = (checkout / "docker/torch-light.dockerfile").read_text()
         line = next(
-            line
-            for line in text.splitlines()
-            if "pip install" in line and re.search(r"[\s']torch[<=>' ]", line)
+            line for line in text.splitlines() if "pip install" in line and re.search(r"[\s']torch[<=>' ]", line)
         )
         specs = re.findall(r"'(torch[a-z]*[^']*)'", line)
         if not any(re.split(r"[<>=!~ ]", spec)[0] == "torch" for spec in specs):
@@ -136,9 +125,7 @@ def transformers_torch_stack(checkout):
     text = (checkout / "docker/transformers-all-latest-gpu/Dockerfile").read_text()
     args = dict(re.findall(r"^ARG (PYTORCH|CUDA)='([^']+)'", text, re.M))
     if set(args) != {"PYTORCH", "CUDA"}:
-        raise ValueError(
-            "No PYTORCH/CUDA args in transformers-all-latest-gpu/Dockerfile"
-        )
+        raise ValueError("No PYTORCH/CUDA args in transformers-all-latest-gpu/Dockerfile")
     return [f"torch=={args['PYTORCH']}", "torchvision", "torchaudio"], args["CUDA"]
 
 

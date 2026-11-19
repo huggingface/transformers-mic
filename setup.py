@@ -1,7 +1,8 @@
 """Bundle the tested backend and catalog from their canonical repository sources."""
 
-from pathlib import Path
 import shutil
+from pathlib import Path
+
 from setuptools import setup
 from setuptools.command.build_py import build_py
 
@@ -20,9 +21,7 @@ class BuildPy(build_py):
             shutil.copy2(source, backend / source.name)
         for name in ("sweep.py", "layer_patterns.py"):
             shutil.copy2(ROOT / "experiments" / name, backend / name)
-        shutil.copytree(
-            ROOT / "example/schemas", backend / "schemas", dirs_exist_ok=True
-        )
+        shutil.copytree(ROOT / "example/schemas", backend / "schemas", dirs_exist_ok=True)
         catalog = package / "_catalog"
         if catalog.exists():
             shutil.rmtree(catalog)

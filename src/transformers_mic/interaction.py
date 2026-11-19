@@ -30,9 +30,7 @@ def load_answer(path):
         "answer",
         "reason",
     }:
-        raise ValueError(
-            "Answer must be a JSON object with question_id, answer, and optional reason"
-        )
+        raise ValueError("Answer must be a JSON object with question_id, answer, and optional reason")
     if not isinstance(answer.get("question_id"), str) or not answer["question_id"]:
         raise ValueError("Answer requires a nonempty question_id")
     if answer.get("answer") not in ("approve", "reject", "retry", "defer"):
@@ -57,9 +55,7 @@ class Interaction:
         self.always_authorization = None
         self.automatic_retries = {}
 
-    def ask(
-        self, question, details, *, reason=False, kind="confirmation", context=None
-    ):
+    def ask(self, question, details, *, reason=False, kind="confirmation", context=None):
         snapshot = {
             "kind": kind,
             "question": question,
@@ -85,10 +81,7 @@ class Interaction:
                 raise Pending(question, details, record=record)
             answer = self.answer
             if answer["question_id"] != record["question_id"]:
-                used = any(
-                    d["question_id"] == answer["question_id"]
-                    for d in self.state.get("decisions", [])
-                )
+                used = any(d["question_id"] == answer["question_id"] for d in self.state.get("decisions", []))
                 raise Pending(
                     question,
                     details,

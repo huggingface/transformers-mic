@@ -15,24 +15,16 @@ def from_env():
         return None
     allowed = os.getenv("MIC_BASELINE_INPUT_NAMESPACES", "huggingface-mic").split(",")
     if (
-        not re.fullmatch(
-            r"[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*-mic", repo
-        )
+        not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*-mic", repo)
         or repo.split("/")[0] not in allowed
         or not re.fullmatch(r"[a-f0-9]{40}", revision)
     ):
-        raise ValueError(
-            "Model input must be an approved MIC repository at an immutable revision"
-        )
+        raise ValueError("Model input must be an approved MIC repository at an immutable revision")
     return {"repo": repo, "revision": revision}
 
 
 def lock(workspace):
-    result = read(
-        hf_hub_download(
-            workspace["repo"], ".mic/baseline-lock.json", revision=workspace["revision"]
-        )
-    )
+    result = read(hf_hub_download(workspace["repo"], ".mic/baseline-lock.json", revision=workspace["revision"]))
     if result.get("local_patches") or len(result["contracts"]) != 1:
         raise ValueError("Cloud model input requires one unpatched contract")
     contract = next(iter(result["contracts"].values()))

@@ -18,11 +18,9 @@ import math
 import time
 from pathlib import Path
 
+import experiment as exp
 import torch
 import transformers
-
-import experiment as exp
-
 
 # Real checkpoints whose weights are compared alongside the slim fixtures.
 REAL = {
@@ -139,8 +137,10 @@ def check(args):
                 probe = exp.training_probe(task, model)
                 row["training_detected"] = not probe["pass"]
                 row["loss_detected"] = probe["loss"] is None or not math.isclose(
-                    probe["loss"], frozen["training"]["loss"],
-                    rel_tol=exp.RTOL, abs_tol=exp.ATOL,
+                    probe["loss"],
+                    frozen["training"]["loss"],
+                    rel_tol=exp.RTOL,
+                    abs_tol=exp.ATOL,
                 )
                 row["loss"] = probe["loss"]
             del model, task
@@ -158,9 +158,18 @@ def check(args):
         result["rows"].append(row)
         exp.log(
             "checked",
-            **{k: row.get(k) for k in ("family", "seed", "weights", "smoke_detected",
-                                       "numerical_detected", "recorded_output_detected",
-                                       "max_absolute_delta")},
+            **{
+                k: row.get(k)
+                for k in (
+                    "family",
+                    "seed",
+                    "weights",
+                    "smoke_detected",
+                    "numerical_detected",
+                    "recorded_output_detected",
+                    "max_absolute_delta",
+                )
+            },
         )
         gc.collect()
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -168,8 +177,7 @@ def check(args):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
     f = sub.add_parser("freeze")
     f.add_argument("--families", nargs="+", choices=list(exp.TASKS), required=True)

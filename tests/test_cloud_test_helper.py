@@ -1,7 +1,7 @@
 """Check test-helper retry behavior without submitting real GPU work."""
 
-from types import SimpleNamespace
 import subprocess
+from types import SimpleNamespace
 
 import pytest
 
@@ -38,9 +38,7 @@ def test_ambiguous_dispatch_is_not_repeated(tmp_path, monkeypatch):
     write(tmp_path / "cloud.json", state())
     monkeypatch.setattr(helper, "find_run", lambda _: None)
     monkeypatch.setattr(helper.time, "sleep", lambda _: None)
-    monkeypatch.setattr(
-        helper.subprocess, "run", lambda *a, **k: pytest.fail("redispatch")
-    )
+    monkeypatch.setattr(helper.subprocess, "run", lambda *a, **k: pytest.fail("redispatch"))
     with pytest.raises(ValueError, match="Dispatch is unresolved"):
         helper.run_locked(args(), tmp_path)
 
@@ -96,16 +94,12 @@ def test_watcher_reports_actual_step_and_queue_without_native_watch(monkeypatch)
     def api(path):
         calls.append(path)
         if "/jobs?" in path:
-            return {
-                "jobs": [{"name": "measure (cpu)", "status": "queued", "steps": []}]
-            }
+            return {"jobs": [{"name": "measure (cpu)", "status": "queued", "steps": []}]}
         return next(states)
 
     monkeypatch.setattr(helper, "api", api)
     monkeypatch.setattr(helper.time, "sleep", lambda _: None)
-    monkeypatch.setattr(
-        helper.cloud_progress, "display", lambda view, previous: views.append(view)
-    )
+    monkeypatch.setattr(helper.cloud_progress, "display", lambda view, previous: views.append(view))
     monkeypatch.setattr(
         helper.subprocess,
         "run",
@@ -116,9 +110,7 @@ def test_watcher_reports_actual_step_and_queue_without_native_watch(monkeypatch)
     assert all("123" in call for call in calls)
 
 
-def test_download_retries_a_dropped_connection_on_a_clean_directory(
-    tmp_path, monkeypatch
-):
+def test_download_retries_a_dropped_connection_on_a_clean_directory(tmp_path, monkeypatch):
     calls = []
 
     def run(command, check):

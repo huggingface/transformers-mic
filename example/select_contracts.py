@@ -95,9 +95,7 @@ def _entries(value):
             pairs.append(item.elts)
     else:
         return None
-    if not all(
-        isinstance(key, ast.Constant) and isinstance(key.value, str) for key, _ in pairs
-    ):
+    if not all(isinstance(key, ast.Constant) and isinstance(key.value, str) for key, _ in pairs):
         return None
     result = {key.value: ast.dump(val) for key, val in pairs}
     return result
@@ -115,9 +113,7 @@ def _registration_value(node):
                 and not part.keywords
             ):
                 return False
-        elif not isinstance(
-            part, (ast.Constant, ast.Name, ast.Load, ast.Tuple, ast.List, ast.IfExp)
-        ):
+        elif not isinstance(part, (ast.Constant, ast.Name, ast.Load, ast.Tuple, ast.List, ast.IfExp)):
             return False
     return True
 
@@ -140,15 +136,9 @@ def registry_models(path, before, after):
         return None
     models = set()
     if path in {"src/transformers/models/__init__.py", "src/transformers/__init__.py"}:
-        old_imports = {
-            ast.dump(node) for node in ast.walk(old) if isinstance(node, ast.ImportFrom)
-        }
+        old_imports = {ast.dump(node) for node in ast.walk(old) if isinstance(node, ast.ImportFrom)}
         for node in ast.walk(new):
-            if (
-                not isinstance(node, ast.If)
-                or not isinstance(node.test, ast.Name)
-                or node.test.id != "TYPE_CHECKING"
-            ):
+            if not isinstance(node, ast.If) or not isinstance(node.test, ast.Name) or node.test.id != "TYPE_CHECKING":
                 continue
             retained = []
             for item in node.body:
@@ -172,32 +162,19 @@ def registry_models(path, before, after):
         assignments = {
             node.targets[0].id: node.value
             for node in old.body
-            if isinstance(node, ast.Assign)
-            and len(node.targets) == 1
-            and isinstance(node.targets[0], ast.Name)
+            if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)
         }
         for node in new.body:
-            if (
-                not isinstance(node, ast.Assign)
-                or len(node.targets) != 1
-                or not isinstance(node.targets[0], ast.Name)
-            ):
+            if not isinstance(node, ast.Assign) or len(node.targets) != 1 or not isinstance(node.targets[0], ast.Name):
                 continue
             name = node.targets[0].id
             if (
-                not (
-                    name.endswith(("_MAPPING_NAMES", "_MAPPING"))
-                    or name == "SPECIAL_MODEL_TYPE_TO_MODULE_NAME"
-                )
+                not (name.endswith(("_MAPPING_NAMES", "_MAPPING")) or name == "SPECIAL_MODEL_TYPE_TO_MODULE_NAME")
                 or name not in assignments
             ):
                 continue
             previous, current = _entries(assignments[name]), _entries(node.value)
-            if (
-                previous is None
-                or current is None
-                or any(current.get(k) != v for k, v in previous.items())
-            ):
+            if previous is None or current is None or any(current.get(k) != v for k, v in previous.items()):
                 continue
             added = set(current) - set(previous)
             if not added:
@@ -216,21 +193,13 @@ def registry_models(path, before, after):
             keys = (
                 [key.value for key in node.value.keys]
                 if isinstance(node.value, ast.Dict)
-                else [
-                    item.elts[0].value
-                    for item in node.value.args[0].elts
-                    if not isinstance(item, ast.Starred)
-                ]
+                else [item.elts[0].value for item in node.value.args[0].elts if not isinstance(item, ast.Starred)]
             )
             if any(keys.count(key) != 1 for key in added):
                 continue
             models.update(added)
             if isinstance(node.value, ast.Dict):
-                pairs = [
-                    (k, v)
-                    for k, v in zip(node.value.keys, node.value.values)
-                    if k.value not in added
-                ]
+                pairs = [(k, v) for k, v in zip(node.value.keys, node.value.values) if k.value not in added]
                 node.value.keys = [k for k, _ in pairs]
                 node.value.values = [v for _, v in pairs]
             else:
@@ -282,7 +251,14 @@ def select(changed_files, contract_dirs, sources=None, model_type_to_module=None
     for path in changed_files:
         if path == "tests/contracts.lock":
             return {name: f"fleet revision ({path})" for name in contract_dirs}
-        if path.startswith(("utils/contracts/", ".github/workflows/contracts", "tests/contracts/fleet", "tests/contracts/prototype-fleet")):
+        if path.startswith(
+            (
+                "utils/contracts/",
+                ".github/workflows/contracts",
+                "tests/contracts/fleet",
+                "tests/contracts/prototype-fleet",
+            )
+        ):
             return {name: f"contract infrastructure ({path})" for name in contract_dirs}
         if path.startswith("tests/contracts/expectations/"):
             name = path.split("/")[3]

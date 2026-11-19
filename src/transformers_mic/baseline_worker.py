@@ -3,25 +3,23 @@
 import argparse
 import json
 import os
-from pathlib import Path
 import platform
 import re
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 
 from huggingface_hub import hf_hub_download, snapshot_download
 
-from . import fleet, cloud_inputs
-from .cloud_progress import Progress
+from . import cloud_inputs, fleet
 from .baselines import sha256
+from .cloud_progress import Progress
 from .workspace import read, write
 
 
 def safe(value):
-    if not isinstance(value, str) or not re.fullmatch(
-        r"[A-Za-z0-9][A-Za-z0-9_.-]*", value
-    ):
+    if not isinstance(value, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", value):
         raise ValueError("Unsafe contract, target or variant name")
     return value
 
@@ -31,15 +29,10 @@ def expected_targets(contract, manifest, fixtures_only):
     unsupported = integration.get("unsupported", {})
     result = []
     if "fixtures" in integration["targets"]:
-        result += [
-            pin.get("target", repo.split("/")[-1])
-            for repo, pin in contract.get("fixtures", {}).items()
-        ]
+        result += [pin.get("target", repo.split("/")[-1]) for repo, pin in contract.get("fixtures", {}).items()]
     elif "fixtures" in unsupported:
         result += [
-            contract.get("fixtures", {})
-            .get(repo, {})
-            .get("target", repo.split("/")[-1])
+            contract.get("fixtures", {}).get(repo, {}).get("target", repo.split("/")[-1])
             for repo in manifest["fixtures"]
         ]
     if not fixtures_only and "checkpoints" in integration["targets"]:
@@ -54,11 +47,7 @@ def expected_targets(contract, manifest, fixtures_only):
 
 
 def read_rows(path):
-    return (
-        [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
-        if path.exists()
-        else []
-    )
+    return [json.loads(line) for line in path.read_text().splitlines() if line.strip()] if path.exists() else []
 
 
 def profile_exclusions(contract, manifest, variant, profile):
@@ -67,10 +56,7 @@ def profile_exclusions(contract, manifest, variant, profile):
         (pin.get("target", repo.split("/")[-1]), resources.get("fixture", {}))
         for repo, pin in contract.get("fixtures", {}).items()
     ]
-    specs += [
-        (repo.split("/")[-1], resources.get(repo, {}))
-        for repo in manifest["checkpoints"]
-    ]
+    specs += [(repo.split("/")[-1], resources.get(repo, {})) for repo in manifest["checkpoints"]]
     result = set()
     for target, spec in specs:
         spec = spec or {}
@@ -101,8 +87,7 @@ def assess(targets, variant, rows, verification, profile, declared_profile_skips
     for target in targets:
         row = by_target[target]
         if row["status"] == "unsupported" and (
-            row.get("skip") == "declared"
-            or (row.get("skip") == "hardware" and target in declared_profile_skips)
+            row.get("skip") == "declared" or (row.get("skip") == "hardware" and target in declared_profile_skips)
         ):
             result.append(
                 {
@@ -114,11 +99,7 @@ def assess(targets, variant, rows, verification, profile, declared_profile_skips
             )
             continue
         platform_name = row.get("platform", "")
-        valid_platform = (
-            platform_name == "cuda"
-            if profile == "cuda"
-            else platform_name.startswith("cpu-")
-        )
+        valid_platform = platform_name == "cuda" if profile == "cuda" else platform_name.startswith("cpu-")
         verification_row = checked.get(target, {})
         okay = (
             row["status"] == "recorded"
@@ -180,9 +161,7 @@ def runtime(profile):
         "gpu": torch.cuda.get_device_name(0) if profile == "cuda" else None,
         "cuda": torch.version.cuda,
         "image": os.environ.get("MIC_BASELINE_IMAGE", ""),
-        "packages": subprocess.check_output(
-            [sys.executable, "-m", "pip", "freeze"], text=True
-        ).splitlines(),
+        "packages": subprocess.check_output([sys.executable, "-m", "pip", "freeze"], text=True).splitlines(),
     }
 
 
@@ -280,12 +259,8 @@ def measure(args):
     installed = Path(transformers.__file__).resolve()
     checkout = Path(os.environ["MIC_TRANSFORMERS_CHECKOUT"]).resolve()
     if not installed.is_relative_to(checkout):
-        raise ValueError(
-            "Measured Transformers did not come from the requested checkout"
-        )
-    actual_sha = subprocess.check_output(
-        ["git", "-C", str(checkout), "rev-parse", "HEAD"], text=True
-    ).strip()
+        raise ValueError("Measured Transformers did not come from the requested checkout")
+    actual_sha = subprocess.check_output(["git", "-C", str(checkout), "rev-parse", "HEAD"], text=True).strip()
     if actual_sha != args.transformers_sha:
         raise ValueError("Installed framework revision does not match the request")
     progress = Progress(args.job_id, args.profile)
@@ -299,20 +274,13 @@ def measure(args):
             if name in excluded:
                 continue
             pin = contract["integration"]
-            manifest = read(
-                hf_hub_download(
-                    pin["repo"], "integration.json", revision=pin["revision"]
-                )
-            )
+            manifest = read(hf_hub_download(pin["repo"], "integration.json", revision=pin["revision"]))
             # Runs only see sources at these pins: run.py refuses files that differ
             # from the lock's files_sha256, so the artifact names them instead of
             # carrying copies (the collection checks them against the fleet).
             for kind, repo, source in [
                 ("contracts", pin["repo"], pin),
-                *(
-                    ("models", repo, fixture)
-                    for repo, fixture in contract.get("fixtures", {}).items()
-                ),
+                *(("models", repo, fixture) for repo, fixture in contract.get("fixtures", {}).items()),
             ]:
                 entry = {
                     "repo": repo,
@@ -321,9 +289,7 @@ def measure(args):
                 }
                 if entry not in report[kind]:
                     report[kind].append(entry)
-            planned_variants = manifest["integrations"]["transformers"].get(
-                "variants", {"default": {}}
-            )
+            planned_variants = manifest["integrations"]["transformers"].get("variants", {"default": {}})
             if not isinstance(planned_variants, dict) or not planned_variants:
                 raise ValueError("Contract declares no variants")
             planned_targets = expected_targets(contract, manifest, args.fixtures_only)
@@ -333,18 +299,13 @@ def measure(args):
                 safe(variant)
                 if isinstance(spec, dict) and spec.get("dtype") in NATIVE_FLAGS:
                     planned_dtypes.add(spec["dtype"])
-                report["expected_cases"].extend(
-                    f"{fleet_name}/{name}/{target}/{variant}"
-                    for target in planned_targets
-                )
+                report["expected_cases"].extend(f"{fleet_name}/{name}/{target}/{variant}" for target in planned_targets)
     total = len(report["expected_cases"])
     completed = 0
     if args.profile == "cpu" and (host_error := missing_native_support(planned_dtypes)):
         report["host_error"] = host_error
         write(root / "collection.json", report)
-        print(
-            f"{report['runtime'].get('cpu')}: {host_error}", file=sys.stderr, flush=True
-        )
+        print(f"{report['runtime'].get('cpu')}: {host_error}", file=sys.stderr, flush=True)
         return 1
     write(root / "collection.json", report)
     for fleet_name in request["fleets"]:
@@ -353,23 +314,15 @@ def measure(args):
         lock = load_lock(fleet_name)
         if lock.get("local_patches"):
             raise ValueError("Cloud baselines require an unpatched fleet")
-        lock.pop(
-            "known_failures", None
-        )  # candidates must satisfy every output assertion
+        lock.pop("known_failures", None)  # candidates must satisfy every output assertion
         for name, contract in lock["contracts"].items():
             safe(name)
             if name in excluded:
                 continue
             pin = contract["integration"]
-            manifest = read(
-                hf_hub_download(
-                    pin["repo"], "integration.json", revision=pin["revision"]
-                )
-            )
+            manifest = read(hf_hub_download(pin["repo"], "integration.json", revision=pin["revision"]))
             targets = expected_targets(contract, manifest, args.fixtures_only)
-            variants = manifest["integrations"]["transformers"].get(
-                "variants", {"default": {}}
-            )
+            variants = manifest["integrations"]["transformers"].get("variants", {"default": {}})
             folder = root / fleet_name / name
             folder.mkdir(parents=True, exist_ok=True)
             write(folder / "integration.json", manifest)
@@ -390,9 +343,7 @@ def measure(args):
             for variant in variants:
                 safe(variant)
                 print(f"{args.profile}: {fleet_name}/{name}/{variant}", flush=True)
-                expected = [
-                    f"{fleet_name}/{name}/{target}/{variant}" for target in targets
-                ]
+                expected = [f"{fleet_name}/{name}/{target}/{variant}" for target in targets]
                 assert all(key in report["expected_cases"] for key in expected)
                 # Store tolerance overrides next to candidates too; never loosen them.
                 candidate_root = folder / "candidates"
@@ -415,9 +366,7 @@ def measure(args):
                 ]
                 if args.fixtures_only:
                     options.append("--fixtures-only")
-                progress.emit(
-                    "recording", completed, total, f"{fleet_name}/{name}/{variant}"
-                )
+                progress.emit("recording", completed, total, f"{fleet_name}/{name}/{variant}")
                 record_code = execute(
                     root,
                     [
@@ -433,9 +382,7 @@ def measure(args):
                 verification_root = folder / "verification"
                 for candidate in candidate_root.glob("*/*.candidate.json"):
                     target = (
-                        verification_root
-                        / candidate.parent.name
-                        / candidate.name.replace(".candidate.json", ".json")
+                        verification_root / candidate.parent.name / candidate.name.replace(".candidate.json", ".json")
                     )
                     target.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(candidate, target)
@@ -443,9 +390,7 @@ def measure(args):
                     target = verification_root / override.parent.name / override.name
                     target.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(override, target)
-                progress.emit(
-                    "validating", completed, total, f"{fleet_name}/{name}/{variant}"
-                )
+                progress.emit("validating", completed, total, f"{fleet_name}/{name}/{variant}")
                 checked = folder / (variant + ".check.jsonl")
                 check_code = execute(
                     root,
@@ -467,15 +412,11 @@ def measure(args):
                         args.profile,
                         profile_exclusions(contract, manifest, variant, args.profile),
                     )
-                    declared_skip = any(
-                        case["status"] == "declared-unsupported" for case in cases
-                    )
-                    if any(
-                        code not in (0, 1) for code in (record_code, check_code)
-                    ) or ((record_code or check_code) and not declared_skip):
-                        raise ValueError(
-                            f"Runner exited unsuccessfully: record={record_code}, check={check_code}"
-                        )
+                    declared_skip = any(case["status"] == "declared-unsupported" for case in cases)
+                    if any(code not in (0, 1) for code in (record_code, check_code)) or (
+                        (record_code or check_code) and not declared_skip
+                    ):
+                        raise ValueError(f"Runner exited unsuccessfully: record={record_code}, check={check_code}")
                 except ValueError as error:
                     cases = [
                         {
@@ -497,44 +438,29 @@ def measure(args):
                     case["files"] = {}
                     if case["status"] == "validated":
                         suffix = "" if variant == "default" else "." + variant
-                        candidate = (
-                            candidate_root
-                            / case["platform"]
-                            / (case["target"] + suffix + ".candidate.json")
-                        )
+                        candidate = candidate_root / case["platform"] / (case["target"] + suffix + ".candidate.json")
                         paths = [candidate, folder / "integration.json"]
-                        paths += list(
-                            (folder / "references").glob(f"{case['platform']}/*.json")
-                        )
+                        paths += list((folder / "references").glob(f"{case['platform']}/*.json"))
                         for path in paths:
-                            case["files"][path.relative_to(root).as_posix()] = sha256(
-                                path
-                            )
+                            case["files"][path.relative_to(root).as_posix()] = sha256(path)
                         case["candidate"] = candidate.relative_to(root).as_posix()
                     report["cases"].append(case)
                 completed += len(cases)
-                progress.emit(
-                    "validating", completed, total, f"{fleet_name}/{name}/{variant}"
-                )
+                progress.emit("validating", completed, total, f"{fleet_name}/{name}/{variant}")
                 write(root / "collection.json", report)
     keys = [case["key"] for case in report["cases"]]
     report["complete"] = (
         bool(keys)
         and len(keys) == len(set(keys))
         and set(keys) == set(report["expected_cases"])
-        and all(
-            case["status"] in ("validated", "declared-unsupported")
-            for case in report["cases"]
-        )
+        and all(case["status"] in ("validated", "declared-unsupported") for case in report["cases"])
     )
     write(root / "collection.json", report)
     progress.emit(
         "complete",
         completed,
         total,
-        "Validated collection"
-        if report["complete"]
-        else "Incomplete collection; inspect failed cases",
+        "Validated collection" if report["complete"] else "Incomplete collection; inspect failed cases",
     )
     return 0 if report["complete"] else 1
 

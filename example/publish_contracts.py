@@ -15,9 +15,8 @@ import argparse
 import json
 from pathlib import Path
 
-from huggingface_hub import HfApi
-
 import run
+from huggingface_hub import HfApi
 
 HERE = Path(__file__).parent
 FRAMEWORKS = ("transformers", "transformers.js")
@@ -61,7 +60,17 @@ def main():
             pin.update(revision=commit.oid, files_sha256=files_sha256)
         for fw in {fw for fw, _ in users}:
             locks[fw].write_text(json.dumps(loaded[fw], indent=2, ensure_ascii=False) + "\n")
-        print(json.dumps({"published": repo, "revision": commit.oid, "files": len(files), "url": f"https://huggingface.co/{repo}"}), flush=True)
+        print(
+            json.dumps(
+                {
+                    "published": repo,
+                    "revision": commit.oid,
+                    "files": len(files),
+                    "url": f"https://huggingface.co/{repo}",
+                }
+            ),
+            flush=True,
+        )
 
 
 if __name__ == "__main__":

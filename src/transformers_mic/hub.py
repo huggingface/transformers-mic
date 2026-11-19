@@ -1,18 +1,14 @@
 """Current Hub ownership; preserve immutable historical manifests and pins."""
 
-from functools import cache
 import re
+from functools import cache
 
 DEFAULT_NAMESPACE = "huggingface-mic"
 
 
 def canonical_repo(repo):
     prefix = "hf-internal-testing/mic-"
-    return (
-        DEFAULT_NAMESPACE + "/mic-" + repo[len(prefix) :]
-        if repo.startswith(prefix)
-        else repo
-    )
+    return DEFAULT_NAMESPACE + "/mic-" + repo[len(prefix) :] if repo.startswith(prefix) else repo
 
 
 def is_test_checkpoint(repo):
@@ -41,11 +37,7 @@ def consolidation():
     from pathlib import Path
 
     path = Path(__file__).with_name("consolidation.json")
-    return (
-        json.loads(path.read_text())
-        if path.exists()
-        else {"aliases": {}, "fixtures": {}, "integrations": {}}
-    )
+    return json.loads(path.read_text()) if path.exists() else {"aliases": {}, "fixtures": {}, "integrations": {}}
 
 
 def umbrella_references(value):

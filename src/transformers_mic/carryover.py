@@ -42,9 +42,7 @@ def integration_files(root, manifest, framework):
     paths = {
         p
         for p in folder.rglob("*")
-        if p.is_file()
-        and not p.name.endswith(".candidate.json")
-        and not SKIPPED_PARTS & set(p.relative_to(root).parts)
+        if p.is_file() and not p.name.endswith(".candidate.json") and not SKIPPED_PARTS & set(p.relative_to(root).parts)
     }
     entry = manifest["integrations"][framework].get("entry_point")
     if entry and (Path(root) / entry).is_file():
@@ -82,9 +80,7 @@ def published(repo, revision, frameworks):
     )
 
 
-def difference(
-    workspace, framework, published_root, fixture_sha256, expectations=True
-):
+def difference(workspace, framework, published_root, fixture_sha256, expectations=True):
     """Why one integration differs from a published snapshot, or None when it does not.
 
     ``expectations=False`` compares only what the publish uploads or pins for it:
@@ -111,10 +107,7 @@ def difference(
         path
         for path, value in integration_files(root, manifest, framework).items()
         if (expectations or "expectations" not in Path(path).parts)
-        and (
-            not (published_root / path).is_file()
-            or sha256(published_root / path) != value
-        )
+        and (not (published_root / path).is_file() or sha256(published_root / path) != value)
     )
     if changed:
         return "files differ: " + ", ".join(changed)
@@ -148,12 +141,8 @@ def plan(workspace, *, fetch=None):
     for name in others:
         if why := difference(workspace, name, base, fixture_sha256):
             result[name] = f"{why} vs {revision[:12]}"
-        elif why := difference(
-            workspace, name, main, fixture_sha256, expectations=False
-        ):
-            result[name] = (
-                f"{why} on the Hub's main since {revision[:12]}; base the workspace on main"
-            )
+        elif why := difference(workspace, name, main, fixture_sha256, expectations=False):
+            result[name] = f"{why} on the Hub's main since {revision[:12]}; base the workspace on main"
         else:
             result[name] = None
     return result
@@ -163,10 +152,6 @@ def describe(name, reason, revision):
     if reason == "primary":
         return "checked"
     if reason is None:
-        owner = (
-            "checked by its own fleet"
-            if name == "sentence_transformers"
-            else "not re-checked"
-        )
+        owner = "checked by its own fleet" if name == "sentence_transformers" else "not re-checked"
         return f"unchanged since {revision[:12]}, carried over; {owner}"
     return f"changed ({reason}); checked"

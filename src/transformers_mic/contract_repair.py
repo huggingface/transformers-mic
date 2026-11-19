@@ -1,17 +1,17 @@
 """Bounded, reviewed repairs of generated executable contracts."""
 
 import ast
-from collections import Counter
 import difflib
 import hashlib
 import inspect
-from pathlib import Path
 import re
 import sys
+from collections import Counter
+from pathlib import Path
 
+import jsonschema
 from huggingface_hub import hf_hub_download
 from huggingface_hub.errors import HfHubHTTPError
-import jsonschema
 
 from . import commands, planner
 from .workspace import read, write
@@ -22,11 +22,7 @@ def snapshot(path):
 
 
 def code(usage):
-    return ast.parse(
-        "\n".join(
-            re.findall(r"```(?:py|python) runnable:[^\n]*\n(.*?)```", usage, re.S)
-        )
-    )
+    return ast.parse("\n".join(re.findall(r"```(?:py|python) runnable:[^\n]*\n(.*?)```", usage, re.S)))
 
 
 def guards(usage):
@@ -45,11 +41,7 @@ def guards(usage):
                     # themselves (finite/nonzero/updated) must remain intact.
                     tree = ast.parse(ast.unparse(value), mode="eval")
                     for part in ast.walk(tree):
-                        if (
-                            isinstance(part, ast.Constant)
-                            and isinstance(part.value, str)
-                            and "." in part.value
-                        ):
+                        if isinstance(part, ast.Constant) and isinstance(part.value, str) and "." in part.value:
                             part.value = "<parameter-name>"
                     result.append(ast.dump(tree))
     return Counter(result)
@@ -64,24 +56,17 @@ def inspect_model(workspace):
     cls = getattr(transformers, manifest["architecture"])
     if not issubclass(cls, transformers.PreTrainedModel):
         raise ValueError("Contract architecture must be a Transformers model class")
-    revision = workspace.lock["contracts"][workspace.state["contract"]]["checkpoints"][
-        workspace.state["model"]
-    ]
-    config_path = hf_hub_download(
-        workspace.state["model"], "config.json", revision=revision
-    )
+    revision = workspace.lock["contracts"][workspace.state["contract"]]["checkpoints"][workspace.state["model"]]
+    config_path = hf_hub_download(workspace.state["model"], "config.json", revision=revision)
     config = cls.config_class.from_dict(read(config_path))
     with torch.device("meta"):
         model = cls(config)
     parameters = [
-        {"name": name, "shape": list(p.shape), "trainable": p.requires_grad}
-        for name, p in model.named_parameters()
+        {"name": name, "shape": list(p.shape), "trainable": p.requires_grad} for name, p in model.named_parameters()
     ]
     return {
         "architecture": cls.__name__,
-        "parameters": parameters[:384] + parameters[-128:]
-        if len(parameters) > 512
-        else parameters,
+        "parameters": parameters[:384] + parameters[-128:] if len(parameters) > 512 else parameters,
         "parameter_count": len(parameters),
         "forward_signature": str(inspect.signature(cls.forward)),
         "forward_source": inspect.getsource(cls.forward)[:12000],
@@ -101,23 +86,14 @@ def failure_details(log, command=()):
             if not report.is_file():
                 continue
             evidence.append(snapshot(report))
-            failed = [
-                case
-                for case in read(report).get("cases", [])
-                if case.get("status") == "failed"
-            ]
+            failed = [case for case in read(report).get("cases", []) if case.get("status") == "failed"]
             for case in failed[:2]:
                 for suffix in ("record", "check"):
                     name = f"{case.get('fleet')}-{case.get('contract')}-{case.get('variant')}-{suffix}.log"
                     path = (report.parent / "logs" / name).resolve()
                     if path.is_relative_to(root) and path.is_file():
                         evidence.append(snapshot(path))
-                        text += (
-                            "\n"
-                            + str(path)
-                            + "\n"
-                            + path.read_text(errors="replace")[-4000:]
-                        )
+                        text += "\n" + str(path) + "\n" + path.read_text(errors="replace")[-4000:]
     return text[-24000:], evidence
 
 
@@ -140,10 +116,7 @@ def failed_phase(text):
 
 
 def eligible(workspace, stage, log, command=()):
-    generated = (
-        workspace.state.get("origin") == "llm"
-        or (workspace.root / ".mic/update-plan.json").is_file()
-    )
+    generated = workspace.state.get("origin") == "llm" or (workspace.root / ".mic/update-plan.json").is_file()
     if not generated or stage not in (
         "build",
         "auto",
@@ -188,16 +161,13 @@ def redact(text):
     return re.sub(r"\b(?:hf_|ghp_|github_pat_)[A-Za-z0-9_]+", "<redacted-token>", text)
 
 
-
 # LLM turns in one repair attempt: a rejected proposal is shown back once.
 REPAIR_TURNS = 2
 
 
 def check_proposal(plan, workspace, current_usage, inspection):
     """Raise ValueError when a repair proposal may not be applied."""
-    commands.validate_plan(
-        plan, workspace.state["model"], workspace.fixture, workspace.manifest
-    )
+    commands.validate_plan(plan, workspace.state["model"], workspace.fixture, workspace.manifest)
     # The draft's usage checks apply to a repair too: one renamed a loop
     # variable and read the stale `n` (LLaVA-OneVision).
     for check in (
@@ -219,15 +189,9 @@ def check_proposal(plan, workspace, current_usage, inspection):
             "Repair did not change the failing usage: return usage with the fix applied, not the existing usage"
         )
     if guards(current_usage) - guards(plan["usage"]):
-        raise ValueError(
-            "Repair removes or changes an assertion/gradient/update check"
-        )
+        raise ValueError("Repair removes or changes an assertion/gradient/update check")
     calls = [n for n in ast.walk(code(plan["usage"])) if isinstance(n, ast.Call)]
-    if any(
-        isinstance(n.func, ast.Attribute)
-        and n.func.attr in ("skip", "skipif", "xfail")
-        for n in calls
-    ):
+    if any(isinstance(n.func, ast.Attribute) and n.func.attr in ("skip", "skipif", "xfail") for n in calls):
         raise ValueError("Repair cannot introduce skipped checks")
 
 
@@ -235,10 +199,7 @@ def propose(args, workspace, stage, log, folder, state, save, command=()):
     """Persist the attempt before calling the provider; proposals never alter source."""
     if len(state.get("repairs", [])) >= args.max_contract_repairs:
         return None
-    usage = (
-        workspace.contract_root
-        / workspace.manifest["integrations"]["transformers"]["entry_point"]
-    )
+    usage = workspace.contract_root / workspace.manifest["integrations"]["transformers"]["entry_point"]
     failure, evidence = failure_details(log, command)
     attempt = {
         "evidence": evidence,
@@ -288,7 +249,9 @@ def propose(args, workspace, stage, log, folder, state, save, command=()):
                     raise
                 # One more turn with the rejection: vitpose's repair named the right
                 # fix in its rationale and returned the failing usage unchanged.
-                print(f"tmic: repair draft rejected ({str(error).splitlines()[0][:200]}); asking again", file=sys.stderr)
+                print(
+                    f"tmic: repair draft rejected ({str(error).splitlines()[0][:200]}); asking again", file=sys.stderr
+                )
                 context = {
                     **context,
                     "previous_draft": plan,
@@ -336,10 +299,7 @@ def current(workspace, attempt):
                 snapshot(Path(attempt[key]["path"])) == attempt[key]
                 for key in ("usage", "manifest", "log", "proposal", "diff")
             )
-            and all(
-                snapshot(Path(item["path"])) == item
-                for item in attempt.get("evidence", [])
-            )
+            and all(snapshot(Path(item["path"])) == item for item in attempt.get("evidence", []))
         )
     except OSError:
         return False
@@ -355,6 +315,4 @@ def apply(workspace, attempt):
     temporary.write_text(plan["usage"])
     temporary.replace(usage)
     workspace.save_state(validated=False, validation=None, validations={})
-    attempt.update(
-        status="applied", previous_source=str(backup), applied=snapshot(usage)
-    )
+    attempt.update(status="applied", previous_source=str(backup), applied=snapshot(usage))

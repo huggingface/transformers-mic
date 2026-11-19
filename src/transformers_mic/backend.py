@@ -2,9 +2,9 @@
 
 import importlib
 import os
-from pathlib import Path
 import subprocess
 import sys
+from pathlib import Path
 
 from . import resources
 
@@ -30,6 +30,7 @@ def dispatch(tool, workspace, args):
         sys.path.insert(1, str(source.parent / "experiments"))
     runner = importlib.import_module("run")
     from .hub import canonical_repo
+
     runner.canonical_repo = canonical_repo
     runner.HERE = workspace / "example"
     runner.SCHEMAS = source / "schemas"
@@ -38,35 +39,25 @@ def dispatch(tool, workspace, args):
     # fresh-process runs still imports patches.py and template_date.py from runner.CODE.
     if tool == "auto-stage":
         import json
+
         from transformers import AutoConfig
         from transformers.models.auto import modeling_auto
+
         from .workspace import Workspace, write
 
         project = Workspace(workspace)
-        pin = project.lock["contracts"][project.state["contract"]]["fixtures"][
-            project.fixture
-        ]
-        folder = runner.fixture_folder(
-            project.lock_path.parent, project.fixture, pin, False
-        )
+        pin = project.lock["contracts"][project.state["contract"]]["fixtures"][project.fixture]
+        folder = runner.fixture_folder(project.lock_path.parent, project.fixture, pin, False)
         config = AutoConfig.from_pretrained(folder)
         resolved = {}
         for name in dir(modeling_auto):
             factory = getattr(modeling_auto, name)
-            if (
-                name.startswith("AutoModel")
-                and isinstance(factory, type)
-                and hasattr(factory, "_model_mapping")
-            ):
+            if name.startswith("AutoModel") and isinstance(factory, type) and hasattr(factory, "_model_mapping"):
                 try:
                     mapped = factory._model_mapping[type(config)]
                 except KeyError:
                     continue
-                resolved[name] = (
-                    [cls.__name__ for cls in mapped]
-                    if isinstance(mapped, tuple)
-                    else mapped.__name__
-                )
+                resolved[name] = [cls.__name__ for cls in mapped] if isinstance(mapped, tuple) else mapped.__name__
         result = {
             "model_type": config.model_type,
             "config_class": type(config).__name__,
@@ -97,9 +88,7 @@ def dispatch(tool, workspace, args):
             {"built_from": repo, "build": spec["build"]},
             {repo: spec["revision"]},
             Path(out),
-            inspect_checkpoint=importlib.import_module(
-                "transformers_mic.inspection"
-            ).inspect_checkpoint,
+            inspect_checkpoint=importlib.import_module("transformers_mic.inspection").inspect_checkpoint,
         )
         Path(result).write_text(json.dumps(review, indent=1, default=str) + "\n")
         return 0
@@ -109,15 +98,11 @@ def dispatch(tool, workspace, args):
         builder = importlib.import_module("build_fixtures")
         builder.HERE = runner.HERE
         name, fixture, out, result, *artifact = args
-        lock = runner.load(
-            runner.HERE / "transformers/tests/contracts/fleet.lock", "fleet-lock"
-        )
+        lock = runner.load(runner.HERE / "transformers/tests/contracts/fleet.lock", "fleet-lock")
         if lock.get("local_patches"):
             importlib.import_module("patches").apply(sorted(lock["local_patches"]))
         entry = lock["contracts"][name]
-        root = (
-            runner.HERE / "transformers/tests/contracts" / entry["integration"]["path"]
-        ).resolve()
+        root = (runner.HERE / "transformers/tests/contracts" / entry["integration"]["path"]).resolve()
         manifest = runner.load(root / "integration.json", "integration")
         import torch
 
@@ -128,9 +113,7 @@ def dispatch(tool, workspace, args):
             entry["checkpoints"],
             Path(out),
             artifact=Path(artifact[0]) if artifact else None,
-            inspect_checkpoint=importlib.import_module(
-                "transformers_mic.inspection"
-            ).inspect_checkpoint,
+            inspect_checkpoint=importlib.import_module("transformers_mic.inspection").inspect_checkpoint,
         )
         Path(result).write_text(json.dumps(review, indent=1, default=str) + "\n")
         return 0
@@ -138,15 +121,11 @@ def dispatch(tool, workspace, args):
         builder = importlib.import_module("build_fixtures")
         builder.HERE = runner.HERE
         name, fixture, out, *selection = args
-        lock = runner.load(
-            runner.HERE / "transformers/tests/contracts/fleet.lock", "fleet-lock"
-        )
+        lock = runner.load(runner.HERE / "transformers/tests/contracts/fleet.lock", "fleet-lock")
         if lock.get("local_patches"):
             importlib.import_module("patches").apply(sorted(lock["local_patches"]))
         entry = lock["contracts"][name]
-        root = (
-            runner.HERE / "transformers/tests/contracts" / entry["integration"]["path"]
-        ).resolve()
+        root = (runner.HERE / "transformers/tests/contracts" / entry["integration"]["path"]).resolve()
         manifest = runner.load(root / "integration.json", "integration")
         import torch
 
@@ -162,9 +141,7 @@ def dispatch(tool, workspace, args):
             Path(out),
             keep_random=bool(selection),
             contract_repo=entry["integration"]["repo"],
-            inspect_checkpoint=importlib.import_module(
-                "transformers_mic.inspection"
-            ).inspect_checkpoint,
+            inspect_checkpoint=importlib.import_module("transformers_mic.inspection").inspect_checkpoint,
         )
         return 0
     module = runner if tool == "run" else importlib.import_module(tool)
@@ -190,11 +167,7 @@ def dispatch(tool, workspace, args):
                 capture=True,
                 env=env,
             )
-            records = [
-                json.loads(line)
-                for line in out.stdout.splitlines()
-                if line.startswith("{")
-            ]
+            records = [json.loads(line) for line in out.stdout.splitlines() if line.startswith("{")]
             if not records:
                 raise ValueError(f"No replay records on {ref}: {out.stderr[-1500:]}")
             return {r["target"]: r for r in records}

@@ -1,19 +1,19 @@
 """Best-effort live progress authenticated with short-lived GitHub Actions OIDC."""
 
 import json
-from datetime import datetime, timezone
 import os
-import sys
-import time
-import threading
-import shutil
 import re
+import shutil
+import sys
 import textwrap
+import threading
+import time
+from datetime import UTC, datetime
 from urllib.parse import urlencode
 from urllib.request import Request, build_opener
 
-from .dashboard_auth import NoRedirect
 from . import terminal
+from .dashboard_auth import NoRedirect
 
 
 class Progress:
@@ -41,9 +41,7 @@ class Progress:
             return
         try:
             if not self.token or time.monotonic() - self.token_time > 240:
-                separator = (
-                    "&" if "?" in os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"] else "?"
-                )
+                separator = "&" if "?" in os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"] else "?"
                 url = (
                     os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"]
                     + separator
@@ -51,10 +49,7 @@ class Progress:
                 )
                 request = Request(
                     url,
-                    headers={
-                        "Authorization": "Bearer "
-                        + os.environ["ACTIONS_ID_TOKEN_REQUEST_TOKEN"]
-                    },
+                    headers={"Authorization": "Bearer " + os.environ["ACTIONS_ID_TOKEN_REQUEST_TOKEN"]},
                 )
                 with build_opener(NoRedirect()).open(request, timeout=5) as response:
                     self.token = json.loads(response.read(16384))["value"]
@@ -87,10 +82,7 @@ def display(job, previous=None):
         "run_url": job.get("run_url"),
         "jobs": job.get("workflow_jobs", []),
         "progress": [
-            {
-                key: event[key]
-                for key in ("profile", "stage", "completed", "total", "detail")
-            }
+            {key: event[key] for key in ("profile", "stage", "completed", "total", "detail")}
             for _, event in sorted(job.get("progress", {}).items())
         ],
     }
@@ -102,9 +94,7 @@ def display(job, previous=None):
         if view != old:
             print("MIC_CLOUD_VIEW " + json.dumps(view), file=sys.stderr, flush=True)
         return json.dumps(view, sort_keys=True)
-    live = (
-        terminal.interactive(sys.stderr) or os.getenv("TMIC_LIVE_PROGRESS") == "1"
-    ) and os.getenv("TERM") != "dumb"
+    live = (terminal.interactive(sys.stderr) or os.getenv("TMIC_LIVE_PROGRESS") == "1") and os.getenv("TERM") != "dumb"
     tick = int(time.monotonic() * 4) if live else None
     if view == old and (not live or tick == old_tick):
         return previous
@@ -130,17 +120,11 @@ def display(job, previous=None):
         if status == "queued" and live and item.get("queued_at"):
             try:
                 since = datetime.fromisoformat(item["queued_at"].replace("Z", "+00:00"))
-                minutes = max(
-                    0, int((datetime.now(timezone.utc) - since).total_seconds() // 60)
-                )
+                minutes = max(0, int((datetime.now(UTC) - since).total_seconds() // 60))
                 detail += f" · queued {minutes}m"
             except ValueError:
                 pass
-        counter = (
-            terminal.bar(item.get("completed_steps", 0), total, 10) + " steps · "
-            if total
-            else ""
-        )
+        counter = terminal.bar(item.get("completed_steps", 0), total, 10) + " steps · " if total else ""
         return f"    {name}: {counter}{detail}"
 
     def event_line(event):
@@ -158,9 +142,7 @@ def display(job, previous=None):
             "unknown",
         ):
             frame = ""
-        lines = [
-            f"  Cloud · {view['status']} {frame} {elapsed // 60:02d}:{elapsed % 60:02d}"
-        ]
+        lines = [f"  Cloud · {view['status']} {frame} {elapsed // 60:02d}:{elapsed % 60:02d}"]
         if view.get("run_url"):
             lines.append("    Run: " + view["run_url"])
         lines += [job_line(item) for item in view["jobs"]]
@@ -234,9 +216,7 @@ class LiveProgress:
                 "status": view["status"],
                 "run_url": view.get("run_url"),
                 "workflow_jobs": view.get("jobs", []),
-                "progress": {
-                    event["profile"]: event for event in view.get("progress", [])
-                },
+                "progress": {event["profile"]: event for event in view.get("progress", [])},
             }
             self.render()
 

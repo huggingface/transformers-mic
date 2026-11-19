@@ -1,13 +1,13 @@
-from pathlib import Path
-from types import SimpleNamespace
 import hashlib
 import shutil
+from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
+from test_baselines import make_collection
 
 from transformers_mic import cloud_inputs, model_baselines
 from transformers_mic.workspace import read, write
-from test_baselines import make_collection
 
 
 @pytest.fixture
@@ -30,11 +30,7 @@ def measured(tmp_path, monkeypatch):
         expectations=tmp_path / "model/expectations",
         lock_path=tmp_path / "model/lock.json",
         contract_root=tmp_path / "model/contract",
-        manifest={
-            "integrations": {
-                "transformers": {"variants": {"default": {}}, "entry_point": "usage.md"}
-            }
-        },
+        manifest={"integrations": {"transformers": {"variants": {"default": {}}, "entry_point": "usage.md"}}},
         validation_fingerprint=lambda: "fingerprint",
     )
     workspace.save_state = lambda **kw: workspace.state.update(kw)
@@ -62,9 +58,7 @@ def test_model_requires_review_then_records_both_hardware_profiles(measured):
     assert {p.name for p in workspace.expectations.iterdir()} == {"cpu-x86_64", "cuda"}
 
 
-def test_changed_source_or_reviewed_measurement_cannot_be_published(
-    measured, monkeypatch
-):
+def test_changed_source_or_reviewed_measurement_cannot_be_published(measured, monkeypatch):
     workspace, root = measured
     approve(workspace)
     baseline = workspace.expectations / "cuda/mic-demo.json"
@@ -73,9 +67,7 @@ def test_changed_source_or_reviewed_measurement_cannot_be_published(
     with pytest.raises(ValueError, match="Reviewed expectations differ"):
         model_baselines.verify(workspace, root)
     baseline.write_bytes(original)
-    monkeypatch.setattr(
-        model_baselines, "inputs", lambda _: ("edited-source", None, {})
-    )
+    monkeypatch.setattr(model_baselines, "inputs", lambda _: ("edited-source", None, {}))
     with pytest.raises(ValueError, match="current model inputs"):
         model_baselines.verify(workspace, root)
 
@@ -119,9 +111,7 @@ def test_staged_model_snapshot_is_separate_and_immutable(tmp_path, monkeypatch):
         lock=lock,
         state={"contract": "Demo"},
     )
-    monkeypatch.setattr(
-        model_baselines, "inputs", lambda _: ("f" * 64, fixture, {"usage.md": "0" * 64})
-    )
+    monkeypatch.setattr(model_baselines, "inputs", lambda _: ("f" * 64, fixture, {"usage.md": "0" * 64}))
     calls = []
 
     class API:
@@ -135,9 +125,7 @@ def test_staged_model_snapshot_is_separate_and_immutable(tmp_path, monkeypatch):
             assert kw["revision"].startswith("tmic-baselines/")
             uploaded = read(Path(kw["folder_path"]) / ".mic/baseline-lock.json")
             assert "path" not in uploaded["contracts"]["Demo"]["integration"]
-            assert (
-                Path(kw["folder_path"]) / "weights.safetensors"
-            ).read_bytes() == b"weights"
+            assert (Path(kw["folder_path"]) / "weights.safetensors").read_bytes() == b"weights"
             return SimpleNamespace(oid="b" * 40)
 
     monkeypatch.setattr(model_baselines, "HfApi", API)
@@ -171,9 +159,7 @@ def test_mutable_or_unapproved_inputs_never_reach_workers(monkeypatch):
     ],
 )
 def test_cpu_coverage_rejects_different_hardware_class(dtype, actual, required):
-    manifest = {
-        "integrations": {"transformers": {"variants": {"variant": {"dtype": dtype}}}}
-    }
+    manifest = {"integrations": {"transformers": {"variants": {"variant": {"dtype": dtype}}}}}
     case = {
         "status": "validated",
         "variant": "variant",
@@ -211,9 +197,7 @@ def test_cpu_coverage_follows_the_dtype_the_case_ran_in(tmp_path):
 def test_verification_rechecks_native_cpu_coverage(measured):
     workspace, root = measured
     approve(workspace)
-    workspace.manifest["integrations"]["transformers"]["variants"]["default"][
-        "dtype"
-    ] = "bfloat16"
+    workspace.manifest["integrations"]["transformers"]["variants"]["default"]["dtype"] = "bfloat16"
     with pytest.raises(ValueError, match="cpu-x86_64-bf16"):
         model_baselines.verify(workspace, root)
     # The wrong-hardware run is set aside, so a retry dispatches a new one.
@@ -222,9 +206,7 @@ def test_verification_rechecks_native_cpu_coverage(measured):
 
 
 def test_wrong_hardware_collections_are_numbered(tmp_path):
-    manifest = {
-        "integrations": {"transformers": {"variants": {"v": {"dtype": "bfloat16"}}}}
-    }
+    manifest = {"integrations": {"transformers": {"variants": {"v": {"dtype": "bfloat16"}}}}}
     case = {
         "status": "validated",
         "variant": "v",

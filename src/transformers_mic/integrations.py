@@ -1,6 +1,7 @@
 """Opt-in usage paths on an existing MIC fixture."""
 
 import json
+
 from .workspace import Workspace, write
 
 NAME = "sentence_transformers"
@@ -52,9 +53,7 @@ def generate(args):
     selected = list(dict.fromkeys(args.integration))
     manifest = workspace.manifest
     if NAME in selected and workspace.state["model"] not in SUPPORTED:
-        raise ValueError(
-            "Sentence Transformers generation currently supports google/embeddinggemma-2"
-        )
+        raise ValueError("Sentence Transformers generation currently supports google/embeddinggemma-2")
     if "transformers" in selected and "transformers" not in manifest["integrations"]:
         raise ValueError("Generate the Transformers usage with tmic create first")
     workspace.snapshot()
@@ -75,9 +74,7 @@ def generate(args):
         path = workspace.contract_root / entry
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(USAGE)
-    manifest["integrations"] = {
-        name: manifest["integrations"][name] for name in selected
-    }
+    manifest["integrations"] = {name: manifest["integrations"][name] for name in selected}
     write(workspace.contract_root / "integration.json", manifest)
     workspace.update_layout()
     lock = workspace.lock

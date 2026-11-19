@@ -58,7 +58,11 @@ def main():
             added = sorted(k for k in rules if run.lookup(old, k) is None and run.lookup(new, k) is not None)
             removed = sorted(k for k in rules if run.lookup(old, k) is not None and run.lookup(new, k) is None)
             verdict = "changed" if failures or removed else "unchanged"
-            detail = failures + [f"added: {k} = {json.dumps(run.lookup(new, k))[:120]}" for k in added] + [f"removed: {k}" for k in removed]
+            detail = (
+                failures
+                + [f"added: {k} = {json.dumps(run.lookup(new, k))[:120]}" for k in added]
+                + [f"removed: {k}" for k in removed]
+            )
         counts[verdict] = counts.get(verdict, 0) + 1
         print(f"{verdict:9} {contract}/{platform}/{candidate.name.removesuffix('.candidate.json')}")
         for line in detail:

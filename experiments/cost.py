@@ -25,10 +25,9 @@ def child(family, target, fixtures, attn):
     t0 = time.perf_counter()
     import resource
 
+    import experiment as exp
     import torch
     import transformers
-
-    import experiment as exp
 
     transformers.logging.set_verbosity_error()
     torch.set_num_threads(2)
@@ -40,8 +39,7 @@ def child(family, target, fixtures, attn):
         path = exp.snapshot(tuple(frozen["source"]))
     else:
         frozen = next(
-            f for f in manifest["fixtures"]
-            if f["family"] == family and f["weights"] == target and f["seed"] == 17
+            f for f in manifest["fixtures"] if f["family"] == family and f["weights"] == target and f["seed"] == 17
         )
         path = fixtures / frozen["path"]
     task_cls = exp.TASKS[family]
@@ -65,23 +63,26 @@ def child(family, target, fixtures, attn):
     if "training" in frozen:
         timed("training_probe", lambda: exp.training_probe(task, model))
     files = [f for f in Path(path).iterdir() if f.is_file()]
-    print(json.dumps({
-        "family": family,
-        "target": target,
-        "attn": attn,
-        "device": str(exp.DEVICE),
-        "dtype": str(exp.DTYPE).removeprefix("torch."),
-        "parameters": sum(p.numel() for p in model.parameters()),
-        "weight_bytes": sum(f.stat().st_size for f in files if f.name.endswith(WEIGHTS)),
-        "other_bytes": sum(f.stat().st_size for f in files if not f.name.endswith(WEIGHTS)),
-        # ru_maxrss is bytes on macOS, kilobytes on Linux.
-        "peak_rss_mb": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        / (2**20 if sys.platform == "darwin" else 2**10),
-        "peak_device_mb": torch.cuda.max_memory_allocated() / 2**20
-        if exp.DEVICE.type == "cuda" else None,
-        "phases": phases,
-        "check_seconds": sum(v for k, v in phases.items() if k != "warm_inference_median"),
-    }))
+    print(
+        json.dumps(
+            {
+                "family": family,
+                "target": target,
+                "attn": attn,
+                "device": str(exp.DEVICE),
+                "dtype": str(exp.DTYPE).removeprefix("torch."),
+                "parameters": sum(p.numel() for p in model.parameters()),
+                "weight_bytes": sum(f.stat().st_size for f in files if f.name.endswith(WEIGHTS)),
+                "other_bytes": sum(f.stat().st_size for f in files if not f.name.endswith(WEIGHTS)),
+                # ru_maxrss is bytes on macOS, kilobytes on Linux.
+                "peak_rss_mb": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+                / (2**20 if sys.platform == "darwin" else 2**10),
+                "peak_device_mb": torch.cuda.max_memory_allocated() / 2**20 if exp.DEVICE.type == "cuda" else None,
+                "phases": phases,
+                "check_seconds": sum(v for k, v in phases.items() if k != "warm_inference_median"),
+            }
+        )
+    )
 
 
 def main():
@@ -105,12 +106,27 @@ def main():
                 for _ in range(args.repeats):
                     start = time.perf_counter()
                     out = subprocess.run(
-                        [sys.executable, __file__, "--attn", args.attn, "--fixtures", str(fixtures),
-                         "--output", "-", "--child", family, target, str(fixtures)],
-                        capture_output=True, text=True, cwd=HERE, env={**os.environ, "HF_HUB_OFFLINE": "1"},
+                        [
+                            sys.executable,
+                            __file__,
+                            "--attn",
+                            args.attn,
+                            "--fixtures",
+                            str(fixtures),
+                            "--output",
+                            "-",
+                            "--child",
+                            family,
+                            target,
+                            str(fixtures),
+                        ],
+                        capture_output=True,
+                        text=True,
+                        cwd=HERE,
+                        env={**os.environ, "HF_HUB_OFFLINE": "1"},
                     )
                     wall = time.perf_counter() - start
-                    line = [l for l in out.stdout.splitlines() if l.startswith("{")]
+                    line = [text for text in out.stdout.splitlines() if text.startswith("{")]
                     if out.returncode or not line:
                         runs.append({"error": out.stderr[-400:]})
                         continue
@@ -121,8 +137,15 @@ def main():
                     row["median_process_wall_seconds"] = statistics.median(r["process_wall_seconds"] for r in ok)
                     row["median_check_seconds"] = statistics.median(r["check_seconds"] for r in ok)
                 rows.append(row)
-                print(json.dumps({k: row.get(k) for k in ("family", "target", "median_process_wall_seconds",
-                                                          "median_check_seconds")}), flush=True)
+                print(
+                    json.dumps(
+                        {
+                            k: row.get(k)
+                            for k in ("family", "target", "median_process_wall_seconds", "median_check_seconds")
+                        }
+                    ),
+                    flush=True,
+                )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps({"attn": args.attn, "rows": rows}, indent=1) + "\n")
 

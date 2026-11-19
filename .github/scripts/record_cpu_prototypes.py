@@ -1,12 +1,11 @@
 """Record native CPU references, then check and export without framework patches."""
 
-from concurrent.futures import ThreadPoolExecutor
 import json
 import os
-from pathlib import Path
 import subprocess
 import sys
-
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 root = Path(sys.argv[1]).resolve()
 spec = json.loads((root / "models.json").read_text())
@@ -24,9 +23,7 @@ def run(item):
     # Only reference recording uses this patch; the final check is unpatched and
     # explicitly excludes the unresolved loss/gradient outputs, as the old proof does.
     if name == "wav2vec2" and "masked-spec-embed-init" in patches:
-        lock["local_patches"] = {
-            "masked-spec-embed-init": patches["masked-spec-embed-init"]
-        }
+        lock["local_patches"] = {"masked-spec-embed-init": patches["masked-spec-embed-init"]}
     lock_path.write_text(json.dumps(lock, indent=2) + "\n")
     stages = [
         ("record", ["record", "--all-variants"]),
@@ -46,9 +43,7 @@ def run(item):
             }
         }
     lock_path.write_text(json.dumps(lock, indent=2) + "\n")
-    row["unpatched-check"] = invoke(
-        name, workspace, "unpatched-check", ["check", "--all-variants"]
-    )
+    row["unpatched-check"] = invoke(name, workspace, "unpatched-check", ["check", "--all-variants"])
     if not row["unpatched-check"]:
         # Each worker exports independently; combine reviewed locks afterwards.
         row["export"] = invoke(

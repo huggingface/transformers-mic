@@ -29,24 +29,51 @@ CONFIGS = {
     "gemma3": (
         "google/gemma-3-1b-it",
         "dcc83ea841ab6100d6b47a070329e1ba4cf78752",
-        dict(hidden_size=64, intermediate_size=128, num_attention_heads=4,
-             num_key_value_heads=1, head_dim=16, sliding_window=4),
+        dict(
+            hidden_size=64,
+            intermediate_size=128,
+            num_attention_heads=4,
+            num_key_value_heads=1,
+            head_dim=16,
+            sliding_window=4,
+        ),
     ),
     "granite_hybrid": (
         "ibm-granite/granite-4.0-h-tiny",
         "791e0d3d28c86e106c9b6e0b4cecdee0375b6124",
-        dict(hidden_size=64, intermediate_size=128, shared_intermediate_size=128,
-             num_attention_heads=4, num_key_value_heads=2, num_local_experts=4,
-             num_experts_per_tok=2, mamba_n_heads=8, mamba_d_head="auto",
-             mamba_d_state=16, mamba_chunk_size=8),
+        dict(
+            hidden_size=64,
+            intermediate_size=128,
+            shared_intermediate_size=128,
+            num_attention_heads=4,
+            num_key_value_heads=2,
+            num_local_experts=4,
+            num_experts_per_tok=2,
+            mamba_n_heads=8,
+            mamba_d_head="auto",
+            mamba_d_state=16,
+            mamba_chunk_size=8,
+        ),
     ),
     "deepseek_v2_lite": (
         "deepseek-ai/DeepSeek-V2-Lite",
         "604d5664dddd88a0433dbae533b7fe9472482de0",
-        dict(hidden_size=64, intermediate_size=128, moe_intermediate_size=32,
-             num_attention_heads=4, num_key_value_heads=4, n_routed_experts=4,
-             num_experts_per_tok=2, n_group=1, topk_group=1, kv_lora_rank=16,
-             q_lora_rank=None, qk_nope_head_dim=16, qk_rope_head_dim=8, v_head_dim=16),
+        dict(
+            hidden_size=64,
+            intermediate_size=128,
+            moe_intermediate_size=32,
+            num_attention_heads=4,
+            num_key_value_heads=4,
+            n_routed_experts=4,
+            num_experts_per_tok=2,
+            n_group=1,
+            topk_group=1,
+            kv_lora_rank=16,
+            q_lora_rank=None,
+            qk_nope_head_dim=16,
+            qk_rope_head_dim=8,
+            v_head_dim=16,
+        ),
     ),
 }
 
@@ -76,6 +103,7 @@ def derived_types(config):
             return list(types)
     return None
 
+
 # Per-layer lists whose values name another layer (Mistral-Large-4: layer 39 reads
 # layer 35's KV cache). A kept layer keeps its source, and the values are re-indexed.
 LAYER_REFERENCES = ("kv_source_layers",)
@@ -89,8 +117,10 @@ def categorical_lists(config):
     for key, value in config.to_dict().items():
         if key == "layer_types" or key in LAYER_REFERENCES:
             continue
-        if isinstance(value, list) and len(value) == config.num_hidden_layers and all(
-            isinstance(v, (str, bool)) or v in (0, 1) for v in value
+        if (
+            isinstance(value, list)
+            and len(value) == config.num_hidden_layers
+            and all(isinstance(v, (str, bool)) or v in (0, 1) for v in value)
         ):
             lists[key] = value
     return lists
@@ -138,9 +168,7 @@ def shrink_by_pattern(config, overrides):
             values[key] = [value[i] for i in kept]
     reindex_references(values, config, kept)
     if getattr(config, "first_k_dense_replace", None) is not None:
-        values["first_k_dense_replace"] = sum(
-            i < config.first_k_dense_replace for i in kept
-        )
+        values["first_k_dense_replace"] = sum(i < config.first_k_dense_replace for i in kept)
     if getattr(config, "mlp_only_layers", None) is not None:
         values["mlp_only_layers"] = [n for n, i in enumerate(kept) if i in config.mlp_only_layers]
     return type(config).from_dict(values), kept
@@ -163,8 +191,10 @@ def built_kinds(model):
     for layer in model.model.layers:
         attention = getattr(layer, "self_attn", None)
         mixer = (
-            "mamba" if getattr(layer, "mamba", None) is not None
-            else "sliding_attention" if getattr(attention, "is_sliding", False)
+            "mamba"
+            if getattr(layer, "mamba", None) is not None
+            else "sliding_attention"
+            if getattr(attention, "is_sliding", False)
             else "attention"
         )
         mlp = getattr(layer, "mlp", None) or getattr(layer, "block_sparse_moe", None)
@@ -202,16 +232,12 @@ def checked_run(config):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--output", type=Path, default=Path(__file__).parent / "results" / "layer_patterns.json"
-    )
+    parser.add_argument("--output", type=Path, default=Path(__file__).parent / "results" / "layer_patterns.json")
     args = parser.parse_args()
     transformers.logging.set_verbosity_error()
     report = {"transformers": transformers.__version__, "torch": torch.__version__, "configs": {}}
     for name, (repo, revision, overrides) in CONFIGS.items():
-        config = AutoConfig.from_pretrained(
-            str(Path(hf_hub_download(repo, "config.json", revision=revision)).parent)
-        )
+        config = AutoConfig.from_pretrained(str(Path(hf_hub_download(repo, "config.json", revision=revision)).parent))
         real_kinds = [layer_kind(config, i) for i in range(config.num_hidden_layers)]
         pattern, kept = shrink_by_pattern(config, overrides)
         fixed, fixed_error = shrink_fixed(config, overrides)
@@ -226,9 +252,16 @@ def main():
             built = {json.dumps([b["mixer"], b["mlp"]]) for b in row[rule].get("built", [])}
             row[rule]["distinct_built_kinds"] = sorted(built)
         report["configs"][name] = row
-        print(json.dumps({name: {k: row[k] for k in ("real_layers", "real_kinds")}
-                          | {r: {k: v for k, v in row[r].items() if k != "built"} for r in ("pattern", "fixed_2")}},
-                         indent=1), flush=True)
+        print(
+            json.dumps(
+                {
+                    name: {k: row[k] for k in ("real_layers", "real_kinds")}
+                    | {r: {k: v for k, v in row[r].items() if k != "built"} for r in ("pattern", "fixed_2")}
+                },
+                indent=1,
+            ),
+            flush=True,
+        )
     args.output.write_text(json.dumps(report, indent=2) + "\n")
 
 

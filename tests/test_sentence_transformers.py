@@ -170,9 +170,7 @@ def test_capture_supports_direct_forward_and_regular_calls():
     ("flags", "expected_stages"),
     [([], []), (["--build"], ["build"]), (["--record"], ["build", "record"])],
 )
-def test_st_creation_preserves_explicit_namespace_and_inference_outputs(
-    tmp_path, monkeypatch, flags, expected_stages
-):
+def test_st_creation_preserves_explicit_namespace_and_inference_outputs(tmp_path, monkeypatch, flags, expected_stages):
     from types import SimpleNamespace
 
     from transformers_mic import commands
@@ -180,9 +178,7 @@ def test_st_creation_preserves_explicit_namespace_and_inference_outputs(
 
     source = tmp_path / "source"
     source.mkdir()
-    (source / "config.json").write_text(
-        json.dumps({"model_type": "bert", "architectures": ["BertModel"]})
-    )
+    (source / "config.json").write_text(json.dumps({"model_type": "bert", "architectures": ["BertModel"]}))
     (source / "modules.json").write_text(
         json.dumps(
             [
@@ -199,18 +195,12 @@ def test_st_creation_preserves_explicit_namespace_and_inference_outputs(
     monkeypatch.setattr(
         support,
         "HfApi",
-        lambda: SimpleNamespace(
-            model_info=lambda *args, **kwargs: SimpleNamespace(sha="a" * 40)
-        ),
+        lambda: SimpleNamespace(model_info=lambda *args, **kwargs: SimpleNamespace(sha="a" * 40)),
     )
-    monkeypatch.setattr(
-        support, "environment", lambda: {"sentence-transformers": "6.2.0"}
-    )
+    monkeypatch.setattr(support, "environment", lambda: {"sentence-transformers": "6.2.0"})
     stages = []
     monkeypatch.setattr(commands, "build", lambda args: stages.append("build") or 0)
-    monkeypatch.setattr(
-        commands, "execute", lambda args, record: stages.append("record") or 0
-    )
+    monkeypatch.setattr(commands, "execute", lambda args, record: stages.append("record") or 0)
     args = parser().parse_args(
         [
             "create",
@@ -226,24 +216,18 @@ def test_st_creation_preserves_explicit_namespace_and_inference_outputs(
     )
     assert commands.create(args) == 0
     assert stages == expected_stages
-    manifest = json.loads(
-        (tmp_path / "work/example/hub/st-model-mic/integration.json").read_text()
-    )
+    manifest = json.loads((tmp_path / "work/example/hub/st-model-mic/integration.json").read_text())
     assert set(manifest["fixtures"]) == {"tomaarsen/st-model-mic"}
     # Only the ST integration: Transformers lanes skip it, the ST nightly selects it.
     assert set(manifest["integrations"]) == {"sentence_transformers"}
     integration = manifest["integrations"]["sentence_transformers"]
     assert integration["entry_point"] == "integrations/sentence_transformers/usage.md"
     assert not integration["training"]
-    assert {"scores", "query_embeddings", "document_embeddings"} <= set(
-        integration["outputs"]
-    )
+    assert {"scores", "query_embeddings", "document_embeddings"} <= set(integration["outputs"])
     root = tmp_path / "work/example/hub/st-model-mic"
     assert (root / integration["entry_point"]).exists()
     assert not (root / "integrations/transformers").exists()
-    lock = json.loads(
-        (tmp_path / "work/example/transformers/tests/contracts/fleet.lock").read_text()
-    )
+    lock = json.loads((tmp_path / "work/example/transformers/tests/contracts/fleet.lock").read_text())
     assert lock["contracts"]["st-model"]["integrations"] == ["sentence_transformers"]
     if not flags:
         # record/check/review default to the contract's only integration.
@@ -251,8 +235,7 @@ def test_st_creation_preserves_explicit_namespace_and_inference_outputs(
         monkeypatch.setattr(
             commands.backend,
             "invoke",
-            lambda command, cwd, options: invoked.append(options)
-            or SimpleNamespace(returncode=1),
+            lambda command, cwd, options: invoked.append(options) or SimpleNamespace(returncode=1),
         )
         check = parser().parse_args(["--workspace", str(tmp_path / "work"), "check"])
         real_execute(check)
@@ -319,4 +302,3 @@ def test_primary_integration_prefers_transformers_then_the_only_one():
     assert primary_integration(only) == "sentence_transformers"
     with pytest.raises(ValueError, match="--integration"):
         primary_integration({"integrations": {"a": {}, "b": {}}})
-

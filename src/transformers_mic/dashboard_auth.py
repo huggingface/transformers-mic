@@ -2,13 +2,13 @@
 
 import json
 import os
-from pathlib import Path
 import tempfile
 import time
+import webbrowser
+from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
-import webbrowser
 
 DEFAULT_DASHBOARD = "https://transformers-ci.huggingface.cool"
 
@@ -21,9 +21,7 @@ class DashboardError(ValueError):
 
 class NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
-        raise DashboardError(
-            "Dashboard redirected an authentication request; check --dashboard"
-        )
+        raise DashboardError("Dashboard redirected an authentication request; check --dashboard")
 
 
 def dashboard_url(value):
@@ -37,9 +35,7 @@ def dashboard_url(value):
         or parsed.query
         or parsed.fragment
     ):
-        raise ValueError(
-            "--dashboard must be an HTTPS origin, e.g. " + DEFAULT_DASHBOARD
-        )
+        raise ValueError("--dashboard must be an HTTPS origin, e.g. " + DEFAULT_DASHBOARD)
     return value.rstrip("/")
 
 
@@ -71,9 +67,7 @@ def request(dashboard, path, *, body=None, token=None, binary=False):
             reason = "request_failed"
         raise DashboardError(reason) from None
     except (URLError, TimeoutError):
-        raise DashboardError(
-            "Could not reach the dashboard; check the URL and connection"
-        ) from None
+        raise DashboardError("Could not reach the dashboard; check the URL and connection") from None
 
 
 def request_bytes(dashboard, path, *, token):
@@ -123,10 +117,7 @@ def run(args):
         grant = request(dashboard, "/auth/device", body={"client_id": "tmic"})
         # The selected HTTPS origin is the only place we open or send credentials.
         verification = grant["verification_uri_complete"]
-        if (
-            urlsplit(verification).scheme != "https"
-            or urlsplit(verification).netloc != urlsplit(dashboard).netloc
-        ):
+        if urlsplit(verification).scheme != "https" or urlsplit(verification).netloc != urlsplit(dashboard).netloc:
             raise ValueError("Dashboard returned an unexpected authorization URL")
         print(f"Open {verification}\nConfirm code: {grant['user_code']}", flush=True)
         if not args.no_browser:
@@ -170,9 +161,7 @@ def run(args):
                     request(dashboard, "/auth/revoke", body={}, token=previous)
                 except DashboardError:
                     pass  # expired or already revoked; the new session is saved
-            print(
-                f"Signed in as @{user['login']} on {dashboard}. Access expires in eight hours."
-            )
+            print(f"Signed in as @{user['login']} on {dashboard}. Access expires in eight hours.")
             return 0
         raise ValueError("Authorization expired; run tmic auth login again")
     if args.auth_command == "status":

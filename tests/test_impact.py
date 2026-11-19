@@ -16,14 +16,31 @@ DAY = 20_000  # a UTC day number
 T = DAY * 86400
 
 
-def row(pr="1", contract="huggingface-mic/a-mic", target="a-mic", kind="Baseline assertion", latest="fail", fail_days=(0,), **extra):
+def row(
+    pr="1",
+    contract="huggingface-mic/a-mic",
+    target="a-mic",
+    kind="Baseline assertion",
+    latest="fail",
+    fail_days=(0,),
+    **extra,
+):
     daily = [{"pass": 0, "fail": 0, "skipped": 0} for _ in range(7)]
     for d in fail_days:
         daily[d]["fail"] = 1
     return {
-        "pr": pr, "contract": contract, "target": target, "variant": "default", "platform": "cpu-x86_64",
-        "failure_kind": kind, "failure": "logits: max delta", "weights": "random", "daily": daily,
-        "latest": {"status": latest, "started_at": T + 3600}, "started_at": T + 60, "commit_sha": "abc",
+        "pr": pr,
+        "contract": contract,
+        "target": target,
+        "variant": "default",
+        "platform": "cpu-x86_64",
+        "failure_kind": kind,
+        "failure": "logits: max delta",
+        "weights": "random",
+        "daily": daily,
+        "latest": {"status": latest, "started_at": T + 3600},
+        "started_at": T + 60,
+        "commit_sha": "abc",
         **extra,
     }
 
@@ -52,9 +69,7 @@ def iso(seconds):
     return dt.datetime.fromtimestamp(seconds, tz=dt.UTC).isoformat().replace("+00:00", "Z")
 
 
-@pytest.mark.parametrize(
-    "pushed, expected", [(True, "fixed-by-push"), (False, "recovered-no-push")]
-)
+@pytest.mark.parametrize("pushed, expected", [(True, "fixed-by-push"), (False, "recovered-no-push")])
 def test_recovery_is_split_by_whether_the_author_pushed(pushed, expected):
     commits = [iso(T + 1800)] if pushed else [iso(T)]
     c = impact.update_candidate(candidate(), row(latest="pass"), info(commits=commits), set(), DAY)
@@ -78,8 +93,15 @@ def write(path, data):
 
 def results_dir(tmp_path):
     """Three merged PRs: one blocked rightly, one by a main failure, one by a PR-only flake."""
-    base = {"variant": "default", "platform": "cpu-x86_64", "weights": "random", "kind": "fixture",
-            "failure_kind": "Baseline assertion", "failure": "x", "latest": "fail"}
+    base = {
+        "variant": "default",
+        "platform": "cpu-x86_64",
+        "weights": "random",
+        "kind": "fixture",
+        "failure_kind": "Baseline assertion",
+        "failure": "x",
+        "latest": "fail",
+    }
     rows = [
         {**base, "pr": "10", "contract": "c/real-mic", "target": "real-mic", "class": "pr-only"},
         {**base, "pr": "11", "contract": "c/main-mic", "target": "main-mic", "class": "pre-existing"},
@@ -89,9 +111,36 @@ def results_dir(tmp_path):
     write(tmp_path / "days" / "2026-10-01.json", {"rows": rows})
     key = lambda r: f"{r['pr']}#{r['contract']}|{r['target']}|default|cpu-x86_64"
     candidates = {
-        key(rows[0]): {"key": key(rows[0]), "pr": "10", "outcome": "merged-then-main-failed", "weights": "random", "kind": "fixture", "first_seen": "2026-10-01", "failure_kind": "Baseline assertion", "failure": "x"},
-        key(rows[2]): {"key": key(rows[2]), "pr": "12", "outcome": "merged-main-ok", "weights": "overfit", "kind": "fixture", "first_seen": "2026-10-01", "failure_kind": "Baseline assertion", "failure": "x"},
-        key(rows[3]): {"key": key(rows[3]), "pr": "13", "outcome": "open", "weights": "random", "kind": "fixture", "first_seen": "2026-10-01", "failure_kind": "Baseline assertion", "failure": "x"},
+        key(rows[0]): {
+            "key": key(rows[0]),
+            "pr": "10",
+            "outcome": "merged-then-main-failed",
+            "weights": "random",
+            "kind": "fixture",
+            "first_seen": "2026-10-01",
+            "failure_kind": "Baseline assertion",
+            "failure": "x",
+        },
+        key(rows[2]): {
+            "key": key(rows[2]),
+            "pr": "12",
+            "outcome": "merged-main-ok",
+            "weights": "overfit",
+            "kind": "fixture",
+            "first_seen": "2026-10-01",
+            "failure_kind": "Baseline assertion",
+            "failure": "x",
+        },
+        key(rows[3]): {
+            "key": key(rows[3]),
+            "pr": "13",
+            "outcome": "open",
+            "weights": "random",
+            "kind": "fixture",
+            "first_seen": "2026-10-01",
+            "failure_kind": "Baseline assertion",
+            "failure": "x",
+        },
     }
     write(tmp_path / "candidates.json", candidates)
     write(tmp_path / "prs.json", {p: {"state": "merged"} for p in ("10", "11", "12")} | {"13": {"state": "open"}})
@@ -132,7 +181,11 @@ def test_a_case_failing_on_several_prs_the_same_day_is_systemic():
 
 @pytest.mark.parametrize(
     "target, kind",
-    [("granite-3.1-2b-instruct-mic", "fixture"), ("mic-mistral3-slim", "fixture"), ("granite-3.1-2b-instruct", "checkpoint")],
+    [
+        ("granite-3.1-2b-instruct-mic", "fixture"),
+        ("mic-mistral3-slim", "fixture"),
+        ("granite-3.1-2b-instruct", "checkpoint"),
+    ],
 )
 def test_fixture_names_old_and_new(target, kind):
     assert impact.target_kind({"target": target}) == kind
@@ -155,12 +208,16 @@ def test_gpu_ci_regressions_group_by_pr_and_model_and_skip_flaky(monkeypatch):
         return {"test": test, "pr_number": pr, "status": status, "bad_commit": "b", "job_link": "j"}
 
     data = {
-        "llama": {"single-gpu": [
-            entry("tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_a"),
-            entry("tests/models/llama/test_modeling_llama.py::LlamaModelTest::test_b"),
-            entry("tests/models/llama/test_modeling_llama.py::LlamaModelTest::test_c", status="flaky: passed on retry"),
-            entry("tests/models/llama/test_modeling_llama.py::LlamaModelTest::test_d", pr=None),
-        ]},
+        "llama": {
+            "single-gpu": [
+                entry("tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_a"),
+                entry("tests/models/llama/test_modeling_llama.py::LlamaModelTest::test_b"),
+                entry(
+                    "tests/models/llama/test_modeling_llama.py::LlamaModelTest::test_c", status="flaky: passed on retry"
+                ),
+                entry("tests/models/llama/test_modeling_llama.py::LlamaModelTest::test_d", pr=None),
+            ]
+        },
         "bert": {"multi-gpu": [entry("tests/models/bert/test_modeling_bert.py::BertModelTest::test_e", pr=50002)]},
     }
     monkeypatch.setattr(impact, "get_json", lambda url: data)
@@ -187,7 +244,12 @@ def test_selection_follows_select_contracts_rules(files, selected):
 @pytest.mark.parametrize(
     "rows, job, files, expected",
     [
-        ([{"pr": "7", "failure_kind": "Baseline assertion", "fixture_repo": "m/llama-mic", "failure": "x"}], "failure", [], "caught-on-pr"),
+        (
+            [{"pr": "7", "failure_kind": "Baseline assertion", "fixture_repo": "m/llama-mic", "failure": "x"}],
+            "failure",
+            [],
+            "caught-on-pr",
+        ),
         ([{"pr": "7", "failure_kind": "Setup error", "fixture_repo": "m/llama-mic"}], None, [], "not-run"),
         ([], "success", ["src/transformers/models/bert/x.py"], "not-selected"),
         ([], "success", ["src/transformers/models/llama/x.py"], "missed"),
@@ -202,22 +264,51 @@ def test_mic_on_culprit(monkeypatch, rows, job, files, expected):
 
 
 def test_sticky_onsets_need_a_passing_day_before():
-    health = {"rows": [
-        {"job": "run_models_gpu", "category": "failure", "sticky": True, "model": "llama", "nodeid": "t/LlamaIntegrationTest::a", "days": [0, 0, 3, 1]},
-        {"job": "run_models_gpu", "category": "failure", "sticky": True, "model": "bert", "nodeid": "t/BertModelTest::b", "days": [1, 1, 1, 1]},
-        {"job": "tests_torch", "category": "failure", "sticky": True, "model": "gpt2", "nodeid": "t/x", "days": [0, 1, 1, 1]},
-    ]}
+    health = {
+        "rows": [
+            {
+                "job": "run_models_gpu",
+                "category": "failure",
+                "sticky": True,
+                "model": "llama",
+                "nodeid": "t/LlamaIntegrationTest::a",
+                "days": [0, 0, 3, 1],
+            },
+            {
+                "job": "run_models_gpu",
+                "category": "failure",
+                "sticky": True,
+                "model": "bert",
+                "nodeid": "t/BertModelTest::b",
+                "days": [1, 1, 1, 1],
+            },
+            {
+                "job": "tests_torch",
+                "category": "failure",
+                "sticky": True,
+                "model": "gpt2",
+                "nodeid": "t/x",
+                "days": [0, 1, 1, 1],
+            },
+        ]
+    }
     found = impact.sticky_gpu_onsets(health, DAY)
     assert list(found) == [f"sticky#llama#{impact.iso_day(DAY + 2)}"]
     item = found[f"sticky#llama#{impact.iso_day(DAY + 2)}"]
     assert item["integration"] is True
-    main = [{"failure_kind": "Baseline assertion", "fixture_repo": "m/llama-mic", "daily": [{"fail": 0}, {"fail": 0}, {"fail": 0}, {"fail": 1}]}]
+    main = [
+        {
+            "failure_kind": "Baseline assertion",
+            "fixture_repo": "m/llama-mic",
+            "daily": [{"fail": 0}, {"fail": 0}, {"fail": 0}, {"fail": 1}],
+        }
+    ]
     assert impact.mic_on_main_near(item, main, DAY, {"m/llama-mic": "llama"}, {"llama"}) == "red-on-main"
     assert impact.mic_on_main_near(item, [], DAY, {}, {"llama"}) == "green-on-main"
     assert impact.mic_on_main_near({**item, "model": "bert"}, main, DAY, {}, {"llama"}) == "not-covered"
 
 
-TEST_FILE = '''
+TEST_FILE = """
 class EomtModelTest(unittest.TestCase):
     def test_tiny(self):
         AutoModel.from_pretrained("hf-internal-testing/tiny-eomt")
@@ -228,7 +319,7 @@ class EomtIntegrationTest(unittest.TestCase):
         Model.from_pretrained("tue-mps/eomt-large")
         load_image("org/images/cat.png")
         Model.from_pretrained("tue-mps/eomt-small")
-'''
+"""
 
 
 def test_checkpoints_come_from_the_failing_class():
@@ -240,17 +331,37 @@ def test_checkpoints_come_from_the_failing_class():
 def test_suggestions_rank_shrinkable_and_real_checkpoint_models_first():
     files = {"tests/models/eomt/test_modeling_eomt.py": TEST_FILE}
     gpu_ci = {
-        "1#eomt": {"model": "eomt", "mic": "not-covered", "integration": True, "date": "d",
-                   "tests": ["tests/models/eomt/test_modeling_eomt.py::EomtIntegrationTest::test_a"]},
-        "2#nope": {"model": "nope", "mic": "not-covered", "integration": True, "date": "d",
-                   "tests": ["tests/models/nope/test_modeling_nope.py::NopeIntegrationTest::test_b"]},
+        "1#eomt": {
+            "model": "eomt",
+            "mic": "not-covered",
+            "integration": True,
+            "date": "d",
+            "tests": ["tests/models/eomt/test_modeling_eomt.py::EomtIntegrationTest::test_a"],
+        },
+        "2#nope": {
+            "model": "nope",
+            "mic": "not-covered",
+            "integration": True,
+            "date": "d",
+            "tests": ["tests/models/nope/test_modeling_nope.py::NopeIntegrationTest::test_b"],
+        },
         "3#auto": {"model": "auto", "mic": "not-covered", "integration": False, "date": "d", "tests": ["t"]},
-        "sticky#llama#d": {"model": "llama", "mic": "green-on-main", "integration": True, "date": "d",
-                           "tests": ["tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_flash_attn_x",
-                                     "tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_export"]},
+        "sticky#llama#d": {
+            "model": "llama",
+            "mic": "green-on-main",
+            "integration": True,
+            "date": "d",
+            "tests": [
+                "tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_flash_attn_x",
+                "tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_export",
+            ],
+        },
     }
     files["tests/models/nope/test_modeling_nope.py"] = ""
-    sweep = {"eomt": {"stage": "ok", "finite": True, "repo": "sweep/eomt"}, "nope": {"stage": "error", "repo": "sweep/nope"}}
+    sweep = {
+        "eomt": {"stage": "ok", "finite": True, "repo": "sweep/eomt"},
+        "nope": {"stage": "error", "repo": "sweep/nope"},
+    }
     s = impact.build_suggestions(gpu_ci, sweep, files)
     assert [x["model"] for x in s["new"]] == ["eomt", "nope"]  # shrinkable first; auto is not a model
     assert s["new"][0]["checkpoint"] == "tue-mps/eomt-large" and s["new"][0]["checkpoint_source"] == "failing test"
@@ -261,39 +372,75 @@ def test_suggestions_rank_shrinkable_and_real_checkpoint_models_first():
 def test_drafts_are_capped_skip_drafted_and_unshrinkable(monkeypatch):
     sent = []
     monkeypatch.setattr(impact, "github_post", lambda path, body: sent.append(body["inputs"]["model"]) or 204)
-    suggestions = {"new": [
-        {"model": "a", "checkpoint": "o/a", "shrinkable": True},
-        {"model": "b", "checkpoint": "o/b", "shrinkable": False},
-        {"model": "c", "checkpoint": "o/c", "shrinkable": True},
-        {"model": "d", "checkpoint": "o/d", "shrinkable": True},
-        {"model": "e", "checkpoint": "o/e", "shrinkable": True},
-    ]}
+    suggestions = {
+        "new": [
+            {"model": "a", "checkpoint": "o/a", "shrinkable": True},
+            {"model": "b", "checkpoint": "o/b", "shrinkable": False},
+            {"model": "c", "checkpoint": "o/c", "shrinkable": True},
+            {"model": "d", "checkpoint": "o/d", "shrinkable": True},
+            {"model": "e", "checkpoint": "o/e", "shrinkable": True},
+        ]
+    }
     drafts = {"c": {"checkpoint": "o/c", "conclusion": "success"}}
     assert impact.dispatch_drafts(suggestions, drafts, 2, "2026-11-03T10:00:00Z") == 2
     assert sent == ["o/a", "o/d"]
 
 
 def test_drafts_find_their_run_by_name(monkeypatch):
-    runs = {"workflow_runs": [
-        {"id": 9, "display_title": "tmic run o/a", "created_at": "2026-11-03T10:00:05Z", "status": "completed", "conclusion": "failure", "html_url": "u9"},
-        {"id": 8, "display_title": "tmic run o/a", "created_at": "2026-11-01T10:00:05Z", "status": "completed", "conclusion": "success", "html_url": "u8"},
-    ]}
+    runs = {
+        "workflow_runs": [
+            {
+                "id": 9,
+                "display_title": "tmic run o/a",
+                "created_at": "2026-11-03T10:00:05Z",
+                "status": "completed",
+                "conclusion": "failure",
+                "html_url": "u9",
+            },
+            {
+                "id": 8,
+                "display_title": "tmic run o/a",
+                "created_at": "2026-11-01T10:00:05Z",
+                "status": "completed",
+                "conclusion": "success",
+                "html_url": "u8",
+            },
+        ]
+    }
     monkeypatch.setattr(impact, "github", lambda path: runs)
     drafts = {"a": {"checkpoint": "o/a", "dispatched_at": "2026-11-03T10:00:00Z", "conclusion": None}}
     impact.refresh_drafts(drafts)
     assert drafts["a"]["run_id"] == 9 and drafts["a"]["conclusion"] == "failure"
-    lines = "\n".join(impact.draft_lines({"new": [{"model": "a", "integration": 1, "other": 0, "checkpoint": "o/a", "shrinkable": True}], "extend": {}}, drafts))
+    lines = "\n".join(
+        impact.draft_lines(
+            {
+                "new": [{"model": "a", "integration": 1, "other": 0, "checkpoint": "o/a", "shrinkable": True}],
+                "extend": {},
+            },
+            drafts,
+        )
+    )
     assert "[failure](u9)" in lines
 
 
 def test_a_test_failing_on_many_models_is_one_shared_suggestion():
     gpu_ci = {
-        f"sticky#{m}#d": {"model": m, "mic": "green-on-main", "integration": False, "date": "d",
-                          "tests": [f"tests/models/{m}/test_modeling_{m}.py::{m}ModelTest::test_torch_export_generate_static"]}
+        f"sticky#{m}#d": {
+            "model": m,
+            "mic": "green-on-main",
+            "integration": False,
+            "date": "d",
+            "tests": [f"tests/models/{m}/test_modeling_{m}.py::{m}ModelTest::test_torch_export_generate_static"],
+        }
         for m in ("bart", "t5", "marian")
     }
-    gpu_ci["sticky#gemma2#d"] = {"model": "gemma2", "mic": "green-on-main", "integration": True, "date": "d",
-                                 "tests": ["tests/models/gemma2/test_modeling_gemma2.py::Gemma2IntegrationTest::test_export_static_cache"]}
+    gpu_ci["sticky#gemma2#d"] = {
+        "model": "gemma2",
+        "mic": "green-on-main",
+        "integration": True,
+        "date": "d",
+        "tests": ["tests/models/gemma2/test_modeling_gemma2.py::Gemma2IntegrationTest::test_export_static_cache"],
+    }
     s = impact.build_suggestions(gpu_ci, {}, {})
     assert s["shared"] == {"test_torch_export_generate_static": ["bart", "marian", "t5"]}
     assert list(s["extend"]) == ["gemma2"]
@@ -301,27 +448,60 @@ def test_a_test_failing_on_many_models_is_one_shared_suggestion():
 
 def test_overview_has_the_headline_numbers_and_next_targets(tmp_path):
     results = results_dir(tmp_path)
-    write(results / "gpu-ci.json", {
-        "1#a": {"mic": "caught-on-pr", "integration": True},
-        "2#b": {"mic": "missed", "integration": True, "date": "d", "tests": ["t"]},
-        "sticky#c#d": {"mic": "not-covered", "integration": True},
-        "sticky#e#d": {"mic": "green-on-main", "integration": False},
-    })
-    write(results / "suggestions.json", {"new": [
-        {"model": f"m{i}", "checkpoint": f"o/m{i}", "integration": 1, "other": 2, "shrinkable": True} for i in range(7)
-    ], "extend": {}})
-    write(results / "drafts.json", {"m0": {"checkpoint": "o/m0", "status": "completed", "conclusion": "success",
-                                           "url": "https://github.com/x/runs/9", "shrink": "shrink/9/shrink-m0.html"}})
+    write(
+        results / "gpu-ci.json",
+        {
+            "1#a": {"mic": "caught-on-pr", "integration": True},
+            "2#b": {"mic": "missed", "integration": True, "date": "d", "tests": ["t"]},
+            "sticky#c#d": {"mic": "not-covered", "integration": True},
+            "sticky#e#d": {"mic": "green-on-main", "integration": False},
+        },
+    )
+    write(
+        results / "suggestions.json",
+        {
+            "new": [
+                {"model": f"m{i}", "checkpoint": f"o/m{i}", "integration": 1, "other": 2, "shrinkable": True}
+                for i in range(7)
+            ],
+            "extend": {},
+        },
+    )
+    write(
+        results / "drafts.json",
+        {
+            "m0": {
+                "checkpoint": "o/m0",
+                "status": "completed",
+                "conclusion": "success",
+                "url": "https://github.com/x/runs/9",
+                "shrink": "shrink/9/shrink-m0.html",
+            }
+        },
+    )
     impact.summarize(results)
     o = json.loads((results / "overview.json").read_text())
     assert o["window"] == ["2026-10-01", "2026-10-01"]
-    assert o["caught"]["real_checkpoint"] == 1 and o["missed"] == {"real_checkpoint": 1, "not_covered": 1, "awaiting_verdict": 1}
+    assert o["caught"]["real_checkpoint"] == 1 and o["missed"] == {
+        "real_checkpoint": 1,
+        "not_covered": 1,
+        "awaiting_verdict": 1,
+    }
     assert o["false_alarms"] == {"prs_with_failure": 4, "prs_not_their_fault": 1}
     assert o["block_merges"]["ready"] is False and any("days observed" in u for u in o["block_merges"]["unmet"])
     assert len(o["next"]) == 7  # every suggestion, up to NEXT_TARGETS
-    assert o["next"][0] == {"model": "m0", "checkpoint": "o/m0", "regressions": 3, "real_checkpoint": 1, "other": 2,
-                            "shrinkable": True, "next_batch": False, "draft": "success",
-                            "run": "https://github.com/x/runs/9", "shrink": "shrink/9/shrink-m0.html"}
+    assert o["next"][0] == {
+        "model": "m0",
+        "checkpoint": "o/m0",
+        "regressions": 3,
+        "real_checkpoint": 1,
+        "other": 2,
+        "shrinkable": True,
+        "next_batch": False,
+        "draft": "success",
+        "run": "https://github.com/x/runs/9",
+        "shrink": "shrink/9/shrink-m0.html",
+    }
     assert o["next"][1]["draft"] == "" and o["next"][1]["shrink"] == ""
     # The next daily run drafts the top DRAFTS_PER_DAY suggestions without a draft.
     assert [t["model"] for t in o["next"] if t["next_batch"]] == ["m1", "m2"]
@@ -362,18 +542,35 @@ def test_space_gets_overview_report_and_new_shrink_pages(monkeypatch, tmp_path):
 
     class Api:
         def upload_folder(self, folder_path, **kwargs):
-            uploaded["files"] = sorted(str(p.relative_to(folder_path)) for p in Path(folder_path).rglob("*") if p.is_file())
+            uploaded["files"] = sorted(
+                str(p.relative_to(folder_path)) for p in Path(folder_path).rglob("*") if p.is_file()
+            )
 
     import huggingface_hub
 
     monkeypatch.setattr(huggingface_hub, "HfApi", Api)
     impact.publish_space(results, "o/space", shrink)
-    assert uploaded["files"] == ["README.md", "index.html", "overview.json", "report.html", "shrink/9/p.html", "summary.md", "updated.txt"]
+    assert uploaded["files"] == [
+        "README.md",
+        "index.html",
+        "overview.json",
+        "report.html",
+        "shrink/9/p.html",
+        "summary.md",
+        "updated.txt",
+    ]
 
 
 def test_a_model_that_got_a_contract_is_no_longer_suggested():
-    gpu_ci = {"1#flint": {"model": "flint", "mic": "not-covered", "integration": True, "date": "d",
-                          "tests": ["tests/models/flint/test_modeling_flint.py::FlintIntegrationTest::test_x"]}}
+    gpu_ci = {
+        "1#flint": {
+            "model": "flint",
+            "mic": "not-covered",
+            "integration": True,
+            "date": "d",
+            "tests": ["tests/models/flint/test_modeling_flint.py::FlintIntegrationTest::test_x"],
+        }
+    }
     assert [s["model"] for s in impact.build_suggestions(gpu_ci, {}, {})["new"]] == ["flint"]
     assert impact.build_suggestions(gpu_ci, {}, {}, {"flint"})["new"] == []
 
@@ -390,8 +587,15 @@ def test_a_refresh_drops_suggestions_the_fleet_now_covers(tmp_path, monkeypatch)
 def test_a_checkpoint_the_hub_does_not_serve_is_skipped():
     text = 'class MoshiTest:\n    a = "kmhf/hf-moshiko"\n    b = "kmhf/hf-moshiko"\n    c = "kmhf/hf-moshika"\n'
     files = {"tests/models/moshi/test_modeling_moshi.py": text}
-    gpu_ci = {"1#moshi": {"model": "moshi", "mic": "not-covered", "integration": False, "date": "d",
-                          "tests": ["tests/models/moshi/test_modeling_moshi.py::MoshiTest::test_a"]}}
+    gpu_ci = {
+        "1#moshi": {
+            "model": "moshi",
+            "mic": "not-covered",
+            "integration": False,
+            "date": "d",
+            "tests": ["tests/models/moshi/test_modeling_moshi.py::MoshiTest::test_a"],
+        }
+    }
     sweep = {"moshi": {"stage": "ok", "finite": True, "repo": "gone/sweep"}}
     assert impact.build_suggestions(gpu_ci, sweep, files)["new"][0]["checkpoint"] == "kmhf/hf-moshiko"
     live = {"kmhf/hf-moshika"}
@@ -406,7 +610,11 @@ def test_a_gated_checkpoint_counts_only_when_the_token_can_download_it(monkeypat
     granted = {"g/granted"}
 
     def get_text(url, token=None):
-        repo = url.split("/api/models/")[-1] if "/api/models/" in url else url.split("huggingface.co/")[1].split("/resolve/")[0]
+        repo = (
+            url.split("/api/models/")[-1]
+            if "/api/models/" in url
+            else url.split("huggingface.co/")[1].split("/resolve/")[0]
+        )
         if "/api/models/" in url:
             if repo == "gone/repo":
                 raise urllib.error.HTTPError(url, 404, "", {}, None)
@@ -425,12 +633,18 @@ def test_a_gated_checkpoint_counts_only_when_the_token_can_download_it(monkeypat
 
 
 def test_a_failed_draft_is_retried_only_on_a_new_checkpoint():
-    suggestions = {"new": [{"model": "moshi", "checkpoint": "kmhf/hf-moshika", "shrinkable": True, "integration": 0, "other": 1},
-                           {"model": "switch", "checkpoint": "google/switch-base-8", "shrinkable": True, "integration": 0, "other": 1},
-                           {"model": "olmo", "checkpoint": "o/olmo", "shrinkable": True, "integration": 0, "other": 1}]}
-    drafts = {"moshi": {"checkpoint": "kmhf/hf-moshiko", "conclusion": "failure"},
-              "switch": {"checkpoint": "google/switch-base-8", "conclusion": "failure"},
-              "olmo": {"checkpoint": "o/older", "conclusion": None, "status": "in_progress"}}
+    suggestions = {
+        "new": [
+            {"model": "moshi", "checkpoint": "kmhf/hf-moshika", "shrinkable": True, "integration": 0, "other": 1},
+            {"model": "switch", "checkpoint": "google/switch-base-8", "shrinkable": True, "integration": 0, "other": 1},
+            {"model": "olmo", "checkpoint": "o/olmo", "shrinkable": True, "integration": 0, "other": 1},
+        ]
+    }
+    drafts = {
+        "moshi": {"checkpoint": "kmhf/hf-moshiko", "conclusion": "failure"},
+        "switch": {"checkpoint": "google/switch-base-8", "conclusion": "failure"},
+        "olmo": {"checkpoint": "o/older", "conclusion": None, "status": "in_progress"},
+    }
     assert [s["model"] for s in impact.draftable(suggestions, drafts)] == ["moshi"]
     assert impact.live_draft(suggestions["new"][0], drafts) is None
     lines = "\n".join(impact.draft_lines({**suggestions, "extend": {}}, drafts))
@@ -467,12 +681,27 @@ def test_replay_plan_pairs_each_regression_with_its_commits():
         "7#llama": regression(pr="7", bad_commit="b" * 40, date="2026-09-01"),
         "sticky#llama#2026-10-03": regression(date="2026-10-03"),
         "sticky#bert#2026-10-03": regression(model="bert", date="2026-10-03"),
-        "8#llama": regression(pr="8", bad_commit="c" * 40, tests=["tests/models/llama/test_modeling_llama.py::LlamaTest::test_flash_attn_2_x"]),
+        "8#llama": regression(
+            pr="8",
+            bad_commit="c" * 40,
+            tests=["tests/models/llama/test_modeling_llama.py::LlamaTest::test_flash_attn_2_x"],
+        ),
     }
     days = {"2026-10-02": "p" * 40, "2026-10-03": "q" * 40}
     replays = {}
-    plan = impact.replay_plan(gpu_ci, replays, CONTRACTS, days.get, sha_of_run=lambda run: None, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py'])
-    assert replays == {"sticky#bert#2026-10-03": {"verdict": "not-covered", "version": impact.REPLAY_VERSION}, "8#llama": {"verdict": "out-of-scope", "version": impact.REPLAY_VERSION}}
+    plan = impact.replay_plan(
+        gpu_ci,
+        replays,
+        CONTRACTS,
+        days.get,
+        sha_of_run=lambda run: None,
+        failing_on=fails,
+        files_of=lambda sha: ["src/transformers/models/llama/modeling_llama.py"],
+    )
+    assert replays == {
+        "sticky#bert#2026-10-03": {"verdict": "not-covered", "version": impact.REPLAY_VERSION},
+        "8#llama": {"verdict": "out-of-scope", "version": impact.REPLAY_VERSION},
+    }
     # Newest first; one entry per fleet holding the model's contracts.
     assert [(p["key"], p["fleet"], p["variants"], p["parent"], p["bad"]) for p in plan] == [
         ("sticky#llama#2026-10-03", "control", ["default", "bfloat16"], "p" * 40, "q" * 40),
@@ -483,18 +712,58 @@ def test_replay_plan_pairs_each_regression_with_its_commits():
     assert plan[0]["model"] == "llama" and plan[0]["contracts"] == ["huggingface-mic/llama-mic"]
     # Replayed regressions are not planned again; the limit counts regressions, not entries.
     done = {**replays, "sticky#llama#2026-10-03": {"verdict": "missed", "version": impact.REPLAY_VERSION}}
-    assert {p["key"] for p in impact.replay_plan(gpu_ci, done, CONTRACTS, days.get, limit=1, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py'])} == {"7#llama"}
-    assert {p["key"] for p in impact.replay_plan(gpu_ci, {}, CONTRACTS, days.get, limit=1, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py'])} == {"sticky#llama#2026-10-03"}
+    assert {
+        p["key"]
+        for p in impact.replay_plan(
+            gpu_ci,
+            done,
+            CONTRACTS,
+            days.get,
+            limit=1,
+            failing_on=fails,
+            files_of=lambda sha: ["src/transformers/models/llama/modeling_llama.py"],
+        )
+    } == {"7#llama"}
+    assert {
+        p["key"]
+        for p in impact.replay_plan(
+            gpu_ci,
+            {},
+            CONTRACTS,
+            days.get,
+            limit=1,
+            failing_on=fails,
+            files_of=lambda sha: ["src/transformers/models/llama/modeling_llama.py"],
+        )
+    } == {"sticky#llama#2026-10-03"}
     # A verdict from older rules is planned again.
     old = {**done, "7#llama": {"verdict": "missed"}}
-    assert {p["key"] for p in impact.replay_plan(gpu_ci, old, CONTRACTS, days.get, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py'])} == {"7#llama"}
+    assert {
+        p["key"]
+        for p in impact.replay_plan(
+            gpu_ci,
+            old,
+            CONTRACTS,
+            days.get,
+            failing_on=fails,
+            files_of=lambda sha: ["src/transformers/models/llama/modeling_llama.py"],
+        )
+    } == {"7#llama"}
 
 
 def test_a_sticky_onset_replays_up_to_the_run_that_failed():
     # A push run on a commit after the daily CI's: the range must reach it.
     gpu_ci = {"sticky#llama#2026-10-03": regression(date="2026-10-03", run_id="99")}
     days = {"2026-10-02": "p" * 40, "2026-10-03": "q" * 40}
-    plan = impact.replay_plan(gpu_ci, {}, CONTRACTS, days.get, sha_of_run={"99": "r" * 40}.get, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py'])
+    plan = impact.replay_plan(
+        gpu_ci,
+        {},
+        CONTRACTS,
+        days.get,
+        sha_of_run={"99": "r" * 40}.get,
+        failing_on=fails,
+        files_of=lambda sha: ["src/transformers/models/llama/modeling_llama.py"],
+    )
     assert {(p["parent"], p["bad"]) for p in plan} == {("p" * 40, "r" * 40)}
 
 
@@ -504,69 +773,151 @@ def test_only_integration_tests_a_fixture_contract_mirrors_are_in_scope():
         "tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_flash_with_static_cache",
     ]
     assert impact.replay_scope(regression(tests=tests), CONTRACTS) == "out-of-scope"
-    assert impact.replay_scope(regression(tests=[*tests, "tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_llama_3_1_hard"]), CONTRACTS) is None
+    assert (
+        impact.replay_scope(
+            regression(
+                tests=[*tests, "tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_llama_3_1_hard"]
+            ),
+            CONTRACTS,
+        )
+        is None
+    )
 
 
 def test_a_sticky_onset_without_two_daily_commits_is_not_replayed():
     gpu_ci = {"sticky#llama#2026-10-03": regression(date="2026-10-03")}
     replays = {}
-    assert impact.replay_plan(gpu_ci, replays, CONTRACTS, {"2026-10-03": "q" * 40}.get, sha_of_run=lambda run: None, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py']) == []
+    assert (
+        impact.replay_plan(
+            gpu_ci,
+            replays,
+            CONTRACTS,
+            {"2026-10-03": "q" * 40}.get,
+            sha_of_run=lambda run: None,
+            failing_on=fails,
+            files_of=lambda sha: ["src/transformers/models/llama/modeling_llama.py"],
+        )
+        == []
+    )
     assert replays["sticky#llama#2026-10-03"]["verdict"] == "broken"
     # The same commit on both days: the failure started without a code change.
     replays = {}
-    assert impact.replay_plan(gpu_ci, replays, CONTRACTS, lambda day: "q" * 40, sha_of_run=lambda run: None, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py']) == []
+    assert (
+        impact.replay_plan(
+            gpu_ci,
+            replays,
+            CONTRACTS,
+            lambda day: "q" * 40,
+            sha_of_run=lambda run: None,
+            failing_on=fails,
+            files_of=lambda sha: ["src/transformers/models/llama/modeling_llama.py"],
+        )
+        == []
+    )
     assert replays["sticky#llama#2026-10-03"]["verdict"] == "no-code-change"
 
 
 def replayed(key, side, status, contract="huggingface-mic/llama-mic", failures=()):
-    return {"contract": contract, "target": "llama-mic", "variant": "bfloat16", "status": status, "failures": list(failures),
-            "replay": {"key": key, "side": side, "sha": side[0] * 40}}
+    return {
+        "contract": contract,
+        "target": "llama-mic",
+        "variant": "bfloat16",
+        "status": status,
+        "failures": list(failures),
+        "replay": {"key": key, "side": side, "sha": side[0] * 40},
+    }
 
 
 def test_replay_verdicts():
     records = [
-        replayed("a", "parent", "pass"), replayed("a", "bad", "fail", failures=["logits: max delta 3.1\nmore"]),
-        replayed("b", "parent", "pass"), replayed("b", "bad", "pass"),
-        replayed("c", "parent", "fail"), replayed("c", "bad", "fail"),
-        replayed("d", "parent", "pass"), replayed("d", "bad", "error", failures=["Traceback ..."]),
+        replayed("a", "parent", "pass"),
+        replayed("a", "bad", "fail", failures=["logits: max delta 3.1\nmore"]),
+        replayed("b", "parent", "pass"),
+        replayed("b", "bad", "pass"),
+        replayed("c", "parent", "fail"),
+        replayed("c", "bad", "fail"),
+        replayed("d", "parent", "pass"),
+        replayed("d", "bad", "error", failures=["Traceback ..."]),
         replayed("e", "parent", "pass"),
-        replayed("f", "parent", "error", contract="*", failures=["deadbeef^: unknown revision"]), replayed("f", "bad", "pass"),
-        replayed("g", "parent", "pass"), replayed("g", "bad", "unsupported"),
+        replayed("f", "parent", "error", contract="*", failures=["deadbeef^: unknown revision"]),
+        replayed("f", "bad", "pass"),
+        replayed("g", "parent", "pass"),
+        replayed("g", "bad", "unsupported"),
         # The bad commit added the model: the parent has nothing to run.
-        replayed("h", "parent", "absent", contract=None), replayed("h", "bad", "fail"),
-        replayed("i", "parent", "absent", contract=None), replayed("i", "bad", "pass"),
+        replayed("h", "parent", "absent", contract=None),
+        replayed("h", "bad", "fail"),
+        replayed("i", "parent", "absent", contract=None),
+        replayed("i", "bad", "pass"),
         # Red before, green after: the baseline was recorded after the change.
-        replayed("j", "parent", "fail"), replayed("j", "bad", "pass"),
+        replayed("j", "parent", "fail"),
+        replayed("j", "bad", "pass"),
     ]
     out = impact.replay_verdicts(records, {}, "https://github.com/x/runs/1")
     assert {k: v["verdict"] for k, v in out.items()} == {
-        "a": "caught", "b": "missed", "c": "already-red", "d": "caught", "e": "broken", "f": "broken", "g": "missed",
-        "h": "model-added", "i": "model-added", "j": "caught",
+        "a": "caught",
+        "b": "missed",
+        "c": "already-red",
+        "d": "caught",
+        "e": "broken",
+        "f": "broken",
+        "g": "missed",
+        "h": "model-added",
+        "i": "model-added",
+        "j": "caught",
     }
     assert out["j"]["reversed"] and "reversed" not in out["a"]
     assert out["h"]["contracts"] == ["huggingface-mic/llama-mic"]
     assert out["a"]["failures"] == ["llama-mic (bfloat16): logits: max delta 3.1"]
-    assert out["a"]["parent"] == "p" * 40 and out["a"]["bad"] == "b" * 40 and out["a"]["run"] == "https://github.com/x/runs/1"
+    assert (
+        out["a"]["parent"] == "p" * 40
+        and out["a"]["bad"] == "b" * 40
+        and out["a"]["run"] == "https://github.com/x/runs/1"
+    )
     assert out["f"]["reason"].startswith("deadbeef^")
 
 
 def test_overview_counts_the_replays(tmp_path):
     results = results_dir(tmp_path)
-    write(results / "gpu-ci.json", {
-        "1#a": regression(model="a", pr="1"),
-        "2#b": regression(model="b", pr="2"),
-        "sticky#c#d": regression(model="c"),
-        "sticky#e#d": regression(model="e"),
-    })
-    write(results / "replays.json", {
-        "1#a": {"verdict": "caught", "failures": ["a-mic: logits"], "run": "https://github.com/x/runs/1"},
-        "2#b": {"verdict": "missed", "failures": []},
-        "sticky#c#d": {"verdict": "not-covered"},
-    })
+    write(
+        results / "gpu-ci.json",
+        {
+            "1#a": regression(model="a", pr="1"),
+            "2#b": regression(model="b", pr="2"),
+            "sticky#c#d": regression(model="c"),
+            "sticky#e#d": regression(model="e"),
+        },
+    )
+    write(
+        results / "replays.json",
+        {
+            "1#a": {"verdict": "caught", "failures": ["a-mic: logits"], "run": "https://github.com/x/runs/1"},
+            "2#b": {"verdict": "missed", "failures": []},
+            "sticky#c#d": {"verdict": "not-covered"},
+        },
+    )
     impact.summarize(results)
     o = json.loads((results / "overview.json").read_text())
-    assert o["replay"] == {"caught": 1, "missed": 1, "not-a-regression": 0, "already-red": 0, "no-code-change": 0, "already-failing": 0, "not-reproduced": 0, "model-added": 0, "duplicate": 0, "unrelated-culprit": 0, "broken": 0, "out-of-scope": 0, "not-covered": 1, "pending": 1}
-    assert [(g["model"], g["verdict"]) for g in o["regressions"]] == [("e", "pending"), ("b", "missed"), ("a", "caught")]
+    assert o["replay"] == {
+        "caught": 1,
+        "missed": 1,
+        "not-a-regression": 0,
+        "already-red": 0,
+        "no-code-change": 0,
+        "already-failing": 0,
+        "not-reproduced": 0,
+        "model-added": 0,
+        "duplicate": 0,
+        "unrelated-culprit": 0,
+        "broken": 0,
+        "out-of-scope": 0,
+        "not-covered": 1,
+        "pending": 1,
+    }
+    assert [(g["model"], g["verdict"]) for g in o["regressions"]] == [
+        ("e", "pending"),
+        ("b", "missed"),
+        ("a", "caught"),
+    ]
     summary = (results / "summary.md").read_text()
     assert "**Catch rate: 1 of 2** (50%)" in summary
 
@@ -574,13 +925,23 @@ def test_overview_counts_the_replays(tmp_path):
 def test_a_human_label_takes_a_miss_out_of_the_catch_rate(tmp_path):
     results = results_dir(tmp_path)
     write(results / "gpu-ci.json", {"1#a": regression(model="a", pr="1"), "sticky#b#d": regression(model="b")})
-    write(results / "replays.json", {
-        "1#a": {"verdict": "caught", "failures": ["a-mic: logits"]},
-        "sticky#b#d": {"verdict": "missed", "failures": []},
-    })
+    write(
+        results / "replays.json",
+        {
+            "1#a": {"verdict": "caught", "failures": ["a-mic: logits"]},
+            "sticky#b#d": {"verdict": "missed", "failures": []},
+        },
+    )
     with open(results / "labels.jsonl", "a") as f:
-        f.write(json.dumps({"key": "replay#sticky#b#d", "verdict": "not-a-regression", "note": "fails at both ends", "by": "me"}) + "\n")
-        f.write(json.dumps({"key": "replay#1#a", "verdict": "flake", "note": "not a replay verdict", "by": "me"}) + "\n")
+        f.write(
+            json.dumps(
+                {"key": "replay#sticky#b#d", "verdict": "not-a-regression", "note": "fails at both ends", "by": "me"}
+            )
+            + "\n"
+        )
+        f.write(
+            json.dumps({"key": "replay#1#a", "verdict": "flake", "note": "not a replay verdict", "by": "me"}) + "\n"
+        )
     impact.summarize(results)
     o = json.loads((results / "overview.json").read_text())
     assert (o["replay"]["caught"], o["replay"]["missed"], o["replay"]["not-a-regression"]) == (1, 0, 1)
@@ -592,11 +953,22 @@ def test_a_sticky_onset_the_daily_ci_did_not_repeat_is_not_reproduced():
     gpu_ci = {"sticky#llama#2026-11-02": regression(date="2026-11-02", run_id="9")}
     replays = {}
     days = {"2026-11-01": "p" * 40, "2026-11-02": "q" * 40}
-    assert impact.replay_plan(gpu_ci, replays, CONTRACTS, days.get, sha_of_run=lambda run: "r" * 40, failing_on=lambda day: set()) == []
+    assert (
+        impact.replay_plan(
+            gpu_ci, replays, CONTRACTS, days.get, sha_of_run=lambda run: "r" * 40, failing_on=lambda day: set()
+        )
+        == []
+    )
     assert replays["sticky#llama#2026-11-02"]["verdict"] == "not-reproduced"
     # Failing in the daily run two days later still confirms it.
-    plan = impact.replay_plan(gpu_ci, {}, CONTRACTS, days.get, sha_of_run=lambda run: "r" * 40,
-                              failing_on=lambda day: {LLAMA_TEST} if day == "2026-11-04" else set())
+    plan = impact.replay_plan(
+        gpu_ci,
+        {},
+        CONTRACTS,
+        days.get,
+        sha_of_run=lambda run: "r" * 40,
+        failing_on=lambda day: {LLAMA_TEST} if day == "2026-11-04" else set(),
+    )
     assert {p["key"] for p in plan} == {"sticky#llama#2026-11-02"}
 
 
@@ -606,10 +978,21 @@ def test_a_sticky_onset_of_a_bisected_regression_is_counted_once():
         "sticky#llama#2026-10-23": regression(date="2026-10-23"),
     }
     replays = {}
-    plan = impact.replay_plan(gpu_ci, replays, CONTRACTS, {"2026-10-22": "p" * 40, "2026-10-23": "q" * 40}.get,
-                              sha_of_run=lambda run: None, failing_on=fails, files_of=lambda sha: ['src/transformers/models/llama/modeling_llama.py'])
+    plan = impact.replay_plan(
+        gpu_ci,
+        replays,
+        CONTRACTS,
+        {"2026-10-22": "p" * 40, "2026-10-23": "q" * 40}.get,
+        sha_of_run=lambda run: None,
+        failing_on=fails,
+        files_of=lambda sha: ["src/transformers/models/llama/modeling_llama.py"],
+    )
     assert {p["key"] for p in plan} == {"49811#llama"}
-    assert replays["sticky#llama#2026-10-23"] == {"verdict": "duplicate", "reason": "same regression as 49811#llama", "version": impact.REPLAY_VERSION}
+    assert replays["sticky#llama#2026-10-23"] == {
+        "verdict": "duplicate",
+        "reason": "same regression as 49811#llama",
+        "version": impact.REPLAY_VERSION,
+    }
 
 
 def test_a_setup_error_is_broken_not_red():
@@ -619,7 +1002,14 @@ def test_a_setup_error_is_broken_not_red():
         replayed("m", "parent", "fail", failures=["no reviewed baseline at /x/expectations/cpu-x86_64-bf16/a.json"]),
         replayed("m", "bad", "fail", failures=["no reviewed baseline at /x/expectations/cpu-x86_64-bf16/a.json"]),
         replayed("n", "parent", "absent", contract=None),
-        replayed("n", "bad", "error", failures=["Traceback\nImportError: tokenizers>=0.22.0,<=0.23.0 is required for a normal functioning of this module, but found tokenizers==0.23.3."]),
+        replayed(
+            "n",
+            "bad",
+            "error",
+            failures=[
+                "Traceback\nImportError: tokenizers>=0.22.0,<=0.23.0 is required for a normal functioning of this module, but found tokenizers==0.23.3."
+            ],
+        ),
     ]
     out = impact.replay_verdicts(records, {})
     assert out["k"]["verdict"] == out["m"]["verdict"] == out["n"]["verdict"] == "broken"
@@ -652,8 +1042,14 @@ def test_a_culprit_that_does_not_touch_the_model_is_unrelated():
     assert replays["46219#llama"]["verdict"] == "unrelated-culprit"
     assert gpu_ci["46219#llama"]["culprit_files"] == docs_only("")
     # Shared code can break any model: replayed.
-    plan = impact.replay_plan({"1#llama": regression(pr="1", bad_commit="c" * 40)}, {}, CONTRACTS, {}.get, failing_on=fails,
-                              files_of=lambda sha: ["src/transformers/masking_utils.py"])
+    plan = impact.replay_plan(
+        {"1#llama": regression(pr="1", bad_commit="c" * 40)},
+        {},
+        CONTRACTS,
+        {}.get,
+        failing_on=fails,
+        files_of=lambda sha: ["src/transformers/masking_utils.py"],
+    )
     assert {p["key"] for p in plan} == {"1#llama"}
 
 
@@ -694,8 +1090,15 @@ def test_a_test_whose_helper_loads_a_quantized_checkpoint_is_out_of_scope():
     assert impact.gpu_only_body(node("test_model_15b_a2b_logits"), text_of=text_of)
     assert impact.gpu_only_body(node("test_decorated"), text_of=text_of)
     assert not impact.gpu_only_body(node("test_plain[param]"), text_of=text_of)
-    assert impact.replay_scope(regression(tests=[node("test_model_15b_a2b_logits")]), CONTRACTS, text_of) == "out-of-scope"
-    assert impact.replay_scope(regression(tests=[node("test_model_15b_a2b_logits"), node("test_plain")]), CONTRACTS, text_of) is None
+    assert (
+        impact.replay_scope(regression(tests=[node("test_model_15b_a2b_logits")]), CONTRACTS, text_of) == "out-of-scope"
+    )
+    assert (
+        impact.replay_scope(
+            regression(tests=[node("test_model_15b_a2b_logits"), node("test_plain")]), CONTRACTS, text_of
+        )
+        is None
+    )
     # Unparseable or missing source: decided by the name alone.
     assert not impact.gpu_only_body(node("test_x"), text_of=lambda p, ref="main": "def (")
 
@@ -704,14 +1107,29 @@ def test_a_sticky_range_that_changes_no_model_code_is_not_replayed():
     gpu_ci = {"sticky#llama#2026-11-08": regression(date="2026-11-08")}
     days = {"2026-11-07": "p" * 40, "2026-11-08": "q" * 40}
     replays = {}
-    docker_only = lambda parent, bad: [".github/workflows/build-docker-images.yml", "docker/transformers-all-latest-gpu/Dockerfile"]
-    assert impact.replay_plan(gpu_ci, replays, CONTRACTS, days.get, sha_of_run=lambda run: None, failing_on=fails,
-                              range_files_of=docker_only) == []
+    docker_only = lambda parent, bad: [
+        ".github/workflows/build-docker-images.yml",
+        "docker/transformers-all-latest-gpu/Dockerfile",
+    ]
+    assert (
+        impact.replay_plan(
+            gpu_ci,
+            replays,
+            CONTRACTS,
+            days.get,
+            sha_of_run=lambda run: None,
+            failing_on=fails,
+            range_files_of=docker_only,
+        )
+        == []
+    )
     assert replays["sticky#llama#2026-11-08"]["verdict"] == "no-code-change"
     assert "docker/transformers-all-latest-gpu/Dockerfile" in replays["sticky#llama#2026-11-08"]["reason"]
     # Shared code in the range, or a range GitHub cannot list in full: replayed.
     for files_of in (lambda parent, bad: ["src/transformers/generation/utils.py"], lambda parent, bad: None):
-        plan = impact.replay_plan(gpu_ci, {}, CONTRACTS, days.get, sha_of_run=lambda run: None, failing_on=fails, range_files_of=files_of)
+        plan = impact.replay_plan(
+            gpu_ci, {}, CONTRACTS, days.get, sha_of_run=lambda run: None, failing_on=fails, range_files_of=files_of
+        )
         assert {p["key"] for p in plan} == {"sticky#llama#2026-11-08"}
 
 
@@ -734,8 +1152,12 @@ def test_a_sticky_onset_the_daily_ci_already_failed_is_not_an_onset():
     gpu_ci = {"sticky#llama#2026-10-17": regression(date="2026-10-17")}
     replays = {}
     days = {"2026-10-16": "p" * 40, "2026-10-17": "q" * 40}
-    assert impact.replay_plan(gpu_ci, replays, CONTRACTS, days.get, sha_of_run=lambda run: None, failing_on=fails,
-                              failed_before=fails) == []
+    assert (
+        impact.replay_plan(
+            gpu_ci, replays, CONTRACTS, days.get, sha_of_run=lambda run: None, failing_on=fails, failed_before=fails
+        )
+        == []
+    )
     assert replays["sticky#llama#2026-10-17"]["verdict"] == "already-failing"
 
 
@@ -745,8 +1167,15 @@ def test_a_sticky_onset_days_after_a_bisected_regression_is_that_regression():
         "sticky#llama#2026-10-19": regression(date="2026-10-19"),
     }
     replays = {}
-    impact.replay_plan(gpu_ci, replays, CONTRACTS, {"2026-10-18": "p" * 40, "2026-10-19": "q" * 40}.get,
-                       sha_of_run=lambda run: None, failing_on=fails, files_of=lambda sha: ["src/transformers/models/llama/modeling_llama.py"])
+    impact.replay_plan(
+        gpu_ci,
+        replays,
+        CONTRACTS,
+        {"2026-10-18": "p" * 40, "2026-10-19": "q" * 40}.get,
+        sha_of_run=lambda run: None,
+        failing_on=fails,
+        files_of=lambda sha: ["src/transformers/models/llama/modeling_llama.py"],
+    )
     assert replays["sticky#llama#2026-10-19"]["verdict"] == "duplicate"
     # Beyond SAME_EVENT_DAYS it is a new onset.
     gpu_ci["sticky#llama#2026-10-30"] = gpu_ci.pop("sticky#llama#2026-10-19") | {"date": "2026-10-30"}

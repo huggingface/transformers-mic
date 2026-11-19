@@ -4,8 +4,7 @@ from types import SimpleNamespace
 import pytest
 
 from transformers_mic import contract_repair as repair
-from transformers_mic.workspace import Workspace
-from transformers_mic.workspace import write
+from transformers_mic.workspace import Workspace, write
 
 
 @pytest.fixture
@@ -13,14 +12,9 @@ def setup(tmp_path, monkeypatch):
     workspace = Workspace(tmp_path / "project")
     workspace.from_catalog("google-bert/bert-base-uncased", "BERT", "auto", False)
     workspace.save_state(origin="llm")
-    usage = (
-        workspace.contract_root
-        / workspace.manifest["integrations"]["transformers"]["entry_point"]
-    )
+    usage = workspace.contract_root / workspace.manifest["integrations"]["transformers"]["entry_point"]
     log = tmp_path / "build.log"
-    log.write_text(
-        "the contract fails on the random fixture:\nKeyError: bad.parameter\nhf_notasecret"
-    )
+    log.write_text("the contract fails on the random fixture:\nKeyError: bad.parameter\nhf_notasecret")
     plan = {
         "name": "BERT",
         "manifest": workspace.manifest,
@@ -52,9 +46,7 @@ def setup(tmp_path, monkeypatch):
 
 
 def propose(s):
-    return repair.propose(
-        s.args, s.workspace, "build", s.log, s.folder, s.state, lambda: None
-    )
+    return repair.propose(s.args, s.workspace, "build", s.log, s.folder, s.state, lambda: None)
 
 
 @pytest.mark.requires_runtime
@@ -81,9 +73,7 @@ def test_repairs_cannot_weaken_manifest(setup, change):
     elif change == "variant":
         del manifest["integrations"]["transformers"]["variants"]["eager"]
     elif change == "gate":
-        next(iter(manifest["fixtures"].values()))["build"]["accept_insensitive"] = {
-            "input_ids:reverse": "ignore"
-        }
+        next(iter(manifest["fixtures"].values()))["build"]["accept_insensitive"] = {"input_ids:reverse": "ignore"}
     else:
         del manifest["outputs"]["answer_logits"]
     before = s.workspace.contract_digest()
@@ -139,12 +129,8 @@ result = {"training": {"gradients": {n: bool(named[n].grad is not None and named
 ```"""
     fixed = old.replace("wrong.parameter", "actual.parameter")
     assert not repair.guards(old) - repair.guards(fixed)
-    assert repair.guards(old) - repair.guards(
-        fixed.replace("assert loss.isfinite()", "")
-    )
-    assert repair.guards(old) - repair.guards(
-        fixed.replace("named[n].grad.isfinite().all()", "True")
-    )
+    assert repair.guards(old) - repair.guards(fixed.replace("assert loss.isfinite()", ""))
+    assert repair.guards(old) - repair.guards(fixed.replace("named[n].grad.isfinite().all()", "True"))
 
 
 def test_dependency_network_errors_do_not_trigger_contract_repair(setup):
@@ -177,9 +163,7 @@ def test_cloud_failure_uses_downloaded_worker_traceback_and_binds_it_to_review(s
     worker_log.write_text("Traceback\nKeyError: invented.parameter")
     command = ["baselines", "run", "--out", str(root)]
     assert repair.eligible(s.workspace, "record", s.log, command)
-    attempt = repair.propose(
-        s.args, s.workspace, "record", s.log, s.folder, s.state, lambda: None, command
-    )
+    attempt = repair.propose(s.args, s.workspace, "record", s.log, s.folder, s.state, lambda: None, command)
     assert "invented.parameter" in s.contexts[0]["failure_log"]
     assert repair.current(s.workspace, attempt)
     worker_log.write_text("different failure")
@@ -187,9 +171,7 @@ def test_cloud_failure_uses_downloaded_worker_traceback_and_binds_it_to_review(s
 
 
 def test_truncated_runtime_error_is_eligible_for_repair(setup):
-    setup.log.write_text(
-        "RuntimeError: Input type FloatTensor and weight type BFloat16Type should be the same"
-    )
+    setup.log.write_text("RuntimeError: Input type FloatTensor and weight type BFloat16Type should be the same")
     assert repair.eligible(setup.workspace, "auto", setup.log)
 
 
@@ -223,8 +205,14 @@ def test_unchanged_repair_is_shown_its_rejection_once(setup, monkeypatch):
     # and the attempt was spent without the model ever hearing why.
     s = setup
     fixed = s.plan["usage"]
-    replies = iter([s.workspace.contract_root.joinpath(
-        s.workspace.manifest["integrations"]["transformers"]["entry_point"]).read_text(), fixed])
+    replies = iter(
+        [
+            s.workspace.contract_root.joinpath(
+                s.workspace.manifest["integrations"]["transformers"]["entry_point"]
+            ).read_text(),
+            fixed,
+        ]
+    )
 
     def propose_once(context, **kw):
         s.contexts.append(context)

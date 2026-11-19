@@ -6,9 +6,9 @@ import sys
 import time
 
 import httpx2
+import jsonschema
 from huggingface_hub import InferenceClient
 from huggingface_hub.errors import HfHubHTTPError
-import jsonschema
 
 # planner-eval, 16 models x 3 (2026-11-05): V4-Pro builds as often as V4.1-Flash
 # (26/48 vs 27/48) with far more drafts accepted (45 vs 33), so fewer calls: on
@@ -96,9 +96,7 @@ def propose(
     client=None,
     temperature=0.0,
 ):
-    client = client or InferenceClient(
-        model=model, provider=provider, timeout=120, bill_to=bill_to or None
-    )
+    client = client or InferenceClient(model=model, provider=provider, timeout=120, bill_to=bill_to or None)
     try:
         started = time.monotonic()
         response = complete_with_backoff(client, context, model, max_tokens, temperature=temperature)
@@ -150,8 +148,7 @@ def complete(client, context, model, max_tokens, temperature=0.0):
             {"role": "system", "content": SYSTEM},
             {
                 "role": "user",
-                "content": json.dumps(context)
-                + "\nReturn the JSON draft directly. /no_think",
+                "content": json.dumps(context) + "\nReturn the JSON draft directly. /no_think",
             },
         ],
         temperature=temperature,
