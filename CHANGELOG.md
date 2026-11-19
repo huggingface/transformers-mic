@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - A tester's own `get_small_config_defaults()` is followed further: locals, `kwargs` filled before `super()`
   (llava_next, hunyuan_vl), displays, comprehensions and pure builtins such as `len` (transformers#50944).
   Nothing is imported or run; a statement it cannot follow is skipped.
+- `position_embedding_size` is kept at the checkpoint's value: it is a table of positions (Gemma 4's
+  vision tower), not a width, so the tester's 128 is no longer adopted.
 
 ## [0.1.2] - 2026-11-12
 

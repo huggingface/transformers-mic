@@ -40,7 +40,10 @@ PRESERVED = re.compile(
     r"window|sliding|kernel|stride|rope|theta|"
     # Behaviour, not width: BigBird's attention block_size, SeamlessM4T's chunking,
     # a convolution's groups (WavLM grew from 4.3M to 4.6M with the tester's 2).
-    r"block_size|chunk_size|groups"
+    r"block_size|chunk_size|groups|"
+    # A table of positions, not a width: Gemma 4's vision position_embedding_size must cover the
+    # patch grid of a real image, and a build check runs no forward pass to catch it.
+    r"position_embedding"
 )
 # Fields that size a model: what the tester shrinks and the fixture may have kept.
 SIZES = re.compile(r"(size|dim|heads|experts|rank|topk|_per_tok)$")

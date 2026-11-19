@@ -230,3 +230,13 @@ class FooModelTester(VLMModelTester):
     assert tester.compare(found, original, shrunk, kept_whole=True) == [
         "no_rope_layers: the model tester covers 0, the fixture has only 1"]
 
+
+
+def test_position_tables_are_not_shrunk():
+    from transformers_mic import tester
+
+    # Gemma 4's vision tester uses 128 positions; the checkpoint's table is 10240.
+    found = {"position_embedding_size": 128, "hidden_size": 32}
+    original = {"vision_config": {"position_embedding_size": 10240, "hidden_size": 768}}
+    shrunk = {"vision_config": {"position_embedding_size": 10240, "hidden_size": 768}}
+    assert tester.unshrunk_sizes(found, original, shrunk) == {("vision_config", "hidden_size"): 32}
