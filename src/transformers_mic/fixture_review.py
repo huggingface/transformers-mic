@@ -127,6 +127,24 @@ def merge_edits(recipe, changes):
         overrides["reason"] = (overrides.get("reason", "").rstrip(". ") + ". " + EDIT_REASON).lstrip(". ")
 
 
+def merge_profile(recipe, config, name):
+    """Add the config_overrides a serving profile needs to a build recipe; returns the fields set.
+
+    Nothing when the shrunk config already fits the profile, so reruns are stable.
+    """
+    from .serving_profiles import overrides, profile
+
+    found = overrides(config, profile(name))
+    if not found:
+        return []
+    fields, reason = found
+    current = recipe.setdefault("config_overrides", {"fields": {}, "reason": reason})
+    current.setdefault("fields", {}).update(fields)
+    if reason not in current.get("reason", ""):
+        current["reason"] = (current.get("reason", "").rstrip(". ") + ". " + reason).lstrip(". ")
+    return sorted(fields)
+
+
 def artifact(workspace):
     """The built fixture for the current recipe, if the build already made one."""
     pin = workspace.lock["contracts"][workspace.state["contract"]]["fixtures"][workspace.fixture]
@@ -388,6 +406,14 @@ def run(args):
     if changes:
         print("Applying your config.json edits as config_overrides: " + ", ".join(apply_edits(workspace, changes)))
     data, _ = refresh(workspace, force=args.force)
+    if getattr(args, "backend", None):
+        manifest = workspace.manifest
+        fields = merge_profile(manifest["fixtures"][workspace.fixture]["build"], data["config"], args.backend)
+        if fields:
+            print(f"Applying the {args.backend} serving profile as config_overrides: " + ", ".join(fields))
+            write(workspace.contract_root / "integration.json", manifest)
+            workspace.update_layout()
+            data, _ = refresh(workspace, force=True)
     return show(data, Path(workspace.root) / PAGE, args)
 
 
@@ -451,14 +477,24 @@ def run_source(args):
         merge_edits(recipe["build"], changes)
         print("Applying your config.json edits as config_overrides: " + ", ".join(sorted(changes)))
     (root / ".mic").mkdir(parents=True, exist_ok=True)
-    write(path, recipe)
-    key = digest(recipe)
-    data = record(space)
-    if args.force or not data or data.get("recipe_key") != key or not (folder(space) / "config.json").exists():
-        data = shrink_source(root, path)
-        data.update(recipe_key=key, artifact=None, folder=str(folder(space)))
-        data["review_sha256"] = review_sha256(data)
-        write(root / RECORD, data)
+
+    def shrunk(force):
+        write(path, recipe)
+        key = digest(recipe)
+        data = record(space)
+        if force or not data or data.get("recipe_key") != key or not (folder(space) / "config.json").exists():
+            data = shrink_source(root, path)
+            data.update(recipe_key=key, artifact=None, folder=str(folder(space)))
+            data["review_sha256"] = review_sha256(data)
+            write(root / RECORD, data)
+        return data
+
+    data = shrunk(args.force)
+    if getattr(args, "backend", None):
+        fields = merge_profile(recipe["build"], data["config"], args.backend)
+        if fields:
+            print(f"Applying the {args.backend} serving profile as config_overrides: " + ", ".join(fields))
+            data = shrunk(False)
     return show(data, root / PAGE, args)
 
 

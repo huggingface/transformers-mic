@@ -9,7 +9,7 @@ from pathlib import Path
 import jsonschema
 from huggingface_hub.errors import HfHubHTTPError
 
-from . import __version__, backend, commands, fleet, planner
+from . import __version__, backend, commands, fleet, planner, serving_profiles
 from .workspace import Workspace
 
 
@@ -84,7 +84,9 @@ serialized format, then compares both with the source. Runs no contract code.
   tmic fixture                         the fixture of the current tmic workspace
 
 Edit fixture/config.json and rerun to shrink again with your values (they
-become the recipe's config_overrides).""",
+become the recipe's config_overrides). --backend adds the config_overrides a
+serving runtime needs (e.g. vllm-cpu: attention head widths vLLM's CPU kernels
+support), with the reason.""",
     )
     fixture.add_argument(
         "model",
@@ -97,6 +99,11 @@ become the recipe's config_overrides).""",
         help="With a Hub repo: output folder (default: ./<model>-fixture)",
     )
     fixture.add_argument("--force", action="store_true", help="Shrink again even if nothing changed")
+    fixture.add_argument(
+        "--backend",
+        choices=sorted(serving_profiles.PROFILES),
+        help="Make the fixture fit this serving profile (adds config_overrides; see transformers_mic.serving_profiles)",
+    )
     fixture.add_argument("--json", action="store_true", help="Print a machine-readable summary")
     fixture.add_argument("--open", action="store_true", help="Open the layer-by-layer comparison page")
     baselines = sub.add_parser(
