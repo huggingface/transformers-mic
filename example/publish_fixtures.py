@@ -14,9 +14,8 @@ import argparse
 import json
 from pathlib import Path
 
-from huggingface_hub import HfApi
-
 import run
+from huggingface_hub import HfApi
 
 HERE = Path(__file__).parent
 
@@ -47,7 +46,10 @@ def main():
             )
             pin["revision"] = commit.oid
             lock_path.write_text(json.dumps(lock, indent=2) + "\n")
-            print(json.dumps({"published": repo, "revision": commit.oid, "url": f"https://huggingface.co/{repo}"}), flush=True)
+            print(
+                json.dumps({"published": repo, "revision": commit.oid, "url": f"https://huggingface.co/{repo}"}),
+                flush=True,
+            )
 
 
 if __name__ == "__main__":

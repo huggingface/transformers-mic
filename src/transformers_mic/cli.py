@@ -1,10 +1,10 @@
 """Command line interface for measured model integration contracts."""
 
 import argparse
-import os
 import json
-from pathlib import Path
+import os
 import sys
+from pathlib import Path
 
 import jsonschema
 from huggingface_hub.errors import HfHubHTTPError
@@ -38,9 +38,7 @@ def history_options(parser):
 
 
 def weights_options(parser, default=None):
-    parser.add_argument(
-        "--weights", choices=("auto", "random", "overfit"), default=default
-    )
+    parser.add_argument("--weights", choices=("auto", "random", "overfit"), default=default)
     parser.add_argument(
         "--readable-output",
         action="store_true",
@@ -98,15 +96,9 @@ become the recipe's config_overrides).""",
         type=Path,
         help="With a Hub repo: output folder (default: ./<model>-fixture)",
     )
-    fixture.add_argument(
-        "--force", action="store_true", help="Shrink again even if nothing changed"
-    )
-    fixture.add_argument(
-        "--json", action="store_true", help="Print a machine-readable summary"
-    )
-    fixture.add_argument(
-        "--open", action="store_true", help="Open the layer-by-layer comparison page"
-    )
+    fixture.add_argument("--force", action="store_true", help="Shrink again even if nothing changed")
+    fixture.add_argument("--json", action="store_true", help="Print a machine-readable summary")
+    fixture.add_argument("--open", action="store_true", help="Open the layer-by-layer comparison page")
     baselines = sub.add_parser(
         "baselines",
         help="Generate a complete baseline collection on the dashboard's ARC runners",
@@ -114,9 +106,7 @@ become the recipe's config_overrides).""",
     baseline_sub = baselines.add_subparsers(dest="baselines_command", required=True)
     for action in ("run", "status", "upload", "review", "publish", "verify-model"):
         command = baseline_sub.add_parser(action)
-        command.add_argument(
-            "--out", required=True, help="Resumable local collection directory"
-        )
+        command.add_argument("--out", required=True, help="Resumable local collection directory")
         if action == "verify-model":
             command.add_argument("--model-workspace", required=True)
         if action in ("upload", "publish"):
@@ -142,13 +132,9 @@ become the recipe's config_overrides).""",
                 action="store_true",
                 help="Explicitly approve displayed changed values",
             )
-            command.add_argument(
-                "--reason", help="Explanation required for changed values"
-            )
+            command.add_argument("--reason", help="Explanation required for changed values")
         if action in ("run", "status"):
-            command.add_argument(
-                "--dashboard", default="https://transformers-ci.huggingface.cool"
-            )
+            command.add_argument("--dashboard", default="https://transformers-ci.huggingface.cool")
         if action == "run":
             command.add_argument(
                 "--transport",
@@ -160,9 +146,7 @@ become the recipe's config_overrides).""",
                 "--model-workspace",
                 help="Built single-model workspace to stage and measure on CPU/CUDA",
             )
-            command.add_argument(
-                "--fleet", choices=("all", "control", "prototypes"), default="all"
-            )
+            command.add_argument("--fleet", choices=("all", "control", "prototypes"), default="all")
             command.add_argument(
                 "--fleet-revision",
                 help="Immutable fleet dataset SHA (default: resolve main once)",
@@ -199,9 +183,7 @@ become the recipe's config_overrides).""",
                 action="store_true",
                 help="Return the Hub revision without downloading artifacts (requires --upload-repo)",
             )
-    integrations = sub.add_parser(
-        "integrations", help="Generate selected usage paths on an existing fixture"
-    )
+    integrations = sub.add_parser("integrations", help="Generate selected usage paths on an existing fixture")
     integrations.add_argument(
         "--integration",
         action="append",
@@ -209,9 +191,7 @@ become the recipe's config_overrides).""",
         choices=("transformers", "sentence_transformers"),
         help="Integration to retain/generate (repeat for both)",
     )
-    auth = sub.add_parser(
-        "auth", help="Sign in to the dashboard with your GitHub account"
-    )
+    auth = sub.add_parser("auth", help="Sign in to the dashboard with your GitHub account")
     auth_sub = auth.add_subparsers(dest="auth_command", required=True)
     for action in ("login", "status", "logout"):
         command = auth_sub.add_parser(action)
@@ -285,7 +265,13 @@ No Git commit or framework PR is created automatically.""",
         help="Workspace override (otherwise resume a matching workspace under work/ or create work/mic/ORG--MODEL)",
     )
     run.add_argument("--namespace", default="huggingface-mic")
-    run.add_argument("--sentence-transformers", nargs="?", const="auto", choices=("auto", "SentenceTransformer", "CrossEncoder", "SparseEncoder", "MultiVectorEncoder"), help="Create an ST inference contract with a complete ST fixture")
+    run.add_argument(
+        "--sentence-transformers",
+        nargs="?",
+        const="auto",
+        choices=("auto", "SentenceTransformer", "CrossEncoder", "SparseEncoder", "MultiVectorEncoder"),
+        help="Create an ST inference contract with a complete ST fixture",
+    )
     run.add_argument("--fleet", choices=tuple(fleet.FILES), default="prototypes")
     run.add_argument("--contract-name")
     run.add_argument("--transformers-checkout")
@@ -296,9 +282,7 @@ No Git commit or framework PR is created automatically.""",
         help="Measure this model on cloud CPU/CUDA by default; local uses this machine",
     )
     run.add_argument("--dashboard", default="https://transformers-ci.huggingface.cool")
-    run.add_argument(
-        "--baseline-transport", choices=("dashboard", "github"), default="dashboard"
-    )
+    run.add_argument("--baseline-transport", choices=("dashboard", "github"), default="dashboard")
     run.add_argument(
         "--baseline-timeout",
         type=int,
@@ -328,18 +312,20 @@ No Git commit or framework PR is created automatically.""",
         action="store_true",
         help="Alias for --mode agent",
     )
-    run.add_argument(
-        "--timeout", type=int, default=1800, help="Timeout in seconds per stage"
-    )
+    run.add_argument("--timeout", type=int, default=1800, help="Timeout in seconds per stage")
     weights_options(run, "auto")
     llm_options(run)
-    create = sub.add_parser(
-        "create", help="Reuse a catalog contract or ask the HF planner for a draft"
-    )
+    create = sub.add_parser("create", help="Reuse a catalog contract or ask the HF planner for a draft")
     create.add_argument("model")
     create.add_argument("--out", required=True)
     create.add_argument("--contract", help="Choose a catalog usage path")
-    create.add_argument("--sentence-transformers", nargs="?", const="auto", choices=("auto", "SentenceTransformer", "CrossEncoder", "SparseEncoder", "MultiVectorEncoder"), help="Create an ST inference contract with a complete ST fixture")
+    create.add_argument(
+        "--sentence-transformers",
+        nargs="?",
+        const="auto",
+        choices=("auto", "SentenceTransformer", "CrossEncoder", "SparseEncoder", "MultiVectorEncoder"),
+        help="Create an ST inference contract with a complete ST fixture",
+    )
     create.add_argument(
         "--namespace",
         default="huggingface-mic",
@@ -349,7 +335,7 @@ No Git commit or framework PR is created automatically.""",
     create.add_argument(
         "--fixture-recipe",
         type=Path,
-        help="A reviewed `tmic fixture org/model` folder: the contract keeps its revision and config_overrides"
+        help="A reviewed `tmic fixture org/model` folder: the contract keeps its revision and config_overrides",
     )
     create.add_argument(
         "--regenerate",
@@ -379,14 +365,10 @@ No Git commit or framework PR is created automatically.""",
     weights_options(create, "auto")
     history_options(create)
     llm_options(create)
-    research = sub.add_parser(
-        "research", help="Collect bounded, unverified historical failure candidates"
-    )
+    research = sub.add_parser("research", help="Collect bounded, unverified historical failure candidates")
     research.add_argument("--model-type")
     history_options(research)
-    build = sub.add_parser(
-        "build", help="Reuse or build a fixture using measured weight-selection gates"
-    )
+    build = sub.add_parser("build", help="Reuse or build a fixture using measured weight-selection gates")
     build.add_argument("--rebuild", action="store_true")
     build.add_argument(
         "--reshrink",
@@ -397,9 +379,7 @@ No Git commit or framework PR is created automatically.""",
     for name in ("record", "check"):
         run = sub.add_parser(
             name,
-            help="Measure candidate expectations"
-            if name == "record"
-            else "Check reviewed expectations",
+            help="Measure candidate expectations" if name == "record" else "Check reviewed expectations",
         )
         run.add_argument(
             "--integration",
@@ -429,8 +409,7 @@ No Git commit or framework PR is created automatically.""",
             run.add_argument("--changed-files", type=Path)
             run.add_argument(
                 "--diff-base",
-                help="With --changed-files: base revision, so registry-only model "
-                "additions select just those models",
+                help="With --changed-files: base revision, so registry-only model additions select just those models",
             )
             run.add_argument(
                 "--run-declared",
@@ -455,9 +434,7 @@ No Git commit or framework PR is created automatically.""",
                 help="Pass targets that have no reviewed baseline for this platform "
                 "when their outputs are valid (marked baseline_missing)",
             )
-    review = sub.add_parser(
-        "review", help="Compare measured candidates with approved expectations"
-    )
+    review = sub.add_parser("review", help="Compare measured candidates with approved expectations")
     review.add_argument(
         "--integration",
         choices=("transformers", "sentence_transformers", "vllm", "sglang", "all"),
@@ -488,9 +465,7 @@ No Git commit or framework PR is created automatically.""",
         help="Local Transformers Git checkout with both revisions",
     )
     replay.add_argument("--variant", default="default")
-    replay.add_argument(
-        "--match-output", help="Require this output to fail on the bad build"
-    )
+    replay.add_argument("--match-output", help="Require this output to fail on the bad build")
     publish = sub.add_parser(
         "publish",
         help="Preview publication; --execute uploads reviewed artifacts to the Hub",
@@ -506,11 +481,18 @@ No Git commit or framework PR is created automatically.""",
         help="Write tests/contracts.lock after a successful upload",
     )
     export.add_argument("--fleet", choices=tuple(fleet.FILES), default="control")
-    export.add_argument(
-        "--expected-revision", help="Reject upload if the dataset changed since preview"
+    export.add_argument("--expected-revision", help="Reject upload if the dataset changed since preview")
+    export.add_argument("--execute", action="store_true", help="Upload the previewed fleet update")
+    reserialize = sub.add_parser(
+        "reserialize",
+        help="Store a published fixture's pytorch_model.bin as model.safetensors, tensors unchanged, and repin its fleets",
     )
-    export.add_argument(
-        "--execute", action="store_true", help="Upload the previewed fleet update"
+    reserialize.add_argument("repo", help="huggingface-mic/<name>-mic")
+    reserialize.add_argument("--out", type=Path, help="Also keep the converted fixture folder here")
+    reserialize.add_argument(
+        "--execute",
+        action="store_true",
+        help="Commit to the repository and repin every fleet that pins it",
     )
     retire = sub.add_parser(
         "retire",
@@ -518,33 +500,46 @@ No Git commit or framework PR is created automatically.""",
     )
     retire.add_argument("contract")
     retire.add_argument("--fleet", choices=tuple(fleet.FILES), required=True)
-    retire.add_argument(
-        "--reason", required=True, help="Recorded in the dataset commit message"
+    retire.add_argument("--reason", required=True, help="Recorded in the dataset commit message")
+    retire.add_argument("--execute", action="store_true", help="Upload the previewed removal")
+    environment = sub.add_parser(
+        "environment",
+        help="Preview or move every fleet's pinned environment (e.g. a new torch) in one dataset commit",
     )
-    retire.add_argument(
-        "--execute", action="store_true", help="Upload the previewed removal"
+    environment.add_argument(
+        "--set",
+        dest="packages",
+        action="append",
+        required=True,
+        metavar="PACKAGE=VERSION",
+        help="A package the environment already pins and its new version (repeatable)",
     )
-    pin = sub.add_parser(
-        "pin", help="Pin a dataset revision in a Transformers checkout"
+    environment.add_argument(
+        "--fleet",
+        choices=("all", *fleet.FILES),
+        default="all",
+        help="Fleets to move together (default all: their environments must stay equal)",
     )
+    environment.add_argument("--execute", action="store_true", help="Upload the previewed environment change")
+    pin = sub.add_parser("pin", help="Pin a dataset revision in a Transformers checkout")
     pin.add_argument("--transformers-checkout", required=True)
     pin.add_argument("--revision", default="main")
-    export.add_argument(
-        "--contract-name", help="Destination name, e.g. mic-bert alongside BERT"
-    )
-    report = sub.add_parser(
-        "report", help="Render CI results and reproducible tmic commands"
-    )
+    export.add_argument("--contract-name", help="Destination name, e.g. mic-bert alongside BERT")
+    report = sub.add_parser("report", help="Render CI results and reproducible tmic commands")
     report.add_argument("results", type=Path)
     report.add_argument("--log", type=Path)
     report.add_argument("--lock", type=Path)
-    sub.add_parser(
+    auto = sub.add_parser(
         "auto",
         help="Check AutoConfig and Auto-model factory mappings for the built slim",
     )
-    sub.add_parser(
-        "status", help="Show project provenance, weight choice and check receipts"
+    auto.add_argument(
+        "--match-cloud",
+        action="store_true",
+        help="First require the cloud runners' environment: every `runtime` extra "
+        "package, and Transformers from a main commit (not a release)",
     )
+    sub.add_parser("status", help="Show project provenance, weight choice and check receipts")
     shrink = sub.add_parser(
         "shrink",
         help="Show how the fixture was shrunk from its source checkpoint (HTML)",
@@ -554,28 +549,16 @@ No Git commit or framework PR is created automatically.""",
         nargs="?",
         help="Fixture repo[@revision] or directory (default: the workspace's fixture)",
     )
-    shrink.add_argument(
-        "--source", help="Source checkpoint repo[@revision] when build.json names none"
-    )
-    shrink.add_argument(
-        "--html", type=Path, help="Output page (default: shrink-<fixture>.html)"
-    )
-    shrink.add_argument(
-        "--open", action="store_true", help="Open the page in a browser"
-    )
-    shrink.add_argument(
-        "--json", action="store_true", help="Print the comparison as JSON"
-    )
-    batch = sub.add_parser(
-        "batch", help="Regenerate a declared prototype fleet and report every stage"
-    )
+    shrink.add_argument("--source", help="Source checkpoint repo[@revision] when build.json names none")
+    shrink.add_argument("--html", type=Path, help="Output page (default: shrink-<fixture>.html)")
+    shrink.add_argument("--open", action="store_true", help="Open the page in a browser")
+    shrink.add_argument("--json", action="store_true", help="Print the comparison as JSON")
+    batch = sub.add_parser("batch", help="Regenerate a declared prototype fleet and report every stage")
     batch.add_argument("--models-file", type=Path, required=True)
     batch.add_argument("--out", required=True)
     batch.add_argument("--namespace", default="huggingface-mic")
     batch.add_argument("--phase", choices=("prepare", "run", "all"), default="all")
-    batch.add_argument(
-        "--select", action="append", help="Model names to run (repeatable)"
-    )
+    batch.add_argument("--select", action="append", help="Model names to run (repeatable)")
     batch.add_argument("--resume", action="store_true")
     batch.add_argument(
         "--publish",
@@ -624,12 +607,11 @@ def external_check(args):
     if not args.all_variants:
         for name in args.contract or []:
             options += ["--contract", name]
-        return backend.invoke(
-            "run", Path.cwd(), [*options, "--variant", args.variant]
-        ).returncode
-    from .workspace import read
-    from .hub import canonical_repo
+        return backend.invoke("run", Path.cwd(), [*options, "--variant", args.variant]).returncode
     from huggingface_hub import hf_hub_download
+
+    from .hub import canonical_repo
+    from .workspace import read
 
     lock = read(args.lock)
     selected = args.contract or list(lock["contracts"])
@@ -647,9 +629,7 @@ def external_check(args):
         )
         if framework not in manifest["integrations"]:
             continue
-        for variant in manifest["integrations"][framework].get(
-            "variants", {"default": {}}
-        ):
+        for variant in manifest["integrations"][framework].get("variants", {"default": {}}):
             status = max(
                 status,
                 backend.invoke(
@@ -686,9 +666,7 @@ def main(argv=None):
             return run(args)
         if args.command == "check":
             if args.lock and (args.fleet or args.fleet_revision):
-                raise ValueError(
-                    "--lock cannot be combined with --fleet or --fleet-revision"
-                )
+                raise ValueError("--lock cannot be combined with --fleet or --fleet-revision")
             if args.lock and args.lock.name == "contracts.lock":
                 args.fleet_revision = fleet.read_pin(args.lock)
                 args.lock = None
@@ -705,9 +683,7 @@ def main(argv=None):
                 revision = args.fleet_revision
                 if not revision and Path("tests/contracts.lock").exists():
                     revision = fleet.read_pin("tests/contracts.lock")
-                args.lock, revision = fleet.download(
-                    args.fleet or "control", revision or "main"
-                )
+                args.lock, revision = fleet.download(args.fleet or "control", revision or "main")
                 print(
                     json.dumps(
                         {
@@ -728,6 +704,10 @@ def main(argv=None):
             return backend.invoke("report", Path.cwd(), options).returncode
         if args.command == "auto":
             project = Workspace(args.workspace)
+            if args.match_cloud:
+                from .cloud_environment import require_cloud_match
+
+                require_cloud_match()
             return backend.invoke("auto-stage", project.root).returncode
         if args.command == "fixture":
             from .fixture_review import run
@@ -735,6 +715,10 @@ def main(argv=None):
             return run(args)
         if args.command == "shrink":
             from .shrink_view import run
+
+            return run(args)
+        if args.command == "reserialize":
+            from .reserialize import run
 
             return run(args)
         if args.command == "status":

@@ -78,7 +78,7 @@ python example/publish_fixtures.py                                  # upload fix
 
 ## 3. Shadow job
 
-[`shadow.yml`](../.github/workflows/shadow.yml) installs a Transformers ref with the lock's pins, runs every fixture on GitHub x86, records selection, and appends `runs/<date>/<run id>-<attempt>.jsonl` to `shadow-results`: daily on `main`, or dispatched on a sha, branch, or `pr/<n>` (`pip_overrides` for old builds). [`shadow-backfill.yml`](../.github/workflows/shadow-backfill.yml) checks every first-parent commit in a window, in 20 parallel chunks, with dependency overrides ([results](evidence.md#shadow-backfill)).
+[`shadow.yml`](../.github/workflows/shadow.yml) installs a Transformers ref with the pins of the Hub control fleet (`huggingface-mic/transformers-fleet` at the dataset revision in [`tests/contracts.lock`](../example/transformers/tests/contracts.lock), read by [`control_locks.py`](../.github/scripts/control_locks.py)), runs every fixture of that fleet plus the catalog contracts it lacks (MusicgenMelody, WhisperSpeech) on GitHub x86, records selection, and appends `runs/<date>/<run id>-<attempt>.jsonl` to `shadow-results`: daily on `main`, or dispatched on a sha, branch, or `pr/<n>` (`pip_overrides` for old builds). [`shadow-backfill.yml`](../.github/workflows/shadow-backfill.yml) checks every first-parent commit in a window, in 20 parallel chunks, with dependency overrides ([results](evidence.md#shadow-backfill)).
 
 ```sh
 gh workflow run shadow.yml --repo huggingface/transformers-mic -f transformers_ref=pr/49386
@@ -94,7 +94,7 @@ On the Transformers ARC group `aws-g5-4xlarge-cache` (one A10G), except `cpu-bas
 | --- | --- |
 | [`gpu-checks.yml`](../.github/workflows/gpu-checks.yml) | The experiments below, in the `huggingface/transformers-all-latest-gpu` image |
 | [`gpu-probe.yml`](../.github/workflows/gpu-probe.yml) | Access and environment only |
-| [`nightly.yml`](../.github/workflows/nightly.yml) | Every target, nightly on Transformers `main` |
+| [`nightly.yml`](../.github/workflows/nightly.yml) | Every target of the pinned Hub control fleet (its environment and Hub baselines) plus the catalog contracts it lacks, nightly on Transformers `main`; `mode=record` records the catalog's `cuda` baselines |
 | [`cpu-baselines.yml`](../.github/workflows/cpu-baselines.yml) | Records and checks x86 CPU candidates for review; `machine=github` (7 GB) or `machine=gpu-host` (64 GB, CPU-only torch) |
 
 **Dependency stability:** `gpu-checks.yml matrix=dependency-stability` keeps the known-good Transformers build, artifacts, baselines and tolerances fixed. It checks tokenizers 0.23.2, NumPy 2.2.6 and Pillow 12.3.0 individually and together, then a no-torchaudio control and torch 2.14.1 / torchvision 0.29.1 with CUDA 13. Each environment gets two fresh-process fleet passes per default/eager/bfloat16 variant. `dependency_profiles=torch-cu130` retries that environment alone; the job restores its CUDA wheel libraries before the runtime preflight. The observer saves actual outputs and numeric drift; `summarize_dependency_study.py` compares repeats. MusicGen Melody requires torchaudio, so its absence is a coverage limit, not a successful check.

@@ -1,18 +1,23 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/CLIP-integration",
-  "contract_revision": "cb2e2abc4c4c992c316ab40d4a3360b1e748fcfe",
+  "contract_name": "CLIP",
+  "contract_revision": "423a026e65fe49bdc292fb25d0a67f8467f6f004",
   "framework": "transformers",
   "variant": "bfloat16",
   "target": "mic-clip-vit-base-patch32-slim",
   "kind": "fixture",
   "revision": "adad0f30de071148ab0b55bb2263ac909e58cc5b",
+  "source_model": "openai/clip-vit-base-patch32",
+  "weights": "random",
+  "fixture_repo": "hf-internal-testing/mic-clip-vit-base-patch32-slim",
   "environment": {
-   "python": "3.10.12",
-   "transformers": "5.19.0.dev0",
-   "torch": "2.11.0+cu128",
-   "torchvision": "0.26.0+cu128",
-   "torchaudio": "2.11.0+cu128",
+   "python": "3.11.18",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0+cu132",
+   "torchvision": "0.29.2+cu132",
+   "torchaudio": "2.11.1+cu132",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
    "pillow": "12.2.0",
@@ -30,8 +35,9 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 7.75,
-  "platform": "cuda"
+  "seconds": 7.81,
+  "platform": "cuda",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {

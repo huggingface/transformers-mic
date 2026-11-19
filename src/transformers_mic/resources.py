@@ -7,11 +7,7 @@ CHECKOUT = PACKAGE.parents[1]
 
 
 def backend():
-    return (
-        PACKAGE / "_backend"
-        if (PACKAGE / "_backend").is_dir()
-        else CHECKOUT / "example"
-    )
+    return PACKAGE / "_backend" if (PACKAGE / "_backend").is_dir() else CHECKOUT / "example"
 
 
 def catalog():

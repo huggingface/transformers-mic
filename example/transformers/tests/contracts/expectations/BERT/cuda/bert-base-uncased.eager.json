@@ -1,18 +1,20 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/BERT-integration",
-  "contract_revision": "e8e23b07e9e13bebf6f1f4ba20298157333f279d",
+  "contract_name": "BERT",
+  "contract_revision": "6a667eafaa05f8ff3c07e7698ce768d6271b1a79",
   "framework": "transformers",
   "variant": "eager",
   "target": "bert-base-uncased",
   "kind": "checkpoint",
   "revision": "86b5e0934494bd15c9632b12f734a8a67f723594",
   "environment": {
-   "python": "3.10.12",
-   "transformers": "5.19.0.dev0",
-   "torch": "2.11.0+cu128",
-   "torchvision": "0.26.0+cu128",
-   "torchaudio": "2.11.0+cu128",
+   "python": "3.11.18",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0+cu132",
+   "torchvision": "0.29.2+cu132",
+   "torchaudio": "2.11.1+cu132",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
    "pillow": "12.2.0",
@@ -30,8 +32,9 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 8.07,
-  "platform": "cuda"
+  "seconds": 7.13,
+  "platform": "cuda",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {
@@ -54,31 +57,31 @@
   "answer_logits": [
    [
     12.3460693359375,
-    1.9429818391799927,
+    1.9429855346679688,
     6.547840595245361,
-    3.6329281330108643
+    3.6329288482666016
    ],
    [
-    6.064364910125732,
-    12.208377838134766,
-    6.488177299499512,
-    6.1527886390686035
+    6.064365386962891,
+    12.208373069763184,
+    6.488173007965088,
+    6.152785778045654
    ],
    [
-    6.255686283111572,
-    4.637132167816162,
-    12.204485893249512,
+    6.255684852600098,
+    4.63712739944458,
+    12.204484939575195,
     4.724189281463623
    ],
    [
-    5.909889221191406,
-    3.585041046142578,
-    4.6298112869262695,
-    12.290726661682129
+    5.909892559051514,
+    3.5850441455841064,
+    4.629814624786377,
+    12.290727615356445
    ]
   ],
   "training": {
-   "loss": 1.3428642749786377,
+   "loss": 1.342864751815796,
    "gradients": {
     "bert.encoder.layer.0.attention.self.query.weight": true,
     "bert.encoder.layer.0.intermediate.dense.weight": true

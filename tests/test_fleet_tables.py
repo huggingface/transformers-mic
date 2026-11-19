@@ -66,19 +66,13 @@ def test_tables_round_trip_exactly():
 
 def test_contract_table_has_one_readable_row_per_slim_model():
     rows = fleet.to_tables(LOCK)["contracts"].splitlines()
-    assert rows[0] == (
-        "contract,target,mic_repo,revision,contract_sha256,fixture_sha256,checkpoints"
-    )
+    assert rows[0] == ("contract,target,mic_repo,revision,contract_sha256,fixture_sha256,checkpoints")
     assert rows[1] == (
-        f"TimesFM,,huggingface-mic/timesfm-mic,{'a' * 40},{'1' * 64},{'2' * 64},"
-        f"google/timesfm@{'b' * 40}"
+        f"TimesFM,,huggingface-mic/timesfm-mic,{'a' * 40},{'1' * 64},{'2' * 64},google/timesfm@{'b' * 40}"
     )
-    assert rows[3] == (
-        f"SmolLM,mic-SmolLM-1.7B-slim,huggingface-mic/smollm-1.7b-mic,{'d' * 40},,{'5' * 64},"
-    )
+    assert rows[3] == (f"SmolLM,mic-SmolLM-1.7B-slim,huggingface-mic/smollm-1.7b-mic,{'d' * 40},,{'5' * 64},")
     assert fleet.to_tables(LOCK)["known_failures"].splitlines()[2] == (
-        "TimesFM,timesfm-mic,https://github.com/org/repo/issues/2,overflow,"
-        "training.loss; training.gradients"
+        "TimesFM,timesfm-mic,https://github.com/org/repo/issues/2,overflow,training.loss; training.gradients"
     )
 
 
@@ -122,17 +116,10 @@ def test_export_operations_write_only_the_tables():
         "prototypes/environment.csv",
         "prototypes/known_failures.csv",
     ]
-    assert (
-        fleet.from_tables(
-            {t: files[fleet.table_path("prototypes", t)] for t in fleet.COLUMNS}
-        )
-        == LOCK
-    )
+    assert fleet.from_tables({t: files[fleet.table_path("prototypes", t)] for t in fleet.COLUMNS}) == LOCK
 
 
-def test_download_reads_tables_and_falls_back_to_json_for_old_revisions(
-    tmp_path, monkeypatch
-):
+def test_download_reads_tables_and_falls_back_to_json_for_old_revisions(tmp_path, monkeypatch):
     tables = fleet.to_tables(LOCK)
     legacy = {
         "1" * 40: LOCK,
@@ -150,10 +137,7 @@ def test_download_reads_tables_and_falls_back_to_json_for_old_revisions(
             if legacy[revision] is None:
                 raise EntryNotFoundError(filename)
             path.write_text(json.dumps({"comment": "ignored", **legacy[revision]}))
-        elif (
-            has_tables[revision]
-            and filename.split("/")[1].removesuffix(".csv") in tables
-        ):
+        elif has_tables[revision] and filename.split("/")[1].removesuffix(".csv") in tables:
             path.write_text(tables[filename.split("/")[1].removesuffix(".csv")])
         else:
             raise EntryNotFoundError(filename)

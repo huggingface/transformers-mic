@@ -119,7 +119,7 @@
   },
   "known_failures": {
    "type": "object",
-   "description": "<contract>/<target> -> a bug in the framework under test. A string (reason with issue link) makes any failure of the target xfail; an object narrows it to failures matching `match`, or leaves `skip_outputs` out of the comparison",
+   "description": "<contract>/<target> -> a bug in the framework under test. A string (reason with issue link) makes any failure of the target xfail; an object narrows it to failures matching `match`, or leaves `skip_outputs` out of the comparison; `variants` / `platforms` scope it to those runs",
    "additionalProperties": {
     "oneOf": [
      {
@@ -151,6 +151,24 @@
          "type": "string"
         },
         "description": "outputs left out of the comparison while the bug is open"
+       },
+       "variants": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+         "type": "string",
+         "minLength": 1
+        },
+        "description": "only runs of these variants (default, eager, bfloat16, ...)"
+       },
+       "platforms": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+         "type": "string",
+         "minLength": 1
+        },
+        "description": "only runs measured on these platforms (cpu-arm64, cpu-x86_64, cpu-x86_64-bf16, cuda)"
        }
       }
      }

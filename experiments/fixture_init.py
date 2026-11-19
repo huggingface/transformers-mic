@@ -22,11 +22,9 @@ import time
 from pathlib import Path
 from unittest.mock import patch
 
+import experiment as exp
 import torch
 import transformers
-
-import experiment as exp
-
 
 # Real checkpoints whose weights feed the pruned and sliced fixtures.
 REAL = {
@@ -59,9 +57,7 @@ DTYPES = ("float32", "bfloat16", "float16")
 @contextlib.contextmanager
 def placement(device, dtype):
     """Load tasks and models with experiment.py's globals pointed elsewhere."""
-    with patch.object(exp, "DEVICE", torch.device(device)), patch.object(
-        exp, "DTYPE", getattr(torch, dtype)
-    ):
+    with patch.object(exp, "DEVICE", torch.device(device)), patch.object(exp, "DTYPE", getattr(torch, dtype)):
         yield
 
 
@@ -97,8 +93,10 @@ def build_sliced(task, real):
     with torch.no_grad():
         for name, tensor in model.state_dict().items():
             original = source.get(name)
-            if original is None or original.dim() != tensor.dim() or any(
-                o < t for o, t in zip(original.shape, tensor.shape)
+            if (
+                original is None
+                or original.dim() != tensor.dim()
+                or any(o < t for o, t in zip(original.shape, tensor.shape))
             ):
                 kept_random.append(name)
                 continue
@@ -128,9 +126,7 @@ def dtype_health(task_cls, path, dtype, reference=None):
                 outputs=result["outputs"],
             )
             if reference is not None:
-                row["max_delta_vs_float32"] = float(
-                    (numerical - torch.tensor(reference["numerical"])).abs().max()
-                )
+                row["max_delta_vs_float32"] = float((numerical - torch.tensor(reference["numerical"])).abs().max())
                 row["outputs_match_float32"] = result["outputs"] == reference["outputs"]
             probe = exp.training_probe(task, model)
             row.update(
@@ -147,11 +143,7 @@ def dtype_health(task_cls, path, dtype, reference=None):
 
 
 def sensitivity(family, evaluation):
-    deltas = {
-        f["name"]: f.get("max_absolute_delta")
-        for f in evaluation["faults"]
-        if f["name"] in INPUT_FAULTS[family]
-    }
+    deltas = {f["name"]: f.get("max_absolute_delta") for f in evaluation["faults"] if f["name"] in INPUT_FAULTS[family]}
     known = [d for d in deltas.values() if d is not None]
     return {"input_fault_deltas": deltas, "min_input_delta": min(known) if known else None}
 
@@ -179,8 +171,7 @@ def record(args, report, task, model, family, weights, seed, build):
         row["evaluation_error"] = f"{type(exc).__name__}: {exc}"[:500]
     float32 = dtype_health(type(task), folder, "float32")
     row["dtypes"] = [float32] + [
-        dtype_health(type(task), folder, d, reference=float32 if "numerical" in float32 else None)
-        for d in DTYPES[1:]
+        dtype_health(type(task), folder, d, reference=float32 if "numerical" in float32 else None) for d in DTYPES[1:]
     ]
     float32.pop("numerical", None)
     for health in row["dtypes"]:
@@ -203,18 +194,24 @@ def summarize(fixtures):
     keys = {
         "numerical": lambda f: f["numerical_detected"],
         "outputs": lambda f: f["recorded_output_detected"],
-        "all_checks": lambda f: f["numerical_detected"]
-        or f.get("training_detected")
-        or f.get("loss_detected"),
+        "all_checks": lambda f: f["numerical_detected"] or f.get("training_detected") or f.get("loss_detected"),
     }
     summary = {}
     for row in fixtures:
         entry = summary.setdefault(row["family"], {}).setdefault(
             row["weights"],
-            {"fixtures": 0, "fault_cases": 0, "control_false_alarms": 0, "errors": 0,
-             **{k: 0 for k in keys}, "min_input_delta": None, "non_finite": [],
-             "weights_bytes": row["weights_bytes"], "parameters": row["parameters"],
-             "build_seconds": []},
+            {
+                "fixtures": 0,
+                "fault_cases": 0,
+                "control_false_alarms": 0,
+                "errors": 0,
+                **{k: 0 for k in keys},
+                "min_input_delta": None,
+                "non_finite": [],
+                "weights_bytes": row["weights_bytes"],
+                "parameters": row["parameters"],
+                "build_seconds": [],
+            },
         )
         entry["fixtures"] += 1
         entry["build_seconds"].append(round(row["build"]["seconds"], 3))
@@ -231,8 +228,10 @@ def summarize(fixtures):
         for key, hit in keys.items():
             entry[key] += sum(bool(hit(f)) for f in faults)
         entry["control_false_alarms"] += sum(
-            c["numerical_detected"] or c["recorded_output_detected"]
-            or c.get("training_detected", False) or c.get("loss_detected", False)
+            c["numerical_detected"]
+            or c["recorded_output_detected"]
+            or c.get("training_detected", False)
+            or c.get("loss_detected", False)
             for c in row["evaluation"]["controls"]
         )
         delta = row.get("min_input_delta")
@@ -250,9 +249,7 @@ def main():
     parser.add_argument("--layers", type=int, default=2, help="layers kept by the pruned fixture")
     parser.add_argument("--threads", type=int, default=2)
     parser.add_argument("--max-steps", type=int, default=500)
-    parser.add_argument(
-        "--output", type=Path, default=Path(__file__).parent / "results" / "fixture_init.json"
-    )
+    parser.add_argument("--output", type=Path, default=Path(__file__).parent / "results" / "fixture_init.json")
     parser.add_argument(
         "--artifacts",
         type=Path,

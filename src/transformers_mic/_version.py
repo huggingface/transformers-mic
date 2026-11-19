@@ -18,7 +18,6 @@ import tomllib
 from importlib.metadata import PackageNotFoundError, distribution
 from pathlib import Path
 
-
 PACKAGE_NAME = "transformers-mic"
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 # Last-resort sentinel used only when neither the installed distribution metadata

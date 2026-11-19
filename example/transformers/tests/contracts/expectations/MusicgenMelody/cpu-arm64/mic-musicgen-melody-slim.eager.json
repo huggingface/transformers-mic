@@ -1,18 +1,23 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/MusicgenMelody-integration",
-  "contract_revision": "unpublished",
+  "contract_name": "MusicgenMelody",
+  "contract_revision": "464ee6197b072a8525754caca250d9e0ba2c75e8",
   "framework": "transformers",
   "variant": "eager",
   "target": "mic-musicgen-melody-slim",
   "kind": "fixture",
-  "revision": "unpublished",
+  "revision": "1ddd8dcc7977e728c6f6131a484e953075aeb751",
+  "source_model": "facebook/musicgen-melody",
+  "weights": "overfit",
+  "fixture_repo": "hf-internal-testing/mic-musicgen-melody-slim",
   "environment": {
-   "python": "3.10.19",
-   "transformers": "5.16.0.dev0",
-   "torch": "2.11.0",
-   "torchvision": "0.26.0",
-   "torchaudio": "2.11.0",
+   "python": "3.11.14",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0",
+   "torchvision": "0.29.2",
+   "torchaudio": "2.11.1",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
    "pillow": "12.2.0",
@@ -30,8 +35,9 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 0.66,
-  "platform": "cpu-arm64"
+  "seconds": 2.43,
+  "platform": "cpu-arm64",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {

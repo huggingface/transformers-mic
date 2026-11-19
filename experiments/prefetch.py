@@ -10,9 +10,8 @@ import os
 
 os.environ["HF_HUB_OFFLINE"] = "0"
 
-from huggingface_hub import snapshot_download  # noqa: E402
-
 import experiment as exp  # noqa: E402
+from huggingface_hub import snapshot_download  # noqa: E402
 
 CONFIG_ONLY = {"olmo"}
 

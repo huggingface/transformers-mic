@@ -1,18 +1,18 @@
 """Resumable prototype regeneration; every model gets an explicit stage result."""
 
-import json
 import codecs
+import json
 import os
-import signal
 import re
 import shutil
-from pathlib import Path
+import signal
 import subprocess
 import sys
 import threading
+from pathlib import Path
 
-from .workspace import Workspace, read, write
 from .cloud_progress import LiveProgress
+from .workspace import Workspace, read, write
 
 
 def invoke(out, name, arguments, timeout):
@@ -53,9 +53,7 @@ def invoke(out, name, arguments, timeout):
                             handle.flush()
                             if line.startswith("MIC_CLOUD_VIEW "):
                                 try:
-                                    live.update(
-                                        json.loads(line.removeprefix("MIC_CLOUD_VIEW "))
-                                    )
+                                    live.update(json.loads(line.removeprefix("MIC_CLOUD_VIEW ")))
                                     return
                                 except (ValueError, KeyError, TypeError):
                                     pass
@@ -124,10 +122,7 @@ def run(args):
         row = report["models"].setdefault(name, {**item, "stages": {}})
         row.update(item)
         workspace = out / "projects" / name
-        if (
-            args.phase in ("prepare", "all")
-            and not Workspace(workspace).state_path.exists()
-        ):
+        if args.phase in ("prepare", "all") and not Workspace(workspace).state_path.exists():
             command = [
                 "create",
                 item["checkpoint"],
@@ -160,11 +155,7 @@ def run(args):
                 write(report_path, report)
                 continue
         if not Workspace(workspace).state_path.exists():
-            row["status"] = (
-                row.get("status")
-                if row.get("status", "").endswith("failed")
-                else "not-prepared"
-            )
+            row["status"] = row.get("status") if row.get("status", "").endswith("failed") else "not-prepared"
             write(report_path, report)
             continue
         if args.phase == "prepare":
@@ -189,16 +180,10 @@ def run(args):
             previous = row["stages"].get(stage, {})
             # Checks are always refreshed; failed stages can be retried after a
             # source fix. Recording candidates intentionally requires review again.
-            if (
-                args.resume
-                and previous.get("exit_code") == 0
-                and stage in ("build", "publish")
-            ):
+            if args.resume and previous.get("exit_code") == 0 and stage in ("build", "publish"):
                 continue
             print(f"{name}: {stage}", flush=True)
-            result = invoke(
-                out, name, ["--workspace", str(workspace), *command], args.timeout
-            )
+            result = invoke(out, name, ["--workspace", str(workspace), *command], args.timeout)
             row["stages"][stage] = result
             write(report_path, report)
             if result["exit_code"]:
@@ -209,14 +194,11 @@ def run(args):
         write(report_path, report)
     counts = {}
     for row in report["models"].values():
-        counts[row.get("status", "unknown")] = (
-            counts.get(row.get("status", "unknown"), 0) + 1
-        )
+        counts[row.get("status", "unknown")] = counts.get(row.get("status", "unknown"), 0) + 1
     print(json.dumps({"report": str(report_path), "summary": counts}), flush=True)
     return int(
         any(
-            row.get("status", "").endswith("failed")
-            or row.get("status") == "not-prepared"
+            row.get("status", "").endswith("failed") or row.get("status") == "not-prepared"
             for name, row in report["models"].items()
             if not selected or name in selected
         )

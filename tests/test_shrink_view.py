@@ -3,7 +3,7 @@ import pytest
 pytest.importorskip("torch")
 pytest.importorskip("transformers")
 
-from transformers_mic import shrink_view  # noqa: E402
+from transformers_mic import shrink_view
 
 
 def gemma(layer_types, heads=4, kv=1):
@@ -53,9 +53,7 @@ def test_a_faithful_shrink_has_no_findings():
     result = report(original, gemma(["sliding_attention", "full_attention"]))
 
     assert shrink_view.verdict(result) == []
-    assert {"field": "num_hidden_layers", "original": "6", "fixture": "2"} in result[
-        "config_changes"
-    ]
+    assert {"field": "num_hidden_layers", "original": "6", "fixture": "2"} in result["config_changes"]
     assert result["parameters"]["original"] > result["parameters"]["fixture"]
     assert "Same architecture, smaller" in shrink_view.render(result)
 
@@ -79,6 +77,134 @@ def test_a_barely_shrunk_fixture_and_a_test_checkpoint_source_are_findings():
     assert any("is a test checkpoint" in f for f in shrink_view.verdict(result))
 
 
+def test_model_tester_static_small_config(monkeypatch):
+    """transformers#50462: literal `small_config_overrides` over the bases' `defaults` chain."""
+    from transformers_mic import tester
+
+    files = {
+        "tests/model_tester_config.py": """
+_TEXT = {"hidden_size": 32, "num_attention_heads": 2, "num_hidden_layers": 2, "seq_length": 7, "batch_size": 13}
+class ModelTesterConfigMixin:
+    defaults = _TEXT
+    small_config_overrides = {}
+""",
+        "tests/multimodal_tester.py": """
+class MultiModalModelTester(ModelTesterConfigMixin):
+    defaults = {**ModelTesterConfigMixin.defaults, "batch_size": 3, "scope": None}
+    def __init__(self, parent, **kwargs):
+        for key, value in self.get_small_config_defaults(**kwargs).items():
+            setattr(self, key, value)
+""",
+        "tests/vlm_tester.py": """
+class VLMModelTester(MultiModalModelTester):
+    defaults = {**MultiModalModelTester.defaults, "image_size": 8, "patch_size": 4, "num_channels": 3}
+""",
+    }
+    monkeypatch.setattr(tester, "fetch", lambda url, timeout=20: files[url.split("/main/")[1]])
+    code = """
+class FooTester(VLMModelTester):
+    small_config_overrides = {"image_size": 16, "kv_lora_rank": 16, "no_rope_layers": [1, 0, 1, 0], "hidden_size": 64}
+"""
+    found, own, static = tester.gather(code)
+    assert static and own == {"image_size": 16, "kv_lora_rank": 16, "no_rope_layers": [1, 0, 1, 0], "hidden_size": 64}
+    assert found["batch_size"] == 3 and found["num_channels"] == 3 and found["scope"] is None
+    # Derived as get_small_config_defaults() derives them.
+    assert found["num_image_tokens"] == 16 and found["seq_length"] == 23 and found["head_dim"] == 32
+    # What __init__ still sets wins over the class overrides, as at runtime.
+    legacy = (
+        code
+        + """
+    def __init__(self, parent, **kwargs):
+        kwargs.setdefault("kv_lora_rank", 8)
+        super().__init__(parent, **kwargs)
+"""
+    )
+    assert tester.gather(legacy)[0]["kv_lora_rank"] == 8
+
+
+def test_model_tester_own_defaults_derivations_and_classes(monkeypatch):
+    """transformers#50916 shapes: a class's own `defaults`, simple derivations in its own
+    `get_small_config_defaults()`, and per-class precedence in a file of several testers."""
+    from transformers_mic import tester
+
+    mixin = """
+class ModelTesterConfigMixin:
+    defaults = {"hidden_size": 32, "num_experts": 8}
+    small_config_overrides = {}
+"""
+    monkeypatch.setattr(tester, "fetch", lambda url, timeout=20: mixin)
+    code = """
+class BertModelTester(ModelTesterConfigMixin):
+    defaults = {}
+    small_config_overrides = {"hidden_size": 48, "num_attention_heads": 4, "image_size": 16, "patch_size": 4}
+
+    @classmethod
+    def get_small_config_defaults(cls, **kwargs):
+        values = super().get_small_config_defaults(**kwargs)
+        values["out_hidden_size"] = values["hidden_size"]
+        values.setdefault("head_dim", values["hidden_size"] // values["num_attention_heads"])
+        if "grid" not in values:
+            values["grid"] = values["image_size"] // values["patch_size"]
+        values["layers"] = {i: i for i in range(2)}
+        values["missing"] = values["nope"]  # skipped
+        return values
+
+class BertVisionTester:
+    def __init__(self, parent, hidden_size=99, depth=3):
+        self.parent = parent
+"""
+    found, _own, static = tester.gather(code)
+    assert static and "num_experts" not in found  # the class's own defaults replace the mixin's
+    assert found["out_hidden_size"] == 48 and found["head_dim"] == 12 and found["grid"] == 4
+    assert found["layers"] == {0: 0, 1: 1} and "missing" not in found
+    # The first class wins across classes; the second still adds what the first lacks.
+    assert found["hidden_size"] == 48 and found["depth"] == 3
+    assert tester.gather(code, only="BertVisionTester")[0] == {"hidden_size": 99, "depth": 3}
+
+
+def test_model_tester_override_forms_from_transformers_50944(monkeypatch):
+    """Overrides that fill kwargs before super(), use locals, len(), displays and comprehensions."""
+    from transformers_mic import tester
+
+    files = {
+        "tests/model_tester_config.py": """
+class ModelTesterConfigMixin:
+    defaults = {"hidden_size": 32, "num_attention_heads": 2, "seq_length": 7}
+""",
+        "tests/vlm_tester.py": """
+class VLMModelTester(ModelTesterConfigMixin):
+    defaults = {**ModelTesterConfigMixin.defaults, "image_size": 8, "patch_size": 4}
+""",
+    }
+    monkeypatch.setattr(tester, "fetch", lambda url, timeout=20: files[url.split("/main/")[1]])
+    code = """
+class LlavaLikeTester(VLMModelTester):
+    small_config_overrides = {"layer_types": ["full", "sliding", "full"], "num_hidden_layers": 2}
+
+    @classmethod
+    def get_small_config_defaults(cls, **kwargs):
+        image_size = kwargs.get("image_size", cls.defaults["image_size"])
+        height = width = image_size // 4
+        kwargs.setdefault("num_image_tokens", height * (width + 1))
+        values = super().get_small_config_defaults(**kwargs)
+        values["num_hidden_layers"] = len(values["layer_types"])
+        values["per_layer"] = {i: {"head_dim": 2 * values["head_dim"]} for i, t in enumerate(values["layer_types"]) if t == "full"}
+        values["sub_config"] = {"hidden_size": values["hidden_size"] * 2, **{"depth": 1}}
+        values["device"] = torch_device  # a runtime value: skipped
+        __import__("os").system("false")  # never run
+        if "seq_length" not in kwargs:
+            values["seq_length"] = 7 + 4 * values["num_image_tokens"]
+        return values
+"""
+    found, _, _ = tester.gather(code)
+    # kwargs filled before super() win and feed the bases' derivations.
+    assert found["num_image_tokens"] == 6 and found["seq_length"] == 31
+    assert found["num_hidden_layers"] == 3 and found["head_dim"] == 16
+    assert found["per_layer"] == {0: {"head_dim": 32}, 2: {"head_dim": 32}}
+    assert found["sub_config"] == {"hidden_size": 64, "depth": 1}
+    assert "device" not in found
+
+
 def test_model_tester_values_and_advisory_findings():
     from transformers_mic import tester
 
@@ -95,7 +221,15 @@ class FooModelTester(VLMModelTester):
     found = tester.values(code)
     assert found["no_rope_layers"] == [1, 0, 1, 0] and found["kv_lora_rank"] == 16 and found["hidden_size"] == 32
     original = {"text_config": {"kv_lora_rank": 512, "index_topk": 2048, "no_rope_layers": [1, 1, 1, 0]}}
-    shrunk = {"text_config": {"kv_lora_rank": 512, "index_topk": 2, "no_rope_layers": [1, 1], "hidden_size": 64, "depths": [1, 1]}}
+    shrunk = {
+        "text_config": {
+            "kv_lora_rank": 512,
+            "index_topk": 2,
+            "no_rope_layers": [1, 1],
+            "hidden_size": 64,
+            "depths": [1, 1],
+        }
+    }
     notes = tester.compare(found, original, shrunk)
     assert notes == [
         "kv_lora_rank kept at the checkpoint's 512; the model tester uses 16",
@@ -103,5 +237,91 @@ class FooModelTester(VLMModelTester):
     ]
     # A stage list is not a kind; a fixture kept whole has nothing to shrink.
     assert tester.compare(found, original, shrunk, kept_whole=True) == [
-        "no_rope_layers: the model tester covers 0, the fixture has only 1"]
+        "no_rope_layers: the model tester covers 0, the fixture has only 1"
+    ]
 
+
+def test_position_tables_are_not_shrunk():
+    from transformers_mic import tester
+
+    # Gemma 4's vision tester uses 128 positions; the checkpoint's table is 10240.
+    found = {"position_embedding_size": 128, "hidden_size": 32}
+    original = {"vision_config": {"position_embedding_size": 10240, "hidden_size": 768}}
+    shrunk = {"vision_config": {"position_embedding_size": 10240, "hidden_size": 768}}
+    assert tester.unshrunk_sizes(found, original, shrunk) == {("vision_config", "hidden_size"): 32}
+
+
+def test_model_tester_forms_from_transformers_50972(monkeypatch):
+    """Older-style testers moved onto the mixin (transformers#50972, #50976): parents in this or
+    another test module, sibling testers' defaults, `math`, loops, `pop`, class attributes."""
+    from transformers_mic import tester
+
+    files = {
+        "tests/model_tester_config.py": """
+class ModelTesterConfigMixin:
+    defaults = {}
+    small_config_overrides = {}
+""",
+        "tests/models/cohere/test_modeling_cohere.py": """
+class CohereModelTester(ModelTesterConfigMixin):
+    small_config_overrides = {"vocab_size": 99, "hidden_size": 32, "seq_length": 7}
+    @classmethod
+    def get_small_config_defaults(cls, **kwargs):
+        values = super().get_small_config_defaults(**kwargs)
+        values["pad_token_id"] = values["vocab_size"] - 1
+        return values
+""",
+        "tests/models/pocket_tts/test_modeling_pocket_tts.py": """
+class PocketTTSModelTester(ModelTesterConfigMixin):
+    small_config_overrides = {"latent_dim": 8, "audio_prompt_dim": 4}
+""",
+    }
+    monkeypatch.setattr(tester, "fetch", lambda url, timeout=20: files[url.split("/main/")[1]])
+
+    # A parent tester imported from another test module: its values and its override.
+    code = """
+from ...models.cohere.test_modeling_cohere import CohereModelTester
+from ..pocket_tts import test_modeling_pocket_tts as pocket_tts
+class Cohere2ModelTester(CohereModelTester):
+    pass
+class GradiumModelTester(pocket_tts.PocketTTSModelTester):
+    defaults = {**pocket_tts.PocketTTSModelTester.defaults, **pocket_tts.PocketTTSModelTester.small_config_overrides}
+    small_config_overrides = {"audio_prompt_dim": 12}
+"""
+    assert tester.gather(code, only="Cohere2ModelTester")[0] == {
+        "vocab_size": 99,
+        "hidden_size": 32,
+        "seq_length": 7,
+        "pad_token_id": 98,
+    }
+    assert tester.gather(code, only="GradiumModelTester")[0] == {"latent_dim": 8, "audio_prompt_dim": 12}
+
+    code = """
+import math
+class TextTester(ModelTesterConfigMixin):
+    defaults = {}
+    small_config_overrides = {"batch_size": 12, "seq_length": 7, "min_size": 32 * 4}
+class ModelTester(ModelTesterConfigMixin):
+    defaults = {}
+    small_config_overrides = {"is_training": True, "seq_length": 16, "conv_stride": [4, 4], "mask_ratio": 0.5, "layer_types": None}
+    base = False
+    @classmethod
+    def get_small_config_defaults(cls, text_kwargs=None, **kwargs):
+        values = super().get_small_config_defaults(**kwargs)
+        values["batch_size"] = TextTester.get_small_config_defaults(**(text_kwargs or {}))["batch_size"]
+        length = values["seq_length"]
+        for stride in values["conv_stride"]:
+            length = math.ceil(length / stride)
+        values["output_seq_length"] = length
+        values["num_masks"] = int(values.pop("mask_ratio") * values["seq_length"])
+        values["seq_length"] += 1
+        if not cls.base:
+            values["expected_num_hidden_layers"] = 4
+        values["layer_types"] = values.get("layer_types") or helper(values["seq_length"])
+        return values
+"""
+    found = tester.gather(code, only="ModelTester")[0]
+    assert found["batch_size"] == 12 and found["output_seq_length"] == 1 and found["num_masks"] == 8
+    assert found["seq_length"] == 17 and found["expected_num_hidden_layers"] == 4 and "mask_ratio" not in found
+    assert "layer_types" not in found  # a helper it cannot follow leaves the value unknown, not stale
+    assert tester.gather(code, only="TextTester")[0]["min_size"] == 128  # constant arithmetic

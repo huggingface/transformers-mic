@@ -2,9 +2,9 @@
 
 import hashlib
 import json
-from pathlib import Path
 import shutil
 import sys
+from pathlib import Path
 
 from . import fleet, resources
 
@@ -61,11 +61,7 @@ def catalog_patches(catalog, name):
         },
         "Wav2Vec2": {"masked-spec-embed-init"},
     }.get(name, set())
-    return {
-        key: value
-        for key, value in catalog.get("local_patches", {}).items()
-        if key in needed
-    }
+    return {key: value for key, value in catalog.get("local_patches", {}).items() if key in needed}
 
 
 class Workspace:
@@ -77,9 +73,7 @@ class Workspace:
     @property
     def state(self):
         if not self.state_path.exists():
-            raise ValueError(
-                f"No MIC workspace at {self.root}; run tmic create MODEL --out {self.root}"
-            )
+            raise ValueError(f"No MIC workspace at {self.root}; run tmic create MODEL --out {self.root}")
         return read(self.state_path)
 
     @property
@@ -132,17 +126,13 @@ class Workspace:
     def from_catalog(self, model, name, weights, readable):
         self.ensure_new()
         catalog = read(resources.catalog_lock())
-        from .hub import upgrade_contract, umbrella_references
+        from .hub import umbrella_references, upgrade_contract
 
         original = catalog["contracts"][name]
         entry = upgrade_contract(original)
         source = resources.catalog() / "hub" / f"{name}-integration"
         upgraded = entry["integration"]["repo"] != original["integration"]["repo"]
-        root = (
-            self.root
-            / "example/hub"
-            / (entry["integration"]["repo"].split("/")[-1] if upgraded else source.name)
-        )
+        root = self.root / "example/hub" / (entry["integration"]["repo"].split("/")[-1] if upgraded else source.name)
         shutil.copytree(source, root, dirs_exist_ok=True)
         entry["integration"]["path"] = str(Path("../../../hub") / root.name)
         if upgraded:
@@ -196,9 +186,7 @@ class Workspace:
             },
         )
 
-    def from_plan(
-        self, model, revision, namespace, name, manifest, usage, weights, readable
-    ):
+    def from_plan(self, model, revision, namespace, name, manifest, usage, weights, readable):
         self.ensure_new()
         repo = next(iter(manifest["fixtures"]))
         root = self.root / "example/hub" / repo.split("/")[-1]
@@ -256,9 +244,7 @@ class Workspace:
 
     def snapshot(self):
         files = {
-            str(p.relative_to(self.contract_root)): hashlib.sha256(
-                p.read_bytes()
-            ).hexdigest()
+            str(p.relative_to(self.contract_root)): hashlib.sha256(p.read_bytes()).hexdigest()
             for p in self.contract_root.rglob("*")
             if p.is_file()
         }
@@ -270,31 +256,18 @@ class Workspace:
     def validation_fingerprint(self):
         paths = [self.lock_path]
         paths += [
-            p
-            for p in self.contract_root.rglob("*")
-            if p.is_file() and p.name not in ("README.md", ".gitattributes")
+            p for p in self.contract_root.rglob("*") if p.is_file() and p.name not in ("README.md", ".gitattributes")
         ]
         paths += list(self.expectations.rglob("*.json"))
-        return digest(
-            {
-                str(p.relative_to(self.root)): hashlib.sha256(
-                    p.read_bytes()
-                ).hexdigest()
-                for p in paths
-            }
-        )
+        return digest({str(p.relative_to(self.root)): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths})
 
     def contract_digest(self):
         files = {
-            p.relative_to(self.contract_root).as_posix(): hashlib.sha256(
-                p.read_bytes()
-            ).hexdigest()
+            p.relative_to(self.contract_root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
             for p in self.contract_root.rglob("*")
             if p.is_file()
             and p.name not in ("README.md", ".gitattributes", ".mic-repo.json")
             and "expectations" not in p.relative_to(self.contract_root).parts
-            and not {"node_modules", ".cache", ".git"}.intersection(
-                p.relative_to(self.contract_root).parts
-            )
+            and not {"node_modules", ".cache", ".git"}.intersection(p.relative_to(self.contract_root).parts)
         }
         return digest(files)

@@ -9,70 +9,56 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
-- The default planner model is `deepseek-ai/DeepSeek-V4-Pro-0813` (was `deepseek-ai/DeepSeek-V4.1-Flash-1017`):
-  as many drafts build, more are accepted, and fewer planner calls are made.
-- The `runtime` extra installs `sacremoses`, which the FSMT and XLM tokenizers need.
+- Fixture builds and `shrink_view` read a model's small test config from the literal
+  `small_config_overrides` and base-tester `defaults` dicts (transformers#50462), merged and derived as
+  `get_small_config_defaults()` does, including a model's own arithmetic derivations there
+  (transformers#50916). Testers not yet migrated are still parsed from `__init__`.
+- A tester's own `get_small_config_defaults()` is followed further: locals, `kwargs` filled before `super()`
+  (llava_next, hunyuan_vl), displays, comprehensions and pure builtins such as `len` (transformers#50944).
+  Nothing is imported or run; a statement it cannot follow is skipped.
+- The static tester reader follows the older-style testers moved onto the mixin (transformers#50972, #50976):
+  parent testers in the same or another test module (cohere2 on cohere, `pocket_tts.PocketTTSModelTester`)
+  with their inherited `small_config_overrides`, `defaults` and overrides chained as `super()` runs them;
+  `X.defaults` / `X.small_config_overrides` of any such tester; a sibling tester's
+  `get_small_config_defaults(**text_kwargs)`; an override's own parameters; `math` functions, `+=`,
+  `dict.pop`, plain class attributes (`cls.base`) and constant arithmetic in a dict. A value a skipped
+  statement would have set is now left unknown instead of keeping the value from before it (NeoMME's
+  `layer_types` read as `None`).
+- `position_embedding_size` is kept at the checkpoint's value: it is a table of positions (Gemma 4's
+  vision tower), not a width, so the tester's 128 is no longer adopted.
+
+## [0.1.2] - 2026-11-12
 
 ### Added
 
-- Result records name what ran as Hub locations: `fixture_repo`, `source_model` and `weights` (from the
-  fixture's `build.json`), and `baseline_repo` / `baseline_revision` / `baseline_path` for the reviewed
-  baseline. Transformers CI's span attributes and MIC dashboard page read them.
-- `tmic check --diff-base REV` (with `--changed-files`): a change that only adds Auto/import model
-  registrations selects just the registered models, not the whole fleet, as Transformers CI's runner did.
-- `tmic check --run-declared` runs the variants a contract declares unmeasured.
-- A bfloat16 case on an x86 CPU without native bfloat16 fails as *wrong hardware* instead of being
-  compared with, or recorded as, a `cpu-x86_64` baseline.
-- `tmic check --allow-missing-baseline` passes a target that has no reviewed baseline for this platform
-  (e.g. `cpu-arm64` on a laptop) when its outputs are valid, marking the record `baseline_missing`.
-  Targets that do have a baseline are still compared; CI keeps failing on a missing baseline.
-- `tmic run` and `tmic create` keep a reviewed `tmic fixture org/model` recipe: the contract pins its
-  revision and adds its `config_overrides`. `tmic run` finds `./<model>-fixture/` by itself;
-  `--fixture-recipe DIR` points elsewhere.
-- `tmic fixture org/model[@revision]` shrinks a Hub checkpoint with no workspace, contract or LLM into
-  `./<model>-fixture/` (`--out` to choose): the tiny config and weights, compared with the source. It is
-  the first command in `tmic --help`.
+- `tmic fixture org/model`: shrink a Hub checkpoint into a tiny config and weights, with no contract or LLM.
+- `tmic run` reviews the tiny model first, and keeps a reviewed `tmic fixture` recipe.
+- `tmic environment --set PKG=VER`: move both fleets' pinned environment in one dataset commit.
+- `tmic reserialize`: store a published `pytorch_model.bin` fixture as `model.safetensors`, tensors unchanged.
+- `tmic check --allow-missing-baseline`, `--run-declared` and `--diff-base`.
+- Sentence Transformers integrations, fleet and nightly.
+- Result records name the fixture and baseline as Hub locations.
+- `known_failures` entries can be scoped to `variants` and `platforms`.
 
 ### Changed
 
-- The `runtime` extra installs `torchvision`: vision processors (PixtralProcessor for Mistral-Large-4)
-  need it, and every CI workflow already installed it by hand.
-- A build that fails on a missing package stops with `ImportError: <what is missing>` instead of
-  rebuilding with the shrink rule's sizes, which would fail the same way.
-- Fixtures are always written as `model.safetensors`, also for `pytorch_model.bin` sources. They keep the
-  source's tensor names, prefix and expert layout; `build.json` records the source file in
-  `serialization.source_file`. Published `.bin` fixtures are unchanged until they are rebuilt.
-- The tiny-model review names the expert layout on both sides (per-expert with count, or fused) and the
-  source's weights file.
-- A tied tensor is serialized under the name the source uses (OPT-125m's `.bin` stores `lm_head.weight`,
-  not `model.decoder.embed_tokens.weight`), so loading the fixture takes the source's path.
-- `tmic fixture --json` keeps stdout to the JSON; the shrink's progress goes to stderr.
+- Pinned environment: torch 2.15.0, torchvision 0.29.2, torchaudio 2.11.1, CUDA cu132.
+- Fixtures are always `model.safetensors`.
+- Composite models record each sub-config's attention implementation in `runtime.attn_implementations`.
+- The `runtime` extra adds torchvision, accelerate, sentencepiece, protobuf, sacremoses, mistral-common,
+  fugashi, unidic-lite, timm and num2words.
+- A cloud run's local factory check stops with the `pip install` to run when the local environment
+  differs from the cloud runners'.
+- `tmic publish` carries over an unchanged non-Transformers integration without re-checking it.
+- Default planner model: `deepseek-ai/DeepSeek-V4-Pro-0813`.
+- Planner: more draft checks (media inputs, audio waveforms, transducers, frozen models, every batch row,
+  output fields), all rejections reported at once.
+- A bfloat16 case on an x86 CPU without native bfloat16 is skipped as wrong hardware.
 
 ### Fixed
 
-- `tmic fixture org/model` says to rerun it after editing `config.json`, not to continue a run.
-- A failed stage's summary no longer reads `Failed: ImportError:` with nothing after it when the
-  message starts on the next line (transformers' `requires_backends`).
-- The shrink keeps `word_embed_proj_dim` and `embedding_size` equal to `hidden_size` when the checkpoint has
-  them equal (as it already did for `projection_size`). Shrinking only `hidden_size` gave OPT-125m fixtures
-  `project_in`/`project_out` layers and ELECTRA-base fixtures an `embeddings_project` the checkpoints do not
-  have. Existing fixtures keep their recorded config until rebuilt with `--reshrink`.
-
-### Added
-
-- `tmic run` asks about the tiny model first: it shrinks the config and writes `fixture/` in the workspace
-  (config.json and the weights in the source's serialized format) without running contract code, and shows the
-  config values that differ from the source and the serialized weight names compared with the source checkpoint.
-  Edit `fixture/config.json` (or press `E`) to change it; the edits become the recipe's `config_overrides`.
-  New question kind `fixture-review` in agent mode.
-- `tmic fixture` does the same on its own (`--json`, `--open`, `--force`).
-
-### Changed
-
-- The contract review comes after the tiny-model review and shows `usage.md` itself (`D`), not only its path.
-- `D` prints details inline instead of opening a pager, then asks again without repeating the question.
-- After the build, `fixture/` holds the built fixture; a reviewed question is not asked again while its subject
-  is unchanged.
+- Shrink: OneFormer, mrope/LongRoPE, Kimi K2.5 vision widths, OPT/ELECTRA projection sizes, tied tensor names.
+- Fixture build leaves out parameters of dropped layers.
 
 ## [0.1.1] - 2026-11-03
 

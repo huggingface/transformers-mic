@@ -37,12 +37,7 @@ def measured(weights, passed=True, finite=True):
     ],
 )
 def test_weight_policy(weights, passed, finite, requested, readable, accepted):
-    assert (
-        policy.decision(measured(weights, passed, finite), requested, readable)[
-            "accepted"
-        ]
-        is accepted
-    )
+    assert policy.decision(measured(weights, passed, finite), requested, readable)["accepted"] is accepted
 
 
 def test_weight_policy_skips_dtypes_declared_unhealthy():
@@ -118,9 +113,7 @@ def test_bill_to_follows_environment_and_can_be_personal(monkeypatch):
     monkeypatch.setenv("TMIC_BILL_TO", "my-org")
     args = parser().parse_args(["create", "model/name", "--out", "project"])
     assert args.bill_to == "my-org"
-    args = parser().parse_args(
-        ["create", "model/name", "--out", "project", "--bill-to", ""]
-    )
+    args = parser().parse_args(["create", "model/name", "--out", "project", "--bill-to", ""])
     assert args.bill_to == ""
 
 
@@ -162,9 +155,7 @@ def test_planner_requests_json_and_never_generates_values():
             assert kwargs["response_format"] == {"type": "json_object"}
             assert "Never invent baseline" in kwargs["messages"][0]["content"]
             return SimpleNamespace(
-                choices=[
-                    SimpleNamespace(message=SimpleNamespace(content=json.dumps(plan)))
-                ],
+                choices=[SimpleNamespace(message=SimpleNamespace(content=json.dumps(plan)))],
                 usage=None,
             )
 
@@ -178,9 +169,7 @@ def test_plan_rejects_relaxed_rules_and_removed_assertions(workspace):
     plan = {
         "name": "BERT",
         "manifest": manifest,
-        "usage": (
-            workspace.contract_root / "integrations/transformers/usage.md"
-        ).read_text(),
+        "usage": (workspace.contract_root / "integrations/transformers/usage.md").read_text(),
         "rationale": "",
         "historical_candidates": [],
     }
@@ -190,17 +179,13 @@ def test_plan_rejects_relaxed_rules_and_removed_assertions(workspace):
     with pytest.raises(ValueError, match="tolerances"):
         commands.validate_plan(relaxed, workspace.state["model"], workspace.fixture)
     assets = copy.deepcopy(plan)
-    assets["manifest"]["fixtures"][workspace.fixture]["build"]["copy_assets"] = [
-        "tokenizer.json"
-    ]
+    assets["manifest"]["fixtures"][workspace.fixture]["build"]["copy_assets"] = ["tokenizer.json"]
     with pytest.raises(ValueError, match="remove copy_assets from the build recipe"):
         commands.validate_plan(assets, workspace.state["model"], workspace.fixture)
     removed = copy.deepcopy(plan)
     del removed["manifest"]["outputs"]["answer_logits"]
     with pytest.raises(ValueError, match="removes"):
-        commands.validate_plan(
-            removed, workspace.state["model"], workspace.fixture, manifest
-        )
+        commands.validate_plan(removed, workspace.state["model"], workspace.fixture, manifest)
 
 
 def test_history_import_and_query_dedup(tmp_path, monkeypatch):
@@ -211,9 +196,7 @@ def test_history_import_and_query_dedup(tmp_path, monkeypatch):
 
     def run(command, **kwargs):
         calls.append(command)
-        return SimpleNamespace(
-            returncode=0, stdout=json.dumps([{"url": "https://example.org/issue"}])
-        )
+        return SimpleNamespace(returncode=0, stdout=json.dumps([{"url": "https://example.org/issue"}]))
 
     monkeypatch.setattr(history.subprocess, "run", run)
     result = history.collect("org/model", "bert")
@@ -228,12 +211,8 @@ def test_history_rate_limit_keeps_partial_candidates(monkeypatch):
     def run(command, **kwargs):
         calls.append(command)
         if len(calls) == 1:
-            return SimpleNamespace(
-                returncode=0, stdout=json.dumps([{"url": "https://example.org/1"}])
-            )
-        return SimpleNamespace(
-            returncode=1, stdout="", stderr="HTTP 403: API rate limit exceeded"
-        )
+            return SimpleNamespace(returncode=0, stdout=json.dumps([{"url": "https://example.org/1"}]))
+        return SimpleNamespace(returncode=1, stdout="", stderr="HTTP 403: API rate limit exceeded")
 
     monkeypatch.setattr(history.subprocess, "run", run)
     result = history.collect("org/model", "bert")
@@ -242,9 +221,7 @@ def test_history_rate_limit_keeps_partial_candidates(monkeypatch):
     assert "rate limit" in result["error"]
 
     def denied(command, **kwargs):
-        return SimpleNamespace(
-            returncode=1, stdout="", stderr="HTTP 401: Bad credentials"
-        )
+        return SimpleNamespace(returncode=1, stdout="", stderr="HTTP 401: Bad credentials")
 
     monkeypatch.setattr(history.subprocess, "run", denied)
     with pytest.raises(ValueError, match="Bad credentials"):
@@ -270,10 +247,7 @@ def approve_receipts(workspace):
         "manifest_sha256": workspace.contract_root / "integration.json",
         "usage_sha256": workspace.contract_root / "integrations/transformers/usage.md",
     }
-    proof = {
-        key: hashlib.sha256(path.read_bytes()).hexdigest()
-        for key, path in paths.items()
-    }
+    proof = {key: hashlib.sha256(path.read_bytes()).hexdigest() for key, path in paths.items()}
     validations = {
         v: {"fingerprint": workspace.validation_fingerprint()}
         for v in workspace.manifest["integrations"]["transformers"]["variants"]
@@ -295,9 +269,7 @@ def test_publish_requires_all_variants_and_invalidates_baseline_edits(workspace)
 def test_snapshot_keeps_previous_usage(workspace):
     backup = workspace.snapshot()
     original = (backup / "integrations/transformers/usage.md").read_text()
-    (workspace.contract_root / "integrations/transformers/usage.md").write_text(
-        "new usage"
-    )
+    (workspace.contract_root / "integrations/transformers/usage.md").write_text("new usage")
     assert (backup / "integrations/transformers/usage.md").read_text() == original
 
 
@@ -353,9 +325,7 @@ def exported(call, name):
 def test_export_publishes_dataset_and_writes_only_sha(workspace, dataset, tmp_path):
     approve_receipts(workspace)
     target = tmp_path / "transformers"
-    args = SimpleNamespace(
-        workspace=workspace.root, transformers_checkout=target, execute=False
-    )
+    args = SimpleNamespace(workspace=workspace.root, transformers_checkout=target, execute=False)
     commands.export(args)
     assert dataset[1] == []
     assert not target.exists()
@@ -374,9 +344,7 @@ def test_export_publishes_dataset_and_writes_only_sha(workspace, dataset, tmp_pa
         target / "tests/contracts.lock",
     ]
     assert (target / "tests/contracts.lock").read_text() == "b" * 40 + "\n"
-    assert (
-        "BERT" not in read(dataset[0])["contracts"]
-    )  # cached download is never edited
+    assert "BERT" not in read(dataset[0])["contracts"]  # cached download is never edited
 
 
 def test_retire_removes_one_contract_after_a_preview(workspace, dataset):
@@ -390,6 +358,75 @@ def test_retire_removes_one_contract_after_a_preview(workspace, dataset):
     assert "Other" not in exported(call, "prototypes")["contracts"]
     with pytest.raises(ValueError, match="not in the prototypes fleet"):
         commands.retire(SimpleNamespace(fleet="prototypes", contract="Missing", reason="x", execute=False))
+
+
+def test_environment_moves_both_fleets_in_one_commit_after_a_preview(workspace, dataset, monkeypatch, capsys):
+    from transformers_mic import fleet
+
+    monkeypatch.setattr(fleet, "resolve", lambda revision="main": "a" * 40)
+    old = read(dataset[0])
+    old["environment"].update(torch="2.14.0", torchvision="0.29.1", torchaudio="2.11.0")
+    write(dataset[0], old)
+    args = SimpleNamespace(
+        packages=["torch=2.15.0", "torchvision=0.29.2", "torchaudio=2.11.1"],
+        fleet="all",
+        execute=False,
+    )
+    commands.environment(args)
+    preview = json.loads(capsys.readouterr().out)
+    assert dataset[1] == []
+    assert preview["changes"]["torch"] == {"from": "2.14.0", "to": "2.15.0"}
+    assert preview["fleets"] == ["control", "prototypes"]
+    args.execute = True
+    commands.environment(args)
+    call = dataset[1][0]
+    assert call["parent_commit"] == "a" * 40
+    assert "torch 2.14.0 -> 2.15.0" in call["commit_message"]
+    for name in ("control", "prototypes"):
+        own = [op for op in call["operations"] if op.path_in_repo.startswith(name + "/")]
+        lock = exported({"operations": own}, name)
+        assert lock["environment"]["torch"] == "2.15.0"
+        assert lock["environment"]["torchaudio"] == "2.11.1"
+        assert lock["environment"]["python"] == old["environment"]["python"]
+        assert set(lock["contracts"]) == set(old["contracts"])
+
+
+def test_environment_refuses_unpinned_unchanged_or_malformed_packages(workspace, dataset, monkeypatch):
+    from transformers_mic import fleet
+
+    monkeypatch.setattr(fleet, "resolve", lambda revision="main": "a" * 40)
+    torch = read(dataset[0])["environment"]["torch"]
+
+    def run(*packages):
+        commands.environment(SimpleNamespace(packages=list(packages), fleet="prototypes", execute=True))
+
+    with pytest.raises(ValueError, match="Not pinned"):
+        run("jax=0.5")
+    with pytest.raises(ValueError, match="already pins"):
+        run(f"torch={torch}")
+    with pytest.raises(ValueError, match="PACKAGE=VERSION"):
+        run("torch")
+    with pytest.raises(ValueError, match="set twice"):
+        run("torch=2.15.0", "torch=2.16.0")
+    assert dataset[1] == []
+
+
+def test_environment_refuses_fleets_that_already_differ(workspace, dataset, monkeypatch, tmp_path):
+    from transformers_mic import fleet
+
+    other = tmp_path / "other-fleet.json"
+    lock = read(dataset[0])
+    lock["environment"]["torch"] = "0.0.1"
+    write(other, lock)
+    monkeypatch.setattr(fleet, "resolve", lambda revision="main": "a" * 40)
+    monkeypatch.setattr(
+        fleet,
+        "download",
+        lambda name, revision: (other if name == "control" else dataset[0], revision),
+    )
+    with pytest.raises(ValueError, match="different environments"):
+        commands.environment(SimpleNamespace(packages=["torch=2.15.0"], fleet="all", execute=True))
+    assert dataset[1] == []
 
 
 def test_export_rejects_case_collision_and_allows_explicit_name(workspace, dataset):
@@ -407,9 +444,7 @@ def test_export_rejects_case_collision_and_allows_explicit_name(workspace, datas
     assert "bert" in lock["contracts"]
 
 
-def test_dataset_export_conflict_does_not_update_framework_pin(
-    workspace, dataset, tmp_path, monkeypatch
-):
+def test_dataset_export_conflict_does_not_update_framework_pin(workspace, dataset, tmp_path, monkeypatch):
     approve_receipts(workspace)
     target = tmp_path / "transformers"
     pin = target / "tests/contracts.lock"
@@ -422,11 +457,7 @@ def test_dataset_export_conflict_does_not_update_framework_pin(
 
     monkeypatch.setattr(commands, "HfApi", API)
     with pytest.raises(ValueError, match="remote changed"):
-        commands.export(
-            SimpleNamespace(
-                workspace=workspace.root, execute=True, transformers_checkout=target
-            )
-        )
+        commands.export(SimpleNamespace(workspace=workspace.root, execute=True, transformers_checkout=target))
     assert pin.read_text() == "a" * 40 + "\n"
 
 
@@ -462,9 +493,7 @@ def test_external_check_defaults_to_full_fleet(monkeypatch, tmp_path):
     monkeypatch.setattr(
         backend,
         "invoke",
-        lambda tool, root, options: (
-            calls.append(options) or SimpleNamespace(returncode=0)
-        ),
+        lambda tool, root, options: calls.append(options) or SimpleNamespace(returncode=0),
     )
     assert main(["check", "--lock", str(tmp_path / "fleet.lock")]) == 0
     assert "--run-all" in calls[-1]
@@ -486,21 +515,13 @@ def test_external_check_defaults_to_full_fleet(monkeypatch, tmp_path):
 def test_contract_infrastructure_and_baseline_changes_select_cases():
     import importlib.util
 
-    spec = importlib.util.spec_from_file_location(
-        "mic_selector_test", resources.backend() / "select_contracts.py"
-    )
+    spec = importlib.util.spec_from_file_location("mic_selector_test", resources.backend() / "select_contracts.py")
     selector = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(selector)
     cases = {"BERT": ["bert"], "mic-vit": ["vit"]}
     assert set(selector.select(["tests/contracts.lock"], cases)) == set(cases)
-    assert set(selector.select(["tests/contracts/prototype-fleet.lock"], cases)) == set(
-        cases
-    )
-    assert set(
-        selector.select(
-            ["tests/contracts/expectations/mic-vit/cpu-x86_64/a.json"], cases
-        )
-    ) == {"mic-vit"}
+    assert set(selector.select(["tests/contracts/prototype-fleet.lock"], cases)) == set(cases)
+    assert set(selector.select(["tests/contracts/expectations/mic-vit/cpu-x86_64/a.json"], cases)) == {"mic-vit"}
 
 
 def test_export_rejects_patched_validation(workspace, tmp_path):
@@ -509,19 +530,13 @@ def test_export_rejects_patched_validation(workspace, tmp_path):
     write(workspace.lock_path, lock)
     approve_receipts(workspace)
     with pytest.raises(ValueError, match="without local patches"):
-        commands.export(
-            SimpleNamespace(
-                workspace=workspace.root, transformers_checkout=tmp_path / "tf"
-            )
-        )
+        commands.export(SimpleNamespace(workspace=workspace.root, transformers_checkout=tmp_path / "tf"))
 
 
 def test_cpu_precision_baselines_follow_hardware(monkeypatch):
     import importlib.util
 
-    spec = importlib.util.spec_from_file_location(
-        "mic_platform_test", resources.backend() / "run.py"
-    )
+    spec = importlib.util.spec_from_file_location("mic_platform_test", resources.backend() / "run.py")
     runner = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(runner)
     monkeypatch.setattr(runner.os, "uname", lambda: SimpleNamespace(machine="x86_64"))
@@ -535,12 +550,7 @@ def test_cpu_precision_baselines_follow_hardware(monkeypatch):
 
 def test_create_offline_and_status(tmp_path, capsys):
     path = tmp_path / "new"
-    assert (
-        main(
-            ["create", "google-bert/bert-base-uncased", "--offline", "--out", str(path)]
-        )
-        == 0
-    )
+    assert main(["create", "google-bert/bert-base-uncased", "--offline", "--out", str(path)]) == 0
     assert main(["--workspace", str(path), "build"]) == 0
     assert Workspace(path).state["weight_decision"]["reused"]
     assert main(["--workspace", str(path), "status"]) == 0
@@ -558,9 +568,7 @@ def test_planner_repairs_invalid_draft(workspace, monkeypatch):
     plan = {
         "name": "BERT",
         "manifest": workspace.manifest,
-        "usage": (
-            workspace.contract_root / "integrations/transformers/usage.md"
-        ).read_text(),
+        "usage": (workspace.contract_root / "integrations/transformers/usage.md").read_text(),
         "rationale": "",
         "historical_candidates": [],
     }
@@ -591,8 +599,7 @@ def test_planner_repairs_invented_parameter_names(workspace, monkeypatch):
     plan = {
         "name": "BERT",
         "manifest": workspace.manifest,
-        "usage": usage
-        + '\nchecked = ("bert.encoder.layer.0.attention.self.query.weight",)\n',
+        "usage": usage + '\nchecked = ("bert.encoder.layer.0.attention.self.query.weight",)\n',
         "rationale": "",
         "historical_candidates": [],
     }
@@ -605,9 +612,7 @@ def test_planner_repairs_invented_parameter_names(workspace, monkeypatch):
         return (invented if len(calls) == 1 else plan), {}
 
     monkeypatch.setattr(planner, "propose", propose)
-    config = BertConfig(
-        hidden_size=8, num_hidden_layers=1, num_attention_heads=2, intermediate_size=8
-    ).to_dict()
+    config = BertConfig(hidden_size=8, num_hidden_layers=1, num_attention_heads=2, intermediate_size=8).to_dict()
     result, _ = commands.propose_valid(
         {"config": config},
         SimpleNamespace(llm_model=planner.DEFAULT_MODEL, provider="auto", bill_to=""),
@@ -626,13 +631,26 @@ def test_parameter_names_accept_suffixes_and_hint_every_layer_kind():
 
     # Block 0 dense, block 1 MoE: the shape of Mistral-Large-4.
     config = DeepseekV3Config(
-        vocab_size=32, hidden_size=16, intermediate_size=16, moe_intermediate_size=8,
-        num_hidden_layers=2, num_attention_heads=2, num_key_value_heads=2,
-        n_routed_experts=2, num_experts_per_tok=1, first_k_dense_replace=1,
-        q_lora_rank=8, kv_lora_rank=8, qk_rope_head_dim=4, qk_nope_head_dim=4, v_head_dim=4,
+        vocab_size=32,
+        hidden_size=16,
+        intermediate_size=16,
+        moe_intermediate_size=8,
+        num_hidden_layers=2,
+        num_attention_heads=2,
+        num_key_value_heads=2,
+        n_routed_experts=2,
+        num_experts_per_tok=1,
+        first_k_dense_replace=1,
+        q_lora_rank=8,
+        kv_lora_rank=8,
+        qk_rope_head_dim=4,
+        qk_nope_head_dim=4,
+        v_head_dim=4,
     ).to_dict()
     plan = {"manifest": {"architecture": "DeepseekV3ForCausalLM"}}
-    commands.check_parameter_names({**plan, "usage": 'next(n for n in names if n.endswith("mlp.gate_proj.weight"))'}, config)
+    commands.check_parameter_names(
+        {**plan, "usage": 'next(n for n in names if n.endswith("mlp.gate_proj.weight"))'}, config
+    )
     with pytest.raises(ValueError) as error:
         commands.check_parameter_names({**plan, "usage": '"model.layers.1.mlp.down_proj.weight"'}, config)
     assert "model.layers.1.mlp.experts." in str(error.value)
@@ -640,9 +658,11 @@ def test_parameter_names_accept_suffixes_and_hint_every_layer_kind():
 
 def test_index_only_misses_name_the_suffix_lookup():
     # Switch Transformers: routers only in odd blocks; drafts copied T5's block.0.
-    real = {"decoder.block.0.layer.2.mlp.wi.weight",
-            "decoder.block.1.layer.2.mlp.router.classifier.weight",
-            "decoder.block.3.layer.2.mlp.router.classifier.weight"}
+    real = {
+        "decoder.block.0.layer.2.mlp.wi.weight",
+        "decoder.block.1.layer.2.mlp.router.classifier.weight",
+        "decoder.block.3.layer.2.mlp.router.classifier.weight",
+    }
     lookup = "n.startswith('decoder.block.') and n.endswith('.layer.2.mlp.router.classifier.weight')"
     (hint,) = commands.index_only_misses(["decoder.block.0.layer.2.mlp.router.classifier.weight"], real)
     assert "decoder.block.1.layer.2.mlp.router.classifier.weight is (layers 1, 3)" in hint and lookup in hint
@@ -654,8 +674,11 @@ def test_index_only_misses_name_the_suffix_lookup():
 
 def test_a_reply_that_is_not_a_draft_does_not_use_a_draft(monkeypatch, capsys):
     plan = {"name": "M"}
-    replies = [json.JSONDecodeError("Unterminated string", "{", 0),
-               planner.MalformedDraft("'rationale' is a required property"), (plan, {})]
+    replies = [
+        json.JSONDecodeError("Unterminated string", "{", 0),
+        planner.MalformedDraft("'rationale' is a required property"),
+        (plan, {}),
+    ]
 
     def propose(context, **kwargs):
         reply = replies.pop(0)
@@ -682,8 +705,14 @@ def test_planner_logs_the_last_rejected_draft(monkeypatch, capsys):
 
 def test_parse_reports_a_missing_top_level_key_as_not_a_draft():
     response = SimpleNamespace(
-        choices=[SimpleNamespace(message=SimpleNamespace(content=json.dumps(
-            {"name": "M", "manifest": {}, "usage": "x" * 100, "historical_candidates": []})), finish_reason="stop")],
+        choices=[
+            SimpleNamespace(
+                message=SimpleNamespace(
+                    content=json.dumps({"name": "M", "manifest": {}, "usage": "x" * 100, "historical_candidates": []})
+                ),
+                finish_reason="stop",
+            )
+        ],
         usage=None,
     )
     with pytest.raises(planner.MalformedDraft, match="rationale"):
@@ -691,7 +720,9 @@ def test_parse_reports_a_missing_top_level_key_as_not_a_draft():
 
 
 def test_compare_rule_spelling_slips_are_normalized():
-    plan = {"manifest": {"outputs": {"g": {"compare": "alltrue"}, "l": {"compare": "AllClose"}, "x": {"compare": "fuzzy"}}}}
+    plan = {
+        "manifest": {"outputs": {"g": {"compare": "alltrue"}, "l": {"compare": "AllClose"}, "x": {"compare": "fuzzy"}}}
+    }
     commands.normalize_compare(plan)
     assert [r["compare"] for r in plan["manifest"]["outputs"].values()] == ["all_true", "allclose", "fuzzy"]
 
@@ -711,27 +742,40 @@ def test_checkpoints_above_the_gpu_limit_are_not_loaded():
 
 
 def test_planner_context_names_one_parameter_per_layer_kind():
-    names = {"model.layers.0.mlp.down_proj.weight", "model.layers.1.mlp.experts.down_proj",
-             "model.layers.2.mlp.experts.down_proj", "lm_head.weight"}
+    names = {
+        "model.layers.0.mlp.down_proj.weight",
+        "model.layers.1.mlp.experts.down_proj",
+        "model.layers.2.mlp.experts.down_proj",
+        "lm_head.weight",
+    }
     assert commands.names_per_layer_kind(names) == [
-        "lm_head.weight", "model.layers.0.mlp.down_proj.weight", "model.layers.1.mlp.experts.down_proj"]
+        "lm_head.weight",
+        "model.layers.0.mlp.down_proj.weight",
+        "model.layers.1.mlp.experts.down_proj",
+    ]
     assert commands.names_per_layer_kind(names, pattern=True) == [
-        "lm_head.weight", "model.layers.N.mlp.down_proj.weight", "model.layers.N.mlp.experts.down_proj"]
+        "lm_head.weight",
+        "model.layers.N.mlp.down_proj.weight",
+        "model.layers.N.mlp.experts.down_proj",
+    ]
 
 
 def test_parameter_patterns_keep_sublayer_indices():
     # Switch Transformers: the router is in every other block, always in sublayer 1.
-    names = {"encoder.block.0.layer.0.SelfAttention.q.weight",
-             "encoder.block.0.layer.1.mlp.wi.weight",
-             "encoder.block.1.layer.1.mlp.router.classifier.weight",
-             "encoder.block.3.layer.1.mlp.router.classifier.weight",
-             "decoder.block.0.layer.1.EncDecAttention.q.weight",
-             "decoder.block.2.layer.1.EncDecAttention.q.weight"}
+    names = {
+        "encoder.block.0.layer.0.SelfAttention.q.weight",
+        "encoder.block.0.layer.1.mlp.wi.weight",
+        "encoder.block.1.layer.1.mlp.router.classifier.weight",
+        "encoder.block.3.layer.1.mlp.router.classifier.weight",
+        "decoder.block.0.layer.1.EncDecAttention.q.weight",
+        "decoder.block.2.layer.1.EncDecAttention.q.weight",
+    }
     assert commands.names_per_layer_kind(names, pattern=True) == [
         "decoder.block.N.layer.1.EncDecAttention.q.weight",
         "encoder.block.N.layer.0.SelfAttention.q.weight",
         "encoder.block.N.layer.1.mlp.router.classifier.weight",
-        "encoder.block.N.layer.1.mlp.wi.weight"]
+        "encoder.block.N.layer.1.mlp.wi.weight",
+    ]
 
 
 @pytest.mark.requires_runtime
@@ -739,9 +783,7 @@ def test_update_keeps_fixture_pin_and_old_source(workspace, monkeypatch):
     plan = {
         "name": "BERT",
         "manifest": workspace.manifest,
-        "usage": (
-            workspace.contract_root / "integrations/transformers/usage.md"
-        ).read_text()
+        "usage": (workspace.contract_root / "integrations/transformers/usage.md").read_text()
         + "\nAdditional path documentation.\n",
         "rationale": "",
         "historical_candidates": [],
@@ -794,9 +836,7 @@ def test_external_fleet_uses_each_contract_variants(tmp_path, monkeypatch):
     from transformers_mic import cli
 
     manifests = {
-        "a": {
-            "integrations": {"transformers": {"variants": {"default": {}, "eager": {}}}}
-        },
+        "a": {"integrations": {"transformers": {"variants": {"default": {}, "eager": {}}}}},
         "b": {"integrations": {"transformers": {"variants": {"default": {}}}}},
     }
     for key, manifest in manifests.items():
@@ -804,12 +844,7 @@ def test_external_fleet_uses_each_contract_variants(tmp_path, monkeypatch):
     lock = tmp_path / "fleet.lock"
     write(
         lock,
-        {
-            "contracts": {
-                key: {"integration": {"repo": key, "revision": "pinned"}}
-                for key in manifests
-            }
-        },
+        {"contracts": {key: {"integration": {"repo": key, "revision": "pinned"}} for key in manifests}},
     )
     monkeypatch.setattr(
         "huggingface_hub.hf_hub_download",
@@ -819,16 +854,11 @@ def test_external_fleet_uses_each_contract_variants(tmp_path, monkeypatch):
     monkeypatch.setattr(
         cli.backend,
         "invoke",
-        lambda tool, workspace, options: (
-            calls.append(options) or SimpleNamespace(returncode=0)
-        ),
+        lambda tool, workspace, options: calls.append(options) or SimpleNamespace(returncode=0),
     )
     assert cli.main(["check", "--lock", str(lock), "--all-variants"]) == 0
     assert len(calls) == 3
-    assert not any(
-        options[options.index("--contract") + 1] == "b" and options[-1] == "eager"
-        for options in calls
-    )
+    assert not any(options[options.index("--contract") + 1] == "b" and options[-1] == "eager" for options in calls)
 
 
 def test_regeneration_creates_new_mic_artifacts_without_old_baselines(tmp_path):
@@ -852,10 +882,7 @@ def test_regeneration_creates_new_mic_artifacts_without_old_baselines(tmp_path):
     )
     project = Workspace(path)
     assert project.fixture == "hf-internal-testing/bert-mic"
-    assert (
-        project.lock["contracts"]["bert"]["integration"]["repo"]
-        == "hf-internal-testing/bert-mic"
-    )
+    assert project.lock["contracts"]["bert"]["integration"]["repo"] == "hf-internal-testing/bert-mic"
     assert project.manifest["integrations"]["transformers"]["targets"] == ["fixtures"]
     assert not (project.lock_path.parent / "expectations").exists()
 
@@ -891,20 +918,14 @@ def test_metadata_missing_keys_handles_ties_and_legacy_norm_names():
 def test_mxfp4_presence_requires_paired_blocks_and_scales():
     from transformers_mic.inspection import logical_checkpoint_keys
 
-    config = SimpleNamespace(
-        model_type="gpt_oss", quantization_config={"quant_method": "mxfp4"}
-    )
+    config = SimpleNamespace(model_type="gpt_oss", quantization_config={"quant_method": "mxfp4"})
     keys = {
         "model.layers.0.mlp.experts.gate_up_proj_blocks",
         "model.layers.0.mlp.experts.gate_up_proj_scales",
     }
-    assert "model.layers.0.mlp.experts.gate_up_proj" in logical_checkpoint_keys(
-        config, keys
-    )
+    assert "model.layers.0.mlp.experts.gate_up_proj" in logical_checkpoint_keys(config, keys)
     with pytest.raises(ValueError, match="lacks scales"):
-        logical_checkpoint_keys(
-            config, {next(k for k in keys if k.endswith("_blocks"))}
-        )
+        logical_checkpoint_keys(config, {next(k for k in keys if k.endswith("_blocks"))})
     config.quantization_config = {"quant_method": "other"}
     with pytest.raises(ValueError, match="reviewed parameter-name adapter"):
         logical_checkpoint_keys(config, keys)
@@ -936,9 +957,7 @@ def test_batch_keeps_running_after_a_model_failure(tmp_path, monkeypatch):
 
     root = tmp_path / "batch"
     for name in ("bert", "other"):
-        Workspace(root / "projects" / name).from_catalog(
-            "google-bert/bert-base-uncased", "BERT", "auto", False
-        )
+        Workspace(root / "projects" / name).from_catalog("google-bert/bert-base-uncased", "BERT", "auto", False)
     path = tmp_path / "models.json"
     write(
         path,
@@ -972,9 +991,7 @@ def test_batch_keeps_running_after_a_model_failure(tmp_path, monkeypatch):
 def test_new_artifacts_default_to_mic_organization(tmp_path):
     args = parser().parse_args(["create", "org/model", "--out", "project"])
     assert args.namespace == "huggingface-mic"
-    args = parser().parse_args(
-        ["batch", "--models-file", "models.json", "--out", "project"]
-    )
+    args = parser().parse_args(["batch", "--models-file", "models.json", "--out", "project"])
     assert args.namespace == "huggingface-mic"
     path = tmp_path / "mic-org"
     assert (
@@ -993,10 +1010,7 @@ def test_new_artifacts_default_to_mic_organization(tmp_path):
     )
     project = Workspace(path)
     assert project.fixture == "huggingface-mic/bert-mic"
-    assert (
-        project.lock["contracts"]["bert"]["integration"]["repo"]
-        == "huggingface-mic/bert-mic"
-    )
+    assert project.lock["contracts"]["bert"]["integration"]["repo"] == "huggingface-mic/bert-mic"
 
 
 def test_hub_aliases_preserve_pins_and_unrelated_owners():
@@ -1039,10 +1053,7 @@ def test_umbrella_baselines_live_next_to_usage_and_invalidate_validation(tmp_pat
     )
     project = Workspace(path)
     assert project.contract_root.name == "bert-mic"
-    assert (
-        project.expectations
-        == project.contract_root / "integrations/transformers/expectations"
-    )
+    assert project.expectations == project.contract_root / "integrations/transformers/expectations"
     digest_before = project.contract_digest()
     fingerprint_before = project.validation_fingerprint()
     write(project.expectations / "cpu-test/bert-mic.json", {"outputs": {"value": 1}})
@@ -1050,18 +1061,14 @@ def test_umbrella_baselines_live_next_to_usage_and_invalidate_validation(tmp_pat
     assert project.validation_fingerprint() != fingerprint_before
 
 
-def test_umbrella_publish_uploads_one_snapshot_and_pins_both_roles(
-    tmp_path, monkeypatch
-):
+def test_umbrella_publish_uploads_one_snapshot_and_pins_both_roles(tmp_path, monkeypatch):
     import importlib.util
     import sys
     from pathlib import Path
 
     example = Path(__file__).resolve().parents[1] / "example"
     monkeypatch.syspath_prepend(str(example))
-    spec = importlib.util.spec_from_file_location(
-        "publish_mic_test", example / "publish_mic.py"
-    )
+    spec = importlib.util.spec_from_file_location("publish_mic_test", example / "publish_mic.py")
     publisher = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(publisher)
     path = tmp_path / "umbrella"
@@ -1109,10 +1116,9 @@ def test_umbrella_publish_uploads_one_snapshot_and_pins_both_roles(
             assert repo_id == "huggingface-mic/bert-mic"
             assert (folder_path / "model.safetensors").read_bytes() == b"weights"
             assert (folder_path / "integrations/transformers/usage.md").exists()
-            assert read(
-                folder_path
-                / "integrations/transformers/expectations/cpu-test/bert-mic.json"
-            ) == {"reviewed": True}
+            assert read(folder_path / "integrations/transformers/expectations/cpu-test/bert-mic.json") == {
+                "reviewed": True
+            }
             assert (folder_path / ".mic-repo.json").exists()
             calls.append(repo_id)
             return SimpleNamespace(oid="c" * 40)
@@ -1121,12 +1127,108 @@ def test_umbrella_publish_uploads_one_snapshot_and_pins_both_roles(
     monkeypatch.setattr(sys, "argv", ["publish_mic"])
     assert publisher.main() == 0
     contract = project.lock["contracts"]["bert"]
-    assert (
-        contract["integration"]["revision"]
-        == contract["fixtures"][project.fixture]["revision"]
-        == "c" * 40
-    )
+    assert contract["integration"]["revision"] == contract["fixtures"][project.fixture]["revision"] == "c" * 40
     assert calls == ["huggingface-mic/bert-mic"]
+
+
+def test_umbrella_publish_leaves_a_carried_integration_on_the_hub(tmp_path, monkeypatch):
+    import importlib.util
+    import sys
+
+    example = Path(__file__).resolve().parents[1] / "example"
+    monkeypatch.syspath_prepend(str(example))
+    spec = importlib.util.spec_from_file_location("publish_mic_carry_test", example / "publish_mic.py")
+    publisher = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(publisher)
+    path = tmp_path / "umbrella"
+    assert (
+        main(
+            [
+                "create",
+                "google-bert/bert-base-uncased",
+                "--regenerate",
+                "--name",
+                "bert",
+                "--out",
+                str(path),
+            ]
+        )
+        == 0
+    )
+    project = Workspace(path)
+    # A second integration another fleet owns; the workspace has its usage but not
+    # its expectations, which live only on the Hub.
+    manifest = project.manifest
+    manifest["integrations"]["sentence_transformers"] = {
+        **manifest["integrations"]["transformers"],
+        "entry_point": "integrations/sentence_transformers/usage.md",
+    }
+    write(project.contract_root / "integration.json", manifest)
+    st_usage = project.contract_root / "integrations/sentence_transformers/usage.md"
+    st_usage.parent.mkdir(parents=True)
+    st_usage.write_text("ST usage")
+    project.update_layout()
+    fixture = tmp_path / "fixture"
+    fixture.mkdir()
+    (fixture / "model.safetensors").write_bytes(b"weights")
+    write(fixture / "build.json", {"sha256": {"model.safetensors": "hash"}})
+    write(project.expectations / "cpu-test/bert-mic.json", {"reviewed": True})
+    lock = project.lock
+    pin = lock["contracts"]["bert"]["fixtures"][project.fixture]
+    pin.update(path=str(fixture), files_sha256="hash")
+    write(project.lock_path, lock)
+    monkeypatch.setattr(publisher, "HERE", project.root / "example")
+    monkeypatch.setattr(publisher.run, "load", lambda path, schema: read(path))
+    monkeypatch.setattr(publisher.run, "fixture_problem", lambda *a: None)
+    previous = tmp_path / "previous"
+    write(
+        previous / ".mic-repo.json",
+        {
+            "format": "mic-umbrella-v1",
+            "contract_files": read(project.contract_root / ".mic-repo.json")["contract_files"],
+        },
+    )
+    write(previous / "build.json", {"sha256": {"model.safetensors": "hash"}})
+    monkeypatch.setattr(publisher, "hf_hub_download", lambda repo, name: str(previous / name))
+    uploads = []
+
+    class API:
+        def repo_exists(self, repo):
+            return True
+
+        def list_repo_files(self, repo):
+            return [
+                ".mic-repo.json",
+                "build.json",
+                "integrations/sentence_transformers/usage.md",
+                "integrations/sentence_transformers/expectations/cpu-x86_64/bert-mic.json",
+            ]
+
+        def create_repo(self, repo, **kwargs):
+            pass
+
+        def upload_folder(self, repo_id, folder_path, delete_patterns, **kwargs):
+            staged = {p.relative_to(folder_path).as_posix() for p in folder_path.rglob("*") if p.is_file()}
+            uploads.append((staged, delete_patterns))
+            return SimpleNamespace(oid="c" * 40)
+
+    monkeypatch.setattr(publisher, "HfApi", API)
+    # Without --carry the expectations missing locally stop the publish, as before.
+    monkeypatch.setattr(sys, "argv", ["publish_mic"])
+    with pytest.raises(ValueError, match="No reviewed sentence_transformers"):
+        publisher.main()
+    monkeypatch.setattr(sys, "argv", ["publish_mic", "--carry", "sentence_transformers"])
+    assert publisher.main() == 0
+    ((staged, deleted),) = uploads
+    # Nothing under the carried integration is uploaded or deleted: the Hub keeps it.
+    assert not [p for p in staged if p.startswith("integrations/sentence_transformers/")]
+    assert not [p for p in deleted if p.startswith("integrations/sentence_transformers/")]
+    assert "integrations/transformers/expectations/cpu-test/bert-mic.json" in staged
+    # The layout still lists its usage, which stays in the repository.
+    assert (
+        "integrations/sentence_transformers/usage.md"
+        in read(project.contract_root / ".mic-repo.json")["contract_files"]
+    )
 
 
 def test_merged_hub_card_keeps_both_descriptions(monkeypatch):
@@ -1171,6 +1273,7 @@ def test_dataset_pin_resolves_main_once_and_checks_both_fleets(monkeypatch, tmp_
         path.parent.mkdir(parents=True, exist_ok=True)
         if Path(filename).stem == "integrations":
             from huggingface_hub.errors import EntryNotFoundError
+
             raise EntryNotFoundError(filename)
         path.write_text(tables.get(filename) or tables[Path(filename).stem])
         return str(path)
@@ -1183,16 +1286,12 @@ def test_dataset_pin_resolves_main_once_and_checks_both_fleets(monkeypatch, tmp_
     assert (checkout / "tests/contracts.lock").read_text() == "d" * 40 + "\n"
 
 
-def test_dataset_export_scopes_known_failures_and_uses_prototype_file(
-    workspace, dataset
-):
+def test_dataset_export_scopes_known_failures_and_uses_prototype_file(workspace, dataset):
     approve_receipts(workspace)
     original = read(dataset[0])
     original["known_failures"] = {"Other/target": {"issue": "keep"}}
     write(dataset[0], original)
-    commands.export(
-        SimpleNamespace(workspace=workspace.root, fleet="prototypes", execute=True)
-    )
+    commands.export(SimpleNamespace(workspace=workspace.root, fleet="prototypes", execute=True))
     lock = exported(dataset[1][0], "prototypes")
     # An issue-only entry is the schema's plain string form
     assert lock["known_failures"]["Other/target"] == "keep"
@@ -1205,17 +1304,13 @@ def test_new_contracts_carry_the_fleet_environment(tmp_path, monkeypatch, capsys
     lock = tmp_path / "prototype-fleet.lock"
     write(lock, {"environment": {"torch": "2.14.0"}})
     monkeypatch.setattr(fleet, "download", lambda name: (lock, "a" * 40))
-    assert fleet_environment({"environment": {"torch": "2.11.0"}}) == {
-        "torch": "2.14.0"
-    }
+    assert fleet_environment({"environment": {"torch": "2.11.0"}}) == {"torch": "2.14.0"}
 
     def offline(name):
         raise OSError("no network")
 
     monkeypatch.setattr(fleet, "download", offline)
-    assert fleet_environment({"environment": {"torch": "2.11.0"}}) == {
-        "torch": "2.11.0"
-    }
+    assert fleet_environment({"environment": {"torch": "2.11.0"}}) == {"torch": "2.11.0"}
     assert "fleet environment unavailable (no network)" in capsys.readouterr().err
 
 
@@ -1234,23 +1329,15 @@ def test_dataset_export_rejects_environment_change(workspace, dataset):
 def test_export_rejects_a_dataset_changed_since_human_preview(workspace, dataset):
     approve_receipts(workspace)
     with pytest.raises(ValueError, match="changed since preview"):
-        commands.export(
-            SimpleNamespace(
-                workspace=workspace.root, execute=True, expected_revision="f" * 40
-            )
-        )
+        commands.export(SimpleNamespace(workspace=workspace.root, execute=True, expected_revision="f" * 40))
     assert not dataset[1]
 
 
-def test_export_moves_known_failure_to_the_renamed_target(
-    workspace, dataset, monkeypatch
-):
+def test_export_moves_known_failure_to_the_renamed_target(workspace, dataset, monkeypatch):
     source = workspace.lock
     fixture, pin = next(iter(source["contracts"]["BERT"]["fixtures"].items()))
     old_target = pin.get("target", fixture.split("/")[-1])
-    source["known_failures"] = {
-        f"BERT/{old_target}": {"issue": "tracked", "skip_outputs": ["training.loss"]}
-    }
+    source["known_failures"] = {f"BERT/{old_target}": {"issue": "tracked", "skip_outputs": ["training.loss"]}}
     write(workspace.lock_path, source)
     approve_receipts(workspace)
     original = commands.upgrade_contract
@@ -1280,9 +1367,7 @@ def test_binary_only_checkpoint_reads_names_from_conversion_pr(tmp_path, monkeyp
             assert filters["author"] == "SFconvertbot"
             return [
                 SimpleNamespace(num=1, title="Something else"),
-                SimpleNamespace(
-                    num=4, title="Adding `safetensors` variant of this model"
-                ),
+                SimpleNamespace(num=4, title="Adding `safetensors` variant of this model"),
             ]
 
         def get_safetensors_metadata(self, repo, revision=None):
@@ -1293,9 +1378,7 @@ def test_binary_only_checkpoint_reads_names_from_conversion_pr(tmp_path, monkeyp
             raise AssertionError("must not fall back to the binary checkpoint")
 
     monkeypatch.setattr(inspection, "HfApi", Api)
-    assert inspection.checkpoint_keys("org/model", "a" * 40, tmp_path) == {
-        "encoder.weight"
-    }
+    assert inspection.checkpoint_keys("org/model", "a" * 40, tmp_path) == {"encoder.weight"}
 
 
 @pytest.mark.requires_runtime
@@ -1341,7 +1424,9 @@ def test_checkpoint_keys_follow_transformers_weights(monkeypatch, tmp_path):
     # Mistral names its shards consolidated-*; config.json points the loader at them.
     name = "consolidated.safetensors.index.json"
     (tmp_path / "config.json").write_text(json.dumps({"transformers_weights": name}))
-    (tmp_path / name).write_text(json.dumps({"weight_map": {"a.weight": "consolidated-1.safetensors", "b.weight": "consolidated-2.safetensors"}}))
+    (tmp_path / name).write_text(
+        json.dumps({"weight_map": {"a.weight": "consolidated-1.safetensors", "b.weight": "consolidated-2.safetensors"}})
+    )
     headers = {"consolidated-1.safetensors": {"a.weight"}, "consolidated-2.safetensors": {"b.weight", "c.weight"}}
 
     class Api:
@@ -1392,12 +1477,16 @@ def test_parameter_count_sums_explicit_shards_the_hub_does_not_count(monkeypatch
 
     name = "consolidated.safetensors.index.json"
     (tmp_path / "config.json").write_text(json.dumps({"transformers_weights": name}))
-    (tmp_path / name).write_text(json.dumps({"weight_map": {"a": "c-1.safetensors", "b": "c-2.safetensors", "c": "c-2.safetensors"}}))
+    (tmp_path / name).write_text(
+        json.dumps({"weight_map": {"a": "c-1.safetensors", "b": "c-2.safetensors", "c": "c-2.safetensors"}})
+    )
     monkeypatch.setattr(huggingface_hub, "hf_hub_download", lambda repo, f, revision=None: str(tmp_path / f))
 
     class Api:
         def parse_safetensors_file_metadata(self, repo, filename, revision=None, timeout=None):
-            return SimpleNamespace(parameter_count={"F8_E4M3": 100, "BF16": 5} if filename == "c-2.safetensors" else {"BF16": 7})
+            return SimpleNamespace(
+                parameter_count={"F8_E4M3": 100, "BF16": 5} if filename == "c-2.safetensors" else {"BF16": 7}
+            )
 
     monkeypatch.setattr(inspection, "HfApi", Api)
     assert inspection.explicit_parameter_count("org/model", "a" * 40) == 112
@@ -1412,19 +1501,16 @@ def test_visible_usage_never_shows_runner_plumbing():
     ]
     assert commands.visible_plumbing(blocks) == []
     blocks = ["model = AutoModel.from_pretrained(model_id, **variant).to(device)\n"]
-    assert commands.visible_plumbing(blocks) == [
-        "model = AutoModel.from_pretrained(model_id, **variant).to(device)"
-    ]
+    assert commands.visible_plumbing(blocks) == ["model = AutoModel.from_pretrained(model_id, **variant).to(device)"]
+    # Prose in a comment is not plumbing; an environment variable is, even in a comment.
+    assert commands.visible_plumbing(["# Cast so the bfloat16 variant runs.\nx = 1\n"]) == []
+    assert commands.visible_plumbing(["# set MIC_MODEL to override\n"]) == ["# set MIC_MODEL to override"]
 
 
 def test_create_rejects_unknown_override_fields_and_adds_missing_requires():
     plan = {
         "manifest": {
-            "fixtures": {
-                "org/fixture": {
-                    "build": {"config_overrides": {"fields": {"hidden_size": 64}}}
-                }
-            },
+            "fixtures": {"org/fixture": {"build": {"config_overrides": {"fields": {"hidden_size": 64}}}}},
             "integrations": {"transformers": {"requires": ["torch"]}},
         }
     }
@@ -1478,14 +1564,10 @@ def test_create_rejects_usage_reading_names_it_never_defines():
     )
     commands.check_undefined_names({"usage": usage})  # state carries across :2
     with pytest.raises(ValueError, match="gradients"):
-        commands.check_undefined_names(
-            {"usage": usage.replace("for n in checked", "for n in gradients")}
-        )
+        commands.check_undefined_names({"usage": usage.replace("for n in checked", "for n in gradients")})
     # A separate runnable id does not see the first block's names.
     with pytest.raises(ValueError, match="logits"):
-        commands.check_undefined_names(
-            {"usage": usage.replace("runnable:a:2", "runnable:b")}
-        )
+        commands.check_undefined_names({"usage": usage.replace("runnable:a:2", "runnable:b")})
 
 
 @pytest.mark.requires_runtime
@@ -1523,13 +1605,19 @@ def test_create_rejects_targets_without_the_drafted_fixture():
 def test_create_keeps_large_checkpoints_off_the_cpu_runner():
     manifest = {
         "checkpoints": {"org/big": {}, "org/small": {}, "org/gpu": {}},
-        "integrations": {"transformers": {
-            "variants": {"default": {}, "eager": {"attn_implementation": "eager"}, "bfloat16": {"dtype": "bfloat16"}},
-            "resources": {
-                "org/big": {"memory_gb": 16},
-                "org/gpu": {"devices": ["cuda"]},
-            },
-        }},
+        "integrations": {
+            "transformers": {
+                "variants": {
+                    "default": {},
+                    "eager": {"attn_implementation": "eager"},
+                    "bfloat16": {"dtype": "bfloat16"},
+                },
+                "resources": {
+                    "org/big": {"memory_gb": 16},
+                    "org/gpu": {"devices": ["cuda"]},
+                },
+            }
+        },
     }
     parameters = {"org/big": 2_600_000_000, "org/small": 500_000_000, "org/gpu": 9e9}
     assert commands.keep_large_checkpoints_off_cpu(manifest, parameters) == ["org/big", "org/gpu"]
@@ -1572,7 +1660,9 @@ def test_github_api_reads_retry_transient_failures(monkeypatch):
     monkeypatch.setattr(github_baselines.time, "sleep", lambda s: None)
     assert github_baselines.api("repos/x/runs/1") == {"status": "in_progress"}
     assert len(calls) == 3
-    monkeypatch.setattr(github_baselines, "gh", lambda *a: (_ for _ in ()).throw(subprocess.CalledProcessError(1, "gh")))
+    monkeypatch.setattr(
+        github_baselines, "gh", lambda *a: (_ for _ in ()).throw(subprocess.CalledProcessError(1, "gh"))
+    )
     with pytest.raises(subprocess.CalledProcessError):
         github_baselines.api("repos/x/runs/1")
 
@@ -1580,9 +1670,7 @@ def test_github_api_reads_retry_transient_failures(monkeypatch):
 def test_fp8_checkpoint_names_drop_their_scales():
     from transformers_mic.inspection import logical_checkpoint_keys
 
-    config = SimpleNamespace(
-        model_type="minimax_m3_vl", quantization_config={"quant_method": "mxfp8"}
-    )
+    config = SimpleNamespace(model_type="minimax_m3_vl", quantization_config={"quant_method": "mxfp8"})
     keys = {"layer.w1.weight", "layer.w1.weight_scale_inv", "norm.weight"}
     assert logical_checkpoint_keys(config, keys) == {"layer.w1.weight", "norm.weight"}
     with pytest.raises(ValueError, match="scale without its weight"):
@@ -1622,9 +1710,7 @@ def test_split_weights_are_expanded_after_renaming(tmp_path, monkeypatch):
         if "k_proj" not in name and "v_proj" not in name
     }
     monkeypatch.setattr(inspection, "checkpoint_keys", lambda *args: legacy)
-    assert (
-        inspection.inspect_checkpoint(NomicBertModel, tmp_path, "org/m", "a" * 40) == []
-    )
+    assert inspection.inspect_checkpoint(NomicBertModel, tmp_path, "org/m", "a" * 40) == []
 
 
 @pytest.mark.requires_runtime
@@ -1635,6 +1721,8 @@ def test_scoped_split_weights_are_expanded(tmp_path, monkeypatch):
     import torch
     from transformers import (
         UnlimitedOcrConfig,
+    )
+    from transformers import (
         UnlimitedOcrForConditionalGeneration as Model,
     )
 
@@ -1667,9 +1755,7 @@ def test_planner_backs_off_on_rate_limits_then_gives_up(monkeypatch):
             calls.append(kwargs)
             raise HfHubHTTPError(
                 "busy",
-                response=SimpleNamespace(
-                    status_code=429, headers={"retry-after": "7"}, request=None
-                ),
+                response=SimpleNamespace(status_code=429, headers={"retry-after": "7"}, request=None),
             )
 
     monkeypatch.setattr(planner.time, "sleep", waits.append)
@@ -1684,9 +1770,7 @@ def test_planner_context_names_loaded_parameters_without_architectures():
 
     from transformers_mic import references
 
-    config = BertConfig(
-        num_hidden_layers=2, hidden_size=32, num_attention_heads=2, intermediate_size=64
-    ).to_dict()
+    config = BertConfig(num_hidden_layers=2, hidden_size=32, num_attention_heads=2, intermediate_size=64).to_dict()
     config.pop("architectures", None)
     classes = references.auto_classes(config)
     assert "BertModel" in classes
@@ -1702,9 +1786,7 @@ def test_planner_context_replaces_a_config_class_transformers_lacks(monkeypatch)
     from transformers_mic import references
 
     monkeypatch.setattr(references, "hf_hub_download", lambda *a, **kw: "/missing")
-    config = BertConfig(
-        num_hidden_layers=2, hidden_size=32, num_attention_heads=2, intermediate_size=64
-    ).to_dict()
+    config = BertConfig(num_hidden_layers=2, hidden_size=32, num_attention_heads=2, intermediate_size=64).to_dict()
     config["architectures"] = ["BertForEverything"]
     context = references.collect("org/bert", "main", config)
     assert "BertModel" in context["transformers_classes"]
@@ -1712,10 +1794,22 @@ def test_planner_context_replaces_a_config_class_transformers_lacks(monkeypatch)
 
 
 def test_fixture_resources_drop_hardware_requirements():
-    manifest = {"integrations": {"transformers": {"resources": {
-        "fixture": {"devices": ["cuda"], "gpus": 1, "gpu_memory_gb": 22, "memory_gb": 64, "download_mb": 200},
-        "org/large": {"devices": ["cuda"], "gpus": 1},
-    }}}}
+    manifest = {
+        "integrations": {
+            "transformers": {
+                "resources": {
+                    "fixture": {
+                        "devices": ["cuda"],
+                        "gpus": 1,
+                        "gpu_memory_gb": 22,
+                        "memory_gb": 64,
+                        "download_mb": 200,
+                    },
+                    "org/large": {"devices": ["cuda"], "gpus": 1},
+                }
+            }
+        }
+    }
     assert commands.fixture_runs_anywhere(manifest) == ["devices", "gpu_memory_gb", "gpus", "memory_gb"]
     resources = manifest["integrations"]["transformers"]["resources"]
     assert resources["fixture"] == {"download_mb": 200}
@@ -1813,7 +1907,9 @@ def test_create_rejects_the_broadcast_image_idiom():
     bad = "y = a.view(H, 1, 1)\nx = b.view(1, W, 1)\nimage = (x + y).expand(3, H, W)\n"
     with pytest.raises(ValueError, match="view"):
         commands.check_image_shapes({"usage": bad})
-    commands.check_image_shapes({"usage": bad.replace("view(H, 1, 1)", "view(1, H, 1)").replace("view(1, W, 1)", "view(1, 1, W)")})
+    commands.check_image_shapes(
+        {"usage": bad.replace("view(H, 1, 1)", "view(1, H, 1)").replace("view(1, W, 1)", "view(1, 1, W)")}
+    )
 
 
 def test_create_rejects_videos_without_the_configs_num_frames():
@@ -1868,8 +1964,12 @@ def test_nearest_contract_prefers_shared_structure(monkeypatch, tmp_path):
 
     configs = {
         "org/llama": {"architectures": ["LlamaForCausalLM"], "model_type": "llama"},
-        "org/mistral3": {"architectures": ["Mistral3ForConditionalGeneration"], "model_type": "mistral3",
-                         "vision_config": {"model_type": "pixtral"}, "text_config": {"model_type": "ministral3"}},
+        "org/mistral3": {
+            "architectures": ["Mistral3ForConditionalGeneration"],
+            "model_type": "mistral3",
+            "vision_config": {"model_type": "pixtral"},
+            "text_config": {"model_type": "ministral3"},
+        },
         "org/bert": {"architectures": ["BertForMaskedLM"], "model_type": "bert"},
     }
 
@@ -1885,12 +1985,18 @@ def test_nearest_contract_prefers_shared_structure(monkeypatch, tmp_path):
         return str(path)
 
     monkeypatch.setattr(examples, "hf_hub_download", download)
-    rows = [("prototypes", name, {"repo": f"{repo}-mic", "revision": "r"}, {repo: "r"})
-            for name, repo in (("Llama", "org/llama"), ("Mistral3", "org/mistral3"), ("BERT", "org/bert"))]
+    rows = [
+        ("prototypes", name, {"repo": f"{repo}-mic", "revision": "r"}, {repo: "r"})
+        for name, repo in (("Llama", "org/llama"), ("Mistral3", "org/mistral3"), ("BERT", "org/bert"))
+    ]
     for repo in list(configs):
         configs[f"{repo}-mic"] = configs[repo]
-    large4 = {"architectures": ["MistralLarge4ForConditionalGeneration"], "model_type": "mistral_large4",
-              "vision_config": {"model_type": "pixtral"}, "text_config": {"model_type": "mistral_large4_text"}}
+    large4 = {
+        "architectures": ["MistralLarge4ForConditionalGeneration"],
+        "model_type": "mistral_large4",
+        "vision_config": {"model_type": "pixtral"},
+        "text_config": {"model_type": "mistral_large4_text"},
+    }
     plan, reason = examples.nearest_contract(large4, rows=rows)
     assert plan["name"] == "Mistral3" and "pixtral" in reason
     plan, reason = examples.nearest_contract({"architectures": ["LlamaForCausalLM"], "model_type": "llama"}, rows=rows)
@@ -1911,8 +2017,72 @@ def test_encoder_decoder_calls_need_decoder_inputs():
         commands.check_encoder_decoder_calls({"usage": f"```py runnable:t\nout = {ok}\n```\n"}, whisper)
     commands.check_encoder_decoder_calls({"usage": usage}, {"is_encoder_decoder": False})
     # RT-DETR is an encoder-decoder over pixel_values that builds its own queries.
-    commands.check_encoder_decoder_calls({"usage": usage}, {"is_encoder_decoder": True, "architectures": ["RTDetrForObjectDetection"]})
+    commands.check_encoder_decoder_calls(
+        {"usage": usage}, {"is_encoder_decoder": True, "architectures": ["RTDetrForObjectDetection"]}
+    )
 
+
+@pytest.mark.requires_runtime
+def test_processor_audio_features_carry_no_decoder_inputs():
+    # moonshine-ai/moonshine-streaming-tiny (2026-11-10): main input input_values, and a probe
+    # model(**inputs) where inputs held only the processor's waveform.
+    moonshine = {"is_encoder_decoder": True, "architectures": ["MoonshineStreamingForConditionalGeneration"]}
+    head = (
+        "```py runnable:t\n"
+        'inputs = processor([a, b], return_tensors="pt", sampling_rate=16000)\n'
+        "inputs = inputs.to(device, dtype=model.dtype)\n"
+        "loss = model(**inputs, labels=labels).loss\n"
+    )
+    with pytest.raises(ValueError, match="carry neither"):
+        commands.check_encoder_decoder_calls({"usage": head + "probe = model(**inputs).logits\n```\n"}, moonshine)
+    commands.check_encoder_decoder_calls({"usage": head + "```\n"}, moonshine)
+    # Inputs that may carry decoder inputs still pass: a processor given text, or added keys.
+    for extra in ('inputs["decoder_input_ids"] = ids\n', 'inputs = processor(a, text=t, return_tensors="pt")\n'):
+        commands.check_encoder_decoder_calls(
+            {"usage": head + extra + "probe = model(**inputs).logits\n```\n"}, moonshine
+        )
+
+
+@pytest.mark.requires_runtime
+def test_media_inputs_follow_the_model_dtype():
+    # docling-project/DocumentFigureClassifier-v2.5 (EfficientNet, 2026-11-10): the bfloat16
+    # variant raised "Input type (torch.FloatTensor) and weight type (CPUBFloat16Type)".
+    manifest = {"integrations": {"transformers": {"variants": {"default": {}, "bfloat16": {"dtype": "bfloat16"}}}}}
+    bad = (
+        "```py runnable:t\n"
+        'inputs = processor(images=[img1, img2], return_tensors="pt").to(device)\n'
+        "logits = model(**inputs).logits\n```\n"
+    )
+    with pytest.raises(ValueError, match="dtype=model.dtype"):
+        commands.check_half_precision_inputs({"usage": bad, "manifest": manifest})
+    for good in (
+        bad.replace(".to(device)", ".to(device, dtype=model.dtype)"),
+        bad.replace(".to(device)", ".to(device, model.dtype)"),
+        bad.replace(".to(device)\n", '.to(device)\ninputs["pixel_values"] = inputs["pixel_values"].to(model.dtype)\n'),
+        bad.replace("images=", "text=prompts, images="),  # a multimodal model casts its media itself
+        bad.replace("logits = model", "with torch.autocast(device, dtype=model.dtype):\n    logits = model"),
+    ):
+        commands.check_half_precision_inputs({"usage": good, "manifest": manifest})
+    full = {"integrations": {"transformers": {"variants": {"default": {}}}}}
+    commands.check_half_precision_inputs({"usage": bad, "manifest": full})
+
+
+def test_a_walrus_in_a_comprehension_defines_its_name():
+    usage = "```py runnable:t\nx = {n: c for n in model.config.sub_configs if (c := getattr(model.config, n, None))}\nmodel = 1\n```\n"
+    commands.check_undefined_names({"usage": usage})
+
+
+def test_a_composite_model_records_each_sub_config_attention():
+    gemma4 = {"model_type": "gemma4", "text_config": {}, "vision_config": {}, "audio_config": {}}
+    usage = '```py runnable:t\nresult = {"runtime": {"attn_implementation": model.config._attn_implementation}}\n```\n'
+    with pytest.raises(ValueError, match="audio_config, text_config, vision_config"):
+        commands.check_sub_config_attention({"usage": usage}, gemma4)
+    ok = usage.replace("}}", ', "attn_implementations": {}}}')
+    commands.check_sub_config_attention({"usage": ok}, gemma4)
+    # No attention sub-config: nothing to record.
+    commands.check_sub_config_attention(
+        {"usage": usage}, {"model_type": "llama", "quantization_config": {}, "rope_scaling": {}}
+    )
 
 
 def test_vlm_training_text_must_carry_image_tokens():
@@ -1920,15 +2090,17 @@ def test_vlm_training_text_must_carry_image_tokens():
     blip2 = {"image_token_index": 50265}
     usage = (
         "```py runnable:t\n"
-        "inputs = processor(images=images, return_tensors=\"pt\").to(device, model.dtype)\n"
-        "targets = processor(text=captions, return_tensors=\"pt\", padding=True).to(device)\n"
+        'inputs = processor(images=images, return_tensors="pt").to(device, model.dtype)\n'
+        'targets = processor(text=captions, return_tensors="pt", padding=True).to(device)\n'
         "loss = model(pixel_values=inputs.pixel_values, input_ids=targets.input_ids, labels=labels).loss\n"
         "```\n"
     )
     with pytest.raises(ValueError, match="no image token"):
         commands.check_image_tokens_in_text({"usage": usage}, blip2)
     with pytest.raises(ValueError, match="no image token"):
-        commands.check_image_tokens_in_text({"usage": usage.replace("targets.input_ids", 'targets["input_ids"]')}, blip2)
+        commands.check_image_tokens_in_text(
+            {"usage": usage.replace("targets.input_ids", 'targets["input_ids"]')}, blip2
+        )
     joint = usage.replace("processor(text=captions,", "processor(images=images, text=captions,")
     commands.check_image_tokens_in_text({"usage": joint}, blip2)
     commands.check_image_tokens_in_text({"usage": usage}, {"model_type": "clip"})  # no image token to carry
@@ -1942,7 +2114,7 @@ def test_an_image_processor_takes_clips_as_images():
     usage = (
         "```py runnable:t\n"
         "processor = VideoMAEImageProcessor.from_pretrained(model_id)\n"
-        "inputs = processor(videos=videos, return_tensors=\"pt\")\n"
+        'inputs = processor(videos=videos, return_tensors="pt")\n'
         "```\n"
     )
     with pytest.raises(ValueError, match="takes no videos="):
@@ -1956,7 +2128,7 @@ def test_any_requires_grad_selection_by_a_deep_layer_name_is_rejected():
     usage = (
         "```py runnable:t\n"
         "for name, param in model.named_parameters():\n"
-        "    param.requires_grad_(name.startswith(\"language_model.model.decoder.layers.31.\"))\n"
+        '    param.requires_grad_(name.startswith("language_model.model.decoder.layers.31."))\n'
         "```\n"
     )
     with pytest.raises(ValueError, match="layer 31 does not exist"):
@@ -1970,23 +2142,24 @@ def test_gradient_checks_must_name_the_trained_last_layer():
         "```py runnable:t\n"
         "model.requires_grad_(False)\n"
         "model.language_model.model.decoder.layers[-1].requires_grad_(True)\n"
-        "checked = (\"language_model.model.decoder.layers.0.fc1.weight\",)\n"
+        'checked = ("language_model.model.decoder.layers.0.fc1.weight",)\n'
         "```\n"
     )
     with pytest.raises(ValueError, match="names layer 0"):
         commands.check_trainable_selection({"usage": usage}, {})
-    trained = usage.replace('\"language_model.model.decoder.layers.0.fc1.weight\"',
-                            'f\"language_model.model.decoder.layers.{last}.fc1.weight\"')
+    trained = usage.replace(
+        '"language_model.model.decoder.layers.0.fc1.weight"', 'f"language_model.model.decoder.layers.{last}.fc1.weight"'
+    )
     commands.check_trainable_selection({"usage": trained}, {})
     # The same draft shape on the Q-Former: layer[-1] trained, layer.0 checked.
     qformer = usage.replace("language_model.model.decoder.layers[-1]", "qformer.encoder.layer[-1]")
     with pytest.raises(ValueError, match="names layer 0"):
         commands.check_trainable_selection({"usage": qformer}, {})
-    tied = "```py runnable:t\nmodel.requires_grad_(False)\nchecked = (\"language_model.lm_head.weight\",)\n```\n"
+    tied = '```py runnable:t\nmodel.requires_grad_(False)\nchecked = ("language_model.lm_head.weight",)\n```\n'
     with pytest.raises(ValueError, match="tie_word_embeddings"):
         commands.check_trainable_selection({"usage": tied}, {"text_config": {"tie_word_embeddings": True}})
     commands.check_trainable_selection({"usage": tied}, {"text_config": {"tie_word_embeddings": False}})
-    projection = "```py runnable:t\nmodel.requires_grad_(False)\nn.endswith(\"language_projection.weight\")\n```\n"
+    projection = '```py runnable:t\nmodel.requires_grad_(False)\nn.endswith("language_projection.weight")\n```\n'
     commands.check_trainable_selection({"usage": projection}, {}, parameters=4e9)
 
 
@@ -1996,21 +2169,37 @@ def test_blip2_q_former_first_query_gets_no_fixture_gradient():
         commands.check_zero_query_gradients({"usage": usage}, {"num_query_tokens": 32})
     commands.check_zero_query_gradients({"usage": usage}, {"model_type": "bert"})
     with pytest.raises(ValueError, match="zero-initialized"):  # round 7's draft
-        commands.check_zero_query_gradients({"usage": usage.replace("layer.0.attention", "layer.0.crossattention")}, {"num_query_tokens": 32})
-    commands.check_zero_query_gradients({"usage": usage.replace("layer.0.attention.attention.query", "layer.0.crossattention.output.dense")}, {"num_query_tokens": 32})
+        commands.check_zero_query_gradients(
+            {"usage": usage.replace("layer.0.attention", "layer.0.crossattention")}, {"num_query_tokens": 32}
+        )
+    commands.check_zero_query_gradients(
+        {"usage": usage.replace("layer.0.attention.attention.query", "layer.0.crossattention.output.dense")},
+        {"num_query_tokens": 32},
+    )
 
 
 def test_planner_records_every_call_with_its_listed_price(monkeypatch):
     monkeypatch.setattr(planner, "CALLS", [])
     monkeypatch.setattr(planner, "_prices", {("m", "p"): (0.3, 1.2)})
-    usage = SimpleNamespace(prompt_tokens=10_000, completion_tokens=2_000,
-                            prompt_tokens_details=SimpleNamespace(cached_tokens=4_000),
-                            completion_tokens_details=SimpleNamespace(reasoning_tokens=0))
+    usage = SimpleNamespace(
+        prompt_tokens=10_000,
+        completion_tokens=2_000,
+        prompt_tokens_details=SimpleNamespace(cached_tokens=4_000),
+        completion_tokens_details=SimpleNamespace(reasoning_tokens=0),
+    )
     planner.record_call(SimpleNamespace(usage=usage), "m", "p", 3.21)
     planner.record_call(SimpleNamespace(usage=usage), "m", "unlisted", 1.0)
     first, second = planner.CALLS
-    assert first == {"model": "m", "provider": "p", "prompt_tokens": 10_000, "cached_tokens": 4_000,
-                     "completion_tokens": 2_000, "reasoning_tokens": 0, "seconds": 3.2, "listed_usd": 0.0054}
+    assert first == {
+        "model": "m",
+        "provider": "p",
+        "prompt_tokens": 10_000,
+        "cached_tokens": 4_000,
+        "completion_tokens": 2_000,
+        "reasoning_tokens": 0,
+        "seconds": 3.2,
+        "listed_usd": 0.0054,
+    }
     assert "listed_usd" not in second
 
 
@@ -2020,11 +2209,16 @@ def test_a_batch_encoding_is_not_cast_with_dtype():
     bad = 'inputs = processor(images=images, text=words, boxes=boxes, return_tensors="pt")\ninputs = inputs.to(device, dtype=model.dtype)\n'
     with pytest.raises(ValueError, match="BatchEncoding"):
         commands.check_batch_encoding_dtype({"usage": bad}, {"model_type": "layoutlmv3"})
-    good = bad.replace("inputs.to(device, dtype=model.dtype)", 'inputs.to(device)\ninputs["pixel_values"] = inputs["pixel_values"].to(dtype=model.dtype)')
+    good = bad.replace(
+        "inputs.to(device, dtype=model.dtype)",
+        'inputs.to(device)\ninputs["pixel_values"] = inputs["pixel_values"].to(dtype=model.dtype)',
+    )
     commands.check_batch_encoding_dtype({"usage": good}, {"model_type": "layoutlmv3"})
     commands.check_batch_encoding_dtype({"usage": bad}, {"model_type": "clip"})  # a BatchFeature takes dtype
     with pytest.raises(ValueError, match="BatchEncoding"):
-        commands.check_batch_encoding_dtype({"usage": 'batch = tokenizer(texts, return_tensors="pt").to(device, dtype=torch.bfloat16)\n'}, {})
+        commands.check_batch_encoding_dtype(
+            {"usage": 'batch = tokenizer(texts, return_tensors="pt").to(device, dtype=torch.bfloat16)\n'}, {}
+        )
 
 
 def test_a_transducer_forward_needs_decoder_inputs():
@@ -2076,7 +2270,9 @@ def test_audio_reaches_the_processor_as_waveforms():
     with pytest.raises(ValueError, match="waveforms"):
         commands.check_audio_waveforms({"usage": multiline})
     # A chat template's audio entries load files (Voxtral-Mini-3B).
-    commands.check_audio_waveforms({"usage": bad + 'processor.apply_chat_template([{"type": "audio", "path": "a.wav"}])\n'})
+    commands.check_audio_waveforms(
+        {"usage": bad + 'processor.apply_chat_template([{"type": "audio", "path": "a.wav"}])\n'}
+    )
 
 
 def test_every_draft_problem_is_reported_at_once(monkeypatch):
@@ -2091,11 +2287,74 @@ def test_every_draft_problem_is_reported_at_once(monkeypatch):
     monkeypatch.setattr(commands, "normalize_compare", lambda plan: None)
     monkeypatch.setattr(commands, "drop_unknown_manifest_keys", lambda plan: None)
     monkeypatch.setattr(commands, "validate_plan", lambda *a: None)
-    for name in ("check_imports", "check_undefined_names", "check_targets", "check_code_fences", "check_no_remote_code",
-                 "check_image_shapes", "check_loss_has_gradients", "check_transducer_inputs", "check_partial_training"):
+    for name in (
+        "check_imports",
+        "check_undefined_names",
+        "check_targets",
+        "check_code_fences",
+        "check_no_remote_code",
+        "check_image_shapes",
+        "check_loss_has_gradients",
+        "check_transducer_inputs",
+        "check_partial_training",
+    ):
         monkeypatch.setattr(commands, name, lambda *a: None)
-    monkeypatch.setattr(commands, "check_chat_template", lambda *a: (_ for _ in ()).throw(ValueError("no chat template")))
+    monkeypatch.setattr(
+        commands, "check_chat_template", lambda *a: (_ for _ in ()).throw(ValueError("no chat template"))
+    )
     monkeypatch.setattr(commands, "check_audio_waveforms", lambda *a: (_ for _ in ()).throw(ValueError("audio files")))
     with pytest.raises(ValueError, match=r"2 problems: \(1\) no chat template \(2\) audio files"):
         commands.propose_valid({}, SimpleNamespace(), "o/m", "o/m-mic")
     assert "no chat template" in calls[1] and "audio files" in calls[1]
+
+
+VJEPA2_USAGE = """```py runnable:video
+import torch
+from transformers import {cls}
+
+model = {cls}.from_pretrained(model_id).to(device)
+if variant:  # doc-builder: hide
+    del model  # doc-builder: hide
+    model = {cls}.from_pretrained(model_id, **variant).to(device)  # doc-builder: hide
+with torch.no_grad():
+    outputs = model(**inputs)
+features = outputs.{field}
+print(outputs.to_tuple()[0].shape)
+```
+"""
+
+
+@pytest.mark.requires_runtime
+@pytest.mark.parametrize("cls", ["VJEPA2Model", "AutoModel"])
+def test_output_attributes_must_exist_on_the_returned_output(cls):
+    # vjepa2 (2026-11-07) read outputs.predictor_embeddings; the build raised AttributeError.
+    config = {"model_type": "vjepa2", "architectures": ["VJEPA2Model"]}
+    usage = lambda field: {"usage": VJEPA2_USAGE.format(cls=cls, field=field)}
+    commands.check_output_attributes(usage("predictor_output.last_hidden_state"), config)
+    commands.check_output_attributes(usage("last_hidden_state"), config)
+    with pytest.raises(ValueError, match="outputs.predictor_embeddings.*predictor_output"):
+        commands.check_output_attributes(usage("predictor_embeddings"), config)
+    with pytest.raises(ValueError, match="predictor_output.embeddings.*target_hidden_state"):
+        commands.check_output_attributes(usage("predictor_output.embeddings"), config)
+
+
+@pytest.mark.requires_runtime
+def test_output_attributes_skip_variables_bound_to_anything_else():
+    config = {"model_type": "vjepa2"}
+    usage = VJEPA2_USAGE.format(cls="VJEPA2Model", field="anything")
+    commands.check_output_attributes({"usage": usage.replace("features =", "outputs = outputs[0]\nfeatures =")}, config)
+    commands.check_output_attributes(
+        {"usage": usage.replace("model = VJEPA2Model.from_pretrained(model_id)", "model = build()")}, config
+    )
+
+
+@pytest.mark.requires_runtime
+def test_output_fields_include_the_class_forward_builds():
+    # CLIPSegForImageSegmentation is annotated CLIPSegOutput but returns
+    # CLIPSegImageSegmentationOutput, whose .logits the approved contract reads.
+    import transformers
+
+    fields = commands.describe_output_fields(transformers.CLIPSegForImageSegmentation)
+    assert "logits" in fields["CLIPSegImageSegmentationOutput"]
+    fields = commands.describe_output_fields(transformers.VJEPA2Model)
+    assert "predictor_output.last_hidden_state" in fields["VJEPA2WithMaskedInputModelOutput"]

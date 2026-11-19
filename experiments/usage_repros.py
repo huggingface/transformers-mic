@@ -8,7 +8,13 @@ $REPLAY_WORKDIR/frozen (processor files re-saved); "copied" uses fixtures built
 by `usage_repros.py prepare` on a known-good build, with processor files copied
 byte for byte from the real model; "real" uses the pinned real checkpoint.
 """
-import json, os, shutil, sys, tempfile, warnings
+
+import json
+import os
+import shutil
+import sys
+import tempfile
+import warnings
 from pathlib import Path
 
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
@@ -55,6 +61,7 @@ def copy_processor_files(src, dst):
 def prepare():
     """Build "copied" fixtures on the current (known-good) build."""
     from transformers import AutoConfig, BigBirdForCausalLM
+
     root = WORKDIR / "copied"
     # Fixtures from replay.py with their re-saved processor files replaced by the originals.
     for family in ("clip", "whisper", "wav2vec2"):
@@ -91,10 +98,12 @@ def r(x):
 def clip_text_kwargs(p):
     """#46195: flat return_tensors dropped when text_kwargs is passed."""
     from transformers import CLIPModel, CLIPProcessor
+
     proc = CLIPProcessor.from_pretrained(p)
     images = [Image.new("RGB", (256, 256), c) for c in ((255, 0, 0), (0, 0, 255))]
-    out = proc(text=["a red square", "a blue square"], images=images,
-               return_tensors="pt", text_kwargs={"padding": True})
+    out = proc(
+        text=["a red square", "a blue square"], images=images, return_tensors="pt", text_kwargs={"padding": True}
+    )
     model = CLIPModel.from_pretrained(p).eval()
     with torch.no_grad():
         logits = model(**out).logits_per_image
@@ -104,11 +113,14 @@ def clip_text_kwargs(p):
 def t5_batch_decode(p):
     """#47793: decode() on a batch ignores clean_up_tokenization_spaces."""
     from transformers import AutoTokenizer, T5ForConditionalGeneration
+
     tok = AutoTokenizer.from_pretrained(p)
     model = T5ForConditionalGeneration.from_pretrained(p).eval()
-    prompts = (["translate English to German: Hello, world. How are you?",
-                "translate English to French: Yes , it is ."] if "snapshots" in str(p)
-               else ["capital of France:", "capital of Germany:"])
+    prompts = (
+        ["translate English to German: Hello, world. How are you?", "translate English to French: Yes , it is ."]
+        if "snapshots" in str(p)
+        else ["capital of France:", "capital of Germany:"]
+    )
     x = tok(prompts, return_tensors="pt", padding=True)
     with torch.no_grad():
         ids = model.generate(**x, max_new_tokens=16, do_sample=False).tolist()
@@ -121,6 +133,7 @@ def t5_batch_decode(p):
 def legacy_special_tokens(p):
     """#47848: additional_special_tokens lost when extra_special_tokens is empty."""
     from transformers import AutoTokenizer
+
     tmp = Path(tempfile.mkdtemp())
     for f in p.iterdir():
         if f.name.startswith(("tokenizer", "special_tokens", "vocab", "merges")):
@@ -130,20 +143,25 @@ def legacy_special_tokens(p):
     (tmp / "tokenizer_config.json").write_text(json.dumps(cfg))
     tok = AutoTokenizer.from_pretrained(tmp)
     ids = tok("<|im_start|>user\nhi<|im_end|>").input_ids
-    return {"has_additional": "additional_special_tokens" in json.loads((p / "tokenizer_config.json").read_text()),
-            "decoded": tok.decode(ids, skip_special_tokens=True),
-            "n_special": len(tok.all_special_tokens)}
+    return {
+        "has_additional": "additional_special_tokens" in json.loads((p / "tokenizer_config.json").read_text()),
+        "decoded": tok.decode(ids, skip_special_tokens=True),
+        "n_special": len(tok.all_special_tokens),
+    }
 
 
 def whisper_timestamps(p):
     """#47997: batch decode_with_timestamps crashes."""
     from transformers import WhisperProcessor
+
     proc = WhisperProcessor.from_pretrained(p)
     begin = proc.tokenizer.convert_tokens_to_ids("<|0.00|>")
     eot = proc.tokenizer.eos_token_id
     ids = [[begin, 2182, begin + 50, eot], [begin, 3092, begin + 50, eot]]
-    return {"batch_decode": proc.batch_decode(ids, decode_with_timestamps=True),
-            "decode_2d": proc.tokenizer.decode(ids, decode_with_timestamps=True)}
+    return {
+        "batch_decode": proc.batch_decode(ids, decode_with_timestamps=True),
+        "decode_2d": proc.tokenizer.decode(ids, decode_with_timestamps=True),
+    }
 
 
 def config_helpers(p, family):
@@ -153,37 +171,51 @@ def config_helpers(p, family):
     else:
         from transformers.models.auto.feature_extraction_auto import get_feature_extractor_config as get
     cfg = get(str(p))
-    return {"keys": sorted(cfg)[:8], "n_keys": len(cfg),
-            "files": sorted(f.name for f in Path(p).iterdir() if f.name.endswith("config.json"))}
+    return {
+        "keys": sorted(cfg)[:8],
+        "n_keys": len(cfg),
+        "files": sorted(f.name for f in Path(p).iterdir() if f.name.endswith("config.json")),
+    }
 
 
 def mms_target_lang(p):
     """#47440: set_target_lang leaves stale added-token encoder entries."""
     from transformers import Wav2Vec2CTCTokenizer
+
     tok = Wav2Vec2CTCTokenizer.from_pretrained(p, target_lang="eng")
     out = {}
     for lang, text in (("fra", "bonjour à tous"), ("deu", "guten morgen"), ("eng", "hello there")):
         tok.set_target_lang(lang)
         ids = tok(text).input_ids
-        out[lang] = {"ids": ids, "decoded": tok.decode(ids),
-                     "stale_added": sorted(set(tok._added_tokens_encoder) - {str(t) for t in tok._added_tokens_decoder.values()})}
+        out[lang] = {
+            "ids": ids,
+            "decoded": tok.decode(ids),
+            "stale_added": sorted(
+                set(tok._added_tokens_encoder) - {str(t) for t in tok._added_tokens_decoder.values()}
+            ),
+        }
     return out
 
 
 def clip_text_projection(p):
     """#46406: CLIP conversion mapping applied to the wrong nesting level."""
     from transformers import AutoTokenizer, CLIPTextModelWithProjection
+
     tok = AutoTokenizer.from_pretrained(p)
     model, info = CLIPTextModelWithProjection.from_pretrained(p, output_loading_info=True)
     with torch.no_grad():
         emb = model(**tok(["a photo of a cat"], return_tensors="pt")).text_embeds
-    return {"missing": len(info["missing_keys"]), "unexpected": len(info["unexpected_keys"]),
-            "text_embeds": r(emb[0, :8])}
+    return {
+        "missing": len(info["missing_keys"]),
+        "unexpected": len(info["unexpected_keys"]),
+        "text_embeds": r(emb[0, :8]),
+    }
 
 
 def bigbird_clm(p):
     """#48785: BigBird/RemBERT/RoFormer CLM attends to future tokens."""
     from transformers import AutoTokenizer, BigBirdForCausalLM
+
     tok = AutoTokenizer.from_pretrained(p)
     model = BigBirdForCausalLM.from_pretrained(p, is_decoder=True, attention_type="original_full").eval()
     ids = tok(["The capital of France is Paris, and it is lovely."], return_tensors="pt").input_ids

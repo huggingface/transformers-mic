@@ -43,7 +43,7 @@ jobs:
           git clone --quiet --filter=blob:none https://github.com/huggingface/transformers.git "$RUNNER_TEMP/transformers"
           git clone --quiet --depth 1 https://github.com/huggingface/transformers-ci.git "$RUNNER_TEMP/transformers-ci"
           python -m pip install --quiet --upgrade pip
-          python -m pip install --quiet --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          python -m pip install --quiet --index-url https://download.pytorch.org/whl/cpu torch torchvision torchaudio
           python -m pip install --quiet -e ".[runtime]" -e "$RUNNER_TEMP/transformers"
       - name: Download the Space
         run: python -c "from huggingface_hub import snapshot_download; snapshot_download('huggingface-mic/mic-coverage', repo_type='space', local_dir='space')"

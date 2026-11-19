@@ -91,7 +91,7 @@ jobs:
           git clone --filter=blob:none https://github.com/huggingface/transformers.git "$RUNNER_TEMP/transformers"
           git -C "$RUNNER_TEMP/transformers" checkout -q "$TRANSFORMERS_REF"
           python -m pip install --quiet --upgrade pip
-          python -m pip install --quiet --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          python -m pip install --quiet --index-url https://download.pytorch.org/whl/cpu torch torchvision torchaudio
           python -m pip install --quiet -e ".[runtime]" -e "$RUNNER_TEMP/transformers" jsonschema \
             "git+https://github.com/huggingface/doc-builder@c69e96c087165ba49b1788e0c3464654dd60253c"
       - name: Draft and build

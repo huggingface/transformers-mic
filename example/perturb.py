@@ -41,12 +41,18 @@ PERTURBATIONS = {
     "decoder_attention_mask": (all_ones,),
     "token_type_ids": (all_ones,),
     "pixel_values": (roll_batch, swap_channels, reverse, halve),
+    # Video models (V-JEPA 2, Qwen2-VL): (batch, frames, channels, H, W). Without an
+    # entry the gate measured nothing and overfit for 20 minutes before failing.
+    "pixel_values_videos": (roll_batch, reverse, halve),
     "input_features": (roll_batch, reverse, halve),
     "input_values": (roll_batch, reverse, halve),
     "state": (roll_batch, reverse, halve),
     # Time-series forecasters (TimesFM): one context series per row, possibly a
     # list of 1-D tensors of different lengths.
     "past_values": (roll_batch, reverse, halve),
+    # Continuous latents of a codec's decoder half (MimiDecoderModel, reached through
+    # MimiModel.decode): (batch, latent_dim, frames), so reverse flips the frames.
+    "latents": (roll_batch, reverse, halve),
 }
 # Training targets are never perturbed; future_values is the forecasting target.
 NEVER = {"labels", "actions", "return_loss", "future_values"}
@@ -60,19 +66,13 @@ def per_row(perturb, rows):
 
 
 def tensor_list(value):
-    return (
-        isinstance(value, (list, tuple))
-        and bool(value)
-        and all(isinstance(v, torch.Tensor) for v in value)
-    )
+    return isinstance(value, (list, tuple)) and bool(value) and all(isinstance(v, torch.Tensor) for v in value)
 
 
 def same(a, b):
     if isinstance(a, torch.Tensor):
         return torch.equal(a, b)
-    return len(a) == len(b) and all(
-        x.shape == y.shape and torch.equal(x, y) for x, y in zip(a, b)
-    )
+    return len(a) == len(b) and all(x.shape == y.shape and torch.equal(x, y) for x, y in zip(a, b))
 
 
 def logits_of(output):
@@ -115,7 +115,12 @@ def sensitivity(model, batch, threshold, accepted=None):
         batch = {k: v for k, v in batch.items() if k != "labels"}
     model.eval()
     parameter = next(model.parameters())
-    with torch.no_grad(), torch.autocast(parameter.device.type, dtype=parameter.dtype, enabled=parameter.dtype in (torch.float16, torch.bfloat16)):
+    with (
+        torch.no_grad(),
+        torch.autocast(
+            parameter.device.type, dtype=parameter.dtype, enabled=parameter.dtype in (torch.float16, torch.bfloat16)
+        ),
+    ):
         base = logits_of(model(**batch))
         rows, undefined, ignored = {}, [], []
         # A tokenizer can return an input the model only absorbs in **kwargs

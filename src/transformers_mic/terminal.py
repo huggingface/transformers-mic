@@ -46,11 +46,7 @@ def short_path(path):
     if not relative.startswith(".."):
         return relative
     home = os.path.expanduser("~")
-    return (
-        value.replace(home + os.sep, "~/", 1)
-        if value.startswith(home + os.sep)
-        else value
-    )
+    return value.replace(home + os.sep, "~/", 1) if value.startswith(home + os.sep) else value
 
 
 def bar(done, total, width=14):
@@ -89,10 +85,7 @@ def prompt(question, details, kind, context):
     print("\n  " + color("? " + question_text(question, kind), "question"), flush=True)
     if kind == "fixture-review" and context.get("headline"):
         folder = context.get("fixture", {}).get("folder")
-        lines = [
-            line.replace(folder, short_path(folder), 1) if folder else line
-            for line in context["headline"]
-        ]
+        lines = [line.replace(folder, short_path(folder), 1) if folder else line for line in context["headline"]]
     elif kind == "source-review" and context.get("files"):
         lines = [
             "Code: " + short_path(context["files"][-1]["path"]),
@@ -188,9 +181,7 @@ class Activity:
                 active = self.label + (" · " + detail if detail else "")
                 active = textwrap.shorten(
                     active,
-                    width=max(
-                        30, shutil.get_terminal_size().columns - len(self.prefix) - 15
-                    ),
+                    width=max(30, shutil.get_terminal_size().columns - len(self.prefix) - 15),
                     placeholder="…",
                 )
                 print(
@@ -212,17 +203,11 @@ class Activity:
 
 
 def failure(text):
-    lines = [
-        line.strip()
-        for line in text.splitlines()
-        if line.strip() and not line.startswith("COMMAND ")
-    ]
+    lines = [line.strip() for line in text.splitlines() if line.strip() and not line.startswith("COMMAND ")]
     for index in range(len(lines) - 1, -1, -1):
         line = lines[index]
         if "random weights fail the gate" in line:
-            summary = (
-                "Fixture outputs are not sensitive enough to changes in the inputs."
-            )
+            summary = "Fixture outputs are not sensitive enough to changes in the inputs."
             start = line.find("{'random':")
             if start >= 0:
                 try:
@@ -244,9 +229,7 @@ def failure(text):
             try:
                 value = json.loads(line)
                 if value.get("error"):
-                    return textwrap.shorten(
-                        str(value["error"]), width=240, placeholder="…"
-                    )
+                    return textwrap.shorten(str(value["error"]), width=240, placeholder="…")
             except (ValueError, AttributeError):
                 pass
     meaningful = [line for line in lines if not re.match(r"[WEI]\d{4}\s", line)]
@@ -266,9 +249,7 @@ def phase(path, offset=0):
         for line in reversed(lines):
             if line.startswith("MIC_PROGRESS "):
                 value = json.loads(line.removeprefix("MIC_PROGRESS "))
-                return value["phase"] + (
-                    " · " + value["detail"] if value.get("detail") else ""
-                )
+                return value["phase"] + (" · " + value["detail"] if value.get("detail") else "")
     except (OSError, ValueError, KeyError):
         pass
     return ""

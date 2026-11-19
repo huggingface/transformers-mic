@@ -26,13 +26,11 @@ from pathlib import Path
 from types import SimpleNamespace
 
 # Measured cases that do not stop a draft: the cloud runners have the hardware.
-HARDWARE_SKIPS = {"hardware", "declared"}
+HARDWARE_SKIPS = {"hardware", "declared", "wrong-hardware"}
 
 
 def tmic(*args):
-    subprocess.run(
-        [sys.executable, "-m", "transformers_mic", *map(str, args)], check=True
-    )
+    subprocess.run([sys.executable, "-m", "transformers_mic", *map(str, args)], check=True)
 
 
 def records(log):
@@ -53,9 +51,7 @@ def hardware_gap_only(log):
     cases = [r for r in records(log) if "status" in r and "summary" not in r]
     recorded = [r for r in cases if r["status"] == "recorded"]
     others = [r for r in cases if r["status"] != "recorded"]
-    return bool(recorded) and all(
-        r["status"] == "unsupported" and r.get("skip") in HARDWARE_SKIPS for r in others
-    )
+    return bool(recorded) and all(r["status"] == "unsupported" and r.get("skip") in HARDWARE_SKIPS for r in others)
 
 
 def checkpoint_only_failure(collection):
@@ -108,11 +104,7 @@ def readiness(result, workspace_root):
         return True, "validated on this runner"
     question = result.get("pending_question") or {}
     context = question.get("context") or {}
-    if (
-        status == "needs-input"
-        and question.get("kind") == "retry"
-        and context.get("failed_stage") == "record"
-    ):
+    if status == "needs-input" and question.get("kind") == "retry" and context.get("failed_stage") == "record":
         log = Path(workspace_root) / ".mic/automation/logs/record.log"
         if log.is_file() and hardware_gap_only(log):
             return (
@@ -120,12 +112,7 @@ def readiness(result, workspace_root):
                 "every CPU case recorded; the rest need hardware this runner lacks",
             )
         return False, "record failed on this runner"
-    stage = (
-        context.get("failed_stage")
-        or context.get("stage")
-        or question.get("kind")
-        or "?"
-    )
+    stage = context.get("failed_stage") or context.get("stage") or question.get("kind") or "?"
     return False, f"tmic run stopped: {status} at {stage}"
 
 
@@ -167,10 +154,7 @@ def require_new(workspace, contract_name=None, overwrite_unexported=False):
     for fleet_name in ("control", "prototypes"):
         path, _ = fleet.download(fleet_name)
         for key, entry in read(path)["contracts"].items():
-            if (
-                key.casefold() == name.casefold()
-                or entry["integration"]["repo"] == workspace.fixture
-            ):
+            if key.casefold() == name.casefold() or entry["integration"]["repo"] == workspace.fixture:
                 raise ValueError(
                     f"Already in the {fleet_name} fleet as {key} ({entry['integration']['repo']}); "
                     "pick another contract_name or use the reviewed update flow"
@@ -201,11 +185,7 @@ def clear_expectations(repo):
 
     api = HfApi()
     folders = sorted(
-        {
-            f.split("/expectations/")[0] + "/expectations"
-            for f in api.list_repo_files(repo)
-            if "/expectations/" in f
-        }
+        {f.split("/expectations/")[0] + "/expectations" for f in api.list_repo_files(repo) if "/expectations/" in f}
     )
     for folder in folders:
         api.delete_folder(
@@ -234,9 +214,7 @@ def export_new(workspace, contract_name=None, attempts=8):
                 and existing["integration"]["revision"] == pin["revision"]
             ):
                 return revision  # an earlier attempt landed
-            raise ValueError(
-                f"{name} appeared in the fleet during publication; refusing to overwrite it"
-            )
+            raise ValueError(f"{name} appeared in the fleet during publication; refusing to overwrite it")
         options = SimpleNamespace(
             workspace=str(workspace.root),
             fleet="prototypes",
@@ -250,17 +228,10 @@ def export_new(workspace, contract_name=None, attempts=8):
             commands.export(options)
             return fleet.resolve("main")
         except HfHubHTTPError as error:
-            if (
-                error.response is None
-                or error.response.status_code != 409
-                or attempt == attempts - 1
-            ):
+            if error.response is None or error.response.status_code != 409 or attempt == attempts - 1:
                 raise
         except ValueError as error:
-            if (
-                "Dataset changed since preview" not in str(error)
-                or attempt == attempts - 1
-            ):
+            if "Dataset changed since preview" not in str(error) or attempt == attempts - 1:
                 raise
         time.sleep(min(2**attempt, 30))
     raise RuntimeError("unreachable")
@@ -274,9 +245,7 @@ def publish(args):
     # The draft recorded on a laptop-like CPU runner; the fleet's references come from the CI
     # images. Keep the draft's candidates for inspection, measure afresh.
     if workspace.expectations.exists():
-        shutil.move(
-            str(workspace.expectations), workspace.root / ".mic/draft-expectations"
-        )
+        shutil.move(str(workspace.expectations), workspace.root / ".mic/draft-expectations")
     collection, scope = args.collection, "all"
     try:
         measure(args, collection)
@@ -326,14 +295,10 @@ def main():
     parser.add_argument("phase", choices=("ready", "publish"))
     parser.add_argument("--model", required=True)
     parser.add_argument("--workspace", default="work/run")
-    parser.add_argument(
-        "--result", default="result.json", help="tmic run's agent-mode result (ready)"
-    )
+    parser.add_argument("--result", default="result.json", help="tmic run's agent-mode result (ready)")
     parser.add_argument("--collection", default="work/cloud")
     parser.add_argument("--transformers-ref", default="main")
-    parser.add_argument(
-        "--contract-name", default=None, help="fleet name to export under (publish)"
-    )
+    parser.add_argument("--contract-name", default=None, help="fleet name to export under (publish)")
     parser.add_argument(
         "--overwrite-unexported",
         action="store_true",
@@ -352,9 +317,7 @@ def main():
         outcome["error"] = str(error)
         raise
     finally:
-        Path(f"{args.phase}-result.json").write_text(
-            json.dumps(outcome, indent=2) + "\n"
-        )
+        Path(f"{args.phase}-result.json").write_text(json.dumps(outcome, indent=2) + "\n")
     print(json.dumps(outcome))
 
 

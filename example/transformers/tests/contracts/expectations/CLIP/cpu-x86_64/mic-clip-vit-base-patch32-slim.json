@@ -1,18 +1,23 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/CLIP-integration",
-  "contract_revision": "cb2e2abc4c4c992c316ab40d4a3360b1e748fcfe",
+  "contract_name": "CLIP",
+  "contract_revision": "423a026e65fe49bdc292fb25d0a67f8467f6f004",
   "framework": "transformers",
   "variant": "default",
   "target": "mic-clip-vit-base-patch32-slim",
   "kind": "fixture",
   "revision": "adad0f30de071148ab0b55bb2263ac909e58cc5b",
+  "source_model": "openai/clip-vit-base-patch32",
+  "weights": "random",
+  "fixture_repo": "hf-internal-testing/mic-clip-vit-base-patch32-slim",
   "environment": {
-   "python": "3.10.22",
-   "transformers": "5.19.0.dev0",
-   "torch": "2.11.0+cpu",
-   "torchvision": "0.26.0+cpu",
-   "torchaudio": "2.11.0+cpu",
+   "python": "3.11.18",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0+cpu",
+   "torchvision": "0.29.2+cpu",
+   "torchaudio": "2.11.1+cpu",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
    "pillow": "12.2.0",
@@ -30,8 +35,9 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 3.69,
-  "platform": "cpu-x86_64"
+  "seconds": 7.31,
+  "platform": "cpu-x86_64",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {
@@ -54,27 +60,27 @@
   "logits_per_image": [
    [
     -2.637209892272949,
-    -2.2477328777313232,
-    -2.503986358642578,
-    -2.723217487335205
+    -2.2477352619171143,
+    -2.5039865970611572,
+    -2.723217725753784
    ],
    [
-    4.143317222595215,
-    4.256854057312012,
-    4.226871013641357,
-    3.778783082962036
+    4.143318176269531,
+    4.256852626800537,
+    4.226871490478516,
+    3.7787835597991943
    ],
    [
-    1.5251176357269287,
-    1.6053062677383423,
-    1.2278861999511719,
-    1.1937217712402344
+    1.5251171588897705,
+    1.6053060293197632,
+    1.2278865575790405,
+    1.1937226057052612
    ],
    [
-    -0.4373680353164673,
-    -0.2958209812641144,
-    -0.10970687866210938,
-    -0.4732409119606018
+    -0.43736815452575684,
+    -0.29582327604293823,
+    -0.10970650613307953,
+    -0.47324126958847046
    ]
   ],
   "text_kwargs_input_ids": [

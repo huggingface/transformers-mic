@@ -2,8 +2,8 @@
 
 import ast
 import importlib.util
-from pathlib import Path
 import re
+from pathlib import Path
 
 from huggingface_hub import hf_hub_download
 
@@ -24,12 +24,7 @@ def collect(model, revision, config):
     spec = importlib.util.find_spec("transformers")
     if spec and spec.submodule_search_locations:
         family = config.get("model_type", "").replace("-", "_")
-        path = (
-            Path(next(iter(spec.submodule_search_locations)))
-            / "models"
-            / family
-            / f"modeling_{family}.py"
-        )
+        path = Path(next(iter(spec.submodule_search_locations))) / "models" / family / f"modeling_{family}.py"
         if path.exists():
             tree = ast.parse(path.read_text())
             architectures = set(classes)
@@ -48,16 +43,31 @@ def collect(model, revision, config):
                             }
                     api[node.name] = methods
             result["architecture_api"] = api
-    names = {
-        architecture: found
-        for architecture in classes
-        if (found := parameter_names(architecture, config))
-    }
+    names = {architecture: found for architecture in classes if (found := parameter_names(architecture, config))}
     if names:
         # Checkpoint keys are often remapped on load; without the real names the
         # planner guesses from the checkpoint layout and names missing parameters.
         result["parameter_names"] = names
+    fields = {architecture: found for architecture in classes if (found := output_field_names(architecture))}
+    if fields:
+        # vjepa2's draft read outputs.predictor_embeddings, a field no output class has.
+        result["output_fields"] = fields
     return result
+
+
+def output_field_names(architecture):
+    """{output class: field names} that the architecture's forward returns."""
+    import transformers
+
+    from . import commands
+
+    cls = getattr(transformers, architecture, None)
+    if not isinstance(cls, type):
+        return None
+    try:
+        return commands.describe_output_fields(cls) or None
+    except Exception:  # advisory context; check_output_attributes still runs
+        return None
 
 
 def exported(names):
@@ -72,17 +82,11 @@ def auto_classes(config, limit=3):
     from transformers.models.auto import modeling_auto
 
     first = ("MODEL_MAPPING_NAMES", "MODEL_FOR_CAUSAL_LM_MAPPING_NAMES")
-    others = sorted(
-        n
-        for n in dir(modeling_auto)
-        if n.startswith("MODEL_") and n.endswith("_MAPPING_NAMES")
-    )
+    others = sorted(n for n in dir(modeling_auto) if n.startswith("MODEL_") and n.endswith("_MAPPING_NAMES"))
     found = []
     for name in (*first, *others):
         mapping = getattr(modeling_auto, name, None)
-        cls = (
-            mapping.get(config.get("model_type")) if isinstance(mapping, dict) else None
-        )
+        cls = mapping.get(config.get("model_type")) if isinstance(mapping, dict) else None
         if isinstance(cls, str) and cls not in found:
             found.append(cls)
     return found[:limit]
@@ -98,9 +102,7 @@ def parameter_names(architecture, config, limit=80):
         return None
     try:
         with torch.device("meta"):
-            real = [
-                n for n, _ in cls(cls.config_class.from_dict(config)).named_parameters()
-            ]
+            real = [n for n, _ in cls(cls.config_class.from_dict(config)).named_parameters()]
     except Exception:  # advisory context; validation still checks the draft
         return None
     return sorted(n for n in real if ".0." in n or not re.search(r"\.\d+\.", n))[:limit]

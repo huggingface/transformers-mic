@@ -4,16 +4,26 @@ import ast
 import hashlib
 import json
 import os
-from pathlib import Path
 import re
-import sys
 import shutil
+import sys
 import tempfile
+import textwrap
+from pathlib import Path
 
-from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download
 import jsonschema
+from huggingface_hub import CommitOperationAdd, HfApi, hf_hub_download
 
-from . import backend, fleet, history, planner, policy, references, resources
+from . import (
+    backend,
+    carryover,
+    fleet,
+    history,
+    planner,
+    policy,
+    references,
+    resources,
+)
 from .hub import (
     DEFAULT_NAMESPACE,
     canonical_references,
@@ -39,20 +49,14 @@ def validate_plan(plan, model, fixture, old=None):
     jsonschema.validate(plan, planner.PLAN_SCHEMA)
     manifest = plan["manifest"]
     jsonschema.validate(manifest, manifest_schema())
-    if set(manifest["checkpoints"]) != {model} or set(manifest["fixtures"]) != {
-        fixture
-    }:
-        raise ValueError(
-            "Generated plan must contain exactly the requested checkpoint and fixture"
-        )
+    if set(manifest["checkpoints"]) != {model} or set(manifest["fixtures"]) != {fixture}:
+        raise ValueError("Generated plan must contain exactly the requested checkpoint and fixture")
     integration = manifest["integrations"]["transformers"]
     if (
         integration["entry_point"] != "integrations/transformers/usage.md"
         or integration["format"] != "runnable-markdown"
     ):
-        raise ValueError(
-            "Generated entry point must be integrations/transformers/usage.md, runnable-markdown"
-        )
+        raise ValueError("Generated entry point must be integrations/transformers/usage.md, runnable-markdown")
     recipe = manifest["fixtures"][fixture].get("build")
     if not isinstance(recipe, dict):
         raise ValueError("Generated fixture needs a build recipe")
@@ -74,40 +78,24 @@ def validate_plan(plan, model, fixture, old=None):
             f"The LLM cannot select overfit, exempt insensitive inputs, or preserve source "
             f"tensors/assets; remove {', '.join(chosen)} from the build recipe"
         )
-    if (
-        manifest["checkpoints"][model]["fixture"] != fixture
-        or manifest["fixtures"][fixture]["built_from"] != model
-    ):
-        raise ValueError(
-            "Generated fixture must be built from and assigned to the requested checkpoint"
-        )
+    if manifest["checkpoints"][model]["fixture"] != fixture or manifest["fixtures"][fixture]["built_from"] != model:
+        raise ValueError("Generated fixture must be built from and assigned to the requested checkpoint")
     for rule in manifest["outputs"].values():
-        if rule["compare"] == "allclose" and (
-            rule["atol"] != 1e-4 or rule["rtol"] != 1e-4
-        ):
+        if rule["compare"] == "allclose" and (rule["atol"] != 1e-4 or rule["rtol"] != 1e-4):
             raise ValueError("Generated numeric tolerances must be atol=rtol=1e-4")
     if old and not set(old["outputs"]).issubset(manifest["outputs"]):
         raise ValueError("Update removes existing output assertions")
-    if old and any(
-        manifest["outputs"][key] != rule for key, rule in old["outputs"].items()
-    ):
-        raise ValueError(
-            "Update changes existing comparison rules; review those changes manually"
-        )
+    if old and any(manifest["outputs"][key] != rule for key, rule in old["outputs"].items()):
+        raise ValueError("Update changes existing comparison rules; review those changes manually")
     if not {"default", "eager", "bfloat16"}.issubset(integration.get("variants", {})):
-        raise ValueError(
-            "Generated contract must declare default, eager and bfloat16 variants"
-        )
+        raise ValueError("Generated contract must declare default, eager and bfloat16 variants")
     if old:
         previous = old["integrations"]["transformers"]
         if previous.get("training") and not integration.get("training"):
             raise ValueError("Update disables existing training assertions")
         if not set(previous["targets"]).issubset(integration["targets"]):
             raise ValueError("Update removes existing target types")
-        if any(
-            integration["variants"].get(key) != value
-            for key, value in previous["variants"].items()
-        ):
+        if any(integration["variants"].get(key) != value for key, value in previous["variants"].items()):
             raise ValueError("Update changes existing variants")
     if integration.get("training"):
         required = {
@@ -115,19 +103,14 @@ def validate_plan(plan, model, fixture, old=None):
             "training.gradients": "all_true",
             "training.updated": "true",
         }
-        if any(
-            manifest["outputs"].get(key, {}).get("compare") != rule
-            for key, rule in required.items()
-        ):
+        if any(manifest["outputs"].get(key, {}).get("compare") != rule for key, rule in required.items()):
             raise ValueError(
                 "Training contracts require training.loss (allclose), training.gradients (all_true nonempty named booleans), and training.updated (true)"
             )
     if integration.get("variants", {}).get("bfloat16") != {"dtype": "bfloat16"}:
         raise ValueError("Use bfloat16 variant kwargs {dtype: bfloat16}")
     # Syntax is checked without importing or running generated code.
-    blocks = re.findall(
-        r"```(?:py|python) runnable:[^\n]*\n(.*?)```", plan["usage"], re.S
-    )
+    blocks = re.findall(r"```(?:py|python) runnable:[^\n]*\n(.*?)```", plan["usage"], re.S)
     if not blocks:
         raise ValueError("Generated usage contains no runnable Python blocks")
     ast.parse("\n".join(blocks))
@@ -148,16 +131,17 @@ def visible_plumbing(blocks):
         hidden_indent = None
         for line in block.splitlines():
             indent = len(line) - len(line.lstrip())
-            if hidden_indent is not None and (
-                not line.strip() or indent > hidden_indent
-            ):
+            if hidden_indent is not None and (not line.strip() or indent > hidden_indent):
                 continue
             hidden_indent = None
             if "# doc-builder: hide" in line:
                 if line.split("#", 1)[0].rstrip().endswith(":"):
                     hidden_indent = indent
                 continue
-            if re.search(r"\bvariant\b|MIC_|os\.environ", line):
+            # "variant" in a comment is prose ("so the bfloat16 variant runs"): vjepa2's
+            # three drafts kept such a comment and were all rejected (2026-11-07).
+            code = line.split("#", 1)[0]
+            if re.search(r"\bvariant\b", code) or re.search(r"MIC_|os\.environ", line):
                 leaked.append(line.strip())
     return leaked
 
@@ -235,9 +219,7 @@ def keep_large_checkpoints_off_cpu(manifest, parameters):
     integration = manifest["integrations"]["transformers"]
     resources = integration.setdefault("resources", {})
     full_precision = [
-        name
-        for name, kwargs in integration.get("variants", {}).items()
-        if (kwargs or {}).get("dtype") != "bfloat16"
+        name for name, kwargs in integration.get("variants", {}).items() if (kwargs or {}).get("dtype") != "bfloat16"
     ]
     if len(full_precision) == len(integration.get("variants", {})):
         full_precision = []  # no bfloat16 variant to keep
@@ -288,7 +270,8 @@ def check_encoder_decoder_calls(plan, config):
         cls = getattr(transformers, (config.get("architectures") or [""])[0], None)
     except Exception:
         cls = None
-    if getattr(cls, "main_input_name", None) != "input_features":
+    # Moonshine reads the raw waveform (input_values) where Whisper reads features.
+    if getattr(cls, "main_input_name", None) not in ("input_features", "input_values"):
         return
     import ast
 
@@ -298,15 +281,98 @@ def check_encoder_decoder_calls(plan, config):
     except SyntaxError:  # the build reports real syntax errors
         return
     needed = {"decoder_input_ids", "decoder_inputs_embeds", "labels"}
+    audio_only = audio_only_inputs(tree, needed)
     for node in ast.walk(tree):
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "model":
             names = {k.arg for k in node.keywords}
-            if None in names or names & needed:  # **inputs may carry them
+            if names & needed:
+                continue
+            # **inputs may carry them, unless inputs is only the processor's audio features:
+            # moonshine-ai/moonshine-streaming-tiny's draft probed model(**inputs).logits
+            # after training on model(**inputs, labels=labels) (2026-11-10).
+            spread = [k.value for k in node.keywords if k.arg is None]
+            if spread and not all(isinstance(v, ast.Name) and v.id in audio_only for v in spread):
                 continue
             raise ValueError(
                 f"line {node.lineno}: model(...) of an encoder-decoder needs decoder inputs; pass "
                 "decoder_input_ids starting from config.decoder_start_token_id, or labels="
+                + (" (the processor's audio features carry neither)" if spread else "")
             )
+
+
+# Sub-configs that resolve an attention implementation of their own (not quantization or rope).
+ATTENTION_SUB_CONFIGS = (
+    "text_config",
+    "vision_config",
+    "audio_config",
+    "speech_config",
+    "encoder_config",
+    "decoder_config",
+    "qformer_config",
+    "perceiver_config",
+    "thinker_config",
+    "talker_config",
+    "llm_config",
+)
+
+
+def check_sub_config_attention(plan, config):
+    """A model with sub-configs records the attention each resolved to in runtime.attn_implementations.
+
+    The top level can say sdpa while a tower silently runs eager: transformers#49404 made Gemma4's
+    audio tower eager-only and the gemma4 contract, recording only the top level, stayed green.
+    Drafts copy the closest approved contract's runtime block, so the prompt alone does not do it.
+    """
+    subs = sorted(k for k in ATTENTION_SUB_CONFIGS if isinstance(config.get(k), dict))
+    if subs and "attn_implementations" not in plan["usage"]:
+        raise ValueError(
+            f"the config has sub-configs ({', '.join(subs)}): runtime must also record "
+            '"attn_implementations": {n: getattr(model.config, n)._attn_implementation for n in sorted(model.config.sub_configs) '
+            "if getattr(getattr(model.config, n, None), '_attn_implementation', None)}, written exactly so"
+        )
+
+
+def audio_only_inputs(tree, needed):
+    """Names bound only to a processor or feature extractor call given no text or labels.
+
+    Such a BatchFeature holds input features and their mask, never decoder inputs. A name
+    also bound any other way, or changed by item assignment or update(), may carry them.
+    """
+    import ast
+
+    def unwrap(node):  # processor(...).to(device, ...) -> processor(...)
+        while isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "to":
+            node = node.func.value
+        return node
+
+    verdicts = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Subscript) and isinstance(target.value, ast.Name):
+                    verdicts.setdefault(target.value.id, []).append(False)
+                if not isinstance(target, ast.Name):
+                    continue
+                call = unwrap(node.value)
+                if isinstance(call, ast.Name) and call.id == target.id:
+                    continue  # inputs = inputs.to(device, dtype=...)
+                callee = ""
+                if isinstance(call, ast.Call):
+                    callee = call.func.id if isinstance(call.func, ast.Name) else getattr(call.func, "attr", "")
+                keywords = {k.arg for k in call.keywords} if isinstance(call, ast.Call) else set()
+                verdicts.setdefault(target.id, []).append(
+                    callee.endswith(("processor", "feature_extractor"))
+                    and len(call.args) <= 1
+                    and not keywords & (needed | {"text", "text_target", None})
+                )
+        elif (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr in ("update", "__setitem__")
+            and isinstance(node.func.value, ast.Name)
+        ):
+            verdicts.setdefault(node.func.value.id, []).append(False)
+    return {name for name, seen in verdicts.items() if all(seen)}
 
 
 def check_image_tokens_in_text(plan, config):
@@ -341,8 +407,12 @@ def check_image_tokens_in_text(plan, config):
                 continue
             callee = call.func.id if isinstance(call.func, ast.Name) else getattr(call.func, "attr", "")
             keywords = {k.arg for k in call.keywords}
-            if (callee.endswith(("processor", "tokenizer")) and "text" in keywords
-                    and not keywords & {"images", "videos", None} and not call.args):
+            if (
+                callee.endswith(("processor", "tokenizer"))
+                and "text" in keywords
+                and not keywords & {"images", "videos", None}
+                and not call.args
+            ):
                 text_only[node.targets[0].id] = node.lineno
             else:
                 text_only.pop(node.targets[0].id, None)
@@ -362,9 +432,11 @@ def check_image_tokens_in_text(plan, config):
         keywords = {k.arg: k.value for k in node.keywords}
         if "pixel_values" not in keywords:
             continue
-        names = [source(keywords["input_ids"])] if "input_ids" in keywords else [
-            k.value.id for k in node.keywords if k.arg is None and isinstance(k.value, ast.Name)
-        ]
+        names = (
+            [source(keywords["input_ids"])]
+            if "input_ids" in keywords
+            else [k.value.id for k in node.keywords if k.arg is None and isinstance(k.value, ast.Name)]
+        )
         for name in names:
             if name in text_only:
                 raise ValueError(
@@ -457,7 +529,7 @@ def check_trainable_selection(plan, config, parameters=None):
             raise ValueError(
                 f"only the last layer ([-1]) trains, but {first[0]!r} names layer 0, which requires_grad_(False) froze: "
                 "its gradient is None and the check fails; check the trained layer, e.g. "
-                "f\"...layers.{model.config.num_hidden_layers - 1}.<suffix>\" (text_config for a VLM)"
+                'f"...layers.{model.config.num_hidden_layers - 1}.<suffix>" (text_config for a VLM)'
             )
     # A VLM states the tie in its text_config (BLIP-2's OPT: language_model.lm_head.weight, 2026-11-07).
     tied = config.get("tie_word_embeddings")
@@ -509,7 +581,11 @@ def check_batch_encoding_dtype(plan, config):
         source = inspect.getsource(cls.__call__) if cls else ""
     except (OSError, TypeError):
         source = ""
-    encoding = "encoded_inputs = self.tokenizer(" in source and "return encoded_inputs" in source and "BatchFeature(" not in source
+    encoding = (
+        "encoded_inputs = self.tokenizer(" in source
+        and "return encoded_inputs" in source
+        and "BatchFeature(" not in source
+    )
     for name, maker in [(n, made.get(n, "")) for n in sorted(cast)] + [(m, m) for m in chained]:
         if "tokenizer" in maker.lower() or (encoding and "processor" in maker.lower()):
             raise ValueError(
@@ -517,6 +593,99 @@ def check_batch_encoding_dtype(plan, config):
                 "not dtype=; move it with .to(device) and cast only the floating tensors, e.g. "
                 f'{name}["pixel_values"] = {name}["pixel_values"].to(model.dtype)'
             )
+
+
+def check_half_precision_inputs(plan):
+    """Processor outputs fed to the model must follow its dtype, or the bfloat16 variant fails.
+
+    Many vision models cast pixel_values to their weights' dtype themselves, so an approved
+    contract can omit the cast and still pass; EfficientNet does not, and
+    docling-project/DocumentFigureClassifier-v2.5's draft copied such a contract's
+    processor(images=...).to(device): every bfloat16 case raised "Input type
+    (torch.FloatTensor) and weight type (CPUBFloat16Type) should be the same" (2026-11-10).
+    """
+    import ast
+
+    usage = plan["usage"]
+    variants = ((plan.get("manifest") or {}).get("integrations") or {}).get("transformers", {}).get("variants") or {}
+    if not any((kwargs or {}).get("dtype") in ("bfloat16", "float16") for kwargs in variants.values()):
+        return
+    if "torch.autocast" in usage:  # autocast casts the inputs of every matmul and convolution
+        return
+    code = "\n".join(re.findall(r"^```py runnable:[^\n]*\n(.*?)^```", usage, re.M | re.S))
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:  # the build reports real syntax errors
+        return
+
+    def unwrap(node):
+        while isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "to":
+            node = node.func.value
+        return node
+
+    def casts(node):  # x.to(device, dtype=...), x.to(device, model.dtype), x.to(torch.bfloat16)
+        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "to"):
+            return False
+        values = [k.value for k in node.keywords if k.arg == "dtype"] + list(node.args)
+        return any(
+            isinstance(v, ast.Attribute)
+            and (v.attr == "dtype" or v.attr in ("bfloat16", "float16", "half"))
+            or isinstance(v, ast.Name)
+            and "dtype" in v.id
+            for v in values
+        ) or casts(node.func.value)
+
+    made, cast = {}, set()  # name -> (line, callee) of a processor call given images, audio or video
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Assign) or len(node.targets) != 1:
+            continue
+        target = node.targets[0]
+        if isinstance(target, ast.Subscript) and isinstance(target.value, ast.Name):
+            if any(casts(n) for n in ast.walk(node.value)):  # inputs["pixel_values"] = ....to(model.dtype)
+                cast.add(target.value.id)
+            continue
+        if not isinstance(target, ast.Name):
+            continue
+        if casts(node.value):
+            cast.add(target.id)
+        call = unwrap(node.value)
+        if not isinstance(call, ast.Call):
+            continue
+        callee = call.func.id if isinstance(call.func, ast.Name) else getattr(call.func, "attr", "")
+        keywords = {k.arg for k in call.keywords}
+        media = call.args or keywords & {"images", "audio", "audios", "videos", "raw_speech"}
+        # Media only: a multimodal model casts the encoded media into its language model's
+        # dtype itself, and its processor may return a BatchEncoding that takes no dtype.
+        if (
+            callee.endswith(("processor", "feature_extractor"))
+            and "tokenizer" not in callee
+            and media
+            and "text" not in keywords
+            and target.id not in made
+        ):
+            made[target.id] = (node.lineno, callee)
+    spread = {
+        k.value.id
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and (
+            isinstance(node.func, ast.Name)
+            and node.func.id == "model"
+            or isinstance(node.func, ast.Attribute)
+            and isinstance(node.func.value, ast.Name)
+            and node.func.value.id == "model"
+        )
+        for k in node.keywords
+        if k.arg is None and isinstance(k.value, ast.Name)
+    }
+    for name in sorted(spread & set(made) - cast):
+        line, callee = made[name]
+        raise ValueError(
+            f"line {line}: {name} from {callee}(...) reaches the model in float32, but the bfloat16 "
+            "variant loads bfloat16 weights and not every model casts its inputs: move it with "
+            f".to(device, dtype=model.dtype) (a BatchFeature casts only floating tensors), or, for a "
+            f'BatchEncoding, {name}["pixel_values"] = {name}["pixel_values"].to(model.dtype)'
+        )
 
 
 def call_arguments(text, start):
@@ -555,7 +724,7 @@ def check_transducer_inputs(plan):
             "(RNN-T/TDT) forward needs them, also for inference: labels do not provide them. For inference use "
             "model.generate(**inputs), or pass decoder_input_ids=torch.full((batch, 1), "
             "model.config.blank_token_id); for training build batch = processor(audio=audios, text=transcripts, "
-            "sampling_rate=sr, return_tensors=\"pt\"), which returns labels and decoder_input_ids "
+            'sampling_rate=sr, return_tensors="pt"), which returns labels and decoder_input_ids '
             "([blank] + labels), then model(**batch)"
         )
 
@@ -572,7 +741,9 @@ def check_audio_waveforms(plan):
         return
     paths = re.findall(r"[\"']([^\"'\n]+\.(?:wav|mp3|flac|ogg|m4a))[\"']", usage)
     calls = [call_arguments(usage, m.end()) for m in re.finditer(r"\bprocessor\(", usage)]
-    if paths and any(re.search(r"\baudio\s*=", args) or re.match(r"\s*\w+\s*[,)]?\s*$|\s*\w+\s*,", args) for args in calls):
+    if paths and any(
+        re.search(r"\baudio\s*=", args) or re.match(r"\s*\w+\s*[,)]?\s*$|\s*\w+\s*,", args) for args in calls
+    ):
         raise ValueError(
             f"the usage passes audio files ({paths[0]!r}) to the processor, which takes decoded waveforms: "
             "build NumPy arrays at the processor's sampling rate in the block (e.g. sine waves), pass them "
@@ -600,7 +771,11 @@ def check_chat_template(plan, context):
         return
     overridden = type(processor).apply_chat_template is not ProcessorMixin.apply_chat_template
     tokenizer = getattr(processor, "tokenizer", None)
-    if not overridden and not getattr(processor, "chat_template", None) and not getattr(tokenizer, "chat_template", None):
+    if (
+        not overridden
+        and not getattr(processor, "chat_template", None)
+        and not getattr(tokenizer, "chat_template", None)
+    ):
         raise ValueError(
             f"{type(processor).__name__} for {context['model']} has no chat template: do not call "
             "processor.apply_chat_template; call the processor directly with the text and audio/images"
@@ -613,9 +788,7 @@ def check_undefined_names(plan):
     import symtable
 
     groups = {}
-    for name, block in re.findall(
-        r"^```py runnable:([\w-]+)[^\n]*\n(.*?)^```", plan["usage"], re.M | re.S
-    ):
+    for name, block in re.findall(r"^```py runnable:([\w-]+)[^\n]*\n(.*?)^```", plan["usage"], re.M | re.S):
         groups[name] = groups.get(name, "") + block
     missing = set()
     for code in groups.values():
@@ -624,19 +797,22 @@ def check_undefined_names(plan):
         except SyntaxError:  # the build reports real syntax errors
             continue
         known = set(dir(builtins)) | {
-            s.get_name()
-            for s in top.get_symbols()
-            if s.is_assigned() or s.is_imported() or s.is_namespace()
+            s.get_name() for s in top.get_symbols() if s.is_assigned() or s.is_imported() or s.is_namespace()
         }
-        tables = [top]
+        tables, every = [top], []
         while tables:
             table = tables.pop()
             tables += table.get_children()
+            every.append(table)
+        # A walrus inside a comprehension, {n: c for n in subs if (c := f(n))}, binds c in the
+        # enclosing scope, but symtable marks it assigned only in the comprehension's table.
+        known |= {
+            s.get_name() for t in every if t is not top for s in t.get_symbols() if s.is_global() and s.is_assigned()
+        }
+        for table in every:
             for symbol in table.get_symbols():
                 read = symbol.is_referenced() and (
-                    symbol.is_global()
-                    if table is not top
-                    else not (symbol.is_assigned() or symbol.is_imported())
+                    symbol.is_global() if table is not top else not (symbol.is_assigned() or symbol.is_imported())
                 )
                 if read and symbol.get_name() not in known:
                     missing.add(symbol.get_name())
@@ -757,9 +933,7 @@ def check_loss_has_gradients(plan):
     import ast
 
     groups = {}
-    for name, block in re.findall(
-        r"^```py runnable:([\w-]+)[^\n]*\n(.*?)^```", plan["usage"], re.M | re.S
-    ):
+    for name, block in re.findall(r"^```py runnable:([\w-]+)[^\n]*\n(.*?)^```", plan["usage"], re.M | re.S):
         groups[name] = groups.get(name, "") + block
 
     def without_grad(node):
@@ -802,7 +976,9 @@ def check_loss_has_gradients(plan):
                                 calls.add(name)
                             else:
                                 calls.discard(name)
-                            deps[name] = read - {name} | (deps.get(name, set()) if isinstance(statement, ast.AugAssign) else set())
+                            deps[name] = read - {name} | (
+                                deps.get(name, set()) if isinstance(statement, ast.AugAssign) else set()
+                            )
                 for field in ("body", "orelse"):
                     if isinstance(getattr(statement, field, None), list) and not isinstance(statement, ast.With):
                         visit(getattr(statement, field), inside)
@@ -858,8 +1034,11 @@ def check_float16_load(plan, config, parameters=None):
             continue
         raise ValueError(
             f"load {name} with dtype=torch.{wanted}: "
-            + ("above 1B parameters the contract is measured in bfloat16 only and float32 does not fit the GPU"
-               if wanted == "bfloat16" else "the checkpoint is stored in float16 (the bfloat16 variant still overrides it)")
+            + (
+                "above 1B parameters the contract is measured in bfloat16 only and float32 does not fit the GPU"
+                if wanted == "bfloat16"
+                else "the checkpoint is stored in float16 (the bfloat16 variant still overrides it)"
+            )
         )
 
 
@@ -930,9 +1109,7 @@ def loaded_parameter_names(config):
 
 def check_parameter_names(plan, config):
     """Reject usage that names parameters the architecture does not have."""
-    names = set(
-        re.findall(r"[\"']([A-Za-z_][\w.]*\.(?:weight|bias))[\"']", plan["usage"])
-    )
+    names = set(re.findall(r"[\"']([A-Za-z_][\w.]*\.(?:weight|bias))[\"']", plan["usage"]))
     if not names:
         return
     import torch
@@ -943,17 +1120,13 @@ def check_parameter_names(plan, config):
         return
     try:
         with torch.device("meta"):
-            real = {
-                n for n, _ in cls(cls.config_class.from_dict(config)).named_parameters()
-            }
+            real = {n for n, _ in cls(cls.config_class.from_dict(config)).named_parameters()}
     except Exception:  # inspection is advisory; the build still runs the contract
         return
     # The prompt asks for suffix lookups (n.endswith("mlp.gate_proj.weight")): a
     # dotted suffix of a real name is a real name. Mistral-Large-4's draft failed
     # three times on this until 2026-11-02.
-    missing = sorted(
-        name for name in names - real if not any(r.endswith("." + name) for r in real)
-    )
+    missing = sorted(name for name in names - real if not any(r.endswith("." + name) for r in real))
     if missing:
         import difflib
 
@@ -1010,6 +1183,219 @@ def index_only_misses(missing, real):
                 f"and n.endswith({'.' + rest!r}))"
             )
     return hints
+
+
+def output_classes(annotation):
+    """The ModelOutput dataclasses in a forward's return annotation (tuple | XOutput)."""
+    import dataclasses
+    import typing
+
+    from transformers.utils import ModelOutput
+
+    if isinstance(annotation, type):
+        # The base class says nothing about the fields a subclass returns.
+        if (
+            issubclass(annotation, ModelOutput)
+            and annotation is not ModelOutput
+            and dataclasses.is_dataclass(annotation)
+        ):
+            return [annotation]
+        return []
+    return [cls for arg in typing.get_args(annotation) for cls in output_classes(arg)]
+
+
+def output_fields(cls):
+    """{output class: {field: nested output classes}} that cls.forward returns, or {} if unknown."""
+    import dataclasses
+    import inspect
+    import typing
+
+    try:
+        returned = output_classes(inspect.signature(cls.forward).return_annotation)
+    except (TypeError, ValueError):
+        return {}
+    # Annotations can be wrong: CLIPSegForImageSegmentation says CLIPSegOutput and
+    # returns CLIPSegImageSegmentationOutput. Add the classes `return X(...)` builds.
+    try:
+        forward = inspect.unwrap(cls.forward)
+        namespace = sys.modules[forward.__module__].__dict__
+        for node in ast.walk(ast.parse(textwrap.dedent(inspect.getsource(forward)))):
+            if (
+                isinstance(node, ast.Return)
+                and isinstance(node.value, ast.Call)
+                and isinstance(node.value.func, ast.Name)
+            ):
+                for built in output_classes(namespace.get(node.value.func.id)):
+                    if built not in returned:
+                        returned.append(built)
+    except (OSError, TypeError, KeyError, SyntaxError):
+        pass
+    result = {}
+    for output in returned:
+        try:
+            hints = typing.get_type_hints(output)
+        except (NameError, TypeError, AttributeError):  # an annotation that does not resolve: no nesting
+            hints = {}
+        result[output] = {f.name: output_classes(hints.get(f.name)) for f in dataclasses.fields(output)}
+    return result
+
+
+def describe_output_fields(cls):
+    """Field names per output class, for the planner: {class: [field, nested.field, ...]}."""
+    described = {}
+    for output, fields in output_fields(cls).items():
+        names = []
+        for name, nested in fields.items():
+            names.append(name)
+            for inner in nested:
+                names += [f"{name}.{field}" for field in output_fields_of(inner)]
+        described[output.__name__] = names
+    return described
+
+
+def output_fields_of(output):
+    import dataclasses
+
+    return [f.name for f in dataclasses.fields(output)]
+
+
+def usage_model_classes(tree, config):
+    """{variable: model classes} for variables bound only to X.from_pretrained(...)[.to(...)]."""
+    import transformers
+
+    model_type = (config or {}).get("model_type")
+
+    def resolve(name):
+        cls = getattr(transformers, name, None)
+        if not isinstance(cls, type):
+            return None
+        if issubclass(cls, transformers.PreTrainedModel):
+            return cls
+        names = getattr(getattr(cls, "_model_mapping", None), "_model_mapping", None)
+        if name.startswith("AutoModel") and isinstance(names, dict) and isinstance(names.get(model_type), str):
+            return resolve(names[model_type])
+        return None
+
+    def loaded(value, variable):
+        """The class a value loads, the variable itself for model.to(...), else None."""
+        while isinstance(value, ast.Call) and isinstance(value.func, ast.Attribute):
+            if value.func.attr == "from_pretrained":
+                base = value.func.value
+                name = base.id if isinstance(base, ast.Name) else getattr(base, "attr", None)
+                return resolve(name) if name else None
+            value = value.func.value
+        if isinstance(value, ast.Name) and value.id == variable:
+            return variable
+        return None
+
+    found, unknown = {}, other_bindings(tree)
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Assign):
+            continue
+        if len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            variable = node.targets[0].id
+            cls = loaded(node.value, variable)
+            if cls is None:
+                unknown.add(variable)
+            elif cls != variable:
+                found.setdefault(variable, set()).add(cls)
+        else:
+            unknown |= {n.id for t in node.targets for n in ast.walk(t) if isinstance(n, ast.Name)}
+    return {name: classes for name, classes in found.items() if name not in unknown}
+
+
+def other_bindings(tree):
+    """Names bound other than by a plain assignment (loops, with, augmented, annotated)."""
+    names = set()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.For, ast.comprehension, ast.withitem, ast.AugAssign, ast.AnnAssign)):
+            target = node.optional_vars if isinstance(node, ast.withitem) else node.target
+            if target is not None:
+                names |= {n.id for n in ast.walk(target) if isinstance(n, ast.Name)}
+    return names
+
+
+def check_output_attributes(plan, config):
+    """Reject usage that reads a field the model's output class does not have.
+
+    vjepa2 (2026-11-07) read outputs.predictor_embeddings from VJEPA2Model, whose
+    VJEPA2WithMaskedInputModelOutput has predictor_output.last_hidden_state: the
+    build failed with an AttributeError, and a repair could not see the real names.
+    Only variables bound to a model call of a known class are checked.
+    """
+    try:
+        from transformers.utils import ModelOutput
+    except ImportError:  # no runtime: the build still runs the contract
+        return
+    try:
+        tree = ast.parse("\n".join(re.findall(r"```(?:py|python) runnable:[^\n]*\n(.*?)```", plan["usage"], re.DOTALL)))
+    except SyntaxError:
+        return
+    models = usage_model_classes(tree, config)
+    if not models:
+        return
+    # Output variables: every binding is a call of one model variable (model(...) or model.forward(...)).
+    outputs, unknown = {}, other_bindings(tree)
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Assign):
+            continue
+        names = [n.id for t in node.targets for n in ast.walk(t) if isinstance(n, ast.Name)]
+        call = node.value
+        func = call.func if isinstance(call, ast.Call) else None
+        if isinstance(func, ast.Attribute) and func.attr == "forward":
+            func = func.value
+        model = func.id if isinstance(func, ast.Name) and func.id in models else None
+        if model and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+            outputs.setdefault(names[0], set()).update(models[model])
+        else:
+            unknown.update(names)
+    common = {name for name in dir(ModelOutput) if not name.startswith("_")}
+    problems = []
+    for variable, classes in sorted(outputs.items()):
+        if variable in unknown:
+            continue
+        fields = {}
+        for cls in classes:
+            known = output_fields(cls)
+            if not known:
+                fields = None  # an unannotated forward: nothing to compare with
+                break
+            for output, names in known.items():
+                fields.setdefault(output, names)
+        if not fields:
+            continue
+        allowed = {name for names in fields.values() for name in names}
+        nested = {}
+        for names in fields.values():
+            for name, inner in names.items():
+                nested.setdefault(name, []).extend(inner)
+        returned = ", ".join(sorted(o.__name__ for o in fields))
+        for node in ast.walk(tree):
+            if not (isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name) and node.value.id == variable):
+                continue
+            if node.attr not in allowed | common:
+                problems.append(
+                    f"{variable}.{node.attr}: {'/'.join(sorted(c.__name__ for c in classes))}.forward returns "
+                    f"{returned}, whose fields are {sorted(allowed)}"
+                )
+            elif nested.get(node.attr):
+                inner_allowed = {f for o in nested[node.attr] for f in output_fields_of(o)}
+                for parent in ast.walk(tree):
+                    if (
+                        isinstance(parent, ast.Attribute)
+                        and parent.value is node
+                        and parent.attr not in inner_allowed | common
+                    ):
+                        problems.append(
+                            f"{variable}.{node.attr}.{parent.attr}: {node.attr} is "
+                            f"{'/'.join(o.__name__ for o in nested[node.attr])}, whose fields are {sorted(inner_allowed)}"
+                        )
+    if problems:
+        raise ValueError(
+            "Usage reads model output fields that do not exist: "
+            + "; ".join(sorted(set(problems)))
+            + ". Read only these fields (context.output_fields lists them per class)."
+        )
 
 
 def check_config_facts(plan, config):
@@ -1155,6 +1541,7 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
                 lambda: check_image_shapes(plan),
                 lambda: check_image_processor_videos(plan),
                 lambda: check_loss_has_gradients(plan),
+                lambda: check_half_precision_inputs(plan),
             ]
             if config:
                 checks += [
@@ -1163,7 +1550,9 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
                     lambda: check_model_classes(plan, config),
                     lambda: check_label_arguments(plan, config),
                     lambda: check_parameter_names(plan, config),
+                    lambda: check_output_attributes(plan, config),
                     lambda: check_encoder_decoder_calls(plan, config),
+                    lambda: check_sub_config_attention(plan, config),
                     lambda: check_image_tokens_in_text(plan, config),
                     lambda: check_zero_query_gradients(plan, config),
                     lambda: check_trainable_selection(plan, config, parameters),
@@ -1187,11 +1576,19 @@ def propose_valid(context, args, model, fixture, old=None, format_retries=2):
             if len(problems) == 1:
                 raise ValueError(problems[0])
             if problems:
-                raise ValueError(f"{len(problems)} problems: " + " ".join(f"({n}) {p}" for n, p in enumerate(problems, 1)))
+                raise ValueError(
+                    f"{len(problems)} problems: " + " ".join(f"({n}) {p}" for n, p in enumerate(problems, 1))
+                )
             return plan, llm
         except (ValueError, jsonschema.ValidationError) as exc:
             print(f"tmic: planner draft {attempt + 1}/3 rejected: {str(exc).splitlines()[0][:300]}", file=sys.stderr)
-            REJECTED.append({"attempt": attempt + 1, "error": str(exc)[:3000], "plan": plan if plan is not None else getattr(exc, "plan", None)})
+            REJECTED.append(
+                {
+                    "attempt": attempt + 1,
+                    "error": str(exc)[:3000],
+                    "plan": plan if plan is not None else getattr(exc, "plan", None),
+                }
+            )
             if attempt == 2:
                 raise
             plan = plan if plan is not None else getattr(exc, "plan", None)
@@ -1222,7 +1619,9 @@ def propose_well_formed(context, args, attempt, retries):
         except (json.JSONDecodeError, planner.MalformedDraft) as exc:
             if extra == retries:
                 raise
-            print(f"tmic: planner reply was not a draft ({str(exc).splitlines()[0][:200]}); asking again", file=sys.stderr)
+            print(
+                f"tmic: planner reply was not a draft ({str(exc).splitlines()[0][:200]}); asking again", file=sys.stderr
+            )
 
 
 def model_context(model, revision=None):
@@ -1255,16 +1654,12 @@ def create(args):
     workspace = Workspace(args.out)
     workspace.ensure_new()
     catalog = read(resources.catalog_lock())
-    names = [
-        n for n, c in catalog["contracts"].items() if args.model in c["checkpoints"]
-    ]
+    names = [n for n, c in catalog["contracts"].items() if args.model in c["checkpoints"]]
     if args.contract:
         names = [n for n in names if n == args.contract]
     if names and args.regenerate and not args.llm:
         name = names[0]
-        original = read(
-            resources.catalog() / "hub" / f"{name}-integration/integration.json"
-        )
+        original = read(resources.catalog() / "hub" / f"{name}-integration/integration.json")
         old_fixture = original["checkpoints"][args.model]["fixture"]
         namespace = args.namespace or DEFAULT_NAMESPACE
         slug = args.name or re.sub(r"[^A-Za-z0-9_-]", "-", args.model.split("/")[-1])
@@ -1277,9 +1672,7 @@ def create(args):
             manifest["integrations"]["transformers"]["targets"] = ["fixtures"]
         pin = catalog["contracts"][name]["checkpoints"][args.model]
         source = resources.catalog() / "hub" / f"{name}-integration"
-        usage = (
-            source / manifest["integrations"]["transformers"]["entry_point"]
-        ).read_text()
+        usage = (source / manifest["integrations"]["transformers"]["entry_point"]).read_text()
         workspace.from_plan(
             args.model,
             pin,
@@ -1293,9 +1686,7 @@ def create(args):
         # Preserve frozen assets used by the catalog usage (e.g. speech).
         for item in source.iterdir():
             if item.is_dir() and item.name != "integrations":
-                shutil.copytree(
-                    item, workspace.contract_root / item.name, dirs_exist_ok=True
-                )
+                shutil.copytree(item, workspace.contract_root / item.name, dirs_exist_ok=True)
         workspace.save_state(origin="catalog-regenerated")
         lock = workspace.lock
         lock["local_patches"] = catalog_patches(catalog, name)
@@ -1322,12 +1713,7 @@ def create(args):
             },
         )
         if not args.offline and not args.no_history:
-            metadata = read(
-                workspace.root
-                / "example/hub"
-                / workspace.fixture.split("/")[-1]
-                / "build.json"
-            )
+            metadata = read(workspace.root / "example/hub" / workspace.fixture.split("/")[-1] / "build.json")
             write(
                 workspace.root / ".mic/history.json",
                 history.collect(
@@ -1414,11 +1800,12 @@ def create(args):
             manifest["integrations"]["transformers"]["targets"] = ["fixtures"]
         if dropped := fixture_runs_anywhere(manifest):
             print(f"tmic: the fixture runs anywhere: dropped its {', '.join(dropped)}", file=sys.stderr)
-        for repo in keep_large_checkpoints_off_cpu(
-            manifest, {args.model: context["parameters"]}
-        ):
+        for repo in keep_large_checkpoints_off_cpu(manifest, {args.model: context["parameters"]}):
             if (context["parameters"] or 0) > GPU_PARAMETER_LIMIT:
-                print(f"tmic: {repo} is above 10B parameters and does not fit the GPU: only the fixture is measured", file=sys.stderr)
+                print(
+                    f"tmic: {repo} is above 10B parameters and does not fit the GPU: only the fixture is measured",
+                    file=sys.stderr,
+                )
             else:
                 print(f"tmic: {repo} is above 1B parameters: measuring it on GPU, in bfloat16 only", file=sys.stderr)
         workspace.from_plan(
@@ -1442,7 +1829,10 @@ def create(args):
             file=sys.stderr,
         )
         if pin != args.revision:
-            print(f"tmic: the catalog pins {args.model}@{pin}; the fixture was reviewed at {args.revision}", file=sys.stderr)
+            print(
+                f"tmic: the catalog pins {args.model}@{pin}; the fixture was reviewed at {args.revision}",
+                file=sys.stderr,
+            )
     workspace.update_layout()
     print(
         json.dumps(
@@ -1516,10 +1906,7 @@ def build(args):
         print(json.dumps(choice))
         return 0
     local_metadata = (workspace.lock_path.parent / pin["path"]).resolve() / "build.json"
-    if not args.rebuild and (
-        pin["revision"] != "unpublished"
-        or (pin.get("files_sha256") and local_metadata.exists())
-    ):
+    if not args.rebuild and (pin["revision"] != "unpublished" or (pin.get("files_sha256") and local_metadata.exists())):
         metadata = read(local_metadata)
         choice = policy.decision(metadata, requested, readable, reused=True)
         if choice["accepted"]:
@@ -1529,9 +1916,7 @@ def build(args):
     original_manifest = workspace.manifest
     recipe = manifest["fixtures"][fixture].get("build")
     if not recipe:
-        raise ValueError(
-            "This legacy fixture has no build recipe; add one before rebuilding"
-        )
+        raise ValueError("This legacy fixture has no build recipe; add one before rebuilding")
     if requested == "overfit" or readable:
         recipe["overfit"] = (
             "Explicit CLI overfit/readable-output requirement; historical detection still needs replay validation."
@@ -1539,9 +1924,7 @@ def build(args):
     elif requested == "random":
         recipe.pop("overfit", None)
     write(workspace.contract_root / "integration.json", manifest)
-    with tempfile.TemporaryDirectory(
-        prefix="build-", dir=workspace.root / ".mic"
-    ) as temp:
+    with tempfile.TemporaryDirectory(prefix="build-", dir=workspace.root / ".mic") as temp:
         out = Path(temp) / "fixture"
         if local_metadata.exists() and not getattr(args, "reshrink", False):
             # The builder reuses the shrunk config this record holds when the
@@ -1562,12 +1945,7 @@ def build(args):
                 print(json.dumps(choice))
                 return 1
             artifact_hash = digest(metadata["sha256"])
-            target = (
-                workspace.root
-                / ".mic/artifacts"
-                / fixture.split("/")[-1]
-                / artifact_hash
-            )
+            target = workspace.root / ".mic/artifacts" / fixture.split("/")[-1] / artifact_hash
             if not target.exists():
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copytree(out, target)
@@ -1620,6 +1998,9 @@ def execute_one(args, record=False):
             options += ["--target", target]
     if record:
         options.append("--record")
+    # A workspace is drafted and checked on whatever runner is at hand; the cloud
+    # baselines measure bfloat16 on native hardware. Transformers CI never skips.
+    options.append("--skip-wrong-hardware")
     if getattr(args, "no_baseline", False):
         options.append("--no-baseline")
     output = (
@@ -1632,31 +2013,18 @@ def execute_one(args, record=False):
     result = backend.invoke("run", workspace.root, options)
     if not record:
         # Publication requires every declared target, not a focused partial check.
-        rows = (
-            [json.loads(line) for line in output.read_text().splitlines()]
-            if output.exists()
-            else []
-        )
+        rows = [json.loads(line) for line in output.read_text().splitlines()] if output.exists() else []
         evidence = {
             "framework": framework,
             "variant": args.variant,
             "records": rows,
             "lock_sha256": hashlib.sha256(workspace.lock_path.read_bytes()).hexdigest(),
-            "manifest_sha256": hashlib.sha256(
-                (workspace.contract_root / "integration.json").read_bytes()
-            ).hexdigest(),
+            "manifest_sha256": hashlib.sha256((workspace.contract_root / "integration.json").read_bytes()).hexdigest(),
             "usage_sha256": hashlib.sha256(
-                (
-                    workspace.contract_root
-                    / workspace.manifest["integrations"][framework]["entry_point"]
-                ).read_bytes()
+                (workspace.contract_root / workspace.manifest["integrations"][framework]["entry_point"]).read_bytes()
             ).hexdigest(),
         }
-        key = (
-            args.variant
-            if framework == "transformers"
-            else f"{framework}:{args.variant}"
-        )
+        key = args.variant if framework == "transformers" else f"{framework}:{args.variant}"
         validations = workspace.state.get("validations", {})
         if not args.target and result.returncode == 0 and bool(rows):
             validations[key] = {
@@ -1686,11 +2054,7 @@ def execute(args, record=False):
     if framework not in workspace.manifest["integrations"]:
         raise ValueError(f"No {framework} integration in this workspace")
     variants = (
-        list(
-            workspace.manifest["integrations"][framework].get(
-                "variants", {"default": {}}
-            )
-        )
+        list(workspace.manifest["integrations"][framework].get("variants", {"default": {}}))
         if args.all_variants
         else [args.variant]
     )
@@ -1747,13 +2111,9 @@ def update(args):
         "existing_manifest": old,
         "existing_usage": (workspace.contract_root / entry).read_text(),
         "request": args.request,
-        "failure_candidates": read(evidence_path)["items"][:30]
-        if evidence_path.exists()
-        else [],
+        "failure_candidates": read(evidence_path)["items"][:30] if evidence_path.exists() else [],
     }
-    plan, llm = propose_valid(
-        context, args, workspace.state["model"], workspace.fixture, old
-    )
+    plan, llm = propose_valid(context, args, workspace.state["model"], workspace.fixture, old)
     backup = workspace.snapshot()
     write(workspace.contract_root / "integration.json", plan["manifest"])
     (workspace.contract_root / entry).write_text(plan["usage"])
@@ -1797,17 +2157,11 @@ def replay(args):
     if result.returncode:
         print(result.stderr, end="")
         return result.returncode
-    rows = [
-        json.loads(line) for line in result.stdout.splitlines() if line.startswith("{")
-    ]
+    rows = [json.loads(line) for line in result.stdout.splitlines() if line.startswith("{")]
     write(workspace.root / ".mic/replay.json", rows)
     caught = [r for r in rows if r.get("verdict") == "caught"]
     if args.match_output:
-        caught = [
-            r
-            for r in caught
-            if any(f.startswith(args.match_output + ":") for f in r["bad_failures"])
-        ]
+        caught = [r for r in caught if any(f.startswith(args.match_output + ":") for f in r["bad_failures"])]
     return 0 if caught else 1
 
 
@@ -1826,48 +2180,46 @@ def publication_ready(workspace):
         "lock_sha256": workspace.lock_path,
         "manifest_sha256": workspace.contract_root / "integration.json",
         "usage_sha256": workspace.contract_root
-        / workspace.manifest["integrations"][proof.get("framework", "transformers")][
-            "entry_point"
-        ],
+        / workspace.manifest["integrations"][proof.get("framework", "transformers")]["entry_point"],
     }
     if not state.get("validated") or any(
-        proof.get(key) != hashlib.sha256(path.read_bytes()).hexdigest()
-        for key, path in paths.items()
+        proof.get(key) != hashlib.sha256(path.read_bytes()).hexdigest() for key, path in paths.items()
     ):
         raise ValueError(
             "Run tmic check on all declared targets after reviewing candidates; source or lock changes invalidate validation"
         )
     if list(workspace.expectations.rglob("*.candidate.json")):
-        raise ValueError(
-            "Unreviewed candidate baselines remain; run tmic review before publishing"
-        )
+        raise ValueError("Unreviewed candidate baselines remain; run tmic review before publishing")
     fingerprint = workspace.validation_fingerprint()
+    # Another fleet's integration (Sentence Transformers) that this workspace did not
+    # change is carried over from the Hub and needs no check here.
+    plan = carryover.plan(workspace)
     for framework, integration in workspace.manifest["integrations"].items():
-        if list(
-            (
-                workspace.contract_root / "integrations" / framework / "expectations"
-            ).rglob("*.candidate.json")
-        ):
+        if list((workspace.contract_root / "integrations" / framework / "expectations").rglob("*.candidate.json")):
             raise ValueError(f"Unreviewed {framework} candidate baselines remain")
+        if framework in plan and plan[framework] is None:
+            continue
         for variant in integration.get("variants", {"default": {}}):
             key = variant if framework == "transformers" else f"{framework}:{variant}"
-            if (
-                state.get("validations", {}).get(key, {}).get("fingerprint")
-                != fingerprint
-            ):
+            if state.get("validations", {}).get(key, {}).get("fingerprint") != fingerprint:
+                why = plan.get(framework)
                 raise ValueError(
                     "Every declared variant and integration needs a successful check; use tmic check --integration all --all-variants"
+                    + (f" ({framework}: {why})" if why not in (None, "primary") else "")
                 )
+    return plan
 
 
 def publish(args):
     workspace = Workspace(args.workspace)
-    publication_ready(workspace)
+    plan = publication_ready(workspace)
+    revision = workspace.lock["contracts"][workspace.state["contract"]]["integration"]["revision"]
     print(
         json.dumps(
             {
                 "contract": workspace.state["contract"],
                 "fixture": workspace.fixture,
+                "integrations": {name: carryover.describe(name, why, revision) for name, why in plan.items()},
                 "execute": args.execute,
                 "next": "tmic publish --execute, then tmic export --transformers-checkout PATH",
             }
@@ -1875,9 +2227,11 @@ def publish(args):
     )
     if not args.execute:
         return 0
-    result = backend.invoke(
-        "publish_mic", workspace.root, ["--private"] if args.private else []
-    )
+    options = ["--private"] if args.private else []
+    for name, why in plan.items():
+        if why is None:
+            options += ["--carry", name]
+    result = backend.invoke("publish_mic", workspace.root, options)
     workspace.save_state(validated=False)
     print("Run tmic check --all-variants on the published pins before export.")
     return result.returncode
@@ -1923,6 +2277,74 @@ def retire(args):
     return 0
 
 
+def environment(args):
+    """Move the fleets' pinned environment in one dataset commit; preview unless --execute.
+
+    Export refuses a model whose lock environment differs from its fleet, so a new
+    torch can only reach the fleets this way. Contracts and their baselines are left
+    as they are: re-measure them on the new environment, then copy it into each
+    workspace lock before the next export.
+    """
+    changes = {}
+    for item in args.packages:
+        package, sep, version = item.partition("=")
+        if not sep or not package or not version or "=" in version:
+            raise ValueError(f"--set takes PACKAGE=VERSION, got {item!r}")
+        if package in changes and changes[package] != version:
+            raise ValueError(f"{package} is set twice")
+        changes[package] = version
+    names = list(fleet.FILES) if args.fleet == "all" else [args.fleet]
+    revision = fleet.resolve()
+    locks = {name: read(fleet.download(name, revision)[0]) for name in names}
+    before = {name: dict(lock["environment"]) for name, lock in locks.items()}
+    if len({json.dumps(env, sort_keys=True) for env in before.values()}) > 1:
+        raise ValueError("The fleets pin different environments; move each with --fleet first")
+    current = next(iter(before.values()))
+    unknown = sorted(set(changes) - set(current))
+    if unknown:
+        raise ValueError(f"Not pinned by the fleet environment: {', '.join(unknown)}; only pinned packages can move")
+    moved = {
+        package: {"from": current[package], "to": version}
+        for package, version in changes.items()
+        if current[package] != version
+    }
+    if not moved:
+        raise ValueError(f"The fleet environment already pins these versions at {revision}")
+    for lock in locks.values():
+        lock["environment"].update(changes)
+    if args.execute:
+        operations = {}
+        for name, lock in locks.items():
+            operations.update(fleet.operations(name, lock))
+        commit = HfApi().create_commit(
+            repo_id=fleet.REPOSITORY,
+            repo_type="dataset",
+            parent_commit=revision,
+            operations=[
+                CommitOperationAdd(path_in_repo=p, path_or_fileobj=text.encode()) for p, text in operations.items()
+            ],
+            commit_message="Fleet environment: " + ", ".join(f"{p} {m['from']} -> {m['to']}" for p, m in moved.items()),
+        )
+        revision = commit.oid
+    print(
+        json.dumps(
+            {
+                "repository": fleet.REPOSITORY,
+                "fleets": names,
+                "changes": moved,
+                "environment": next(iter(locks.values()))["environment"],
+                "revision": revision,
+                "execute": args.execute,
+                "next": "Copy this environment into each workspace lock before its next export."
+                if args.execute
+                else "Review, then repeat with --execute to upload.",
+            },
+            indent=2,
+        )
+    )
+    return 0
+
+
 def export(args):
     workspace = Workspace(args.workspace)
     publication_ready(workspace)
@@ -1936,32 +2358,21 @@ def export(args):
     contract = source["contracts"][name]
     pins = [contract["integration"], *contract.get("fixtures", {}).values()]
     if any(p["revision"] == "unpublished" or not p.get("files_sha256") for p in pins):
-        raise ValueError(
-            "Publish immutable contract and fixture revisions before exporting to Transformers"
-        )
+        raise ValueError("Publish immutable contract and fixture revisions before exporting to Transformers")
     if workspace.contract_digest() != contract["integration"]["files_sha256"]:
-        raise ValueError(
-            "Local contract differs from its published pin; publish the reviewed source before export"
-        )
+        raise ValueError("Local contract differs from its published pin; publish the reviewed source before export")
     fleet_name = getattr(args, "fleet", "control")
     path, revision = fleet.download(fleet_name)
     if expected := getattr(args, "expected_revision", None):
         if revision != expected:
-            raise ValueError(
-                "Dataset changed since preview; review the current fleet before exporting"
-            )
+            raise ValueError("Dataset changed since preview; review the current fleet before exporting")
     old = read(path)
     destination_name = getattr(args, "contract_name", None) or name
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", destination_name):
         raise ValueError("Destination contract name must be a safe folder name")
     existing_names = set(old["contracts"])
-    if any(
-        n != destination_name and n.casefold() == destination_name.casefold()
-        for n in existing_names
-    ):
-        raise ValueError(
-            "Destination name differs only by case from an existing contract; use --contract-name"
-        )
+    if any(n != destination_name and n.casefold() == destination_name.casefold() for n in existing_names):
+        raise ValueError("Destination name differs only by case from an existing contract; use --contract-name")
     if old["environment"] != source["environment"]:
         differences = "; ".join(
             f"{key}: fleet={old['environment'].get(key, '<unset>')}, model={source['environment'].get(key, '<unset>')}"
@@ -1983,9 +2394,7 @@ def export(args):
     for repo, pin in contract.get("fixtures", {}).items():
         canonical = umbrella_references(canonical_references(repo))
         if current := clean.get("fixtures", {}).get(canonical):
-            renamed_targets[pin.get("target", repo.split("/")[-1])] = current.get(
-                "target", canonical.split("/")[-1]
-            )
+            renamed_targets[pin.get("target", repo.split("/")[-1])] = current.get("target", canonical.split("/")[-1])
 
     # Only this workspace's contract belongs to the update; keep other cases intact.
     known = old.setdefault("known_failures", {})
@@ -2005,8 +2414,7 @@ def export(args):
             repo_type="dataset",
             parent_commit=revision,
             operations=[
-                CommitOperationAdd(path_in_repo=path, path_or_fileobj=text.encode())
-                for path, text in files.items()
+                CommitOperationAdd(path_in_repo=path, path_or_fileobj=text.encode()) for path, text in files.items()
             ],
             commit_message=f"Update {destination_name} in the {fleet_name} fleet",
         )
@@ -2034,9 +2442,5 @@ def export(args):
 def pin(args):
     revision = fleet.resolve(args.revision)
     path = fleet.pin(args.transformers_checkout, revision)
-    print(
-        json.dumps(
-            {"repository": fleet.REPOSITORY, "revision": revision, "pin": str(path)}
-        )
-    )
+    print(json.dumps({"repository": fleet.REPOSITORY, "revision": revision, "pin": str(path)}))
     return 0

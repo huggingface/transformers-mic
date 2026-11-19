@@ -5,20 +5,14 @@ import subprocess
 import sys
 
 
-def collect(
-    model, model_type=None, repo="huggingface/transformers", limit=50, imported=None
-):
+def collect(model, model_type=None, repo="huggingface/transformers", limit=50, imported=None):
     if imported:
         with open(imported) as handle:
             rows = json.load(handle)
         if not isinstance(rows, list) or any(not isinstance(r, dict) for r in rows):
-            raise ValueError(
-                "History export must be a JSON list of issue/failure objects"
-            )
+            raise ValueError("History export must be a JSON list of issue/failure objects")
         return {"source": "import", "model": model, "items": rows, "complete": False}
-    terms = list(
-        dict.fromkeys([model.split("/")[-1], model_type or model.split("/")[-1]])
-    )
+    terms = list(dict.fromkeys([model.split("/")[-1], model_type or model.split("/")[-1]]))
     found = {}
     error = None
     for term in terms:
@@ -42,9 +36,7 @@ def collect(
                 # Candidates are leads, so a rate-limited search keeps what it
                 # found and says why it stopped; any other failure is an error.
                 if "rate limit" not in result.stderr.lower():
-                    raise ValueError(
-                        f"GitHub history query failed: {result.stderr.strip()}"
-                    )
+                    raise ValueError(f"GitHub history query failed: {result.stderr.strip()}")
                 error = result.stderr.strip()
                 print(f"tmic: GitHub history search stopped: {error}", file=sys.stderr)
                 continue

@@ -3,16 +3,16 @@
 import difflib
 import hashlib
 import json
-from pathlib import Path
 import shlex
 import sys
 import time
+from pathlib import Path
 
 from filelock import FileLock, Timeout
 from huggingface_hub.utils import validate_repo_id
 
-from . import batch, fleet, fixture_review, model_baselines, contract_repair, terminal
-from .interaction import Interaction, Pending, PROTOCOL_VERSION, load_answer
+from . import batch, contract_repair, fixture_review, fleet, model_baselines, terminal
+from .interaction import PROTOCOL_VERSION, Interaction, Pending, load_answer
 from .workspace import Workspace, primary_integration, read, write
 
 NEEDS_INPUT = 3
@@ -34,7 +34,6 @@ STAGES = (
 )
 
 
-
 def pre_contract_note(stage, log):
     """Why no repair was proposed: the build failed before the contract ran."""
     if stage != "build" or not Path(log).is_file():
@@ -47,6 +46,7 @@ def pre_contract_note(stage, log):
         "checkpoint-layout problem, not a contract one, so no repair was proposed. "
         "Report it with the log below. "
     )
+
 
 def ask(args, question, details, **kwargs):
     interaction = getattr(args, "_interaction", None)
@@ -71,9 +71,7 @@ def review_changed(args, workspace):
     """Changed baselines need an explicit decision and a recorded reason."""
     reviewed_source = workspace.contract_digest()
     for candidate in sorted(workspace.expectations.rglob("*.candidate.json")):
-        approved = candidate.with_name(
-            candidate.name.replace(".candidate.json", ".json")
-        )
+        approved = candidate.with_name(candidate.name.replace(".candidate.json", ".json"))
         before = approved.read_text() if approved.exists() else ""
         after = candidate.read_text()
         detail = "\n".join(
@@ -102,9 +100,7 @@ def review_changed(args, workspace):
             or candidate.read_text() != after
             or (approved.read_text() if approved.exists() else "") != before
         ):
-            raise ValueError(
-                "Baseline changed during review; rerun to review the current files"
-            )
+            raise ValueError("Baseline changed during review; rerun to review the current files")
         audit = workspace.root / ".mic/automation-reviews.json"
         receipts = read(audit) if audit.exists() else []
         receipts.append(
@@ -202,9 +198,7 @@ def locked_run(args):
         with lock.acquire(timeout=0):
             return run_locked(args, root, answer)
     except Timeout:
-        raise ValueError(
-            f"Another tmic run is using {root}; wait for it to finish"
-        ) from None
+        raise ValueError(f"Another tmic run is using {root}; wait for it to finish") from None
 
 
 def run_locked(args, root, answer):
@@ -240,9 +234,7 @@ def run_locked(args, root, answer):
         }
     )
     if answer is not None and not state.get("pending_question"):
-        raise ValueError(
-            "There is no pending question; resume without --answer to obtain one"
-        )
+        raise ValueError("There is no pending question; resume without --answer to obtain one")
     if state["config"] != config:
         raise ValueError(
             "Automation options differ from this workspace; reuse the original options or choose another --out"
@@ -268,17 +260,11 @@ def run_locked(args, root, answer):
         state["next_stage"] = STAGES[0]
         state.pop("dataset_revision", None)
     state["execution"] = execution
-    resume = shlex.join(
-        ["tmic", "run", args.model, "--out", str(root), *resume_options(args)]
-    )
+    resume = shlex.join(["tmic", "run", args.model, "--out", str(root), *resume_options(args)])
     state["resume"] = resume
 
     def fingerprint():
-        return (
-            workspace.validation_fingerprint()
-            if workspace.state_path.exists()
-            else None
-        )
+        return workspace.validation_fingerprint() if workspace.state_path.exists() else None
 
     def save():
         state["fingerprint"] = fingerprint()
@@ -302,11 +288,7 @@ def run_locked(args, root, answer):
     output = sys.stderr if args.mode == "agent" else sys.stdout
 
     if args.mode == "human":
-        location = (
-            "local hardware"
-            if args.baseline_execution == "local"
-            else "cloud CPU + CUDA"
-        )
+        location = "local hardware" if args.baseline_execution == "local" else "cloud CPU + CUDA"
         print(
             "\n"
             + terminal.color(f"MIC · {args.model}", "title")
@@ -338,19 +320,12 @@ def run_locked(args, root, answer):
             return []
         steps = list(STAGES[STAGES.index(start) :])
         if args.local_only:
-            steps = [
-                step
-                for step in steps
-                if STAGES.index(step) < STAGES.index("publish-preview")
-            ]
+            steps = [step for step in steps if STAGES.index(step) < STAGES.index("publish-preview")]
         if not args.transformers_checkout:
             steps = [step for step in steps if step != "pin"]
         if (
             workspace.state_path.exists()
-            and "fixtures"
-            not in workspace.manifest["integrations"][
-                primary_integration(workspace.manifest)
-            ]["targets"]
+            and "fixtures" not in workspace.manifest["integrations"][primary_integration(workspace.manifest)]["targets"]
         ):
             steps = [step for step in steps if step != "auto"]
         if workspace.state_path.exists() and not fixture_review.needed(workspace):
@@ -362,10 +337,7 @@ def run_locked(args, root, answer):
         if fixture_review.needed(workspace):
             if fixture_review.stale(workspace):
                 return "shrink"
-            if (
-                state.get("reviewed_fixture_sha256")
-                != fixture_review.record(workspace)["review_sha256"]
-            ):
+            if state.get("reviewed_fixture_sha256") != fixture_review.record(workspace)["review_sha256"]:
                 return "fixture-review"
         if state.get("reviewed_source_sha256") != workspace.contract_digest():
             return "source"
@@ -425,12 +397,7 @@ def run_locked(args, root, answer):
                 print("\n".join(text.splitlines()[-60:]), file=output, flush=True)
             else:
                 print(
-                    (
-                        terminal.color(prefix + " " + label + " · failed", "error")
-                        + "\n"
-                        if activity.enabled
-                        else ""
-                    )
+                    (terminal.color(prefix + " " + label + " · failed", "error") + "\n" if activity.enabled else "")
                     + "  Failed: "
                     + terminal.failure(text)
                     + f"\n  Full log: {terminal.short_path(log)}",
@@ -439,14 +406,10 @@ def run_locked(args, root, answer):
         elif args.mode == "human":
             progress = ""
             if display_plan and name in display_plan:
-                progress = (
-                    terminal.bar(display_plan.index(name) + 1, len(display_plan)) + " "
-                )
+                progress = terminal.bar(display_plan.index(name) + 1, len(display_plan)) + " "
             print(
                 (prefix + " " + label + " · " if activity.enabled else "  ")
-                + terminal.color(
-                    progress + f"Done ({time.monotonic() - started:.1f}s)", "ok"
-                ),
+                + terminal.color(progress + f"Done ({time.monotonic() - started:.1f}s)", "ok"),
                 flush=True,
             )
         return result["exit_code"], log
@@ -535,10 +498,7 @@ def run_locked(args, root, answer):
             and pending["kind"] == "retry"
             and pending["context"].get("workspace_sha256") == fingerprint()
         ):
-            context = {
-                key: pending["context"][key]
-                for key in ("failed_stage", "exit_code", "log")
-            }
+            context = {key: pending["context"][key] for key in ("failed_stage", "exit_code", "log")}
             context["log"] = file_snapshot(Path(context["log"]["path"]))
             ask(
                 args,
@@ -612,17 +572,14 @@ def run_locked(args, root, answer):
             state.pop("dataset_revision", None)
         destination = {"fleet": args.fleet, "contract_name": args.contract_name}
         if state.get("destination", destination) != destination:
-            if state["next_stage"] == "done" or STAGES.index(
-                state["next_stage"]
-            ) >= STAGES.index("export-preview"):
+            if state["next_stage"] == "done" or STAGES.index(state["next_stage"]) >= STAGES.index("export-preview"):
                 state["next_stage"] = "export-preview"
                 state.pop("dataset_revision", None)
         state["destination"] = destination
         if (
             state["next_stage"] == "done"
             and args.transformers_checkout
-            and state.get("pin_checkout")
-            != str(Path(args.transformers_checkout).resolve())
+            and state.get("pin_checkout") != str(Path(args.transformers_checkout).resolve())
         ):
             state["next_stage"] = "pin"
         save()
@@ -633,9 +590,7 @@ def run_locked(args, root, answer):
                 state["next_stage"] = gate
                 save()
             name = state["next_stage"]
-            if args.local_only and STAGES.index(name) >= STAGES.index(
-                "publish-preview"
-            ):
+            if args.local_only and STAGES.index(name) >= STAGES.index("publish-preview"):
                 state["status"] = "validated"
                 save()
                 emit_result(
@@ -658,9 +613,7 @@ def run_locked(args, root, answer):
                     if state.get("reviewed_fixture_sha256") != data["review_sha256"]:
                         if args.mode == "human":
                             print(
-                                "\n"
-                                + terminal.color(step_prefix(name), "title")
-                                + " Review tiny model",
+                                "\n" + terminal.color(step_prefix(name), "title") + " Review tiny model",
                                 flush=True,
                             )
                         note = (
@@ -677,30 +630,20 @@ def run_locked(args, root, answer):
                             kind="fixture-review",
                             context={
                                 "fixture": fixture_review.summary(data),
-                                "config": file_snapshot(
-                                    fixture_review.folder(workspace) / "config.json"
-                                ),
-                                "review": file_snapshot(
-                                    workspace.root / fixture_review.RECORD
-                                ),
+                                "config": file_snapshot(fixture_review.folder(workspace) / "config.json"),
+                                "review": file_snapshot(workspace.root / fixture_review.RECORD),
                                 "page": str(page),
                                 "headline": fixture_review.headline(data),
                             },
                         )
-                        if (
-                            answer == "edit"
-                            or before != fingerprint()
-                            or fixture_review.stale(workspace)
-                        ):
+                        if answer == "edit" or before != fingerprint() or fixture_review.stale(workspace):
                             continue
                         state["reviewed_fixture_sha256"] = data["review_sha256"]
             elif name == "source":
                 if state.get("reviewed_source_sha256") != workspace.contract_digest():
                     if args.mode == "human":
                         print(
-                            "\n"
-                            + terminal.color(step_prefix(name), "title")
-                            + " Review contract",
+                            "\n" + terminal.color(step_prefix(name), "title") + " Review contract",
                             flush=True,
                         )
                     review_source()
@@ -710,9 +653,7 @@ def run_locked(args, root, answer):
             elif name == "build":
                 code, log = stage(
                     name,
-                    ["build", "--rebuild"]
-                    if state.get("rebuild_after_repair")
-                    else ["build"],
+                    ["build", "--rebuild"] if state.get("rebuild_after_repair") else ["build"],
                 )
                 if not code:
                     state.pop("rebuild_after_repair", None)
@@ -721,17 +662,13 @@ def run_locked(args, root, answer):
                         # change the reviewed config sends the review back.
                         code, log = stage(name, ["fixture"])
             elif name == "auto":
-                if (
-                    "fixtures"
-                    in workspace.manifest["integrations"][
-                        primary_integration(workspace.manifest)
-                    ]["targets"]
-                ):
-                    code, log = stage(name, ["auto"])
+                if "fixtures" in workspace.manifest["integrations"][primary_integration(workspace.manifest)]["targets"]:
+                    code, log = stage(
+                        name,
+                        ["auto", "--match-cloud"] if args.baseline_execution == "cloud" else ["auto"],
+                    )
                     if not code and args.baseline_execution == "cloud":
-                        contract = workspace.lock["contracts"][
-                            workspace.state["contract"]
-                        ]
+                        contract = workspace.lock["contracts"][workspace.state["contract"]]
                         smoke = [
                             "check",
                             "--all-variants",
@@ -746,9 +683,7 @@ def run_locked(args, root, answer):
                         code, log = stage(name, smoke)
             elif name in ("record", "check", "published-check"):
                 if args.baseline_execution == "cloud":
-                    cloud_root = cloud_collection(
-                        folder, workspace, args.baseline_transport
-                    )
+                    cloud_root = cloud_collection(folder, workspace, args.baseline_transport)
                     options = [
                         "baselines",
                         "run" if name == "record" else "verify-model",
@@ -798,8 +733,7 @@ def run_locked(args, root, answer):
                 ask(
                     args,
                     "Publish the checked MIC model and expectations publicly to the Hub?",
-                    f"Model: {workspace.fixture}\nWorkspace: {root}\n"
-                    f"Preview: {folder / 'logs/publish-preview.log'}",
+                    f"Model: {workspace.fixture}\nWorkspace: {root}\nPreview: {folder / 'logs/publish-preview.log'}",
                     kind="model-publication",
                     context={
                         "repository": workspace.fixture,
@@ -869,14 +803,10 @@ def run_locked(args, root, answer):
                         ],
                     )
                     if not code:
-                        state["pin_checkout"] = str(
-                            Path(args.transformers_checkout).resolve()
-                        )
+                        state["pin_checkout"] = str(Path(args.transformers_checkout).resolve())
             if code:
                 if (
-                    contract_repair.eligible(
-                        workspace, name, log, state["stages"][name]["command"]
-                    )
+                    contract_repair.eligible(workspace, name, log, state["stages"][name]["command"])
                     and len(state.get("repairs", [])) < args.max_contract_repairs
                 ):
                     print(
@@ -908,9 +838,7 @@ def run_locked(args, root, answer):
                     if state.get("repairs"):
                         print(
                             "tmic: repair was not applied: "
-                            + state["repairs"][-1].get(
-                                "error", "proposal became stale"
-                            ),
+                            + state["repairs"][-1].get("error", "proposal became stale"),
                             file=output,
                             flush=True,
                         )
@@ -963,9 +891,7 @@ def run_locked(args, root, answer):
         )
         return 0
     except Pending as pending:
-        state.update(
-            status="needs-input", question=pending.question, details=pending.details
-        )
+        state.update(status="needs-input", question=pending.question, details=pending.details)
         save()
         emit_result(
             {

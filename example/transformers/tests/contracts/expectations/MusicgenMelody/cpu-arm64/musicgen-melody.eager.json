@@ -1,18 +1,20 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/MusicgenMelody-integration",
-  "contract_revision": "unpublished",
+  "contract_name": "MusicgenMelody",
+  "contract_revision": "464ee6197b072a8525754caca250d9e0ba2c75e8",
   "framework": "transformers",
   "variant": "eager",
   "target": "musicgen-melody",
   "kind": "checkpoint",
   "revision": "68d653a95788ec0d2b0abccab22c0b3a200c2d90",
   "environment": {
-   "python": "3.10.19",
-   "transformers": "5.16.0.dev0",
-   "torch": "2.11.0",
-   "torchvision": "0.26.0",
-   "torchaudio": "2.11.0",
+   "python": "3.11.14",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0",
+   "torchvision": "0.29.2",
+   "torchaudio": "2.11.1",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
    "pillow": "12.2.0",
@@ -30,8 +32,9 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 429.07,
-  "platform": "cpu-arm64"
+  "seconds": 56.98,
+  "platform": "cpu-arm64",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {
@@ -292,7 +295,7 @@
    ]
   ],
   "training": {
-   "loss": 10.236822128295898,
+   "loss": 10.236824035644531,
    "gradients": {
     "text_encoder.encoder.block.0.layer.0.SelfAttention.q.weight": true,
     "audio_enc_to_dec_proj.weight": true,

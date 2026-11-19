@@ -1,18 +1,23 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/BERT-integration",
-  "contract_revision": "e8e23b07e9e13bebf6f1f4ba20298157333f279d",
+  "contract_name": "BERT",
+  "contract_revision": "6a667eafaa05f8ff3c07e7698ce768d6271b1a79",
   "framework": "transformers",
   "variant": "eager",
   "target": "mic-bert-base-uncased-slim",
   "kind": "fixture",
   "revision": "a1f96617d0b6c9f76ed6822ec843c922da95878b",
+  "source_model": "google-bert/bert-base-uncased",
+  "weights": "random",
+  "fixture_repo": "hf-internal-testing/mic-bert-base-uncased-slim",
   "environment": {
-   "python": "3.10.12",
-   "transformers": "5.19.0.dev0",
-   "torch": "2.11.0+cu128",
-   "torchvision": "0.26.0+cu128",
-   "torchaudio": "2.11.0+cu128",
+   "python": "3.11.18",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0+cu132",
+   "torchvision": "0.29.2+cu132",
+   "torchaudio": "2.11.1+cu132",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
    "pillow": "12.2.0",
@@ -30,8 +35,9 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 6.71,
-  "platform": "cuda"
+  "seconds": 6.68,
+  "platform": "cuda",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {
@@ -53,10 +59,10 @@
   ],
   "answer_logits": [
    [
-    0.007818933576345444,
-    0.37318211793899536,
-    0.08803120255470276,
-    0.026554349809885025
+    0.007818958722054958,
+    0.37318214774131775,
+    0.08803118020296097,
+    0.026554327458143234
    ],
    [
     0.008690956979990005,
@@ -65,16 +71,16 @@
     0.026254914700984955
    ],
    [
-    0.008095301687717438,
+    0.008095316588878632,
     0.3739738464355469,
     0.08767396956682205,
     0.027107585221529007
    ],
    [
-    0.13014265894889832,
-    0.2742496132850647,
-    -0.06490706652402878,
-    0.03800759091973305
+    0.13014261424541473,
+    0.2742495834827423,
+    -0.0649070218205452,
+    0.038007624447345734
    ]
   ],
   "training": {

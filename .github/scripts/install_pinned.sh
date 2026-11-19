@@ -1,14 +1,17 @@
 #!/usr/bin/env bash
 # Install a Transformers commit and the fleet lock's pinned environment.
 #
-#   PY=python FETCH=<sha or pull/<n>/head> [SHA=<expected sha>] [TORCH_INDEX=cu128] .github/scripts/install_pinned.sh
+#   PY=python FETCH=<sha or pull/<n>/head> [SHA=<expected sha>] [TORCH_INDEX=cu132] [LOCK=<fleet lock>] .github/scripts/install_pinned.sh
 #
+# LOCK defaults to the in-tree catalog lock; nightly.yml and shadow.yml pass the
+# Hub control fleet's lock (control_locks.py), so they run in the environment the
+# fleet's baselines were measured in.
 # torch, torchvision, and torchaudio come from PyTorch's index for TORCH_INDEX
-# (default cpu; cu128 for the same versions built with CUDA); packages the lock
+# (default cpu; cu132 for the same versions built with CUDA, as Transformers CI); packages the lock
 # does not pin are left as Transformers resolves them.
 set -euo pipefail
 
-LOCK=example/transformers/tests/contracts/fleet.lock
+LOCK=${LOCK:-example/transformers/tests/contracts/fleet.lock}
 requirements() { "$PY" -c 'import json, sys
 env = json.load(open(sys.argv[1]))["environment"]
 torch = {"torch", "torchvision", "torchaudio"}

@@ -10,12 +10,13 @@ import math
 import platform
 import time
 from pathlib import Path
+
 import torch
 import transformers
 from huggingface_hub import snapshot_download
 from transformers import (
-    WhisperForConditionalGeneration,
     WhisperForCausalLM,
+    WhisperForConditionalGeneration,
     WhisperProcessor,
     set_seed,
 )
@@ -25,9 +26,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--model", choices=["checkpoint", "overfit", "random"], required=True
-    )
+    parser.add_argument("--model", choices=["checkpoint", "overfit", "random"], required=True)
     parser.add_argument("--random-fixture", type=Path)
     parser.add_argument("--main-checkpoint", choices=["openai/whisper-large-v2"])
     parser.add_argument("--dtype", choices=["float32", "float16"], default="float32")
@@ -41,21 +40,11 @@ def main():
     torch.set_num_threads(2)
     torch.use_deterministic_algorithms(True)
     set_seed(0)
-    lock = json.loads(
-        (ROOT / "example/transformers/tests/contracts/fleet.lock").read_text()
-    )["contracts"]["Whisper"]
-    repo = (
-        "openai/whisper-tiny"
-        if args.model == "checkpoint"
-        else "hf-internal-testing/proto-whisper-tiny-slim"
-    )
+    lock = json.loads((ROOT / "example/transformers/tests/contracts/fleet.lock").read_text())["contracts"]["Whisper"]
+    repo = "openai/whisper-tiny" if args.model == "checkpoint" else "hf-internal-testing/proto-whisper-tiny-slim"
     if args.main_checkpoint and args.model != "checkpoint":
         parser.error("--main-checkpoint requires --model checkpoint")
-    revision = (
-        lock["checkpoints"][repo]
-        if args.model == "checkpoint"
-        else lock["fixtures"][repo]["revision"]
-    )
+    revision = lock["checkpoints"][repo] if args.model == "checkpoint" else lock["fixtures"][repo]["revision"]
     if args.main_checkpoint:
         repo = args.main_checkpoint
         revision = "ae4642769ce2ad8fc292556ccea8e901f1530655"
@@ -103,22 +92,12 @@ def main():
         .to(args.device)
     )
     tokenizer = processor.tokenizer
-    tokenizer.set_prefix_tokens(
-        language="english", task="transcribe", predict_timestamps=False
-    )
+    tokenizer.set_prefix_tokens(language="english", task="transcribe", predict_timestamps=False)
     sr = 16000
     half = torch.arange(sr // 2) / sr
-    tone = (
-        torch.cat([torch.sin(2 * math.pi * f * half) for f in (220, 880)])
-        .mul(0.5)
-        .numpy()
-    )
-    features = processor(tone, sampling_rate=sr, return_tensors="pt").input_features.to(
-        args.device, dtype
-    )
-    silence = processor(
-        tone * 0, sampling_rate=sr, return_tensors="pt"
-    ).input_features.to(args.device, dtype)
+    tone = torch.cat([torch.sin(2 * math.pi * f * half) for f in (220, 880)]).mul(0.5).numpy()
+    features = processor(tone, sampling_rate=sr, return_tensors="pt").input_features.to(args.device, dtype)
+    silence = processor(tone * 0, sampling_rate=sr, return_tensors="pt").input_features.to(args.device, dtype)
     causal = (
         WhisperForCausalLM.from_pretrained(
             assistant_folder,
@@ -159,9 +138,7 @@ def main():
                                 begin_index=getattr(p, "begin_index", None),
                                 suppress_tokens=(
                                     p.suppress_tokens.cpu().tolist()
-                                    if torch.is_tensor(
-                                        getattr(p, "suppress_tokens", None)
-                                    )
+                                    if torch.is_tensor(getattr(p, "suppress_tokens", None))
                                     else getattr(p, "suppress_tokens", None)
                                 ),
                             )
@@ -185,9 +162,9 @@ def main():
         import soundfile as sf
 
         speech, rate = sf.read(args.speech, dtype="float32")
-        speech_features = processor(
-            speech, sampling_rate=rate, return_tensors="pt"
-        ).input_features.to(args.device, dtype)
+        speech_features = processor(speech, sampling_rate=rate, return_tensors="pt").input_features.to(
+            args.device, dtype
+        )
         cases.append(("speech", speech_features, None))
     for name, audio, text in cases:
         for assistant_name, assistant in [
@@ -202,15 +179,11 @@ def main():
                 continue
             observed.clear()
             set_seed(0)
-            kwargs = dict(
-                language="en", task="transcribe", max_new_tokens=64, do_sample=False
-            )
+            kwargs = dict(language="en", task="transcribe", max_new_tokens=64, do_sample=False)
             if assistant is not None:
                 kwargs["assistant_model"] = assistant
             if text is not None:
-                kwargs["prompt_ids"] = processor.get_prompt_ids(
-                    text, return_tensors="pt"
-                ).to(args.device)
+                kwargs["prompt_ids"] = processor.get_prompt_ids(text, return_tensors="pt").to(args.device)
             start = time.perf_counter()
             with torch.no_grad():
                 result = model.generate(audio, **kwargs)
@@ -239,9 +212,7 @@ def main():
             device=args.device,
             gpu=torch.cuda.get_device_name(0) if args.device == "cuda" else None,
         ),
-        speech_sha256=None
-        if args.speech is None
-        else hashlib.sha256(args.speech.read_bytes()).hexdigest(),
+        speech_sha256=None if args.speech is None else hashlib.sha256(args.speech.read_bytes()).hexdigest(),
         assistant_repo="openai/whisper-tiny" if args.main_checkpoint else repo,
         dtype=args.dtype,
         rows=rows,

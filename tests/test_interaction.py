@@ -11,30 +11,19 @@ def test_agent_baseline_answer_requires_reason_and_is_single_use():
 
     interaction = Interaction("agent", state, lambda: None, context)
     with pytest.raises(Pending) as first:
-        interaction.ask(
-            "Approve baseline?", "diff", kind="baseline-change", reason=True
-        )
+        interaction.ask("Approve baseline?", "diff", kind="baseline-change", reason=True)
     question = first.value.record
     interaction.answer = {"question_id": question["question_id"], "answer": "approve"}
     with pytest.raises(Pending) as missing:
-        interaction.ask(
-            "Approve baseline?", "diff", kind="baseline-change", reason=True
-        )
+        interaction.ask("Approve baseline?", "diff", kind="baseline-change", reason=True)
     assert "reason" in missing.value.error
     interaction.answer["reason"] = "Measured correction on the reference runtime"
     old_answer = interaction.answer.copy()
-    assert (
-        interaction.ask(
-            "Approve baseline?", "diff", kind="baseline-change", reason=True
-        )
-        == old_answer["reason"]
-    )
+    assert interaction.ask("Approve baseline?", "diff", kind="baseline-change", reason=True) == old_answer["reason"]
     assert not state.get("pending_question") and len(state["decisions"]) == 1
     interaction.answer = old_answer
     with pytest.raises(Pending) as replay:
-        interaction.ask(
-            "Approve baseline?", "diff", kind="baseline-change", reason=True
-        )
+        interaction.ask("Approve baseline?", "diff", kind="baseline-change", reason=True)
     assert "already been used" in replay.value.error
     assert replay.value.record["question_id"] != question["question_id"]
 
@@ -83,22 +72,13 @@ def test_always_approves_later_human_questions_and_records_authorization(monkeyp
     monkeypatch.setattr("builtins.input", choose)
     state = {}
     interaction = Interaction("human", state, lambda: None, lambda: {})
-    assert (
-        interaction.ask("Review contract?", "source", kind="source-review") == "approve"
-    )
+    assert interaction.ask("Review contract?", "source", kind="source-review") == "approve"
     authorization = state["decisions"][0]["question_id"]
-    assert (
-        interaction.ask("Publish model?", "preview", kind="model-publication")
-        == "approve"
-    )
-    reason = interaction.ask(
-        "Approve baseline?", "diff", kind="baseline-change", reason=True
-    )
+    assert interaction.ask("Publish model?", "preview", kind="model-publication") == "approve"
+    reason = interaction.ask("Approve baseline?", "diff", kind="baseline-change", reason=True)
     assert "always yes" in reason
     assert len(prompts) == 1 and "A=always" in prompts[0]
-    assert all(
-        d["authorization_question_id"] == authorization for d in state["decisions"]
-    )
+    assert all(d["authorization_question_id"] == authorization for d in state["decisions"])
     # A fresh invocation does not inherit a previous process's blanket approval.
     monkeypatch.setattr("sys.stdin.isatty", lambda: False)
     fresh = Interaction("human", state, lambda: None, lambda: {})
@@ -110,9 +90,7 @@ def test_always_stops_unchanged_retry_loop_even_if_log_changes(monkeypatch):
     monkeypatch.setattr("sys.stdin.isatty", lambda: True)
     monkeypatch.setattr("builtins.input", lambda _: "a")
     state = {}
-    interaction = Interaction(
-        "human", state, lambda: None, lambda: {"workspace_sha256": "unchanged"}
-    )
+    interaction = Interaction("human", state, lambda: None, lambda: {"workspace_sha256": "unchanged"})
     interaction.ask("Start?", "model")
     for version in ("first log", "second log"):
         assert (

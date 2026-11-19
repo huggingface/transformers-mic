@@ -21,9 +21,7 @@ def decision(build, requested="auto", readable=False, reused=False):
         # Legacy published fixtures have reviewed expectations but older build
         # metadata. Reusing them is allowed; rebuilding still needs new gates.
         if not build.get("gate"):
-            accepted = requested in ("auto", weights) and (
-                not readable or weights == "overfit"
-            )
+            accepted = requested in ("auto", weights) and (not readable or weights == "overfit")
         reason = "Reuse the pinned fixture; validate the new usage path before considering retraining."
     elif weights == "real":
         reason = "The source is small enough to be the fixture: its trained weights pass the sensitivity and numeric-health gates."

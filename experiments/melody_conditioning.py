@@ -32,9 +32,7 @@ PROMPTS = [
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--model", choices=("checkpoint", "overfit", "random"), required=True
-    )
+    parser.add_argument("--model", choices=("checkpoint", "overfit", "random"), required=True)
     parser.add_argument("--random-fixture", type=Path)
     parser.add_argument("--build", required=True)
     parser.add_argument("--output", type=Path, required=True)
@@ -42,9 +40,7 @@ def main():
     parser.add_argument("--max-new-tokens", type=int, default=8)
     parser.add_argument("--cases", nargs="+", help="run only these named input cases")
     parser.add_argument("--threads", type=int, default=2)
-    parser.add_argument(
-        "--skip-loss", action="store_true", help="generation-only checkpoint probes"
-    )
+    parser.add_argument("--skip-loss", action="store_true", help="generation-only checkpoint probes")
     parser.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
     args = parser.parse_args()
     if args.model == "random" and args.random_fixture is None:
@@ -53,20 +49,12 @@ def main():
     torch.set_num_threads(args.threads)
     torch.use_deterministic_algorithms(True)
     set_seed(0)
-    lock = json.loads(
-        (ROOT / "example/transformers/tests/contracts/fleet.lock").read_text()
-    )
+    lock = json.loads((ROOT / "example/transformers/tests/contracts/fleet.lock").read_text())
     contract = lock["contracts"]["MusicgenMelody"]
     repo = (
-        "facebook/musicgen-melody"
-        if args.model == "checkpoint"
-        else "hf-internal-testing/proto-musicgen-melody-slim"
+        "facebook/musicgen-melody" if args.model == "checkpoint" else "hf-internal-testing/proto-musicgen-melody-slim"
     )
-    revision = (
-        contract["checkpoints"][repo]
-        if args.model == "checkpoint"
-        else contract["fixtures"][repo]["revision"]
-    )
+    revision = contract["checkpoints"][repo] if args.model == "checkpoint" else contract["fixtures"][repo]["revision"]
     folder = (
         args.random_fixture
         if args.model == "random"
@@ -84,19 +72,10 @@ def main():
         if build["weights"] != ("random" if args.model == "random" else "overfit"):
             raise ValueError("Fixture weight kind does not match --model")
         expected = build["sha256"]["model.safetensors"]
-        if (
-            hashlib.sha256((folder / "model.safetensors").read_bytes()).hexdigest()
-            != expected
-        ):
+        if hashlib.sha256((folder / "model.safetensors").read_bytes()).hexdigest() != expected:
             raise ValueError("Fixture weights do not match build.json")
     processor = AutoProcessor.from_pretrained(folder, local_files_only=True)
-    model = (
-        MusicgenMelodyForConditionalGeneration.from_pretrained(
-            folder, local_files_only=True
-        )
-        .eval()
-        .to(args.device)
-    )
+    model = MusicgenMelodyForConditionalGeneration.from_pretrained(folder, local_files_only=True).eval().to(args.device)
     # Observe the codes actually sent to EnCodec. Score argmaxes also contain
     # positions later removed by the delay mask; do not mistake those for audio.
     decoded_codes = []
@@ -201,17 +180,8 @@ def main():
                     return_dict_in_generate=True,
                     output_scores=True,
                 )
-                codes = (
-                    torch.stack(generated.scores)
-                    .argmax(-1)
-                    .reshape(len(generated.scores), 2, -1)
-                    .permute(1, 2, 0)
-                )
-                loss = (
-                    None
-                    if args.skip_loss
-                    else model(**batch, labels=labels).loss.item()
-                )
+                codes = torch.stack(generated.scores).argmax(-1).reshape(len(generated.scores), 2, -1).permute(1, 2, 0)
+                loss = None if args.skip_loss else model(**batch, labels=labels).loss.item()
             key = f"guidance={guidance:g}/{name}"
             if args.device == "cuda":
                 torch.cuda.synchronize()

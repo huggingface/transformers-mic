@@ -1,18 +1,23 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/T5-integration",
-  "contract_revision": "unpublished",
+  "contract_name": "T5",
+  "contract_revision": "2fe60bcd6fbdf615d93cd1599a5776459e7646bf",
   "framework": "transformers",
   "variant": "default",
   "target": "mic-umt5-small-slim",
   "kind": "fixture",
-  "revision": "bcf49ff61123021fec581f72120001f396cb0b59",
+  "revision": "5c2db1c75f56bce8b4c200734810eb07f29bfcc3",
+  "source_model": "google/umt5-small",
+  "weights": "random",
+  "fixture_repo": "hf-internal-testing/mic-umt5-small-slim",
   "environment": {
-   "python": "3.10.19",
-   "transformers": "5.16.0.dev0",
-   "torch": "2.11.0",
-   "torchvision": "0.26.0",
-   "torchaudio": "2.11.0",
+   "python": "3.11.14",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0",
+   "torchvision": "0.29.2",
+   "torchaudio": "2.11.1",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
    "pillow": "12.2.0",
@@ -25,12 +30,14 @@
    "soundfile": "0.13.1",
    "scipy": "1.15.3",
    "local_patches": [
+    "config-field-generation-params",
     "masked-spec-embed-init",
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 0.76,
-  "platform": "cpu-arm64"
+  "seconds": 2.69,
+  "platform": "cpu-arm64",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {
@@ -110,17 +117,17 @@
    [
     -13.114486694335938,
     -12.09228801727295,
-    -13.72606086730957,
-    -12.221919059753418,
-    -12.13330078125,
+    -13.726059913635254,
+    -12.221920013427734,
+    -12.133299827575684,
     -11.019336700439453,
     0.0
    ],
    [
     -12.420158386230469,
-    -12.82443904876709,
-    -13.647567749023438,
-    -13.477910995483398,
+    -12.824438095092773,
+    -13.647568702697754,
+    -13.477911949157715,
     -12.971185684204102,
     -9.5980224609375,
     -12.954094886779785
@@ -128,10 +135,10 @@
    [
     -12.416688919067383,
     -14.566019058227539,
-    -14.67101001739502,
+    -14.671009063720703,
     -12.052458763122559,
-    -13.04535961151123,
-    -12.434401512145996,
+    -13.045358657836914,
+    -12.43440055847168,
     0.0
    ],
    [
@@ -149,7 +156,7 @@
    "Hello, world! How are you?"
   ],
   "training": {
-   "loss": 12.861258506774902,
+   "loss": 12.861257553100586,
    "gradients": {
     "encoder.block.0.layer.0.SelfAttention.q.weight": true,
     "decoder.block.0.layer.1.EncDecAttention.q.weight": true

@@ -1,6 +1,10 @@
-import sys, time, requests, torch
+import sys
+import time
+
+import requests
+import torch
 from PIL import Image
-from transformers import AutoProcessor, AutoModelForMultimodalLM
+from transformers import AutoModelForMultimodalLM, AutoProcessor
 
 model_id = sys.argv[1]
 url = "https://huggingface.co/datasets/huggingface/documentation-images/resolve/main/transformers/tasks/car.jpg"
@@ -8,7 +12,7 @@ image = Image.open(requests.get(url, stream=True).raw)
 t0 = time.time()
 processor = AutoProcessor.from_pretrained(model_id)
 model = AutoModelForMultimodalLM.from_pretrained(model_id)
-print(f"load {time.time()-t0:.1f}s {type(model).__name__}")
+print(f"load {time.time() - t0:.1f}s {type(model).__name__}")
 for task in ["<CAPTION>", "<OD>"]:
     inputs = processor(text=task, images=image, return_tensors="pt")
     with torch.inference_mode():

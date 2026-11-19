@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "transformers-mic"
-version = "0.1.2"
+version = "0.1.3"
 description = "Build and validate model integration contracts and slim fixtures for Transformers"
 readme = "README.md"
 license = "Apache-2.0"
@@ -27,8 +27,8 @@ classifiers = [
 dependencies = ["huggingface-hub>=1.32", "jsonschema>=4.23", "filelock>=3"]
 
 [project.optional-dependencies]
-runtime = ["transformers>=5", "torch>=2.11", "torchvision", "numpy", "pillow", "soundfile", "librosa", "scipy", "safetensors", "sentencepiece", "protobuf", "accelerate", "sacremoses", "mistral-common", "fugashi", "unidic-lite", "timm"]
-dev = ["pytest>=8", "build", "twine", "sentencepiece"]
+runtime = ["transformers>=5", "torch>=2.11", "torchvision", "torchaudio", "numpy", "pillow", "soundfile", "librosa", "scipy", "safetensors", "sentencepiece", "protobuf", "accelerate", "sacremoses", "mistral-common", "fugashi", "unidic-lite", "num2words", "timm"]
+dev = ["pytest>=8", "build", "twine", "sentencepiece", "ruff==0.17.1"]
 sentence-transformers = ["sentence-transformers>=6.2"]
 
 [project.scripts]
@@ -48,3 +48,23 @@ testpaths = ["tests"]
 
 [tool.setuptools.package-data]
 transformers_mic = ["consolidation.json"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+# Python only: Markdown code blocks (usage.md in contracts) are data, not code to restyle.
+extend-exclude = ["*.md"]
+
+[tool.ruff.lint]
+# An explicit list, so a ruff upgrade does not change what CI enforces.
+select = ["E", "F", "W", "I", "UP"]
+ignore = [
+    "E501",  # the formatter wraps code; long strings and comments stay readable as they are
+    "E731",  # short lambdas as test stubs
+]
+
+[tool.ruff.lint.per-file-ignores]
+# These put example/ or experiments/ on sys.path before importing from them.
+"tests/**" = ["E402"]
+"example/**" = ["E402"]
+"experiments/**" = ["E402"]

@@ -6,9 +6,9 @@ import sys
 import time
 
 import httpx2
+import jsonschema
 from huggingface_hub import InferenceClient
 from huggingface_hub.errors import HfHubHTTPError
-import jsonschema
 
 # planner-eval, 16 models x 3 (2026-11-05): V4-Pro builds as often as V4.1-Flash
 # (26/48 vs 27/48) with far more drafts accepted (45 vs 33), so fewer calls: on
@@ -96,9 +96,7 @@ def propose(
     client=None,
     temperature=0.0,
 ):
-    client = client or InferenceClient(
-        model=model, provider=provider, timeout=120, bill_to=bill_to or None
-    )
+    client = client or InferenceClient(model=model, provider=provider, timeout=120, bill_to=bill_to or None)
     try:
         started = time.monotonic()
         response = complete_with_backoff(client, context, model, max_tokens, temperature=temperature)
@@ -150,8 +148,7 @@ def complete(client, context, model, max_tokens, temperature=0.0):
             {"role": "system", "content": SYSTEM},
             {
                 "role": "user",
-                "content": json.dumps(context)
-                + "\nReturn the JSON draft directly. /no_think",
+                "content": json.dumps(context) + "\nReturn the JSON draft directly. /no_think",
             },
         ],
         temperature=temperature,
@@ -231,7 +228,11 @@ Probe every batch row (e.g. logits[:, -1, :8] for a causal LM, not logits[0, ...
 generate the same text for every row, so a row-0 probe cannot see a batch mix-up. Prefer named top-level model kwargs so the builder
 can capture the training inputs. Print a final JSON object only when MIC_RUNNER
 is set, plain JSON only (device as model.device.type, never a torch.device).
-Include runtime device/dtype/attn_implementation and meaningful outputs.
+Include runtime device/dtype/attn_implementation and meaningful outputs. For a model with sub-configs
+(text_config, vision_config, audio_config, ...), runtime also records the attention each one resolved to:
+"attn_implementations": {n: getattr(model.config, n)._attn_implementation for n in sorted(model.config.sub_configs)
+if getattr(getattr(model.config, n, None), '_attn_implementation', None)}, written exactly so. The top level
+can say sdpa while a tower silently runs eager (Gemma4's audio tower after transformers#49404).
 The final JSON must nest training.loss, training.gradients, and training.updated
 under a training object. Declare those exact dotted keys in outputs, using
 allclose, all_true, and true respectively. training.gradients must be a nonempty
@@ -347,6 +348,12 @@ not memory:
   tokenized target text (SeamlessM4T).
 - The training step runs its own forward with gradients: never build the loss
   from tensors computed under torch.no_grad() in the inference block.
+- Read only the model output fields context.output_fields lists for the class you
+  call (nested fields as a.b): a field that sounds right may not exist (vjepa2's
+  VJEPA2Model has predictor_output.last_hidden_state, not predictor_embeddings).
+  Slice a probe with at most as many indices as the tensor has dimensions, from
+  the documented shape: VitPose heatmaps are (batch, keypoints, height, width),
+  so heatmaps[:, :, 0, :4], not heatmaps[:, :, 0, 0, :4].
 - Every key declared in outputs must appear in the printed result; a nested value
   is declared by its dotted path (logits.probe for {"logits": {"probe": ...}}).
 - Many causal-LM tokenizers define no pad token (MiniMax-M2.5, Llama-style):
@@ -357,6 +364,8 @@ not memory:
   takes no labels, and Transformers may have no pretraining head for it: train it
   with a small linear probe on pooled hidden states, built with .to(device,
   model.dtype) so the bfloat16 variant runs, optimizing both together.
+  Check gradients only on the branch that probe's loss reaches: VJEPA2Model's
+  last_hidden_state is the encoder's, so predictor.* weights get none.
 - Get a word's token id with tokenizer.encode(word, add_special_tokens=False)[0],
   not convert_tokens_to_ids (None for BPE tokens with a leading space).
 - get_text_features / get_image_features / get_audio_features take only their own

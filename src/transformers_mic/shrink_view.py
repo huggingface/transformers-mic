@@ -6,12 +6,12 @@ which layer kinds each stack has, which module classes exist, and where the
 parameters sit. Config changes and preserved properties come from the configs.
 """
 
-from collections import Counter
 import html
 import json
-from pathlib import Path
 import re
 import sys
+from collections import Counter
+from pathlib import Path
 
 # Module attributes that tell layers of the same classes apart (Gemma 3's sliding
 # and full attention share one class).
@@ -71,19 +71,13 @@ def load(fixture, source=None):
                 allow_patterns=["build.json", "config.json"],
             )
         )
-    build = (
-        json.loads((path / "build.json").read_text())
-        if (path / "build.json").exists()
-        else {}
-    )
+    build = json.loads((path / "build.json").read_text()) if (path / "build.json").exists() else {}
     if source:
         repo, _, revision = source.partition("@")
     elif build.get("built_from"):
         repo, revision = build["built_from"]["repo"], build["built_from"]["revision"]
     else:
-        raise ValueError(
-            "The fixture's build.json names no source checkpoint; pass --source REPO[@REVISION]"
-        )
+        raise ValueError("The fixture's build.json names no source checkpoint; pass --source REPO[@REVISION]")
     shrunk = config_dict(path)
     original = config_dict(
         Path(hf_hub_download(repo, "config.json", revision=revision or None)).parent,
@@ -156,9 +150,7 @@ def signature(layer):
         features.add(type(module).__name__)
         for key in KIND_ATTRIBUTES:
             value = getattr(module, key, None)
-            if isinstance(value, (str, bool)) and not isinstance(
-                getattr(type(module), key, None), property
-            ):
+            if isinstance(value, (str, bool)) and not isinstance(getattr(type(module), key, None), property):
                 features.add(f"{key}={value}")
     return frozenset(features)
 
@@ -177,9 +169,7 @@ def kind_prefix(original, shrunk):
         except Exception:
             return None
         depth = config.num_hidden_layers
-        stack = next(
-            (layers for layers in stacks(model).values() if len(layers) == depth), None
-        )
+        stack = next((layers for layers in stacks(model).values() if len(layers) == depth), None)
         return [signature(layer) for layer in stack] if stack else None
 
     before, after = kinds(original), kinds(shrunk)
@@ -200,11 +190,7 @@ def label_kinds(signatures, prefix):
     for kind in kinds:
         own = sorted(kind - common, key=lambda f: ("=" not in f, f))
         if len(kinds) == 1:
-            own = [
-                max(
-                    kind, key=lambda f: (bool(re.search(r"(Layer|Block)$", f)), -len(f))
-                )
-            ]
+            own = [max(kind, key=lambda f: (bool(re.search(r"(Layer|Block)$", f)), -len(f)))]
         elif not own:
             others = sorted(set().union(*kinds) - kind)
             own = [f"no {short(others[0], prefix)}"] if others else ["base"]
@@ -212,18 +198,12 @@ def label_kinds(signatures, prefix):
             # A type name says it; is_sliding/is_causal only repeat it.
             own = [f for f in own if not f.endswith(("=True", "=False"))]
         own = [f.split("=", 1)[1] if f.split("=")[0] in TYPE_NAMES else f for f in own]
-        labels[kind] = ", ".join(short(f, prefix) for f in own[:3]) + (
-            " …" if len(own) > 3 else ""
-        )
+        labels[kind] = ", ".join(short(f, prefix) for f in own[:3]) + (" …" if len(own) > 3 else "")
     return labels
 
 
 def short(name, prefix):
-    return (
-        name[len(prefix) :]
-        if prefix and name.startswith(prefix) and len(name) > len(prefix)
-        else name
-    )
+    return name[len(prefix) :] if prefix and name.startswith(prefix) and len(name) > len(prefix) else name
 
 
 def component(param, stack_names):
@@ -236,9 +216,7 @@ def component(param, stack_names):
 
 def nested(key, value):
     return (
-        isinstance(value, dict)
-        and key != "quantization_config"
-        and ("model_type" in value or key.endswith("_config"))
+        isinstance(value, dict) and key != "quantization_config" and ("model_type" in value or key.endswith("_config"))
     )
 
 
@@ -285,13 +263,9 @@ def properties(original, shrunk):
                 }
             )
             continue
-        style = attention_style(
-            before.get("num_attention_heads"), before.get("num_key_value_heads")
-        )
+        style = attention_style(before.get("num_attention_heads"), before.get("num_key_value_heads"))
         if style:
-            new = attention_style(
-                after.get("num_attention_heads"), after.get("num_key_value_heads")
-            )
+            new = attention_style(after.get("num_attention_heads"), after.get("num_key_value_heads"))
             rows.append(
                 {
                     "config": name,
@@ -302,11 +276,7 @@ def properties(original, shrunk):
                 }
             )
         experts = next(
-            (
-                k
-                for k in ("n_routed_experts", "num_local_experts", "num_experts")
-                if isinstance(before.get(k), int)
-            ),
+            (k for k in ("n_routed_experts", "num_local_experts", "num_experts") if isinstance(before.get(k), int)),
             None,
         )
         top = before.get("num_experts_per_tok")
@@ -366,9 +336,7 @@ def brief(value):
     if isinstance(value, list) and len(value) > 6:
         counts = Counter(json.dumps(v) for v in value)
         if len(counts) <= 4:
-            return f"{len(value)} entries: " + ", ".join(
-                f"{n}× {json.loads(v)}" for v, n in counts.most_common()
-            )
+            return f"{len(value)} entries: " + ", ".join(f"{n}× {json.loads(v)}" for v, n in counts.most_common())
         return f"{len(value)} entries"
     text = json.dumps(value) if not isinstance(value, str) else value
     return text if len(text) <= 80 else text[:77] + "…"
@@ -376,9 +344,7 @@ def brief(value):
 
 def analyze(data):
     build = data["build"]
-    class_name = (
-        build.get("model_class") or (data["shrunk"].get("architectures") or [None])[0]
-    )
+    class_name = build.get("model_class") or (data["shrunk"].get("architectures") or [None])[0]
     report = {
         "fixture": data["fixture"],
         "source": data["source"],
@@ -387,9 +353,7 @@ def analyze(data):
         "build_shrink": build.get("shrink"),
         "overrides": (build.get("recipe") or {}).get("config_overrides"),
     }
-    report["config_changes"], report["config_unchanged"] = changes(
-        data["original"], data["shrunk"]
-    )
+    report["config_changes"], report["config_unchanged"] = changes(data["original"], data["shrunk"])
     report["properties"] = properties(data["original"], data["shrunk"])
     from . import tester
 
@@ -410,9 +374,7 @@ def analyze(data):
     before, after = classes(original), classes(shrunk)
     report["classes"] = [
         {"class": name, "original": before[name], "fixture": after.get(name, 0)}
-        for name in sorted(
-            set(before) | set(after), key=lambda n: (-before.get(n, 0), n)
-        )
+        for name in sorted(set(before) | set(after), key=lambda n: (-before.get(n, 0), n))
     ]
 
     stacks_before, stacks_after = stacks(original), stacks(shrunk)
@@ -458,9 +420,7 @@ def analyze(data):
             "original": p_before.get(name, 0),
             "fixture": p_after.get(name, 0),
         }
-        for name in sorted(
-            set(p_before) | set(p_after), key=lambda n: -p_before.get(n, 0)
-        )
+        for name in sorted(set(p_before) | set(p_after), key=lambda n: -p_before.get(n, 0))
     ]
     return report
 
@@ -476,7 +436,9 @@ def verdict(report):
     findings = []
     source = report.get("source", "").partition("@")[0]
     if is_test_checkpoint(source):
-        findings.append(f"{source} is a test checkpoint (untrained): build from a trained checkpoint of this model type")
+        findings.append(
+            f"{source} is a test checkpoint (untrained): build from a trained checkpoint of this model type"
+        )
     p = report.get("parameters")
     if p and p["original"] and report.get("build_shrink") != "none" and p["fixture"] >= MAX_KEPT * p["original"]:
         findings.append(
@@ -488,18 +450,12 @@ def verdict(report):
     for stack in report.get("stacks", []):
         for kind in stack["kinds"]:
             if kind["original"] and not kind["fixture"]:
-                findings.append(
-                    f"{stack['name']}: layer kind '{kind['label']}' is not in the fixture"
-                )
+                findings.append(f"{stack['name']}: layer kind '{kind['label']}' is not in the fixture")
             if kind["fixture"] and not kind["original"]:
-                findings.append(
-                    f"{stack['name']}: layer kind '{kind['label']}' exists only in the fixture"
-                )
+                findings.append(f"{stack['name']}: layer kind '{kind['label']}' exists only in the fixture")
     for row in report.get("properties", []):
         if not row["kept"]:
-            findings.append(
-                f"{row['config']}: {row['property']} {row['original']} became {row['fixture']}"
-            )
+            findings.append(f"{row['config']}: {row['property']} {row['original']} became {row['fixture']}")
     return findings
 
 
@@ -516,23 +472,15 @@ def text(report):
         p = report["parameters"]
         lines.append(f"parameters: {human(p['original'])} -> {human(p['fixture'])}")
     for stack in report.get("stacks", []):
-        kinds = "; ".join(
-            f"{k['label']} {k['original']}->{k['fixture']}" for k in stack["kinds"]
-        )
-        lines.append(
-            f"{stack['name']}: {len(stack['original'])} -> {len(stack['fixture'])} layers ({kinds})"
-        )
+        kinds = "; ".join(f"{k['label']} {k['original']}->{k['fixture']}" for k in stack["kinds"])
+        lines.append(f"{stack['name']}: {len(stack['original'])} -> {len(stack['fixture'])} layers ({kinds})")
     if report.get("modules_error"):
         lines.append(f"modules not compared: {report['modules_error']}")
     findings = verdict(report)
-    lines.append(
-        f"{len(findings)} finding(s)" + "".join(f"\n  - {f}" for f in findings)
-    )
+    lines.append(f"{len(findings)} finding(s)" + "".join(f"\n  - {f}" for f in findings))
     advice = (report.get("tester") or {}).get("findings") or []
     if advice:
-        lines.append(
-            f"{len(advice)} model-tester note(s), advisory" + "".join(f"\n  - {f}" for f in advice)
-        )
+        lines.append(f"{len(advice)} model-tester note(s), advisory" + "".join(f"\n  - {f}" for f in advice))
     return "\n".join(lines)
 
 
@@ -579,10 +527,15 @@ def render(report):
             '<section class="findings"><h2>Model tester (advisory)</h2><p class="note">'
             f'The model\'s own small test config in <a href="{e(check["url"])}">its ModelTester</a> '
             f"({check['values']} literal values, {check.get('own_values', check['values'])} set by the model's own tester, "
-            "the rest generic base-tester defaults). Testers are usually representative but not always, "
+            "the rest generic base-tester defaults"
+            + (", read from its static <code>small_config_overrides</code>" if check.get("static") else "")
+            + "). Testers are usually representative but not always, "
             "so these notes are for review, not rules.</p>"
-            + ("<ul>" + "".join(f"<li>{e(n)}</li>" for n in notes) + "</ul>" if notes
-               else "<p>The fixture covers every per-layer kind the tester sets, and shrinks every size it does.</p>")
+            + (
+                "<ul>" + "".join(f"<li>{e(n)}</li>" for n in notes) + "</ul>"
+                if notes
+                else "<p>The fixture covers every per-layer kind the tester sets, and shrinks every size it does.</p>"
+            )
             + "</section>"
         )
 
@@ -681,12 +634,11 @@ def render(report):
         f"{report['config_unchanged']} unchanged.</p><table><tr><th>Field</th><th>Original</th><th>Fixture</th></tr>{rows}</table>"
     )
 
-    swatches = "".join(
-        f".c{i}{{background:var(--s{i})}}" for i in range(len(PALETTE) + 1)
-    )
+    swatches = "".join(f".c{i}{{background:var(--s{i})}}" for i in range(len(PALETTE) + 1))
     light = "".join(f"--s{i}:{c[0]};" for i, c in enumerate((*PALETTE, OTHER)))
     dark = "".join(f"--s{i}:{c[1]};" for i, c in enumerate((*PALETTE, OTHER)))
     dark_tokens = f"--bg:#1a1a19;--fg:#f0efec;--muted:#c3c2b7;--line:#3a3936;--ok:#2f9e5a;--warn:#d9822b;{dark}"
+
     def pin(value):
         """A Hub repo@sha links to the repo at that commit; anything else stays text."""
         repo, _, revision = value.partition("@")
@@ -754,9 +706,7 @@ def run(args):
     try:
         import torch  # noqa: F401
     except ImportError:
-        raise ValueError(
-            "tmic shrink builds both models on the meta device: install transformers-mic[runtime]"
-        )
+        raise ValueError("tmic shrink builds both models on the meta device: install transformers-mic[runtime]")
     report = analyze(load(fixture, args.source))
     if args.json:
         print(json.dumps(report, indent=2, default=str))

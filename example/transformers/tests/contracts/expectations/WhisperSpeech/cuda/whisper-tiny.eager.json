@@ -1,18 +1,20 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/WhisperSpeech-integration",
-  "contract_revision": "unpublished",
+  "contract_name": "WhisperSpeech",
+  "contract_revision": "341f9dbc1855f8c5b1e7952fe1e51f2d0901932a",
   "framework": "transformers",
   "variant": "eager",
   "target": "whisper-tiny",
   "kind": "checkpoint",
   "revision": "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
   "environment": {
-   "python": "3.10.12",
-   "transformers": "5.19.0.dev0",
-   "torch": "2.11.0+cu128",
-   "torchvision": "0.26.0+cu128",
-   "torchaudio": "2.11.0+cu128",
+   "python": "3.11.18",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0+cu132",
+   "torchvision": "0.29.2+cu132",
+   "torchaudio": "2.11.1+cu132",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
    "pillow": "12.2.0",
@@ -30,8 +32,9 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 9.38,
-  "platform": "cuda"
+  "seconds": 8.87,
+  "platform": "cuda",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {

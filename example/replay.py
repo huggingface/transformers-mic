@@ -43,7 +43,9 @@ def run(ref, options):
     env = {**os.environ, "PYTHONPATH": ":".join(p for p in path if p)}
     out = subprocess.run(
         [sys.executable, str(HERE / "run.py"), "--framework", "transformers", *options],
-        capture_output=True, text=True, env=env,
+        capture_output=True,
+        text=True,
+        env=env,
     )
     records = [json.loads(line) for line in out.stdout.splitlines() if line.startswith("{")]
     if not records:
@@ -62,19 +64,27 @@ def main():
     for target, on_bad in results["bad"].items():
         on_fix = results["fix"].get(target, {})
         verdict = (
-            "caught" if on_bad["status"] == "fail" and on_fix.get("status") == "pass"
-            else "unsupported" if on_bad["status"] == "unsupported"
-            else "clean" if on_bad["status"] == on_fix.get("status") == "pass"
+            "caught"
+            if on_bad["status"] == "fail" and on_fix.get("status") == "pass"
+            else "unsupported"
+            if on_bad["status"] == "unsupported"
+            else "clean"
+            if on_bad["status"] == on_fix.get("status") == "pass"
             else "inconclusive"
         )
-        print(json.dumps({
-            "target": target,
-            "verdict": verdict,
-            "bad": on_bad["status"],
-            "fix": on_fix.get("status"),
-            "bad_failures": [f[:200] for f in on_bad.get("failures", [])],
-            "fix_failures": [f[:200] for f in on_fix.get("failures", [])],
-        }, ensure_ascii=False))
+        print(
+            json.dumps(
+                {
+                    "target": target,
+                    "verdict": verdict,
+                    "bad": on_bad["status"],
+                    "fix": on_fix.get("status"),
+                    "bad_failures": [f[:200] for f in on_bad.get("failures", [])],
+                    "fix_failures": [f[:200] for f in on_fix.get("failures", [])],
+                },
+                ensure_ascii=False,
+            )
+        )
 
 
 if __name__ == "__main__":

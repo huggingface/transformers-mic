@@ -3,18 +3,18 @@
 import hashlib
 import json
 import re
-from pathlib import Path, PurePosixPath
 import shutil
 import stat
 import time
 import uuid
 import zipfile
 from io import BytesIO
+from pathlib import Path, PurePosixPath
 
 from filelock import FileLock
 from huggingface_hub import HfApi
 
-from . import cloud_inputs, dashboard_auth, fleet, cloud_progress
+from . import cloud_inputs, cloud_progress, dashboard_auth, fleet
 from .workspace import read, write
 
 TERMINAL = {"completed", "failed", "cancelled", "unknown"}
@@ -29,10 +29,7 @@ def extract_archive(payload, destination):
     destination = Path(destination)
     with zipfile.ZipFile(BytesIO(payload)) as archive:
         files = archive.infolist()
-        if (
-            len(files) > 100_000
-            or sum(item.file_size for item in files) > 2_000_000_000
-        ):
+        if len(files) > 100_000 or sum(item.file_size for item in files) > 2_000_000_000:
             raise ValueError("Baseline artifact is too large")
         seen = set()
         for item in files:
@@ -87,9 +84,7 @@ def collection(root):
         if request.get("workspace") != state["job"].get("workspace"):
             raise ValueError("Artifact model input does not match the requested job")
         if not report.get("complete") or not report.get("cases"):
-            raise ValueError(
-                f"{profile}: baseline collection is incomplete; inspect collection.json"
-            )
+            raise ValueError(f"{profile}: baseline collection is incomplete; inspect collection.json")
         keys = [case["key"] for case in report["cases"]]
         if len(keys) != len(set(keys)) or set(keys) != set(report["expected_cases"]):
             raise ValueError("Collection does not cover its declared case matrix")
@@ -128,15 +123,9 @@ def collection(root):
                 if path.is_absolute() or ".." in path.parts or "\\" in relative:
                     raise ValueError("Unsafe collection path")
                 if sha256(folder / relative) != expected:
-                    raise ValueError(
-                        f"Measured baseline changed after execution: {relative}"
-                    )
+                    raise ValueError(f"Measured baseline changed after execution: {relative}")
         reports.append((folder, report))
-    if not any(
-        case["status"] == "validated"
-        for _, report in reports
-        for case in report["cases"]
-    ):
+    if not any(case["status"] == "validated" for _, report in reports for case in report["cases"]):
         raise ValueError("Collection contains no validated measurements")
     return state, reports
 
@@ -146,10 +135,7 @@ def pinned_sources(job):
     if job.get("workspace"):
         locks = [cloud_inputs.lock(job["workspace"])]
     else:
-        locks = [
-            read(fleet.download(name, job["fleet_revision"])[0])
-            for name in job["fleets"]
-        ]
+        locks = [read(fleet.download(name, job["fleet_revision"])[0]) for name in job["fleets"]]
     return {
         (repo, pin["revision"], pin.get("files_sha256"))
         for lock in locks
@@ -162,9 +148,7 @@ def pinned_sources(job):
 
 
 def fingerprint(reports):
-    return hashlib.sha256(
-        json.dumps([report for _, report in reports], sort_keys=True).encode()
-    ).hexdigest()
+    return hashlib.sha256(json.dumps([report for _, report in reports], sort_keys=True).encode()).hexdigest()
 
 
 def candidates(reports):
@@ -174,10 +158,7 @@ def candidates(reports):
                 candidate = folder / case["candidate"]
                 contract = candidate.parents[2]
                 reference = (
-                    contract
-                    / "references"
-                    / candidate.parent.name
-                    / candidate.name.replace(".candidate.json", ".json")
+                    contract / "references" / candidate.parent.name / candidate.name.replace(".candidate.json", ".json")
                 )
                 yield (
                     report["profile"],
@@ -193,6 +174,7 @@ def review(root, approve=False, approve_changed=False, reason=None):
     import difflib
     import importlib
     import sys
+
     from . import resources
 
     sys.path.insert(0, str(resources.backend()))
@@ -200,11 +182,7 @@ def review(root, approve=False, approve_changed=False, reason=None):
     _, reports = collection(root)
     current = fingerprint(reports)
     receipts_path = Path(root) / "reviews.json"
-    receipts = (
-        read(receipts_path)
-        if receipts_path.exists()
-        else {"collection": current, "approved": {}}
-    )
+    receipts = read(receipts_path) if receipts_path.exists() else {"collection": current, "approved": {}}
     if receipts["collection"] != current:
         receipts = {"collection": current, "approved": {}}
     pending = 0
@@ -214,17 +192,9 @@ def review(root, approve=False, approve_changed=False, reason=None):
         if reference.exists():
             old = read(reference)["outputs"]
             rules = runner.rules_for(read(manifest_path), candidate.parent)
-            shared = {
-                key: rule
-                for key, rule in rules.items()
-                if runner.lookup(old, key) is not None
-            }
+            shared = {key: rule for key, rule in rules.items() if runner.lookup(old, key) is not None}
             removed = [key for key in shared if runner.lookup(measured, key) is None]
-            verdict = (
-                "changed"
-                if removed or runner.compare(shared, measured, old)
-                else "unchanged"
-            )
+            verdict = "changed" if removed or runner.compare(shared, measured, old) else "unchanged"
             if verdict == "changed":
                 print(
                     "\n".join(
@@ -245,9 +215,7 @@ def review(root, approve=False, approve_changed=False, reason=None):
             receipts["approved"][key] = {
                 "sha256": sha256(candidate),
                 "verdict": verdict,
-                "reason": reason
-                if verdict == "changed"
-                else "New or unchanged measured reference",
+                "reason": reason if verdict == "changed" else "New or unchanged measured reference",
             }
         if receipts["approved"].get(key, {}).get("sha256") != sha256(candidate):
             pending += 1
@@ -271,34 +239,19 @@ def publish(root, execute=False):
         if receipt["approved"].get(key, {}).get("sha256") != sha256(candidate):
             raise ValueError("Unreviewed baseline: " + key)
         if not case["repo"].endswith("-mic"):
-            raise ValueError(
-                "Legacy split repositories must be migrated before cloud baseline publication"
-            )
-        group = groups.setdefault(
-            case["repo"], {"revision": case["revision"], "files": {}}
-        )
+            raise ValueError("Legacy split repositories must be migrated before cloud baseline publication")
+        group = groups.setdefault(case["repo"], {"revision": case["revision"], "files": {}})
         if group["revision"] != case["revision"]:
-            raise ValueError(
-                "Selected fleets pin different revisions of the same MIC repository"
-            )
-        destination = (
-            f"integrations/transformers/expectations/{case['platform']}/"
-            + candidate.name.replace(".candidate.json", ".json")
+            raise ValueError("Selected fleets pin different revisions of the same MIC repository")
+        destination = f"integrations/transformers/expectations/{case['platform']}/" + candidate.name.replace(
+            ".candidate.json", ".json"
         )
-        if (
-            destination in group["files"]
-            and read(group["files"][destination])["outputs"]
-            != read(candidate)["outputs"]
-        ):
+        if destination in group["files"] and read(group["files"][destination])["outputs"] != read(candidate)["outputs"]:
             raise ValueError("Overlapping fleets produced conflicting references")
         group["files"][destination] = candidate
     publications = state.setdefault("publications", {})
-    if any(
-        item.get("collection") != fingerprint(reports) for item in publications.values()
-    ):
-        raise ValueError(
-            "Publication belongs to an earlier collection; use a new --out"
-        )
+    if any(item.get("collection") != fingerprint(reports) for item in publications.values()):
+        raise ValueError("Publication belongs to an earlier collection; use a new --out")
     for repo, group in sorted(groups.items()):
         print(
             json.dumps(
@@ -366,9 +319,7 @@ def upload(root, repository, execute):
         print(json.dumps(preview))
         return 0
     existing = state.get("upload", {})
-    if existing.get("repository") == repository and existing.get(
-        "collection"
-    ) == fingerprint(reports):
+    if existing.get("repository") == repository and existing.get("collection") == fingerprint(reports):
         print(json.dumps(existing))
         return 0
     api = HfApi()
@@ -401,17 +352,13 @@ def upload(root, repository, execute):
 
 
 def run(args):
-    if (
-        args.baselines_command == "run"
-        and getattr(args, "transport", "dashboard") == "github"
-    ):
-        from . import github_baselines
+    if args.baselines_command == "run" and getattr(args, "transport", "dashboard") == "github":
         from types import SimpleNamespace
 
+        from . import github_baselines
+
         if args.no_wait or args.no_download or args.fleet_revision:
-            raise ValueError(
-                "GitHub test transport watches and downloads a collection resolved from fleet main"
-            )
+            raise ValueError("GitHub test transport watches and downloads a collection resolved from fleet main")
         return github_baselines.run(
             SimpleNamespace(
                 out=args.out,
@@ -458,9 +405,7 @@ def run_locked(args, root):
         and args.fleet_revision
         and not re.fullmatch(r"[a-f0-9]{40}", args.fleet_revision)
     ):
-        raise ValueError(
-            "--fleet-revision must be an immutable 40-character dataset SHA"
-        )
+        raise ValueError("--fleet-revision must be an immutable 40-character dataset SHA")
     if args.baselines_command == "run" and args.no_download and not args.upload_repo:
         raise ValueError("--no-download requires --upload-repo")
     token = dashboard_auth.access_token(dashboard)
@@ -472,9 +417,7 @@ def run_locked(args, root):
 
         model = Workspace(args.model_workspace)
         if args.fleet == "all" or args.fixtures_only or args.no_download:
-            raise ValueError(
-                "Model measurement requires one --fleet and all declared targets, with artifact download"
-            )
+            raise ValueError("Model measurement requires one --fleet and all declared targets, with artifact download")
         model_input = model_baselines.stage(model, root)
     path = root / "cloud.json"
     if path.exists():
@@ -488,9 +431,7 @@ def run_locked(args, root):
         request = {
             "request_id": uuid.uuid4().hex,
             "fleet_revision": revision,
-            "fleets": ["control", "prototypes"]
-            if args.fleet == "all"
-            else [args.fleet],
+            "fleets": ["control", "prototypes"] if args.fleet == "all" else [args.fleet],
             "profiles": ["cpu", "cuda"],
             "transformers_ref": args.transformers_ref,
             "fixtures_only": args.fixtures_only,
@@ -501,30 +442,21 @@ def run_locked(args, root):
         state = {"dashboard": dashboard, "request": request}
         write(path, state)  # persist the idempotency key before the network call
     if args.baselines_command == "run":
-        expected_fleets = (
-            ["control", "prototypes"] if args.fleet == "all" else [args.fleet]
-        )
+        expected_fleets = ["control", "prototypes"] if args.fleet == "all" else [args.fleet]
         if (
             state["request"].get("workspace") != model_input
             or state["request"]["fleets"] != expected_fleets
             or state["request"]["fixtures_only"] != args.fixtures_only
             or state["request"]["transformers_ref"] != args.transformers_ref
             or state["request"]["upload_repo"] != args.upload_repo
-            or (
-                args.fleet_revision
-                and args.fleet_revision != state["request"]["fleet_revision"]
-            )
+            or (args.fleet_revision and args.fleet_revision != state["request"]["fleet_revision"])
         ):
             raise ValueError("Collection options changed; use a different --out")
         if "job" not in state:
-            state["job"] = dashboard_auth.request(
-                dashboard, "/mic-jobs", body=state["request"], token=token
-            )
+            state["job"] = dashboard_auth.request(dashboard, "/mic-jobs", body=state["request"], token=token)
             write(path, state)
     if "job" not in state:
-        raise ValueError(
-            "Submission is incomplete; repeat tmic baselines run with the same options"
-        )
+        raise ValueError("Submission is incomplete; repeat tmic baselines run with the same options")
     endpoint = "/mic-jobs/" + state["job"]["id"]
     last_progress = None
     while True:
@@ -534,10 +466,7 @@ def run_locked(args, root):
             if (
                 args.baselines_command == "run"
                 and not args.no_wait
-                and (
-                    error.error == "mic_service_unavailable"
-                    or error.error.startswith("Could not reach")
-                )
+                and (error.error == "mic_service_unavailable" or error.error.startswith("Could not reach"))
             ):
                 import sys
 
@@ -551,11 +480,7 @@ def run_locked(args, root):
             raise
         write(path, state)
         last_progress = cloud_progress.display(state["job"], last_progress)
-        if (
-            state["job"]["status"] in TERMINAL
-            or args.baselines_command == "status"
-            or args.no_wait
-        ):
+        if state["job"]["status"] in TERMINAL or args.baselines_command == "status" or args.no_wait:
             break
         time.sleep(10)
     if args.baselines_command == "status" or args.no_wait:
@@ -590,9 +515,7 @@ def run_locked(args, root):
             raise ValueError("Unexpected artifact profile")
         target = root / "artifacts" / profile
         # Fetch through the authenticated dashboard; the CLI needs no GitHub token.
-        payload = dashboard_auth.request_bytes(
-            dashboard, endpoint + "/artifacts/" + str(artifact["id"]), token=token
-        )
+        payload = dashboard_auth.request_bytes(dashboard, endpoint + "/artifacts/" + str(artifact["id"]), token=token)
         staging = root / (".artifact-" + uuid.uuid4().hex)
         try:
             extract_archive(payload, staging)
@@ -608,9 +531,7 @@ def run_locked(args, root):
             "Cloud job failed; available partial artifacts were downloaded. Inspect "
             + state["job"].get("run_url", "cloud.json")
         )
-    collection(
-        root
-    )  # partial/failed runs stay downloadable but cannot be uploaded as complete
+    collection(root)  # partial/failed runs stay downloadable but cannot be uploaded as complete
     if model:
         model_baselines.import_candidates(model, root)
     print(

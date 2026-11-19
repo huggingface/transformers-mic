@@ -1,18 +1,20 @@
 {
  "recorded_with": {
   "contract": "hf-internal-testing/Whisper-integration",
-  "contract_revision": "local",
+  "contract_name": "Whisper",
+  "contract_revision": "d5f035b6fb3376d502de523606c5cef5305d294e",
   "framework": "transformers",
   "variant": "default",
   "target": "whisper-tiny",
   "kind": "checkpoint",
   "revision": "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
   "environment": {
-   "python": "3.10.12",
-   "transformers": "5.19.0.dev0",
-   "torch": "2.11.0+cu128",
-   "torchvision": "0.26.0+cu128",
-   "torchaudio": "2.11.0+cu128",
+   "python": "3.11.18",
+   "transformers": "5.23.0.dev0",
+   "sentence-transformers": null,
+   "torch": "2.15.0+cu132",
+   "torchvision": "0.29.2+cu132",
+   "torchaudio": "2.11.1+cu132",
    "tokenizers": "0.23.1",
    "numpy": "1.26.4",
    "pillow": "12.2.0",
@@ -30,8 +32,9 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 1.76,
-  "platform": "cuda"
+  "seconds": 8.64,
+  "platform": "cuda",
+  "template_date": "2026-01-01"
  },
  "outputs": {
   "runtime": {
@@ -63,30 +66,30 @@
    [
     -2.635981321334839,
     -0.0002810560108628124,
-    -0.5602189898490906,
-    -11.560056686401367,
-    -2.047189474105835
+    -0.5602198839187622,
+    -11.560050010681152,
+    -2.0471880435943604
    ],
    [
-    -2.407421588897705,
+    -2.4074244499206543,
     -0.00014232576359063387,
-    -0.5749133229255676,
-    -11.815662384033203,
-    -1.7347092628479004
+    -0.5749142169952393,
+    -11.815665245056152,
+    -1.7347124814987183
    ],
    [
-    -3.1059577465057373,
+    -3.10595965385437,
     -0.0002119316632160917,
-    -0.5115042328834534,
-    -11.908805847167969,
-    -1.543474793434143
+    -0.5115050077438354,
+    -11.908807754516602,
+    -1.543474555015564
    ],
    [
-    -2.423509120941162,
+    -2.4235100746154785,
     -0.00019596086349338293,
-    -0.44273534417152405,
-    -12.329566955566406,
-    -1.6896235942840576
+    -0.44273558259010315,
+    -12.329562187194824,
+    -1.689623236656189
    ]
   ],
   "timestamped_tokens": [
@@ -229,7 +232,7 @@
    ]
   ],
   "training": {
-   "loss": 3.3646080493927,
+   "loss": 3.3646082878112793,
    "gradients": {
     "model.encoder.conv1.weight": true,
     "model.decoder.layers.0.encoder_attn.q_proj.weight": true

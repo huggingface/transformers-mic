@@ -2,13 +2,12 @@
 
 import argparse
 import json
-from pathlib import Path
 import shutil
 import tempfile
-
-from huggingface_hub import HfApi, hf_hub_download
+from pathlib import Path
 
 import run
+from huggingface_hub import HfApi, hf_hub_download
 from mic_card import merged_card
 
 HERE = Path(__file__).parent
@@ -17,6 +16,15 @@ HERE = Path(__file__).parent
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--private", action="store_true")
+    parser.add_argument(
+        "--carry",
+        action="append",
+        default=[],
+        metavar="INTEGRATION",
+        help="leave this integration's files on the Hub as they are: neither "
+        "uploaded nor deleted (tmic publish passes it for an unchanged integration "
+        "another fleet checks)",
+    )
     args = parser.parse_args()
     lock_path = HERE / "transformers/tests/contracts/fleet.lock"
     lock = run.load(lock_path, "fleet-lock")
@@ -24,25 +32,17 @@ def main():
         raise ValueError("Publish a single MIC workspace at a time")
     name, contract = next(iter(lock["contracts"].items()))
     integration_repo = contract["integration"]["repo"]
-    root = run.source_folder(
-        lock_path.parent, integration_repo, contract["integration"]
-    )
+    root = run.source_folder(lock_path.parent, integration_repo, contract["integration"])
     state = HERE.parent / ".mic/project.json"
     if state.exists():
         model = json.loads(state.read_text())["model"]
-        repo = json.loads((root / "integration.json").read_text())["checkpoints"][
-            model
-        ]["fixture"]
+        repo = json.loads((root / "integration.json").read_text())["checkpoints"][model]["fixture"]
     elif len(contract["fixtures"]) == 1:
         repo = next(iter(contract["fixtures"]))
     else:
-        raise ValueError(
-            "Select one model workspace before publishing a shared contract"
-        )
+        raise ValueError("Select one model workspace before publishing a shared contract")
     if repo not in contract["fixtures"] or not repo.endswith("-mic"):
-        raise ValueError(
-            "Regenerate this legacy workspace to publish a single <name>-mic repository"
-        )
+        raise ValueError("Regenerate this legacy workspace to publish a single <name>-mic repository")
     pin = contract["fixtures"][repo]
     fixture = run.fixture_folder(lock_path.parent, repo, pin, False)
     problem = run.fixture_problem(fixture, pin)
@@ -50,6 +50,7 @@ def main():
         raise ValueError(problem)
     files = run.contract_files(root)
     contract_hash = run.digest(files)
+    carried = tuple(f"integrations/{name}/" for name in args.carry)
     with tempfile.TemporaryDirectory(prefix="mic-publish-") as tmp:
         staging = Path(tmp)
         build = run.load(fixture / "build.json", "fixture-build")
@@ -60,55 +61,43 @@ def main():
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(source, target)
         for path in files:
+            if path.startswith(carried):
+                continue
             target = staging / path
             target.parent.mkdir(parents=True, exist_ok=True)
             source = root / path
-            if (
-                path in build["sha256"]
-                and target.exists()
-                and target.read_bytes() != source.read_bytes()
-            ):
+            if path in build["sha256"] and target.exists() and target.read_bytes() != source.read_bytes():
                 raise ValueError(f"Contract/fixture path collision: {path}")
             shutil.copy2(source, target)
         manifest = run.load(root / "integration.json", "integration")
         for framework in manifest["integrations"]:
+            if framework in args.carry:
+                continue
             expectations = root / "integrations" / framework / "expectations"
             if not expectations.exists():
                 raise ValueError(f"No reviewed {framework} expectations to publish")
             shutil.copytree(
-                expectations, staging / "integrations" / framework / "expectations",
-                dirs_exist_ok=True, ignore=shutil.ignore_patterns("*.candidate.json"),
+                expectations,
+                staging / "integrations" / framework / "expectations",
+                dirs_exist_ok=True,
+                ignore=shutil.ignore_patterns("*.candidate.json"),
             )
         layout = {"format": "mic-umbrella-v1", "contract_files": sorted(files)}
         (staging / ".mic-repo.json").write_text(json.dumps(layout, indent=2) + "\n")
-        integration_card = (
-            (root / "README.md").read_text() if (root / "README.md").exists() else ""
-        )
-        fixture_card = (
-            (fixture / "README.md").read_text()
-            if (fixture / "README.md").exists()
-            else ""
-        )
+        integration_card = (root / "README.md").read_text() if (root / "README.md").exists() else ""
+        fixture_card = (fixture / "README.md").read_text() if (fixture / "README.md").exists() else ""
         checkpoint = build.get("built_from", {}).get("repo", "")
-        (staging / "README.md").write_text(
-            merged_card(repo, integration_card, fixture_card, checkpoint)
-        )
+        (staging / "README.md").write_text(merged_card(repo, integration_card, fixture_card, checkpoint))
         api = HfApi()
         stale = []
         existing_files = set(api.list_repo_files(repo)) if api.repo_exists(repo) else set()
         if existing_files - {".gitattributes", "README.md"} and not {".mic-repo.json", "build.json"} <= existing_files:
             raise ValueError("Existing model main is not a complete MIC snapshot")
         if {".mic-repo.json", "build.json"} <= existing_files:
-            previous_layout = json.loads(
-                Path(hf_hub_download(repo, ".mic-repo.json")).read_text()
-            )
-            previous_build = json.loads(
-                Path(hf_hub_download(repo, "build.json")).read_text()
-            )
-            owned = set(previous_layout["contract_files"]) | set(
-                previous_build["sha256"]
-            )
-            stale = sorted(name for name in owned if not (staging / name).exists())
+            previous_layout = json.loads(Path(hf_hub_download(repo, ".mic-repo.json")).read_text())
+            previous_build = json.loads(Path(hf_hub_download(repo, "build.json")).read_text())
+            owned = set(previous_layout["contract_files"]) | set(previous_build["sha256"])
+            stale = sorted(name for name in owned if not (staging / name).exists() and not name.startswith(carried))
         api.create_repo(repo, private=args.private, exist_ok=True)
         commit = api.upload_folder(
             repo_id=repo,
@@ -117,9 +106,7 @@ def main():
             ignore_patterns=["**/*.candidate.json", ".cache/*", "**/__pycache__/*"],
             commit_message="Publish MIC usage, slim fixture and reviewed Transformers expectations",
         )
-    contract["integration"].update(
-        repo=repo, revision=commit.oid, files_sha256=contract_hash
-    )
+    contract["integration"].update(repo=repo, revision=commit.oid, files_sha256=contract_hash)
     pin["revision"] = commit.oid
     lock_path.write_text(json.dumps(lock, indent=2) + "\n")
     print(json.dumps({"published": repo, "revision": commit.oid, "contract": name}))
