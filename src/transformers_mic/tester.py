@@ -91,7 +91,7 @@ def init_values(cls):
     init = next((f for f in cls.body if isinstance(f, ast.FunctionDef) and f.name == "__init__"), None)
     if init is None:
         return found
-    args = init.args.args[-len(init.args.defaults):] if init.args.defaults else []
+    args = init.args.args[-len(init.args.defaults) :] if init.args.defaults else []
     for arg, default in zip(args, init.args.defaults):
         value = literal(default)
         if value is not None:
@@ -163,8 +163,12 @@ def compare(tester, original, shrunk, kept_whole=False):
     depth = tester.get("num_hidden_layers")
     for key, value in sorted(tester.items()):
         fixture = lookup(shrunk, key)
-        if isinstance(value, list) and isinstance(fixture, list) and value and len(value) == depth and all(
-            isinstance(v, (str, bool)) or v in (0, 1) for v in value
+        if (
+            isinstance(value, list)
+            and isinstance(fixture, list)
+            and value
+            and len(value) == depth
+            and all(isinstance(v, (str, bool)) or v in (0, 1) for v in value)
         ):
             missing = sorted(set(map(str, value)) - set(map(str, fixture)))
             if missing:
@@ -246,7 +250,9 @@ def find_class(name, tree, ref, seen=()):
             continue
         for alias in node.names:
             bound = alias.asname or alias.name
-            if module_alias and bound == module_alias:  # from ..pocket_tts import test_modeling_pocket_tts as pocket_tts
+            if (
+                module_alias and bound == module_alias
+            ):  # from ..pocket_tts import test_modeling_pocket_tts as pocket_tts
                 path = imported_path(".".join(filter(None, (node.module, alias.name))), node.level)
             elif not module_alias and bound == name:  # from ...models.bamba.test_modeling_bamba import BambaModelTester
                 path, name = imported_path(node.module, node.level), alias.name
@@ -363,12 +369,33 @@ COMPARE = {
 }
 # The only functions an override may call: pure builtins over plain values.
 FUNCTIONS = {
-    "len": len, "list": list, "tuple": tuple, "dict": dict, "set": set, "sorted": sorted, "min": min,
-    "max": max, "sum": sum, "abs": abs, "int": int, "float": float, "str": str, "bool": bool,
-    "range": range, "enumerate": enumerate, "zip": zip,
+    "len": len,
+    "list": list,
+    "tuple": tuple,
+    "dict": dict,
+    "set": set,
+    "sorted": sorted,
+    "min": min,
+    "max": max,
+    "sum": sum,
+    "abs": abs,
+    "int": int,
+    "float": float,
+    "str": str,
+    "bool": bool,
+    "range": range,
+    "enumerate": enumerate,
+    "zip": zip,
 }
 # Pure functions of the math module (`math.ceil(min_size / 32)`).
-MATH = {"ceil": math.ceil, "floor": math.floor, "sqrt": math.sqrt, "prod": math.prod, "log2": math.log2, "gcd": math.gcd}
+MATH = {
+    "ceil": math.ceil,
+    "floor": math.floor,
+    "sqrt": math.sqrt,
+    "prod": math.prod,
+    "log2": math.log2,
+    "gcd": math.gcd,
+}
 # Methods on the plain dicts and lists the override works with.
 METHODS = {"get", "setdefault", "pop", "copy", "keys", "values", "items", "index", "count"}
 
@@ -396,7 +423,10 @@ def evaluate(node, scope):
     if isinstance(node, ast.Subscript):
         container = evaluate(node.value, scope)
         if isinstance(node.slice, ast.Slice):
-            parts = [evaluate(x, scope) if x is not None else None for x in (node.slice.lower, node.slice.upper, node.slice.step)]
+            parts = [
+                evaluate(x, scope) if x is not None else None
+                for x in (node.slice.lower, node.slice.upper, node.slice.step)
+            ]
             return container[slice(*parts)]
         return container[evaluate(node.slice, scope)]
     if isinstance(node, ast.BinOp) and type(node.op) in OPS:
@@ -530,7 +560,7 @@ def split_override(method):
     for index, stmt in enumerate(method.body):
         value = getattr(stmt, "value", None)
         if is_super_call(value):
-            return method.body[:index], method.body[index + 1:]
+            return method.body[:index], method.body[index + 1 :]
     return [], method.body  # no super() call: treat the whole body as derivations
 
 
@@ -585,7 +615,9 @@ def assigned_keys(stmt, scope):
         return set()
     keys = set()
     for node in ast.walk(stmt):
-        targets = node.targets if isinstance(node, ast.Assign) else [node.target] if isinstance(node, ast.AugAssign) else []
+        targets = (
+            node.targets if isinstance(node, ast.Assign) else [node.target] if isinstance(node, ast.AugAssign) else []
+        )
         for target in targets:
             for sub in ast.walk(target):
                 if (
@@ -602,7 +634,7 @@ def method_scope(method, scope):
     """The override's own scope: its parameters' defaults (`text_kwargs=None`) over the shared names."""
     local = dict(scope)
     args = method.args
-    for arg, default in zip(args.args[len(args.args) - len(args.defaults):], args.defaults):
+    for arg, default in zip(args.args[len(args.args) - len(args.defaults) :], args.defaults):
         local[arg.arg] = literal(default)
     for arg, default in zip(args.kwonlyargs, args.kw_defaults):
         local[arg.arg] = literal(default) if default is not None else None
@@ -660,7 +692,9 @@ def class_values(cls, tree, ref, kwargs=None, depth=0):
     for _, owner in chain:
         if owner.name in BASES:
             break
-        method = next((f for f in owner.body if isinstance(f, ast.FunctionDef) and f.name == "get_small_config_defaults"), None)
+        method = next(
+            (f for f in owner.body if isinstance(f, ast.FunctionDef) and f.name == "get_small_config_defaults"), None
+        )
         if method is not None:
             methods.append((method, *split_override(method)))
     scopes = []
@@ -700,7 +734,7 @@ def tester_values(model_type, ref="main"):
     try:
         url, code = source(model_type, ref)
         return url, gather(code, ref)[0]
-    except Exception:  # no tester, renamed folder, offline
+    except Exception:  # noqa: BLE001 - never raises: no tester, renamed folder, offline
         return None, {}
 
 
@@ -709,7 +743,7 @@ def check(original, shrunk, ref="main", kept_whole=False):
     try:
         url, code = source(shrunk.get("model_type") or original["model_type"], ref)
         found, own, static = gather(code, ref)
-    except Exception as error:  # no tester, renamed folder, offline
+    except Exception as error:  # noqa: BLE001 - never raises: no tester, renamed folder, offline
         return {"error": f"{type(error).__name__}: {error}"[:200]}
     return {
         "url": url,
