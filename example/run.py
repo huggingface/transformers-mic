@@ -637,7 +637,7 @@ def rules_for(manifest, platform_dir):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--framework", choices=("transformers", "transformers.js", "sentence_transformers"), required=True)
+    parser.add_argument("--framework", choices=("transformers", "transformers.js", "sentence_transformers", "vllm"), required=True)
     parser.add_argument("--contract", action="append", help="run only this contract (repeatable)")
     parser.add_argument("--target", action="append", help="run only this target, fixture or checkpoint name (repeatable)")
     parser.add_argument("--fixtures-only", action="store_true", help="skip real checkpoints")
