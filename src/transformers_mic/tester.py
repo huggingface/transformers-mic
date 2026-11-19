@@ -17,6 +17,7 @@ and those values win, as they do at runtime.
 
 import ast
 import functools
+import math
 import re
 import urllib.request
 
@@ -90,7 +91,7 @@ def init_values(cls):
     init = next((f for f in cls.body if isinstance(f, ast.FunctionDef) and f.name == "__init__"), None)
     if init is None:
         return found
-    args = init.args.args[-len(init.args.defaults):] if init.args.defaults else []
+    args = init.args.args[-len(init.args.defaults) :] if init.args.defaults else []
     for arg, default in zip(args, init.args.defaults):
         value = literal(default)
         if value is not None:
@@ -162,8 +163,12 @@ def compare(tester, original, shrunk, kept_whole=False):
     depth = tester.get("num_hidden_layers")
     for key, value in sorted(tester.items()):
         fixture = lookup(shrunk, key)
-        if isinstance(value, list) and isinstance(fixture, list) and value and len(value) == depth and all(
-            isinstance(v, (str, bool)) or v in (0, 1) for v in value
+        if (
+            isinstance(value, list)
+            and isinstance(fixture, list)
+            and value
+            and len(value) == depth
+            and all(isinstance(v, (str, bool)) or v in (0, 1) for v in value)
         ):
             missing = sorted(set(map(str, value)) - set(map(str, fixture)))
             if missing:
@@ -206,42 +211,108 @@ def unshrunk_sizes(tester, original, shrunk):
     return adopted
 
 
+@functools.lru_cache(maxsize=128)
+def parse(code):
+    return ast.parse(code)
+
+
 def class_node(code, name):
-    tree = ast.parse(code)
+    tree = parse(code)
     return tree, next((c for c in ast.walk(tree) if isinstance(c, ast.ClassDef) and c.name == name), None)
 
 
+def imported_path(module, level):
+    """The repo path of a test module a tester file imports from (`...models.bamba.test_modeling_bamba`,
+    `..bert.test_modeling_bert`, `tests.models.x.test_modeling_x`), or None."""
+    parts = (module or "").split(".")
+    if level == 0 and parts[0] == "tests":
+        parts = parts[1:]
+    elif level == 2:  # tests/models/<folder>/ -> tests/models
+        parts = ["models", *parts]
+    elif level != 3:  # tests/models/<folder>/ -> tests
+        return None
+    return "/".join(["tests", *parts]) + ".py" if parts and parts[-1] else None
+
+
+def find_class(name, tree, ref, seen=()):
+    """(tree, class) of a tester a file can name: its own, one it imports from another test
+    module (cohere2 subclasses cohere's tester), or a shared base. (None, None) otherwise."""
+    if name in seen:
+        return None, None
+    module_alias, _, name = name.rpartition(".")  # `pocket_tts.PocketTTSModelTester`
+    own = next((c for c in ast.walk(tree) if isinstance(c, ast.ClassDef) and c.name == name), None)
+    if own is not None and not module_alias:
+        return tree, own
+    if name in BASES:
+        return class_node(fetch(BASE.format(ref=ref, path=BASES[name])), name)
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.ImportFrom):
+            continue
+        for alias in node.names:
+            bound = alias.asname or alias.name
+            if (
+                module_alias and bound == module_alias
+            ):  # from ..pocket_tts import test_modeling_pocket_tts as pocket_tts
+                path = imported_path(".".join(filter(None, (node.module, alias.name))), node.level)
+            elif not module_alias and bound == name:  # from ...models.bamba.test_modeling_bamba import BambaModelTester
+                path, name = imported_path(node.module, node.level), alias.name
+            else:
+                continue
+            if path is None:
+                return None, None
+            try:
+                return class_node(fetch(BASE.format(ref=ref, path=path)), name)
+            except (OSError, KeyError, SyntaxError, UnicodeDecodeError):  # not a test module we can read
+                return None, None
+    return None, None
+
+
+def ancestors(cls, tree, ref, seen=()):
+    """(tree, class) for the class and every tester class above it, nearest first."""
+    yield tree, cls
+    seen = (*seen, cls.name)
+    for base in cls.bases:
+        base_tree, base_cls = find_class(ast.unparse(base), tree, ref, seen)
+        if base_cls is not None and base_cls.name not in seen:
+            yield from ancestors(base_cls, base_tree, ref, seen)
+
+
 def resolve(node, tree, ref, seen=()):
-    """A dict literal's values, following `**X.defaults` into the shared bases and
-    `**NAME` into the module's own assignments; values that are not literals are left out."""
+    """A dict literal's values, following `**X.defaults` / `**X.small_config_overrides` into the
+    shared bases and the module's (or an imported module's) testers, and `**NAME` into the
+    module's own assignments; values that are not literals are left out."""
     if isinstance(node, ast.Dict):
         found = {}
         for key, value in zip(node.keys, node.values):
             if key is None:
                 found.update(resolve(value, tree, ref, seen))
             elif isinstance(key, ast.Constant):
-                literal_value = literal(value)
-                if literal_value is not None or (isinstance(value, ast.Constant) and value.value is None):
-                    found[key.value] = literal_value
+                try:  # a literal, or constant arithmetic (`32 * 4`)
+                    found[key.value] = evaluate(value, {})
+                except (Unknown, KeyError, IndexError, ValueError, TypeError, AttributeError, ArithmeticError):
+                    pass
         return found
     if isinstance(node, ast.Name):
         for stmt in tree.body:
             if isinstance(stmt, ast.Assign) and any(isinstance(t, ast.Name) and t.id == node.id for t in stmt.targets):
                 return resolve(stmt.value, tree, ref, seen)
-    if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name) and node.value.id in BASES:
-        return base_attr(node.value.id, node.attr, ref, seen) or {}
+    if isinstance(node, ast.Attribute) and isinstance(node.value, (ast.Name, ast.Attribute)):
+        owner_name = ast.unparse(node.value)
+        if (owner_name, node.attr) in seen:
+            return {}
+        owner_tree, owner = find_class(owner_name, tree, ref)
+        if owner is not None:
+            return class_attr(owner, node.attr, owner_tree, ref, (*seen, (owner_name, node.attr))) or {}
     return {}
 
 
 def class_attr(cls, attr, tree, ref, seen=()):
-    """A class-level dict (`defaults`, `small_config_overrides`), inherited from a shared base."""
-    for stmt in cls.body:
-        if isinstance(stmt, ast.Assign) and any(isinstance(t, ast.Name) and t.id == attr for t in stmt.targets):
-            return resolve(stmt.value, tree, ref, seen)
-    for base in cls.bases:
-        name = ast.unparse(base).split(".")[-1]
-        if name in BASES:
-            return base_attr(name, attr, ref, seen)
+    """A class-level dict (`defaults`, `small_config_overrides`), declared by the class or
+    inherited from the nearest tester above it that declares it; None if none does."""
+    for owner_tree, owner in ancestors(cls, tree, ref):
+        for stmt in owner.body:
+            if isinstance(stmt, ast.Assign) and any(isinstance(t, ast.Name) and t.id == attr for t in stmt.targets):
+                return resolve(stmt.value, owner_tree, ref, seen)
     return None
 
 
@@ -298,12 +369,35 @@ COMPARE = {
 }
 # The only functions an override may call: pure builtins over plain values.
 FUNCTIONS = {
-    "len": len, "list": list, "tuple": tuple, "dict": dict, "set": set, "sorted": sorted, "min": min,
-    "max": max, "sum": sum, "abs": abs, "int": int, "float": float, "str": str, "bool": bool,
-    "range": range, "enumerate": enumerate, "zip": zip,
+    "len": len,
+    "list": list,
+    "tuple": tuple,
+    "dict": dict,
+    "set": set,
+    "sorted": sorted,
+    "min": min,
+    "max": max,
+    "sum": sum,
+    "abs": abs,
+    "int": int,
+    "float": float,
+    "str": str,
+    "bool": bool,
+    "range": range,
+    "enumerate": enumerate,
+    "zip": zip,
+}
+# Pure functions of the math module (`math.ceil(min_size / 32)`).
+MATH = {
+    "ceil": math.ceil,
+    "floor": math.floor,
+    "sqrt": math.sqrt,
+    "prod": math.prod,
+    "log2": math.log2,
+    "gcd": math.gcd,
 }
 # Methods on the plain dicts and lists the override works with.
-METHODS = {"get", "setdefault", "copy", "keys", "values", "items", "index", "count"}
+METHODS = {"get", "setdefault", "pop", "copy", "keys", "values", "items", "index", "count"}
 
 
 class Unknown(Exception):
@@ -329,7 +423,10 @@ def evaluate(node, scope):
     if isinstance(node, ast.Subscript):
         container = evaluate(node.value, scope)
         if isinstance(node.slice, ast.Slice):
-            parts = [evaluate(x, scope) if x is not None else None for x in (node.slice.lower, node.slice.upper, node.slice.step)]
+            parts = [
+                evaluate(x, scope) if x is not None else None
+                for x in (node.slice.lower, node.slice.upper, node.slice.step)
+            ]
             return container[slice(*parts)]
         return container[evaluate(node.slice, scope)]
     if isinstance(node, ast.BinOp) and type(node.op) in OPS:
@@ -380,9 +477,29 @@ def evaluate(node, scope):
         return comprehension(node, scope)
     if isinstance(node, ast.Call) and not any(isinstance(a, ast.Starred) for a in node.args):
         args = [evaluate(a, scope) for a in node.args]
-        kwargs = {k.arg: evaluate(k.value, scope) for k in node.keywords if k.arg}
+        kwargs = {}
+        for keyword in node.keywords:  # f(a=1, **text_kwargs)
+            if keyword.arg:
+                kwargs[keyword.arg] = evaluate(keyword.value, scope)
+            else:
+                kwargs.update(evaluate(keyword.value, scope) or {})
+        if (
+            isinstance(node.func, ast.Attribute)
+            and node.func.attr == "get_small_config_defaults"
+            and isinstance(node.func.value, ast.Name)
+            and "testers" in scope
+            and not args
+        ):  # a sibling tester's values: BlipTextModelTester.get_small_config_defaults(**text_kwargs)
+            return scope["testers"](node.func.value.id, kwargs)
         if isinstance(node.func, ast.Name) and node.func.id in FUNCTIONS and node.func.id not in scope:
             return FUNCTIONS[node.func.id](*args, **kwargs)
+        if (
+            isinstance(node.func, ast.Attribute)
+            and isinstance(node.func.value, ast.Name)
+            and node.func.value.id == "math"
+            and node.func.attr in MATH
+        ):
+            return MATH[node.func.attr](*args, **kwargs)
         if isinstance(node.func, ast.Attribute) and node.func.attr in METHODS:
             target = evaluate(node.func.value, scope)
             if isinstance(target, (dict, list, tuple)):
@@ -443,7 +560,7 @@ def split_override(method):
     for index, stmt in enumerate(method.body):
         value = getattr(stmt, "value", None)
         if is_super_call(value):
-            return method.body[:index], method.body[index + 1:]
+            return method.body[:index], method.body[index + 1 :]
     return [], method.body  # no super() call: treat the whole body as derivations
 
 
@@ -467,6 +584,16 @@ def run_derivations(body, scope):
                         if isinstance(target, ast.Name) and target.id in ("values", "kwargs", "cls"):
                             raise Unknown(f"rebinding {target.id}")
                         bind(target, value, scope)
+            elif isinstance(stmt, ast.AugAssign) and type(stmt.op) in OPS:  # values["seq_length"] += n
+                current = evaluate(stmt.target, scope)
+                value = OPS[type(stmt.op)](current, evaluate(stmt.value, scope))
+                if isinstance(stmt.target, ast.Subscript):
+                    container = evaluate(stmt.target.value, scope)
+                    if not isinstance(container, (dict, list)):
+                        raise Unknown(ast.unparse(stmt.target))
+                    container[evaluate(stmt.target.slice, scope)] = value
+                else:
+                    bind(stmt.target, value, scope)
             elif isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call):
                 evaluate(stmt.value, scope)  # values.setdefault / kwargs.setdefault
             elif isinstance(stmt, ast.If):
@@ -476,27 +603,64 @@ def run_derivations(body, scope):
                     bind(stmt.target, item, scope)
                     run_derivations(stmt.body, scope)
         except (Unknown, KeyError, IndexError, ValueError, TypeError, AttributeError, ArithmeticError):
-            continue
+            # The statement would have set these: a value left from before it is stale, not known.
+            for key in assigned_keys(stmt, scope):
+                scope["values"].pop(key, None)
     return scope
 
 
-def class_values(cls, tree, ref):
-    """(merged values, own values, static) for one tester class.
+def assigned_keys(stmt, scope):
+    """Constant keys a statement assigns in `values` (`values["k"] = ...`, `values.setdefault("k", ...)`)."""
+    if not isinstance(scope.get("values"), dict):
+        return set()
+    keys = set()
+    for node in ast.walk(stmt):
+        targets = (
+            node.targets if isinstance(node, ast.Assign) else [node.target] if isinstance(node, ast.AugAssign) else []
+        )
+        for target in targets:
+            for sub in ast.walk(target):
+                if (
+                    isinstance(sub, ast.Subscript)
+                    and isinstance(sub.value, ast.Name)
+                    and sub.value.id == "values"
+                    and isinstance(sub.slice, ast.Constant)
+                ):
+                    keys.add(sub.slice.value)
+    return keys
 
-    Precedence is the runtime's: what `__init__` still sets (kwargs.setdefault, self.x)
-    > the class's `small_config_overrides` > its `defaults` (its own, else its base's);
-    then the fields the bases' and the class's own `get_small_config_defaults()` derive.
+
+def method_scope(method, scope):
+    """The override's own scope: its parameters' defaults (`text_kwargs=None`) over the shared names."""
+    local = dict(scope)
+    args = method.args
+    for arg, default in zip(args.args[len(args.args) - len(args.defaults) :], args.defaults):
+        local[arg.arg] = literal(default)
+    for arg, default in zip(args.kwonlyargs, args.kw_defaults):
+        local[arg.arg] = literal(default) if default is not None else None
+    for name in list(local["kwargs"]):  # a named parameter takes its value out of **kwargs
+        if any(a.arg == name for a in (*args.args, *args.kwonlyargs)):
+            local[name] = local["kwargs"].pop(name)
+    return local
+
+
+def class_values(cls, tree, ref, kwargs=None, depth=0):
+    """(merged values, own values, static) for one tester class, as `cls.get_small_config_defaults(**kwargs)`.
+
+    Precedence is the runtime's: the caller's kwargs > what `__init__` still sets
+    (kwargs.setdefault, self.x) > `small_config_overrides` > `defaults` (each the class's own,
+    else the nearest tester's above it); then the fields the bases' and the testers' own
+    `get_small_config_defaults()` derive, nearest override first, as super() chains them.
     An override that fills `kwargs` before calling `super()` (llava_next, hunyuan_vl) is
     followed as a caller would be: those values win and feed the bases' derivations.
+    A sibling tester's `get_small_config_defaults(...)` is evaluated the same way.
     A base from before transformers#50462 has no `defaults`; its `__init__` is parsed instead.
     """
     legacy = init_values(cls)
-    overrides = {}
-    for stmt in cls.body:
-        if isinstance(stmt, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "small_config_overrides" for t in stmt.targets):
-            overrides = resolve(stmt.value, tree, ref)
+    chain = list(ancestors(cls, tree, ref))
+    overrides = class_attr(cls, "small_config_overrides", tree, ref) or {}
     defaults = class_attr(cls, "defaults", tree, ref)
-    names = {ast.unparse(b).split(".")[-1] for b in cls.bases} & set(BASES)
+    names = {c.name for _, c in chain} & set(BASES)
     lines = set().union(*(lineage(name, ref) for name in names)) if names else set()
     static = defaults is not None or bool(overrides)
     if defaults is None:
@@ -507,15 +671,44 @@ def class_values(cls, tree, ref):
     own = {**overrides, **legacy}
     if not static:
         return {**defaults, **own}, own, static
-    method = next((f for f in cls.body if isinstance(f, ast.FunctionDef) and f.name == "get_small_config_defaults"), None)
-    before, after = split_override(method) if method is not None else ([], [])
-    passed = {}  # what the override hands super() in kwargs; the caller passes nothing
-    scope = {"kwargs": passed, "cls": {"small_config_overrides": dict(overrides), "defaults": dict(defaults)}}
-    run_derivations(before, scope)
+
+    def sibling(name, sibling_kwargs):
+        sibling_tree, sibling_cls = find_class(name, tree, ref)
+        if sibling_cls is None or depth > 4:
+            raise Unknown(name)
+        return class_values(sibling_cls, sibling_tree, ref, sibling_kwargs, depth + 1)[0]
+
+    passed = dict(kwargs or {})  # what the overrides hand super() in kwargs, starting with the caller's
+    attributes = {}  # plain class attributes the overrides read (`cls.base` on funnel's testers)
+    for _, owner in chain:
+        for stmt in owner.body:
+            if isinstance(stmt, ast.Assign) and len(stmt.targets) == 1 and isinstance(stmt.targets[0], ast.Name):
+                value = literal(stmt.value)
+                if value is not None or (isinstance(stmt.value, ast.Constant) and stmt.value.value is None):
+                    attributes.setdefault(stmt.targets[0].id, value)
+    attributes.update(small_config_overrides=dict(overrides), defaults=dict(defaults))
+    shared = {"kwargs": passed, "testers": sibling, "cls": attributes}
+    methods = []  # the testers' own overrides, nearest first; the shared bases' are `derive`
+    for _, owner in chain:
+        if owner.name in BASES:
+            break
+        method = next(
+            (f for f in owner.body if isinstance(f, ast.FunctionDef) and f.name == "get_small_config_defaults"), None
+        )
+        if method is not None:
+            methods.append((method, *split_override(method)))
+    scopes = []
+    for method, before, _ in methods:
+        scope = method_scope(method, shared)
+        run_derivations(before, scope)
+        scopes.append(scope)
+        if not any(is_super_call(getattr(stmt, "value", None)) for stmt in method.body):
+            break  # no super() call: nothing further up runs
     found = {**defaults, **own, **passed}
     derive(found, lines, set(own) | set(passed))
-    scope["values"] = found
-    run_derivations(after, scope)
+    for (method, _, after), scope in reversed(list(zip(methods, scopes))):
+        scope["values"] = found
+        run_derivations(after, scope)
     return found, own, static
 
 
@@ -541,7 +734,7 @@ def tester_values(model_type, ref="main"):
     try:
         url, code = source(model_type, ref)
         return url, gather(code, ref)[0]
-    except Exception:  # no tester, renamed folder, offline
+    except Exception:  # noqa: BLE001 - never raises: no tester, renamed folder, offline
         return None, {}
 
 
@@ -550,7 +743,7 @@ def check(original, shrunk, ref="main", kept_whole=False):
     try:
         url, code = source(shrunk.get("model_type") or original["model_type"], ref)
         found, own, static = gather(code, ref)
-    except Exception as error:  # no tester, renamed folder, offline
+    except Exception as error:  # noqa: BLE001 - never raises: no tester, renamed folder, offline
         return {"error": f"{type(error).__name__}: {error}"[:200]}
     return {
         "url": url,
