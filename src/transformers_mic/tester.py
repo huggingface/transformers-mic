@@ -81,37 +81,47 @@ def literal(node):
         return None
 
 
+def init_values(cls):
+    """Literal values one tester class's __init__ sets: arg defaults, kwargs.setdefault, self.x = ..."""
+    found = {}
+    init = next((f for f in cls.body if isinstance(f, ast.FunctionDef) and f.name == "__init__"), None)
+    if init is None:
+        return found
+    args = init.args.args[-len(init.args.defaults):] if init.args.defaults else []
+    for arg, default in zip(args, init.args.defaults):
+        value = literal(default)
+        if value is not None:
+            found.setdefault(arg.arg, value)
+    for node in ast.walk(init):
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "setdefault"
+            and len(node.args) == 2
+            and isinstance(node.args[0], ast.Constant)
+        ):
+            value = literal(node.args[1])
+            if value is not None:
+                found.setdefault(node.args[0].value, value)
+        elif isinstance(node, ast.Assign) and len(node.targets) == 1:
+            target = node.targets[0]
+            if isinstance(target, ast.Attribute) and isinstance(target.value, ast.Name) and target.value.id == "self":
+                value = literal(node.value)
+                if value is not None:
+                    found.setdefault(target.attr, value)
+    return found
+
+
+def testers(tree):
+    return [c for c in ast.walk(tree) if isinstance(c, ast.ClassDef) and "Tester" in c.name]
+
+
 def values(code):
     """Literal config values the testers' __init__ set: defaults, kwargs.setdefault, self.x = ..."""
     found = {}
-    for cls in ast.walk(ast.parse(code)):
-        if not (isinstance(cls, ast.ClassDef) and "Tester" in cls.name):
-            continue
-        init = next((f for f in cls.body if isinstance(f, ast.FunctionDef) and f.name == "__init__"), None)
-        if init is None:
-            continue
-        args = init.args.args[-len(init.args.defaults):] if init.args.defaults else []
-        for arg, default in zip(args, init.args.defaults):
-            value = literal(default)
-            if value is not None:
-                found.setdefault(arg.arg, value)
-        for node in ast.walk(init):
-            if (
-                isinstance(node, ast.Call)
-                and isinstance(node.func, ast.Attribute)
-                and node.func.attr == "setdefault"
-                and len(node.args) == 2
-                and isinstance(node.args[0], ast.Constant)
-            ):
-                value = literal(node.args[1])
-                if value is not None:
-                    found.setdefault(node.args[0].value, value)
-            elif isinstance(node, ast.Assign) and len(node.targets) == 1:
-                target = node.targets[0]
-                if isinstance(target, ast.Attribute) and isinstance(target.value, ast.Name) and target.value.id == "self":
-                    value = literal(node.value)
-                    if value is not None:
-                        found.setdefault(target.attr, value)
+    for cls in testers(ast.parse(code)):
+        for key, value in init_values(cls).items():
+            found.setdefault(key, value)
     return found
 
 
@@ -216,7 +226,7 @@ def resolve(node, tree, ref, seen=()):
             if isinstance(stmt, ast.Assign) and any(isinstance(t, ast.Name) and t.id == node.id for t in stmt.targets):
                 return resolve(stmt.value, tree, ref, seen)
     if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name) and node.value.id in BASES:
-        return base_attr(node.value.id, node.attr, ref, seen)
+        return base_attr(node.value.id, node.attr, ref, seen) or {}
     return {}
 
 
@@ -229,14 +239,15 @@ def class_attr(cls, attr, tree, ref, seen=()):
         name = ast.unparse(base).split(".")[-1]
         if name in BASES:
             return base_attr(name, attr, ref, seen)
-    return {}
+    return None
 
 
 def base_attr(name, attr, ref, seen=()):
+    """A shared base's class-level dict, or None where no class declares it (before #50462)."""
     if (name, attr) in seen:
-        return {}
+        return None
     tree, cls = class_node(fetch(BASE.format(ref=ref, path=BASES[name])), name)
-    return class_attr(cls, attr, tree, ref, (*seen, (name, attr))) if cls else {}
+    return class_attr(cls, attr, tree, ref, (*seen, (name, attr))) if cls else None
 
 
 def lineage(name, ref, seen=()):
@@ -261,40 +272,116 @@ def derive(values, lineage, explicit):
     return values
 
 
-def gather(code, ref="main"):
-    """(merged values, the model's own values, static): the tester's small config.
+OPS = {
+    ast.Add: lambda a, b: a + b,
+    ast.Sub: lambda a, b: a - b,
+    ast.Mult: lambda a, b: a * b,
+    ast.FloorDiv: lambda a, b: a // b,
+    ast.Div: lambda a, b: a / b,
+    ast.Mod: lambda a, b: a % b,
+    ast.Pow: lambda a, b: a**b,
+}
+
+
+def evaluate(node, values):
+    """An expression over `values[...]`, constants and arithmetic; anything else raises."""
+    if isinstance(node, ast.Constant):
+        return node.value
+    if isinstance(node, ast.Subscript) and isinstance(node.value, ast.Name) and node.value.id == "values":
+        return values[evaluate(node.slice, values)]
+    if isinstance(node, ast.BinOp) and type(node.op) in OPS:
+        return OPS[type(node.op)](evaluate(node.left, values), evaluate(node.right, values))
+    if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
+        return -evaluate(node.operand, values)
+    if isinstance(node, ast.Compare) and len(node.ops) == 1 and isinstance(node.ops[0], (ast.In, ast.NotIn)):
+        right = node.comparators[0]
+        if not (isinstance(right, ast.Name) and right.id == "values"):
+            raise ValueError("membership outside values")
+        inside = evaluate(node.left, values) in values
+        return inside if isinstance(node.ops[0], ast.In) else not inside
+    raise ValueError(ast.unparse(node))
+
+
+def run_derivations(body, values):
+    """A model's own `get_small_config_defaults()` override, statement by statement: only
+    `values[k] = expr`, `values.setdefault(k, expr)` and `if` on those; the rest is skipped."""
+    for stmt in body:
+        try:
+            if (
+                isinstance(stmt, ast.Assign)
+                and len(stmt.targets) == 1
+                and isinstance(stmt.targets[0], ast.Subscript)
+                and isinstance(stmt.targets[0].value, ast.Name)
+                and stmt.targets[0].value.id == "values"
+            ):
+                values[evaluate(stmt.targets[0].slice, values)] = evaluate(stmt.value, values)
+            elif (
+                isinstance(stmt, ast.Expr)
+                and isinstance(stmt.value, ast.Call)
+                and isinstance(stmt.value.func, ast.Attribute)
+                and stmt.value.func.attr == "setdefault"
+                and isinstance(stmt.value.func.value, ast.Name)
+                and stmt.value.func.value.id == "values"
+                and len(stmt.value.args) == 2
+            ):
+                key = evaluate(stmt.value.args[0], values)
+                if key not in values:
+                    values[key] = evaluate(stmt.value.args[1], values)
+            elif isinstance(stmt, ast.If):
+                run_derivations(stmt.body if evaluate(stmt.test, values) else stmt.orelse, values)
+        except (KeyError, ValueError, TypeError, ZeroDivisionError, ArithmeticError):
+            continue
+    return values
+
+
+def class_values(cls, tree, ref):
+    """(merged values, own values, static) for one tester class.
 
     Precedence is the runtime's: what `__init__` still sets (kwargs.setdefault, self.x)
-    > the class's `small_config_overrides` > its base's `defaults`. A base from before
-    transformers#50462 has no `defaults`; its `__init__` is parsed instead.
+    > the class's `small_config_overrides` > its `defaults` (its own, else its base's);
+    then the fields the bases' and the class's own `get_small_config_defaults()` derive.
+    A base from before transformers#50462 has no `defaults`; its `__init__` is parsed instead.
     """
-    tree = ast.parse(code)
-    legacy = values(code)
-    overrides, defaults, lines = {}, {}, set()
-    for cls in ast.walk(tree):
-        if not (isinstance(cls, ast.ClassDef) and "Tester" in cls.name):
-            continue
-        for stmt in cls.body:
-            if isinstance(stmt, ast.Assign) and any(
-                isinstance(t, ast.Name) and t.id == "small_config_overrides" for t in stmt.targets
-            ):
-                for key, value in resolve(stmt.value, tree, ref).items():
-                    overrides.setdefault(key, value)
-        for base in cls.bases:
-            name = ast.unparse(base).split(".")[-1]
-            if name in BASES:
-                lines |= lineage(name, ref)
-                for key, value in base_attr(name, "defaults", ref).items():
-                    defaults.setdefault(key, value)
-    static = bool(overrides or defaults)
-    if not defaults:  # a ref from before the static defaults
-        for base in bases(code):
-            for key, value in values(fetch(BASE.format(ref=ref, path=BASES[base]))).items():
+    legacy = init_values(cls)
+    overrides = {}
+    for stmt in cls.body:
+        if isinstance(stmt, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "small_config_overrides" for t in stmt.targets):
+            overrides = resolve(stmt.value, tree, ref)
+    defaults = class_attr(cls, "defaults", tree, ref)
+    names = {ast.unparse(b).split(".")[-1] for b in cls.bases} & set(BASES)
+    lines = set().union(*(lineage(name, ref) for name in names)) if names else set()
+    static = defaults is not None or bool(overrides)
+    if defaults is None:
+        defaults = {}
+        for name in sorted(names):
+            for key, value in values(fetch(BASE.format(ref=ref, path=BASES[name]))).items():
                 defaults.setdefault(key, value)
     own = {**overrides, **legacy}
     found = {**defaults, **own}
     if static:
         derive(found, lines, set(own))
+        method = next(
+            (f for f in cls.body if isinstance(f, ast.FunctionDef) and f.name == "get_small_config_defaults"), None
+        )
+        if method is not None:
+            run_derivations(method.body, found)
+    return found, own, static
+
+
+def gather(code, ref="main", only=None):
+    """(merged values, the model's own values, static) over the file's tester classes, the
+    first class's value winning; `only` names one class."""
+    tree = ast.parse(code)
+    found, own, static = {}, {}, False
+    for cls in testers(tree):
+        if only and cls.name != only:
+            continue
+        cls_found, cls_own, cls_static = class_values(cls, tree, ref)
+        for key, value in cls_found.items():
+            found.setdefault(key, value)
+        for key, value in cls_own.items():
+            own.setdefault(key, value)
+        static = static or cls_static
     return found, own, static
 
 

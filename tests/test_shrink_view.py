@@ -121,6 +121,46 @@ class FooTester(VLMModelTester):
     assert tester.gather(legacy)[0]["kv_lora_rank"] == 8
 
 
+def test_model_tester_own_defaults_derivations_and_classes(monkeypatch):
+    """transformers#50916 shapes: a class's own `defaults`, simple derivations in its own
+    `get_small_config_defaults()`, and per-class precedence in a file of several testers."""
+    from transformers_mic import tester
+
+    mixin = """
+class ModelTesterConfigMixin:
+    defaults = {"hidden_size": 32, "num_experts": 8}
+    small_config_overrides = {}
+"""
+    monkeypatch.setattr(tester, "fetch", lambda url, timeout=20: mixin)
+    code = """
+class BertModelTester(ModelTesterConfigMixin):
+    defaults = {}
+    small_config_overrides = {"hidden_size": 48, "num_attention_heads": 4, "image_size": 16, "patch_size": 4}
+
+    @classmethod
+    def get_small_config_defaults(cls, **kwargs):
+        values = super().get_small_config_defaults(**kwargs)
+        values["out_hidden_size"] = values["hidden_size"]
+        values.setdefault("head_dim", values["hidden_size"] // values["num_attention_heads"])
+        if "grid" not in values:
+            values["grid"] = values["image_size"] // values["patch_size"]
+        values["layers"] = {i: i for i in range(2)}  # not evaluated
+        values["missing"] = values["nope"]  # skipped
+        return values
+
+class BertVisionTester:
+    def __init__(self, parent, hidden_size=99, depth=3):
+        self.parent = parent
+"""
+    found, own, static = tester.gather(code)
+    assert static and "num_experts" not in found  # the class's own defaults replace the mixin's
+    assert found["out_hidden_size"] == 48 and found["head_dim"] == 12 and found["grid"] == 4
+    assert "layers" not in found and "missing" not in found
+    # The first class wins across classes; the second still adds what the first lacks.
+    assert found["hidden_size"] == 48 and found["depth"] == 3
+    assert tester.gather(code, only="BertVisionTester")[0] == {"hidden_size": 99, "depth": 3}
+
+
 def test_model_tester_values_and_advisory_findings():
     from transformers_mic import tester
 
