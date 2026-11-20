@@ -5,7 +5,13 @@ All notable changes to `transformers-mic` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.3] - 2026-11-20
+
+### Added
+
+- `vllm` and `sglang` integrations are accepted by `tmic check`, `record` and `review` and by the runner
+  (`example/run.py --framework`), so a contract can declare `integrations/vllm/usage.md`.
+- Ruff lint and format configuration, `make format` / `make lint`, and a `lint` CI job.
 
 ### Changed
 
