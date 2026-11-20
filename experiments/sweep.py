@@ -94,6 +94,16 @@ KERNEL_HEADS = {
     "embedding_gemma2_text": {"head_dim": 64},
     "diffusion_gemma_text": {"head_dim": 64},
     "flint": {"head_dim": 64},  # attention sinks: FlashInfer, 64 and up
+    "gpt_oss": {"head_dim": 64},
+    "openai_privacy_filter": {"head_dim": 64},
+    "gemma4_text": {"head_dim": 64},
+    "gemma4_unified_text": {"head_dim": 64},
+    "minimax_m3_vl_text": {"head_dim": 128},  # fused q/k norm + rope: 128
+    # gated delta net: 128-wide linear heads only
+    **{
+        t: {"head_dim": 64, "linear_key_head_dim": 128, "linear_value_head_dim": 128}
+        for t in ("qwen3_next", "qwen3_5_text", "qwen3_5_moe_text", "qwen4_exp_text")
+    },
 }
 
 
