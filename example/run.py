@@ -63,7 +63,11 @@ once the bug is fixed. An object {issue, match, skip_outputs} narrows it:
 with match, the target is xfail only if every failure line contains that text
 (any other failure still fails, and a pass asks to remove the entry); with
 skip_outputs, those outputs are left out of the comparison and recorded as
-skipped_outputs, and the others are checked as usual; with variants and/or
+skipped_outputs, and the others are checked as usual. --record honours it too:
+the skipped outputs are neither required nor stored in the candidate (its
+recorded_with lists them), so one known-broken output (e.g. one input modality
+of a multimodal contract) does not block recording the others; once the entry is
+removed, the check reports them as not in the baseline until re-recorded. With variants and/or
 platforms, the entry covers only runs of those variants on those platforms (a
 pass anywhere else is an ordinary pass). A contract that raises
 stops there, so a matched error still hides the checks after it. local_patches in the fleet lock name
@@ -432,6 +436,19 @@ def lookup(outputs, dotted):
             return None
         value = value[key]
     return value
+
+
+def without(outputs, names):
+    """A copy of outputs without the dotted names: outputs a known failure skips are not recorded."""
+    outputs = json.loads(json.dumps(outputs))
+    for name in names:
+        *parents, leaf = name.split(".")
+        node = outputs
+        for key in parents:
+            node = node.get(key) if isinstance(node, dict) else None
+        if isinstance(node, dict):
+            node.pop(leaf, None)
+    return outputs
 
 
 def flatten(value):
@@ -957,7 +974,7 @@ def main():
                 entry = known_entry(
                     known, record.get("contract_name", record["contract"]), target, args.variant, platform
                 )
-                skipped = sorted(entry.get("skip_outputs", [])) if entry and not args.record else []
+                skipped = sorted(entry.get("skip_outputs", [])) if entry else []
                 outputs = {k: r for k, r in manifest["outputs"].items() if k not in skipped}
                 checked = required - set(skipped)
                 if skipped:
@@ -1022,11 +1039,8 @@ def main():
                     ok2, stdout2, _ = executor.run(env, fresh_process=True)  # must reproduce outside this process
                     again = [line for line in stdout2.splitlines() if line.startswith("{")]
                     # Same rules as a check: exact outputs equal, numeric ones within this platform's tolerance.
-                    unstable = (
-                        compare(rules_for(manifest, platform_dir), json.loads(again[-1]), actual, required)
-                        if again
-                        else ["no result record"]
-                    )
+                    rules = {k: r for k, r in rules_for(manifest, platform_dir).items() if k not in skipped}
+                    unstable = compare(rules, json.loads(again[-1]), actual, checked) if again else ["no result record"]
                     if not ok2 or unstable:
                         emit(
                             {
@@ -1043,7 +1057,10 @@ def main():
                         recorded["template_date"] = template_date.TEMPLATE_DATE
                     candidate.write_text(
                         json.dumps(
-                            validate({"recorded_with": recorded, "outputs": actual}, "baseline", candidate), indent=1
+                            validate(
+                                {"recorded_with": recorded, "outputs": without(actual, skipped)}, "baseline", candidate
+                            ),
+                            indent=1,
                         )
                         + "\n"
                     )

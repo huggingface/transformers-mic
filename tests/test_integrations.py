@@ -194,6 +194,67 @@ def test_runner_uses_only_selected_outputs_and_checks_numeric_shape(workspace, m
 
 
 @pytest.mark.requires_runtime
+def test_a_known_failure_skipping_one_output_does_not_block_recording_the_others(workspace, monkeypatch):
+    """One output per input case (e.g. text, image of a multimodal contract); the image case is a known
+    framework bug: the contract is still recorded and checked on the text case, and stays honest about it."""
+    sys.path.insert(0, str(resources.backend()))
+    import run
+
+    manifest = json.loads((workspace.contract_root / "integration.json").read_text())
+    manifest["outputs"] = {
+        "runtime": {"compare": "exact"},
+        "checks.text": {"compare": "all_true"},
+        "checks.image": {"compare": "all_true"},
+    }
+    write(workspace.contract_root / "integration.json", manifest)
+    lock = json.loads(workspace.lock_path.read_text())
+    lock["known_failures"] = {
+        "EmbeddingGemma/fixture": {"issue": "image prompts differ", "skip_outputs": ["checks.image"]}
+    }
+    write(workspace.lock_path, lock)
+    monkeypatch.setattr(run, "contract_folder", lambda *a: (workspace.contract_root, "local"))
+    monkeypatch.setattr(run, "targets", lambda *a: iter([("fixture", "fixture", "/fixture", "a" * 40, None)]))
+    monkeypatch.setattr(
+        run.template_date if hasattr(run, "template_date") else __import__("template_date"), "freeze", lambda *a: None
+    )
+    values = {
+        "runtime": {"device": "cpu", "dtype": "float32"},
+        "checks": {"text": {"tokens_equal": True}, "image": {"tokens_equal": False}},
+    }
+
+    class Executor:
+        def __init__(self, *a):
+            pass
+
+        def environment(self):
+            return {"python": "3.11"}
+
+        def run(self, *a, **kw):
+            return True, json.dumps(values), ""
+
+    monkeypatch.setattr(run, "Executor", Executor)
+    options = ["run", "--framework", "transformers", "--lock", str(workspace.lock_path)]
+    monkeypatch.setattr(sys, "argv", [*options, "--record"])
+    assert run.main() == 0
+    (candidate,) = workspace.contract_root.rglob("*.candidate.json")
+    recorded = json.loads(candidate.read_text())
+    assert recorded["outputs"]["checks"] == {"text": {"tokens_equal": True}}
+    assert recorded["recorded_with"]["skipped_outputs"] == ["checks.image"]
+    candidate.rename(candidate.with_name(candidate.name.replace(".candidate", "")))
+
+    monkeypatch.setattr(sys, "argv", options)
+    assert run.main() == 0
+    values["checks"]["text"]["tokens_equal"] = False
+    assert run.main() == 1  # the cases the entry does not name are still checked
+    values["checks"]["text"]["tokens_equal"] = True
+    # Fixed upstream and the entry removed: the case is not in the baseline until it is re-recorded.
+    del lock["known_failures"]
+    write(workspace.lock_path, lock)
+    values["checks"]["image"]["tokens_equal"] = True
+    assert run.main() == 1
+
+
+@pytest.mark.requires_runtime
 def test_allow_missing_baseline_validates_outputs_without_comparing(workspace, monkeypatch, capsys):
     integrations.generate(SimpleNamespace(workspace=workspace.root, integration=["transformers", integrations.NAME]))
     sys.path.insert(0, str(resources.backend()))
