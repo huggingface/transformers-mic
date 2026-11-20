@@ -415,7 +415,6 @@ def build(
     keep_random=False,
     **kwargs,
 ):
-
     repo = fixture["built_from"]
     recipe = fixture["build"]
     kind = recipe["sentence_transformers_class"]

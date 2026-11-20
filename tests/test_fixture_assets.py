@@ -278,6 +278,34 @@ def test_shrink_resamples_longrope_factors_to_the_mla_rotary_width():
     assert len(rope["short_factor"]) == len(rope["long_factor"]) == shrunk.qk_rope_head_dim // 2
 
 
+def test_shrink_keeps_the_head_widths_vllm_kernels_accept(monkeypatch):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    import sweep
+    from transformers import AutoConfig, LlamaConfig
+
+    mla = sweep.shrink(AutoConfig.for_model("deepseek_v3"))
+    assert {k: getattr(mla, k) for k in ("kv_lora_rank", "qk_nope_head_dim", "qk_rope_head_dim", "v_head_dim")} == {
+        "kv_lora_rank": 512,
+        "qk_nope_head_dim": 128,
+        "qk_rope_head_dim": 64,
+        "v_head_dim": 128,
+    }
+    assert sweep.shrink(AutoConfig.for_model("flint")).head_dim == 64
+    # A pinned width is only set where the config has it.
+    monkeypatch.setitem(sweep.KERNEL_HEADS, "llama", {"index_head_dim": 128})
+    assert getattr(sweep.shrink(LlamaConfig()), "index_head_dim", None) is None
+
+
+def test_kernel_fields_follow_sub_configs_and_mla_only_with_a_latent_rank():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+    from sweep import KERNEL_MLA, kernel_fields
+
+    nested = {"model_type": "diffusion_gemma", "text_config": {"model_type": "diffusion_gemma_text", "head_dim": 256}}
+    assert kernel_fields(nested) == {"head_dim"}
+    assert kernel_fields({"model_type": "kimi_k25", "text_config": {"kv_lora_rank": 512}}) == set(KERNEL_MLA)
+    assert kernel_fields({"model_type": "llama", "index_head_dim": 128}) == set()
+
+
 def test_sensitivity_perturbs_list_contexts_and_never_the_forecast_target():
     import perturb
 

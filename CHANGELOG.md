@@ -26,6 +26,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   `layer_types` read as `None`).
 - `position_embedding_size` is kept at the checkpoint's value: it is a table of positions (Gemma 4's
   vision tower), not a width, so the tester's 128 is no longer adopted.
+- Fixtures keep the head widths vLLM's attention kernels accept: an MLA config (any node with a latent
+  `kv_lora_rank`) keeps DeepSeek's `kv_lora_rank` 512, `qk_nope_head_dim` 128, `qk_rope_head_dim` 64,
+  `v_head_dim` 128 and `index_head_dim` 128, and DeepSeek-V4, EmbeddingGemma2, DiffusionGemma and Flint keep a
+  head width with a kernel. Model-tester sizes no longer override them, in sub-configs too. Published fixtures
+  change only on `tmic build --rebuild --reshrink`, and reviewed `config_overrides` still win (GLM-5.3).
 
 ## [0.1.2] - 2026-11-12
 
