@@ -432,6 +432,9 @@ def shrink(config):
         # (DeepSeek-V3.2: top-k 8 left every output unchanged), so keep 2.
         if isinstance(values.get("index_topk"), int):
             values["index_topk"] = min(values["index_topk"], 2)
+            # GLM-5.3-Flash pools the indexer's keys: top-k a multiple of the pool
+            if isinstance(pool := values.get("index_kpool"), int) and pool > 1:
+                values["index_topk"] = pool
         if values.get("q_lora_rank"):
             values["q_lora_rank"] = 16
         for key in EXPERTS:
