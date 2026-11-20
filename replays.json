@@ -1486,6 +1486,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#deepseek_v3#2026-10-28": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#deepseek_v32#2026-11-08": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1506,6 +1510,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#electra#2026-11-19": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#eomt_dinov3#2026-11-08": {
   "verdict": "not-covered",
   "version": 9
@@ -1519,6 +1527,10 @@
   "version": 9
  },
  "sticky#ernie#2026-10-12": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#ernie#2026-11-19": {
   "verdict": "out-of-scope",
   "version": 9
  },
@@ -1739,6 +1751,10 @@
   "version": 9
  },
  "sticky#hunyuan_v1_moe#2026-10-22": {
+  "verdict": "not-covered",
+  "version": 9
+ },
+ "sticky#hunyuan_v1_moe#2026-10-24": {
   "verdict": "not-covered",
   "version": 9
  },
@@ -1970,6 +1986,10 @@
   "version": 9
  },
  "sticky#moshi#2026-10-22": {
+  "verdict": "not-covered",
+  "version": 9
+ },
+ "sticky#moshi#2026-10-24": {
   "verdict": "not-covered",
   "version": 9
  },
@@ -2286,6 +2306,10 @@
   "version": 9
  },
  "sticky#xmod#2026-10-14": {
+  "verdict": "not-covered",
+  "version": 9
+ },
+ "sticky#xmod#2026-11-17": {
   "verdict": "not-covered",
   "version": 9
  }

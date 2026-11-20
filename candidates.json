@@ -7952,6 +7952,426 @@
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44415237312%3A1&var-pr=50269&var-gh_run_id=44415237312",
   "weights": "random"
  },
+ "50274#huggingface-mic/Florence-2-base-mic|Florence-2-base-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/Florence-2-base-mic|Florence-2-base-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "training.loss: max delta 0.000637 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/Florence-2-base-mic|Florence-2-base-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "overfit"
+ },
+ "50274#huggingface-mic/MiniMax-M3-MXFP8-mic|MiniMax-M3-MXFP8-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/MiniMax-M3-MXFP8-mic|MiniMax-M3-MXFP8-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "logits_probe: max delta 0.00195 over tolerance\nposition_norms: max delta 0.139 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/MiniMax-M3-MXFP8-mic|MiniMax-M3-MXFP8-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "random"
+ },
+ "50274#huggingface-mic/bart-base-mic|bart-base-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/bart-base-mic|bart-base-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "training.loss: max delta 0.00195 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/bart-base-mic|bart-base-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "overfit"
+ },
+ "50274#huggingface-mic/bigbird-pegasus-large-arxiv-mic|bigbird-pegasus-large-arxiv-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/bigbird-pegasus-large-arxiv-mic|bigbird-pegasus-large-arxiv-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "training.loss: max delta 0.0625 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/bigbird-pegasus-large-arxiv-mic|bigbird-pegasus-large-arxiv-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "random"
+ },
+ "50274#huggingface-mic/blip2-opt-2.7b-mic|blip2-opt-2.7b-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/blip2-opt-2.7b-mic|blip2-opt-2.7b-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "training.loss: max delta 0.0209 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/blip2-opt-2.7b-mic|blip2-opt-2.7b-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "random"
+ },
+ "50274#huggingface-mic/grounding-dino-tiny-mic|grounding-dino-tiny-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/grounding-dino-tiny-mic|grounding-dino-tiny-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "class_scores: max delta 9.17 over tolerance\nbox_preds: max delta 0.441 over tolerance\ntraining.loss: max delta 605 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/grounding-dino-tiny-mic|grounding-dino-tiny-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "random"
+ },
+ "50274#huggingface-mic/hubert-large-ls960-ft-mic|hubert-large-ls960-ft-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/hubert-large-ls960-ft-mic|hubert-large-ls960-ft-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "training.loss: max delta 23.5 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/hubert-large-ls960-ft-mic|hubert-large-ls960-ft-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "overfit"
+ },
+ "50274#huggingface-mic/mask2former-swin-tiny-coco-instance-mic|mask2former-swin-tiny-coco-instance-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/mask2former-swin-tiny-coco-instance-mic|mask2former-swin-tiny-coco-instance-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "training.loss: max delta 0.0548 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/mask2former-swin-tiny-coco-instance-mic|mask2former-swin-tiny-coco-instance-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "random"
+ },
+ "50274#huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "logits_probe: max delta 1.28 over tolerance\nboxes_probe: max delta 0.788 over tolerance\ntraining.loss: max delta 0.00627 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "random"
+ },
+ "50274#huggingface-mic/opt-125m-mic|opt-125m-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/opt-125m-mic|opt-125m-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "training.loss: max delta 0.00194 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/opt-125m-mic|opt-125m-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "random"
+ },
+ "50274#huggingface-mic/opus-mt-fr-en-mic|opus-mt-fr-en-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/opus-mt-fr-en-mic|opus-mt-fr-en-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "training.loss: max delta 0.0114 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/opus-mt-fr-en-mic|opus-mt-fr-en-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "overfit"
+ },
+ "50274#huggingface-mic/pegasus-x-base-mic|pegasus-x-base-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/pegasus-x-base-mic|pegasus-x-base-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "logits.probe: max delta 0.128 over tolerance\ntraining.loss: max delta 0.125 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/pegasus-x-base-mic|pegasus-x-base-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "random"
+ },
+ "50274#huggingface-mic/pegasus-xsum-mic|pegasus-xsum-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/pegasus-xsum-mic|pegasus-xsum-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "training.loss: max delta 0.0625 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/pegasus-xsum-mic|pegasus-xsum-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "random"
+ },
+ "50274#huggingface-mic/s2t-small-librispeech-asr-mic|s2t-small-librispeech-asr-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/s2t-small-librispeech-asr-mic|s2t-small-librispeech-asr-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "training.loss: max delta 0.0625 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/s2t-small-librispeech-asr-mic|s2t-small-librispeech-asr-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "random"
+ },
+ "50274#huggingface-mic/table_transformer-mic|table_transformer-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/table_transformer-mic|table_transformer-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "training.loss: max delta 0.00256 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/table_transformer-mic|table_transformer-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "random"
+ },
+ "50274#huggingface-mic/tibetan-ocr-mic|tibetan-ocr-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/tibetan-ocr-mic|tibetan-ocr-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "logits.probe: max delta 0.00391 over tolerance\nlogits.position_norms: max delta 0.011 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/tibetan-ocr-mic|tibetan-ocr-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "random"
+ },
+ "50274#huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|": {
+  "case": "huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--vip-llava-7b-hf-mic/snapshots/2c201806b2666d6748446",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "random"
+ },
+ "50274#huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "training.loss: max delta 0.736 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "random"
+ },
+ "50274#huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|default|cpu-x86_64": {
+  "case": "huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|default|cpu-x86_64",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "training.loss: max delta 1.29 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|default|cpu-x86_64",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "random"
+ },
+ "50274#huggingface-mic/wav2vec2-conformer-rope-large-960h-ft-mic|wav2vec2-conformer-rope-large-960h-ft-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/wav2vec2-conformer-rope-large-960h-ft-mic|wav2vec2-conformer-rope-large-960h-ft-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "training.loss: max delta 0.63 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/wav2vec2-conformer-rope-large-960h-ft-mic|wav2vec2-conformer-rope-large-960h-ft-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "random"
+ },
+ "50274#huggingface-mic/wavlm-base-plus-mic|wavlm-base-plus-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/wavlm-base-plus-mic|wavlm-base-plus-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c94c3325d66e64226232a375a7f9f7529362386b"
+  ],
+  "failure": "training.loss: max delta 0.0583 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795080075.923128,
+  "first_seen": "2026-11-20",
+  "key": "50274#huggingface-mic/wavlm-base-plus-mic|wavlm-base-plus-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50274",
+  "pr_state": "open",
+  "pr_title": "Add Gemma 3 to the GGUF loading path",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41499317490%3A2&var-pr=50274&var-gh_run_id=41499317490",
+  "weights": "random"
+ },
  "50290#huggingface-mic/granite-4.0-1b-speech-mic|granite-4.0-1b-speech-mic|bfloat16|cpu-x86_64-bf16": {
   "case": "huggingface-mic/granite-4.0-1b-speech-mic|granite-4.0-1b-speech-mic|bfloat16|cpu-x86_64-bf16",
   "commits": [
@@ -8028,10 +8448,10 @@
   "key": "50379#huggingface-mic/GLM-5.3-Flash-mic|GLM-5.3-Flash-mic|bfloat16|",
   "kind": "fixture",
   "last_seen": 20767,
-  "merged_at": null,
-  "outcome": "open",
+  "merged_at": "2026-11-20T06:09:13Z",
+  "outcome": "merged-watching",
   "pr": "50379",
-  "pr_state": "open",
+  "pr_state": "merged",
   "pr_title": "Multimodal Model Output for generative LMs",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42619916726%3A1&var-pr=50379&var-gh_run_id=42619916726",
   "weights": "random"
@@ -8048,10 +8468,10 @@
   "key": "50379#huggingface-mic/LLaVA-NeXT-Video-7B-hf-mic|LLaVA-NeXT-Video-7B-hf-mic|bfloat16|",
   "kind": "fixture",
   "last_seen": 20774,
-  "merged_at": null,
-  "outcome": "open",
+  "merged_at": "2026-11-20T06:09:13Z",
+  "outcome": "merged-watching",
   "pr": "50379",
-  "pr_state": "open",
+  "pr_state": "merged",
   "pr_title": "Multimodal Model Output for generative LMs",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43848906473%3A1&var-pr=50379&var-gh_run_id=43848906473",
   "weights": "random"
@@ -8068,10 +8488,10 @@
   "key": "50379#huggingface-mic/Llama-3.2-11B-Vision-Instruct-mic|Llama-3.2-11B-Vision-Instruct-mic|bfloat16|",
   "kind": "fixture",
   "last_seen": 20771,
-  "merged_at": null,
-  "outcome": "open",
+  "merged_at": "2026-11-20T06:09:13Z",
+  "outcome": "merged-watching",
   "pr": "50379",
-  "pr_state": "open",
+  "pr_state": "merged",
   "pr_title": "Multimodal Model Output for generative LMs",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43420767622%3A1&var-pr=50379&var-gh_run_id=43420767622",
   "weights": "overfit"
@@ -8093,10 +8513,11 @@
   "key": "50379#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "kind": "fixture",
   "last_seen": 20776,
-  "merged_at": null,
-  "outcome": "open",
+  "main_after_merge": "fail",
+  "merged_at": "2026-11-20T06:09:13Z",
+  "outcome": "merged-then-main-failed",
   "pr": "50379",
-  "pr_state": "open",
+  "pr_state": "merged",
   "pr_title": "Multimodal Model Output for generative LMs",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=41972049124%3A1&var-pr=50379&var-gh_run_id=41972049124",
   "weights": "random"
@@ -8113,10 +8534,10 @@
   "key": "50379#huggingface-mic/Qwen3-VL-30B-A3B-Instruct-mic|Qwen3-VL-30B-A3B-Instruct-mic|bfloat16|",
   "kind": "fixture",
   "last_seen": 20767,
-  "merged_at": null,
-  "outcome": "open",
+  "merged_at": "2026-11-20T06:09:13Z",
+  "outcome": "merged-watching",
   "pr": "50379",
-  "pr_state": "open",
+  "pr_state": "merged",
   "pr_title": "Multimodal Model Output for generative LMs",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42619916726%3A1&var-pr=50379&var-gh_run_id=42619916726",
   "weights": "random"
@@ -8133,10 +8554,10 @@
   "key": "50379#huggingface-mic/Qwen3.5-35B-A3B-mic|Qwen3.5-35B-A3B-mic|bfloat16|",
   "kind": "fixture",
   "last_seen": 20767,
-  "merged_at": null,
-  "outcome": "open",
+  "merged_at": "2026-11-20T06:09:13Z",
+  "outcome": "merged-watching",
   "pr": "50379",
-  "pr_state": "open",
+  "pr_state": "merged",
   "pr_title": "Multimodal Model Output for generative LMs",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42619916726%3A1&var-pr=50379&var-gh_run_id=42619916726",
   "weights": "random"
@@ -8153,10 +8574,10 @@
   "key": "50379#huggingface-mic/Qwen3.8-Flash-Next-mic|Qwen3.8-Flash-Next-mic|bfloat16|",
   "kind": "fixture",
   "last_seen": 20767,
-  "merged_at": null,
-  "outcome": "open",
+  "merged_at": "2026-11-20T06:09:13Z",
+  "outcome": "merged-watching",
   "pr": "50379",
-  "pr_state": "open",
+  "pr_state": "merged",
   "pr_title": "Multimodal Model Output for generative LMs",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42619916726%3A1&var-pr=50379&var-gh_run_id=42619916726",
   "weights": "random"
@@ -8173,10 +8594,10 @@
   "key": "50379#huggingface-mic/gemma-4-12B-it-mic|gemma-4-12B-it-mic|bfloat16|",
   "kind": "fixture",
   "last_seen": 20774,
-  "merged_at": null,
-  "outcome": "open",
+  "merged_at": "2026-11-20T06:09:13Z",
+  "outcome": "merged-watching",
   "pr": "50379",
-  "pr_state": "open",
+  "pr_state": "merged",
   "pr_title": "Multimodal Model Output for generative LMs",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43848906473%3A1&var-pr=50379&var-gh_run_id=43848906473",
   "weights": "random"
@@ -8193,10 +8614,10 @@
   "key": "50379#huggingface-mic/gemma-4-E2B-it-mic|gemma-4-E2B-it-mic|bfloat16|",
   "kind": "fixture",
   "last_seen": 20774,
-  "merged_at": null,
-  "outcome": "open",
+  "merged_at": "2026-11-20T06:09:13Z",
+  "outcome": "merged-watching",
   "pr": "50379",
-  "pr_state": "open",
+  "pr_state": "merged",
   "pr_title": "Multimodal Model Output for generative LMs",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43848906473%3A1&var-pr=50379&var-gh_run_id=43848906473",
   "weights": "random"
@@ -8242,12 +8663,33 @@
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42097775915%3A2&var-pr=50421&var-gh_run_id=42097775915",
   "weights": "random"
  },
+ "50428#huggingface-mic/Kimi-K2.5-mic|Kimi-K2.5-mic|bfloat16|": {
+  "case": "huggingface-mic/Kimi-K2.5-mic|Kimi-K2.5-mic|bfloat16|",
+  "commits": [
+   "556a678f65bb63e65698d445ff6f2d466e970b6c"
+  ],
+  "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Kimi-K2.5-mic/snapshots/214a995089658ba5e59cbd87104",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795159185.996121,
+  "first_seen": "2026-11-20",
+  "key": "50428#huggingface-mic/Kimi-K2.5-mic|Kimi-K2.5-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50428",
+  "pr_state": "open",
+  "pr_title": "\ud83d\udea8 Rework slightly subprocessor loading",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44693531125%3A1&var-pr=50428&var-gh_run_id=44693531125",
+  "weights": "random"
+ },
  "50428#huggingface-mic/Ministral-3-3B-Instruct-2512-mic|Ministral-3-3B-Instruct-2512-mic|bfloat16|": {
   "case": "huggingface-mic/Ministral-3-3B-Instruct-2512-mic|Ministral-3-3B-Instruct-2512-mic|bfloat16|",
   "commits": [
    "6fad3b82510c1f3bbdeaa025dd4156237c7ce001",
    "7375060b069b19c86df68857624c8653745db1f7",
-   "9071d9ceebcf051c506831d3a839c85789e06b78"
+   "9071d9ceebcf051c506831d3a839c85789e06b78",
+   "556a678f65bb63e65698d445ff6f2d466e970b6c"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Ministral-3-3B-Instruct-2512-mic/snapshots/07f6f7820",
   "failure_kind": "Runtime traceback",
@@ -8255,7 +8697,7 @@
   "first_seen": "2026-11-06",
   "key": "50428#huggingface-mic/Ministral-3-3B-Instruct-2512-mic|Ministral-3-3B-Instruct-2512-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20769,
+  "last_seen": 20777,
   "merged_at": null,
   "outcome": "open",
   "pr": "50428",
@@ -8264,12 +8706,33 @@
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42175241168%3A1&var-pr=50428&var-gh_run_id=42175241168",
   "weights": "random"
  },
+ "50428#huggingface-mic/internvl-mic|internvl-mic|bfloat16|": {
+  "case": "huggingface-mic/internvl-mic|internvl-mic|bfloat16|",
+  "commits": [
+   "556a678f65bb63e65698d445ff6f2d466e970b6c"
+  ],
+  "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--internvl-mic/snapshots/733872a83e3b105f0e3cf397c28e",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795159185.996121,
+  "first_seen": "2026-11-20",
+  "key": "50428#huggingface-mic/internvl-mic|internvl-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50428",
+  "pr_state": "open",
+  "pr_title": "\ud83d\udea8 Rework slightly subprocessor loading",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44693531125%3A1&var-pr=50428&var-gh_run_id=44693531125",
+  "weights": "random"
+ },
  "50428#huggingface-mic/mistral3-mic|mistral3-mic|bfloat16|cpu-x86_64-bf16": {
   "case": "huggingface-mic/mistral3-mic|mistral3-mic|bfloat16|cpu-x86_64-bf16",
   "commits": [
    "6fad3b82510c1f3bbdeaa025dd4156237c7ce001",
    "7375060b069b19c86df68857624c8653745db1f7",
-   "9071d9ceebcf051c506831d3a839c85789e06b78"
+   "9071d9ceebcf051c506831d3a839c85789e06b78",
+   "556a678f65bb63e65698d445ff6f2d466e970b6c"
   ],
   "failure": "predicted_tokens: [']', ']'] != ['', '']\nanswer_logits: max delta 1.11 over tolerance\ntraining.loss: max delta 0.0135 over tolerance",
   "failure_kind": "Baseline assertion",
@@ -8277,7 +8740,7 @@
   "first_seen": "2026-11-06",
   "key": "50428#huggingface-mic/mistral3-mic|mistral3-mic|bfloat16|cpu-x86_64-bf16",
   "kind": "fixture",
-  "last_seen": 20769,
+  "last_seen": 20777,
   "merged_at": null,
   "outcome": "open",
   "pr": "50428",
@@ -8534,7 +8997,8 @@
  "50947#huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|": {
   "case": "huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|",
   "commits": [
-   "cbdacbb0a3057131cfdc621fbfd3e646e5d0751b"
+   "cbdacbb0a3057131cfdc621fbfd3e646e5d0751b",
+   "f00dc6868fb0e9743543b009cfff992d0d4248bb"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--vip-llava-7b-hf-mic/snapshots/2c201806b2666d6748446",
   "failure_kind": "Runtime traceback",
@@ -8542,13 +9006,73 @@
   "first_seen": "2026-11-19",
   "key": "50947#huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20776,
+  "last_seen": 20777,
   "merged_at": null,
   "outcome": "open",
   "pr": "50947",
   "pr_state": "open",
   "pr_title": "[serge] Fix 2 integration tests regressed by commit c5bd76ec51a7 (PR #49594)",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44481867815%3A1&var-pr=50947&var-gh_run_id=44481867815",
+  "weights": "random"
+ },
+ "50971#huggingface-mic/HyperCLOVAX-SEED-Think-32B-mic|HyperCLOVAX-SEED-Think-32B-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/HyperCLOVAX-SEED-Think-32B-mic|HyperCLOVAX-SEED-Think-32B-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "1b97ecbddaf0f20898305dc50f07bdfa23705b81"
+  ],
+  "failure": "generated_tokens: [[128000, 873, 199, 128052, 4914, 308, 789, 331, 1806, 63, 16, 16, 498, 331, 1314, 789, 331, 1806, 52121, 498, 331, 8405, 789, 331, 65, 4820, 9208, 128053, 199, 128056, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 1",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795097653.901269,
+  "first_seen": "2026-11-20",
+  "key": "50971#huggingface-mic/HyperCLOVAX-SEED-Think-32B-mic|HyperCLOVAX-SEED-Think-32B-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50971",
+  "pr_state": "open",
+  "pr_title": "Always loading generic tokenizer class if in tokenizer_config.json",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44540179807%3A1&var-pr=50971&var-gh_run_id=44540179807",
+  "weights": "overfit"
+ },
+ "50975#huggingface-mic/DeepSeek-V4-Flash-0731-mic|DeepSeek-V4-Flash-0731-mic|bfloat16|": {
+  "case": "huggingface-mic/DeepSeek-V4-Flash-0731-mic|DeepSeek-V4-Flash-0731-mic|bfloat16|",
+  "commits": [
+   "3ab9de0c99c9d5ade94d917412653079bc03937d"
+  ],
+  "failure": "ransformers/transformers/src/transformers/models/deepseek_v4/modeling_deepseek_v4.py\", line 1465, in __init__\n    self.model = DeepseekV4Model(config)\n                 ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/__w/transformers/transformers/src/transformers/models/deepseek_v4/modeling_deepseek_v4.py\", line 13",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795104450.348512,
+  "first_seen": "2026-11-20",
+  "key": "50975#huggingface-mic/DeepSeek-V4-Flash-0731-mic|DeepSeek-V4-Flash-0731-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50975",
+  "pr_state": "open",
+  "pr_title": "Always ensure correct dtype for _keep_in_fp32_modules_strict",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44561135825%3A1&var-pr=50975&var-gh_run_id=44561135825",
+  "weights": "random"
+ },
+ "50975#huggingface-mic/GLM-5.3-Flash-mic|GLM-5.3-Flash-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/GLM-5.3-Flash-mic|GLM-5.3-Flash-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "ca047800c353dcddf73c1f636bf3c8434c756641"
+  ],
+  "failure": "answer_logits: max delta 0.00781 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795108810.924332,
+  "first_seen": "2026-11-20",
+  "key": "50975#huggingface-mic/GLM-5.3-Flash-mic|GLM-5.3-Flash-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20777,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50975",
+  "pr_state": "open",
+  "pr_title": "Always ensure correct dtype for _keep_in_fp32_modules_strict",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44575416194%3A1&var-pr=50975&var-gh_run_id=44575416194",
   "weights": "random"
  },
  "gh-readonly-queue/main/pr-49886-a4f362742ba4846882fd0bc9636461ef3a5e3f34#huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16": {

@@ -5818,6 +5818,18 @@
    "tests/models/deepseek_v3/test_modeling_deepseek_v3.py::DeepseekV3IntegrationTest::test_compile_static_cache"
   ]
  },
+ "sticky#deepseek_v3#2026-10-28": {
+  "date": "2026-10-28",
+  "day": 20754,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "deepseek_v3",
+  "run_id": "44660568580",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/deepseek_v3/test_modeling_deepseek_v3.py::DeepseekV3IntegrationTest::test_compile_static_cache"
+  ]
+ },
  "sticky#deepseek_v32#2026-11-08": {
   "date": "2026-11-08",
   "day": 20765,
@@ -5881,6 +5893,18 @@
    "tests/models/electra/test_modeling_electra.py::ElectraModelTest::test_eager_padding_matches_padding_free_with_position_ids"
   ]
  },
+ "sticky#electra#2026-11-19": {
+  "date": "2026-11-19",
+  "day": 20776,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "electra",
+  "run_id": "44660568580",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/electra/test_modeling_electra.py::ElectraModelTest::test_sdpa_padding_matches_padding_free_with_position_ids"
+  ]
+ },
  "sticky#eomt_dinov3#2026-11-08": {
   "date": "2026-11-08",
   "day": 20765,
@@ -5926,6 +5950,18 @@
   "signal": "AssertionError",
   "tests": [
    "tests/models/ernie/test_modeling_ernie.py::ErnieModelTest::test_flash_attn_2_inference_equivalence"
+  ]
+ },
+ "sticky#ernie#2026-11-19": {
+  "date": "2026-11-19",
+  "day": 20776,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "ernie",
+  "run_id": "44660568580",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/ernie/test_modeling_ernie.py::ErnieModelTest::test_eager_padding_matches_padding_free_with_position_ids"
   ]
  },
  "sticky#ernie4_5_moe#2026-10-10": {
@@ -6569,6 +6605,18 @@
  "sticky#hunyuan_v1_moe#2026-10-22": {
   "date": "2026-10-22",
   "day": 20748,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "hunyuan_v1_moe",
+  "run_id": "44002743824",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/hunyuan_v1_moe/test_modeling_hunyuan_v1_moe.py::HunYuanMoEV1ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#hunyuan_v1_moe#2026-10-24": {
+  "date": "2026-10-24",
+  "day": 20750,
   "integration": false,
   "mic": "not-covered",
   "model": "hunyuan_v1_moe",
@@ -7244,6 +7292,18 @@
  "sticky#moshi#2026-10-22": {
   "date": "2026-10-22",
   "day": 20748,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "moshi",
+  "run_id": "44444074525",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/moshi/test_modeling_moshi.py::MoshiDecoderTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids"
+  ]
+ },
+ "sticky#moshi#2026-10-24": {
+  "date": "2026-10-24",
+  "day": 20750,
   "integration": false,
   "mic": "not-covered",
   "model": "moshi",
@@ -8230,6 +8290,18 @@
   "signal": "AssertionError",
   "tests": [
    "tests/models/xmod/test_modeling_xmod.py::XmodModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+  ]
+ },
+ "sticky#xmod#2026-11-17": {
+  "date": "2026-11-17",
+  "day": 20774,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "xmod",
+  "run_id": "44660568580",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/xmod/test_modeling_xmod.py::XmodModelTest::test_eager_padding_matches_padding_free_with_position_ids"
   ]
  }
 }

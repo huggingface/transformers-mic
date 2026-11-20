@@ -1,5 +1,5 @@
 {
- "awaiting_verdict": 52,
+ "awaiting_verdict": 53,
  "block_merges": {
   "ready": false,
   "unmet": [
@@ -10,18 +10,18 @@
  "caught": {
   "fixed_by_push": 16,
   "labelled_real_bug": 0,
-  "merged_then_main_failed": 3,
+  "merged_then_main_failed": 4,
   "real_checkpoint": 2
  },
  "drafts_per_day": 2,
  "false_alarms": {
-  "prs_not_their_fault": 163,
-  "prs_with_failure": 206
+  "prs_not_their_fault": 174,
+  "prs_with_failure": 220
  },
  "missed": {
-  "awaiting_verdict": 27,
+  "awaiting_verdict": 28,
   "not_covered": 31,
-  "real_checkpoint": 27
+  "real_checkpoint": 28
  },
  "next": [
   {
@@ -49,6 +49,18 @@
    "shrinkable": true
   },
   {
+   "checkpoint": "kmhf/hf-moshika",
+   "draft": "failure",
+   "model": "moshi",
+   "next_batch": false,
+   "other": 5,
+   "real_checkpoint": 0,
+   "regressions": 5,
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41999673429",
+   "shrink": "",
+   "shrinkable": true
+  },
+  {
    "checkpoint": "vidore/colpali-v1.2-hf",
    "draft": "failure",
    "model": "colpali",
@@ -57,18 +69,6 @@
    "real_checkpoint": 0,
    "regressions": 4,
    "run": "https://github.com/huggingface/transformers-mic/actions/runs/41994158679",
-   "shrink": "",
-   "shrinkable": true
-  },
-  {
-   "checkpoint": "kmhf/hf-moshika",
-   "draft": "failure",
-   "model": "moshi",
-   "next_batch": false,
-   "other": 4,
-   "real_checkpoint": 0,
-   "regressions": 4,
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/41999673429",
    "shrink": "",
    "shrinkable": true
   },
@@ -326,6 +326,28 @@
   }
  ],
  "regressions": [
+  {
+   "date": "2026-11-19",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "ernie",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-19",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "electra",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
   {
    "date": "2026-11-18",
    "detail": "",
@@ -1179,6 +1201,17 @@
    "integration": false,
    "job": "",
    "model": "electra",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-10-28",
+   "detail": "",
+   "integration": true,
+   "job": "",
+   "model": "deepseek_v3",
    "pr": null,
    "run": "",
    "tests": 1,
@@ -3120,14 +3153,14 @@
   "model-added": 4,
   "no-code-change": 1,
   "not-a-regression": 5,
-  "not-covered": 240,
+  "not-covered": 243,
   "not-reproduced": 7,
-  "out-of-scope": 191,
+  "out-of-scope": 194,
   "pending": 0,
   "unrelated-culprit": 16
  },
  "window": [
   "2026-10-20",
-  "2026-11-19"
+  "2026-11-20"
  ]
 }
