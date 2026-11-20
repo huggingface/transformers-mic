@@ -300,8 +300,7 @@ def shrunk_config(source, cls, recipe=None):
             if value is None:
                 continue  # dropping a field the shrunk config already lacks
             raise SystemExit(f"config_overrides: the shrunk config has no field {dotted}")
-        kernel = {*(KERNEL_MLA if target.get("kv_lora_rank") else ()), *KERNEL_HEADS.get(target.get("model_type"), {})}
-        if field in kernel:
+        if field in kernel_fields(target):
             continue  # sized for vLLM's kernels (sweep.KERNEL_*), over a reviewed width
         target[field] = value
     if shrunk:
