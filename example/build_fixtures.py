@@ -84,7 +84,7 @@ HERE = Path(__file__).parent
 sys.path.insert(0, str(HERE.parent / "experiments"))
 import run  # noqa: E402
 from perturb import logits_of, sensitivity  # noqa: E402
-from sweep import fit_rope_everywhere, shrink  # noqa: E402
+from sweep import KERNEL_HEADS, KERNEL_MLA, fit_rope_everywhere, shrink  # noqa: E402
 
 WEIGHTS = (
     ".safetensors",
@@ -322,6 +322,8 @@ def adopt_tester_sizes(cls, original, config):
 
     url, found = tester.tester_values(original.get("model_type"))
     adopted = tester.unshrunk_sizes(found, original, config.to_dict()) if found else {}
+    kernel = {*KERNEL_MLA, *KERNEL_HEADS.get(original.get("model_type"), {})}  # sized for vLLM's kernels
+    adopted = {path: value for path, value in adopted.items() if path[-1] not in kernel}
     if not adopted:
         return config
     values = config.to_dict()
