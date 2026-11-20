@@ -79,6 +79,37 @@ WIDTHS = {
     "hidden_dim": 128,
     "n_heads": 4,
 }
+# vLLM's attention kernels take the released models' head widths only: an MLA fixture
+# (any config with a latent kv_lora_rank) keeps DeepSeek's, and the model types below,
+# whose 16-wide head has no kernel, keep theirs. Applied after WIDTHS.
+KERNEL_MLA = {
+    "kv_lora_rank": 512,
+    "qk_nope_head_dim": 128,
+    "qk_rope_head_dim": 64,
+    "v_head_dim": 128,
+    "index_head_dim": 128,
+}
+KERNEL_HEADS = {
+    "deepseek_v4": {"head_dim": 512, "qk_rope_head_dim": 64, "index_head_dim": 128},  # fused quant+cache: 512 or 128
+    "embedding_gemma2_text": {"head_dim": 64},
+    "diffusion_gemma_text": {"head_dim": 64},
+    "flint": {"head_dim": 64},  # attention sinks: FlashInfer, 64 and up
+}
+
+
+def kernel_fields(values):
+    """Field names the kernel widths pin anywhere in a config dict: the MLA widths under a node
+    with a latent kv_lora_rank, and the head widths of each node's model type."""
+    fields = set()
+    if isinstance(values, dict):
+        if values.get("kv_lora_rank"):
+            fields.update(KERNEL_MLA)
+        fields.update(KERNEL_HEADS.get(values.get("model_type"), {}))
+        for value in values.values():
+            fields |= kernel_fields(value)
+    return fields
+
+
 # Fields that, when equal to hidden_size in the checkpoint, must stay equal to it.
 LINKED_TO_HIDDEN = ("projection_size", "word_embed_proj_dim", "embedding_size", "codebook_dim")
 # The same for hidden_dim: OneFormer projects its pixel decoder's conv_dim features to
@@ -355,6 +386,11 @@ def shrink(config):
             # 0 is a choice, not a width (GLM-5.3's NoPE qk_rope_head_dim).
             if key in values and values[key] not in (None, 0) and not isinstance(values[key], (list, dict)):
                 values[key] = value
+        if values.get("kv_lora_rank"):
+            values.update({k: v for k, v in KERNEL_MLA.items() if values.get(k)})
+        values.update(
+            {k: v for k, v in KERNEL_HEADS.get(values.get("model_type"), {}).items() if values.get(k) not in (None, 0)}
+        )
         if "num_key_value_heads" in values and values["num_key_value_heads"]:
             try:
                 heads = cfg.num_attention_heads if hasattr(cfg, "num_attention_heads") else None
