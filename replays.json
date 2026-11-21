@@ -1338,6 +1338,18 @@
   "verdict": "not-covered",
   "version": 9
  },
+ "50975#axk1": {
+  "bad": "42efcfde46e668067a74bbd439d33f107b4a7c6c",
+  "commits": 1,
+  "contracts": [
+   "huggingface-mic/A.X-K1-mic"
+  ],
+  "failures": [],
+  "parent": "4bb61661e15e65c135839acfb8ed0781605aabe2",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/44887652085",
+  "verdict": "missed",
+  "version": 9
+ },
  "50975#dots3_note": {
   "verdict": "not-covered",
   "version": 9
