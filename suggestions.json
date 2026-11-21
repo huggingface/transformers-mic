@@ -14,6 +14,14 @@
     "test": "tests/models/albert/test_modeling_albert.py::AlbertModelTest::test_flash_attn_2_inference_equivalence"
    }
   ],
+  "axk1": [
+   {
+    "date": "2026-11-21",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/axk1/test_modeling_axk1.py::AXK1IntegrationTest::test_model_logits_batched"
+   }
+  ],
   "cohere": [
    {
     "date": "2026-10-17",
@@ -510,6 +518,12 @@
     "gpu_only": true,
     "integration": true,
     "test": "tests/models/swinv2/test_modeling_swinv2.py::Swinv2ModelIntegrationTest::test_inference_fp16"
+   },
+   {
+    "date": "2026-10-25",
+    "gpu_only": true,
+    "integration": true,
+    "test": "tests/models/swinv2/test_modeling_swinv2.py::Swinv2ModelIntegrationTest::test_inference_fp16"
    }
   ],
   "unlimited_ocr": [
@@ -799,6 +813,20 @@
    ]
   },
   {
+   "checkpoint": null,
+   "checkpoint_source": null,
+   "integration": 1,
+   "model": "dots3_note",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/dots3_note/test_modeling_dots3_note.py::Dots3NoteHubIntegrationTest::test_audio_generation",
+    "tests/models/dots3_note/test_modeling_dots3_note.py::Dots3NoteHubIntegrationTest::test_image_generation",
+    "tests/models/dots3_note/test_modeling_dots3_note.py::Dots3NoteHubIntegrationTest::test_text_generation",
+    "tests/models/dots3_note/test_modeling_dots3_note.py::Dots3NoteHubIntegrationTest::test_video_generation"
+   ]
+  },
+  {
    "checkpoint": "tue-mps/coco_panoptic_eomt_large_640",
    "checkpoint_source": "failing test",
    "integration": 1,
@@ -842,6 +870,17 @@
    "shrinkable": false,
    "tests": [
     "tests/models/minicpmv4_7/test_modeling_minicpmv4_7.py::MiniCPMV4_7IntegrationTest::test_small_model_vision_generation_batch_mixed"
+   ]
+  },
+  {
+   "checkpoint": "trl-internal-testing/tiny-Qwen2_5_VLForConditionalGeneration",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "peft_integration",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/peft_integration/test_peft_integration.py::PeftIntegrationTester::test_prefix_tuning_trainer_load_best_model_at_end_error"
    ]
   },
   {
@@ -1055,6 +1094,17 @@
    ]
   },
   {
+   "checkpoint": "nvidia/NVIDIA-Nemotron-Labs-Dory1.0-4B-BF16",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "dory",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/dory/test_modeling_dory.py::DoryModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids"
+   ]
+  },
+  {
    "checkpoint": "ibm/PowerMoE-3b",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -1088,6 +1138,17 @@
    "shrinkable": false,
    "tests": [
     "tests/models/omdet_turbo/test_modeling_omdet_turbo.py::OmDetTurboModelTest::test_batching_equivalence"
+   ]
+  },
+  {
+   "checkpoint": "hf-audio/omniasr-ctc-300m-v2",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "omniasr_ctc",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/omniasr_ctc/test_modeling_omniasr_ctc.py::OmniASRForCTCModelTest::test_openvino_export_dynamic"
    ]
   },
   {

@@ -7750,7 +7750,8 @@
  "50249#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
   "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "commits": [
-   "a970ad1afbcfb3c283f3861c5a347aee5192dfdf"
+   "a970ad1afbcfb3c283f3861c5a347aee5192dfdf",
+   "da42443ebee7c3a218981ded712e7839e99c10e1"
   ],
   "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
   "failure_kind": "Runtime traceback",
@@ -7758,7 +7759,7 @@
   "first_seen": "2026-11-19",
   "key": "50249#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20776,
+  "last_seen": 20778,
   "merged_at": null,
   "outcome": "open",
   "pr": "50249",
@@ -7812,7 +7813,8 @@
  "50251#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
   "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "commits": [
-   "0124677f14ccad5164b067bfc58541db70fd77e0"
+   "0124677f14ccad5164b067bfc58541db70fd77e0",
+   "d3f9f3e9647c0015b4b761583424fba6cfc16447"
   ],
   "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
   "failure_kind": "Runtime traceback",
@@ -7820,7 +7822,7 @@
   "first_seen": "2026-11-19",
   "key": "50251#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20776,
+  "last_seen": 20778,
   "merged_at": null,
   "outcome": "open",
   "pr": "50251",
@@ -8877,7 +8879,8 @@
  "50643#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
   "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "commits": [
-   "63dbab899707de28d44b3e876076166d0d763211"
+   "63dbab899707de28d44b3e876076166d0d763211",
+   "796393f6d4e6140b1a5ab8bba24adcc528808d1b"
   ],
   "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
   "failure_kind": "Runtime traceback",
@@ -8885,7 +8888,7 @@
   "first_seen": "2026-11-19",
   "key": "50643#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20776,
+  "last_seen": 20778,
   "merged_at": null,
   "outcome": "open",
   "pr": "50643",
@@ -8897,7 +8900,8 @@
  "50733#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
   "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "commits": [
-   "600e879d2dd455f9e6f2a65cc6c898dc0b52ec81"
+   "600e879d2dd455f9e6f2a65cc6c898dc0b52ec81",
+   "1b692b8470b913b2619045f13c1534f46a5dcb6c"
   ],
   "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
   "failure_kind": "Runtime traceback",
@@ -8905,7 +8909,7 @@
   "first_seen": "2026-11-19",
   "key": "50733#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20776,
+  "last_seen": 20778,
   "merged_at": null,
   "outcome": "open",
   "pr": "50733",
@@ -8926,10 +8930,10 @@
   "key": "50754#huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16",
   "kind": "fixture",
   "last_seen": 20771,
-  "merged_at": null,
-  "outcome": "open",
+  "merged_at": "2026-11-20T18:04:30Z",
+  "outcome": "merged-watching",
   "pr": "50754",
-  "pr_state": "open",
+  "pr_state": "merged",
   "pr_title": "fix(generation): sort sampled beam candidates before finalization",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43575282361%3A2&var-pr=50754&var-gh_run_id=43575282361",
   "weights": "random"
@@ -8937,7 +8941,8 @@
  "50785#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
   "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "commits": [
-   "38c1c88536696c0597cd554a3cb799de82e6f25f"
+   "38c1c88536696c0597cd554a3cb799de82e6f25f",
+   "749ccc743bd72b01e7f4f66c04bed6b2cd584bc2"
   ],
   "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
   "failure_kind": "Runtime traceback",
@@ -8945,7 +8950,7 @@
   "first_seen": "2026-11-19",
   "key": "50785#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20776,
+  "last_seen": 20778,
   "merged_at": null,
   "outcome": "open",
   "pr": "50785",
@@ -8977,7 +8982,8 @@
  "50887#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
   "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "commits": [
-   "6bf1f9588858d382325e8b1a32361870b952c9b0"
+   "6bf1f9588858d382325e8b1a32361870b952c9b0",
+   "3fc1e68edda492faf932305171b982544ae8569f"
   ],
   "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
   "failure_kind": "Runtime traceback",
@@ -8985,7 +8991,7 @@
   "first_seen": "2026-11-19",
   "key": "50887#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20776,
+  "last_seen": 20778,
   "merged_at": null,
   "outcome": "open",
   "pr": "50887",
@@ -8998,7 +9004,8 @@
   "case": "huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|",
   "commits": [
    "cbdacbb0a3057131cfdc621fbfd3e646e5d0751b",
-   "f00dc6868fb0e9743543b009cfff992d0d4248bb"
+   "f00dc6868fb0e9743543b009cfff992d0d4248bb",
+   "96d0ef41cac425475f721d41ce1dc966524ed9d5"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--vip-llava-7b-hf-mic/snapshots/2c201806b2666d6748446",
   "failure_kind": "Runtime traceback",
@@ -9006,7 +9013,7 @@
   "first_seen": "2026-11-19",
   "key": "50947#huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20777,
+  "last_seen": 20778,
   "merged_at": null,
   "outcome": "open",
   "pr": "50947",
@@ -9047,10 +9054,10 @@
   "key": "50975#huggingface-mic/DeepSeek-V4-Flash-0731-mic|DeepSeek-V4-Flash-0731-mic|bfloat16|",
   "kind": "fixture",
   "last_seen": 20777,
-  "merged_at": null,
-  "outcome": "open",
+  "merged_at": "2026-11-20T13:21:31Z",
+  "outcome": "merged-watching",
   "pr": "50975",
-  "pr_state": "open",
+  "pr_state": "merged",
   "pr_title": "Always ensure correct dtype for _keep_in_fp32_modules_strict",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44561135825%3A1&var-pr=50975&var-gh_run_id=44561135825",
   "weights": "random"
@@ -9067,12 +9074,33 @@
   "key": "50975#huggingface-mic/GLM-5.3-Flash-mic|GLM-5.3-Flash-mic|bfloat16|cpu-x86_64-bf16",
   "kind": "fixture",
   "last_seen": 20777,
-  "merged_at": null,
-  "outcome": "open",
+  "main_after_merge": "fail",
+  "merged_at": "2026-11-20T13:21:31Z",
+  "outcome": "merged-then-main-failed",
   "pr": "50975",
-  "pr_state": "open",
+  "pr_state": "merged",
   "pr_title": "Always ensure correct dtype for _keep_in_fp32_modules_strict",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44575416194%3A1&var-pr=50975&var-gh_run_id=44575416194",
+  "weights": "random"
+ },
+ "51044#huggingface-mic/OLMo-1B-hf-mic|OLMo-1B-hf-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/OLMo-1B-hf-mic|OLMo-1B-hf-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c878935ca7815469172080ccc6bb8aab677b4a7c"
+  ],
+  "failure": "logits.probe: max delta 0.0811 over tolerance\ntraining.loss: max delta 0.0134 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795197020.562578,
+  "first_seen": "2026-11-21",
+  "key": "51044#huggingface-mic/OLMo-1B-hf-mic|OLMo-1B-hf-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20778,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51044",
+  "pr_state": "open",
+  "pr_title": "regression add_bos_token, add_eos_token preserve tokenizer.json behav\u2026",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44786418420%3A1&var-pr=51044&var-gh_run_id=44786418420",
   "weights": "random"
  },
  "gh-readonly-queue/main/pr-49886-a4f362742ba4846882fd0bc9636461ef3a5e3f34#huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16": {

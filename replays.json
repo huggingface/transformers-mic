@@ -1267,6 +1267,10 @@
   "verdict": "not-covered",
   "version": 9
  },
+ "49846#deepseek_v2": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "49862#colpali": {
   "verdict": "not-covered",
   "version": 9
@@ -1334,6 +1338,10 @@
   "verdict": "not-covered",
   "version": 9
  },
+ "50975#dots3_note": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#albert#2026-10-06": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1355,6 +1363,10 @@
   "version": 9
  },
  "sticky#axk1#2026-10-23": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#axk1#2026-10-28": {
   "verdict": "out-of-scope",
   "version": 9
  },
@@ -1502,6 +1514,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#dory#2026-11-20": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#electra#2026-10-09": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1550,6 +1566,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#ernie4_5_moe#2026-10-31": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#flex_olmo#2026-10-14": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1563,6 +1583,10 @@
   "version": 9
  },
  "sticky#flex_olmo#2026-10-24": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#flex_olmo#2026-10-26": {
   "verdict": "out-of-scope",
   "version": 9
  },
@@ -1939,6 +1963,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#minimax_m2#2026-10-27": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#minimax_m2#2026-10-30": {
   "verdict": "out-of-scope",
   "version": 9
@@ -2017,6 +2045,10 @@
   "verdict": "not-covered",
   "version": 9
  },
+ "sticky#omniasr_ctc#2026-11-17": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#oneformer#2026-10-18": {
   "verdict": "out-of-scope",
   "version": 9
@@ -2041,6 +2073,10 @@
  },
  "sticky#paligemma#2026-11-17": {
   "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#peft_integration#2026-11-20": {
+  "verdict": "not-covered",
   "version": 9
  },
  "sticky#pegasus#2026-10-30": {
@@ -2182,6 +2218,10 @@
   "version": 9
  },
  "sticky#swinv2#2026-10-23": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#swinv2#2026-10-25": {
   "verdict": "out-of-scope",
   "version": 9
  },

@@ -5002,6 +5002,18 @@
    "tests/models/eomt_dinov3/test_modeling_eomt_dinov3.py::EomtDinov3ForUniversalSegmentationIntegrationTest::test_segmentation_pipeline"
   ]
  },
+ "49846#deepseek_v2": {
+  "bad_commit": "6155c41289dd2553e55c59e1e387b41566f87ce6",
+  "date": "2026-11-21",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/44855668287/job/136697822323",
+  "mic": "not-run",
+  "model": "deepseek_v2",
+  "pr": "49846",
+  "tests": [
+   "tests/models/deepseek_v2/test_modeling_deepseek_v2.py::DeepseekV2IntegrationTest::test_batch_fa2"
+  ]
+ },
  "49862#colpali": {
   "bad_commit": "f8a1e1fba977ecd39e1b877312f4452a2ba570fa",
   "date": "2026-11-05",
@@ -5337,6 +5349,115 @@
    "tests/exporters/test_save_load.py::OpenVINOSaveLoadTest::test_loaded_model_saves_in_place"
   ]
  },
+ "50975#axk1": {
+  "bad_commit": "42efcfde46e668067a74bbd439d33f107b4a7c6c",
+  "culprit_files": [
+   "src/transformers/models/afmoe/modeling_afmoe.py",
+   "src/transformers/models/afmoe/modular_afmoe.py",
+   "src/transformers/models/apertus1p5/modeling_apertus1p5.py",
+   "src/transformers/models/apertus1p5/modular_apertus1p5.py",
+   "src/transformers/models/axk1/modeling_axk1.py",
+   "src/transformers/models/axk2/modeling_axk2.py",
+   "src/transformers/models/bailing_hybrid/modeling_bailing_hybrid.py",
+   "src/transformers/models/bailing_hybrid/modular_bailing_hybrid.py",
+   "src/transformers/models/beam/modeling_beam.py",
+   "src/transformers/models/deepseek_ocr2/modeling_deepseek_ocr2.py",
+   "src/transformers/models/deepseek_v2/modeling_deepseek_v2.py",
+   "src/transformers/models/deepseek_v2/modular_deepseek_v2.py",
+   "src/transformers/models/deepseek_v3/modeling_deepseek_v3.py",
+   "src/transformers/models/deepseek_v3/modular_deepseek_v3.py",
+   "src/transformers/models/deepseek_v32/modeling_deepseek_v32.py",
+   "src/transformers/models/deepseek_v32/modular_deepseek_v32.py",
+   "src/transformers/models/deepseek_v4/modeling_deepseek_v4.py",
+   "src/transformers/models/deepseek_v4/modular_deepseek_v4.py",
+   "src/transformers/models/dots1/modeling_dots1.py",
+   "src/transformers/models/dots3_note/modeling_dots3_note.py",
+   "src/transformers/models/dots3_note/modular_dots3_note.py",
+   "src/transformers/models/ernie4_5_moe/modeling_ernie4_5_moe.py",
+   "src/transformers/models/ernie4_5_moe/modular_ernie4_5_moe.py",
+   "src/transformers/models/ernie4_5_vl_moe/modeling_ernie4_5_vl_moe.py",
+   "src/transformers/models/ernie4_5_vl_moe/modular_ernie4_5_vl_moe.py",
+   "src/transformers/models/esmfold2/modeling_esmfold2.py",
+   "src/transformers/models/esmfold2/modular_esmfold2.py",
+   "src/transformers/models/exaone_moe/modeling_exaone_moe.py",
+   "src/transformers/models/exaone_moe/modular_exaone_moe.py",
+   "src/transformers/models/flint/modeling_flint.py",
+   "src/transformers/models/flint/modular_flint.py",
+   "src/transformers/models/glm4_moe/modeling_glm4_moe.py",
+   "src/transformers/models/glm4_moe/modular_glm4_moe.py",
+   "src/transformers/models/glm4_moe_lite/modeling_glm4_moe_lite.py",
+   "src/transformers/models/glm4v_moe/modeling_glm4v_moe.py",
+   "src/transformers/models/glm5_next/modeling_glm5_next.py",
+   "src/transformers/models/glm5_next/modular_glm5_next.py",
+   "src/transformers/models/glm_moe_dsa/modeling_glm_moe_dsa.py",
+   "src/transformers/models/gradium_phonon_tts/modeling_gradium_phonon_tts.py",
+   "src/transformers/models/granite_speech5/modeling_granite_speech5.py",
+   "src/transformers/models/granite_speech5/modular_granite_speech5.py",
+   "src/transformers/models/hy_v3/modeling_hy_v3.py",
+   "src/transformers/models/hy_v3/modular_hy_v3.py",
+   "src/transformers/models/hy_v4/modeling_hy_v4.py",
+   "src/transformers/models/hy_v4/modular_hy_v4.py",
+   "src/transformers/models/hy_v4_vl/modeling_hy_v4_vl.py",
+   "src/transformers/models/hy_v4_vl/modular_hy_v4_vl.py",
+   "src/transformers/models/inkling/modeling_inkling.py",
+   "src/transformers/models/inkling/modular_inkling.py",
+   "src/transformers/models/inkling2/modeling_inkling2.py",
+   "src/transformers/models/inkling2/modular_inkling2.py",
+   "src/transformers/models/kimi_linear/modeling_kimi_linear.py",
+   "src/transformers/models/kimi_linear/modular_kimi_linear.py",
+   "src/transformers/models/kolibri1/modeling_kolibri1.py",
+   "src/transformers/models/kolibri1/modular_kolibri1.py",
+   "src/transformers/models/kyutai_speech_to_text/modeling_kyutai_speech_to_text.py",
+   "src/transformers/models/kyutai_speech_to_text/modular_kyutai_speech_to_text.py",
+   "src/transformers/models/mimo_v2_flash/modeling_mimo_v2_flash.py",
+   "src/transformers/models/mimo_v2_flash/modular_mimo_v2_flash.py",
+   "src/transformers/models/mistral4/modular_mistral4.py",
+   "src/transformers/models/mistral_large4/modeling_mistral_large4.py",
+   "src/transformers/models/mistral_large4/modular_mistral_large4.py",
+   "src/transformers/models/muse_spark/modeling_muse_spark.py",
+   "src/transformers/models/muse_spark/modular_muse_spark.py",
+   "src/transformers/models/nemotron3_5_transcribe/modeling_nemotron3_5_transcribe.py",
+   "src/transformers/models/nemotron3_5_transcribe/modular_nemotron3_5_transcribe.py",
+   "src/transformers/models/nemotron_h/modeling_nemotron_h.py",
+   "src/transformers/models/nemotron_h/modular_nemotron_h.py",
+   "src/transformers/models/openai_privacy_filter/modeling_openai_privacy_filter.py",
+   "src/transformers/models/openai_privacy_filter/modular_openai_privacy_filter.py",
+   "src/transformers/models/pocket_tts/modeling_pocket_tts.py",
+   "src/transformers/models/pocket_tts/modular_pocket_tts.py",
+   "src/transformers/models/slanet/modeling_slanet.py",
+   "src/transformers/models/slanext/modeling_slanext.py",
+   "src/transformers/models/slanext/modular_slanext.py",
+   "src/transformers/models/solar_open/modeling_solar_open.py",
+   "src/transformers/models/unlimited_ocr/modeling_unlimited_ocr.py",
+   "src/transformers/models/voxtral/modeling_voxtral.py",
+   "src/transformers/models/voxtral/modular_voxtral.py",
+   "tests/test_modeling_common.py"
+  ],
+  "date": "2026-11-21",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/44855668287/job/136697811435",
+  "mic": "missed",
+  "model": "axk1",
+  "pr": "50975",
+  "tests": [
+   "tests/models/axk1/test_modeling_axk1.py::AXK1IntegrationTest::test_model_logits_batched"
+  ]
+ },
+ "50975#dots3_note": {
+  "bad_commit": "42efcfde46e668067a74bbd439d33f107b4a7c6c",
+  "date": "2026-11-21",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/44855668287/job/136697826663",
+  "mic": "not-covered",
+  "model": "dots3_note",
+  "pr": "50975",
+  "tests": [
+   "tests/models/dots3_note/test_modeling_dots3_note.py::Dots3NoteHubIntegrationTest::test_audio_generation",
+   "tests/models/dots3_note/test_modeling_dots3_note.py::Dots3NoteHubIntegrationTest::test_image_generation",
+   "tests/models/dots3_note/test_modeling_dots3_note.py::Dots3NoteHubIntegrationTest::test_text_generation",
+   "tests/models/dots3_note/test_modeling_dots3_note.py::Dots3NoteHubIntegrationTest::test_video_generation"
+  ]
+ },
  "sticky#albert#2026-10-06": {
   "date": "2026-10-06",
   "day": 20732,
@@ -5401,6 +5522,18 @@
   "mic": "green-on-main",
   "model": "axk1",
   "run_id": "43792136115",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/axk1/test_modeling_axk1.py::AXK1ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#axk1#2026-10-28": {
+  "date": "2026-10-28",
+  "day": 20754,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "axk1",
+  "run_id": "44855640337",
   "signal": "AssertionError",
   "tests": [
    "tests/models/axk1/test_modeling_axk1.py::AXK1ModelTest::test_flash_attn_2_equivalence"
@@ -5869,6 +6002,18 @@
    "tests/models/distilbert/test_modeling_distilbert.py::DistilBertModelTest::test_flash_attn_2_inference_equivalence_right_padding"
   ]
  },
+ "sticky#dory#2026-11-20": {
+  "date": "2026-11-20",
+  "day": 20777,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "dory",
+  "run_id": "44855640337",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/dory/test_modeling_dory.py::DoryModelTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids"
+  ]
+ },
  "sticky#electra#2026-10-09": {
   "date": "2026-10-09",
   "day": 20735,
@@ -6012,6 +6157,18 @@
    "tests/models/ernie4_5_moe/test_modeling_ernie4_5_moe.py::Ernie4_5_MoeModelTest::test_flash_attn_2_equivalence"
   ]
  },
+ "sticky#ernie4_5_moe#2026-10-31": {
+  "date": "2026-10-31",
+  "day": 20757,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "ernie4_5_moe",
+  "run_id": "44855640337",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/ernie4_5_moe/test_modeling_ernie4_5_moe.py::Ernie4_5_MoeModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
  "sticky#flex_olmo#2026-10-14": {
   "date": "2026-10-14",
   "day": 20740,
@@ -6058,6 +6215,18 @@
   "signal": "AssertionError",
   "tests": [
    "tests/models/flex_olmo/test_modeling_flex_olmo.py::FlexOlmoModelTest::test_sdpa_padding_matches_padding_free_with_position_ids"
+  ]
+ },
+ "sticky#flex_olmo#2026-10-26": {
+  "date": "2026-10-26",
+  "day": 20752,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "flex_olmo",
+  "run_id": "44660533068",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/flex_olmo/test_modeling_flex_olmo.py::FlexOlmoModelTest::test_flash_attn_2_equivalence"
   ]
  },
  "sticky#flint#2026-10-22": {
@@ -7155,6 +7324,18 @@
    "tests/models/minimax_m2/test_modeling_minimax_m2.py::MiniMaxM2ModelTest::test_flash_attn_2_equivalence"
   ]
  },
+ "sticky#minimax_m2#2026-10-27": {
+  "date": "2026-10-27",
+  "day": 20753,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "minimax_m2",
+  "run_id": "44855640337",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/minimax_m2/test_modeling_minimax_m2.py::MiniMaxM2ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
  "sticky#minimax_m2#2026-10-30": {
   "date": "2026-10-30",
   "day": 20756,
@@ -7395,6 +7576,18 @@
    "tests/models/omdet_turbo/test_modeling_omdet_turbo.py::OmDetTurboModelTest::test_batching_equivalence"
   ]
  },
+ "sticky#omniasr_ctc#2026-11-17": {
+  "date": "2026-11-17",
+  "day": 20774,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "omniasr_ctc",
+  "run_id": "44660568580",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/omniasr_ctc/test_modeling_omniasr_ctc.py::OmniASRForCTCModelTest::test_openvino_export_dynamic"
+  ]
+ },
  "sticky#oneformer#2026-10-18": {
   "date": "2026-10-18",
   "day": 20744,
@@ -7468,6 +7661,18 @@
   "signal": "ValueError",
   "tests": [
    "tests/models/paligemma/test_modeling_paligemma.py::PaliGemmaForConditionalGenerationModelTest::test_flash_attn_2_can_dispatch_composite_models"
+  ]
+ },
+ "sticky#peft_integration#2026-11-20": {
+  "date": "2026-11-20",
+  "day": 20777,
+  "integration": true,
+  "mic": "not-covered",
+  "model": "peft_integration",
+  "run_id": "44855668287",
+  "signal": "StopIteration",
+  "tests": [
+   "tests/peft_integration/test_peft_integration.py::PeftIntegrationTester::test_prefix_tuning_trainer_load_best_model_at_end_error"
   ]
  },
  "sticky#pegasus#2026-10-30": {
@@ -7893,6 +8098,18 @@
   "mic": "green-on-main",
   "model": "swinv2",
   "run_id": "41760365698",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/swinv2/test_modeling_swinv2.py::Swinv2ModelIntegrationTest::test_inference_fp16"
+  ]
+ },
+ "sticky#swinv2#2026-10-25": {
+  "date": "2026-10-25",
+  "day": 20751,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "swinv2",
+  "run_id": "44855668287",
   "signal": "AssertionError",
   "tests": [
    "tests/models/swinv2/test_modeling_swinv2.py::Swinv2ModelIntegrationTest::test_inference_fp16"

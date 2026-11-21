@@ -94,6 +94,11 @@
   "merged_at": null,
   "state": "open"
  },
+ "49218": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
  "49249": {
   "closed_at": null,
   "merged_at": null,
@@ -298,6 +303,11 @@
   "closed_at": "2026-11-10T09:40:44Z",
   "merged_at": "2026-11-10T09:40:44Z",
   "state": "merged"
+ },
+ "49895": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
  },
  "49910": {
   "closed_at": null,
@@ -610,6 +620,11 @@
   "state": "open"
  },
  "50313": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "50317": {
   "closed_at": null,
   "merged_at": null,
   "state": "open"
@@ -935,9 +950,9 @@
   "state": "open"
  },
  "50595": {
-  "closed_at": null,
-  "merged_at": null,
-  "state": "open"
+  "closed_at": "2026-11-20T11:59:33Z",
+  "merged_at": "2026-11-20T11:59:33Z",
+  "state": "merged"
  },
  "50610": {
   "closed_at": null,
@@ -964,15 +979,25 @@
   "merged_at": null,
   "state": "open"
  },
+ "50649": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
  "50733": {
   "closed_at": null,
   "merged_at": null,
   "state": "open"
  },
- "50754": {
+ "50739": {
   "closed_at": null,
   "merged_at": null,
   "state": "open"
+ },
+ "50754": {
+  "closed_at": "2026-11-20T18:04:30Z",
+  "merged_at": "2026-11-20T18:04:30Z",
+  "state": "merged"
  },
  "50785": {
   "closed_at": null,
@@ -1039,6 +1064,11 @@
   "merged_at": null,
   "state": "open"
  },
+ "50988": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
  "50993": {
   "closed_at": null,
   "merged_at": null,
@@ -1055,6 +1085,66 @@
   "state": "open"
  },
  "51001": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "51017": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "51020": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "51026": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "51034": {
+  "closed_at": "2026-11-20T20:58:10Z",
+  "merged_at": null,
+  "state": "closed"
+ },
+ "51036": {
+  "closed_at": "2026-11-20T17:25:34Z",
+  "merged_at": "2026-11-20T17:25:34Z",
+  "state": "merged"
+ },
+ "51038": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "51043": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "51044": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "51050": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "51052": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "51053": {
+  "closed_at": null,
+  "merged_at": null,
+  "state": "open"
+ },
+ "51055": {
   "closed_at": null,
   "merged_at": null,
   "state": "open"
