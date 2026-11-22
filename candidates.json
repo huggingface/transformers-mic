@@ -9005,7 +9005,8 @@
   "commits": [
    "cbdacbb0a3057131cfdc621fbfd3e646e5d0751b",
    "f00dc6868fb0e9743543b009cfff992d0d4248bb",
-   "96d0ef41cac425475f721d41ce1dc966524ed9d5"
+   "96d0ef41cac425475f721d41ce1dc966524ed9d5",
+   "c3c65e699c645d23e9b1f6b4255458c2354b6816"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--vip-llava-7b-hf-mic/snapshots/2c201806b2666d6748446",
   "failure_kind": "Runtime traceback",
@@ -9013,7 +9014,7 @@
   "first_seen": "2026-11-19",
   "key": "50947#huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20778,
+  "last_seen": 20779,
   "merged_at": null,
   "outcome": "open",
   "pr": "50947",

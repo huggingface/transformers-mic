@@ -1382,6 +1382,11 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#axk1#2026-11-21": {
+  "reason": "same regression as 50975#axk1",
+  "verdict": "duplicate",
+  "version": 9
+ },
  "sticky#bart#2026-10-30": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1527,6 +1532,10 @@
   "version": 9
  },
  "sticky#dory#2026-11-20": {
+  "verdict": "not-covered",
+  "version": 9
+ },
+ "sticky#dots3_note#2026-11-21": {
   "verdict": "not-covered",
   "version": 9
  },
@@ -1794,6 +1803,10 @@
   "verdict": "not-covered",
   "version": 9
  },
+ "sticky#hunyuan_v1_moe#2026-10-30": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#hunyuan_vl#2026-10-20": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1823,6 +1836,10 @@
   "version": 9
  },
  "sticky#idefics#2026-10-24": {
+  "verdict": "not-covered",
+  "version": 9
+ },
+ "sticky#idefics#2026-11-03": {
   "verdict": "not-covered",
   "version": 9
  },
@@ -2037,6 +2054,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#musicgen#2026-11-13": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#mvp#2026-10-30": {
   "verdict": "not-covered",
   "version": 9
@@ -2061,6 +2082,10 @@
   "verdict": "not-covered",
   "version": 9
  },
+ "sticky#omniasr_ctc#2026-11-18": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#oneformer#2026-10-18": {
   "verdict": "out-of-scope",
   "version": 9
@@ -2071,6 +2096,11 @@
   "version": 9
  },
  "sticky#oneformer#2026-10-24": {
+  "reason": "the daily CI failed it the day before too",
+  "verdict": "already-failing",
+  "version": 9
+ },
+ "sticky#oneformer#2026-10-26": {
   "reason": "the daily CI failed it the day before too",
   "verdict": "already-failing",
   "version": 9
@@ -2242,6 +2272,10 @@
   "version": 9
  },
  "sticky#switch_transformers#2026-10-16": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#switch_transformers#2026-11-18": {
   "verdict": "out-of-scope",
   "version": 9
  },

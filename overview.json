@@ -16,13 +16,13 @@
  },
  "drafts_per_day": 2,
  "false_alarms": {
-  "prs_not_their_fault": 191,
-  "prs_with_failure": 238
+  "prs_not_their_fault": 194,
+  "prs_with_failure": 241
  },
  "missed": {
-  "awaiting_verdict": 30,
-  "not_covered": 33,
-  "real_checkpoint": 30
+  "awaiting_verdict": 32,
+  "not_covered": 34,
+  "real_checkpoint": 32
  },
  "next": [
   {
@@ -230,6 +230,18 @@
    "shrinkable": false
   },
   {
+   "checkpoint": null,
+   "draft": "not draftable",
+   "model": "dots3_note",
+   "next_batch": false,
+   "other": 0,
+   "real_checkpoint": 2,
+   "regressions": 2,
+   "run": "",
+   "shrink": "",
+   "shrinkable": false
+  },
+  {
    "checkpoint": "tue-mps/eomt-dinov3-coco-panoptic-large-640",
    "draft": "not draftable",
    "model": "eomt_dinov3",
@@ -278,18 +290,6 @@
    "shrinkable": false
   },
   {
-   "checkpoint": null,
-   "draft": "not draftable",
-   "model": "dots3_note",
-   "next_batch": false,
-   "other": 0,
-   "real_checkpoint": 1,
-   "regressions": 1,
-   "run": "",
-   "shrink": "",
-   "shrinkable": false
-  },
-  {
    "checkpoint": "tue-mps/coco_panoptic_eomt_large_640",
    "draft": "not draftable",
    "model": "eomt",
@@ -329,6 +329,17 @@
  "regressions": [
   {
    "date": "2026-11-21",
+   "detail": "same regression as 50975#axk1",
+   "integration": true,
+   "job": "",
+   "model": "axk1",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "duplicate"
+  },
+  {
+   "date": "2026-11-21",
    "detail": "",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/44855668287/job/136697811435",
@@ -366,6 +377,17 @@
    "integration": false,
    "job": "",
    "model": "electra",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-18",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "switch_transformers",
    "pr": null,
    "run": "",
    "tests": 1,
@@ -1283,6 +1305,17 @@
    "run": "",
    "tests": 1,
    "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-10-26",
+   "detail": "the daily CI failed it the day before too",
+   "integration": true,
+   "job": "",
+   "model": "oneformer",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "already-failing"
   },
   {
    "date": "2026-10-26",
@@ -3222,23 +3255,23 @@
   }
  ],
  "replay": {
-  "already-failing": 5,
+  "already-failing": 6,
   "already-red": 10,
   "broken": 0,
   "caught": 10,
-  "duplicate": 4,
+  "duplicate": 5,
   "missed": 1,
   "model-added": 4,
   "no-code-change": 1,
   "not-a-regression": 5,
-  "not-covered": 247,
+  "not-covered": 252,
   "not-reproduced": 7,
-  "out-of-scope": 200,
+  "out-of-scope": 201,
   "pending": 0,
   "unrelated-culprit": 16
  },
  "window": [
   "2026-10-20",
-  "2026-11-21"
+  "2026-11-22"
  ]
 }
