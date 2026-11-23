@@ -17,8 +17,8 @@ For each fixture in a contract's manifest that has a `build` recipe:
    saved in the source checkpoint's dtype (its config's, else its text or
    unanimous sub-config's, else float32), so the fixture loads in the dtype users
    of the checkpoint get by default. A tensor the checkpoint stores in another
-   float dtype keeps it (a router kept in float32 beside bfloat16 weights),
-   matched by name pattern from the checkpoint's safetensors headers.
+   float dtype than its main one keeps it (a router kept in float32 beside
+   bfloat16 weights), matched by name pattern from the safetensors headers.
    A source of SMALL_SOURCE parameters or fewer is not shrunk: the fixture is
    the checkpoint itself, config and trained weights unchanged (`weights:
    real`), since it costs no more than a fixture and tests trained behaviour.

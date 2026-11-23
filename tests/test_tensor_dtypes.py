@@ -55,8 +55,19 @@ def test_targets_map_a_shrunk_fixture_and_default_the_rest():
         names[3]: "bfloat16",
         names[4]: "bfloat16",
     }
-    # A float32 default: the BF16 router keeps bfloat16 (GLM-5.3-Flash's fixture was all float32).
-    assert tensor_dtypes.target_dtypes(names[:1], GLM, "float32") == {names[0]: "bfloat16"}
+    # Tensors in the checkpoint's main dtype (BF16 here) follow the default, whatever it is.
+    assert tensor_dtypes.target_dtypes(names[:2], GLM, "float32") == {names[0]: "float32", names[1]: "float32"}
+
+
+def test_the_main_dtype_is_weighted_by_parameters():
+    stored = {
+        "embed.weight": {"dtype": "BF16", "numel": 1000},
+        **{f"layers.{i}.norm.weight": {"dtype": "F32", "numel": 8} for i in range(5)},
+    }
+    assert tensor_dtypes.main_dtype(stored) == "bfloat16"
+    assert tensor_dtypes.overrides(stored, "bfloat16") == {"layers.*.norm.weight": "float32"}
+    # Counted by tensors when sizes are unknown.
+    assert tensor_dtypes.main_dtype({k: v["dtype"] for k, v in stored.items()}) == "float32"
 
 
 def test_overrides_list_only_patterns_that_differ_from_the_default():
@@ -64,8 +75,20 @@ def test_overrides_list_only_patterns_that_differ_from_the_default():
         "model.language_model.layers.*.mlp.experts.*.gate_proj.weight_scale_inv": "float32",
         "model.language_model.layers.*.mlp.gate.e_score_correction_bias": "float32",
     }
-    assert tensor_dtypes.overrides({"a.0.w": "BF16", "a.1.w": "BF16"}, "bfloat16") == {}
+    assert tensor_dtypes.overrides({"a.0.w": "BF16", "a.1.w": "BF16", "b.w": "F32"}, "bfloat16") == {"b.w": "float32"}
     assert tensor_dtypes.overrides({}, "float32") == {}
+
+
+def test_a_uniformly_stored_checkpoint_keeps_the_default():
+    # SmolLM-135M stores every tensor F32 under a bfloat16 config: its fixture stays bfloat16.
+    smollm = {"model.layers.0.mlp.up_proj.weight": "F32", "model.norm.weight": "F32"}
+    assert not tensor_dtypes.mixed(smollm)
+    assert tensor_dtypes.overrides(smollm, "bfloat16") == {}
+    assert set(tensor_dtypes.target_dtypes(smollm, smollm, "bfloat16").values()) == {"bfloat16"}
+    # F8 weights with F32 scales: one float dtype, so nothing to mirror either.
+    assert not tensor_dtypes.mixed({"a.weight": "F8_E4M3", "a.weight_scale_inv": "F32"})
+    assert tensor_dtypes.overrides({"a.weight": "F8_E4M3", "a.weight_scale_inv": "F32"}, "bfloat16") == {}
+    assert tensor_dtypes.mixed(GLM)
 
 
 def test_config_dtype_reads_sub_configs_when_the_top_level_has_none():
@@ -104,9 +127,10 @@ def test_checkpoint_dtypes_read_local_headers_and_cache_per_revision(tmp_path, m
     cache = tmp_path / "cache.json"
     monkeypatch.setattr(tensor_dtypes, "cache_path", lambda repo, revision: cache)
     revision = "0" * 40
-    assert tensor_dtypes.checkpoint_dtypes("org/model", revision, tmp_path) == {"a.weight": "BF16", "b.weight": "F32"}
+    expected = {"a.weight": {"dtype": "BF16", "numel": 1}, "b.weight": {"dtype": "F32", "numel": 1}}
+    assert tensor_dtypes.checkpoint_dtypes("org/model", revision, tmp_path) == expected
     (tmp_path / "s1.safetensors").unlink()  # the cache answers without the files
-    assert tensor_dtypes.checkpoint_dtypes("org/model", revision, tmp_path) == {"a.weight": "BF16", "b.weight": "F32"}
+    assert tensor_dtypes.checkpoint_dtypes("org/model", revision, tmp_path) == expected
 
 
 @pytest.mark.requires_runtime

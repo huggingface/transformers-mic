@@ -4,9 +4,16 @@ Real checkpoints are not stored in one dtype: MoE routers keep `mlp.gate.weight`
 or `e_score_correction_bias` in float32 beside bfloat16 weights, and quantized
 experts are F8. A fixture saved in one dtype hides changes that depend on it (a
 router kept in float32 on load is a lossless upcast of a bfloat16 fixture, and a
-false difference for a float32 fixture of a bfloat16 router). Fixtures keep each
-tensor's stored float dtype instead, matched by name pattern so a shrunk fixture
-(fewer layers, fewer experts) still maps onto the checkpoint.
+false difference for a float32 fixture of a bfloat16 router).
+
+So a fixture mirrors the checkpoint's dtypes relative to each other: tensors stored
+in the checkpoint's main float dtype (the one most parameters use) take the
+fixture's default dtype, the dtype users load the checkpoint in, and tensors stored
+in another float dtype keep it. Names match by pattern, so a shrunk fixture (fewer
+layers, fewer experts) still maps onto the checkpoint. A uniformly stored checkpoint
+therefore changes nothing (SmolLM-135M stores float32 under a bfloat16 config; its
+fixture stays bfloat16), nor does a float32 fixture of a bfloat16 checkpoint whose
+router is float32.
 
 Only headers are read: the index plus each shard's 8-byte length and header JSON,
 by HTTP range request or from local files, cached per revision.
@@ -28,33 +35,62 @@ def pattern(name):
     return re.sub(r"(?<=\.)\d+(?=\.|$)|^\d+(?=\.)", "*", name)
 
 
+def _dtype(value):
+    return value if isinstance(value, str) else value["dtype"]
+
+
+def _numel(value):
+    return 1 if isinstance(value, str) else value["numel"]
+
+
 def pattern_dtypes(stored):
     """{pattern: torch dtype name} for patterns whose source tensors are unanimous in a float dtype.
 
-    `stored` maps checkpoint tensor names to safetensors dtypes ("BF16", "F8_E4M3").
-    A pattern whose tensors disagree (o_proj BF16 in some layers, F8 in others), or
-    that is stored quantized or as integers, has no entry: the fixture default applies.
+    `stored` maps checkpoint tensor names to safetensors dtypes ("BF16", "F8_E4M3"),
+    or to {"dtype", "numel"} as checkpoint_dtypes returns them. A pattern whose
+    tensors disagree (o_proj BF16 in some layers, F8 in others), or that is stored
+    quantized or as integers, has no entry: the fixture default applies.
     """
     seen = collections.defaultdict(set)
-    for name, dtype in stored.items():
-        seen[pattern(name)].add(dtype)
+    for name, value in stored.items():
+        seen[pattern(name)].add(_dtype(value))
     return {
         key: FLOAT[next(iter(dtypes))] for key, dtypes in seen.items() if len(dtypes) == 1 and dtypes <= FLOAT.keys()
     }
 
 
+def main_dtype(stored):
+    """The float dtype most of the checkpoint's float parameters are stored in (tensors when sizes are unknown)."""
+    totals = collections.Counter()
+    for value in stored.values():
+        if _dtype(value) in FLOAT:
+            totals[FLOAT[_dtype(value)]] += _numel(value)
+    return max(sorted(totals), key=totals.get) if totals else None
+
+
+def mixed(stored):
+    """Whether the checkpoint stores its floating tensors in more than one float dtype."""
+    return len({_dtype(value) for value in stored.values() if _dtype(value) in FLOAT}) > 1
+
+
+def kept_dtypes(stored):
+    """{pattern: torch dtype name} the fixture keeps: the patterns stored in another float dtype than the main one."""
+    main = main_dtype(stored)
+    return {key: dtype for key, dtype in pattern_dtypes(stored).items() if dtype != main}
+
+
 def overrides(stored, default):
-    """The patterns whose stored float dtype differs from the fixture default: what a fixture key records."""
-    return {key: dtype for key, dtype in sorted(pattern_dtypes(stored).items()) if dtype != default}
+    """The kept patterns whose dtype differs from the fixture default: what a fixture key records."""
+    return {key: dtype for key, dtype in sorted(kept_dtypes(stored).items()) if dtype != default}
 
 
 def target_dtypes(names, stored, default):
     """{fixture tensor name: torch dtype name} each floating fixture tensor is saved in.
 
-    Names whose pattern the checkpoint does not have (renamed or fused by a
-    conversion) take the default.
+    Names stored in the checkpoint's main float dtype take the default, as do names
+    whose pattern the checkpoint does not have (renamed or fused by a conversion).
     """
-    patterns = pattern_dtypes(stored)
+    patterns = kept_dtypes(stored)
     return {name: patterns.get(pattern(name), default) for name in names}
 
 
@@ -87,7 +123,10 @@ def _local_dtypes(source, files):
     for name in files:
         for tensor, info in _header(Path(source) / name).items():
             if tensor != "__metadata__":
-                stored[tensor] = info["dtype"]
+                numel = 1
+                for size in info["shape"]:
+                    numel *= size
+                stored[tensor] = {"dtype": info["dtype"], "numel": numel}
     return stored
 
 
@@ -108,11 +147,11 @@ def weight_files(source):
 def cache_path(repo, revision):
     from huggingface_hub.constants import HF_HUB_CACHE
 
-    return Path(HF_HUB_CACHE).parent / "tmic-tensor-dtypes" / repo.replace("/", "--") / f"{revision}.json"
+    return Path(HF_HUB_CACHE).parent / "tmic-tensor-headers" / repo.replace("/", "--") / f"{revision}.json"
 
 
 def checkpoint_dtypes(repo, revision, source=None):
-    """{tensor name: safetensors dtype} of a pinned checkpoint, from headers only.
+    """{tensor name: {"dtype": safetensors dtype, "numel"}} of a pinned checkpoint, from headers only.
 
     Empty for a checkpoint with no safetensors file (a pytorch_model.bin source):
     its fixture keeps the default dtype. Cached per revision, since a commit's
@@ -140,7 +179,11 @@ def checkpoint_dtypes(repo, revision, source=None):
                         files,
                     )
                 )
-            stored = {name: info.dtype for header in headers for name, info in header.tensors.items()}
+            stored = {
+                name: {"dtype": info.dtype, "numel": info.parameter_count}
+                for header in headers
+                for name, info in header.tensors.items()
+            }
     if cached:
         cached.parent.mkdir(parents=True, exist_ok=True)
         cached.write_text(json.dumps(stored, sort_keys=True))
