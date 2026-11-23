@@ -174,6 +174,8 @@ def test_build_saves_per_tensor_dtypes_and_keeps_uniform_keys(tmp_path):
     assert torch.equal(saved[dense], model.state_dict()[dense])  # not rounded through bfloat16 first
     assert saved["encoder.layer.0.intermediate.dense.weight"].dtype == torch.bfloat16
     assert saved["embeddings.word_embeddings.weight"].dtype == torch.bfloat16
+    # The model was saved from float32; dtype="auto" must still load the fixture in its own dtype.
+    assert json.loads((tmp_path / "out" / "config.json").read_text())["dtype"] == "bfloat16"
     # Integer tensors are never cast, whatever the header says.
     ints = build_fixtures.stored_like({"a.ids": torch.arange(3)}, {"a.ids": "F32"}, "bfloat16")
     assert ints["a.ids"].dtype == torch.int64
@@ -181,3 +183,31 @@ def test_build_saves_per_tensor_dtypes_and_keeps_uniform_keys(tmp_path):
     plain = build_fixtures.fixture_key(source, BertModel, [])[0]
     assert build_fixtures.fixture_key(source, BertModel, [], tensor_dtypes=uniform)[0] == plain
     assert build_fixtures.fixture_key(source, BertModel, [], tensor_dtypes=mixed)[0] != plain
+
+
+def test_config_with_dtype_sets_the_top_level_and_sub_configs_and_keeps_bytes_when_right(tmp_path):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "example"))
+    import build_fixtures
+
+    path = tmp_path / "config.json"
+    path.write_text(
+        json.dumps(
+            {
+                "dtype": "float32",
+                "text_config": {"dtype": "float32", "hidden_size": 8},
+                "vision_config": {"hidden_size": 4},
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
+    build_fixtures.config_with_dtype(path, "bfloat16")
+    config = json.loads(path.read_text())
+    assert config["dtype"] == config["text_config"]["dtype"] == "bfloat16"
+    assert "dtype" not in config["vision_config"]  # a sub-config that named none stays as saved
+
+    right = path.read_bytes()
+    stamp = path.stat().st_mtime_ns
+    build_fixtures.config_with_dtype(path, "bfloat16")
+    assert path.read_bytes() == right and path.stat().st_mtime_ns == stamp  # nothing to change, not rewritten

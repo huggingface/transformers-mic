@@ -603,11 +603,41 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
             ):
                 tensors[alias] = tensors.pop(kept)
     save_file(tensors, weights, metadata={"format": "pt"})
+    if checkpoint and checkpoint.get("dtype"):
+        # save_pretrained wrote the dtype of the model it was handed, float32 when tensors had to keep
+        # their stored precision; dtype="auto" reads config.json first, so it must name the fixture's.
+        config_with_dtype(out / "config.json", checkpoint["dtype"])
     copied = copied_files(source, recipe)
     for name in copied:
         (out / name).parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source / name, out / name)  # overwrites the generation config save_pretrained wrote
     return copied
+
+
+def config_with_dtype(path, dtype):
+    """Set `dtype` in a saved config.json and in each sub-config that names one; rewrite only on change."""
+
+    def set_dtype(config):
+        changed = False
+        for key in ("dtype", "torch_dtype"):
+            if key in config and config[key] != dtype:
+                config[key] = dtype
+                changed = True
+        for value in config.values():
+            if isinstance(value, dict) and ("dtype" in value or "torch_dtype" in value):
+                changed |= set_dtype(value)
+        return changed
+
+    config = json.loads(path.read_text())
+    if "dtype" not in config and "torch_dtype" not in config:
+        config["dtype"] = dtype
+        set_dtype(config)
+        changed = True
+    else:
+        changed = set_dtype(config)
+    if changed:
+        # The layout transformers' save_pretrained writes (PretrainedConfig.to_json_string).
+        path.write_text(json.dumps(config, indent=2, sort_keys=True) + "\n")
 
 
 @contextlib.contextmanager
