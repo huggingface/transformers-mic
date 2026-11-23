@@ -542,6 +542,12 @@
     "gpu_only": true,
     "integration": true,
     "test": "tests/models/swinv2/test_modeling_swinv2.py::Swinv2ModelIntegrationTest::test_inference_fp16"
+   },
+   {
+    "date": "2026-11-04",
+    "gpu_only": true,
+    "integration": true,
+    "test": "tests/models/swinv2/test_modeling_swinv2.py::Swinv2ModelIntegrationTest::test_inference_fp16"
    }
   ],
   "switch_transformers": [
@@ -841,6 +847,21 @@
    ]
   },
   {
+   "checkpoint": "Qwen/Qwen3-4B",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "utils",
+   "other": 6,
+   "shrinkable": false,
+   "tests": [
+    "tests/utils/test_modeling_utils.py::GradientCheckpointingOffloadTest::test_frees_exactly_the_saved_activations",
+    "tests/utils/test_image_utils.py::LoadImageTester::test_load_img_url_timeout",
+    "tests/utils/test_modeling_utils.py::ModelOnTheFlyConversionTester::test_safetensors_on_the_fly_sharded_conversion_private",
+    "tests/utils/test_modeling_utils.py::ModelOnTheFlyConversionTester::test_safetensors_on_the_fly_conversion_private",
+    "tests/utils/test_modeling_utils.py::ModelOnTheFlyConversionTester::test_safetensors_on_the_fly_sharded_conversion"
+   ]
+  },
+  {
    "checkpoint": "swiss-ai/Apertus-v1.5-8B",
    "checkpoint_source": "failing test",
    "integration": 1,
@@ -861,6 +882,18 @@
    "shrinkable": false,
    "tests": [
     "tests/models/eomt/test_modeling_eomt.py::EomtForUniversalSegmentationIntegrationTest::test_segmentation_pipeline"
+   ]
+  },
+  {
+   "checkpoint": "sshleifer/bart-tiny-random",
+   "checkpoint_source": "failing test",
+   "integration": 1,
+   "model": "generation",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/generation/test_utils.py::GenerationIntegrationTests::test_generate_multi_accelerator_causal_mask",
+    "tests/generation/test_utils.py::GenerationIntegrationTests::test_mtp_use_correct_device_when_drafting"
    ]
   },
   {
@@ -932,21 +965,6 @@
    ]
   },
   {
-   "checkpoint": null,
-   "checkpoint_source": null,
-   "integration": 0,
-   "model": "utils",
-   "other": 6,
-   "shrinkable": false,
-   "tests": [
-    "tests/utils/test_modeling_utils.py::GradientCheckpointingOffloadTest::test_frees_exactly_the_saved_activations",
-    "tests/utils/test_image_utils.py::LoadImageTester::test_load_img_url_timeout",
-    "tests/utils/test_modeling_utils.py::ModelOnTheFlyConversionTester::test_safetensors_on_the_fly_sharded_conversion_private",
-    "tests/utils/test_modeling_utils.py::ModelOnTheFlyConversionTester::test_safetensors_on_the_fly_conversion_private",
-    "tests/utils/test_modeling_utils.py::ModelOnTheFlyConversionTester::test_safetensors_on_the_fly_sharded_conversion"
-   ]
-  },
-  {
    "checkpoint": "HuggingFaceM4/idefics-9b",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -983,6 +1001,19 @@
    ]
   },
   {
+   "checkpoint": "facebook/data2vec-text-base",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "data2vec",
+   "other": 3,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_flash_attn_2_inference_equivalence",
+    "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_flash_attn_2_inference_equivalence_right_padding",
+    "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_sdpa_padding_matches_padding_free_with_position_ids"
+   ]
+  },
+  {
    "checkpoint": "andreasmadsen/efficient_mlm_m0.40",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -996,15 +1027,14 @@
    ]
   },
   {
-   "checkpoint": "facebook/data2vec-text-base",
+   "checkpoint": "ibm/PowerMoE-3b",
    "checkpoint_source": "failing test",
    "integration": 0,
-   "model": "data2vec",
+   "model": "granitemoeshared",
    "other": 2,
    "shrinkable": false,
    "tests": [
-    "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_flash_attn_2_inference_equivalence",
-    "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_flash_attn_2_inference_equivalence_right_padding"
+    "tests/models/granitemoeshared/test_modeling_granitemoeshared.py::GraniteMoeSharedModelTest::test_flash_attn_2_equivalence"
    ]
   },
   {
@@ -1143,14 +1173,14 @@
    ]
   },
   {
-   "checkpoint": "ibm/PowerMoE-3b",
-   "checkpoint_source": "failing test",
+   "checkpoint": null,
+   "checkpoint_source": null,
    "integration": 0,
-   "model": "granitemoeshared",
+   "model": "hy_v4_vl",
    "other": 1,
    "shrinkable": false,
    "tests": [
-    "tests/models/granitemoeshared/test_modeling_granitemoeshared.py::GraniteMoeSharedModelTest::test_flash_attn_2_equivalence"
+    "tests/models/hy_v4_vl/test_image_processing_hy_v4_vl.py::HYV4VLImageProcessorTest::test_backends_equivalence_batched"
    ]
   },
   {
@@ -1187,6 +1217,17 @@
    "shrinkable": false,
    "tests": [
     "tests/models/omdet_turbo/test_modeling_omdet_turbo.py::OmDetTurboModelTest::test_batching_equivalence"
+   ]
+  },
+  {
+   "checkpoint": null,
+   "checkpoint_source": null,
+   "integration": 0,
+   "model": "paligemma2",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/paligemma2/test_modeling_paligemma2.py::PaliGemma2ForConditionalGenerationModelTest::test_model_parallel_beam_search"
    ]
   },
   {
@@ -1340,6 +1381,7 @@
   "test_sdpa_padding_matches_padding_free_with_position_ids": [
    "bert",
    "electra",
+   "ernie",
    "glm4_moe_lite",
    "minicpm3",
    "minimax_m2"

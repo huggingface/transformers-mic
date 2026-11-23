@@ -1499,6 +1499,10 @@
   "verdict": "not-covered",
   "version": 9
  },
+ "sticky#data2vec#2026-11-21": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#deepseek_ocr2#2026-10-24": {
   "verdict": "not-covered",
   "version": 9
@@ -1564,6 +1568,10 @@
   "version": 9
  },
  "sticky#ernie#2026-10-12": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#ernie#2026-11-17": {
   "verdict": "out-of-scope",
   "version": 9
  },
@@ -1697,6 +1705,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#generation#2026-11-23": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#glm4#2026-10-07": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1769,6 +1781,10 @@
   "verdict": "not-covered",
   "version": 9
  },
+ "sticky#granitemoeshared#2026-10-28": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#grounding_dino#2026-10-13": {
   "reason": "the daily CI failed it the day before too",
   "verdict": "already-failing",
@@ -1823,6 +1839,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#hy_v4_vl#2026-11-18": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#hyperclovax_vision_v2#2026-11-11": {
   "verdict": "not-covered",
   "version": 9
@@ -1868,6 +1888,10 @@
   "version": 9
  },
  "sticky#jetmoe#2026-10-17": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#jetmoe#2026-10-30": {
   "verdict": "out-of-scope",
   "version": 9
  },
@@ -2117,6 +2141,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#paligemma2#2026-11-23": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#peft_integration#2026-11-20": {
   "verdict": "not-covered",
   "version": 9
@@ -2267,6 +2295,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#swinv2#2026-11-04": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#switch_transformers#2026-10-06": {
   "verdict": "out-of-scope",
   "version": 9
@@ -2336,6 +2368,10 @@
   "version": 9
  },
  "sticky#utils#2026-11-15": {
+  "verdict": "not-covered",
+  "version": 9
+ },
+ "sticky#utils#2026-11-23": {
   "verdict": "not-covered",
   "version": 9
  },
