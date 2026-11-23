@@ -405,6 +405,11 @@ No Git commit or framework PR is created automatically.""",
                 "--fleet-revision",
                 help="Dataset revision (defaults to tests/contracts.lock, then main)",
             )
+            run.add_argument(
+                "--fleet-pr",
+                type=int,
+                help="Transformers PR whose re-recorded expected values (record-mic) apply to this run",
+            )
             run.add_argument("--fixtures-only", action="store_true")
             run.add_argument("--changed-files", type=Path)
             run.add_argument(
@@ -683,16 +688,15 @@ def main(argv=None):
                 revision = args.fleet_revision
                 if not revision and Path("tests/contracts.lock").exists():
                     revision = fleet.read_pin("tests/contracts.lock")
-                args.lock, revision = fleet.download(args.fleet or "control", revision or "main")
-                print(
-                    json.dumps(
-                        {
-                            "fleet_repository": fleet.REPOSITORY,
-                            "fleet_revision": revision,
-                        }
-                    ),
-                    file=sys.stderr,
-                )
+                pr = getattr(args, "fleet_pr", None)
+                metadata = {}
+                if pr is None:
+                    args.lock, revision = fleet.download(args.fleet or "control", revision or "main")
+                else:
+                    args.lock, revision, report = fleet.download_for_pr(args.fleet or "control", revision or "main", pr)
+                    metadata["fleet_overlay"] = {"pr": pr, **report}
+                metadata = {"fleet_repository": fleet.REPOSITORY, "fleet_revision": revision, **metadata}
+                print(json.dumps(metadata), file=sys.stderr)
             if args.lock:
                 return external_check(args)
         if args.command == "report":

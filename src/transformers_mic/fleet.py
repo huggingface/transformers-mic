@@ -40,6 +40,9 @@ COLUMNS = {
 }
 
 INTEGRATION_COLUMNS = ("contract", "revision", "integrations")
+# Expected values re-recorded for one open Transformers PR (`record-mic`): a file on the
+# dataset's main that moves named contracts to new mic-repo commits for that PR's runs only.
+OVERLAYS = "overlays"
 
 
 def table_path(name, table):
@@ -241,6 +244,59 @@ def read_pin(path):
     if not re.fullmatch(r"[0-9a-f]{40}", revision):
         raise ValueError(f"{path} must contain one immutable dataset commit SHA")
     return revision
+
+
+def overlay_path(pr):
+    return f"{OVERLAYS}/transformers-pr-{int(pr)}.json"
+
+
+def download_overlay(pr, revision):
+    """The PR's overlay at a dataset revision, or None."""
+    try:
+        path = hf_hub_download(REPOSITORY, overlay_path(pr), repo_type="dataset", revision=revision)
+    except EntryNotFoundError:
+        return None
+    return json.loads(Path(path).read_text())
+
+
+def pins(contract, repo):
+    """The pins of `contract` on mic repo `repo`: its integration and fixtures there."""
+    found = [contract["integration"]] if contract["integration"]["repo"] == repo else []
+    return found + [pin for name, pin in contract.get("fixtures", {}).items() if name == repo]
+
+
+def apply_overlay(lock, overlay, name):
+    """Move the overlay's contracts of fleet `name` to their re-recorded commits.
+
+    An entry applies only while the fleet still pins its `from` commit: once main moved the
+    contract (another update, a merged record), the PR's values are stale and the case is
+    red again until re-recorded. Returns the lock and {"applied": [...], "stale": [...]}.
+    """
+    lock = json.loads(json.dumps(lock))
+    report = {"applied": [], "stale": []}
+    for key, moves in sorted((overlay or {}).get("contracts", {}).items()):
+        fleet_name, _, contract_name = key.partition("/")
+        if fleet_name != name:
+            continue
+        contract = lock["contracts"].get(contract_name)
+        for repo, move in sorted(moves.items()):
+            found = pins(contract, repo) if contract else []
+            if found and all(pin["revision"] == move["from"] for pin in found):
+                for pin in found:
+                    pin["revision"] = move["to"]
+                report["applied"].append(f"{contract_name}:{repo}")
+            else:
+                report["stale"].append(f"{contract_name}:{repo}")
+    return lock, report
+
+
+def download_for_pr(name, revision, pr):
+    """download() with PR `pr`'s overlay applied: (lock path, revision, overlay report)."""
+    path, revision = download(name, revision)
+    lock, report = apply_overlay(json.loads(Path(path).read_text()), download_overlay(pr, revision), name)
+    overlaid = path.with_name(f"transformers-pr-{int(pr)}.{path.name}")
+    overlaid.write_text(json.dumps(lock, indent=2) + "\n")
+    return overlaid, revision, report
 
 
 def download(name="control", revision="main"):
