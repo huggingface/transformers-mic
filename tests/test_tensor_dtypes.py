@@ -186,6 +186,7 @@ def test_build_saves_per_tensor_dtypes_and_keeps_uniform_keys(tmp_path):
 
 
 def test_config_with_dtype_sets_the_top_level_and_sub_configs_and_keeps_bytes_when_right(tmp_path):
+    pytest.importorskip("torch")  # build_fixtures imports torch at module level
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "example"))
     import build_fixtures
 
