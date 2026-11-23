@@ -615,12 +615,16 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
 
 
 def config_with_dtype(path, dtype):
-    """Set `dtype` in a saved config.json and in each sub-config that names one; rewrite only on change."""
+    """Set `dtype` in a saved config.json and in each sub-config that names one; rewrite only on change.
+
+    A sub-config whose dtype is null inherits the loading dtype and keeps its null: naming one would pin it
+    there, and a float32 load would still build that sub-model in `dtype`.
+    """
 
     def set_dtype(config):
         changed = False
         for key in ("dtype", "torch_dtype"):
-            if key in config and config[key] != dtype:
+            if config.get(key) is not None and config[key] != dtype:
                 config[key] = dtype
                 changed = True
         for value in config.values():

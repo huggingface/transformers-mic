@@ -197,6 +197,7 @@ def test_config_with_dtype_sets_the_top_level_and_sub_configs_and_keeps_bytes_wh
                 "dtype": "float32",
                 "text_config": {"dtype": "float32", "hidden_size": 8},
                 "vision_config": {"hidden_size": 4},
+                "thinker_config": {"dtype": None, "audio_config": {"dtype": None}},
             },
             indent=2,
             sort_keys=True,
@@ -207,6 +208,8 @@ def test_config_with_dtype_sets_the_top_level_and_sub_configs_and_keeps_bytes_wh
     config = json.loads(path.read_text())
     assert config["dtype"] == config["text_config"]["dtype"] == "bfloat16"
     assert "dtype" not in config["vision_config"]  # a sub-config that named none stays as saved
+    # A null dtype inherits the loading dtype (Qwen2.5-Omni's thinker): pinning it would break float32 loads.
+    assert config["thinker_config"] == {"dtype": None, "audio_config": {"dtype": None}}
 
     right = path.read_bytes()
     stamp = path.stat().st_mtime_ns
