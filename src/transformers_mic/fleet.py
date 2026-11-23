@@ -12,8 +12,10 @@ count as Transformers coverage.
 import csv
 import io
 import json
+import os
 import re
 import tempfile
+import urllib.request
 from pathlib import Path
 
 from huggingface_hub import HfApi, hf_hub_download
@@ -288,6 +290,122 @@ def apply_overlay(lock, overlay, name):
             else:
                 report["stale"].append(f"{contract_name}:{repo}")
     return lock, report
+
+
+# Which Transformers commit made a re-recorded value live (record-mic, on the PR's merge): a run of
+# older code, which does not contain that commit, is checked against the value before it. Kept
+# apart from COLUMNS: revisions from before it have no such table, and it is optional.
+HISTORY = "history"
+HISTORY_COLUMNS = ("contract", "mic_repo", "from_revision", "revision", "since_transformers")
+HISTORY_KEEP = 5  # rows kept per (contract, mic repo): far more than a run of old code needs
+TRANSFORMERS = "huggingface/transformers"
+
+
+def history_csv(rows):
+    out = io.StringIO()
+    writer = csv.DictWriter(out, HISTORY_COLUMNS, lineterminator="\n")
+    writer.writeheader()
+    writer.writerows(rows)
+    return out.getvalue()
+
+
+def download_history(name, revision):
+    """The fleet's history rows at a revision, oldest first ([] when it has none)."""
+    try:
+        text = Path(
+            hf_hub_download(REPOSITORY, table_path(name, HISTORY), repo_type="dataset", revision=revision)
+        ).read_text()
+    except EntryNotFoundError:
+        return []
+    reader = csv.DictReader(io.StringIO(text))
+    if tuple(reader.fieldnames or ()) != HISTORY_COLUMNS:
+        raise ValueError(f"{HISTORY}.csv must have the columns {', '.join(HISTORY_COLUMNS)}")
+    return list(reader)
+
+
+def with_history(rows, added):
+    """`rows` plus `added`, keeping the newest HISTORY_KEEP per (contract, mic repo)."""
+    rows = [*rows, *added]
+    kept, seen = [], {}
+    for row in reversed(rows):
+        key = (row["contract"], row["mic_repo"])
+        seen[key] = seen.get(key, 0) + 1
+        if seen[key] <= HISTORY_KEEP:
+            kept.append(row)
+    return list(reversed(kept))
+
+
+def apply_history(lock, rows, is_ancestor):
+    """Pin each contract to the value the code under test should meet.
+
+    Walking a contract's history from the newest row, while its pin is the row's `revision` and the
+    row's Transformers commit is not an ancestor of the code under test (`is_ancestor(sha)`), the pin
+    goes back to the row's `from_revision`. Contracts with no history are unchanged.
+    Returns the lock and {"reverted": ["<contract>:<repo>", ...]}.
+    """
+    lock = json.loads(json.dumps(lock))
+    report = {"reverted": []}
+    for row in reversed(rows):
+        contract = lock["contracts"].get(row["contract"])
+        found = pins(contract, row["mic_repo"]) if contract else []
+        if (
+            found
+            and all(pin["revision"] == row["revision"] for pin in found)
+            and not is_ancestor(row["since_transformers"])
+        ):
+            for pin in found:
+                pin["revision"] = row["from_revision"]
+            report["reverted"].append(f"{row['contract']}:{row['mic_repo']}")
+    return lock, report
+
+
+def github_ancestor(head, repository=TRANSFORMERS):
+    """is_ancestor(sha) for commit `head` through GitHub's compare API (GH_TOKEN/GITHUB_TOKEN if set).
+
+    An answer the API cannot give (network, rate limit, unknown commit) counts as an ancestor: the
+    run then meets the latest values, as it did before history existed.
+    """
+    cache = {}
+
+    def is_ancestor(sha):
+        if sha not in cache:
+            request = urllib.request.Request(
+                f"https://api.github.com/repos/{repository}/compare/{sha}...{head}",
+                headers={"Accept": "application/vnd.github+json"},
+            )
+            if token := os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN"):
+                request.add_header("Authorization", f"Bearer {token}")
+            try:
+                with urllib.request.urlopen(request, timeout=30) as response:
+                    cache[sha] = json.load(response).get("status") in ("ahead", "identical")
+            except (OSError, ValueError):
+                cache[sha] = True
+        return cache[sha]
+
+    return is_ancestor
+
+
+def download_for_run(name, revision, pr=None, code_revision=None, is_ancestor=None):
+    """download() for one run: the history matched to the code under test, then the PR's overlay.
+
+    (lock path, revision, report): report has "reverted" (history) and "applied"/"stale" (overlay).
+    """
+    path, revision = download(name, revision)
+    lock, report = json.loads(Path(path).read_text()), {}
+    tag = []
+    if code_revision:
+        rows = download_history(name, revision)
+        lock, report = apply_history(lock, rows, is_ancestor or github_ancestor(code_revision))
+        tag.append(code_revision[:12])
+    if pr is not None:
+        lock, overlay = apply_overlay(lock, download_overlay(pr, revision), name)
+        report.update(overlay)
+        tag.append(f"transformers-pr-{int(pr)}")
+    if not tag:
+        return path, revision, report
+    out = path.with_name(f"{'.'.join(tag)}.{path.name}")
+    out.write_text(json.dumps(lock, indent=2) + "\n")
+    return out, revision, report
 
 
 def download_for_pr(name, revision, pr):

@@ -395,6 +395,30 @@ def merge(args, api=None):
                 CommitOperationAdd(path_in_repo=p, path_or_fileobj=t.encode())
                 for p, t in fleet.operations(name, lock).items()
             ]
+            since = getattr(args, "since", None)
+            if since:
+                # Older code (without the PR's commit on main) keeps meeting the values before these.
+                added = [
+                    {
+                        "contract": contract,
+                        "mic_repo": repo,
+                        "from_revision": move["from"],
+                        "revision": move["to"],
+                        "since_transformers": since,
+                    }
+                    for key, moves in sorted(overlay["contracts"].items())
+                    for contract in [key.partition("/")[2]]
+                    if key.partition("/")[0] == name
+                    for repo, move in sorted(moves.items())
+                    if f"{contract}:{repo}" in report["applied"]
+                ]
+                rows = fleet.with_history(fleet.download_history(name, head), added)
+                operations.append(
+                    CommitOperationAdd(
+                        path_in_repo=fleet.table_path(name, fleet.HISTORY),
+                        path_or_fileobj=fleet.history_csv(rows).encode(),
+                    )
+                )
     operations.append(CommitOperationDelete(path_in_repo=fleet.overlay_path(args.pr)))
     result = {"pr": args.pr, "fleet_revision": head, **reports}
     if args.execute:
@@ -456,6 +480,11 @@ def parser():
         c = commands.add_parser(name, help=help)
         c.add_argument("--pr", type=int, required=True)
         c.add_argument("--execute", action="store_true")
+        if name == "merge":
+            c.add_argument(
+                "--since",
+                help="the PR's commit on Transformers main: runs of code without it keep the previous values",
+            )
     return parser
 
 
