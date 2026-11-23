@@ -14,8 +14,11 @@ For each fixture in a contract's manifest that has a `build` recipe:
    experiments/sweep.py (widths by field name in every sub-config, depth by
    layer pattern, MoE to 4 experts); nothing else changes, so dropout and
    SpecAugment stay as configured (contracts seed them). Seeded random weights,
-   saved in the source checkpoint's dtype (float32 when its config names none),
-   so the fixture loads in the dtype users of the checkpoint get by default.
+   saved in the source checkpoint's dtype (its config's, else its text or
+   unanimous sub-config's, else float32), so the fixture loads in the dtype users
+   of the checkpoint get by default. A tensor the checkpoint stores in another
+   float dtype keeps it (a router kept in float32 beside bfloat16 weights),
+   matched by name pattern from the checkpoint's safetensors headers.
    A source of SMALL_SOURCE parameters or fewer is not shrunk: the fixture is
    the checkpoint itself, config and trained weights unchanged (`weights:
    real`), since it costs no more than a fixture and tests trained behaviour.
@@ -53,6 +56,7 @@ alone.
 
 import argparse
 import contextlib
+import copy
 import hashlib
 import importlib.metadata
 import inspect
@@ -361,9 +365,21 @@ def missing_parameters(cls, path):
 
 
 def source_dtype(source):
-    """The dtype the checkpoint loads in by default (dtype="auto"): its config's, else float32."""
-    config = json.loads((source / "config.json").read_text())
-    return config.get("dtype") or config.get("torch_dtype") or "float32"
+    """The dtype the checkpoint loads in by default (dtype="auto"): its config's, else float32.
+
+    A composite config may name it only in a sub-config (GLM-5.3-Flash's
+    text_config.dtype): the text config's, else the sub-configs' when they agree.
+    """
+    from transformers_mic.tensor_dtypes import config_dtype
+
+    return config_dtype(json.loads((source / "config.json").read_text())) or "float32"
+
+
+def stored_dtypes(repo, revision, source):
+    """{tensor name: safetensors dtype} of the pinned checkpoint, from its headers."""
+    from transformers_mic.tensor_dtypes import checkpoint_dtypes
+
+    return checkpoint_dtypes(repo, revision, source)
 
 
 def builder_revision():
@@ -394,7 +410,7 @@ def recorded_config(out, fixture):
     return previous.get("key_fields")
 
 
-def fixture_key(source, cls, missing, recipe=None, frozen_hashes=None):
+def fixture_key(source, cls, missing, recipe=None, frozen_hashes=None, tensor_dtypes=None):
     config = {k: v for k, v in shrunk_config(source, cls, recipe).to_dict().items() if k not in VOLATILE}
     processor = {
         name: hashlib.sha256((source / name).read_bytes()).hexdigest() for name in copied_files(source, recipe)
@@ -405,6 +421,14 @@ def fixture_key(source, cls, missing, recipe=None, frozen_hashes=None):
     dtype = source_dtype(source)
     if dtype != "float32":  # float32 is implied, so the keys of float32 fixtures stay as built
         fields["dtype"] = config["dtype"] = dtype
+    if tensor_dtypes:
+        from transformers_mic.tensor_dtypes import overrides
+
+        # Only tensors stored in another dtype than the default enter the key, so
+        # fixtures of uniformly stored checkpoints keep the keys they were built with.
+        stored = overrides(tensor_dtypes, dtype)
+        if stored:
+            fields["tensor_dtypes"] = stored
     blob = json.dumps(fields, sort_keys=True, default=str)
     return hashlib.sha256(blob.encode()).hexdigest(), config
 
@@ -511,12 +535,32 @@ def in_fixture(missing, names):
     return kept
 
 
+def stored_like(tensors, stored, default):
+    """Cast each floating tensor to the float dtype the checkpoint stores it in, else to `default`.
+
+    The last step of a save, after any float32 training: the fixture keeps the
+    checkpoint's per-tensor dtypes (a float32 router beside bfloat16 weights).
+    Integer tensors are left alone.
+    """
+    from transformers_mic.tensor_dtypes import target_dtypes
+
+    targets = target_dtypes(tensors, stored, default)
+    return {
+        name: tensor.to(getattr(torch, targets[name])) if tensor.is_floating_point() else tensor
+        for name, tensor in tensors.items()
+    }
+
+
 def save(model, out, source, missing, recipe=None, checkpoint=None):
     """Write the fixture: new config and weights without the parameters the real
     checkpoint lacks, every processor file copied unchanged.
 
-    `checkpoint` ({"keys", "binary"}) is the real checkpoint's serialization: the
-    fixture keeps its tensor names, base-model prefix and expert layout. The file is
+    `checkpoint` ({"keys", "binary"}, optional "dtype" and "dtypes") is the real
+    checkpoint's serialization: the fixture keeps its tensor names, base-model
+    prefix and expert layout. With "dtype" (the fixture default) every floating
+    tensor is saved in the float dtype "dtypes" (the source's safetensors header
+    dtypes) stores it in, else in "dtype"; pass the model in float32 so a tensor
+    the checkpoint keeps in float32 is not rounded first. The file is
     always model.safetensors, even for a pytorch_model.bin source: the names are what
     the loader's conversions read, and a .bin container tests nothing more.
     """
@@ -544,6 +588,8 @@ def save(model, out, source, missing, recipe=None, checkpoint=None):
     ):
         # A base model loaded from a head checkpoint (Jina's roberta.*): the loader strips the prefix.
         tensors = {prefix + k: v for k, v in tensors.items()}
+    if checkpoint and checkpoint.get("dtype"):
+        tensors = stored_like(tensors, checkpoint.get("dtypes") or {}, checkpoint["dtype"])
     tied = getattr(model, "all_tied_weights_keys", None) or {}
     if checkpoint and checkpoint["keys"] and isinstance(tied, dict):
         for alias, kept in tied.items():
@@ -817,6 +863,14 @@ def readme(name, contract, build, cls, config, contract_repo=None):
     )
     covers = ", ".join(f"[`{r}`](https://huggingface.co/{r})" for r in build["covers"])
     gate = build["gate"].get("random") or build["gate"].get("real")
+    stored = build.get("tensor_dtypes") or {}
+    stored = (
+        "; tensors it stores in another dtype keep it ("
+        + ", ".join(f"`{pattern}` {dtype}" for pattern, dtype in stored.items())
+        + ")"
+        if stored
+        else ""
+    )
     if build["weights"] == "real":
         weights = (
             f"**The checkpoint's own trained weights**, unchanged: at {build['parameters'] / 1e6:.1f}M parameters it is "
@@ -867,7 +921,7 @@ A {build["parameters"] / 1e6:.1f}M-parameter fixture for the [{contract} MIC](ht
 - **Processor files copied byte for byte** from `{build["built_from"]["repo"]}`: {", ".join(f"`{f}`" for f in build["copied_unchanged"])}.
 - {weights}
 - **Same tensor names as the real checkpoint.** {mirror}
-{fixed}- **Saved in {build["dtype"]}**, the dtype `{build["built_from"]["repo"]}` loads in by default.
+{fixed}- **Saved in {build["dtype"]}**, the dtype `{build["built_from"]["repo"]}` loads in by default{stored}.
 - **Finite in float32, bfloat16, and float16** (forward, loss, gradients).
 
 Built by [`build_fixtures.py`](https://github.com/huggingface/transformers-mic/blob/main/example/build_fixtures.py); [`build.json`](build.json) records the pinned sources, gate results, and file hashes. The source repository commits only `README.md` and `build.json`; rebuild the other files with `python example/build_fixtures.py --fixture {short(name)}`.
@@ -943,6 +997,20 @@ def build_fixture(*args, **kwargs):
         return _build_fixture(*args, **kwargs)
 
 
+def load_real(cls, path, dtype, checkpoint):
+    """The small source kept whole: (the model in the default dtype, the model to save).
+
+    When the checkpoint stores some tensors in another float dtype, the saved copy is
+    loaded in float32, so a float32 tensor is not first rounded to the default.
+    """
+    from transformers_mic.tensor_dtypes import overrides
+
+    model = cls.from_pretrained(path, dtype=dtype).eval()
+    if not overrides(checkpoint.get("dtypes") or {}, checkpoint["dtype"]):
+        return model, model
+    return model, cls.from_pretrained(path, dtype=torch.float32).eval()
+
+
 def source_weights_file(source, binary):
     """The weights file (or index) the source checkpoint loads from."""
     from transformers_mic.inspection import explicit_weights
@@ -992,20 +1060,26 @@ def review_fixture(name, fixture, revisions, out, artifact=None, inspect_checkpo
             if inspect_checkpoint
             else missing_parameters(cls, run.checkpoint_path(source_repo, revision))
         )
-        checkpoint = {"keys": set(source_keys), "binary": inspection.loads_binary(source_repo, revision, source)}
+        checkpoint = {
+            "keys": set(source_keys),
+            "binary": inspection.loads_binary(source_repo, revision, source),
+            "dtype": source_dtype(source),
+            "dtypes": stored_dtypes(source_repo, revision, source),
+        }
         source_file = source_weights_file(source, checkpoint["binary"])
-        dtype = getattr(torch, source_dtype(source))
+        dtype = getattr(torch, checkpoint["dtype"])
         real = keeps_source(source, cls, shrunk_config(source, cls, recipe))
         if real:
             report_phase("Load the small source checkpoint unchanged")
-            model = cls.from_pretrained(run.checkpoint_path(source_repo, revision), dtype=dtype).eval()
+            model, saved = load_real(cls, run.checkpoint_path(source_repo, revision), dtype, checkpoint)
         else:
             report_phase("Initialize fixture")
             torch.manual_seed(recipe["seed"])
-            model = cls._from_config(shrunk_config(source, cls, recipe), dtype=torch.float32).eval().to(dtype)
+            # Saved from float32: save() casts each tensor to the dtype the checkpoint stores it in.
+            model = saved = cls._from_config(shrunk_config(source, cls, recipe), dtype=torch.float32).eval()
             restore_frozen(model, source, source_repo, revision, recipe)
-        save(model, out, source, lacks, recipe, checkpoint)
-        del model
+        save(saved, out, source, lacks, recipe, checkpoint)
+        del model, saved
         weights = "real" if real else "random (seeded; the build checks and may fit them)"
         build = {"model_class": cls.__name__, "shrink": "none" if real else "rule", "recipe": recipe}
     else:
@@ -1096,7 +1170,9 @@ def _build_fixture(
             frozen_model = cls._from_config(shrunk_config(source, cls, recipe))
             frozen_hashes = restore_frozen(frozen_model, source, repo, revisions[repo], recipe)
             del frozen_model
-        keys[repo] = fixture_key(source, cls, missing[repo], recipe, frozen_hashes)
+        keys[repo] = fixture_key(
+            source, cls, missing[repo], recipe, frozen_hashes, stored_dtypes(repo, revisions[repo], source)
+        )
     if len({key for key, _ in keys.values()}) != 1:
         raise SystemExit(
             f"{name}: covered checkpoints have different fixture keys: { {r: k[:12] for r, (k, _) in keys.items()} }"
@@ -1110,26 +1186,33 @@ def _build_fixture(
     checkpoint = {
         "keys": inspection.checkpoint_keys(source_repo, revisions[source_repo], source),
         "binary": inspection.loads_binary(source_repo, revisions[source_repo], source),
+        "dtype": source_dtype(source),
+        "dtypes": stored_dtypes(source_repo, revisions[source_repo], source),
     }
     cls = model_class(source, recipe)
     tolerance = recipe.get("gate_tolerance") or max(
         r["atol"] for r in manifest["outputs"].values() if r["compare"] == "allclose"
     )
     threshold = GATE_FACTOR * tolerance
-    dtype = getattr(torch, source_dtype(source))
+    dtype = getattr(torch, checkpoint["dtype"])
 
     real = keeps_source(source, cls, shrunk_config(source, cls, recipe))
     if real:
         report_phase("Load the small source checkpoint unchanged")
-        model = cls.from_pretrained(run.checkpoint_path(source_repo, revisions[source_repo]), dtype=dtype).eval()
+        model, saved = load_real(cls, run.checkpoint_path(source_repo, revisions[source_repo]), dtype, checkpoint)
         frozen_hashes = None
+        copied = save(saved, out, source, lacks, recipe, checkpoint)
+        model._weight_conversions = getattr(saved, "_weight_conversions", None)  # recorded in build.json
+        del saved
     else:
         report_phase("Initialize fixture")
         torch.manual_seed(recipe["seed"])
-        # Initialized in float32 like every other fixture, then cast: the seed gives the same weights in any dtype.
-        model = cls._from_config(shrunk_config(source, cls, recipe), dtype=torch.float32).eval().to(dtype)
+        # Initialized in float32 like every other fixture: the seed gives the same weights in any dtype.
+        model = cls._from_config(shrunk_config(source, cls, recipe), dtype=torch.float32).eval()
         frozen_hashes = restore_frozen(model, source, source_repo, revisions[source_repo], recipe)
-    copied = save(model, out, source, lacks, recipe, checkpoint)
+        # Saved from float32, each tensor cast to the dtype the checkpoint stores it in; then cast for the gate.
+        copied = save(model, out, source, lacks, recipe, checkpoint)
+        model = model.to(dtype)
     entry = root / manifest["integrations"]["transformers"]["entry_point"]
     report_phase("Run contract and capture training inputs")
     batch, captured = contract_batch(entry, out)
@@ -1169,6 +1252,7 @@ def _build_fixture(
             training["batch_norm_calibration"] = {"layers": calibrated, "batches": 1}
         if unit_scales:
             training["batch_norm_unit_scale"] = unit_scales
+        trained = copy.deepcopy(model)  # float32: save() casts per tensor, after training
         model = model.to(dtype)
         report_phase("Verify trained fixture sensitivity")
         gate["overfit"] = sensitivity(called_module(model, captured), as_dtype(batch, dtype), threshold, accepted)
@@ -1186,7 +1270,8 @@ def _build_fixture(
                 f"{name}: random weights fail the gate and overfitting did not fix it:{hint} {training}, {gate}"
             )
         weights = "overfit"
-        save(model, out, source, lacks, recipe, checkpoint)
+        save(trained, out, source, lacks, recipe, checkpoint)
+        del trained
     mirrored = missing_parameters(cls, out)
     if mirrored != in_fixture(lacks, model.state_dict()):
         raise SystemExit(f"{name}: fixture lacks {mirrored}, the real checkpoint lacks {lacks}")
@@ -1204,6 +1289,9 @@ def _build_fixture(
         or ({"rejected": TESTER_OFF[str(source)]} if str(source) in TESTER_OFF else None)
         or previous_tester
     )
+    from transformers_mic.tensor_dtypes import overrides
+
+    stored_overrides = overrides(checkpoint["dtypes"], checkpoint["dtype"])
     build = {
         "fixture": name,
         "key": key,
@@ -1212,6 +1300,7 @@ def _build_fixture(
         "built_from": {"repo": source_repo, "revision": revisions[source_repo]},
         "seed": recipe["seed"],
         "dtype": str(dtype).removeprefix("torch."),
+        **({"tensor_dtypes": stored_overrides} if stored_overrides else {}),
         "builder": "example/build_fixtures.py",
         "builder_revision": builder_revision(),
         "recipe": fixture["build"],
@@ -1304,7 +1393,14 @@ def main():
                             model, source, repo, contract["checkpoints"][repo], fixture["build"]
                         )
                         del model
-                    keys[repo] = fixture_key(source, cls, lacks, fixture["build"], frozen_hashes)[0][:12]
+                    keys[repo] = fixture_key(
+                        source,
+                        cls,
+                        lacks,
+                        fixture["build"],
+                        frozen_hashes,
+                        stored_dtypes(repo, contract["checkpoints"][repo], source),
+                    )[0][:12]
                 print(json.dumps({"fixture": name, "keys": keys, "shared": len(set(keys.values())) == 1}))
                 continue
             start = time.perf_counter()

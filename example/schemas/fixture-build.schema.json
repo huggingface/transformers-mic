@@ -58,6 +58,16 @@
     "float16"
    ]
   },
+  "tensor_dtypes": {
+   "type": "object",
+   "additionalProperties": {
+    "enum": [
+     "float32",
+     "bfloat16",
+     "float16"
+    ]
+   }
+  },
   "builder": {
    "type": "string"
   },
