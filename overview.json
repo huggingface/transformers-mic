@@ -15,8 +15,8 @@
  },
  "drafts_per_day": 2,
  "false_alarms": {
-  "prs_not_their_fault": 198,
-  "prs_with_failure": 245
+  "prs_not_their_fault": 201,
+  "prs_with_failure": 248
  },
  "missed": {
   "awaiting_verdict": 33,
