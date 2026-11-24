@@ -511,7 +511,11 @@ def parser():
     p.add_argument("--record", type=Path, required=True)
     p.add_argument("--by", required=True, help="who asked for it")
     p.add_argument("--models", help="publish only these contracts (model types, contract or target names)")
-    p.add_argument("--merge-sha", help="refuse a record measured on any other Transformers commit")
+    p.add_argument(
+        "--merge-sha",
+        help="refuse a record measured on any other Transformers commit (a consistency check: the record "
+        "comes from PR code; the caller ties it to the reviewed code from GitHub's run metadata)",
+    )
     p.add_argument("--execute", action="store_true")
     for name, help in (
         ("merge", "write a merged PR's overlay into the fleet"),
