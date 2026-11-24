@@ -1,16 +1,20 @@
 """record-mic: re-record a Transformers PR's expected values, for that PR only.
 
-A PR that changes a model's outputs on purpose turns its contracts red. A maintainer (write
-access to huggingface/transformers) asks for a re-record with a `record-mic: <model> ...` PR
-comment or `make record-mic`; CI then runs, in two jobs that never share a token with PR code:
+A PR that changes a model's outputs on purpose turns its contracts red. Transformers PR CI's
+contracts job records the cases its gate would block, on the PR's code (no secrets), and keeps
+them in its artifact:
 
-    # 1. PR code, no secrets, on the PR CI runner and image (same platform classes):
-    python -m transformers_mic.pr_record measure --pr 50965 --models gptj,codegen --out rec/
-    # 2. no PR code, the Hub write token: validate rec/, then publish it
-    python -m transformers_mic.pr_record publish --pr 50965 --record rec/ --by <login> --execute
+    python -m transformers_mic.pr_record measure --pr 50965 --cases contracts-gate.json --out rec/
 
-`measure` runs the selected contracts as PR CI does, records candidates for the targets that are
-red (each rerun in a fresh process), and checks the candidates again in a separate pass.
+A maintainer (write access to huggingface/transformers) then asks for them with a
+`record-mic: <model> ...` PR comment or `make record-mic`; a job that holds the Hub write token and
+runs no PR code validates that run's record and publishes it:
+
+    python -m transformers_mic.pr_record publish --pr 50965 --record rec/ --models gptj \
+        --merge-sha <the verified merge commit> --by <login> --execute
+
+`measure --models` (outside CI) checks the selected contracts first and records their red targets.
+Recording reruns each target in a fresh process, then checks the candidates in a separate pass.
 `publish` commits them to a `transformers-pr-<N>` branch of each contract's mic repo, branched
 from the commit the fleet pins, and writes `overlays/transformers-pr-<N>.json` on the fleet
 dataset's main: {"<fleet>/<contract>": {"<mic repo>": {"from": pinned, "to": new}}}. Only runs
@@ -116,20 +120,56 @@ def changes(old, new):
     return {k: (old.get(k), new.get(k)) for k in sorted(set(old) | set(new)) if old.get(k) != new.get(k)}
 
 
+def blocked_cases(path):
+    """{(fleet, contract, variant): {targets}} of a contracts gate report's `block` decisions."""
+    wanted = {}
+    for d in read(path).get("decisions", []):
+        if d.get("verdict") == "block":
+            wanted.setdefault((d["fleet"], d["contract"], d["variant"]), set()).add(d["target"])
+    return wanted
+
+
 def measure(args):
+    """Record candidates on this checkout (PR code, no secrets).
+
+    --models: the selected contracts are checked first and their red targets recorded.
+    --cases:  a contracts gate report (contracts-gate.json); only its `block` cases are recorded,
+              with no check pass: the contracts job that wrote the report already ran it.
+    """
     from huggingface_hub import hf_hub_download, snapshot_download
 
+    if bool(args.models) == bool(args.cases):
+        raise SystemExit("measure needs exactly one of --models and --cases")
     root = Path(args.out).resolve()
     root.mkdir(parents=True, exist_ok=True)
-    models = [m for m in re.split(r"[,\s]+", args.models) if m]
-    record = {"pr": args.pr, "models": models, "transformers_sha": args.transformers_sha, "cases": [], "errors": []}
+    models = [m for m in re.split(r"[,\s]+", args.models or "") if m]
+    blocked = blocked_cases(args.cases) if args.cases else {}
+    record = {
+        "pr": args.pr,
+        "models": models,
+        "transformers_sha": args.transformers_sha,
+        "context": json.loads(args.context or "{}"),
+        "cases": [],
+        "errors": [],
+    }
     for fleet_name, variants in PR_CI_VARIANTS.items():
         path, revision, overlay = fleet.download_for_pr(fleet_name, args.fleet_revision, args.pr)
         base, _ = fleet.download(fleet_name, revision)
         record.setdefault("fleet_revision", revision)
+        record.setdefault("overlay", {})[fleet_name] = overlay
         lock, pinned = read(path), read(base)
         lock.pop("known_failures", None)  # candidates must satisfy every output assertion
-        for name in select(lock, models):
+        if args.cases:
+            names = sorted({c for f, c, _ in blocked if f == fleet_name})
+            unknown = [n for n in names if n not in lock["contracts"]]
+            for name in unknown:
+                record["errors"].append(
+                    {"fleet": fleet_name, "contract": name, "variant": "", "targets": [], "reason": "not in the fleet"}
+                )
+            names = [n for n in names if n in lock["contracts"]]
+        else:
+            names = select(lock, models)
+        for name in names:
             contract = lock["contracts"][name]
             pin = contract["integration"]
             folder = root / fleet_name / name
@@ -145,83 +185,88 @@ def measure(args):
                 options = ["--framework", "transformers", "--lock", str(folder / "fleet.lock"), "--contract", name]
                 options += ["--variant", variant, "--isolate", "--fixtures-only"]
                 tag = f"{fleet_name}-{name}-{variant}"
-                checked = folder / f"{variant}.check.jsonl"
-                run(root, [*options, "--output", str(checked)], tag + "-check")
-                red = sorted({r["target"] for r in rows(checked) if r["status"] == "fail"})
-                crashed = sorted({r["target"] for r in rows(checked) if r["status"] == "error"})
-                if crashed:
-                    record["errors"].append(
-                        {
-                            "fleet": fleet_name,
-                            "contract": name,
-                            "variant": variant,
-                            "targets": crashed,
-                            "reason": "crashes: not a value change, fix the code",
-                        }
-                    )
-                if not red:
-                    continue
-                candidates, verification = folder / "candidates", folder / "verification"
-                copy_tolerances(references, candidates)
-                targets = [x for t in red for x in ("--target", t)]
-                recorded = folder / f"{variant}.record.jsonl"
-                run(
-                    root,
-                    [*options, *targets, "--record", "--expectations", str(candidates), "--output", str(recorded)],
-                    tag + "-record",
-                )
-                for row in rows(recorded):
-                    if row["status"] != "recorded":
+                if args.cases:
+                    red = sorted(blocked.get((fleet_name, name, variant), ()))
+                else:
+                    checked = folder / f"{variant}.check.jsonl"
+                    run(root, [*options, "--output", str(checked)], tag + "-check")
+                    red = sorted({r["target"] for r in rows(checked) if r["status"] == "fail"})
+                    crashed = sorted({r["target"] for r in rows(checked) if r["status"] == "error"})
+                    if crashed:
                         record["errors"].append(
                             {
                                 "fleet": fleet_name,
                                 "contract": name,
                                 "variant": variant,
-                                "targets": [row["target"]],
-                                "reason": "; ".join(row.get("failures", []))[:500],
+                                "targets": crashed,
+                                "reason": "crashes: not a value change, fix the code",
                             }
                         )
-                for candidate in candidates.glob("*/*.candidate.json"):
-                    final = verification / candidate.parent.name / candidate.name.replace(".candidate.json", ".json")
-                    final.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(candidate, final)
-                copy_tolerances(candidates, verification)
-                verified = folder / f"{variant}.verify.jsonl"
-                run(
-                    root,
-                    [*options, *targets, "--expectations", str(verification), "--output", str(verified)],
-                    tag + "-verify",
-                )
-                passed = {r["target"] for r in rows(verified) if r["status"] == "pass"}
-                suffix = "" if variant == "default" else f".{variant}"
-                for row in rows(recorded):
-                    if row["status"] != "recorded":
-                        continue
-                    platform = row["platform"]
-                    file = verification / platform / f"{row['target']}{suffix}.json"
-                    if not file.exists():
-                        continue
-                    old = references / platform / file.name
-                    record["cases"].append(
-                        {
-                            "fleet": fleet_name,
-                            "contract": name,
-                            "repo": pin["repo"],
-                            "pinned": pinned["contracts"][name]["integration"]["revision"],
-                            "measured_on": pin["revision"],
-                            "target": row["target"],
-                            "variant": variant,
-                            "platform": platform,
-                            "path_in_repo": f"{EXPECTATIONS}/{platform}/{file.name}",
-                            "file": str(file.relative_to(root)),
-                            "verified": row["target"] in passed,
-                            "changes": changes(read(old) if old.exists() else None, read(file)),
-                        }
+                if red:
+                    record_and_verify(
+                        root, record, folder, options, tag, red, references, pinned, fleet_name, name, pin, variant
                     )
-        record.setdefault("overlay", {})[fleet_name] = overlay
     write(root / RECORD, record)
     print(summary(record))
     return 0 if record["cases"] and all(c["verified"] for c in record["cases"]) and not record["errors"] else 1
+
+
+def record_and_verify(root, record, folder, options, tag, red, references, pinned, fleet_name, name, pin, variant):
+    """Record candidates for the `red` targets (each rerun in a fresh process), then check them in a separate pass."""
+    candidates, verification = folder / "candidates", folder / "verification"
+    copy_tolerances(references, candidates)
+    targets = [x for t in red for x in ("--target", t)]
+    recorded = folder / f"{variant}.record.jsonl"
+    run(
+        root,
+        [*options, *targets, "--record", "--expectations", str(candidates), "--output", str(recorded)],
+        tag + "-record",
+    )
+    for row in rows(recorded):
+        if row["status"] != "recorded":
+            # A crash, a non-finite value or a failing assertion is not a value change to record.
+            record["errors"].append(
+                {
+                    "fleet": fleet_name,
+                    "contract": name,
+                    "variant": variant,
+                    "targets": [row["target"]],
+                    "reason": "; ".join(row.get("failures", []))[:500] or row["status"],
+                }
+            )
+    for candidate in candidates.glob("*/*.candidate.json"):
+        final = verification / candidate.parent.name / candidate.name.replace(".candidate.json", ".json")
+        final.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(candidate, final)
+    copy_tolerances(candidates, verification)
+    verified = folder / f"{variant}.verify.jsonl"
+    run(root, [*options, *targets, "--expectations", str(verification), "--output", str(verified)], tag + "-verify")
+    passed = {r["target"] for r in rows(verified) if r["status"] == "pass"}
+    suffix = "" if variant == "default" else f".{variant}"
+    for row in rows(recorded):
+        if row["status"] != "recorded":
+            continue
+        platform = row["platform"]
+        file = verification / platform / f"{row['target']}{suffix}.json"
+        if not file.exists():
+            continue
+        old = references / platform / file.name
+        record["cases"].append(
+            {
+                "fleet": fleet_name,
+                "contract": name,
+                "repo": pin["repo"],
+                "pinned": pinned["contracts"][name]["integration"]["revision"],
+                "measured_on": pin["revision"],
+                "target": row["target"],
+                "variant": variant,
+                "platform": platform,
+                "path_in_repo": f"{EXPECTATIONS}/{platform}/{file.name}",
+                "file": str(file.relative_to(root)),
+                "verified": row["target"] in passed,
+                "changes": changes(read(old) if old.exists() else None, read(file)),
+            }
+        )
 
 
 def short(value, limit=60):
@@ -278,10 +323,22 @@ def summary(record):
     return "\n".join(lines) + "\n"
 
 
-def validate(root, record, pr):
+def requested(record, models, locks, types=model_type):
+    """The record restricted to the contracts `models` name, in fleets {name: lock}."""
+    chosen = {(name, c) for name, lock in locks.items() for c in select(lock, models, types)}
+    keep = [c for c in record["cases"] if (c["fleet"], c["contract"]) in chosen]
+    errors = [e for e in record["errors"] if (e["fleet"], e["contract"]) in chosen]
+    if not keep and not errors:
+        raise ValueError(f"no recorded case matches {', '.join(models)}")
+    return {**record, "cases": keep, "errors": errors}
+
+
+def validate(root, record, pr, merge_sha=None):
     """Refuse anything but verified expected-value files of this PR (the record comes from PR code)."""
     if record.get("pr") != pr:
         raise ValueError(f"record is for PR {record.get('pr')}, not {pr}")
+    if merge_sha and record.get("transformers_sha") != merge_sha:
+        raise ValueError(f"record measured {record.get('transformers_sha')}, not the verified merge commit {merge_sha}")
     if record.get("errors") or not record.get("cases"):
         raise ValueError("record has errors or no cases; nothing is published")
     files = {}
@@ -306,8 +363,11 @@ def publish(args, api=None):
     api = api or HfApi()
     root = Path(args.record).resolve()
     record = read(root / RECORD)
-    files = validate(root, record, args.pr)
     head = fleet.resolve("main")
+    models = [m for m in re.split(r"[,\s]+", getattr(args, "models", None) or "") if m]
+    if models:
+        record = requested(record, models, {name: read(fleet.download(name, head)[0]) for name in fleet.FILES})
+    files = validate(root, record, args.pr, getattr(args, "merge_sha", None))
     overlay = fleet.download_overlay(args.pr, head) or {"pr": args.pr, "contracts": {}, "records": []}
     plan = []
     for (fleet_name, contract, repo), paths in sorted(files.items()):
@@ -440,14 +500,22 @@ def parser():
     commands = parser.add_subparsers(dest="command", required=True)
     m = commands.add_parser("measure", help="record candidates on this checkout (PR code, no secrets)")
     m.add_argument("--pr", type=int, required=True)
-    m.add_argument("--models", required=True, help="model types, contract or target names (comma/space separated)")
+    m.add_argument("--models", help="model types, contract or target names (comma/space separated)")
+    m.add_argument("--cases", type=Path, help="a contracts gate report: record its `block` cases only")
     m.add_argument("--fleet-revision", default="main")
     m.add_argument("--transformers-sha")
+    m.add_argument("--context", help="JSON stored with the record (runner, image, run id)")
     m.add_argument("--out", type=Path, required=True)
     p = commands.add_parser("publish", help="publish a measured record for the PR (Hub write token)")
     p.add_argument("--pr", type=int, required=True)
     p.add_argument("--record", type=Path, required=True)
     p.add_argument("--by", required=True, help="who asked for it")
+    p.add_argument("--models", help="publish only these contracts (model types, contract or target names)")
+    p.add_argument(
+        "--merge-sha",
+        help="refuse a record measured on any other Transformers commit (a consistency check: the record "
+        "comes from PR code; the caller ties it to the reviewed code from GitHub's run metadata)",
+    )
     p.add_argument("--execute", action="store_true")
     for name, help in (
         ("merge", "write a merged PR's overlay into the fleet"),

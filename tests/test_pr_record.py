@@ -1,6 +1,7 @@
 """record-mic: PR overlays on the fleet, and the record → publish → merge path."""
 
 import json
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -194,3 +195,128 @@ def test_merge_reports_stale_entries(hub):
     hub["overlay"] = OVERLAY
     hub["lock"] = lock(revision=D)
     assert pr_record.merge(SimpleNamespace(pr=7, execute=False), FakeApi()) == 1
+
+
+def test_blocked_cases_reads_only_block_decisions(tmp_path):
+    report = tmp_path / "gate.json"
+    report.write_text(
+        json.dumps(
+            {
+                "decisions": [
+                    {
+                        "fleet": "control",
+                        "contract": "gpt-j-6b",
+                        "variant": "bfloat16",
+                        "target": "gpt-j-6b-mic",
+                        "verdict": "block",
+                    },
+                    {
+                        "fleet": "control",
+                        "contract": "bert",
+                        "variant": "default",
+                        "target": "mic-bert",
+                        "verdict": "warn",
+                    },
+                ]
+            }
+        )
+    )
+    assert pr_record.blocked_cases(report) == {("control", "gpt-j-6b", "bfloat16"): {"gpt-j-6b-mic"}}
+
+
+def test_measure_needs_exactly_one_of_models_and_cases(tmp_path):
+    for extra in ([], ["--models", "gptj", "--cases", str(tmp_path / "g.json")]):
+        with pytest.raises(SystemExit):
+            pr_record.main(["measure", "--pr", "7", "--out", str(tmp_path / "rec"), *extra])
+
+
+def test_measure_cases_records_blocked_targets_without_a_check_pass(tmp_path, monkeypatch, hub):
+    report = tmp_path / "gate.json"
+    report.write_text(
+        json.dumps(
+            {
+                "decisions": [
+                    {
+                        "fleet": "control",
+                        "contract": "gpt-j-6b",
+                        "variant": "default",
+                        "target": "gpt-j-6b-mic",
+                        "verdict": "block",
+                    }
+                ]
+            }
+        )
+    )
+    monkeypatch.setattr(
+        fleet, "download_for_pr", lambda name, rev, pr: (*fleet.download(name, rev), {"applied": [], "stale": []})
+    )
+    import huggingface_hub
+
+    snap = tmp_path / "snap"
+    (snap / pr_record.EXPECTATIONS).mkdir(parents=True)
+    manifest = tmp_path / "integration.json"
+    manifest.write_text(json.dumps({"integrations": {"transformers": {"variants": {"default": {}, "bfloat16": {}}}}}))
+    monkeypatch.setattr(huggingface_hub, "snapshot_download", lambda *a, **k: str(snap))
+    monkeypatch.setattr(huggingface_hub, "hf_hub_download", lambda *a, **k: str(manifest))
+    calls = []
+
+    def fake_run(root, options, name):
+        calls.append(name)
+        out = options[options.index("--output") + 1]
+        if "--record" in options:
+            cand = Path(options[options.index("--expectations") + 1]) / "cpu-x86_64" / "gpt-j-6b-mic.candidate.json"
+            cand.parent.mkdir(parents=True, exist_ok=True)
+            cand.write_text(json.dumps({"recorded_with": {}, "outputs": {"logits": [1.0]}}))
+            Path(out).write_text(
+                json.dumps({"target": "gpt-j-6b-mic", "status": "recorded", "platform": "cpu-x86_64"}) + "\n"
+            )
+        else:
+            Path(out).write_text(json.dumps({"target": "gpt-j-6b-mic", "status": "pass"}) + "\n")
+        return 0
+
+    monkeypatch.setattr(pr_record, "run", fake_run)
+    out = tmp_path / "rec"
+    code = pr_record.main(
+        [
+            "measure",
+            "--pr",
+            "7",
+            "--cases",
+            str(report),
+            "--out",
+            str(out),
+            "--transformers-sha",
+            "m" * 40,
+            "--context",
+            '{"runner": "aws-m8i-l-cache"}',
+        ]
+    )
+    assert code == 0
+    assert calls == ["control-gpt-j-6b-default-record", "control-gpt-j-6b-default-verify"]  # no check pass
+    record = json.loads((out / pr_record.RECORD).read_text())
+    assert record["context"] == {"runner": "aws-m8i-l-cache"} and record["transformers_sha"] == "m" * 40
+    assert [(c["contract"], c["target"], c["verified"]) for c in record["cases"]] == [
+        ("gpt-j-6b", "gpt-j-6b-mic", True)
+    ]
+
+
+def test_publish_refuses_a_record_of_another_commit(tmp_path, hub):
+    root = tmp_path / "rec"
+    record = write_record(root)
+    record["transformers_sha"] = "a" * 40
+    (root / pr_record.RECORD).write_text(json.dumps(record))
+    args = SimpleNamespace(record=root, pr=7, by="m", execute=True, models=None, merge_sha="b" * 40)
+    with pytest.raises(ValueError, match="not the verified merge commit"):
+        pr_record.publish(args, FakeApi())
+
+
+def test_requested_keeps_only_the_named_contracts():
+    record = {
+        "cases": [{"fleet": "control", "contract": "gpt-j-6b"}, {"fleet": "control", "contract": "bert"}],
+        "errors": [],
+    }
+    types = {"huggingface-mic/gpt-j-6b-mic": "gptj", "huggingface-mic/bert-mic": "bert"}
+    got = pr_record.requested(record, ["gptj"], {"control": lock()}, types=lambda repo, rev: types[repo])
+    assert [c["contract"] for c in got["cases"]] == ["gpt-j-6b"]
+    with pytest.raises(ValueError, match="no recorded case"):
+        pr_record.requested(record, ["llama"], {"control": lock()}, types=lambda repo, rev: types[repo])
