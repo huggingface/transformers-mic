@@ -1499,6 +1499,10 @@
   "verdict": "not-covered",
   "version": 9
  },
+ "sticky#data2vec#2026-11-18": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#data2vec#2026-11-21": {
   "verdict": "not-covered",
   "version": 9
@@ -1863,6 +1867,10 @@
   "verdict": "not-covered",
   "version": 9
  },
+ "sticky#idefics2#2026-11-21": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#inkling2#2026-11-13": {
   "verdict": "not-covered",
   "version": 9
@@ -2129,6 +2137,11 @@
   "verdict": "already-failing",
   "version": 9
  },
+ "sticky#oneformer#2026-11-01": {
+  "reason": "the daily CI failed it the day before too",
+  "verdict": "already-failing",
+  "version": 9
+ },
  "sticky#owlv2#2026-11-09": {
   "verdict": "out-of-scope",
   "version": 9
@@ -2212,6 +2225,11 @@
   "parent": "536ecc007387a50e77603bb5d92100e9b07514cc",
   "run": "https://github.com/huggingface/transformers-mic/actions/runs/42796431187",
   "verdict": "missed",
+  "version": 9
+ },
+ "sticky#qwen3_5#2026-11-24": {
+  "reason": "the daily CI failed it the day before too",
+  "verdict": "already-failing",
   "version": 9
  },
  "sticky#qwen3_asr#2026-10-15": {
@@ -2432,6 +2450,10 @@
   "version": 9
  },
  "sticky#xmod#2026-11-17": {
+  "verdict": "not-covered",
+  "version": 9
+ },
+ "sticky#xmod#2026-11-19": {
   "verdict": "not-covered",
   "version": 9
  }

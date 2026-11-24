@@ -5915,6 +5915,18 @@
    "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_flash_attn_2_inference_equivalence_right_padding"
   ]
  },
+ "sticky#data2vec#2026-11-18": {
+  "date": "2026-11-18",
+  "day": 20775,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "data2vec",
+  "run_id": "45312318698",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_eager_padding_matches_padding_free_with_position_ids"
+  ]
+ },
  "sticky#data2vec#2026-11-21": {
   "date": "2026-11-21",
   "day": 20778,
@@ -7006,6 +7018,18 @@
    "tests/models/idefics/test_modeling_idefics.py::IdeficsForVisionText2TextTest::test_generate_continue_from_inputs_embeds"
   ]
  },
+ "sticky#idefics2#2026-11-21": {
+  "date": "2026-11-21",
+  "day": 20778,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "idefics2",
+  "run_id": "45312318698",
+  "signal": "RuntimeError",
+  "tests": [
+   "tests/models/idefics2/test_modeling_idefics2.py::Idefics2ForConditionalGenerationModelTest::test_openvino_export_generate_static"
+  ]
+ },
  "sticky#inkling2#2026-11-13": {
   "date": "2026-11-13",
   "day": 20770,
@@ -7788,6 +7812,19 @@
    "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_universal_segmentation_head"
   ]
  },
+ "sticky#oneformer#2026-11-01": {
+  "date": "2026-11-01",
+  "day": 20758,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "oneformer",
+  "run_id": "45312318698",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_no_head",
+   "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_universal_segmentation_head"
+  ]
+ },
  "sticky#owlv2#2026-11-09": {
   "date": "2026-11-09",
   "day": 20766,
@@ -8038,6 +8075,19 @@
   "mic": "not-covered",
   "model": "qwen3_5",
   "run_id": "41954992211",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/qwen3_5/test_modeling_qwen3_5.py::Qwen3_5IntegrationTest::test_model_video_generation",
+   "tests/models/qwen3_5/test_modeling_qwen3_5.py::Qwen3_5IntegrationTest::test_model_video_generation_batch"
+  ]
+ },
+ "sticky#qwen3_5#2026-11-24": {
+  "date": "2026-11-24",
+  "day": 20781,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "qwen3_5",
+  "run_id": "45312318698",
   "signal": "AssertionError",
   "tests": [
    "tests/models/qwen3_5/test_modeling_qwen3_5.py::Qwen3_5IntegrationTest::test_model_video_generation",
@@ -8729,6 +8779,18 @@
   "signal": "AssertionError",
   "tests": [
    "tests/models/xmod/test_modeling_xmod.py::XmodModelTest::test_eager_padding_matches_padding_free_with_position_ids"
+  ]
+ },
+ "sticky#xmod#2026-11-19": {
+  "date": "2026-11-19",
+  "day": 20776,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "xmod",
+  "run_id": "45312318698",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/xmod/test_modeling_xmod.py::XmodModelTest::test_sdpa_padding_matches_padding_free_with_position_ids"
   ]
  }
 }

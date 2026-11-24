@@ -1,5 +1,5 @@
 {
- "awaiting_verdict": 64,
+ "awaiting_verdict": 66,
  "block_merges": {
   "ready": false,
   "unmet": [
@@ -8,20 +8,20 @@
   ]
  },
  "caught": {
-  "fixed_by_push": 16,
+  "fixed_by_push": 17,
   "labelled_real_bug": 0,
   "merged_then_main_failed": 5,
   "real_checkpoint": 2
  },
  "drafts_per_day": 2,
  "false_alarms": {
-  "prs_not_their_fault": 201,
-  "prs_with_failure": 248
+  "prs_not_their_fault": 219,
+  "prs_with_failure": 268
  },
  "missed": {
-  "awaiting_verdict": 33,
+  "awaiting_verdict": 35,
   "not_covered": 36,
-  "real_checkpoint": 33
+  "real_checkpoint": 35
  },
  "next": [
   {
@@ -153,6 +153,18 @@
    "real_checkpoint": 0,
    "regressions": 1,
    "run": "https://github.com/huggingface/transformers-mic/actions/runs/43188275893",
+   "shrink": "",
+   "shrinkable": true
+  },
+  {
+   "checkpoint": "HuggingFaceM4/idefics2-8b-base",
+   "draft": "queued",
+   "model": "idefics2",
+   "next_batch": false,
+   "other": 1,
+   "real_checkpoint": 0,
+   "regressions": 1,
+   "run": "",
    "shrink": "",
    "shrinkable": true
   },
@@ -311,21 +323,20 @@
    "run": "",
    "shrink": "",
    "shrinkable": false
-  },
-  {
-   "checkpoint": "sshleifer/bart-tiny-random",
-   "draft": "not draftable",
-   "model": "generation",
-   "next_batch": false,
-   "other": 0,
-   "real_checkpoint": 1,
-   "regressions": 1,
-   "run": "",
-   "shrink": "",
-   "shrinkable": false
   }
  ],
  "regressions": [
+  {
+   "date": "2026-11-24",
+   "detail": "the daily CI failed it the day before too",
+   "integration": true,
+   "job": "",
+   "model": "qwen3_5",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "already-failing"
+  },
   {
    "date": "2026-11-21",
    "detail": "same regression as 50975#axk1",
@@ -1007,6 +1018,17 @@
    "run": "",
    "tests": 1,
    "verdict": "not-reproduced"
+  },
+  {
+   "date": "2026-11-01",
+   "detail": "the daily CI failed it the day before too",
+   "integration": true,
+   "job": "",
+   "model": "oneformer",
+   "pr": null,
+   "run": "",
+   "tests": 2,
+   "verdict": "already-failing"
   },
   {
    "date": "2026-11-01",
@@ -3287,7 +3309,7 @@
   }
  ],
  "replay": {
-  "already-failing": 6,
+  "already-failing": 8,
   "already-red": 10,
   "broken": 0,
   "caught": 10,
@@ -3296,7 +3318,7 @@
   "model-added": 4,
   "no-code-change": 1,
   "not-a-regression": 6,
-  "not-covered": 258,
+  "not-covered": 261,
   "not-reproduced": 7,
   "out-of-scope": 204,
   "pending": 0,
@@ -3304,6 +3326,6 @@
  },
  "window": [
   "2026-10-20",
-  "2026-11-23"
+  "2026-11-24"
  ]
 }

@@ -19,6 +19,406 @@
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43744664621%3A2&var-pr=45586&var-gh_run_id=43744664621",
   "weights": "random"
  },
+ "46623#huggingface-mic/Florence-2-base-mic|Florence-2-base-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/Florence-2-base-mic|Florence-2-base-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "training.loss: max delta 0.000637 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/Florence-2-base-mic|Florence-2-base-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "overfit"
+ },
+ "46623#huggingface-mic/MiniMax-M3-MXFP8-mic|MiniMax-M3-MXFP8-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/MiniMax-M3-MXFP8-mic|MiniMax-M3-MXFP8-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "logits_probe: max delta 0.00195 over tolerance\nposition_norms: max delta 0.139 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/MiniMax-M3-MXFP8-mic|MiniMax-M3-MXFP8-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "random"
+ },
+ "46623#huggingface-mic/bart-base-mic|bart-base-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/bart-base-mic|bart-base-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "training.loss: max delta 0.00195 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/bart-base-mic|bart-base-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "overfit"
+ },
+ "46623#huggingface-mic/bigbird-pegasus-large-arxiv-mic|bigbird-pegasus-large-arxiv-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/bigbird-pegasus-large-arxiv-mic|bigbird-pegasus-large-arxiv-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "training.loss: max delta 0.0625 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/bigbird-pegasus-large-arxiv-mic|bigbird-pegasus-large-arxiv-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "random"
+ },
+ "46623#huggingface-mic/blip2-opt-2.7b-mic|blip2-opt-2.7b-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/blip2-opt-2.7b-mic|blip2-opt-2.7b-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "training.loss: max delta 0.0209 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/blip2-opt-2.7b-mic|blip2-opt-2.7b-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "random"
+ },
+ "46623#huggingface-mic/grounding-dino-tiny-mic|grounding-dino-tiny-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/grounding-dino-tiny-mic|grounding-dino-tiny-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "class_scores: max delta 9.17 over tolerance\nbox_preds: max delta 0.441 over tolerance\ntraining.loss: max delta 605 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/grounding-dino-tiny-mic|grounding-dino-tiny-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "random"
+ },
+ "46623#huggingface-mic/hubert-large-ls960-ft-mic|hubert-large-ls960-ft-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/hubert-large-ls960-ft-mic|hubert-large-ls960-ft-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "training.loss: max delta 23.5 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/hubert-large-ls960-ft-mic|hubert-large-ls960-ft-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "overfit"
+ },
+ "46623#huggingface-mic/mask2former-swin-tiny-coco-instance-mic|mask2former-swin-tiny-coco-instance-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/mask2former-swin-tiny-coco-instance-mic|mask2former-swin-tiny-coco-instance-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "training.loss: max delta 0.0548 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/mask2former-swin-tiny-coco-instance-mic|mask2former-swin-tiny-coco-instance-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "random"
+ },
+ "46623#huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "logits_probe: max delta 1.28 over tolerance\nboxes_probe: max delta 0.788 over tolerance\ntraining.loss: max delta 0.00627 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "random"
+ },
+ "46623#huggingface-mic/opt-125m-mic|opt-125m-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/opt-125m-mic|opt-125m-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "training.loss: max delta 0.0211 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/opt-125m-mic|opt-125m-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "random"
+ },
+ "46623#huggingface-mic/opus-mt-fr-en-mic|opus-mt-fr-en-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/opus-mt-fr-en-mic|opus-mt-fr-en-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "training.loss: max delta 0.0114 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/opus-mt-fr-en-mic|opus-mt-fr-en-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "overfit"
+ },
+ "46623#huggingface-mic/pegasus-x-base-mic|pegasus-x-base-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/pegasus-x-base-mic|pegasus-x-base-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "logits.probe: max delta 0.128 over tolerance\ntraining.loss: max delta 0.125 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/pegasus-x-base-mic|pegasus-x-base-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "random"
+ },
+ "46623#huggingface-mic/pegasus-xsum-mic|pegasus-xsum-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/pegasus-xsum-mic|pegasus-xsum-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "training.loss: max delta 0.0625 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/pegasus-xsum-mic|pegasus-xsum-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "random"
+ },
+ "46623#huggingface-mic/s2t-small-librispeech-asr-mic|s2t-small-librispeech-asr-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/s2t-small-librispeech-asr-mic|s2t-small-librispeech-asr-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "training.loss: max delta 0.0625 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/s2t-small-librispeech-asr-mic|s2t-small-librispeech-asr-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "random"
+ },
+ "46623#huggingface-mic/table_transformer-mic|table_transformer-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/table_transformer-mic|table_transformer-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "training.loss: max delta 0.00256 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/table_transformer-mic|table_transformer-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "random"
+ },
+ "46623#huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|": {
+  "case": "huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 349, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--vip-llava-7b-hf-mic/snapshots/2c201806b2666d6748446",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "random"
+ },
+ "46623#huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "training.loss: max delta 0.736 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "random"
+ },
+ "46623#huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|default|cpu-x86_64": {
+  "case": "huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|default|cpu-x86_64",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "training.loss: max delta 1.29 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/wav2vec2-base-960h-mic|mic-wav2vec2-base-960h-slim|default|cpu-x86_64",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "random"
+ },
+ "46623#huggingface-mic/wav2vec2-conformer-rope-large-960h-ft-mic|wav2vec2-conformer-rope-large-960h-ft-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/wav2vec2-conformer-rope-large-960h-ft-mic|wav2vec2-conformer-rope-large-960h-ft-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "training.loss: max delta 0.63 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/wav2vec2-conformer-rope-large-960h-ft-mic|wav2vec2-conformer-rope-large-960h-ft-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "random"
+ },
+ "46623#huggingface-mic/wavlm-base-plus-mic|wavlm-base-plus-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/wavlm-base-plus-mic|wavlm-base-plus-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c0ea7cf8308a370893dc73238fc211c7fb36eaf5"
+  ],
+  "failure": "training.loss: max delta 0.0583 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795435275.16916,
+  "first_seen": "2026-11-24",
+  "key": "46623#huggingface-mic/wavlm-base-plus-mic|wavlm-base-plus-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "46623",
+  "pr_state": "open",
+  "pr_title": "Made SAM3 to return loss in outputs",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42042273121%3A2&var-pr=46623&var-gh_run_id=42042273121",
+  "weights": "random"
+ },
  "47773#huggingface-mic/A.X-K1-mic|A.X-K1-mic|bfloat16|": {
   "case": "huggingface-mic/A.X-K1-mic|A.X-K1-mic|bfloat16|",
   "commits": [
@@ -7752,7 +8152,8 @@
   "commits": [
    "a970ad1afbcfb3c283f3861c5a347aee5192dfdf",
    "da42443ebee7c3a218981ded712e7839e99c10e1",
-   "a59e30835538446279e21e38176f8b8bb29fc77e"
+   "a59e30835538446279e21e38176f8b8bb29fc77e",
+   "74c2b3135d84f3de5ae08d06a892b8b9819f4849"
   ],
   "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
   "failure_kind": "Runtime traceback",
@@ -7760,7 +8161,7 @@
   "first_seen": "2026-11-19",
   "key": "50249#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20780,
+  "last_seen": 20781,
   "merged_at": null,
   "outcome": "open",
   "pr": "50249",
@@ -7816,7 +8217,8 @@
   "commits": [
    "0124677f14ccad5164b067bfc58541db70fd77e0",
    "d3f9f3e9647c0015b4b761583424fba6cfc16447",
-   "7de64337dbf54215d3c70a94c7716c18f5de5439"
+   "7de64337dbf54215d3c70a94c7716c18f5de5439",
+   "181d7906ffe3ad91869fd4cd2c79f60b1fd6bccb"
   ],
   "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
   "failure_kind": "Runtime traceback",
@@ -7824,7 +8226,7 @@
   "first_seen": "2026-11-19",
   "key": "50251#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20780,
+  "last_seen": 20781,
   "merged_at": null,
   "outcome": "open",
   "pr": "50251",
@@ -8900,9 +9302,9 @@
   "kind": "fixture",
   "last_seen": 20778,
   "merged_at": null,
-  "outcome": "open",
+  "outcome": "closed-unmerged",
   "pr": "50643",
-  "pr_state": "open",
+  "pr_state": "closed",
   "pr_title": "Exporters: ModelOpt quantizer for the converted ONNX model",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44415213523%3A1&var-pr=50643&var-gh_run_id=44415213523",
   "weights": "random"
@@ -8912,7 +9314,8 @@
   "commits": [
    "600e879d2dd455f9e6f2a65cc6c898dc0b52ec81",
    "1b692b8470b913b2619045f13c1534f46a5dcb6c",
-   "94a07d81b814c42899444dd71fdd0d1af5c97ec7"
+   "94a07d81b814c42899444dd71fdd0d1af5c97ec7",
+   "3622d497a606e25d9edf9191ad49b1050273ec39"
   ],
   "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
   "failure_kind": "Runtime traceback",
@@ -8920,7 +9323,7 @@
   "first_seen": "2026-11-19",
   "key": "50733#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20780,
+  "last_seen": 20781,
   "merged_at": null,
   "outcome": "open",
   "pr": "50733",
@@ -8955,7 +9358,8 @@
   "commits": [
    "38c1c88536696c0597cd554a3cb799de82e6f25f",
    "749ccc743bd72b01e7f4f66c04bed6b2cd584bc2",
-   "2d563d120df3a70130c10867d386493e1ca0bf6d"
+   "2d563d120df3a70130c10867d386493e1ca0bf6d",
+   "e2bb45603d78c4685c7bc89f638716d17dad4db2"
   ],
   "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
   "failure_kind": "Runtime traceback",
@@ -8963,7 +9367,7 @@
   "first_seen": "2026-11-19",
   "key": "50785#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20780,
+  "last_seen": 20781,
   "merged_at": null,
   "outcome": "open",
   "pr": "50785",
@@ -8997,7 +9401,8 @@
   "commits": [
    "6bf1f9588858d382325e8b1a32361870b952c9b0",
    "3fc1e68edda492faf932305171b982544ae8569f",
-   "54fad2aa879b5cc0d2f65918dea35533d5fefb82"
+   "54fad2aa879b5cc0d2f65918dea35533d5fefb82",
+   "7ed09e15bed84b40ef6f3acfd096c05ebca676b3"
   ],
   "failure": "ec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    ],\n       \n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py",
   "failure_kind": "Runtime traceback",
@@ -9005,7 +9410,7 @@
   "first_seen": "2026-11-19",
   "key": "50887#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20780,
+  "last_seen": 20781,
   "merged_at": null,
   "outcome": "open",
   "pr": "50887",
@@ -9041,7 +9446,8 @@
  "50971#huggingface-mic/HyperCLOVAX-SEED-Think-32B-mic|HyperCLOVAX-SEED-Think-32B-mic|bfloat16|cpu-x86_64-bf16": {
   "case": "huggingface-mic/HyperCLOVAX-SEED-Think-32B-mic|HyperCLOVAX-SEED-Think-32B-mic|bfloat16|cpu-x86_64-bf16",
   "commits": [
-   "1b97ecbddaf0f20898305dc50f07bdfa23705b81"
+   "1b97ecbddaf0f20898305dc50f07bdfa23705b81",
+   "9b1ebdcd232af0b2184f416a9a7e4233007dbe13"
   ],
   "failure": "generated_tokens: [[128000, 873, 199, 128052, 4914, 308, 789, 331, 1806, 63, 16, 16, 498, 331, 1314, 789, 331, 1806, 52121, 498, 331, 8405, 789, 331, 65, 4820, 9208, 128053, 199, 128056, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 1",
   "failure_kind": "Baseline assertion",
@@ -9049,7 +9455,7 @@
   "first_seen": "2026-11-20",
   "key": "50971#huggingface-mic/HyperCLOVAX-SEED-Think-32B-mic|HyperCLOVAX-SEED-Think-32B-mic|bfloat16|cpu-x86_64-bf16",
   "kind": "fixture",
-  "last_seen": 20777,
+  "last_seen": 20781,
   "merged_at": null,
   "outcome": "open",
   "pr": "50971",
@@ -9100,10 +9506,91 @@
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44575416194%3A1&var-pr=50975&var-gh_run_id=44575416194",
   "weights": "random"
  },
+ "51044#huggingface-mic/DeepSeek-Coder-V2-Lite-Instruct-mic|DeepSeek-Coder-V2-Lite-Instruct-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/DeepSeek-Coder-V2-Lite-Instruct-mic|DeepSeek-Coder-V2-Lite-Instruct-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c8a0d82816c608ee0bcf108a394da55550a76497"
+  ],
+  "failure": "logits.probe: max delta 0.0312 over tolerance\ngenerated_text: [' testim amounts\u51fa\u56fd surrendered Carta elevator\u4eec\u5728\u5764', ' testim amounts\u51fa\u56fd surrendered Cartacustomers espacio\u0441\u0442\u044a'] != [' testim amountsomachrels ALTERAppl Recruitscanf', ' testim amounts\u51fa\u56fd surrendered Cartacustomers espacio\u0441\u0442\u044a']\nlogits.positi",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795451905.347644,
+  "first_seen": "2026-11-24",
+  "key": "51044#huggingface-mic/DeepSeek-Coder-V2-Lite-Instruct-mic|DeepSeek-Coder-V2-Lite-Instruct-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51044",
+  "pr_state": "open",
+  "pr_title": "regression add_bos_token, add_eos_token preserve tokenizer.json behav\u2026",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45218077239%3A1&var-pr=51044&var-gh_run_id=45218077239",
+  "weights": "random"
+ },
+ "51044#huggingface-mic/DeepSeek-R1-mic|DeepSeek-R1-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/DeepSeek-R1-mic|DeepSeek-R1-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c8a0d82816c608ee0bcf108a394da55550a76497"
+  ],
+  "failure": "next_token_ids: [99934, 99934] != [5519, 40890]\nprobe_logits: max delta 0.205 over tolerance\ntraining.loss: max delta 0.0374 over tolerance\nposition_norms: shape (2, 6), baseline has (2, 5)",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795451905.347644,
+  "first_seen": "2026-11-24",
+  "key": "51044#huggingface-mic/DeepSeek-R1-mic|DeepSeek-R1-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51044",
+  "pr_state": "open",
+  "pr_title": "regression add_bos_token, add_eos_token preserve tokenizer.json behav\u2026",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45218077239%3A1&var-pr=51044&var-gh_run_id=45218077239",
+  "weights": "random"
+ },
+ "51044#huggingface-mic/MiniCPM3-4B-mic|MiniCPM3-4B-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/MiniCPM3-4B-mic|MiniCPM3-4B-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c8a0d82816c608ee0bcf108a394da55550a76497"
+  ],
+  "failure": "logits: max delta 5.41 over tolerance\ntraining.loss: max delta 0.37 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795451905.347644,
+  "first_seen": "2026-11-24",
+  "key": "51044#huggingface-mic/MiniCPM3-4B-mic|MiniCPM3-4B-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51044",
+  "pr_state": "open",
+  "pr_title": "regression add_bos_token, add_eos_token preserve tokenizer.json behav\u2026",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45218077239%3A1&var-pr=51044&var-gh_run_id=45218077239",
+  "weights": "random"
+ },
+ "51044#huggingface-mic/Mistral-7B-Instruct-v0.2-mic|Mistral-7B-Instruct-v0.2-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/Mistral-7B-Instruct-v0.2-mic|Mistral-7B-Instruct-v0.2-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c8a0d82816c608ee0bcf108a394da55550a76497"
+  ],
+  "failure": "next_token_ids: [21743, 15221] != [23234, 15221]\nnext_token_logits: max delta 0.26 over tolerance\ntraining.loss: max delta 0.0088 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795451905.347644,
+  "first_seen": "2026-11-24",
+  "key": "51044#huggingface-mic/Mistral-7B-Instruct-v0.2-mic|Mistral-7B-Instruct-v0.2-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51044",
+  "pr_state": "open",
+  "pr_title": "regression add_bos_token, add_eos_token preserve tokenizer.json behav\u2026",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45218077239%3A1&var-pr=51044&var-gh_run_id=45218077239",
+  "weights": "random"
+ },
  "51044#huggingface-mic/OLMo-1B-hf-mic|OLMo-1B-hf-mic|bfloat16|cpu-x86_64-bf16": {
   "case": "huggingface-mic/OLMo-1B-hf-mic|OLMo-1B-hf-mic|bfloat16|cpu-x86_64-bf16",
   "commits": [
-   "c878935ca7815469172080ccc6bb8aab677b4a7c"
+   "c878935ca7815469172080ccc6bb8aab677b4a7c",
+   "e7bc722701fcafaed559f244bfb8601cd8584c80"
   ],
   "failure": "logits.probe: max delta 0.0811 over tolerance\ntraining.loss: max delta 0.0134 over tolerance",
   "failure_kind": "Baseline assertion",
@@ -9111,13 +9598,634 @@
   "first_seen": "2026-11-21",
   "key": "51044#huggingface-mic/OLMo-1B-hf-mic|OLMo-1B-hf-mic|bfloat16|cpu-x86_64-bf16",
   "kind": "fixture",
-  "last_seen": 20778,
+  "last_seen": 20781,
   "merged_at": null,
-  "outcome": "open",
+  "outcome": "fixed-by-push",
   "pr": "51044",
   "pr_state": "open",
   "pr_title": "regression add_bos_token, add_eos_token preserve tokenizer.json behav\u2026",
+  "recovered": "after-push",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44786418420%3A1&var-pr=51044&var-gh_run_id=44786418420",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/HunyuanOCR-mic|HunyuanOCR-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/HunyuanOCR-mic|HunyuanOCR-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "logits.probe: max delta 0.105 over tolerance\ntraining.loss: max delta 0.102 over tolerance\nlogits.position_norms: max delta 0.248 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/HunyuanOCR-mic|HunyuanOCR-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/HyperCLOVAX-SEED-Think-32B-mic|HyperCLOVAX-SEED-Think-32B-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/HyperCLOVAX-SEED-Think-32B-mic|HyperCLOVAX-SEED-Think-32B-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "generated_tokens: [[128000, 873, 199, 128052, 4914, 308, 789, 331, 1806, 63, 16, 16, 498, 331, 1314, 789, 331, 1806, 15, 31313, 498, 331, 8405, 789, 331, 65, 14, 18076, 9208, 128053, 199, 128056, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, 128060, ",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/HyperCLOVAX-SEED-Think-32B-mic|HyperCLOVAX-SEED-Think-32B-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "overfit"
+ },
+ "51167#huggingface-mic/Inkling-mic|Inkling-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/Inkling-mic|Inkling-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "generated_ids: [[61443, 290, 11180, 306, 1001, 21872, 13, 12921, 56054, 124945, 2409, 68966, 160743, 172336, 180378], [4827, 7351, 382, 306, 290, 19925, 30, 34408, 63525, 39445, 19807, 144588, 153704, 10058, 171740]] != [[61443, 290, 11180, 306, 1001, 21872, 13, 82403, 136293, 83424, 147813, 353, 10",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/Inkling-mic|Inkling-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/LCO-Embedding-Omni-3B-mic|LCO-Embedding-Omni-3B-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/LCO-Embedding-Omni-3B-mic|LCO-Embedding-Omni-3B-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "text_embeddings: max delta 3.47 over tolerance\nimage_embeddings: max delta 4.23 over tolerance\ntext_probe_logits: max delta 0.323 over tolerance\ntraining.loss: max delta 0.045 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/LCO-Embedding-Omni-3B-mic|LCO-Embedding-Omni-3B-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/LLaVA-NeXT-Video-7B-hf-mic|LLaVA-NeXT-Video-7B-hf-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/LLaVA-NeXT-Video-7B-hf-mic|LLaVA-NeXT-Video-7B-hf-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "probe_logits: max delta 0.686 over tolerance\ntraining.loss: max delta 0.0105 over tolerance\nposition_norms: max delta 0.367 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/LLaVA-NeXT-Video-7B-hf-mic|LLaVA-NeXT-Video-7B-hf-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/Llama-3.2-11B-Vision-Instruct-mic|Llama-3.2-11B-Vision-Instruct-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/Llama-3.2-11B-Vision-Instruct-mic|Llama-3.2-11B-Vision-Instruct-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "logits.probe: max delta 9.3 over tolerance\npredicted_text: ['-copy-copy'] != [' this this']\ntraining.loss: max delta 7.02 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/Llama-3.2-11B-Vision-Instruct-mic|Llama-3.2-11B-Vision-Instruct-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "overfit"
+ },
+ "51167#huggingface-mic/Qwen2-VL-2B-Instruct-mic|Qwen2-VL-2B-Instruct-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/Qwen2-VL-2B-Instruct-mic|Qwen2-VL-2B-Instruct-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "logits_probe: max delta 0.289 over tolerance\ntraining.loss: max delta 0.039 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/Qwen2-VL-2B-Instruct-mic|Qwen2-VL-2B-Instruct-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/Qwen3.5-0.8B-text-only-mic|Qwen3.5-0.8B-text-only-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/Qwen3.5-0.8B-text-only-mic|Qwen3.5-0.8B-text-only-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "probe_logits: max delta 0.355 over tolerance\ntraining.loss: max delta 0.0483 over tolerance\nposition_norms: max delta 0.364 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/Qwen3.5-0.8B-text-only-mic|Qwen3.5-0.8B-text-only-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/Voxtral-Mini-3B-2507-mic|Voxtral-Mini-3B-2507-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/Voxtral-Mini-3B-2507-mic|Voxtral-Mini-3B-2507-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "predicted_tokens: [32498, 32498] != [115057, 115057]\nanswer_logits: max delta 0.043 over tolerance\ntraining.loss: max delta 0.307 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/Voxtral-Mini-3B-2507-mic|Voxtral-Mini-3B-2507-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/audio-flamingo-3-hf-mic|audio-flamingo-3-hf-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/audio-flamingo-3-hf-mic|audio-flamingo-3-hf-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "predicted_tokens: [139636, 5808] != [73047, 78574]\nlogits.probe: max delta 0.321 over tolerance\ntraining.loss: max delta 0.0995 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/audio-flamingo-3-hf-mic|audio-flamingo-3-hf-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/dinov2-small-mic|dinov2-small-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/dinov2-small-mic|dinov2-small-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "cls_features: max delta 2.3 over tolerance\npatch_features: max delta 0.00908 over tolerance\ntraining.loss: max delta 0.0254 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/dinov2-small-mic|dinov2-small-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/dinov2-with-registers-base-mic|dinov2-with-registers-base-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/dinov2-with-registers-base-mic|dinov2-with-registers-base-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "features.probe: max delta 0.107 over tolerance\nfeatures.probe_b: max delta 0.129 over tolerance\ntraining.loss: max delta 0.125 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/dinov2-with-registers-base-mic|dinov2-with-registers-base-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/gemma3-vllm-mic|gemma3-vllm-mic|default|": {
+  "case": "huggingface-mic/gemma3-vllm-mic|gemma3-vllm-mic|default|",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "ed 'model.language_model.model' in TransformersMultiModalForCausalLM. The available parameters belonging to model.language_model (Gemma3TextModel) are: {'model.language_model.layers.0.self_attn.o_proj.weight', 'model.language_model.layers.0.self_attn.k_norm.weight', 'model.language_model.layers.1.in",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/gemma3-vllm-mic|gemma3-vllm-mic|default|",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/granite-4.0-1b-speech-mic|granite-4.0-1b-speech-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/granite-4.0-1b-speech-mic|granite-4.0-1b-speech-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "probe_logits: max delta 0.504 over tolerance\npredicted_tokens: [47151, 33160] != [47338, 74554]\ntraining.loss: max delta 0.0625 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/granite-4.0-1b-speech-mic|granite-4.0-1b-speech-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/jina-embeddings-v3-hf-mic|jina-embeddings-v3-hf-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/jina-embeddings-v3-hf-mic|jina-embeddings-v3-hf-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "cosine_similarity: max delta 0.00781 over tolerance\nprobe_logits: max delta 0.672 over tolerance\ntraining.loss: max delta 0.0508 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/jina-embeddings-v3-hf-mic|jina-embeddings-v3-hf-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/llava-mic|llava-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/llava-mic|llava-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "predicted_tokens: [19219, 7964] != [12224, 28290]\nprobe_logits: max delta 0.315 over tolerance\ntraining.loss: max delta 0.0504 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/llava-mic|llava-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/llava-next-mistral-vllm-mic|llava-next-mistral-vllm-mic|default|": {
+  "case": "huggingface-mic/llava-next-mistral-vllm-mic|llava-next-mistral-vllm-mic|default|",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/vllm/model_executor/models/utils.py\", line 423, in _load_module\n    yield from self._load_module(\n  File \"/usr/local/lib/python3.11/site-packages/vllm/model_executor/models/utils.py\", line 423, in _load_module\n    yield from self._l",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/llava-next-mistral-vllm-mic|llava-next-mistral-vllm-mic|default|",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/llava-onevision-qwen2-vllm-mic|llava-onevision-qwen2-vllm-mic|default|": {
+  "case": "huggingface-mic/llava-onevision-qwen2-vllm-mic|llava-onevision-qwen2-vllm-mic|default|",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "23, in _load_module\n    yield from self._load_module(\n  File \"/usr/local/lib/python3.11/site-packages/vllm/model_executor/models/utils.py\", line 423, in _load_module\n    yield from self._load_module(\n  File \"/usr/local/lib/python3.11/site-packages/vllm/model_executor/models/utils.py\", line 458, in _",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/llava-onevision-qwen2-vllm-mic|llava-onevision-qwen2-vllm-mic|default|",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/llava-v1.6-mistral-7b-hf-mic|llava-v1.6-mistral-7b-hf-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/llava-v1.6-mistral-7b-hf-mic|llava-v1.6-mistral-7b-hf-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "logits_probe: max delta 0.442 over tolerance\ntraining.loss: max delta 0.171 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/llava-v1.6-mistral-7b-hf-mic|llava-v1.6-mistral-7b-hf-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/ministral3-vllm-mic|ministral3-vllm-mic|default|": {
+  "case": "huggingface-mic/ministral3-vllm-mic|ministral3-vllm-mic|default|",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/vllm/model_executor/models/utils.py\", line 423, in _load_module\n    yield from self._load_module(\n  File \"/usr/local/lib/python3.11/site-packages/vllm/model_executor/models/utils.py\", line 423, in _load_module\n    yield from self._load",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/ministral3-vllm-mic|ministral3-vllm-mic|default|",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/mistral3-vllm-mic|mistral3-vllm-mic|default|": {
+  "case": "huggingface-mic/mistral3-vllm-mic|mistral3-vllm-mic|default|",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/vllm/model_executor/models/utils.py\", line 423, in _load_module\n    yield from self._load_module(\n  File \"/usr/local/lib/python3.11/site-packages/vllm/model_executor/models/utils.py\", line 423, in _load_module\n    yield from self._l",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/mistral3-vllm-mic|mistral3-vllm-mic|default|",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/nomic-embed-text-v1.5-mic|nomic-embed-text-v1.5-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/nomic-embed-text-v1.5-mic|nomic-embed-text-v1.5-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "embedding_probe: max delta 0.0105 over tolerance\ntraining.loss: max delta 0.00391 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/nomic-embed-text-v1.5-mic|nomic-embed-text-v1.5-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/pythia-160m-mic|pythia-160m-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/pythia-160m-mic|pythia-160m-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "next_token_ids: [20500, 20500, 20500, 20500] != [42960, 42960, 42960, 42960]\nnext_token_text: [' startup', ' startup', ' startup', ' startup'] != [' doubted', ' doubted', ' doubted', ' doubted']\nprobe_logits: max delta 0.449 over tolerance\ntraining.loss: max delta 0.0043 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/pythia-160m-mic|pythia-160m-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/qwen2-audio-vllm-mic|qwen2-audio-vllm-mic|default|": {
+  "case": "huggingface-mic/qwen2-audio-vllm-mic|qwen2-audio-vllm-mic|default|",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "23, in _load_module\n    yield from self._load_module(\n  File \"/usr/local/lib/python3.11/site-packages/vllm/model_executor/models/utils.py\", line 423, in _load_module\n    yield from self._load_module(\n  File \"/usr/local/lib/python3.11/site-packages/vllm/model_executor/models/utils.py\", line 458, in _",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/qwen2-audio-vllm-mic|qwen2-audio-vllm-mic|default|",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/qwen2-vl-vllm-mic|qwen2-vl-vllm-mic|default|cpu-x86_64": {
+  "case": "huggingface-mic/qwen2-vl-vllm-mic|qwen2-vl-vllm-mic|default|cpu-x86_64",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "checks: ['text_logits_close', 'image_logits_close'] false",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/qwen2-vl-vllm-mic|qwen2-vl-vllm-mic|default|cpu-x86_64",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/qwen2.5-vl-vllm-mic|qwen2.5-vl-vllm-mic|default|cpu-x86_64": {
+  "case": "huggingface-mic/qwen2.5-vl-vllm-mic|qwen2.5-vl-vllm-mic|default|cpu-x86_64",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "checks: ['text_logits_close', 'image_logits_close'] false",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/qwen2.5-vl-vllm-mic|qwen2.5-vl-vllm-mic|default|cpu-x86_64",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/qwen2_5_vl-mic|qwen2_5_vl-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/qwen2_5_vl-mic|qwen2_5_vl-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "inference.selected_logits: max delta 0.422 over tolerance\ntraining.loss: max delta 0.0319 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/qwen2_5_vl-mic|qwen2_5_vl-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/qwen2_audio-mic|qwen2_audio-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/qwen2_audio-mic|qwen2_audio-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "selected_logits: max delta 0.598 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/qwen2_audio-mic|qwen2_audio-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/segformer-b0-finetuned-ade-512-512-mic|segformer-b0-finetuned-ade-512-512-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/segformer-b0-finetuned-ade-512-512-mic|segformer-b0-finetuned-ade-512-512-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "42, 26, 26, 42, 42, 26, 26, 26, 42, 42, 26, 42, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26], [2, 2, 2, 2, 2, 2, 2, 2, 26, 42, 42, 42, 42, 42, 26, 26, 42, 42, 42, 42, 42, 26, 26, 26, 26, 26, 26, 26",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/segformer-b0-finetuned-ade-512-512-mic|segformer-b0-finetuned-ade-512-512-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "real"
+ },
+ "51167#huggingface-mic/tibetan-ocr-mic|tibetan-ocr-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/tibetan-ocr-mic|tibetan-ocr-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "logits.probe: max delta 0.445 over tolerance\ntraining.loss: max delta 0.122 over tolerance\nlogits.position_norms: max delta 0.296 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/tibetan-ocr-mic|tibetan-ocr-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51167#huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "176cfd0fe22dbfa8ae00f80a1fa2bc449a6a671d"
+  ],
+  "failure": "predicted_tokens: [19219, 7964] != [12224, 28290]\nprobe_logits: max delta 0.31 over tolerance\ntraining.loss: max delta 0.0486 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795509146.02829,
+  "first_seen": "2026-11-24",
+  "key": "51167#huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20781,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51167",
+  "pr_state": "open",
+  "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
   "weights": "random"
  },
  "gh-readonly-queue/main/pr-49886-a4f362742ba4846882fd0bc9636461ef3a5e3f34#huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16": {
