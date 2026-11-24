@@ -410,6 +410,10 @@ No Git commit or framework PR is created automatically.""",
                 type=int,
                 help="Transformers PR whose re-recorded expected values (record-mic) apply to this run",
             )
+            run.add_argument(
+                "--code-revision",
+                help="Transformers commit under test: each contract meets the values whose record-mic commit it contains",
+            )
             run.add_argument("--fixtures-only", action="store_true")
             run.add_argument("--changed-files", type=Path)
             run.add_argument(
@@ -689,12 +693,19 @@ def main(argv=None):
                 if not revision and Path("tests/contracts.lock").exists():
                     revision = fleet.read_pin("tests/contracts.lock")
                 pr = getattr(args, "fleet_pr", None)
+                code = getattr(args, "code_revision", None)
                 metadata = {}
-                if pr is None:
-                    args.lock, revision = fleet.download(args.fleet or "control", revision or "main")
-                else:
-                    args.lock, revision, report = fleet.download_for_pr(args.fleet or "control", revision or "main", pr)
-                    metadata["fleet_overlay"] = {"pr": pr, **report}
+                args.lock, revision, report = fleet.download_for_run(
+                    args.fleet or "control", revision or "main", pr=pr, code_revision=code
+                )
+                if code:
+                    metadata["fleet_history"] = {"code_revision": code, "reverted": report.get("reverted", [])}
+                if pr is not None:
+                    metadata["fleet_overlay"] = {
+                        "pr": pr,
+                        "applied": report.get("applied", []),
+                        "stale": report.get("stale", []),
+                    }
                 metadata = {"fleet_repository": fleet.REPOSITORY, "fleet_revision": revision, **metadata}
                 print(json.dumps(metadata), file=sys.stderr)
             if args.lock:
