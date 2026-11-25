@@ -9376,6 +9376,86 @@
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44415201688%3A1&var-pr=50785&var-gh_run_id=44415201688",
   "weights": "random"
  },
+ "50785#huggingface-mic/VibeVoice-1.5B-hf-mic|VibeVoice-1.5B-hf-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/VibeVoice-1.5B-hf-mic|VibeVoice-1.5B-hf-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "338e626d2187eb95ace023a0aabdb0d9e7f93aa8"
+  ],
+  "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa', 'attn_implementations': {'audio_config': 'eager', 'diffusion_head_config': 'sdpa', 'semantic_model_config': 'eager', 'text_config': 'sdpa'}} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa', 'attn_i",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795590311.574467,
+  "first_seen": "2026-11-25",
+  "key": "50785#huggingface-mic/VibeVoice-1.5B-hf-mic|VibeVoice-1.5B-hf-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20782,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50785",
+  "pr_state": "open",
+  "pr_title": "Exporters: fixes to the export path, checked on inputs the exports never saw",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45565152752%3A1&var-pr=50785&var-gh_run_id=45565152752",
+  "weights": "random"
+ },
+ "50785#huggingface-mic/gemma-4-12B-it-mic|gemma-4-12B-it-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/gemma-4-12B-it-mic|gemma-4-12B-it-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "338e626d2187eb95ace023a0aabdb0d9e7f93aa8"
+  ],
+  "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa', 'attn_implementations': {'audio_config': 'sdpa', 'text_config': 'sdpa', 'vision_config': 'sdpa'}} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa', 'attn_implementations': {'text_config': 'sdpa'}}",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795590311.574467,
+  "first_seen": "2026-11-25",
+  "key": "50785#huggingface-mic/gemma-4-12B-it-mic|gemma-4-12B-it-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20782,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50785",
+  "pr_state": "open",
+  "pr_title": "Exporters: fixes to the export path, checked on inputs the exports never saw",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45565152752%3A1&var-pr=50785&var-gh_run_id=45565152752",
+  "weights": "random"
+ },
+ "50785#huggingface-mic/granite-vision-4.1-4b-mic|granite-vision-4.1-4b-mic|bfloat16|": {
+  "case": "huggingface-mic/granite-vision-4.1-4b-mic|granite-vision-4.1-4b-mic|bfloat16|",
+  "commits": [
+   "338e626d2187eb95ace023a0aabdb0d9e7f93aa8"
+  ],
+  "failure": "le \"/__w/transformers/transformers/src/transformers/utils/generic.py\", line 1187, in wrapper\n    output = func(self, *args, **kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/__w/transformers/transformers/src/transformers/utils/generic.py\", line 1040, in wrapper\n    output = func(self, *arg",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795590311.574467,
+  "first_seen": "2026-11-25",
+  "key": "50785#huggingface-mic/granite-vision-4.1-4b-mic|granite-vision-4.1-4b-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20782,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50785",
+  "pr_state": "open",
+  "pr_title": "Exporters: fixes to the export path, checked on inputs the exports never saw",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45565152752%3A1&var-pr=50785&var-gh_run_id=45565152752",
+  "weights": "random"
+ },
+ "50785#huggingface-mic/sam2.1-hiera-tiny-mic|sam2.1-hiera-tiny-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/sam2.1-hiera-tiny-mic|sam2.1-hiera-tiny-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "338e626d2187eb95ace023a0aabdb0d9e7f93aa8"
+  ],
+  "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa', 'attn_implementations': {'mask_decoder_config': 'sdpa', 'prompt_encoder_config': 'sdpa', 'vision_config': 'sdpa'}} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa', 'attn_implementations': {'mask_de",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795590311.574467,
+  "first_seen": "2026-11-25",
+  "key": "50785#huggingface-mic/sam2.1-hiera-tiny-mic|sam2.1-hiera-tiny-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20782,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50785",
+  "pr_state": "open",
+  "pr_title": "Exporters: fixes to the export path, checked on inputs the exports never saw",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45565152752%3A1&var-pr=50785&var-gh_run_id=45565152752",
+  "weights": "overfit"
+ },
  "50821#huggingface-mic/tibetan-ocr-mic|tibetan-ocr-mic|bfloat16|cpu-x86_64-bf16": {
   "case": "huggingface-mic/tibetan-ocr-mic|tibetan-ocr-mic|bfloat16|cpu-x86_64-bf16",
   "commits": [
@@ -9419,6 +9499,106 @@
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44415202439%3A1&var-pr=50887&var-gh_run_id=44415202439",
   "weights": "random"
  },
+ "50887#huggingface-mic/VibeVoice-1.5B-hf-mic|VibeVoice-1.5B-hf-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/VibeVoice-1.5B-hf-mic|VibeVoice-1.5B-hf-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "6d928790a037b5c2627fb314f961724e306aa08a"
+  ],
+  "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa', 'attn_implementations': {'audio_config': 'eager', 'diffusion_head_config': 'sdpa', 'semantic_model_config': 'eager', 'text_config': 'sdpa'}} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa', 'attn_i",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795590271.837638,
+  "first_seen": "2026-11-25",
+  "key": "50887#huggingface-mic/VibeVoice-1.5B-hf-mic|VibeVoice-1.5B-hf-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20782,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50887",
+  "pr_state": "open",
+  "pr_title": "\ud83d\udea8 Add `get_data_dependent_inputs`: compute a forward's data-dependent inputs outside it",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45565146538%3A1&var-pr=50887&var-gh_run_id=45565146538",
+  "weights": "random"
+ },
+ "50887#huggingface-mic/gemma-4-12B-it-mic|gemma-4-12B-it-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/gemma-4-12B-it-mic|gemma-4-12B-it-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "6d928790a037b5c2627fb314f961724e306aa08a"
+  ],
+  "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa', 'attn_implementations': {'audio_config': 'sdpa', 'text_config': 'sdpa', 'vision_config': 'sdpa'}} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa', 'attn_implementations': {'text_config': 'sdpa'}}",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795590271.837638,
+  "first_seen": "2026-11-25",
+  "key": "50887#huggingface-mic/gemma-4-12B-it-mic|gemma-4-12B-it-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20782,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50887",
+  "pr_state": "open",
+  "pr_title": "\ud83d\udea8 Add `get_data_dependent_inputs`: compute a forward's data-dependent inputs outside it",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45565146538%3A1&var-pr=50887&var-gh_run_id=45565146538",
+  "weights": "random"
+ },
+ "50887#huggingface-mic/granite-vision-4.1-4b-mic|granite-vision-4.1-4b-mic|bfloat16|": {
+  "case": "huggingface-mic/granite-vision-4.1-4b-mic|granite-vision-4.1-4b-mic|bfloat16|",
+  "commits": [
+   "6d928790a037b5c2627fb314f961724e306aa08a"
+  ],
+  "failure": "le \"/__w/transformers/transformers/src/transformers/utils/generic.py\", line 1187, in wrapper\n    output = func(self, *args, **kwargs)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/__w/transformers/transformers/src/transformers/utils/generic.py\", line 1040, in wrapper\n    output = func(self, *arg",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795590271.837638,
+  "first_seen": "2026-11-25",
+  "key": "50887#huggingface-mic/granite-vision-4.1-4b-mic|granite-vision-4.1-4b-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20782,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50887",
+  "pr_state": "open",
+  "pr_title": "\ud83d\udea8 Add `get_data_dependent_inputs`: compute a forward's data-dependent inputs outside it",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45565146538%3A1&var-pr=50887&var-gh_run_id=45565146538",
+  "weights": "random"
+ },
+ "50887#huggingface-mic/sam2.1-hiera-tiny-mic|sam2.1-hiera-tiny-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/sam2.1-hiera-tiny-mic|sam2.1-hiera-tiny-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "6d928790a037b5c2627fb314f961724e306aa08a"
+  ],
+  "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa', 'attn_implementations': {'mask_decoder_config': 'sdpa', 'prompt_encoder_config': 'sdpa', 'vision_config': 'sdpa'}} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa', 'attn_implementations': {'mask_de",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795590271.837638,
+  "first_seen": "2026-11-25",
+  "key": "50887#huggingface-mic/sam2.1-hiera-tiny-mic|sam2.1-hiera-tiny-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20782,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50887",
+  "pr_state": "open",
+  "pr_title": "\ud83d\udea8 Add `get_data_dependent_inputs`: compute a forward's data-dependent inputs outside it",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45565146538%3A1&var-pr=50887&var-gh_run_id=45565146538",
+  "weights": "overfit"
+ },
+ "50927#huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "868f5a286cd5ff422c2d1e14976a3f150b6efafd"
+  ],
+  "failure": "training.gradients: ['backbone_model.layers.0.self_attn.q_proj.weight', 'backbone_model.layers.0.mlp.down_proj.weight'] false",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795536177.79663,
+  "first_seen": "2026-11-25",
+  "key": "50927#huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20782,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50927",
+  "pr_state": "open",
+  "pr_title": "[serve] Refactor server and engine architecture",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45431733582%3A1&var-pr=50927&var-gh_run_id=45431733582",
+  "weights": "random"
+ },
  "50947#huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|": {
   "case": "huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|",
   "commits": [
@@ -9426,7 +9606,8 @@
    "f00dc6868fb0e9743543b009cfff992d0d4248bb",
    "96d0ef41cac425475f721d41ce1dc966524ed9d5",
    "c3c65e699c645d23e9b1f6b4255458c2354b6816",
-   "db5a9e728b3cf3830f6cee725180a0f7a056c508"
+   "db5a9e728b3cf3830f6cee725180a0f7a056c508",
+   "5db45c40284b95f105d1a1fec1e37b7930f7524a"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--vip-llava-7b-hf-mic/snapshots/2c201806b2666d6748446",
   "failure_kind": "Runtime traceback",
@@ -9434,7 +9615,7 @@
   "first_seen": "2026-11-19",
   "key": "50947#huggingface-mic/vip-llava-7b-hf-mic|vip-llava-7b-hf-mic|bfloat16|",
   "kind": "fixture",
-  "last_seen": 20780,
+  "last_seen": 20782,
   "merged_at": null,
   "outcome": "open",
   "pr": "50947",
@@ -9509,7 +9690,8 @@
  "51044#huggingface-mic/DeepSeek-Coder-V2-Lite-Instruct-mic|DeepSeek-Coder-V2-Lite-Instruct-mic|bfloat16|cpu-x86_64-bf16": {
   "case": "huggingface-mic/DeepSeek-Coder-V2-Lite-Instruct-mic|DeepSeek-Coder-V2-Lite-Instruct-mic|bfloat16|cpu-x86_64-bf16",
   "commits": [
-   "c8a0d82816c608ee0bcf108a394da55550a76497"
+   "c8a0d82816c608ee0bcf108a394da55550a76497",
+   "e615f665154f34c3b0b1a63426ff897c4df660e1"
   ],
   "failure": "logits.probe: max delta 0.0312 over tolerance\ngenerated_text: [' testim amounts\u51fa\u56fd surrendered Carta elevator\u4eec\u5728\u5764', ' testim amounts\u51fa\u56fd surrendered Cartacustomers espacio\u0441\u0442\u044a'] != [' testim amountsomachrels ALTERAppl Recruitscanf', ' testim amounts\u51fa\u56fd surrendered Cartacustomers espacio\u0441\u0442\u044a']\nlogits.positi",
   "failure_kind": "Baseline assertion",
@@ -9517,7 +9699,7 @@
   "first_seen": "2026-11-24",
   "key": "51044#huggingface-mic/DeepSeek-Coder-V2-Lite-Instruct-mic|DeepSeek-Coder-V2-Lite-Instruct-mic|bfloat16|cpu-x86_64-bf16",
   "kind": "fixture",
-  "last_seen": 20781,
+  "last_seen": 20782,
   "merged_at": null,
   "outcome": "open",
   "pr": "51044",
@@ -9529,7 +9711,8 @@
  "51044#huggingface-mic/DeepSeek-R1-mic|DeepSeek-R1-mic|bfloat16|cpu-x86_64-bf16": {
   "case": "huggingface-mic/DeepSeek-R1-mic|DeepSeek-R1-mic|bfloat16|cpu-x86_64-bf16",
   "commits": [
-   "c8a0d82816c608ee0bcf108a394da55550a76497"
+   "c8a0d82816c608ee0bcf108a394da55550a76497",
+   "e615f665154f34c3b0b1a63426ff897c4df660e1"
   ],
   "failure": "next_token_ids: [99934, 99934] != [5519, 40890]\nprobe_logits: max delta 0.205 over tolerance\ntraining.loss: max delta 0.0374 over tolerance\nposition_norms: shape (2, 6), baseline has (2, 5)",
   "failure_kind": "Baseline assertion",
@@ -9537,7 +9720,7 @@
   "first_seen": "2026-11-24",
   "key": "51044#huggingface-mic/DeepSeek-R1-mic|DeepSeek-R1-mic|bfloat16|cpu-x86_64-bf16",
   "kind": "fixture",
-  "last_seen": 20781,
+  "last_seen": 20782,
   "merged_at": null,
   "outcome": "open",
   "pr": "51044",
@@ -9549,7 +9732,8 @@
  "51044#huggingface-mic/MiniCPM3-4B-mic|MiniCPM3-4B-mic|bfloat16|cpu-x86_64-bf16": {
   "case": "huggingface-mic/MiniCPM3-4B-mic|MiniCPM3-4B-mic|bfloat16|cpu-x86_64-bf16",
   "commits": [
-   "c8a0d82816c608ee0bcf108a394da55550a76497"
+   "c8a0d82816c608ee0bcf108a394da55550a76497",
+   "e615f665154f34c3b0b1a63426ff897c4df660e1"
   ],
   "failure": "logits: max delta 5.41 over tolerance\ntraining.loss: max delta 0.37 over tolerance",
   "failure_kind": "Baseline assertion",
@@ -9557,7 +9741,7 @@
   "first_seen": "2026-11-24",
   "key": "51044#huggingface-mic/MiniCPM3-4B-mic|MiniCPM3-4B-mic|bfloat16|cpu-x86_64-bf16",
   "kind": "fixture",
-  "last_seen": 20781,
+  "last_seen": 20782,
   "merged_at": null,
   "outcome": "open",
   "pr": "51044",
@@ -9569,7 +9753,8 @@
  "51044#huggingface-mic/Mistral-7B-Instruct-v0.2-mic|Mistral-7B-Instruct-v0.2-mic|bfloat16|cpu-x86_64-bf16": {
   "case": "huggingface-mic/Mistral-7B-Instruct-v0.2-mic|Mistral-7B-Instruct-v0.2-mic|bfloat16|cpu-x86_64-bf16",
   "commits": [
-   "c8a0d82816c608ee0bcf108a394da55550a76497"
+   "c8a0d82816c608ee0bcf108a394da55550a76497",
+   "e615f665154f34c3b0b1a63426ff897c4df660e1"
   ],
   "failure": "next_token_ids: [21743, 15221] != [23234, 15221]\nnext_token_logits: max delta 0.26 over tolerance\ntraining.loss: max delta 0.0088 over tolerance",
   "failure_kind": "Baseline assertion",
@@ -9577,7 +9762,7 @@
   "first_seen": "2026-11-24",
   "key": "51044#huggingface-mic/Mistral-7B-Instruct-v0.2-mic|Mistral-7B-Instruct-v0.2-mic|bfloat16|cpu-x86_64-bf16",
   "kind": "fixture",
-  "last_seen": 20781,
+  "last_seen": 20782,
   "merged_at": null,
   "outcome": "open",
   "pr": "51044",
@@ -10226,6 +10411,107 @@
   "pr_state": "open",
   "pr_title": "Add named_pretrained_modules helper and centralize submodel traversal",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45356534117%3A1&var-pr=51167&var-gh_run_id=45356534117",
+  "weights": "random"
+ },
+ "51172#huggingface-mic/pythia-160m-mic|pythia-160m-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/pythia-160m-mic|pythia-160m-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "c59a4f40472a8405ed0a692a5f2edc5461b288e3"
+  ],
+  "failure": "probe_logits: max delta 0.0156 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795513505.388608,
+  "first_seen": "2026-11-25",
+  "key": "51172#huggingface-mic/pythia-160m-mic|pythia-160m-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20782,
+  "merged_at": null,
+  "outcome": "recovered-no-push",
+  "pr": "51172",
+  "pr_state": "open",
+  "pr_title": "[DO NOT MERGE] record-mic experiment: deliberate GPT-NeoX output change",
+  "recovered": "no-push",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45367986466%3A1&var-pr=51172&var-gh_run_id=45367986466",
+  "weights": "random"
+ },
+ "51180#huggingface-mic/Qwen3-Next-80B-A3B-Instruct-mic|Qwen3-Next-80B-A3B-Instruct-mic|bfloat16|": {
+  "case": "huggingface-mic/Qwen3-Next-80B-A3B-Instruct-mic|Qwen3-Next-80B-A3B-Instruct-mic|bfloat16|",
+  "commits": [
+   "d873de7e4f22f0a5feda1223bf4e25e0b6633e35"
+  ],
+  "failure": "odules/module.py\", line 1787, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py\", line 1798, in _call_impl\n    return forward_call(*args, **kwargs)\n           ^^^^^^",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795534427.554185,
+  "first_seen": "2026-11-25",
+  "key": "51180#huggingface-mic/Qwen3-Next-80B-A3B-Instruct-mic|Qwen3-Next-80B-A3B-Instruct-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20782,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51180",
+  "pr_state": "open",
+  "pr_title": "[cache][generate] Allow rollback on recurrent states caches!",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45426675453%3A1&var-pr=51180&var-gh_run_id=45426675453",
+  "weights": "random"
+ },
+ "51202#huggingface-mic/DeepSeek-V4-Flash-0731-mic|DeepSeek-V4-Flash-0731-mic|bfloat16|": {
+  "case": "huggingface-mic/DeepSeek-V4-Flash-0731-mic|DeepSeek-V4-Flash-0731-mic|bfloat16|",
+  "commits": [
+   "423cc9c6e2eeef0111848b4c543a0beb64088b61"
+  ],
+  "failure": " \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py\", line 1787, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py\", line 1798, in _call_impl\n    re",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795563830.362705,
+  "first_seen": "2026-11-25",
+  "key": "51202#huggingface-mic/DeepSeek-V4-Flash-0731-mic|DeepSeek-V4-Flash-0731-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20782,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51202",
+  "pr_state": "open",
+  "pr_title": "[`Indexer`] Refactor Indexers",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45512249730%3A1&var-pr=51202&var-gh_run_id=45512249730",
+  "weights": "random"
+ },
+ "51202#huggingface-mic/GLM-5.3-mic|GLM-5.3-mic|bfloat16|": {
+  "case": "huggingface-mic/GLM-5.3-mic|GLM-5.3-mic|bfloat16|",
+  "commits": [
+   "423cc9c6e2eeef0111848b4c543a0beb64088b61"
+  ],
+  "failure": ".11/site-packages/torch/nn/modules/module.py\", line 1798, in _call_impl\n    return forward_call(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/__w/transformers/transformers/src/transformers/utils/deprecation.py\", line 178, in wrapped_func\n    return func(*args, **kwargs)\n        ",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795563830.362705,
+  "first_seen": "2026-11-25",
+  "key": "51202#huggingface-mic/GLM-5.3-mic|GLM-5.3-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20782,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51202",
+  "pr_state": "open",
+  "pr_title": "[`Indexer`] Refactor Indexers",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45512249730%3A1&var-pr=51202&var-gh_run_id=45512249730",
+  "weights": "random"
+ },
+ "51202#huggingface-mic/Qwen3.8-Flash-Next-mic|Qwen3.8-Flash-Next-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/Qwen3.8-Flash-Next-mic|Qwen3.8-Flash-Next-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "423cc9c6e2eeef0111848b4c543a0beb64088b61"
+  ],
+  "failure": "image_logits: max delta 0.0225 over tolerance",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795563830.362705,
+  "first_seen": "2026-11-25",
+  "key": "51202#huggingface-mic/Qwen3.8-Flash-Next-mic|Qwen3.8-Flash-Next-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20782,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51202",
+  "pr_state": "open",
+  "pr_title": "[`Indexer`] Refactor Indexers",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45512249730%3A1&var-pr=51202&var-gh_run_id=45512249730",
   "weights": "random"
  },
  "gh-readonly-queue/main/pr-49886-a4f362742ba4846882fd0bc9636461ef3a5e3f34#huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16": {

@@ -388,6 +388,12 @@
     "gpu_only": false,
     "integration": true,
     "test": "tests/models/mistral3/test_modeling_mistral3.py::Mistral3IntegrationTest::test_mistral3_integration_generate"
+   },
+   {
+    "date": "2026-11-24",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/mistral3/test_modeling_mistral3.py::Mistral3IntegrationTest::test_mistral3_integration_generate_text_only"
    }
   ],
   "mm_grounding_dino": [
@@ -649,7 +655,7 @@
    "checkpoint_source": "failing test",
    "integration": 0,
    "model": "moshi",
-   "other": 5,
+   "other": 6,
    "shrinkable": true,
    "tests": [
     "tests/models/moshi/test_modeling_moshi.py::MoshiDecoderTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids",
@@ -747,17 +753,6 @@
    "shrinkable": true,
    "tests": [
     "tests/models/higgs_audio_v2/test_modeling_higgs_audio_v2.py::HiggsAudioV2ModelTest::test_static_cache_no_recompile_with_smaller_length"
-   ]
-  },
-  {
-   "checkpoint": "HuggingFaceM4/idefics2-8b-base",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "idefics2",
-   "other": 1,
-   "shrinkable": true,
-   "tests": [
-    "tests/models/idefics2/test_modeling_idefics2.py::Idefics2ForConditionalGenerationModelTest::test_openvino_export_generate_static"
    ]
   },
   {
@@ -881,6 +876,17 @@
     "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_deciders",
     "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_jev_35b",
     "tests/models/jev/test_modeling_jev.py::JevIntegrationTest::test_jev_9b"
+   ]
+  },
+  {
+   "checkpoint": "meituan-longcat/LongCat-Flash-Chat",
+   "checkpoint_source": "failing test",
+   "integration": 2,
+   "model": "longcat_flash",
+   "other": 0,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/longcat_flash/test_modeling_longcat_flash.py::LongcatFlashIntegrationTest::test_shortcat_generation"
    ]
   },
   {
@@ -1025,8 +1031,8 @@
    "tests": [
     "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_flash_attn_2_inference_equivalence",
     "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_flash_attn_2_inference_equivalence_right_padding",
-    "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_sdpa_padding_matches_padding_free_with_position_ids",
-    "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_eager_padding_matches_padding_free_with_position_ids"
+    "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_eager_padding_matches_padding_free_with_position_ids",
+    "tests/models/data2vec/test_modeling_data2vec_text.py::Data2VecTextModelTest::test_sdpa_padding_matches_padding_free_with_position_ids"
    ]
   },
   {

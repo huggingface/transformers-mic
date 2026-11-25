@@ -5349,6 +5349,18 @@
    "tests/exporters/test_save_load.py::OpenVINOSaveLoadTest::test_loaded_model_saves_in_place"
   ]
  },
+ "50897#longcat_flash": {
+  "bad_commit": "52bac5d0e0da56e26289c072f306877ff5870262",
+  "date": "2026-11-24",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/45312318698/job/138171248270",
+  "mic": "not-covered",
+  "model": "longcat_flash",
+  "pr": "50897",
+  "tests": [
+   "tests/models/longcat_flash/test_modeling_longcat_flash.py::LongcatFlashIntegrationTest::test_shortcat_generation"
+  ]
+ },
  "50975#axk1": {
   "bad_commit": "42efcfde46e668067a74bbd439d33f107b4a7c6c",
   "culprit_files": [
@@ -5492,6 +5504,18 @@
    "tests/models/albert/test_modeling_albert.py::AlbertModelTest::test_flash_attn_2_inference_equivalence"
   ]
  },
+ "sticky#auto#2026-11-20": {
+  "date": "2026-11-20",
+  "day": 20777,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "auto",
+  "run_id": "45389419451",
+  "signal": "ValueError",
+  "tests": [
+   "tests/models/auto/test_modeling_auto.py::AutoModelTest::test_adapter_path_not_overwritten_for_complete_model"
+  ]
+ },
  "sticky#axk1#2026-10-06": {
   "date": "2026-10-06",
   "day": 20732,
@@ -5587,6 +5611,18 @@
   "mic": "green-on-main",
   "model": "beam",
   "run_id": "43667606453",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/beam/test_modeling_beam.py::BeamModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#beam#2026-11-05": {
+  "date": "2026-11-05",
+  "day": 20762,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "beam",
+  "run_id": "45532872813",
   "signal": "AssertionError",
   "tests": [
    "tests/models/beam/test_modeling_beam.py::BeamModelTest::test_flash_attn_2_equivalence"
@@ -7280,6 +7316,18 @@
    "tests/models/llava/test_modeling_llava.py::LlavaForConditionalGenerationModelTest::test_bc_cache_name_generate"
   ]
  },
+ "sticky#longcat_flash#2026-11-24": {
+  "date": "2026-11-24",
+  "day": 20781,
+  "integration": true,
+  "mic": "not-covered",
+  "model": "longcat_flash",
+  "run_id": "45532908065",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/longcat_flash/test_modeling_longcat_flash.py::LongcatFlashIntegrationTest::test_shortcat_generation"
+  ]
+ },
  "sticky#longt5#2026-10-30": {
   "date": "2026-10-30",
   "day": 20756,
@@ -7496,6 +7544,18 @@
    "tests/models/minimax_m2/test_modeling_minimax_m2.py::MiniMaxM2ModelTest::test_sdpa_padding_matches_padding_free_with_position_ids"
   ]
  },
+ "sticky#minimax_m2#2026-11-06": {
+  "date": "2026-11-06",
+  "day": 20763,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "minimax_m2",
+  "run_id": "45532872813",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/minimax_m2/test_modeling_minimax_m2.py::MiniMaxM2ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
  "sticky#mistral3#2026-10-19": {
   "date": "2026-10-19",
   "day": 20745,
@@ -7509,6 +7569,19 @@
    "tests/models/mistral3/test_modeling_mistral3.py::Mistral3IntegrationTest::test_mistral3_integration_generate"
   ]
  },
+ "sticky#mistral3#2026-11-02": {
+  "date": "2026-11-02",
+  "day": 20759,
+  "integration": true,
+  "mic": "red-on-main",
+  "model": "mistral3",
+  "run_id": "45532908065",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/mistral3/test_modeling_mistral3.py::Mistral3IntegrationTest::test_mistral3_integration_generate",
+   "tests/models/mistral3/test_modeling_mistral3.py::Mistral3IntegrationTest::test_mistral3_integration_batched_generate_multi_image"
+  ]
+ },
  "sticky#mistral3#2026-11-13": {
   "date": "2026-11-13",
   "day": 20770,
@@ -7520,6 +7593,18 @@
   "tests": [
    "tests/models/mistral3/test_modeling_mistral3.py::Mistral3ModelTest::test_bc_cache_name_forward",
    "tests/models/mistral3/test_modeling_mistral3.py::Mistral3ModelTest::test_bc_cache_name_generate"
+  ]
+ },
+ "sticky#mistral3#2026-11-24": {
+  "date": "2026-11-24",
+  "day": 20781,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "mistral3",
+  "run_id": "45532908065",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/mistral3/test_modeling_mistral3.py::Mistral3IntegrationTest::test_mistral3_integration_generate_text_only"
   ]
  },
  "sticky#mixtral#2026-10-07": {
@@ -7637,6 +7722,18 @@
   "mic": "not-covered",
   "model": "moshi",
   "run_id": "44444074525",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/moshi/test_modeling_moshi.py::MoshiDecoderTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids"
+  ]
+ },
+ "sticky#moshi#2026-11-02": {
+  "date": "2026-11-02",
+  "day": 20759,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "moshi",
+  "run_id": "45532872813",
   "signal": "AssertionError",
   "tests": [
    "tests/models/moshi/test_modeling_moshi.py::MoshiDecoderTest::test_flash_attention_2_padding_matches_padding_free_with_position_ids"

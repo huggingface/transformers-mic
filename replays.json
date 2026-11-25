@@ -1338,6 +1338,10 @@
   "verdict": "not-covered",
   "version": 9
  },
+ "50897#longcat_flash": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "50975#axk1": {
   "bad": "42efcfde46e668067a74bbd439d33f107b4a7c6c",
   "commits": 1,
@@ -1364,6 +1368,10 @@
  },
  "sticky#albert#2026-10-24": {
   "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#auto#2026-11-20": {
+  "verdict": "not-covered",
   "version": 9
  },
  "sticky#axk1#2026-10-06": {
@@ -1396,6 +1404,10 @@
   "version": 9
  },
  "sticky#beam#2026-10-27": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#beam#2026-11-05": {
   "verdict": "out-of-scope",
   "version": 9
  },
@@ -1956,6 +1968,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#longcat_flash#2026-11-24": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#longt5#2026-10-30": {
   "verdict": "out-of-scope",
   "version": 9
@@ -2032,7 +2048,16 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#minimax_m2#2026-11-06": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#mistral3#2026-10-19": {
+  "reason": "the daily CI did not fail it",
+  "verdict": "not-reproduced",
+  "version": 9
+ },
+ "sticky#mistral3#2026-11-02": {
   "reason": "the daily CI did not fail it",
   "verdict": "not-reproduced",
   "version": 9
@@ -2079,6 +2104,10 @@
   "version": 9
  },
  "sticky#moshi#2026-10-24": {
+  "verdict": "not-covered",
+  "version": 9
+ },
+ "sticky#moshi#2026-11-02": {
   "verdict": "not-covered",
   "version": 9
  },
