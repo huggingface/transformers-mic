@@ -5,7 +5,27 @@ All notable changes to `transformers-mic` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.4] - 2026-11-25
+
+### Added
+
+- `tmic.pr_record` (record-mic): re-records a Transformers PR's expected values into a PR overlay on the
+  fleet dataset, applied to that PR's runs only by `tmic check --fleet-pr <N>` (#265). `measure --cases`
+  records exactly the cases a contracts gate report marks `blocked`; `publish --models/--merge-sha` publishes
+  only the requested contracts of a record of that commit (#267, #272); `merge` / `discard` settle a merged or
+  closed PR's overlay.
+- Fleet history (`<fleet>/history.csv`): `tmic check --code-revision <sha>` makes a run meet, per contract, the
+  newest revision whose Transformers commit the code contains, plus the overlays of PRs already merged into it
+  but not reconciled yet (#269, #271).
+- `tools/audit_fixture_dtypes.py` lists fleet fixtures a rebuild would change, from safetensors headers only.
+
+### Changed
+
+- Every fleet pin move writes a history row: `pr_record merge --since` is required, `tmic export --execute`
+  needs `--since <Transformers commit>` or `--since always` when it moves an existing contract's pins (also
+  `tmic run --since`), and `tmic reserialize` writes `always` rows (#271).
+- Fixtures keep the checkpoint's per-tensor float dtypes where they differ from its main float dtype
+  (#266), and their `config.json` names the fixture's dtype, keeping null sub-config dtypes (#268, #270).
 
 ## [0.1.3] - 2026-11-20
 
