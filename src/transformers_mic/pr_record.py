@@ -440,6 +440,7 @@ def merge(args, api=None):
     """Write a merged PR's overlay into the fleet tables, then remove it (one commit)."""
     from huggingface_hub import CommitOperationAdd, CommitOperationDelete, HfApi
 
+    since = fleet.check_since(args.since)
     api = api or HfApi()
     head = fleet.resolve("main")
     overlay = fleet.download_overlay(args.pr, head)
@@ -455,7 +456,6 @@ def merge(args, api=None):
                 CommitOperationAdd(path_in_repo=p, path_or_fileobj=t.encode())
                 for p, t in fleet.operations(name, lock).items()
             ]
-            since = getattr(args, "since", None)
             if since:
                 # Older code (without the PR's commit on main) keeps meeting the values before these.
                 added = [
@@ -551,7 +551,9 @@ def parser():
         if name == "merge":
             c.add_argument(
                 "--since",
-                help="the PR's commit on Transformers main: runs of code without it keep the previous values",
+                required=True,
+                help="the PR's commit on Transformers main: runs of code without it keep the previous values "
+                "(every pin move writes a history row; a move without one turns history off for that contract)",
             )
     return parser
 

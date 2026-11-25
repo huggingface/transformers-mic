@@ -787,6 +787,8 @@ def run_locked(args, root, answer):
                 ]
                 if args.contract_name:
                     options += ["--contract-name", args.contract_name]
+                if getattr(args, "since", None):
+                    options += ["--since", args.since]
                 code, log = stage(name, options)
                 if not code:
                     state["dataset_revision"] = last_json(log)["revision"]
@@ -968,9 +970,10 @@ def resume_options(args):
         "name",
         "contract",
         "contract_name",
+        "since",
         "transformers_checkout",
     ):
-        if value := getattr(args, name):
+        if value := getattr(args, name, None):
             options += ["--" + name.replace("_", "-"), value]
     for name in ("regenerate", "llm", "fixtures_only", "readable_output", "no_history"):
         if getattr(args, name):

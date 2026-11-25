@@ -274,6 +274,11 @@ No Git commit or framework PR is created automatically.""",
     )
     run.add_argument("--fleet", choices=tuple(fleet.FILES), default="prototypes")
     run.add_argument("--contract-name")
+    run.add_argument(
+        "--since",
+        help="For an export that moves an existing contract's pins: the Transformers main commit its "
+        f"new values apply from, or '{fleet.ALWAYS}'",
+    )
     run.add_argument("--transformers-checkout")
     run.add_argument(
         "--baseline-execution",
@@ -492,6 +497,11 @@ No Git commit or framework PR is created automatically.""",
     export.add_argument("--fleet", choices=tuple(fleet.FILES), default="control")
     export.add_argument("--expected-revision", help="Reject upload if the dataset changed since preview")
     export.add_argument("--execute", action="store_true", help="Upload the previewed fleet update")
+    export.add_argument(
+        "--since",
+        help="Required when the export moves a pin: the Transformers main commit the new values apply from "
+        f"(runs of older code keep the previous ones), or '{fleet.ALWAYS}' for a change that applies to any code",
+    )
     reserialize = sub.add_parser(
         "reserialize",
         help="Store a published fixture's pytorch_model.bin as model.safetensors, tensors unchanged, and repin its fleets",
@@ -699,7 +709,10 @@ def main(argv=None):
                     args.fleet or "control", revision or "main", pr=pr, code_revision=code
                 )
                 if code:
-                    metadata["fleet_history"] = {"code_revision": code, "reverted": report.get("reverted", [])}
+                    metadata["fleet_history"] = {
+                        "code_revision": code,
+                        **{key: report.get(key, []) for key in ("reverted", "unrecorded", "merged", "merged_stale")},
+                    }
                 if pr is not None:
                     metadata["fleet_overlay"] = {
                         "pr": pr,

@@ -962,6 +962,17 @@ Upload requires write access to the MIC model namespace, which defaults to
 retaining an existing `BERT` contract. Export rejects names that differ only
 by case.
 
+An export that moves an existing contract's pins needs `--since`: the
+Transformers main commit the new values apply from (for example the merge of the
+PR that changed the outputs), or `--since always` for a change that applies to any
+code (a tolerance, a new target). It writes one row per moved pin to the fleet's
+`history.csv` in the same commit. A run given `tmic check --code-revision <sha>`
+meets, per contract, the newest row whose commit that code contains, so older code
+keeps the values of its time; a pin moved without a row turns this off for that
+contract (reported as `unrecorded`). The preview shows the rows and never refuses.
+Such runs also apply the record-mic overlays of PRs already merged into that code
+but not yet reconciled into the fleet.
+
 `export --fleet control` updates the `control/` tables in the shared dataset;
 `--fleet prototypes` updates `prototypes/`. The default is `control`. Each fleet
 is three CSV tables the dataset viewer shows: `contracts.csv` (one row per
@@ -1040,7 +1051,8 @@ bit-identical values, and loads both folders with `from_pretrained` to check tha
 loaded models and loading info are the same. `build.json` gets the new file hash and
 `serialization.file = model.safetensors`, keeping `source_file`. The fixture's
 `files_sha256` changes, so `--execute` repins each contract that uses the repository;
-the contract's own hash is unchanged. Rerunning after an interrupted export only
+the contract's own hash is unchanged, and the fleet history gets an `always` row
+(the same tensors apply to any code). Rerunning after an interrupted export only
 repins. Baselines need no new recording: the tensors are the same.
 
 ## Files and publication
