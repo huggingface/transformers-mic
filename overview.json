@@ -339,14 +339,14 @@
   },
   {
    "date": "2026-11-24",
-   "detail": "",
+   "detail": "53 commits in range; ",
    "integration": true,
    "job": "",
    "model": "mistral3",
    "pr": null,
-   "run": "",
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/45581630080",
    "tests": 1,
-   "verdict": "pending"
+   "verdict": "missed"
   },
   {
    "date": "2026-11-21",
@@ -3358,14 +3358,14 @@
   "broken": 0,
   "caught": 10,
   "duplicate": 5,
-  "missed": 0,
+  "missed": 1,
   "model-added": 4,
   "no-code-change": 1,
   "not-a-regression": 6,
   "not-covered": 265,
   "not-reproduced": 8,
   "out-of-scope": 206,
-  "pending": 1,
+  "pending": 0,
   "unrelated-culprit": 16
  },
  "window": [

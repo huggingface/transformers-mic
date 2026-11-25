@@ -2066,6 +2066,19 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#mistral3#2026-11-24": {
+  "bad": "fa9c04ea60c5e1d2ecc38064442973fa1ddccc72",
+  "commits": 53,
+  "contracts": [
+   "huggingface-mic/Ministral-3-3B-Instruct-2512-mic",
+   "huggingface-mic/mistral3-mic"
+  ],
+  "failures": [],
+  "parent": "be48e7a0b63d2ff22ce1ebccbccbd0374c1592ef",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/45581630080",
+  "verdict": "missed",
+  "version": 9
+ },
  "sticky#mixtral#2026-10-07": {
   "verdict": "out-of-scope",
   "version": 9

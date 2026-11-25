@@ -8,12 +8,12 @@ Each PR failure is classified on the day it first failed: **infra** (setup error
 
 Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers_daily_ci`) — bisected to a commit, or a sticky failure's first day — is replayed with the model's fixture contracts as Transformers PR CI runs them (today's fleets; control in the default and bfloat16 variants, prototypes in bfloat16; `run-model-contracts` on the same runner and image) on the commit before it and on the commit that broke it. When that commit added the model, only its side runs.
 
-**Catch rate: 10 of 10** (100%) — caught / (caught + missed).
+**Catch rate: 10 of 11** (91%) — caught / (caught + missed).
 
 | verdict | regressions | meaning |
 |---|---|---|
 | caught | 10 | the contracts' result changes between the two commits: green to red, or red to green when the baseline was recorded after the change |
-| missed | 0 | green on both |
+| missed | 1 | green on both |
 | not-a-regression | 6 | a human reproduced the failing test on both sides of the range: the failure is not from these commits (the environment, a Hub checkpoint, a tokenizer); see the note |
 | already-red | 10 | red on both: says nothing about this regression |
 | no-code-change | 1 | nothing between the two commits changes code the model runs (the same commit, or only CI images, docs, tests or other models): nothing for a contract to catch |
@@ -25,11 +25,11 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 | broken | 0 | the replay could not measure it (commit, install, fixture or baseline setup) |
 | out-of-scope | 206 | no failing *IntegrationTest a CPU fixture contract mirrors: GPU-only (by name, body, or a trace that is out of memory or multi-GPU only), or a feature contracts do not call (export, offloading, parallelism, processors) |
 | not-covered | 265 | no contract for the model |
-| pending | 1 | not replayed yet |
 
 | date | model | regression | verdict | at the bad commit |
 |---|---|---|---|---|
 | 2026-11-24 | qwen3_5 | sticky onset | already-failing | the daily CI failed it the day before too |
+| 2026-11-24 | mistral3 | sticky onset | [missed](https://github.com/huggingface/transformers-mic/actions/runs/45581630080) | 53 commits in range;  |
 | 2026-11-21 | axk1 | sticky onset | duplicate | same regression as 50975#axk1 |
 | 2026-11-21 | axk1 | [PR #50975](https://github.com/huggingface/transformers/pull/50975) | [not-a-regression](https://github.com/huggingface/transformers-mic/actions/runs/44887652085) | #50975 keeps gate.weight in fp32 on load and forward already upcasts it, so only an fp32-on-disk checkpoint changes. tiny-axk1 is all F32 loaded as bf16 (the test's expectations were recorded with a b |
 | 2026-11-21 | deepseek_v2 | [PR #49846](https://github.com/huggingface/transformers/pull/49846) | out-of-scope |  |

@@ -140,6 +140,7 @@
   "conclusion": "success",
   "dispatched_at": "2026-11-24T09:05:34Z",
   "run_id": 45361895713,
+  "shrink": "shrink/45361895713/shrink-idefics2-8b-base-mic.html",
   "status": "completed",
   "url": "https://github.com/huggingface/transformers-mic/actions/runs/45361895713"
  },
