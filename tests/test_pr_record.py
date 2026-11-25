@@ -197,7 +197,7 @@ def test_merge_reports_stale_entries(hub):
     assert pr_record.merge(SimpleNamespace(pr=7, execute=False, since="5" * 40), FakeApi()) == 1
 
 
-def test_blocked_cases_reads_only_block_decisions(tmp_path):
+def test_blocked_cases_reads_only_blocked_decisions(tmp_path):
     report = tmp_path / "gate.json"
     report.write_text(
         json.dumps(
@@ -208,7 +208,7 @@ def test_blocked_cases_reads_only_block_decisions(tmp_path):
                         "contract": "gpt-j-6b",
                         "variant": "bfloat16",
                         "target": "gpt-j-6b-mic",
-                        "verdict": "block",
+                        "verdict": "blocked",
                     },
                     {
                         "fleet": "control",
@@ -241,7 +241,7 @@ def test_measure_cases_records_blocked_targets_without_a_check_pass(tmp_path, mo
                         "contract": "gpt-j-6b",
                         "variant": "default",
                         "target": "gpt-j-6b-mic",
-                        "verdict": "block",
+                        "verdict": "blocked",
                     }
                 ]
             }
@@ -320,3 +320,10 @@ def test_requested_keeps_only_the_named_contracts():
     assert [c["contract"] for c in got["cases"]] == ["gpt-j-6b"]
     with pytest.raises(ValueError, match="no recorded case"):
         pr_record.requested(record, ["llama"], {"control": lock()}, types=lambda repo, rev: types[repo])
+
+
+def test_blocked_cases_reads_an_older_gate_report(tmp_path):
+    report = tmp_path / "gate.json"
+    decision = {"fleet": "control", "contract": "c", "variant": "v", "target": "t", "verdict": "block"}
+    report.write_text(json.dumps({"decisions": [decision]}))
+    assert pr_record.blocked_cases(report) == {("control", "c", "v"): {"t"}}

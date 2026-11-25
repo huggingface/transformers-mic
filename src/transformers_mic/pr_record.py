@@ -121,10 +121,12 @@ def changes(old, new):
 
 
 def blocked_cases(path):
-    """{(fleet, contract, variant): {targets}} of a contracts gate report's `block` decisions."""
+    """{(fleet, contract, variant): {targets}} of a contracts gate report's `blocked` decisions.
+
+    Gates before huggingface/transformers-ci#404 wrote the verdict as `block`: read both."""
     wanted = {}
     for d in read(path).get("decisions", []):
-        if d.get("verdict") == "block":
+        if d.get("verdict") in ("blocked", "block"):
             wanted.setdefault((d["fleet"], d["contract"], d["variant"]), set()).add(d["target"])
     return wanted
 
@@ -133,7 +135,7 @@ def measure(args):
     """Record candidates on this checkout (PR code, no secrets).
 
     --models: the selected contracts are checked first and their red targets recorded.
-    --cases:  a contracts gate report (contracts-gate.json); only its `block` cases are recorded,
+    --cases:  a contracts gate report (contracts-gate.json); only its `blocked` cases are recorded,
               with no check pass: the contracts job that wrote the report already ran it.
     """
     from huggingface_hub import hf_hub_download, snapshot_download
@@ -525,7 +527,7 @@ def parser():
     m = commands.add_parser("measure", help="record candidates on this checkout (PR code, no secrets)")
     m.add_argument("--pr", type=int, required=True)
     m.add_argument("--models", help="model types, contract or target names (comma/space separated)")
-    m.add_argument("--cases", type=Path, help="a contracts gate report: record its `block` cases only")
+    m.add_argument("--cases", type=Path, help="a contracts gate report: record its `blocked` cases only")
     m.add_argument("--fleet-revision", default="main")
     m.add_argument("--transformers-sha")
     m.add_argument("--context", help="JSON stored with the record (runner, image, run id)")
