@@ -45,9 +45,76 @@ def test_older_code_meets_the_values_before_each_record_it_lacks():
     assert pinned(got) == C and report["reverted"] == []
 
 
-def test_a_pin_main_moved_another_way_is_left_alone():
+def test_a_pin_moved_without_a_row_is_left_alone():
     got, report = fleet.apply_history(lock("d" * 40), [row(A, B, "pr1")], lambda sha: False)
-    assert pinned(got) == "d" * 40 and report["reverted"] == []
+    assert pinned(got) == "d" * 40 and report["unrecorded"] == [f"gpt-j-6b:{REPO}"]
+
+
+def test_the_newest_applicable_row_wins_whatever_the_row_order():
+    # pr2's row was written first, though its commit is newer on main: ancestry decides, not order.
+    rows = [row(A, B, "pr1"), row(B, C, "pr2")]
+    contains = {"pr2"}  # only answers for pr2: pr1 is not even asked once a newer row applies
+    got, _ = fleet.apply_history(lock(C), rows, lambda sha: sha in contains)
+    assert pinned(got) == C
+
+
+def test_an_always_row_applies_to_any_code():
+    rows = [row(A, B, "pr1"), row(B, C, fleet.ALWAYS)]  # re-serialized weights after a record
+    asked = []
+    got, report = fleet.apply_history(lock(C), rows, lambda sha: asked.append(sha) or False)
+    assert pinned(got) == C and report["reverted"] == [] and asked == []
+
+
+def test_a_break_in_the_chain_stops_the_walk():
+    # B -> D moved with no row: rows before it describe another chain and are not walked past.
+    D = "d" * 40
+    rows = [row(A, B, "pr1"), row(D, C, "pr2")]
+    got, _ = fleet.apply_history(lock(C), rows, lambda sha: False)
+    assert pinned(got) == D
+
+
+def test_rows_for_a_moved_pin_and_none_for_a_new_contract():
+    old, new = lock(A), lock(B)
+    new["contracts"]["fresh"] = lock(C)["contracts"]["gpt-j-6b"]
+    assert fleet.history_rows(old, new, "s" * 40) == [row(A, B, "s" * 40)]
+    assert fleet.history_rows(old, lock(A), fleet.ALWAYS) == []
+
+
+def test_since_must_be_a_full_sha_or_always():
+    assert fleet.check_since(fleet.ALWAYS) == fleet.ALWAYS and fleet.check_since("a" * 40) == "a" * 40
+    for bad in ("abc123", "main", None):
+        try:
+            fleet.check_since(bad)
+        except ValueError:
+            continue
+        raise AssertionError(bad)
+
+
+def test_merged_overlays_apply_only_to_code_that_contains_the_merge(monkeypatch):
+    overlay = {"contracts": {"control/gpt-j-6b": {REPO: {"from": A, "to": B}}}}
+    monkeypatch.setattr(fleet, "download_overlay", lambda pr, rev: overlay)
+    merged = {7: "m" * 40}.get  # PR 7 merged, PR 8 open
+    got, report = fleet.apply_merged_overlays(lock(A), "control", "f" * 40, lambda s: True, merged=merged, prs=[7, 8])
+    assert pinned(got) == B and report["merged"] == [f"gpt-j-6b:{REPO}@transformers-pr-7"]
+    got, report = fleet.apply_merged_overlays(lock(A), "control", "f" * 40, lambda s: False, merged=merged, prs=[7])
+    assert pinned(got) == A and report["merged"] == []
+    got, report = fleet.apply_merged_overlays(
+        lock(A), "control", "f" * 40, lambda s: True, skip=7, merged=merged, prs=[7]
+    )
+    assert pinned(got) == A  # the run's own PR goes through --fleet-pr instead
+
+
+def test_github_merged_reads_the_pull(monkeypatch):
+    answers = {7: {"merged": True, "merge_commit_sha": "m" * 40}, 8: {"merged": False, "merge_commit_sha": "x" * 40}}
+
+    def urlopen(request, timeout):
+        pr = int(request.full_url.rsplit("/", 1)[1])
+        if pr == 9:
+            raise OSError("rate limited")
+        return io.BytesIO(json.dumps(answers[pr]).encode())
+
+    monkeypatch.setattr(fleet.urllib.request, "urlopen", urlopen)
+    assert [fleet.github_merged(pr) for pr in (7, 8, 9)] == ["m" * 40, None, None]
 
 
 def test_history_keeps_the_newest_rows_per_contract():
@@ -80,7 +147,10 @@ def test_download_for_run_matches_history_then_applies_the_overlay(monkeypatch, 
     monkeypatch.setattr(fleet, "download_history", lambda name, rev: [row(B, C, "pr2")])
     overlay = {"contracts": {"control/gpt-j-6b": {REPO: {"from": B, "to": "e" * 40}}}}
     monkeypatch.setattr(fleet, "download_overlay", lambda pr, rev: overlay)
-    path, _, report = fleet.download_for_run("control", "main", pr=7, code_revision=A, is_ancestor=lambda s: False)
+    monkeypatch.setattr(fleet, "list_overlays", lambda rev: [7])
+    path, _, report = fleet.download_for_run(
+        "control", "main", pr=7, code_revision=A, is_ancestor=lambda s: False, merged=lambda pr: None
+    )
     assert pinned(json.loads(path.read_text())) == "e" * 40  # back to B for old code, then the PR's overlay on B
     assert report["reverted"] == [f"gpt-j-6b:{REPO}"] and report["applied"] == [f"gpt-j-6b:{REPO}"]
     plain, _, report = fleet.download_for_run("control", "main")
@@ -112,8 +182,8 @@ def test_merge_since_records_history_in_the_same_commit(monkeypatch, tmp_path):
         fleet, "download_overlay", lambda pr, rev: {"contracts": {"control/gpt-j-6b": {REPO: {"from": A, "to": B}}}}
     )
     api = Api()
-    assert pr_record.merge(SimpleNamespace(pr=7, execute=True, since="m" * 40), api) == 0
+    assert pr_record.merge(SimpleNamespace(pr=7, execute=True, since="5" * 40), api) == 0
     ops = {op.path_in_repo: op for op in api.commits[0]["operations"]}
     history = ops["control/history.csv"].path_or_fileobj.decode().splitlines()
-    assert history == [",".join(fleet.HISTORY_COLUMNS), f"gpt-j-6b,{REPO},{A},{B},{'m' * 40}"]
+    assert history == [",".join(fleet.HISTORY_COLUMNS), f"gpt-j-6b,{REPO},{A},{B},{'5' * 40}"]
     assert "prototypes/history.csv" not in ops  # nothing applied there

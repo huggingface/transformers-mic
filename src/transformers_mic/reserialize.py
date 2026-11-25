@@ -193,15 +193,20 @@ def export(repo, old_sha256, revision, files_sha256, fleets, attempts=5):
         for attempt in range(attempts):
             path, parent = fleet.download(name)
             lock = read(path)
+            before = read(path)
             changed = repin(lock, repo, old_sha256, revision, files_sha256)
+            files = fleet.operations(name, lock)
+            # Same tensors, new revision: every Transformers commit meets it (fleet history).
+            if rows := fleet.history_rows(before, lock, fleet.ALWAYS):
+                rows = fleet.with_history(fleet.download_history(name, parent), rows)
+                files[fleet.table_path(name, fleet.HISTORY)] = fleet.history_csv(rows)
             try:
                 commit = HfApi().create_commit(
                     repo_id=fleet.REPOSITORY,
                     repo_type="dataset",
                     parent_commit=parent,
                     operations=[
-                        CommitOperationAdd(path_in_repo=p, path_or_fileobj=text.encode())
-                        for p, text in fleet.operations(name, lock).items()
+                        CommitOperationAdd(path_in_repo=p, path_or_fileobj=text.encode()) for p, text in files.items()
                     ],
                     commit_message=f"Repin {', '.join(changed)} in the {name} fleet: {repo.split('/')[-1]} weights as {SAFETENSORS}",
                 )

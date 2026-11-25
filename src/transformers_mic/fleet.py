@@ -292,12 +292,16 @@ def apply_overlay(lock, overlay, name):
     return lock, report
 
 
-# Which Transformers commit made a re-recorded value live (record-mic, on the PR's merge): a run of
-# older code, which does not contain that commit, is checked against the value before it. Kept
-# apart from COLUMNS: revisions from before it have no such table, and it is optional.
+# Which Transformers commit each pin move applies from. A run of Transformers code X meets, for each
+# contract, the newest revision whose row's commit X contains: the history is the source of truth and
+# the pin is its newest row. Every pin move writes a row (record-mic's merge, `tmic export --since`,
+# reserialize), with `since_transformers` = the commit on Transformers main, or ALWAYS for a move
+# that applies to any code (weights re-serialized, a tolerance, a new target). Kept apart from
+# COLUMNS: revisions from before it have no such table, and it is optional.
 HISTORY = "history"
 HISTORY_COLUMNS = ("contract", "mic_repo", "from_revision", "revision", "since_transformers")
 HISTORY_KEEP = 5  # rows kept per (contract, mic repo): far more than a run of old code needs
+ALWAYS = "always"
 TRANSFORMERS = "huggingface/transformers"
 
 
@@ -335,28 +339,85 @@ def with_history(rows, added):
     return list(reversed(kept))
 
 
-def apply_history(lock, rows, is_ancestor):
-    """Pin each contract to the value the code under test should meet.
+def check_since(since):
+    """`since` for a pin move: a full Transformers commit SHA, or ALWAYS."""
+    if since != ALWAYS and not re.fullmatch(r"[0-9a-f]{40}", since or ""):
+        raise ValueError(f"--since takes a full Transformers commit SHA or {ALWAYS!r}, got {since!r}")
+    return since
 
-    Walking a contract's history from the newest row, while its pin is the row's `revision` and the
-    row's Transformers commit is not an ancestor of the code under test (`is_ancestor(sha)`), the pin
-    goes back to the row's `from_revision`. Contracts with no history are unchanged.
-    Returns the lock and {"reverted": ["<contract>:<repo>", ...]}.
+
+def moves(old, new):
+    """[(contract, mic repo, from, to)] for every pin of a contract in both locks whose revision moved."""
+    found = []
+    for name, contract in sorted(new["contracts"].items()):
+        before = old["contracts"].get(name)
+        if not before:
+            continue  # a new contract has no earlier value to keep for older code
+        repos = {contract["integration"]["repo"], *contract.get("fixtures", {})}
+        for repo in sorted(repos):
+            frm = {p["revision"] for p in pins(before, repo)}
+            to = {p["revision"] for p in pins(contract, repo)}
+            if len(frm) == 1 and len(to) == 1 and frm != to:
+                found.append((name, repo, frm.pop(), to.pop()))
+    return found
+
+
+def history_rows(old, new, since):
+    """The history rows for moving fleet lock `old` to `new`, applying from Transformers `since`."""
+    return [
+        {"contract": c, "mic_repo": r, "from_revision": f, "revision": t, "since_transformers": since}
+        for c, r, f, t in moves(old, new)
+    ]
+
+
+def apply_history(lock, rows, is_ancestor):
+    """Pin each contract to the newest revision that applies to the code under test.
+
+    A contract's rows form a chain ending at its pin (each row's `from_revision` is the row before's
+    `revision`). The code meets the newest row of that chain whose `since_transformers` it contains
+    (`is_ancestor(sha)`; ALWAYS applies to any code), or the chain's first `from_revision` when none
+    applies. A pin that is not its newest row's revision moved without one: it is left as it is.
+    Returns the lock and {"reverted": ["<contract>:<repo>", ...], "unrecorded": [...]}.
     """
     lock = json.loads(json.dumps(lock))
-    report = {"reverted": []}
-    for row in reversed(rows):
-        contract = lock["contracts"].get(row["contract"])
-        found = pins(contract, row["mic_repo"]) if contract else []
-        if (
-            found
-            and all(pin["revision"] == row["revision"] for pin in found)
-            and not is_ancestor(row["since_transformers"])
-        ):
+    report = {"reverted": [], "unrecorded": []}
+    chains = {}
+    for row in rows:
+        chains.setdefault((row["contract"], row["mic_repo"]), []).append(row)
+    for (name, repo), chain in sorted(chains.items()):
+        contract = lock["contracts"].get(name)
+        found = pins(contract, repo) if contract else []
+        current = {pin["revision"] for pin in found}
+        if not found:
+            continue
+        if current != {chain[-1]["revision"]}:
+            report["unrecorded"].append(f"{name}:{repo}")
+            continue
+        linked = [chain[-1]]
+        for row in reversed(chain[:-1]):
+            if row["revision"] != linked[0]["from_revision"]:
+                break  # a move with no row: older rows describe another chain
+            linked.insert(0, row)
+        revision = linked[0]["from_revision"]
+        for row in reversed(linked):
+            if row["since_transformers"] == ALWAYS or is_ancestor(row["since_transformers"]):
+                revision = row["revision"]
+                break
+        if revision != chain[-1]["revision"]:
             for pin in found:
-                pin["revision"] = row["from_revision"]
-            report["reverted"].append(f"{row['contract']}:{row['mic_repo']}")
+                pin["revision"] = revision
+            report["reverted"].append(f"{name}:{repo}")
     return lock, report
+
+
+def _github(path, repository=TRANSFORMERS):
+    request = urllib.request.Request(
+        f"https://api.github.com/repos/{repository}/{path}", headers={"Accept": "application/vnd.github+json"}
+    )
+    if token := os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN"):
+        request.add_header("Authorization", f"Bearer {token}")
+    with urllib.request.urlopen(request, timeout=30) as response:
+        return json.load(response)
 
 
 def github_ancestor(head, repository=TRANSFORMERS):
@@ -369,15 +430,8 @@ def github_ancestor(head, repository=TRANSFORMERS):
 
     def is_ancestor(sha):
         if sha not in cache:
-            request = urllib.request.Request(
-                f"https://api.github.com/repos/{repository}/compare/{sha}...{head}",
-                headers={"Accept": "application/vnd.github+json"},
-            )
-            if token := os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN"):
-                request.add_header("Authorization", f"Bearer {token}")
             try:
-                with urllib.request.urlopen(request, timeout=30) as response:
-                    cache[sha] = json.load(response).get("status") in ("ahead", "identical")
+                cache[sha] = _github(f"compare/{sha}...{head}", repository).get("status") in ("ahead", "identical")
             except (OSError, ValueError):
                 cache[sha] = True
         return cache[sha]
@@ -385,17 +439,60 @@ def github_ancestor(head, repository=TRANSFORMERS):
     return is_ancestor
 
 
-def download_for_run(name, revision, pr=None, code_revision=None, is_ancestor=None):
-    """download() for one run: the history matched to the code under test, then the PR's overlay.
+def github_merged(pr, repository=TRANSFORMERS):
+    """PR `pr`'s commit on main if it is merged, else None (also when GitHub cannot answer)."""
+    try:
+        data = _github(f"pulls/{int(pr)}", repository)
+    except (OSError, ValueError):
+        return None
+    return data.get("merge_commit_sha") if data.get("merged") else None
 
-    (lock path, revision, report): report has "reverted" (history) and "applied"/"stale" (overlay).
+
+def list_overlays(revision):
+    """The PR numbers with an overlay on the fleet dataset at `revision`."""
+    files = HfApi().list_repo_files(REPOSITORY, repo_type="dataset", revision=revision)
+    found = []
+    for path in files:
+        match = re.fullmatch(rf"{re.escape(OVERLAYS)}/transformers-pr-(\d+)\.json", path)
+        if match:
+            found.append(int(match.group(1)))
+    return sorted(found)
+
+
+def apply_merged_overlays(lock, name, revision, code_is_ancestor, skip=None, merged=github_merged, prs=None):
+    """Apply the overlays of PRs merged into the code under test that the reconciler has not merged yet.
+
+    Between a PR's merge and the reconciler's next pass, its values are still an overlay: code that
+    contains its commit on main meets them now, code that does not keeps the fleet's.
+    Returns the lock and {"merged": [...], "merged_stale": [...]}.
+    """
+    report = {"merged": [], "merged_stale": []}
+    for pr in list_overlays(revision) if prs is None else prs:
+        if pr == skip:
+            continue
+        sha = merged(pr)
+        if not sha or not code_is_ancestor(sha):
+            continue
+        lock, applied = apply_overlay(lock, download_overlay(pr, revision), name)
+        report["merged"] += [f"{key}@transformers-pr-{pr}" for key in applied["applied"]]
+        report["merged_stale"] += [f"{key}@transformers-pr-{pr}" for key in applied["stale"]]
+    return lock, report
+
+
+def download_for_run(name, revision, pr=None, code_revision=None, is_ancestor=None, merged=github_merged):
+    """download() for one run: the values the code under test contains, then the PR's overlay.
+
+    (lock path, revision, report): report has "reverted"/"unrecorded" (history), "merged"/
+    "merged_stale" (merged PRs not reconciled yet) and "applied"/"stale" (the PR's own overlay).
     """
     path, revision = download(name, revision)
     lock, report = json.loads(Path(path).read_text()), {}
     tag = []
     if code_revision:
-        rows = download_history(name, revision)
-        lock, report = apply_history(lock, rows, is_ancestor or github_ancestor(code_revision))
+        is_ancestor = is_ancestor or github_ancestor(code_revision)
+        lock, report = apply_history(lock, download_history(name, revision), is_ancestor)
+        lock, pending = apply_merged_overlays(lock, name, revision, is_ancestor, skip=pr, merged=merged)
+        report.update(pending)
         tag.append(code_revision[:12])
     if pr is not None:
         lock, overlay = apply_overlay(lock, download_overlay(pr, revision), name)

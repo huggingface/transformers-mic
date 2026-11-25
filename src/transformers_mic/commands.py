@@ -2367,6 +2367,7 @@ def export(args):
         if revision != expected:
             raise ValueError("Dataset changed since preview; review the current fleet before exporting")
     old = read(path)
+    before = json.loads(json.dumps(old))
     destination_name = getattr(args, "contract_name", None) or name
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", destination_name):
         raise ValueError("Destination contract name must be a safe folder name")
@@ -2406,6 +2407,19 @@ def export(args):
             target = key[len(name) + 1 :]
             known[destination_name + "/" + renamed_targets.get(target, target)] = value
     files = fleet.operations(fleet_name, old)
+    # A moved pin is a new value for some Transformers code: say which, so runs of older code keep
+    # the value before it (fleet history). A new contract has no earlier value and needs no row.
+    since = getattr(args, "since", None)
+    history = fleet.history_rows(before, old, fleet.check_since(since) if since else None)
+    if history and not since and getattr(args, "execute", False):
+        moved = ", ".join(f"{row['contract']}:{row['mic_repo']}" for row in history)
+        raise ValueError(
+            f"This export moves pins ({moved}): pass --since <the Transformers main commit the new values "
+            f"apply from> or --since {fleet.ALWAYS} (a change that applies to any code, e.g. a tolerance)"
+        )
+    if history and since:
+        rows = fleet.with_history(fleet.download_history(fleet_name, revision), history)
+        files[fleet.table_path(fleet_name, fleet.HISTORY)] = fleet.history_csv(rows)
     executed = getattr(args, "execute", False)
     checkout = getattr(args, "transformers_checkout", None)
     if executed:
@@ -2429,10 +2443,12 @@ def export(args):
                 "contract": destination_name,
                 "revision": revision,
                 "execute": executed,
+                "history": history,
                 "contracts": old["contracts"],
                 "next": "Review the dataset update and the tests/contracts.lock diff."
                 if executed
-                else "Review this preview, then repeat with --execute to upload.",
+                else "Review this preview, then repeat with --execute to upload."
+                + (" This export moves pins: --execute needs --since." if history and not since else ""),
             }
         )
     )

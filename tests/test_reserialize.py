@@ -160,10 +160,14 @@ def test_export_retries_a_concurrent_dataset_update(monkeypatch, tmp_path):
     path.write_text(json.dumps(lock()))
     parents, uploads = iter(["p1", "p2"]), []
     monkeypatch.setattr(reserialize.fleet, "download", lambda name: (path, next(parents)))
+    monkeypatch.setattr(reserialize.fleet, "download_history", lambda name, rev: [])
+    histories = []
 
     class Api:
         def create_commit(self, **kwargs):
             uploads.append(kwargs["parent_commit"])
+            ops = {op.path_in_repo: op.path_or_fileobj for op in kwargs["operations"]}
+            histories.append(ops.get("prototypes/history.csv"))
             if len(uploads) == 1:
                 raise HfHubHTTPError("moved", response=SimpleNamespace(status_code=412, headers={}, request=None))
             return SimpleNamespace(oid="n" * 40)
@@ -173,3 +177,7 @@ def test_export_retries_a_concurrent_dataset_update(monkeypatch, tmp_path):
 
     assert uploads == ["p1", "p2"]
     assert result == {"prototypes": {"revision": "n" * 40, "contracts": ["X", "Shared"]}}
+    # Same tensors: the new revision applies to every Transformers commit (fleet history).
+    rows = histories[-1].decode().splitlines()
+    assert rows[0] == ",".join(reserialize.fleet.HISTORY_COLUMNS) and len(rows) > 1
+    assert all(r.endswith("," + reserialize.fleet.ALWAYS) and "huggingface-mic/x-mic" in r for r in rows[1:])

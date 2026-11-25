@@ -181,7 +181,7 @@ def test_publish_refuses_a_record_measured_on_an_older_fleet(tmp_path, hub):
 def test_merge_writes_the_overlay_into_the_tables_and_tags_the_commits(hub):
     hub["overlay"] = OVERLAY
     api = FakeApi()
-    assert pr_record.merge(SimpleNamespace(pr=7, execute=True), api) == 0
+    assert pr_record.merge(SimpleNamespace(pr=7, execute=True, since="5" * 40), api) == 0
     commit, tag = api.calls
     paths = [getattr(op, "path_in_repo") for op in commit[4]]
     assert "control/contracts.csv" in paths and paths[-1] == "overlays/transformers-pr-7.json"
@@ -194,7 +194,7 @@ def test_merge_writes_the_overlay_into_the_tables_and_tags_the_commits(hub):
 def test_merge_reports_stale_entries(hub):
     hub["overlay"] = OVERLAY
     hub["lock"] = lock(revision=D)
-    assert pr_record.merge(SimpleNamespace(pr=7, execute=False), FakeApi()) == 1
+    assert pr_record.merge(SimpleNamespace(pr=7, execute=False, since="5" * 40), FakeApi()) == 1
 
 
 def test_blocked_cases_reads_only_block_decisions(tmp_path):

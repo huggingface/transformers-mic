@@ -429,6 +429,30 @@ def test_environment_refuses_fleets_that_already_differ(workspace, dataset, monk
     assert dataset[1] == []
 
 
+def test_export_moving_a_pin_needs_since_and_writes_history(workspace, dataset, monkeypatch, capsys):
+    from transformers_mic import fleet
+
+    approve_receipts(workspace)
+    remote = read(dataset[0])
+    remote["contracts"]["BERT"] = json.loads(json.dumps(remote["contracts"]["Other"]))
+    old = "c" * 40
+    remote["contracts"]["BERT"]["integration"]["repo"] = workspace.lock["contracts"]["BERT"]["integration"]["repo"]
+    write(dataset[0], remote)
+    monkeypatch.setattr(fleet, "download_history", lambda name, rev: [])
+    commands.export(SimpleNamespace(workspace=workspace.root, execute=False))  # a preview never refuses
+    preview = json.loads(capsys.readouterr().out.strip().splitlines()[-1])
+    assert preview["history"] and "--execute needs --since" in preview["next"]
+    with pytest.raises(ValueError, match="moves pins"):
+        commands.export(SimpleNamespace(workspace=workspace.root, execute=True))
+    assert not dataset[1]
+    with pytest.raises(ValueError, match="full Transformers commit"):
+        commands.export(SimpleNamespace(workspace=workspace.root, execute=True, since="main"))
+    commands.export(SimpleNamespace(workspace=workspace.root, execute=True, since="5" * 40))
+    files = {op.path_in_repo: op.path_or_fileobj.decode() for op in dataset[1][0]["operations"]}
+    rows = files["control/history.csv"].splitlines()
+    assert rows[1].startswith("BERT,") and f",{old}," in rows[1] and rows[1].endswith("5" * 40)
+
+
 def test_export_rejects_case_collision_and_allows_explicit_name(workspace, dataset):
     approve_receipts(workspace)
     old = read(dataset[0])
