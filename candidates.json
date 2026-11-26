@@ -431,7 +431,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--A.X-K1-mic/snapshots/17772fdabaedb43741fd61c83502a58",
   "failure_kind": "Runtime traceback",
@@ -461,7 +462,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Apertus-v1.1-0.5B-Instruct-mic/snapshots/55ae98cbccd",
   "failure_kind": "Runtime traceback",
@@ -490,7 +492,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Beam-1.0-501B-A23B-mic/snapshots/c8d27ee41a00196c5a2",
   "failure_kind": "Runtime traceback",
@@ -520,7 +523,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Cosmos3-Nano-mic/snapshots/4c4a117fd8d6b13993505f86a",
   "failure_kind": "Runtime traceback",
@@ -550,7 +554,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--DeepSeek-Coder-V2-Lite-Instruct-mic/snapshots/90601f",
   "failure_kind": "Runtime traceback",
@@ -580,7 +585,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--DeepSeek-R1-mic/snapshots/89eddb3d8f9419e63b667eb7d5",
   "failure_kind": "Runtime traceback",
@@ -610,7 +616,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--DeepSeek-V3.2-mic/snapshots/17eb45ef3d184d06890f217e",
   "failure_kind": "Runtime traceback",
@@ -640,7 +647,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--DeepSeek-V4-Flash-0731-mic/snapshots/8a7f84badfbdb52",
   "failure_kind": "Runtime traceback",
@@ -665,7 +673,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--ERNIE-4.5-21B-A3B-PT-mic/snapshots/81560ba9801fe43d",
   "failure_kind": "Runtime traceback",
@@ -695,7 +704,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--ESMC-300M-hf-mic/snapshots/7c11c22ceffcbddb7fb1bb321",
   "failure_kind": "Runtime traceback",
@@ -725,7 +735,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--EuroBERT-210m-mic/snapshots/514cea1b679f118f051124ef",
   "failure_kind": "Runtime traceback",
@@ -755,7 +766,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Falcon-H1-Tiny-90M-Instruct-mic/snapshots/0db75b996c",
   "failure_kind": "Runtime traceback",
@@ -783,7 +795,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Flex-reddit-2x7B-1T-mic/snapshots/b3a97ed0d49776fc5b",
   "failure_kind": "Runtime traceback",
@@ -813,7 +826,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Florence-2-base-mic/snapshots/85c1b12e1d9565763f6f2b",
   "failure_kind": "Runtime traceback",
@@ -843,7 +857,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--GLM-4-9B-0414-mic/snapshots/140a76e1cd7001bc3d0aed3b",
   "failure_kind": "Runtime traceback",
@@ -873,7 +888,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--GLM-4.5-Air-mic/snapshots/abc7ea97d6d633936cfd54900e",
   "failure_kind": "Runtime traceback",
@@ -903,7 +919,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--GLM-4.7-Flash-mic/snapshots/8b4c9af3fc9e6a8325e3dade",
   "failure_kind": "Runtime traceback",
@@ -933,7 +950,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--GLM-5.3-Flash-mic/snapshots/53f3e5bd10a67d2c75a170a3",
   "failure_kind": "Runtime traceback",
@@ -963,7 +981,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--GLM-5.3-mic/snapshots/96f26155810f651ebf462d4478dc32",
   "failure_kind": "Runtime traceback",
@@ -993,7 +1012,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--GLM-OCR-mic/snapshots/08eddf7ae838d5d3b6b135b984c0e3",
   "failure_kind": "Runtime traceback",
@@ -1023,7 +1043,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Hunyuan-0.5B-Instruct-mic/snapshots/d7fe47dc3288bba1",
   "failure_kind": "Runtime traceback",
@@ -1053,7 +1074,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--HunyuanOCR-mic/snapshots/2b69a85316ef4335c59c1a82d62",
   "failure_kind": "Runtime traceback",
@@ -1083,7 +1105,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Hy-MT2-30B-A3B-mic/snapshots/8357a369b5aa965d0f486cb",
   "failure_kind": "Runtime traceback",
@@ -1106,7 +1129,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--HyperCLOVAX-SEED-Think-32B-mic/snapshots/baa15a8bee",
   "failure_kind": "Runtime traceback",
@@ -1136,7 +1160,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Inkling-mic/snapshots/06ce3d54ff614c8b427f9bc8f28b67",
   "failure_kind": "Runtime traceback",
@@ -1166,7 +1191,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Jamba-tiny-dev-mic/snapshots/d03ef8cc4d1f81b8af2ae68",
   "failure_kind": "Runtime traceback",
@@ -1196,7 +1222,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Janus-Pro-1B-mic/snapshots/5d0bfc05499ea83be331a434e",
   "failure_kind": "Runtime traceback",
@@ -1223,7 +1250,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Kimi-K2.5-mic/snapshots/ae31dfdce0342e9c0de660367be8",
   "failure_kind": "Runtime traceback",
@@ -1252,7 +1280,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Kolibri-1-mic/snapshots/bc6f4013f76cd986b24e539dd4f1",
   "failure_kind": "Runtime traceback",
@@ -1282,7 +1311,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--LCO-Embedding-Omni-3B-mic/snapshots/1e770f7015e573f2",
   "failure_kind": "Runtime traceback",
@@ -1312,7 +1342,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--LFM2-8B-A1B-mic/snapshots/02493cd540778260b98790f375",
   "failure_kind": "Runtime traceback",
@@ -1342,7 +1373,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--LFM2.5-230M-Base-mic/snapshots/d6697c673a52ed87ae4e8",
   "failure_kind": "Runtime traceback",
@@ -1372,7 +1404,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--LFM2.5-VL-450M-mic/snapshots/aa835f2f3e77faf16ec6e14",
   "failure_kind": "Runtime traceback",
@@ -1402,7 +1435,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--LLaVA-NeXT-Video-7B-hf-mic/snapshots/e025a3d15d2cc35",
   "failure_kind": "Runtime traceback",
@@ -1432,7 +1466,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Laguna-XS.2-mic/snapshots/40f82d0efe30b3843fb78b44a4",
   "failure_kind": "Runtime traceback",
@@ -1462,7 +1497,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-3.2-11B-Vision-Instruct-mic/snapshots/8071268e",
   "failure_kind": "Runtime traceback",
@@ -1492,7 +1528,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/18ed0f7",
   "failure_kind": "Runtime traceback",
@@ -1522,7 +1559,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--MOSS-Transcribe-Diarize-HF-mic/snapshots/10010f1a010",
   "failure_kind": "Runtime traceback",
@@ -1551,7 +1589,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--MiniCPM-OCR-1.0-mic/snapshots/194327781d681c6269645f",
   "failure_kind": "Runtime traceback",
@@ -1581,7 +1620,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--MiniCPM-V-4.6-mic/snapshots/2b48973e1d0a54725aaa8b8b",
   "failure_kind": "Runtime traceback",
@@ -1611,7 +1651,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--MiniCPM3-4B-mic/snapshots/874f11d622cb165e995468f15d",
   "failure_kind": "Runtime traceback",
@@ -1641,7 +1682,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--MiniMax-M2.5-mic/snapshots/5e9d65abcedbbc965c77d1f07",
   "failure_kind": "Runtime traceback",
@@ -1671,7 +1713,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--MiniMax-M3-MXFP8-mic/snapshots/802fe11fbbd76c2a9a90b",
   "failure_kind": "Runtime traceback",
@@ -1701,7 +1744,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Ministral-3-3B-Instruct-2512-mic/snapshots/444a971de",
   "failure_kind": "Runtime traceback",
@@ -1731,7 +1775,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Mistral-7B-Instruct-v0.2-mic/snapshots/90938461b4cb2",
   "failure_kind": "Runtime traceback",
@@ -1761,7 +1806,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Mixtral-8x7B-Instruct-v0.1-mic/snapshots/9c86dd7f51c",
   "failure_kind": "Runtime traceback",
@@ -1791,7 +1837,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Muse-Glimmer-30B-mic/snapshots/e50133513c96c5b9d341d",
   "failure_kind": "Runtime traceback",
@@ -1821,7 +1868,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--NVIDIA-Nemotron-3-Nano-4B-BF16-mic/snapshots/de69ee8",
   "failure_kind": "Runtime traceback",
@@ -1851,7 +1899,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Nemotron-3-Embed-1B-BF16-mic/snapshots/645864f9759d3",
   "failure_kind": "Runtime traceback",
@@ -1881,7 +1930,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--OLMo-1B-hf-mic/snapshots/87c81bd7d9f93663d9906bbde07",
   "failure_kind": "Runtime traceback",
@@ -1911,7 +1961,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--OLMo-2-0425-1B-mic/snapshots/7a6eea1e741066708957df8",
   "failure_kind": "Runtime traceback",
@@ -1941,7 +1992,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--OLMoE-1B-7B-0924-mic/snapshots/abd7fb026a08bdb27dfa8",
   "failure_kind": "Runtime traceback",
@@ -1971,7 +2023,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Olmo-3-7B-Instruct-mic/snapshots/3d2269c8c387b9dec2f",
   "failure_kind": "Runtime traceback",
@@ -2001,7 +2054,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Phi-3.5-MoE-0.8B-A0.2B-mic/snapshots/38df14197e6a9ed",
   "failure_kind": "Runtime traceback",
@@ -2031,7 +2085,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Phi-3.5-mini-instruct-mic/snapshots/0c7964e6c77b965e",
   "failure_kind": "Runtime traceback",
@@ -2061,7 +2116,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Phi-4-multimodal-instruct-mic/snapshots/721c204bb9a6",
   "failure_kind": "Runtime traceback",
@@ -2086,7 +2142,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--QianfanOCR-mic/snapshots/e69421f0a07e5a2a614d7e40df",
   "failure_kind": "Runtime traceback",
@@ -2116,7 +2173,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Qwen1.5-MoE-A2.7B-mic/snapshots/2fd4813071f2c23b7766",
   "failure_kind": "Runtime traceback",
@@ -2146,7 +2204,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Qwen2-VL-2B-Instruct-mic/snapshots/743a11f21777bbaac",
   "failure_kind": "Runtime traceback",
@@ -2176,7 +2235,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Qwen3-0.6B-mic/snapshots/f3c69d34835d4cf1d9aba9a08cd",
   "failure_kind": "Runtime traceback",
@@ -2206,7 +2266,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Qwen3-30B-A3B-mic/snapshots/02a209fca46248ff0b3da72e",
   "failure_kind": "Runtime traceback",
@@ -2236,7 +2297,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Qwen3-ASR-0.6B-hf-mic/snapshots/5254c4b0cdd357a60836",
   "failure_kind": "Runtime traceback",
@@ -2266,7 +2328,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Qwen3-Next-80B-A3B-Instruct-mic/snapshots/5ea34fc9ea",
   "failure_kind": "Runtime traceback",
@@ -2296,7 +2359,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Qwen3-VL-2B-Instruct-mic/snapshots/7e045dfc87cda2240",
   "failure_kind": "Runtime traceback",
@@ -2326,7 +2390,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Qwen3-VL-30B-A3B-Instruct-mic/snapshots/fce9290a8553",
   "failure_kind": "Runtime traceback",
@@ -2355,7 +2420,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Qwen3.5-0.8B-mic/snapshots/4f495bc381042c1d3493977f9",
   "failure_kind": "Runtime traceback",
@@ -2385,7 +2451,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Qwen3.5-0.8B-text-only-mic/snapshots/bd2c4be075e9bc8",
   "failure_kind": "Runtime traceback",
@@ -2415,7 +2482,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Qwen3.5-35B-A3B-mic/snapshots/ed07422cd83642a6d4b22f",
   "failure_kind": "Runtime traceback",
@@ -2445,7 +2513,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Qwen3.8-1.0B-A0.6B-mic/snapshots/9633d99d303ac2051fd",
   "failure_kind": "Runtime traceback",
@@ -2475,7 +2544,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Qwen3.8-Flash-Next-mic/snapshots/94230ccd8e73a5d0107",
   "failure_kind": "Runtime traceback",
@@ -2505,7 +2575,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Seed-OSS-36B-Instruct-mic/snapshots/5a7c613134e50c88",
   "failure_kind": "Runtime traceback",
@@ -2535,7 +2606,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--SmolLM3-3B-mic/snapshots/717fbb55a2a1e454d1de0cd85e1",
   "failure_kind": "Runtime traceback",
@@ -2565,7 +2637,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Unlimited-OCR-mic/snapshots/7b86520360914f84047e85b7",
   "failure_kind": "Runtime traceback",
@@ -2595,7 +2668,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--VibeVoice-1.5B-hf-mic/snapshots/a651225b62eeb6b3aa47",
   "failure_kind": "Runtime traceback",
@@ -2625,7 +2699,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Voxtral-Mini-3B-2507-mic/snapshots/88954b6754a54ae7b",
   "failure_kind": "Runtime traceback",
@@ -2655,7 +2730,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--albert-base-v2-mic/snapshots/61c7ad51ae2363e35fcb9e4",
   "failure_kind": "Runtime traceback",
@@ -2682,7 +2758,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--ast-finetuned-audioset-10-10-0.4593-mic/snapshots/91",
   "failure_kind": "Runtime traceback",
@@ -2712,7 +2789,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--audio-flamingo-3-hf-mic/snapshots/5e785e0943d8a895ca",
   "failure_kind": "Runtime traceback",
@@ -2742,7 +2820,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--aya-expanse-8b-ungated-mic/snapshots/ed87e2b6202ba7f",
   "failure_kind": "Runtime traceback",
@@ -2772,7 +2851,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--bart-base-mic/snapshots/1d300e47ad358f5882f422d8c0cf",
   "failure_kind": "Runtime traceback",
@@ -2802,7 +2882,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--beit-base-patch16-224-mic/snapshots/1a760472d6b5a9ad",
   "failure_kind": "Runtime traceback",
@@ -2832,7 +2913,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--bert-base-uncased-mic/snapshots/b22d1695360ee0c7764b",
   "failure_kind": "Runtime traceback",
@@ -2863,7 +2945,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--bert-base-uncased-mic/snapshots/faa5f7a24350db87b0b9",
   "failure_kind": "Runtime traceback",
@@ -2913,7 +2996,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--bert2bert-cnn_dailymail-fp16-mic/snapshots/4dc2839f1",
   "failure_kind": "Runtime traceback",
@@ -2942,7 +3026,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--bigbird-pegasus-large-arxiv-mic/snapshots/ef0748d06d",
   "failure_kind": "Runtime traceback",
@@ -2972,7 +3057,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--bigbird-roberta-base-mic/snapshots/5c8d7c34dc917be7d",
   "failure_kind": "Runtime traceback",
@@ -3002,7 +3088,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--blenderbot-400M-distill-mic/snapshots/3971683a079bd8",
   "failure_kind": "Runtime traceback",
@@ -3029,7 +3116,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--blip-image-captioning-base-mic/snapshots/40ea84c73c0",
   "failure_kind": "Runtime traceback",
@@ -3054,7 +3142,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--blip2-opt-2.7b-mic/snapshots/35cfe69ce3e1cc80d6e841",
   "failure_kind": "Runtime traceback",
@@ -3084,7 +3173,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--bloomz-560m-mic/snapshots/1fa586c833eadf22565c7300a1",
   "failure_kind": "Runtime traceback",
@@ -3114,7 +3204,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--camembert-base-mic/snapshots/20f8ae1a74c39ea94985475",
   "failure_kind": "Runtime traceback",
@@ -3136,7 +3227,8 @@
   "commits": [
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--canary-1b-v2-mic/snapshots/2d407a8cb145452f65de35e2",
   "failure_kind": "Runtime traceback",
@@ -3166,7 +3258,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--canine-c-mic/snapshots/74effe6821673648251eccbcce73a",
   "failure_kind": "Runtime traceback",
@@ -3196,7 +3289,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--chinese-clip-vit-base-patch16-mic/snapshots/e4f19250",
   "failure_kind": "Runtime traceback",
@@ -3226,7 +3320,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--clap-htsat-fused-mic/snapshots/fb8962e8a171e9824f1f2",
   "failure_kind": "Runtime traceback",
@@ -3276,7 +3371,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--clip-vit-base-patch32-mic/snapshots/51ae90d9c34bf49f",
   "failure_kind": "Runtime traceback",
@@ -3307,7 +3403,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--clip-vit-base-patch32-mic/snapshots/5eb92c4457ab6084",
   "failure_kind": "Runtime traceback",
@@ -3337,7 +3434,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--clip-vit-base-patch32-vision-mic/snapshots/b1084cb8a",
   "failure_kind": "Runtime traceback",
@@ -3367,7 +3465,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--clipseg-rd64-refined-mic/snapshots/5be0dc86183423129",
   "failure_kind": "Runtime traceback",
@@ -3392,7 +3491,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--codegen2-16B_P-mic/snapshots/1fea908e4ceb77a2c6a842",
   "failure_kind": "Runtime traceback",
@@ -3417,7 +3517,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--cohere-transcribe-03-2026-ungated-mic/snapshots/cdf",
   "failure_kind": "Runtime traceback",
@@ -3447,7 +3548,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--conv-bert-base-mic/snapshots/939ec1a4a34866f8fe83695",
   "failure_kind": "Runtime traceback",
@@ -3477,7 +3579,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--convnext-tiny-224-mic/snapshots/f5dae79dc4935e97ae29",
   "failure_kind": "Runtime traceback",
@@ -3507,7 +3610,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--convnextv2-nano-1k-224-mic/snapshots/6253e7d50f8fd09",
   "failure_kind": "Runtime traceback",
@@ -3537,7 +3641,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--csm-1b-mic/snapshots/ceb9f9aebdb8fe8d8aca3a3c51091ae",
   "failure_kind": "Runtime traceback",
@@ -3568,7 +3673,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--detr-mic/snapshots/91ff508188db759f2ee39ec64016a7e41",
   "failure_kind": "Runtime traceback",
@@ -3595,7 +3701,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--diffusiongemma-26B-A4B-it-mic/snapshots/31d4da992418",
   "failure_kind": "Runtime traceback",
@@ -3625,7 +3732,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--dinov2-small-mic/snapshots/770cc8e9a4eccc42eb2f4ea67",
   "failure_kind": "Runtime traceback",
@@ -3655,7 +3763,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--dinov2-with-registers-base-mic/snapshots/186e99a19d6",
   "failure_kind": "Runtime traceback",
@@ -3685,7 +3794,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--dinov3-vitl16-pretrain-lvd1689m-mic/snapshots/ba70f2",
   "failure_kind": "Runtime traceback",
@@ -3715,7 +3825,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--distilbert-base-uncased-mic/snapshots/c65e2b7864ac5e",
   "failure_kind": "Runtime traceback",
@@ -3745,7 +3856,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--docling-layout-heron-mic/snapshots/90eddb16945501098",
   "failure_kind": "Runtime traceback",
@@ -3775,7 +3887,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--dpt-large-mic/snapshots/fef05122ed4bc80c9abd66c8dfb1",
   "failure_kind": "Runtime traceback",
@@ -3805,7 +3918,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--electra-small-discriminator-mic/snapshots/d8fc7b1131",
   "failure_kind": "Runtime traceback",
@@ -3835,7 +3949,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--embeddinggemma-2-mic/snapshots/839a2b1f9c2b144e2203b",
   "failure_kind": "Runtime traceback",
@@ -3864,7 +3979,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--ernie-3.0-base-zh-mic/snapshots/1fbbc8112764d4e9db54",
   "failure_kind": "Runtime traceback",
@@ -3894,7 +4010,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--esm2_t6_8M_UR50D-mic/snapshots/d3655a4ee0f1b139a1526",
   "failure_kind": "Runtime traceback",
@@ -3924,7 +4041,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--falcon-7b-mic/snapshots/c2ffcf79ca756a8157331b274fea",
   "failure_kind": "Runtime traceback",
@@ -3954,7 +4072,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--flint-mic/snapshots/0ef1e43061d0ad8938cba0541525c164",
   "failure_kind": "Runtime traceback",
@@ -3984,7 +4103,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--gemma-2-2b-it-mic/snapshots/e3af84449295759dc428e547",
   "failure_kind": "Runtime traceback",
@@ -4014,7 +4134,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--gemma-2b-mic/snapshots/7ce6a0c1274da42dd2eb5c07e703e",
   "failure_kind": "Runtime traceback",
@@ -4044,7 +4165,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--gemma-3n-E2B-it-mic/snapshots/bd78bb3f74709093f27ded",
   "failure_kind": "Runtime traceback",
@@ -4074,7 +4196,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--gemma-4-12B-it-mic/snapshots/a190e22989d3fddef2c5134",
   "failure_kind": "Runtime traceback",
@@ -4104,7 +4227,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--gemma-4-E2B-it-mic/snapshots/633dbd103d5cfb02c5946a8",
   "failure_kind": "Runtime traceback",
@@ -4124,7 +4248,8 @@
  "47773#huggingface-mic/gemma-vllm-mic|gemma-vllm-mic|default|": {
   "case": "huggingface-mic/gemma-vllm-mic|gemma-vllm-mic|default|",
   "commits": [
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 349, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--gemma-vllm-mic/snapshots/47ef39bb1df74db7629b0efad8",
   "failure_kind": "Runtime traceback",
@@ -4144,7 +4269,8 @@
  "47773#huggingface-mic/gemma2-vllm-mic|gemma2-vllm-mic|default|": {
   "case": "huggingface-mic/gemma2-vllm-mic|gemma2-vllm-mic|default|",
   "commits": [
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 349, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--gemma2-vllm-mic/snapshots/96ad06c0120df0054a132091b",
   "failure_kind": "Runtime traceback",
@@ -4175,7 +4301,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--gemma3-mic/snapshots/12052f92b23dcb6f3ae6b89881dfc84",
   "failure_kind": "Runtime traceback",
@@ -4195,7 +4322,8 @@
  "47773#huggingface-mic/gemma3-vllm-mic|gemma3-vllm-mic|default|": {
   "case": "huggingface-mic/gemma3-vllm-mic|gemma3-vllm-mic|default|",
   "commits": [
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 349, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--gemma3-vllm-mic/snapshots/cbe5e5f20dfcaa1d5219c2cb4",
   "failure_kind": "Runtime traceback",
@@ -4226,7 +4354,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--got_ocr2-mic/snapshots/13570a6693de3946b85a71cb0fdf6",
   "failure_kind": "Runtime traceback",
@@ -4251,7 +4380,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--gpt-j-6b-mic/snapshots/870f261d75901eab7f51775411da",
   "failure_kind": "Runtime traceback",
@@ -4278,7 +4408,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--gpt-neo-125m-mic/snapshots/894fe2b5fe76e9bc71b6512da",
   "failure_kind": "Runtime traceback",
@@ -4309,7 +4440,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--gpt2-mic/snapshots/47b38229fd919519fd16cd355a8e7c492",
   "failure_kind": "Runtime traceback",
@@ -4340,7 +4472,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--gpt_oss-mic/snapshots/adb29e36a5bb98d7bc0729ddf90698",
   "failure_kind": "Runtime traceback",
@@ -4370,7 +4503,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--granite-3.0-1b-a400m-instruct-mic/snapshots/94e400b5",
   "failure_kind": "Runtime traceback",
@@ -4400,7 +4534,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--granite-3.1-2b-instruct-mic/snapshots/4aaf41e77f9e0d",
   "failure_kind": "Runtime traceback",
@@ -4430,7 +4565,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--granite-4.0-1b-speech-mic/snapshots/15329050e1ffa3cd",
   "failure_kind": "Runtime traceback",
@@ -4460,7 +4596,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--granite-4.0-h-350m-mic/snapshots/83dded3d062dd73ed24",
   "failure_kind": "Runtime traceback",
@@ -4490,7 +4627,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--granite-docling-258M-mic/snapshots/100175103449d7ed8",
   "failure_kind": "Runtime traceback",
@@ -4520,7 +4658,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--granite-vision-4.1-4b-mic/snapshots/a6d32301c1b54aa5",
   "failure_kind": "Runtime traceback",
@@ -4550,7 +4689,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--grounding-dino-tiny-mic/snapshots/fb35353454540cd677",
   "failure_kind": "Runtime traceback",
@@ -4580,7 +4720,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--hubert-large-ls960-ft-mic/snapshots/5f4ea3f40f370b2a",
   "failure_kind": "Runtime traceback",
@@ -4600,7 +4741,8 @@
  "47773#huggingface-mic/idefics2-8b-base-mic|idefics2-8b-base-mic|bfloat16|": {
   "case": "huggingface-mic/idefics2-8b-base-mic|idefics2-8b-base-mic|bfloat16|",
   "commits": [
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 349, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--idefics2-8b-base-mic/snapshots/f7b760510a4e792cf53f",
   "failure_kind": "Runtime traceback",
@@ -4631,7 +4773,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--internvl-mic/snapshots/a3cf780afaa89f6ba3a0d4d9a20c3",
   "failure_kind": "Runtime traceback",
@@ -4658,7 +4801,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--jetmoe-8b-mic/snapshots/64efd7d2ba3ae380c4b0fc238fa9",
   "failure_kind": "Runtime traceback",
@@ -4688,7 +4832,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--jina-embeddings-v3-hf-mic/snapshots/7288a7adb5335fb7",
   "failure_kind": "Runtime traceback",
@@ -4718,7 +4863,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--language-perceiver-mic/snapshots/f1dbe4ac9ce0309e240",
   "failure_kind": "Runtime traceback",
@@ -4748,7 +4894,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--layoutlm-base-uncased-mic/snapshots/7aa363dd7f97db62",
   "failure_kind": "Runtime traceback",
@@ -4779,7 +4926,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--llama-mic/snapshots/756d01c0b733e950e6f4de51c9443539",
   "failure_kind": "Runtime traceback",
@@ -4799,7 +4947,8 @@
  "47773#huggingface-mic/llama-vllm-mic|llama-vllm-mic|default|": {
   "case": "huggingface-mic/llama-vllm-mic|llama-vllm-mic|default|",
   "commits": [
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 349, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--llama-vllm-mic/snapshots/58449dd535e8d04cb5ac8553db",
   "failure_kind": "Runtime traceback",
@@ -4830,7 +4979,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--llava-mic/snapshots/0fdcc8328bb598bbd85a99daf632a2da",
   "failure_kind": "Runtime traceback",
@@ -4850,7 +5000,8 @@
  "47773#huggingface-mic/llava-next-mistral-vllm-mic|llava-next-mistral-vllm-mic|default|": {
   "case": "huggingface-mic/llava-next-mistral-vllm-mic|llava-next-mistral-vllm-mic|default|",
   "commits": [
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 349, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--llava-next-mistral-vllm-mic/snapshots/4a2e8334f1808",
   "failure_kind": "Runtime traceback",
@@ -4880,7 +5031,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--llava-onevision-qwen2-0.5b-ov-hf-mic/snapshots/c8d8d",
   "failure_kind": "Runtime traceback",
@@ -4900,7 +5052,8 @@
  "47773#huggingface-mic/llava-onevision-qwen2-vllm-mic|llava-onevision-qwen2-vllm-mic|default|": {
   "case": "huggingface-mic/llava-onevision-qwen2-vllm-mic|llava-onevision-qwen2-vllm-mic|default|",
   "commits": [
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 349, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--llava-onevision-qwen2-vllm-mic/snapshots/3c90cc6c31",
   "failure_kind": "Runtime traceback",
@@ -4930,7 +5083,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--llava-v1.6-mistral-7b-hf-mic/snapshots/2575b1c20c767",
   "failure_kind": "Runtime traceback",
@@ -4960,7 +5114,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--long-t5-tglobal-base-mic/snapshots/04d69ed32e31d0ce6",
   "failure_kind": "Runtime traceback",
@@ -4990,7 +5145,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--longformer-base-4096-mic/snapshots/5e8ae916a99590068",
   "failure_kind": "Runtime traceback",
@@ -5020,7 +5176,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--luke-base-mic/snapshots/a6523b6d3c3d3febf13db2fe8c7c",
   "failure_kind": "Runtime traceback",
@@ -5050,7 +5207,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--mDeBERTa-v3-base-xnli-multilingual-nli-2mil7-mic/sna",
   "failure_kind": "Runtime traceback",
@@ -5080,7 +5238,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--mamba-130m-hf-mic/snapshots/049c3bff1eb71679fcc5bf5f",
   "failure_kind": "Runtime traceback",
@@ -5105,7 +5264,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--manga-ocr-base-mic/snapshots/94e5f425647758037304e4",
   "failure_kind": "Runtime traceback",
@@ -5135,7 +5295,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--mask2former-swin-tiny-coco-instance-mic/snapshots/85",
   "failure_kind": "Runtime traceback",
@@ -5165,7 +5326,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--mbart-large-50-mic/snapshots/ef21bcc00bb0aac630f0218",
   "failure_kind": "Runtime traceback",
@@ -5185,7 +5347,8 @@
  "47773#huggingface-mic/mistral-7b-instruct-v0.2-vllm-mic|mistral-7b-instruct-v0.2-vllm-mic|default|": {
   "case": "huggingface-mic/mistral-7b-instruct-v0.2-vllm-mic|mistral-7b-instruct-v0.2-vllm-mic|default|",
   "commits": [
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 349, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--mistral-7b-instruct-v0.2-vllm-mic/snapshots/4be1a4c",
   "failure_kind": "Runtime traceback",
@@ -5216,7 +5379,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--mistral3-mic/snapshots/5d6b31a7548b1dc4c1255f42cbe8d",
   "failure_kind": "Runtime traceback",
@@ -5246,7 +5410,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--mm_grounding_dino_tiny_o365v1_goldg_v3det-mic/snapsh",
   "failure_kind": "Runtime traceback",
@@ -5271,7 +5436,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--mobilebert-uncased-mic/snapshots/ea4858ffb8ede324a9",
   "failure_kind": "Runtime traceback",
@@ -5301,7 +5467,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--mobilenet_v2_1.0_224-mic/snapshots/6938bb7a591f10a66",
   "failure_kind": "Runtime traceback",
@@ -5332,7 +5499,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--mobilevit-xx-small-mic/snapshots/f6493430a6343708c79",
   "failure_kind": "Runtime traceback",
@@ -5363,7 +5531,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--modernbert-mic/snapshots/52ba11fb809465524dae87fb412",
   "failure_kind": "Runtime traceback",
@@ -5393,7 +5562,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--mpnet-base-mic/snapshots/9d98c3d72a6cae57a9f3ed7f52c",
   "failure_kind": "Runtime traceback",
@@ -5423,7 +5593,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--mt5-small-mic/snapshots/13bc3e6cb33e75d32f533822c690",
   "failure_kind": "Runtime traceback",
@@ -5447,7 +5618,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--nemotron3-8b-mic/snapshots/17038aefec754a13dda2cca2",
   "failure_kind": "Runtime traceback",
@@ -5477,7 +5649,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--nllb-200-distilled-600M-mic/snapshots/fcaaa8d89cb3bc",
   "failure_kind": "Runtime traceback",
@@ -5507,7 +5680,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--nomic-embed-text-v1.5-mic/snapshots/2cbaf2971908b9ad",
   "failure_kind": "Runtime traceback",
@@ -5532,7 +5706,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--nsfw_image_detector-mic/snapshots/a289ef28ebd1405b1",
   "failure_kind": "Runtime traceback",
@@ -5557,7 +5732,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--oneformer_ade20k_swin_tiny-mic/snapshots/585a3c3c28",
   "failure_kind": "Runtime traceback",
@@ -5587,7 +5763,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--opt-125m-mic/snapshots/8e66dde8898523465a14341a6adfe",
   "failure_kind": "Runtime traceback",
@@ -5617,7 +5794,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--opus-mt-fr-en-mic/snapshots/d09105cda74d27a8ab952466",
   "failure_kind": "Runtime traceback",
@@ -5647,7 +5825,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--owlv2-base-patch16-ensemble-mic/snapshots/de5f6eb0e6",
   "failure_kind": "Runtime traceback",
@@ -5677,7 +5856,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--owlvit-base-patch32-mic/snapshots/09d714a0dd1f21dcf2",
   "failure_kind": "Runtime traceback",
@@ -5707,7 +5887,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--paligemma-3b-pt-224-mic/snapshots/adfd7e09d295b39ddf",
   "failure_kind": "Runtime traceback",
@@ -5733,7 +5914,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--parakeet-tdt-0.6b-v3-mic/snapshots/8f66b9fa7c0ddeae0",
   "failure_kind": "Runtime traceback",
@@ -5757,7 +5939,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--pegasus-x-base-mic/snapshots/802afb4a8b099409006c7c",
   "failure_kind": "Runtime traceback",
@@ -5787,7 +5970,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--pegasus-xsum-mic/snapshots/3703172718d029fd3c19c9339",
   "failure_kind": "Runtime traceback",
@@ -5817,7 +6001,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--phi-2-mic/snapshots/af26f3c429a4d873dfe9c7fdc51fc78a",
   "failure_kind": "Runtime traceback",
@@ -5839,7 +6024,8 @@
   "commits": [
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--plbart-java-cs-mic/snapshots/ed5a986dc11621c51394ae",
   "failure_kind": "Runtime traceback",
@@ -5868,7 +6054,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--poolformer_s12-mic/snapshots/c6f3c06c7b9d8df96e63f8f",
   "failure_kind": "Runtime traceback",
@@ -5898,7 +6085,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--privacy-filter-mic/snapshots/ad3dba8d001d1fe12c03328",
   "failure_kind": "Runtime traceback",
@@ -5920,7 +6108,8 @@
   "commits": [
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--prophetnet-large-uncased-cnndm-mic/snapshots/bc7ff8",
   "failure_kind": "Runtime traceback",
@@ -5950,7 +6139,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--pvt-tiny-224-mic/snapshots/e087920fd4476617018c160cd",
   "failure_kind": "Runtime traceback",
@@ -5980,7 +6170,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--pythia-160m-mic/snapshots/f21c9ac8c4e817ebcf9cb29637",
   "failure_kind": "Runtime traceback",
@@ -6000,7 +6191,8 @@
  "47773#huggingface-mic/qwen2-audio-vllm-mic|qwen2-audio-vllm-mic|default|": {
   "case": "huggingface-mic/qwen2-audio-vllm-mic|qwen2-audio-vllm-mic|default|",
   "commits": [
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 349, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--qwen2-audio-vllm-mic/snapshots/69d5adbdf967302e50db",
   "failure_kind": "Runtime traceback",
@@ -6031,7 +6223,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--qwen2-mic/snapshots/a730a1757ff7dd710c418be07d064c8a",
   "failure_kind": "Runtime traceback",
@@ -6051,7 +6244,8 @@
  "47773#huggingface-mic/qwen2-vl-vllm-mic|qwen2-vl-vllm-mic|default|": {
   "case": "huggingface-mic/qwen2-vl-vllm-mic|qwen2-vl-vllm-mic|default|",
   "commits": [
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 349, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--qwen2-vl-vllm-mic/snapshots/7e5a8bf20a778ec9f6fc46e",
   "failure_kind": "Runtime traceback",
@@ -6071,7 +6265,8 @@
  "47773#huggingface-mic/qwen2-vllm-mic|qwen2-vllm-mic|default|": {
   "case": "huggingface-mic/qwen2-vllm-mic|qwen2-vllm-mic|default|",
   "commits": [
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 349, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--qwen2-vllm-mic/snapshots/59965c0f8498f52b87ed04de9a",
   "failure_kind": "Runtime traceback",
@@ -6091,7 +6286,8 @@
  "47773#huggingface-mic/qwen2.5-vl-vllm-mic|qwen2.5-vl-vllm-mic|default|": {
   "case": "huggingface-mic/qwen2.5-vl-vllm-mic|qwen2.5-vl-vllm-mic|default|",
   "commits": [
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 349, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--qwen2.5-vl-vllm-mic/snapshots/b700ed7c8d07662a2392b",
   "failure_kind": "Runtime traceback",
@@ -6122,7 +6318,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--qwen2_5_omni-mic/snapshots/ac475da445d932851d232de6d",
   "failure_kind": "Runtime traceback",
@@ -6153,7 +6350,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--qwen2_5_vl-mic/snapshots/72f0308fad67226b608b112c3c4",
   "failure_kind": "Runtime traceback",
@@ -6184,7 +6382,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--qwen2_audio-mic/snapshots/ddbba27766a5b9ca722377470d",
   "failure_kind": "Runtime traceback",
@@ -6204,7 +6403,8 @@
  "47773#huggingface-mic/qwen3-vl-vllm-mic|qwen3-vl-vllm-mic|default|": {
   "case": "huggingface-mic/qwen3-vl-vllm-mic|qwen3-vl-vllm-mic|default|",
   "commits": [
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 349, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--qwen3-vl-vllm-mic/snapshots/e0f7688cb7f89a101cda71a",
   "failure_kind": "Runtime traceback",
@@ -6224,7 +6424,8 @@
  "47773#huggingface-mic/qwen3-vllm-mic|qwen3-vllm-mic|default|": {
   "case": "huggingface-mic/qwen3-vllm-mic|qwen3-vllm-mic|default|",
   "commits": [
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 349, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--qwen3-vllm-mic/snapshots/8a3894b19fae708e3315f7d479",
   "failure_kind": "Runtime traceback",
@@ -6254,7 +6455,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--recurrentgemma-2b-mic/snapshots/732c0b9399dcbbdb7c80",
   "failure_kind": "Runtime traceback",
@@ -6284,7 +6486,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--resnet-18-mic/snapshots/79f17282337052447d8e69c74df9",
   "failure_kind": "Runtime traceback",
@@ -6314,7 +6517,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--roberta-base-mic/snapshots/ff3c8d1292ae8885553023bad",
   "failure_kind": "Runtime traceback",
@@ -6344,7 +6548,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--rtdetr_r50vd-mic/snapshots/9bc7eba908d814482f1d455d1",
   "failure_kind": "Runtime traceback",
@@ -6365,7 +6570,8 @@
   "case": "huggingface-mic/s2t-small-librispeech-asr-mic|s2t-small-librispeech-asr-mic|bfloat16|",
   "commits": [
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--s2t-small-librispeech-asr-mic/snapshots/88acd7a6239",
   "failure_kind": "Runtime traceback",
@@ -6395,7 +6601,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--sam2.1-hiera-tiny-mic/snapshots/e740a31c3d860e3d217f",
   "failure_kind": "Runtime traceback",
@@ -6425,7 +6632,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--seamless-m4t-v2-large-mic/snapshots/5a9b85832b6a187b",
   "failure_kind": "Runtime traceback",
@@ -6455,7 +6663,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--segformer-b0-finetuned-ade-512-512-mic/snapshots/667",
   "failure_kind": "Runtime traceback",
@@ -6485,7 +6694,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--siglip-base-patch16-224-mic/snapshots/13fcabe2240b7f",
   "failure_kind": "Runtime traceback",
@@ -6515,7 +6725,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--smollm-mic/snapshots/d0da7b30e6c71b294e950e4abdbc7b8",
   "failure_kind": "Runtime traceback",
@@ -6546,7 +6757,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--smollm-mic/snapshots/39a8a2e580277c904e7d9737302b408",
   "failure_kind": "Runtime traceback",
@@ -6576,7 +6788,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--smollm-mic/snapshots/d0da7b30e6c71b294e950e4abdbc7b8",
   "failure_kind": "Runtime traceback",
@@ -6607,7 +6820,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--smollm-mic/snapshots/39a8a2e580277c904e7d9737302b408",
   "failure_kind": "Runtime traceback",
@@ -6638,7 +6852,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--smolvlm-mic/snapshots/3ebe5640dc5177d743ecf11d8333c0",
   "failure_kind": "Runtime traceback",
@@ -6669,7 +6884,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--speech_t5-mic/snapshots/3c78a9c3bc885d435b92cd619cfe",
   "failure_kind": "Runtime traceback",
@@ -6699,7 +6915,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--stablelm-2-1_6b-mic/snapshots/eec0b53366b61c85645d4c",
   "failure_kind": "Runtime traceback",
@@ -6729,7 +6946,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--starcoder2-3b-mic/snapshots/f158c5574331920c1b49c844",
   "failure_kind": "Runtime traceback",
@@ -6759,7 +6977,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--swin-tiny-patch4-window7-224-mic/snapshots/89ae45d56",
   "failure_kind": "Runtime traceback",
@@ -6789,7 +7008,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--swinv2-tiny-patch4-window16-256-mic/snapshots/8c9975",
   "failure_kind": "Runtime traceback",
@@ -6817,7 +7037,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--switch-base-8-mic/snapshots/de4a0b8ab69bc53b1d8b936a",
   "failure_kind": "Runtime traceback",
@@ -6867,7 +7088,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--t5-small-mic/snapshots/4f5dcdc6040660035cd0f86a88672",
   "failure_kind": "Runtime traceback",
@@ -6898,7 +7120,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--t5-small-mic/snapshots/4a35f4f7e20ff5839f0de0050b928",
   "failure_kind": "Runtime traceback",
@@ -6928,7 +7151,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--t5-small-mic/snapshots/4f5dcdc6040660035cd0f86a88672",
   "failure_kind": "Runtime traceback",
@@ -6959,7 +7183,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--t5-small-mic/snapshots/4a35f4f7e20ff5839f0de0050b928",
   "failure_kind": "Runtime traceback",
@@ -6990,7 +7215,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--table_transformer-mic/snapshots/cf9bc0c263aa4a971241",
   "failure_kind": "Runtime traceback",
@@ -7020,7 +7246,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--tibetan-ocr-mic/snapshots/78b84a91abf7da0acb2773e935",
   "failure_kind": "Runtime traceback",
@@ -7050,7 +7277,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--timesfm-2.0-500m-pytorch-mic/snapshots/d9e2f9e3ea410",
   "failure_kind": "Runtime traceback",
@@ -7080,7 +7308,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--tiny-random-aya-base-mic/snapshots/42e97ac577e1e82f7",
   "failure_kind": "Runtime traceback",
@@ -7110,7 +7339,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--tiny_starcoder_py-mic/snapshots/0ad90af0e2e20c84f246",
   "failure_kind": "Runtime traceback",
@@ -7139,7 +7369,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--vaultgemma-1b-mic/snapshots/f2eb4eb94bd5bf0150f1eeb6",
   "failure_kind": "Runtime traceback",
@@ -7159,7 +7390,8 @@
  "47773#huggingface-mic/vaultgemma-vllm-mic|vaultgemma-vllm-mic|default|": {
   "case": "huggingface-mic/vaultgemma-vllm-mic|vaultgemma-vllm-mic|default|",
   "commits": [
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 349, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--vaultgemma-vllm-mic/snapshots/a3a1a601540d57cefb4f2",
   "failure_kind": "Runtime traceback",
@@ -7184,7 +7416,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--videomae-base-mic/snapshots/219b880691a03b3170d296d",
   "failure_kind": "Runtime traceback",
@@ -7209,7 +7442,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--vip-llava-7b-hf-mic/snapshots/5936cc60da0d85c8b3c49",
   "failure_kind": "Runtime traceback",
@@ -7240,7 +7474,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--vit-mic/snapshots/a6d3f2396e5c8acf9a25d65cb31cf41cca",
   "failure_kind": "Runtime traceback",
@@ -7270,7 +7505,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--vitmatte-small-composition-1k-mic/snapshots/61792a27",
   "failure_kind": "Runtime traceback",
@@ -7300,7 +7536,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--wav2vec2-base-960h-mic/snapshots/889c4c48f746571cbbd",
   "failure_kind": "Runtime traceback",
@@ -7331,7 +7568,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--wav2vec2-base-960h-mic/snapshots/d77fbf722169d5fbf4c",
   "failure_kind": "Runtime traceback",
@@ -7356,7 +7594,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformers_mic/_backend/run.py\", line 323, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--wav2vec2-conformer-rope-large-960h-ft-mic/snapshots",
   "failure_kind": "Runtime traceback",
@@ -7406,7 +7645,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--wavlm-base-plus-mic/snapshots/8d92e94ee48ac2befe6f39",
   "failure_kind": "Runtime traceback",
@@ -7437,7 +7677,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--whisper-mic/snapshots/677db2459e5166f14fb8ac65e47386",
   "failure_kind": "Runtime traceback",
@@ -7467,7 +7708,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--whisper-tiny-mic/snapshots/9d85803a8fb0226794764f4b1",
   "failure_kind": "Runtime traceback",
@@ -7498,7 +7740,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 308, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--whisper-tiny-mic/snapshots/7eee73ba0b2d57adb35894f52",
   "failure_kind": "Runtime traceback",
@@ -7528,7 +7771,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--xlm-roberta-base-mic/snapshots/934d2300ab3a3eb5acc9c",
   "failure_kind": "Runtime traceback",
@@ -7558,7 +7802,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--xlm-roberta-xl-mic/snapshots/54cda088a6d8425f8172bc7",
   "failure_kind": "Runtime traceback",
@@ -7588,7 +7833,8 @@
    "3a3b29da5501e807bb00269d55fa6aedb096a132",
    "ba600901348d67f72f271376dd797a32332a3683",
    "16a0d30ad6948e2907275b513d8ef82c205896be",
-   "729b0835696afcb63ab03b696e0fd75c5b696e44"
+   "729b0835696afcb63ab03b696e0fd75c5b696e44",
+   "61ccb1718992af65aa3fde6b75ee0f1adecfab9f"
   ],
   "failure": "Traceback (most recent call last):\n  File \"/usr/local/lib/python3.11/site-packages/transformersci/contracts/run.py\", line 314, in execute_inline\n    exec(compile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--yolos-small-mic/snapshots/908c43a6393a98f01b4a828f7c",
   "failure_kind": "Runtime traceback",

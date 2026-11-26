@@ -15,8 +15,8 @@
  },
  "drafts_per_day": 2,
  "false_alarms": {
-  "prs_not_their_fault": 241,
-  "prs_with_failure": 300
+  "prs_not_their_fault": 247,
+  "prs_with_failure": 306
  },
  "merged_gate": {
   "blocked": 2,
@@ -25,8 +25,8 @@
    "real": 2,
    "to-review": 0
   },
-  "merged": 150,
-  "pending": 0,
+  "merged": 300,
+  "pending": 7,
   "rows": [
    {
     "cases": [
@@ -61,7 +61,7 @@
    "2026-10-27",
    "2026-11-26"
   ],
-  "with_red": 51
+  "with_red": 60
  },
  "missed": {
   "awaiting_verdict": 39,
