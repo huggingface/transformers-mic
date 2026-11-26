@@ -30,6 +30,11 @@ def short(contract):
     return contract.split("/")[-1].removesuffix("-integration")
 
 
+def target(record):
+    """The target, with its input case when the contract declares cases."""
+    return record["target"] if record.get("case") is None else f"{record['target']} [{record['case']}]"
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("results", type=Path)
@@ -87,7 +92,7 @@ def main():
             else:
                 detail = first_line(r.get("failures"))
             out.append(
-                f"| {ICON.get(r['status'], r['status'])} | {r.get('contract_name', short(r['contract']))} | `{r['target']}` | {r.get('platform', '')} | {detail} |"
+                f"| {ICON.get(r['status'], r['status'])} | {r.get('contract_name', short(r['contract']))} | `{target(r)}` | {r.get('platform', '')} | {detail} |"
             )
     bad = [r for r in records if r["status"] in ("fail", "error")]
     if bad:
@@ -97,8 +102,10 @@ def main():
             command = f"{args.runner}{framework} --fixtures-only{lock} --contract {r.get('contract_name', short(r['contract']))} --target {r['target']}"
             if r.get("variant", "default") != "default":
                 command += f" --variant {r['variant']}"
+            if r.get("case") is not None:
+                command += f" --case {r['case']}"
             out += [
-                f"**{r.get('contract_name', short(r['contract']))} / `{r['target']}`** ({r['status']}; baseline `{r.get('baseline', 'none')}`)",
+                f"**{r.get('contract_name', short(r['contract']))} / `{target(r)}`** ({r['status']}; baseline `{r.get('baseline', 'none')}`)",
                 "",
                 "```",
                 *(f.rstrip() for f in r.get("failures", [])[:5]),

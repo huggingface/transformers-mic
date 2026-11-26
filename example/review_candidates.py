@@ -4,7 +4,7 @@
     python example/review_candidates.py --framework transformers --platform cpu-arm64
     python example/review_candidates.py --framework transformers --approve       # rename the clean ones
 
-For each <target>[.<variant>].candidate.json under expectations/, compare it
+For each <target>[.<case>][.<variant>].candidate.json under expectations/, compare it
 with the approved baseline next to it, using the contract's own comparison
 rules (manifest plus the platform's tolerances.json):
 

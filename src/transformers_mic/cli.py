@@ -395,6 +395,7 @@ No Git commit or framework PR is created automatically.""",
         run.add_argument("--all-variants", action="store_true")
         run.add_argument("--isolate", action="store_true")
         run.add_argument("--target", action="append")
+        run.add_argument("--case", action="append", help="Only this input case (repeatable; default: every case)")
         if name == "check":
             run.add_argument(
                 "--lock",
@@ -605,6 +606,8 @@ def external_check(args):
     ]
     for target in args.target or []:
         options += ["--target", target]
+    for case in getattr(args, "case", None) or []:
+        options += ["--case", case]
     if args.isolate:
         options.append("--isolate")
     if args.fixtures_only:

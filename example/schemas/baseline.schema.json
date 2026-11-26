@@ -37,6 +37,13 @@
     "variant": {
      "type": "string"
     },
+    "case": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "the input case recorded; null when the contract declares no cases; absent in baselines recorded before cases existed (read as the default case)"
+    },
     "framework": {
      "type": "string"
     },

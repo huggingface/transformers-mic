@@ -229,6 +229,24 @@
        "type": "object"
       }
      },
+     "cases": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+       "pattern": "^[A-Za-z0-9_-]+$"
+      },
+      "additionalProperties": {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "default": {
+         "type": "boolean",
+         "description": "the case that feeds the inputs the contract fed before it declared cases: it keeps the case-free baseline names (at most one)"
+        }
+       }
+      },
+      "description": "input cases (e.g. text, image, text_image): unlike variants, every case runs for every target and variant, with MIC_CASE set, and has its own result and baseline; a case may not share a variant's name"
+     },
      "training": {
       "type": "boolean"
      },
