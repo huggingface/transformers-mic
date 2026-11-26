@@ -19,14 +19,14 @@
   "prs_with_failure": 300
  },
  "merged_gate": {
-  "blocked": 1,
+  "blocked": 2,
   "flags": {
    "false-positive": 0,
-   "real": 1,
+   "real": 2,
    "to-review": 0
   },
   "merged": 150,
-  "pending": 13,
+  "pending": 0,
   "rows": [
    {
     "cases": [
@@ -41,9 +41,22 @@
     "source": "gate",
     "title": "\ud83d\udea8 Rework slightly subprocessor loading",
     "why": "red on main after the merge"
+   },
+   {
+    "cases": [
+     "GLM5Next/GLM-5.3-Flash-mic [bfloat16]"
+    ],
+    "failure": "answer_logits: max delta 0.00781 over tolerance",
+    "flag": "real",
+    "merged": "2026-11-20",
+    "pr": "50975",
+    "run": "https://github.com/huggingface/transformers/actions/runs/44575416194",
+    "source": "replay",
+    "title": "Always ensure correct dtype for _keep_in_fp32_modules_strict",
+    "why": "red on main after the merge"
    }
   ],
-  "unmeasured": 0,
+  "unmeasured": 1,
   "window": [
    "2026-10-27",
    "2026-11-26"

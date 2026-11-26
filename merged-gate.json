@@ -500,6 +500,7 @@
   "merge_commit": "944d028d0e3470b7bbfb98aba681a0ebf2b3e15c",
   "merged_at": "2026-11-03T13:09:21Z",
   "pr": "50294",
+  "reason": "944d028d0e3470b7bbfb98aba681a0ebf2b3e15c^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0', 'transformers-mlinter==0.1.5']' returned non-zero exit st",
   "red": [
    {
     "contract": "Granite",
@@ -518,11 +519,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45868806493",
   "run_id": 41586441790,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/41586441790",
   "source": "replay",
   "title": "upgrade version for mamba-ssm and fla kernel",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "50295": {
@@ -548,6 +550,7 @@
   "merge_commit": "fe4a46771d2d38ffb047a2cab797d3848303cd4c",
   "merged_at": "2026-11-24T11:44:49Z",
   "pr": "50317",
+  "reason": "1 red on the base too",
   "red": [
    {
     "contract": "GLM5Next",
@@ -558,11 +561,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45868806493",
   "run_id": 44764340882,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44764340882",
   "source": "replay",
   "title": "[PR1] [Modular Clean-Up] Remove No-op Overrides",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50348": {
@@ -836,6 +840,7 @@
   "merge_commit": "94779e00c693452db3ae9e6a6027b5fead1ff3e8",
   "merged_at": "2026-11-20T18:04:30Z",
   "pr": "50754",
+  "reason": "4 red on the base too",
   "red": [
    {
     "contract": "CodeGen2",
@@ -870,11 +875,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45868806493",
   "run_id": 44780489632,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44780489632",
   "source": "replay",
   "title": "Restore sorting of sampled beam candidates before finalization",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50818": {
@@ -884,6 +890,7 @@
   "merge_commit": "32607642d06a2490c0e3230ba4618d317595b555",
   "merged_at": "2026-11-20T16:22:53Z",
   "pr": "50818",
+  "reason": "3 red on the base too",
   "red": [
    {
     "contract": "CodeGen2",
@@ -910,11 +917,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45868806493",
   "run_id": 44734340189,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44734340189",
   "source": "replay",
   "title": "Fix apply_chat_template with message objects",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50869": {
@@ -956,6 +964,7 @@
   "merge_commit": "f2c9ee2401bce932d38d48eafde581a65af7fcc9",
   "merged_at": "2026-11-20T18:20:16Z",
   "pr": "50890",
+  "reason": "4 red on the base too",
   "red": [
    {
     "contract": "CodeGen2",
@@ -990,11 +999,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45868806493",
   "run_id": 44777605745,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44777605745",
   "source": "replay",
   "title": "Keep the cache under activation checkpointing when gradients are off",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50895": {
@@ -1141,12 +1151,24 @@
   "version": 1
  },
  "50975": {
-  "blocked": [],
+  "blocked": [
+   {
+    "contract": "GLM5Next",
+    "failure": "answer_logits: max delta 0.00781 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "f6494479c3c725ffd70fd9e983df25d81e636f7e",
+    "target": "GLM-5.3-Flash-mic",
+    "variant": "bfloat16"
+   }
+  ],
   "head": "92482a8652996f435548ba62dce864ba494df833",
   "labels": [],
+  "main_after": "fail",
   "merge_commit": "42efcfde46e668067a74bbd439d33f107b4a7c6c",
   "merged_at": "2026-11-20T13:21:31Z",
   "pr": "50975",
+  "reason": "",
+  "rebaselined": [],
   "red": [
    {
     "contract": "GLM5Next",
@@ -1157,11 +1179,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45868806493",
   "run_id": 44575416194,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44575416194",
   "source": "replay",
   "title": "Always ensure correct dtype for _keep_in_fp32_modules_strict",
-  "verdict": "pending",
+  "verdict": "blocked",
   "version": 1
  },
  "50978": {
@@ -1279,6 +1302,7 @@
   "merge_commit": "1097d1570e6208063fa49575bb2b6e756a50c2f6",
   "merged_at": "2026-11-23T05:48:58Z",
   "pr": "50996",
+  "reason": "2 red on the base too",
   "red": [
    {
     "contract": "CodeGen2",
@@ -1297,11 +1321,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45868806493",
   "run_id": 44682150829,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44682150829",
   "source": "replay",
   "title": "Allow expert parallelism alone with `tp_plan={}`",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50999": {
@@ -1397,6 +1422,7 @@
   "merge_commit": "56547cbb1b39ef75506470902750b4c01fdfff3f",
   "merged_at": "2026-11-20T14:40:59Z",
   "pr": "51028",
+  "reason": "4 red on the base too",
   "red": [
    {
     "contract": "CodeGen2",
@@ -1431,11 +1457,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45868806493",
   "run_id": 44753107689,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44753107689",
   "source": "replay",
   "title": "Fix is_croppable property for mixed linear-full attention classes",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "51030": {
@@ -1445,6 +1472,7 @@
   "merge_commit": "12d4af6a31b39c7e46a75d02387b1e263dd04939",
   "merged_at": "2026-11-20T15:17:14Z",
   "pr": "51030",
+  "reason": "4 red on the base too",
   "red": [
    {
     "contract": "CodeGen2",
@@ -1479,11 +1507,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45868806493",
   "run_id": 44759430975,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44759430975",
   "source": "replay",
   "title": "[cache] Fix is_linear property to correctly remove hybrid layers",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "51032": {
@@ -1493,6 +1522,7 @@
   "merge_commit": "9e94e2adc6058af330ff31edc7e4d71f8966f58c",
   "merged_at": "2026-11-20T15:33:12Z",
   "pr": "51032",
+  "reason": "4 red on the base too",
   "red": [
    {
     "contract": "CodeGen2",
@@ -1527,11 +1557,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45868806493",
   "run_id": 44760741457,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44760741457",
   "source": "replay",
   "title": "Fix generate for mps and encoder-decoder models",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "51036": {
@@ -1541,6 +1572,7 @@
   "merge_commit": "ce3003d95574ebe05d85c5742c6c7636c1285923",
   "merged_at": "2026-11-20T17:25:34Z",
   "pr": "51036",
+  "reason": "4 red on the base too",
   "red": [
    {
     "contract": "CodeGen2",
@@ -1575,11 +1607,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45868806493",
   "run_id": 44780073866,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44780073866",
   "source": "replay",
   "title": "Fix TextStreamer dropping spaces sometimes",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "51040": {
@@ -1906,6 +1939,7 @@
   "merge_commit": "90e9ee1d25ac37b626a9e2d3aef815150384f880",
   "merged_at": "2026-11-23T11:17:53Z",
   "pr": "51085",
+  "reason": "4 red on the base too",
   "red": [
    {
     "contract": "CodeGen2",
@@ -1940,11 +1974,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45868806493",
   "run_id": 45152990209,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/45152990209",
   "source": "replay",
   "title": "Fix backward compatibility of the `cache` rename for remote code",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "51090": {
@@ -2152,6 +2187,7 @@
   "merge_commit": "bc7bd00302067106c9d4f30f09689caddb955be8",
   "merged_at": "2026-11-23T10:17:51Z",
   "pr": "51112",
+  "reason": "4 red on the base too",
   "red": [
    {
     "contract": "CodeGen2",
@@ -2186,11 +2222,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45868806493",
   "run_id": 45148376250,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/45148376250",
   "source": "replay",
   "title": "Never accept zero-probability draft tokens in speculative sampling",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "51113": {
