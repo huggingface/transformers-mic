@@ -1,5 +1,5 @@
 {
- "awaiting_verdict": 67,
+ "awaiting_verdict": 79,
  "block_merges": {
   "ready": false,
   "unmet": [
@@ -8,20 +8,20 @@
   ]
  },
  "caught": {
-  "fixed_by_push": 17,
+  "fixed_by_push": 27,
   "labelled_real_bug": 0,
-  "merged_then_main_failed": 5,
+  "merged_then_main_failed": 7,
   "real_checkpoint": 3
  },
  "drafts_per_day": 2,
  "false_alarms": {
-  "prs_not_their_fault": 230,
-  "prs_with_failure": 283
+  "prs_not_their_fault": 233,
+  "prs_with_failure": 290
  },
  "missed": {
-  "awaiting_verdict": 36,
+  "awaiting_verdict": 39,
   "not_covered": 38,
-  "real_checkpoint": 36
+  "real_checkpoint": 39
  },
  "next": [
   {
@@ -293,9 +293,9 @@
    "draft": "not draftable",
    "model": "utils",
    "next_batch": false,
-   "other": 6,
+   "other": 7,
    "real_checkpoint": 1,
-   "regressions": 7,
+   "regressions": 8,
    "run": "",
    "shrink": "",
    "shrinkable": false
@@ -326,6 +326,17 @@
   }
  ],
  "regressions": [
+  {
+   "date": "2026-11-26",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "nemotron",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
   {
    "date": "2026-11-24",
    "detail": "the daily CI failed it the day before too",
@@ -475,6 +486,17 @@
    "integration": false,
    "job": "",
    "model": "ernie",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-17",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "electra",
    "pr": null,
    "run": "",
    "tests": 1,
@@ -779,6 +801,17 @@
   },
   {
    "date": "2026-11-08",
+   "detail": "",
+   "integration": true,
+   "job": "",
+   "model": "llava",
+   "pr": null,
+   "run": "",
+   "tests": 3,
+   "verdict": "pending"
+  },
+  {
+   "date": "2026-11-08",
    "detail": "nothing in the range changes code the model runs: .github/workflows/build-docker-images.yml, docker/transformers-all-latest-gpu/Dockerfile",
    "integration": true,
    "job": "",
@@ -934,6 +967,17 @@
   {
    "date": "2026-11-05",
    "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "flex_olmo",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-05",
+   "detail": "",
    "integration": true,
    "job": "",
    "model": "blip_2",
@@ -1035,6 +1079,17 @@
    "detail": "the daily CI did not fail it",
    "integration": true,
    "job": "",
+   "model": "got_ocr2",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "not-reproduced"
+  },
+  {
+   "date": "2026-11-02",
+   "detail": "the daily CI did not fail it",
+   "integration": true,
+   "job": "",
    "model": "gemma4",
    "pr": null,
    "run": "",
@@ -1119,6 +1174,17 @@
    "verdict": "out-of-scope"
   },
   {
+   "date": "2026-10-31",
+   "detail": "",
+   "integration": true,
+   "job": "",
+   "model": "deepseek_v3",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
    "date": "2026-10-30",
    "detail": "",
    "integration": false,
@@ -1171,6 +1237,17 @@
    "pr": null,
    "run": "",
    "tests": 4,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-10-30",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "mixtral",
+   "pr": null,
+   "run": "",
+   "tests": 1,
    "verdict": "out-of-scope"
   },
   {
@@ -1314,6 +1391,17 @@
    "pr": null,
    "run": "",
    "tests": 4,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-10-30",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "axk1",
+   "pr": null,
+   "run": "",
+   "tests": 1,
    "verdict": "out-of-scope"
   },
   {
@@ -3362,14 +3450,14 @@
   "model-added": 4,
   "no-code-change": 1,
   "not-a-regression": 6,
-  "not-covered": 265,
-  "not-reproduced": 8,
-  "out-of-scope": 206,
-  "pending": 0,
+  "not-covered": 268,
+  "not-reproduced": 9,
+  "out-of-scope": 212,
+  "pending": 1,
   "unrelated-culprit": 16
  },
  "window": [
   "2026-10-20",
-  "2026-11-25"
+  "2026-11-26"
  ]
 }

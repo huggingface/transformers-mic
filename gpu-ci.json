@@ -5563,6 +5563,18 @@
    "tests/models/axk1/test_modeling_axk1.py::AXK1ModelTest::test_flash_attn_2_equivalence"
   ]
  },
+ "sticky#axk1#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "axk1",
+  "run_id": "45742236307",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/axk1/test_modeling_axk1.py::AXK1ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
  "sticky#axk1#2026-11-21": {
   "date": "2026-11-21",
   "day": 20778,
@@ -6035,6 +6047,18 @@
    "tests/models/deepseek_v3/test_modeling_deepseek_v3.py::DeepseekV3IntegrationTest::test_compile_static_cache"
   ]
  },
+ "sticky#deepseek_v3#2026-10-31": {
+  "date": "2026-10-31",
+  "day": 20757,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "deepseek_v3",
+  "run_id": "45742296946",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/deepseek_v3/test_modeling_deepseek_v3.py::DeepseekV3IntegrationTest::test_compile_static_cache"
+  ]
+ },
  "sticky#deepseek_v32#2026-11-08": {
   "date": "2026-11-08",
   "day": 20765,
@@ -6120,6 +6144,18 @@
   "mic": "green-on-main",
   "model": "electra",
   "run_id": "44002825235",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/electra/test_modeling_electra.py::ElectraModelTest::test_eager_padding_matches_padding_free_with_position_ids"
+  ]
+ },
+ "sticky#electra#2026-11-17": {
+  "date": "2026-11-17",
+  "day": 20774,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "electra",
+  "run_id": "45532908065",
   "signal": "AssertionError",
   "tests": [
    "tests/models/electra/test_modeling_electra.py::ElectraModelTest::test_eager_padding_matches_padding_free_with_position_ids"
@@ -6323,6 +6359,18 @@
   "mic": "green-on-main",
   "model": "flex_olmo",
   "run_id": "44660533068",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/flex_olmo/test_modeling_flex_olmo.py::FlexOlmoModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#flex_olmo#2026-11-05": {
+  "date": "2026-11-05",
+  "day": 20762,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "flex_olmo",
+  "run_id": "45742236307",
   "signal": "AssertionError",
   "tests": [
    "tests/models/flex_olmo/test_modeling_flex_olmo.py::FlexOlmoModelTest::test_flash_attn_2_equivalence"
@@ -6686,6 +6734,18 @@
    "tests/models/got_ocr2/test_image_processing_got_ocr2.py::GotOcr2ProcessingTest::test_backends_equivalence_batched_crop_to_patches"
   ]
  },
+ "sticky#got_ocr2#2026-11-02": {
+  "date": "2026-11-02",
+  "day": 20759,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "got_ocr2",
+  "run_id": "45663286499",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/got_ocr2/test_modeling_got_ocr2.py::GotOcr2IntegrationTest::test_small_model_integration_test_got_ocr_format"
+  ]
+ },
  "sticky#got_ocr2#2026-11-13": {
   "date": "2026-11-13",
   "day": 20770,
@@ -6812,6 +6872,18 @@
   "mic": "not-covered",
   "model": "granitemoeshared",
   "run_id": "45100270070",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/granitemoeshared/test_modeling_granitemoeshared.py::GraniteMoeSharedModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#granitemoeshared#2026-11-06": {
+  "date": "2026-11-06",
+  "day": 20763,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "granitemoeshared",
+  "run_id": "45532872813",
   "signal": "AssertionError",
   "tests": [
    "tests/models/granitemoeshared/test_modeling_granitemoeshared.py::GraniteMoeSharedModelTest::test_flash_attn_2_equivalence"
@@ -7303,6 +7375,20 @@
    "tests/models/llava/test_modeling_llava.py::LlavaForConditionalGenerationIntegrationTest::test_small_model_integration_test_llama_single"
   ]
  },
+ "sticky#llava#2026-11-08": {
+  "date": "2026-11-08",
+  "day": 20765,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "llava",
+  "run_id": "45663286499",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/llava/test_modeling_llava.py::LlavaForConditionalGenerationIntegrationTest::test_batched_generation",
+   "tests/models/llava/test_modeling_llava.py::LlavaForConditionalGenerationIntegrationTest::test_pixtral",
+   "tests/models/llava/test_modeling_llava.py::LlavaForConditionalGenerationIntegrationTest::test_pixtral_4bit"
+  ]
+ },
  "sticky#llava#2026-11-13": {
   "date": "2026-11-13",
   "day": 20770,
@@ -7642,6 +7728,18 @@
    "tests/models/mixtral/test_modeling_mixtral.py::MixtralModelTest::test_flash_attn_2_equivalence"
   ]
  },
+ "sticky#mixtral#2026-10-30": {
+  "date": "2026-10-30",
+  "day": 20756,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "mixtral",
+  "run_id": "45742236307",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/mixtral/test_modeling_mixtral.py::MixtralModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
  "sticky#mm_grounding_dino#2026-10-17": {
   "date": "2026-10-17",
   "day": 20743,
@@ -7786,6 +7884,18 @@
   "mic": "not-covered",
   "model": "nemotron",
   "run_id": "41954951296",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/nemotron/test_modeling_nemotron.py::NemotronModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#nemotron#2026-11-26": {
+  "date": "2026-11-26",
+  "day": 20783,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "nemotron",
+  "run_id": "45742236307",
   "signal": "AssertionError",
   "tests": [
    "tests/models/nemotron/test_modeling_nemotron.py::NemotronModelTest::test_flash_attn_2_equivalence"
@@ -8010,6 +8120,18 @@
    "tests/models/pegasus_x/test_modeling_pegasus_x.py::PegasusXModelTest::test_torch_export_generate_dynamic_static_cache",
    "tests/models/pegasus_x/test_modeling_pegasus_x.py::PegasusXModelTest::test_torch_export_generate_static",
    "tests/models/pegasus_x/test_modeling_pegasus_x.py::PegasusXModelTest::test_torch_export_generate_static_static_cache"
+  ]
+ },
+ "sticky#pi05#2026-11-25": {
+  "date": "2026-11-25",
+  "day": 20782,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "pi05",
+  "run_id": "45742296946",
+  "signal": "RuntimeError",
+  "tests": [
+   "tests/models/pi05/test_modeling_pi05.py::PI05ForConditionalGenerationModelTest::test_model_parallelism"
   ]
  },
  "sticky#plbart#2026-10-30": {
@@ -8690,6 +8812,18 @@
   "tests": [
    "tests/utils/test_cache_utils.py::CacheHardIntegrationTest::test_data_parallel_dynamic_cache",
    "tests/utils/test_modeling_utils.py::ModelUtilsTest::test_model_parallelism_gpt2"
+  ]
+ },
+ "sticky#utils#2026-11-25": {
+  "date": "2026-11-25",
+  "day": 20782,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "utils",
+  "run_id": "45742296946",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/utils/test_backbone_utils.py::BackboneUtilsTester::test_consolidate_backbone_kwargs_to_config_with_null_backbone_kwargs"
   ]
  },
  "sticky#vipllava#2026-11-07": {

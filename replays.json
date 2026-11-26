@@ -1390,6 +1390,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#axk1#2026-10-30": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#axk1#2026-11-21": {
   "reason": "same regression as 50975#axk1",
   "verdict": "duplicate",
@@ -1539,6 +1543,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#deepseek_v3#2026-10-31": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#deepseek_v32#2026-11-08": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1564,6 +1572,10 @@
   "version": 9
  },
  "sticky#electra#2026-10-28": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#electra#2026-11-17": {
   "verdict": "out-of-scope",
   "version": 9
  },
@@ -1632,6 +1644,10 @@
   "version": 9
  },
  "sticky#flex_olmo#2026-10-26": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "sticky#flex_olmo#2026-11-05": {
   "verdict": "out-of-scope",
   "version": 9
  },
@@ -1761,6 +1777,11 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#got_ocr2#2026-11-02": {
+  "reason": "the daily CI did not fail it",
+  "verdict": "not-reproduced",
+  "version": 9
+ },
  "sticky#got_ocr2#2026-11-13": {
   "verdict": "out-of-scope",
   "version": 9
@@ -1798,6 +1819,10 @@
   "version": 9
  },
  "sticky#granitemoeshared#2026-10-28": {
+  "verdict": "not-covered",
+  "version": 9
+ },
+ "sticky#granitemoeshared#2026-11-06": {
   "verdict": "not-covered",
   "version": 9
  },
@@ -2091,6 +2116,10 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#mixtral#2026-10-30": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
  "sticky#mm_grounding_dino#2026-10-17": {
   "reason": "the daily CI failed it the day before too",
   "verdict": "already-failing",
@@ -2138,6 +2167,10 @@
  },
  "sticky#nemotron#2026-10-27": {
   "verdict": "not-covered",
+  "version": 9
+ },
+ "sticky#nemotron#2026-11-26": {
+  "verdict": "out-of-scope",
   "version": 9
  },
  "sticky#nemotron3_5_transcribe#2026-10-29": {
@@ -2209,6 +2242,10 @@
   "version": 9
  },
  "sticky#pegasus_x#2026-10-30": {
+  "verdict": "not-covered",
+  "version": 9
+ },
+ "sticky#pi05#2026-11-25": {
   "verdict": "not-covered",
   "version": 9
  },
@@ -2432,6 +2469,10 @@
   "version": 9
  },
  "sticky#utils#2026-11-23": {
+  "verdict": "not-covered",
+  "version": 9
+ },
+ "sticky#utils#2026-11-25": {
   "verdict": "not-covered",
   "version": 9
  },

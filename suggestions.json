@@ -68,6 +68,12 @@
     "gpu_only": true,
     "integration": true,
     "test": "tests/models/deepseek_v3/test_modeling_deepseek_v3.py::DeepseekV3IntegrationTest::test_compile_static_cache"
+   },
+   {
+    "date": "2026-10-31",
+    "gpu_only": true,
+    "integration": true,
+    "test": "tests/models/deepseek_v3/test_modeling_deepseek_v3.py::DeepseekV3IntegrationTest::test_compile_static_cache"
    }
   ],
   "deepseek_v32": [
@@ -236,6 +242,12 @@
   ],
   "got_ocr2": [
    {
+    "date": "2026-11-02",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/got_ocr2/test_modeling_got_ocr2.py::GotOcr2IntegrationTest::test_small_model_integration_test_got_ocr_format"
+   },
+   {
     "date": "2026-10-20",
     "gpu_only": false,
     "integration": false,
@@ -366,6 +378,26 @@
     "gpu_only": true,
     "integration": true,
     "test": "tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_flash_with_static_cache"
+   }
+  ],
+  "llava": [
+   {
+    "date": "2026-11-08",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/llava/test_modeling_llava.py::LlavaForConditionalGenerationIntegrationTest::test_batched_generation"
+   },
+   {
+    "date": "2026-11-08",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/llava/test_modeling_llava.py::LlavaForConditionalGenerationIntegrationTest::test_pixtral"
+   },
+   {
+    "date": "2026-11-08",
+    "gpu_only": true,
+    "integration": true,
+    "test": "tests/models/llava/test_modeling_llava.py::LlavaForConditionalGenerationIntegrationTest::test_pixtral_4bit"
    }
   ],
   "m2m_100": [
@@ -894,7 +926,7 @@
    "checkpoint_source": "failing test",
    "integration": 1,
    "model": "utils",
-   "other": 6,
+   "other": 7,
    "shrinkable": false,
    "tests": [
     "tests/utils/test_modeling_utils.py::GradientCheckpointingOffloadTest::test_frees_exactly_the_saved_activations",
@@ -1059,6 +1091,17 @@
    ]
   },
   {
+   "checkpoint": "ibm/PowerMoE-3b",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "granitemoeshared",
+   "other": 3,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/granitemoeshared/test_modeling_granitemoeshared.py::GraniteMoeSharedModelTest::test_flash_attn_2_equivalence"
+   ]
+  },
+  {
    "checkpoint": "andreasmadsen/efficient_mlm_m0.40",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -1069,17 +1112,6 @@
     "tests/models/roberta_prelayernorm/test_modeling_roberta_prelayernorm.py::RobertaPreLayerNormModelTest::test_flash_attn_2_inference_equivalence",
     "tests/models/roberta_prelayernorm/test_modeling_roberta_prelayernorm.py::RobertaPreLayerNormModelTest::test_flash_attn_2_inference_equivalence_right_padding",
     "tests/models/roberta_prelayernorm/test_modeling_roberta_prelayernorm.py::RobertaPreLayerNormModelTest::test_eager_padding_matches_padding_free_with_position_ids"
-   ]
-  },
-  {
-   "checkpoint": "ibm/PowerMoE-3b",
-   "checkpoint_source": "failing test",
-   "integration": 0,
-   "model": "granitemoeshared",
-   "other": 2,
-   "shrinkable": false,
-   "tests": [
-    "tests/models/granitemoeshared/test_modeling_granitemoeshared.py::GraniteMoeSharedModelTest::test_flash_attn_2_equivalence"
    ]
   },
   {
@@ -1276,6 +1308,17 @@
    ]
   },
   {
+   "checkpoint": "lerobot/pi05_libero_finetuned_v044",
+   "checkpoint_source": "failing test",
+   "integration": 0,
+   "model": "pi05",
+   "other": 1,
+   "shrinkable": false,
+   "tests": [
+    "tests/models/pi05/test_modeling_pi05.py::PI05ForConditionalGenerationModelTest::test_model_parallelism"
+   ]
+  },
+  {
    "checkpoint": "PaddlePaddle/PP-FormulaNet_plus-L_safetensors",
    "checkpoint_source": "failing test",
    "integration": 0,
@@ -1411,7 +1454,8 @@
    "jetmoe",
    "kolibri1",
    "minimax_m2",
-   "mixtral"
+   "mixtral",
+   "nemotron"
   ],
   "test_flash_attn_2_inference_equivalence_right_padding": [
    "albert",
