@@ -1069,12 +1069,24 @@
   "version": 1
  },
  "50379": {
-  "blocked": [],
+  "blocked": [
+   {
+    "contract": "Llama4",
+    "failure": "kend/run.py\", line 349, in execute_inline",
+    "fleet": "prototypes",
+    "fleet_revision": "f6494479c3c725ffd70fd9e983df25d81e636f7e",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
   "head": "43aa3437b1a41b819b76ec24acb4d392aa879758",
   "labels": [],
+  "main_after": "fail",
   "merge_commit": "c54cfd9b0a4b769518d04325bb9f19a69ef41d0c",
   "merged_at": "2026-11-20T06:09:13Z",
   "pr": "50379",
+  "reason": "2 red on the base too",
+  "rebaselined": [],
   "red": [
    {
     "contract": "CodeGen2",
@@ -1101,11 +1113,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45877085482",
   "run_id": 44676135620,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44676135620",
   "source": "replay",
   "title": ":rotating_light: Multimodal Model Output for generative LMs",
-  "verdict": "pending",
+  "verdict": "blocked",
   "version": 1
  },
  "50415": {
@@ -1361,6 +1374,7 @@
   "merge_commit": "0bc6d3ab59d50f035be80f137b956a9dcd1b5fa2",
   "merged_at": "2026-11-20T11:59:33Z",
   "pr": "50595",
+  "reason": "3 red on the base too",
   "red": [
    {
     "contract": "CodeGen2",
@@ -1387,11 +1401,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45877085482",
   "run_id": 44720799703,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44720799703",
   "source": "replay",
   "title": "Cast the unquantized weights of a dequantized FP8 checkpoint to the model's dtype",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50615": {
@@ -2291,6 +2306,7 @@
   "merge_commit": "e446f7a305355c46a756ccf21e8963a6da567cca",
   "merged_at": "2026-11-16T13:02:48Z",
   "pr": "50780",
+  "reason": "1 green when replayed",
   "red": [
    {
     "contract": "CSM",
@@ -2301,11 +2317,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45877085482",
   "run_id": 43727882113,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/43727882113",
   "source": "replay",
   "title": "Speed up StopStringCriteria init and fix its cache never hitting",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50781": {
@@ -3428,12 +3445,32 @@
   "version": 1
  },
  "50965": {
-  "blocked": [],
+  "blocked": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "f6494479c3c725ffd70fd9e983df25d81e636f7e",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "f6494479c3c725ffd70fd9e983df25d81e636f7e",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   }
+  ],
   "head": "ea7ef8f71eba8ed5b1cb166cbff8d2b78769397c",
   "labels": [],
+  "main_after": "fail",
   "merge_commit": "e41087b973a6542ad64f341b68ed8991b0318e22",
   "merged_at": "2026-11-19T18:20:42Z",
   "pr": "50965",
+  "reason": "",
+  "rebaselined": [],
   "red": [
    {
     "contract": "CodeGen2",
@@ -3452,11 +3489,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45877085482",
   "run_id": 44557888468,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44557888468",
   "source": "replay",
   "title": "Move GPT-J and CodeGen onto the attention interface with modular files",
-  "verdict": "pending",
+  "verdict": "blocked",
   "version": 1
  },
  "50966": {
@@ -3673,6 +3711,7 @@
   "merge_commit": "4bb61661e15e65c135839acfb8ed0781605aabe2",
   "merged_at": "2026-11-20T12:39:36Z",
   "pr": "50984",
+  "reason": "2 red on the base too",
   "red": [
    {
     "contract": "CodeGen2",
@@ -3691,11 +3730,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45877085482",
   "run_id": 44594738541,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44594738541",
   "source": "replay",
   "title": "Fix DataCollatorWithFlattening crash on empty examples",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50993": {
@@ -3806,6 +3846,7 @@
   "merge_commit": "cf0fd5eea086b564314045d42b2ae645608349d8",
   "merged_at": "2026-11-20T11:26:18Z",
   "pr": "51019",
+  "reason": "3 red on the base too",
   "red": [
    {
     "contract": "CodeGen2",
@@ -3832,11 +3873,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45877085482",
   "run_id": 44723661434,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44723661434",
   "source": "replay",
   "title": "Require transformers-mic 0.1.3 for make run-mic",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "51022": {
@@ -3861,6 +3903,7 @@
   "merge_commit": "4df015c5ebf78854c1ce97ddd18507452a08cdc8",
   "merged_at": "2026-11-20T13:51:39Z",
   "pr": "51023",
+  "reason": "3 red on the base too",
   "red": [
    {
     "contract": "CodeGen2",
@@ -3887,11 +3930,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45877085482",
   "run_id": 44738093486,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44738093486",
   "source": "replay",
   "title": "Add SarvamMoE (sarvamai/sarvam-30b)",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "51027": {

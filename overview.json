@@ -19,14 +19,14 @@
   "prs_with_failure": 306
  },
  "merged_gate": {
-  "blocked": 2,
+  "blocked": 4,
   "flags": {
    "false-positive": 0,
-   "real": 2,
+   "real": 4,
    "to-review": 0
   },
   "merged": 300,
-  "pending": 7,
+  "pending": 0,
   "rows": [
    {
     "cases": [
@@ -53,6 +53,33 @@
     "run": "https://github.com/huggingface/transformers/actions/runs/44575416194",
     "source": "replay",
     "title": "Always ensure correct dtype for _keep_in_fp32_modules_strict",
+    "why": "red on main after the merge"
+   },
+   {
+    "cases": [
+     "Llama4/Llama-4-Scout-17B-16E-Instruct-mic [bfloat16]"
+    ],
+    "failure": "kend/run.py\", line 349, in execute_inline",
+    "flag": "real",
+    "merged": "2026-11-20",
+    "pr": "50379",
+    "run": "https://github.com/huggingface/transformers/actions/runs/44676135620",
+    "source": "replay",
+    "title": ":rotating_light: Multimodal Model Output for generative LMs",
+    "why": "red on main after the merge"
+   },
+   {
+    "cases": [
+     "CodeGen2/codegen2-16B_P-mic [bfloat16]",
+     "GPT-J/gpt-j-6b-mic [bfloat16]"
+    ],
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "flag": "real",
+    "merged": "2026-11-19",
+    "pr": "50965",
+    "run": "https://github.com/huggingface/transformers/actions/runs/44557888468",
+    "source": "replay",
+    "title": "Move GPT-J and CodeGen onto the attention interface with modular files",
     "why": "red on main after the merge"
    }
   ],

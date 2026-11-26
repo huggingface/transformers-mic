@@ -318,8 +318,8 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 Every PR merged into main 2026-10-27 → 2026-11-26, put through the contracts gate as it was when it merged: **blocked** when a case is red with the PR and green on the commit it merged onto. From 2026-11-23 that is PR CI's own verdict (shadow mode, `contracts-gate.json`); before, the red cases of the PR's last run are replayed on its squash commit and on that commit's parent.
 
 - Merged PRs looked up: **300**; with a red MIC case in their last run: 60.
-- Would have been blocked: **2** — real 2, false positive 0, to review 0.
-- Waiting for the replay: 7; could not be measured: 1.
+- Would have been blocked: **4** — real 4, false positive 0, to review 0.
+- Waiting for the replay: 0; could not be measured: 1.
 
 | flag | meaning |
 |---|---|
@@ -331,6 +331,8 @@ Every PR merged into main 2026-10-27 → 2026-11-26, put through the contracts g
 |---|---|---|---|---|---|
 | 2026-11-26 | [#50428](https://github.com/huggingface/transformers/pull/50428) 🚨 Rework slightly subprocessor loading | Mistral3/Ministral-3-3B-Instruct-2512-mic [bfloat16], mic-mistral3/mistral3-mic [bfloat16] | [gate](https://github.com/huggingface/transformers/actions/runs/45762544835) | real | red on main after the merge |
 | 2026-11-20 | [#50975](https://github.com/huggingface/transformers/pull/50975) Always ensure correct dtype for _keep_in_fp32_modules_strict | GLM5Next/GLM-5.3-Flash-mic [bfloat16] | [replay](https://github.com/huggingface/transformers/actions/runs/44575416194) | real | red on main after the merge |
+| 2026-11-20 | [#50379](https://github.com/huggingface/transformers/pull/50379) :rotating_light: Multimodal Model Output for generative LMs | Llama4/Llama-4-Scout-17B-16E-Instruct-mic [bfloat16] | [replay](https://github.com/huggingface/transformers/actions/runs/44676135620) | real | red on main after the merge |
+| 2026-11-19 | [#50965](https://github.com/huggingface/transformers/pull/50965) Move GPT-J and CodeGen onto the attention interface with mod | CodeGen2/codegen2-16B_P-mic [bfloat16], GPT-J/gpt-j-6b-mic [bfloat16] | [replay](https://github.com/huggingface/transformers/actions/runs/44557888468) | real | red on main after the merge |
 
 Set the flag by hand with a line in `labels.jsonl`: `{"key": "merged#<pr>", "verdict": "real-bug|intended|false-alarm|flake", "note": "...", "by": "<login>"}`.
 
