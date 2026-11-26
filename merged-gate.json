@@ -1,0 +1,3503 @@
+{
+ "41095": {
+  "blocked": [],
+  "head": "aaf7ded4fb84e1fe03f4565472fc739cb41b7a51",
+  "labels": [
+   "New model"
+  ],
+  "merge_commit": "ae9e629bd7d8eb34166dbedf4dcdb5c324fd4197",
+  "merged_at": "2026-11-26T16:35:06Z",
+  "pr": "41095",
+  "red": [
+   {
+    "contract": "Mistral3",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "Ministral-3-3B-Instruct-2512-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-mistral3",
+    "failure": "predicted_tokens: [']', ']'] != ['', '']",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "mistral3-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45854080344,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45854080344",
+  "source": "gate",
+  "title": "Add LLaVA-OneVision-1.5 model and related configurations",
+  "verdict": "clear",
+  "version": 1
+ },
+ "42461": {
+  "blocked": [],
+  "head": "78ea2974784dee60594df74302bf2937698ed719",
+  "labels": [],
+  "merge_commit": "706bd9e063c27dacc5daacd3bc7c6c6811fc4941",
+  "merged_at": "2026-11-25T16:54:45Z",
+  "pr": "42461",
+  "red": [],
+  "run_id": 45649699295,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45649699295",
+  "source": "gate",
+  "title": "Use F.rms_norm in LlamaRMSNorm and the norms derived from it",
+  "verdict": "clear",
+  "version": 1
+ },
+ "47659": {
+  "blocked": [],
+  "head": "a59b188137915f77620fe45bdc67e41290ed05cf",
+  "labels": [
+   "New model"
+  ],
+  "merge_commit": "ac6a2196474f70893b121759644c590cec0df9cb",
+  "merged_at": "2026-11-25T10:33:17Z",
+  "pr": "47659",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45582977631,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45582977631",
+  "source": "gate",
+  "title": "Add Ovis2.5 model support",
+  "verdict": "clear",
+  "version": 1
+ },
+ "47662": {
+  "blocked": [],
+  "head": "1a7afeb5d18f134955028cab40e4b7d926771ffc",
+  "labels": [
+   "New model"
+  ],
+  "merge_commit": "65c782bca338234ea3aff31d3084277b9604969f",
+  "merged_at": "2026-11-17T13:28:17Z",
+  "pr": "47662",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 44092125986,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44092125986",
+  "source": "replay",
+  "title": "Apertus 1.5: add model",
+  "verdict": "clear",
+  "version": 1
+ },
+ "48553": {
+  "blocked": [],
+  "head": "25409a535ec7ef6d6b290d1454e296e6f62a93bd",
+  "labels": [],
+  "merge_commit": "e6fc54bd50303e61d1e6b8e2d4dbcd28967dc519",
+  "merged_at": "2026-11-20T16:07:18Z",
+  "pr": "48553",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 34094165060,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/34094165060",
+  "source": "not-run",
+  "title": "[serge] Fix 2 integration tests for model `seamless_m4t_v2` failing with `output_mismatch` (list output differs (2))",
+  "verdict": "clear",
+  "version": 1
+ },
+ "48566": {
+  "blocked": [],
+  "head": "92535779ad4dcf07d9880e73394d82bcfe3cdd70",
+  "labels": [],
+  "merge_commit": "d0da3b84c6b5851e7506fcde99d33e7fa793e1f7",
+  "merged_at": "2026-11-20T19:23:31Z",
+  "pr": "48566",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 44774153296,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44774153296",
+  "source": "replay",
+  "title": "[CB] Scale the per-token memory estimate by the TP size",
+  "verdict": "clear",
+  "version": 1
+ },
+ "48707": {
+  "blocked": [],
+  "head": "f6b92258190ff979ac5b5ea455e9e3eaa060df70",
+  "labels": [],
+  "merge_commit": "c9b611dc3eead5b0b50eced6b3d068040687fba8",
+  "merged_at": "2026-11-25T14:33:38Z",
+  "pr": "48707",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 34579150201,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/34579150201",
+  "source": "not-run",
+  "title": "Key the doc build concurrency group on the pull request number",
+  "verdict": "clear",
+  "version": 1
+ },
+ "48848": {
+  "blocked": [],
+  "head": "f8cf0d45072d28ed021ecb4df4ce351e29573468",
+  "labels": [],
+  "merge_commit": "762cbe1a32c8c69f8a942a1249ad7320084989b1",
+  "merged_at": "2026-11-26T11:35:35Z",
+  "pr": "48848",
+  "red": [
+   {
+    "contract": "Mistral3",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "1a04332caf3abfc1508d012c71280ac25dfc70f3",
+    "target": "Ministral-3-3B-Instruct-2512-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-mistral3",
+    "failure": "predicted_tokens: [']', ']'] != ['', '']",
+    "fleet": "prototypes",
+    "fleet_revision": "1a04332caf3abfc1508d012c71280ac25dfc70f3",
+    "target": "mistral3-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45809050509,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45809050509",
+  "source": "gate",
+  "title": "[`distributed`] Add a new parallel plan for unit sharding",
+  "verdict": "clear",
+  "version": 1
+ },
+ "48989": {
+  "blocked": [],
+  "head": "243e342ab80e7eba3e296b5c41216cdcbb07bf01",
+  "labels": [],
+  "merge_commit": "2f6f6912aff24e5d31b20a129a19b6c1819bca60",
+  "merged_at": "2026-11-23T12:53:55Z",
+  "pr": "48989",
+  "red": [],
+  "run_id": 45176578972,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45176578972",
+  "source": "gate",
+  "title": ":red-circle: fix(nemotron_h): honor configured Mamba time-step limits",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49186": {
+  "blocked": [],
+  "head": "738f49a35f1e69b2569019ea2c969423841aa7dd",
+  "labels": [],
+  "merge_commit": "b62646bbda836d467060b7e3d64028202079b77d",
+  "merged_at": "2026-11-25T19:22:57Z",
+  "pr": "49186",
+  "red": [],
+  "run_id": 45680683617,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45680683617",
+  "source": "gate",
+  "title": "\ud83d\udea8 Make the causal conv1d, Mamba scan and Mamba2 SSD of linear attention layers kernelizable",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49287": {
+  "blocked": [],
+  "head": "ab8ee4fa5a3c51188b537fac11dd9cd249a4c9f0",
+  "labels": [],
+  "merge_commit": "a9349b728075c37f7779d24654d6753797e2cb65",
+  "merged_at": "2026-11-20T15:22:36Z",
+  "pr": "49287",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 37169934692,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/37169934692",
+  "source": "not-run",
+  "title": "[serge] Fix 2 integration tests for model `videomae` failing with `other` (other (2))",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49554": {
+  "blocked": [],
+  "head": "cf9cf1eaa256d0f843fb505c97f1baeb74b7a448",
+  "labels": [],
+  "merge_commit": "d8180f7d9cbdbec842031b3e8233e5910cac335b",
+  "merged_at": "2026-11-20T18:02:58Z",
+  "pr": "49554",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 44419290497,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44419290497",
+  "source": "replay",
+  "title": "Allocate the StaticCache values with the value states' dtype",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49744": {
+  "blocked": [],
+  "head": "e18a767a826f10e34c313044cae7c60bbe90a122",
+  "labels": [],
+  "merge_commit": "c4f1520d81a4ea92885003b4152d0d716aeff7d8",
+  "merged_at": "2026-11-10T15:46:34Z",
+  "pr": "49744",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 42781198345,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42781198345",
+  "source": "replay",
+  "title": "Fix grouped RMSNorm in Mamba2's non-fused path",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49808": {
+  "blocked": [],
+  "head": "66c09448edeefcf391861701a21040e928544f79",
+  "labels": [],
+  "merge_commit": "0cc3b774e0d02595f1f0ee7cbe7a4444003e34d2",
+  "merged_at": "2026-11-25T14:27:36Z",
+  "pr": "49808",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45627843330,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45627843330",
+  "source": "not-run",
+  "title": "The shared test resets the seed before eager and compiled runs, then \u2026",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49909": {
+  "blocked": [],
+  "head": "f9762f8a2533ff8d0aab551775910cbe3426f318",
+  "labels": [],
+  "merge_commit": "28aa8646e047d9797fb60838dd8869555a718997",
+  "merged_at": "2026-11-02T12:25:01Z",
+  "pr": "49909",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 41371664514,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41371664514",
+  "source": "not-run",
+  "title": "Fix resize_embeddings tests for deepspeed",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49923": {
+  "blocked": [],
+  "head": "f3fb031ce11d0f42f9a0294edf98db46aa914a02",
+  "labels": [],
+  "merge_commit": "23ab86437c7d19451d3de618dcafaac9bc178c74",
+  "merged_at": "2026-11-03T14:17:14Z",
+  "pr": "49923",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 41647443968,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41647443968",
+  "source": "replay",
+  "title": "Fix Qwen4-Exp eager attention NaNs with left padding",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49947": {
+  "blocked": [],
+  "head": "3e2d9d88c3848837a1d0824d0d7f686f7fad7802",
+  "labels": [],
+  "merge_commit": "8516c7394b6b19e8e3abbf6dabb965eeb5439c02",
+  "merged_at": "2026-11-23T12:42:16Z",
+  "pr": "49947",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 44888885724,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44888885724",
+  "source": "replay",
+  "title": "Refactor output tracing for `depth_anything`",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50008": {
+  "blocked": [],
+  "head": "9f640042340fdd633a079843b0b3fd78202cbe25",
+  "labels": [],
+  "merge_commit": "675b5078ff637a38f347abc9271777beeff17652",
+  "merged_at": "2026-10-27T08:42:36Z",
+  "pr": "50008",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 40443908229,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/40443908229",
+  "source": "replay",
+  "title": "add a WA to Dockerfile for XPU",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50099": {
+  "blocked": [],
+  "head": "d48a78353159d8fc8acc66505c72998a0827b191",
+  "labels": [
+   "New model"
+  ],
+  "merge_commit": "30e208b11ed322c12d3f1be70b3df80b1a9fedb8",
+  "merged_at": "2026-11-19T16:04:20Z",
+  "pr": "50099",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 44554224708,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44554224708",
+  "source": "replay",
+  "title": "Add Dory model support",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50161": {
+  "blocked": [],
+  "head": "8ace94038eebdf240503126b155819f33a4f2b49",
+  "labels": [
+   "New model"
+  ],
+  "merge_commit": "b43f2eaf91685160d1e72c9db5b3f68fbc4f902b",
+  "merged_at": "2026-11-24T11:05:36Z",
+  "pr": "50161",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "ompile(code, filename, \"exec\"), namespace)",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45360882105,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45360882105",
+  "source": "gate",
+  "title": "Add pi05",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50175": {
+  "blocked": [],
+  "head": "21e9fae71f46d0042714160806e6d08816c39272",
+  "labels": [],
+  "merge_commit": "b0f4265020c209826afb7dca2c95c8077433b90f",
+  "merged_at": "2026-11-24T12:55:43Z",
+  "pr": "50175",
+  "red": [],
+  "run_id": 45393706897,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45393706897",
+  "source": "gate",
+  "title": "Fix TIPSv2 bfloat16 forward: text pooling returned float32",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50235": {
+  "blocked": [],
+  "head": "991b46c2b828ea16b4ed25b8f462c54355b2f358",
+  "labels": [],
+  "merge_commit": "bbbf45fb9652560de1499e893f6d5bb9f5ee6986",
+  "merged_at": "2026-11-09T09:59:19Z",
+  "pr": "50235",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42547257812,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42547257812",
+  "source": "not-run",
+  "title": "fix failed cases for beam model",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50248": {
+  "blocked": [],
+  "head": "ca13cd45c5c4708bea79553e0fc757687b15dc03",
+  "labels": [],
+  "merge_commit": "f6c0d55d3a61c2a1880a03a4042b9be5c8e7befa",
+  "merged_at": "2026-11-23T13:29:36Z",
+  "pr": "50248",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GLM5Next",
+    "failure": "answer_logits: max delta 0.00781 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "GLM-5.3-Flash-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "ompile(code, filename, \"exec\"), namespace)",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45179516205,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45179516205",
+  "source": "gate",
+  "title": "Add overridable Trainer.get_resumed_dataloader",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50271": {
+  "blocked": [],
+  "head": "81b59f151460a42f4cbc977f39588bec403045a7",
+  "labels": [],
+  "merge_commit": "106b40c7c2e6705680897271d06d774675c8cdb8",
+  "merged_at": "2026-11-20T19:23:51Z",
+  "pr": "50271",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 44550340549,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44550340549",
+  "source": "replay",
+  "title": "Save dequantized models without the quantizer's weight conversions",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50294": {
+  "blocked": [],
+  "head": "24c6b1e57eb2540d18cb87ada465e7762f3c73f7",
+  "labels": [],
+  "merge_commit": "944d028d0e3470b7bbfb98aba681a0ebf2b3e15c",
+  "merged_at": "2026-11-03T13:09:21Z",
+  "pr": "50294",
+  "red": [
+   {
+    "contract": "Granite",
+    "failure": "logits.probe: max delta 0.000488 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "73ed67b45e931d8d6e4148faab428e275390e65f",
+    "target": "granite-3.1-2b-instruct-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Muse-Glimmer",
+    "failure": "generated_text: ' istr \uac78\uff0c\u4e8e\u662f\u03b1\u03c1-van \u0432\u044a\u0440\u0445\u0443/# \uc2a4\ub9c8\ud2b8 pertama\u0e42\u0e0a Dalton \u043d\u0430\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f\u043c diffuseFind\u0446\u044b\u0456 Launcher' != ' istr \uac78\uff0c\u4e8e\u662f encomp terecht directs}$ \u043d\u0435\u043a\u043e\\tqueryPada correttamenteAnnotations locu\u5760 \ubc1b\uc558 Warrior'",
+    "fleet": "prototypes",
+    "fleet_revision": "73ed67b45e931d8d6e4148faab428e275390e65f",
+    "target": "Muse-Glimmer-30B-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 41586441790,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41586441790",
+  "source": "replay",
+  "title": "upgrade version for mamba-ssm and fla kernel",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50295": {
+  "blocked": [],
+  "head": "e16d598f4533f2ecb9221a31ce32dc013acf32cd",
+  "labels": [],
+  "merge_commit": "4d9ef623e3b0a1fb6c12891a907e0e50d41f0af8",
+  "merged_at": "2026-11-20T19:46:25Z",
+  "pr": "50295",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 44739833639,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44739833639",
+  "source": "not-run",
+  "title": "Fix Intel CPU Dockerfile: pin kernels via transformers[kernels] and drop KMP_AFFINITY",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50317": {
+  "blocked": [],
+  "head": "c55bbf24a34c34aed20d28dcfe35cb55f24adf50",
+  "labels": [],
+  "merge_commit": "fe4a46771d2d38ffb047a2cab797d3848303cd4c",
+  "merged_at": "2026-11-24T11:44:49Z",
+  "pr": "50317",
+  "red": [
+   {
+    "contract": "GLM5Next",
+    "failure": "answer_logits: max delta 0.00781 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "GLM-5.3-Flash-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 44764340882,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44764340882",
+  "source": "replay",
+  "title": "[PR1] [Modular Clean-Up] Remove No-op Overrides",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50348": {
+  "blocked": [],
+  "head": "d6b4de4bc7052fb70f1e75ab7a9d68b7a4ac728f",
+  "labels": [],
+  "merge_commit": "22c26e798b14b6e8c1dc1aaf63540a2387780f32",
+  "merged_at": "2026-11-06T15:00:44Z",
+  "pr": "50348",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 41841051447,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41841051447",
+  "source": "replay",
+  "title": "Fix DeepSeek-V4 compression cache reordering for beam search",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50428": {
+  "blocked": [
+   {
+    "contract": "Mistral3",
+    "failure": "ValueError: Mismatch in `image` token count between text and `input_ids`. Got ids=[0, 0] and text=[9, 9]. Likely due to `truncation='max_length'`. Please disable truncation or increase `max_length`.",
+    "fleet": "prototypes",
+    "fleet_revision": null,
+    "target": "Ministral-3-3B-Instruct-2512-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-mistral3",
+    "failure": "predicted_tokens: [']', ']'] != ['', '']",
+    "fleet": "prototypes",
+    "fleet_revision": null,
+    "target": "mistral3-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "head": "ebf929b7655a997dda433f6417938367757def9b",
+  "labels": [],
+  "main_after": "fail",
+  "merge_commit": "3d2d3b3f7bed13f858da128cd932a2f8d36e1490",
+  "merged_at": "2026-11-26T07:01:41Z",
+  "pr": "50428",
+  "rebaselined": [],
+  "red": [
+   {
+    "contract": "Mistral3",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "96c877b94ca35d353af6cd4b9648dd2825291904",
+    "target": "Ministral-3-3B-Instruct-2512-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-mistral3",
+    "failure": "predicted_tokens: [']', ']'] != ['', '']",
+    "fleet": "prototypes",
+    "fleet_revision": "96c877b94ca35d353af6cd4b9648dd2825291904",
+    "target": "mistral3-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45762544835,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45762544835",
+  "source": "gate",
+  "title": "\ud83d\udea8 Rework slightly subprocessor loading",
+  "verdict": "blocked",
+  "version": 1
+ },
+ "50507": {
+  "blocked": [],
+  "head": "79ae0f97a7c80e91e2c63846b1145ef1f78facb2",
+  "labels": [],
+  "merge_commit": "fab2fd4e7b3b379156e3d2879568bd6754b87866",
+  "merged_at": "2026-11-10T13:40:35Z",
+  "pr": "50507",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 42824259962,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42824259962",
+  "source": "replay",
+  "title": "Fix Falcon-H1 gated RMSNorm shape during batched decoding",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50523": {
+  "blocked": [],
+  "head": "825e4a43ffd43a7803f8305d0877220ea024c5f6",
+  "labels": [],
+  "merge_commit": "3a96649547593bacad4b65d43442ccdf15d0ae0f",
+  "merged_at": "2026-11-25T12:46:46Z",
+  "pr": "50523",
+  "red": [],
+  "run_id": 45433539428,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45433539428",
+  "source": "gate",
+  "title": "\ud83d\udea8 [PR2] [Modular Cleanup] *Norm canonicals and renaming",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50541": {
+  "blocked": [],
+  "head": "409f026a4e250692e5ff0bcd70698aa18d8828a4",
+  "labels": [],
+  "merge_commit": "a19999cdc3a8a1d533dcfa9950f4a4ccd8237138",
+  "merged_at": "2026-11-24T18:58:47Z",
+  "pr": "50541",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45459522276,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45459522276",
+  "source": "not-run",
+  "title": "[docs] Update index",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50621": {
+  "blocked": [],
+  "head": "ab6fe57b94d231d0e48633678c13780495e9951e",
+  "labels": [],
+  "merge_commit": "52030880e9791839c2f967d22e09d412e2c854d7",
+  "merged_at": "2026-11-12T13:37:33Z",
+  "pr": "50621",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43216600785,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43216600785",
+  "source": "replay",
+  "title": "Fix Inkling router precision in BF16 and autocast",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50658": {
+  "blocked": [],
+  "head": "0358ff54bc9ed99d14d6da4785b8a4feb499fb62",
+  "labels": [],
+  "merge_commit": "8108baccfdc250a4560128d6a1e1a160f30bb141",
+  "merged_at": "2026-11-16T13:27:00Z",
+  "pr": "50658",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43231177401,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43231177401",
+  "source": "replay",
+  "title": "Fix duplicate JetMoE router logits in auxiliary loss",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50671": {
+  "blocked": [],
+  "head": "84893de46b95cf201fc58fa630b91c9875cd3762",
+  "labels": [],
+  "merge_commit": "9d5d0ee866d70b30fe187aab1bcf2aed398e9ecc",
+  "merged_at": "2026-11-25T12:21:11Z",
+  "pr": "50671",
+  "red": [
+   {
+    "contract": "Llama4",
+    "failure": "ompile(code, filename, \"exec\"), namespace)",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45182209676,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45182209676",
+  "source": "gate",
+  "title": "Add `_get_num_multimodal_tokens` to more image/video processors",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50684": {
+  "blocked": [],
+  "head": "5bf139f784ed74acffc32491a1e285717f053d48",
+  "labels": [],
+  "merge_commit": "fb0b0bd0180a6196d66fe3d563282f1107525cbd",
+  "merged_at": "2026-11-25T07:10:46Z",
+  "pr": "50684",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 44756092512,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44756092512",
+  "source": "replay",
+  "title": "[DiffusionGemma] Assign prefill multimodal mask in DiffusionGemmaEncoderModel.forward",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50723": {
+  "blocked": [],
+  "head": "317c16ba612c66782b04f7b4cbe0f470082998d1",
+  "labels": [],
+  "merge_commit": "37fdf622014f8a825d2a63a78165b398ca1b5b4a",
+  "merged_at": "2026-11-25T09:23:33Z",
+  "pr": "50723",
+  "red": [],
+  "run_id": 45569502786,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45569502786",
+  "source": "gate",
+  "title": "Apply Cohere logit_scale in AyaVisionForConditionalGeneration",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50727": {
+  "blocked": [],
+  "head": "f3b7212c4f0c3be6be4802af53abbca67822444d",
+  "labels": [],
+  "merge_commit": "311accabde040244bee8ab461e0c80c5549e78f1",
+  "merged_at": "2026-11-16T15:44:14Z",
+  "pr": "50727",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43896292663,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43896292663",
+  "source": "replay",
+  "title": "Fix Mistral Large 4 LeRoPE training gradients",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50746": {
+  "blocked": [],
+  "head": "ac8f08325b817a0b05d48dababa595a14d1cafc2",
+  "labels": [],
+  "merge_commit": "bcac86f294df3be933f57f0702acc6bb56d48ec5",
+  "merged_at": "2026-11-24T10:01:12Z",
+  "pr": "50746",
+  "red": [],
+  "run_id": 45362794823,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45362794823",
+  "source": "gate",
+  "title": "Fix EfficientLoFTR batching for match indices and refinement offsets",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50749": {
+  "blocked": [],
+  "head": "30aa2a0931511c86fb3797b5738dec653380aa35",
+  "labels": [],
+  "merge_commit": "5aa45c0906a6e9260cc11ce500bbb1cbb13098ba",
+  "merged_at": "2026-11-26T16:35:06Z",
+  "pr": "50749",
+  "red": [
+   {
+    "contract": "Mistral3",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "Ministral-3-3B-Instruct-2512-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-mistral3",
+    "failure": "predicted_tokens: [']', ']'] != ['', '']",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "mistral3-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45852970910,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45852970910",
+  "source": "gate",
+  "title": "Pair tool-result images with the right placeholders in `Glm5NextProcessor.apply_chat_template`",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50754": {
+  "blocked": [],
+  "head": "9fdb44b3311db325734dc8cd874c77849808e69e",
+  "labels": [],
+  "merge_commit": "94779e00c693452db3ae9e6a6027b5fead1ff3e8",
+  "merged_at": "2026-11-20T18:04:30Z",
+  "pr": "50754",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GLM5Next",
+    "failure": "answer_logits: max delta 0.00781 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "GLM-5.3-Flash-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "nd/run.py\", line 323, in execute_inline",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 44780489632,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44780489632",
+  "source": "replay",
+  "title": "Restore sorting of sampled beam candidates before finalization",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50818": {
+  "blocked": [],
+  "head": "17e3423e8b3e3845edb734329ff6cd0b0dabbe23",
+  "labels": [],
+  "merge_commit": "32607642d06a2490c0e3230ba4618d317595b555",
+  "merged_at": "2026-11-20T16:22:53Z",
+  "pr": "50818",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "nd/run.py\", line 323, in execute_inline",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 44734340189,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44734340189",
+  "source": "replay",
+  "title": "Fix apply_chat_template with message objects",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50869": {
+  "blocked": [],
+  "head": "591b75df844bfcecf9255ff53d4cced15f3b4e01",
+  "labels": [],
+  "merge_commit": "bcd0b3d64c584e68fd88037cee58b57a16c670d4",
+  "merged_at": "2026-11-24T20:42:27Z",
+  "pr": "50869",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45474806268,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45474806268",
+  "source": "gate",
+  "title": "Use Liger RMSNorm v4 to preserve residual gradients",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50890": {
+  "blocked": [],
+  "head": "0f37582d027492bb41346b834f3c75b2a7c50264",
+  "labels": [],
+  "merge_commit": "f2c9ee2401bce932d38d48eafde581a65af7fcc9",
+  "merged_at": "2026-11-20T18:20:16Z",
+  "pr": "50890",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GLM5Next",
+    "failure": "answer_logits: max delta 0.00781 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "GLM-5.3-Flash-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "nd/run.py\", line 323, in execute_inline",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 44777605745,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44777605745",
+  "source": "replay",
+  "title": "Keep the cache under activation checkpointing when gradients are off",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50895": {
+  "blocked": [],
+  "head": "263452d6bbfafae2ff5310764de5ce9f6a25dc9b",
+  "labels": [],
+  "merge_commit": "ea1ea8d7628023b1cfda73444b5b671eedfee4b5",
+  "merged_at": "2026-11-25T21:41:21Z",
+  "pr": "50895",
+  "red": [],
+  "run_id": 45702202227,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45702202227",
+  "source": "gate",
+  "title": "Add _spm_precompiled_charsmap support to Udop/MBart/LayoutXLM/Barthez/SeamlessM4T tokenizers",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50897": {
+  "blocked": [],
+  "head": "161ae89b48dff1bf88408c9e142b7e7ce9f31d2e",
+  "labels": [],
+  "merge_commit": "52bac5d0e0da56e26289c072f306877ff5870262",
+  "merged_at": "2026-11-23T18:56:13Z",
+  "pr": "50897",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "ompile(code, filename, \"exec\"), namespace)",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45237516276,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45237516276",
+  "source": "gate",
+  "title": ":rotating_light: [`EP/TP`] Deprecate TP on MoE",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50899": {
+  "blocked": [],
+  "head": "a00ba26471c17ba77edaabe5a2865022b2f2fc69",
+  "labels": [],
+  "merge_commit": "dd623c8cf785bec63a9b1a396b846b5d121f2ace",
+  "merged_at": "2026-11-20T18:31:18Z",
+  "pr": "50899",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 44350991896,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44350991896",
+  "source": "not-run",
+  "title": "Fix flaky DeepseekV32 / Whisper / HiggsAudioV2 CUDA graph capture failures (GC inside the capture, torch 2.15)",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50930": {
+  "blocked": [],
+  "head": "a27e8e3c5791c330277e43ce64f8f7907f598bf3",
+  "labels": [],
+  "merge_commit": "9572fa2a151c4b08bd2c8004e20cdb91c8803a63",
+  "merged_at": "2026-11-23T18:38:32Z",
+  "pr": "50930",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "ompile(code, filename, \"exec\"), namespace)",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45235081547,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45235081547",
+  "source": "gate",
+  "title": "Fix CPU forwards when causal-conv1d, mamba-ssm or fla is installed",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50934": {
+  "blocked": [],
+  "head": "edf18a6c96a30ebe2e472a4d6579dc40b6a2b041",
+  "labels": [],
+  "merge_commit": "2f6d51a19cba5c2c40f4d4f7264d0480ee57991f",
+  "merged_at": "2026-11-20T06:31:58Z",
+  "pr": "50934",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 44501154676,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44501154676",
+  "source": "replay",
+  "title": "Fix loading DETR-family configs that store dilation=None",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50953": {
+  "blocked": [],
+  "head": "262ae73292071581f3b66feadafed2469717d00c",
+  "labels": [],
+  "merge_commit": "5b6c887c3e75dce213631488353a73b5d67d373e",
+  "merged_at": "2026-11-23T15:08:31Z",
+  "pr": "50953",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45197441452,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45197441452",
+  "source": "not-run",
+  "title": "Fix test_flash_attn_2_can_dispatch_composite_models for models that disable Flash Attention",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50975": {
+  "blocked": [],
+  "head": "92482a8652996f435548ba62dce864ba494df833",
+  "labels": [],
+  "merge_commit": "42efcfde46e668067a74bbd439d33f107b4a7c6c",
+  "merged_at": "2026-11-20T13:21:31Z",
+  "pr": "50975",
+  "red": [
+   {
+    "contract": "GLM5Next",
+    "failure": "answer_logits: max delta 0.00781 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "f6494479c3c725ffd70fd9e983df25d81e636f7e",
+    "target": "GLM-5.3-Flash-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 44575416194,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44575416194",
+  "source": "replay",
+  "title": "Always ensure correct dtype for _keep_in_fp32_modules_strict",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50978": {
+  "blocked": [],
+  "head": "6ef0b2e6eb6b71f410c206d819bb4a85fd5540e8",
+  "labels": [],
+  "merge_commit": "f7ff58866e48de1c550a22d3b10d38dc3144453c",
+  "merged_at": "2026-11-26T16:37:04Z",
+  "pr": "50978",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "ompile(code, filename, \"exec\"), namespace)",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45223018595,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45223018595",
+  "source": "gate",
+  "title": "Let `xml-inline` pick each value's parser from the tag",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50980": {
+  "blocked": [],
+  "head": "d05bfc3dc8273e59af27390f8b4ef65ef6e0a874",
+  "labels": [],
+  "merge_commit": "9ffd1f50a1fe13183d435ff60cb4b92777cc417e",
+  "merged_at": "2026-11-24T15:50:18Z",
+  "pr": "50980",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45424516759,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45424516759",
+  "source": "gate",
+  "title": "feat: add rocm entries to hub kernels mapping",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50982": {
+  "blocked": [],
+  "head": "24102edfd151413981eb4cb8ba341e24f0007a44",
+  "labels": [],
+  "merge_commit": "1031277cef60200fda98628e9adc8fb15f0e1549",
+  "merged_at": "2026-11-20T03:44:18Z",
+  "pr": "50982",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 44662694600,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44662694600",
+  "source": "replay",
+  "title": "Fix Dory vocabulary resizing, loop validation, and last-loop static caching",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50993": {
+  "blocked": [],
+  "head": "c70289f722bf801b4dfddf613264fe41254c448a",
+  "labels": [
+   "for patch"
+  ],
+  "merge_commit": "7ad60adc9e337c2e2378581f0200417c2f1b0a17",
+  "merged_at": "2026-11-23T11:27:30Z",
+  "pr": "50993",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 44725033446,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44725033446",
+  "source": "replay",
+  "title": "Fix dory static cache",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50996": {
+  "blocked": [],
+  "head": "b78dbbe8a061ef53c75e8ce30ffc78fd37716b1d",
+  "labels": [
+   "for patch"
+  ],
+  "merge_commit": "1097d1570e6208063fa49575bb2b6e756a50c2f6",
+  "merged_at": "2026-11-23T05:48:58Z",
+  "pr": "50996",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "f6494479c3c725ffd70fd9e983df25d81e636f7e",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "f6494479c3c725ffd70fd9e983df25d81e636f7e",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 44682150829,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44682150829",
+  "source": "replay",
+  "title": "Allow expert parallelism alone with `tp_plan={}`",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50999": {
+  "blocked": [],
+  "head": "0e337258bd19dd5e9f006f56f0c47127f349369d",
+  "labels": [],
+  "merge_commit": "c0ae6dd7e68a8e8d7ad3a7fd8c8ac7fc9171d91e",
+  "merged_at": "2026-11-20T18:30:44Z",
+  "pr": "50999",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 44701915586,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44701915586",
+  "source": "not-run",
+  "title": "[docs] Fix the custom ResNet example in the customizing models guide",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51002": {
+  "blocked": [],
+  "head": "798c5c92deace1904559587ad908f82f4e6626b8",
+  "labels": [],
+  "merge_commit": "9c633c87b16b033e63acbbd379d38cf57c954cbd",
+  "merged_at": "2026-11-26T06:16:03Z",
+  "pr": "51002",
+  "red": [],
+  "run_id": 45673499568,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45673499568",
+  "source": "gate",
+  "title": "Fix ColPali and ColQwen2 processors splitting a single string query into characters",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51022": {
+  "blocked": [],
+  "head": "7473ea10a134b11bcfe7b6f28e2780a57db3b23b",
+  "labels": [],
+  "merge_commit": "e35e1a5087907deb2cbdd7304dd3ff047dca4135",
+  "merged_at": "2026-11-25T08:31:43Z",
+  "pr": "51022",
+  "red": [],
+  "run_id": 45425655707,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45425655707",
+  "source": "gate",
+  "title": "Support Flash Attention in SigLIP2",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51027": {
+  "blocked": [],
+  "head": "5761eba3eab1eca427ccc16b8b325c59586777a9",
+  "labels": [],
+  "merge_commit": "d7803bca76558eac9ca09a746a9a306917bfb257",
+  "merged_at": "2026-11-24T09:46:13Z",
+  "pr": "51027",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "018d02493d3b29acc972079102c78fb57fe1b26a",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "018d02493d3b29acc972079102c78fb57fe1b26a",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "ompile(code, filename, \"exec\"), namespace)",
+    "fleet": "prototypes",
+    "fleet_revision": "018d02493d3b29acc972079102c78fb57fe1b26a",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45363509677,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45363509677",
+  "source": "gate",
+  "title": "Fix loading DETR-family configs that store backbone_kwargs=None",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51028": {
+  "blocked": [],
+  "head": "fd3b64a845f6e460e9d5fff652f6303fde6632ab",
+  "labels": [],
+  "merge_commit": "56547cbb1b39ef75506470902750b4c01fdfff3f",
+  "merged_at": "2026-11-20T14:40:59Z",
+  "pr": "51028",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GLM5Next",
+    "failure": "answer_logits: max delta 0.00781 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "GLM-5.3-Flash-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "nd/run.py\", line 323, in execute_inline",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 44753107689,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44753107689",
+  "source": "replay",
+  "title": "Fix is_croppable property for mixed linear-full attention classes",
+  "verdict": "pending",
+  "version": 1
+ },
+ "51030": {
+  "blocked": [],
+  "head": "85260e147ff022080dfd0bc96f2a25c86b3d8cad",
+  "labels": [],
+  "merge_commit": "12d4af6a31b39c7e46a75d02387b1e263dd04939",
+  "merged_at": "2026-11-20T15:17:14Z",
+  "pr": "51030",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GLM5Next",
+    "failure": "answer_logits: max delta 0.00781 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "GLM-5.3-Flash-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "nd/run.py\", line 323, in execute_inline",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 44759430975,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44759430975",
+  "source": "replay",
+  "title": "[cache] Fix is_linear property to correctly remove hybrid layers",
+  "verdict": "pending",
+  "version": 1
+ },
+ "51032": {
+  "blocked": [],
+  "head": "fca7482678271cae5b77684c00f7f8eb1abf9f1e",
+  "labels": [],
+  "merge_commit": "9e94e2adc6058af330ff31edc7e4d71f8966f58c",
+  "merged_at": "2026-11-20T15:33:12Z",
+  "pr": "51032",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GLM5Next",
+    "failure": "answer_logits: max delta 0.00781 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "GLM-5.3-Flash-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "nd/run.py\", line 323, in execute_inline",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 44760741457,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44760741457",
+  "source": "replay",
+  "title": "Fix generate for mps and encoder-decoder models",
+  "verdict": "pending",
+  "version": 1
+ },
+ "51036": {
+  "blocked": [],
+  "head": "764e36982715a0412d598aeaff80a4cbbf1ce8f6",
+  "labels": [],
+  "merge_commit": "ce3003d95574ebe05d85c5742c6c7636c1285923",
+  "merged_at": "2026-11-20T17:25:34Z",
+  "pr": "51036",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GLM5Next",
+    "failure": "answer_logits: max delta 0.00781 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "GLM-5.3-Flash-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "nd/run.py\", line 323, in execute_inline",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 44780073866,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44780073866",
+  "source": "replay",
+  "title": "Fix TextStreamer dropping spaces sometimes",
+  "verdict": "pending",
+  "version": 1
+ },
+ "51040": {
+  "blocked": [],
+  "head": "05f5cae60fa48dceb60122bf5e8ba7ab7c9e3563",
+  "labels": [],
+  "merge_commit": "1cfb1e8e4cb6945a84078c60a92a26bc35f80bd1",
+  "merged_at": "2026-11-20T19:12:56Z",
+  "pr": "51040",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 44787163272,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44787163272",
+  "source": "replay",
+  "title": "Fix OmniASR CTC blank token ID",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51042": {
+  "blocked": [],
+  "head": "47ae5a22db9813bd978ee48678895e482e3117d2",
+  "labels": [
+   "for patch"
+  ],
+  "merge_commit": "af80f69cb0cf321dffc1cdb8379f3a58a883295b",
+  "merged_at": "2026-11-24T14:41:05Z",
+  "pr": "51042",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "ompile(code, filename, \"exec\"), namespace)",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45332816742,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45332816742",
+  "source": "gate",
+  "title": "Fix strided checkpoint reads on PyTorch 2.9",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51048": {
+  "blocked": [],
+  "head": "39bb64405ee4c9bffb8db9abfd628f73148008c2",
+  "labels": [],
+  "merge_commit": "3322f226a02c5c3a3c1a3f0f4a3c9cee50789f6d",
+  "merged_at": "2026-11-25T11:11:03Z",
+  "pr": "51048",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 45150917083,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45150917083",
+  "source": "replay",
+  "title": "Cast the Inkling vision tower input to its weight dtype",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51049": {
+  "blocked": [],
+  "head": "17e8ac1e735669d3d298f47e8deaf5997e680ef7",
+  "labels": [],
+  "merge_commit": "8d7668dd7d5f945e34aa0f5d9f163bc5f955e163",
+  "merged_at": "2026-11-20T19:24:25Z",
+  "pr": "51049",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 44798739000,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44798739000",
+  "source": "not-run",
+  "title": "Skip flaky Kosmos2 `test_generate_from_multimodal_encoder_outputs`",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51050": {
+  "blocked": [],
+  "head": "430050f6f71195b76004b5d61bbb446ec0508fb3",
+  "labels": [
+   "New model"
+  ],
+  "merge_commit": "046bdb8cc2cee29d233964bb77fe6fd37cfe4aa3",
+  "merged_at": "2026-11-21T12:07:28Z",
+  "pr": "51050",
+  "reason": "`New model`: red cases only warn",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GLM5Next",
+    "failure": "answer_logits: max delta 0.00781 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "GLM-5.3-Flash-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "nd/run.py\", line 323, in execute_inline",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 44902321431,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44902321431",
+  "source": "replay",
+  "title": "Add Inkling2 Mini",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51051": {
+  "blocked": [],
+  "head": "5ac69f037cb644dd1329123b5b12976c36a68e02",
+  "labels": [],
+  "merge_commit": "91c512bc655351d5a38fd355a923ae167518f6fb",
+  "merged_at": "2026-11-23T14:18:20Z",
+  "pr": "51051",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 44810402024,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44810402024",
+  "source": "not-run",
+  "title": "[docs] Replace deprecated torch_dtype with dtype in doc examples",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51057": {
+  "blocked": [],
+  "head": "ffa2c44058802edcd71e18d3cbe3bcad74c65333",
+  "labels": [],
+  "merge_commit": "ad3a61a4d57bb89fe38708e479d3aad9c2fb3b7c",
+  "merged_at": "2026-11-24T17:45:10Z",
+  "pr": "51057",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 44835560875,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44835560875",
+  "source": "not-run",
+  "title": "Fix dead links to onnxruntime issues in exporters doc",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51067": {
+  "blocked": [],
+  "head": "c8028c01d5b492c105ad622b697b7ee59d2294c3",
+  "labels": [],
+  "merge_commit": "f3b0be813bab0c3373a548106d9bce0c1a76efc7",
+  "merged_at": "2026-11-25T21:48:02Z",
+  "pr": "51067",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 44917862606,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44917862606",
+  "source": "not-run",
+  "title": "Fix axk1 / dots3_note integration tests after fp32 router gate change",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51068": {
+  "blocked": [],
+  "head": "3dae1fb957c6a68bc60b0dcd860aa0254736ca22",
+  "labels": [],
+  "merge_commit": "2f1bc5e321b9a736200a590d6e7743ccdeb60772",
+  "merged_at": "2026-11-21T15:21:12Z",
+  "pr": "51068",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 44917869408,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44917869408",
+  "source": "not-run",
+  "title": "Restore CUDA expectation for DeepseekV2 test_batch_fa2",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51069": {
+  "blocked": [],
+  "head": "d3415996495209c87e1e16681ce49fc4f226c9d4",
+  "labels": [],
+  "merge_commit": "fcc89620113994456848b7f2a7a47230b187f569",
+  "merged_at": "2026-11-23T15:04:05Z",
+  "pr": "51069",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "ompile(code, filename, \"exec\"), namespace)",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45184663751,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45184663751",
+  "source": "gate",
+  "title": "[Chat Parsing] Preserve explicit string arguments in typed json and python-call-list tool calls",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51071": {
+  "blocked": [],
+  "head": "6bd3a3b623186722970e31a16e9e4d4c192232aa",
+  "labels": [],
+  "merge_commit": "fc56da544447c7791e34dedb2cf5cf655d59b429",
+  "merged_at": "2026-11-24T17:36:52Z",
+  "pr": "51071",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 44937827729,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44937827729",
+  "source": "not-run",
+  "title": "[docs] Fix the output recorder registration in the MoE routing replay recipe",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51073": {
+  "blocked": [],
+  "head": "d218960a0dd985e74867b4b5105b7c0f9af5ab1d",
+  "labels": [],
+  "merge_commit": "a8041496678faf305f8d384f34fc3997c7edd04f",
+  "merged_at": "2026-11-23T13:55:47Z",
+  "pr": "51073",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "ompile(code, filename, \"exec\"), namespace)",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 44944344514,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/44944344514",
+  "source": "gate",
+  "title": "Fix batch-dependent text output in image-text-to-text and any-to-any pipelines",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51084": {
+  "blocked": [],
+  "head": "e16f7725a32a7986a6b180726827ac1ff6597f55",
+  "labels": [],
+  "merge_commit": "9e5e84cc8985a4c2b1b5adc4facee92dbc25ec2f",
+  "merged_at": "2026-11-26T13:11:07Z",
+  "pr": "51084",
+  "reason": "no PR CI run on the merged head",
+  "red": [],
+  "source": "no-pr-ci",
+  "title": "Fix Unigram tokenizers built from a bare `spiece.model` splitting text at user-defined pieces",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51085": {
+  "blocked": [],
+  "head": "e3f768b9eaea181252106c35856e30e79d426da4",
+  "labels": [
+   "for patch"
+  ],
+  "merge_commit": "90e9ee1d25ac37b626a9e2d3aef815150384f880",
+  "merged_at": "2026-11-23T11:17:53Z",
+  "pr": "51085",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GLM5Next",
+    "failure": "answer_logits: max delta 0.00781 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "GLM-5.3-Flash-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "nd/run.py\", line 323, in execute_inline",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45152990209,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45152990209",
+  "source": "replay",
+  "title": "Fix backward compatibility of the `cache` rename for remote code",
+  "verdict": "pending",
+  "version": 1
+ },
+ "51090": {
+  "blocked": [],
+  "head": "d43e0b9f85efca7ac31f94c2af2f79cd733f330e",
+  "labels": [],
+  "merge_commit": "7bf5b715a6741dcfe43b81f24f3e08ee9ac06e95",
+  "merged_at": "2026-11-22T14:23:36Z",
+  "pr": "51090",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45027106344,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45027106344",
+  "source": "not-run",
+  "title": "[vLLM CI] Test transformers main instead of the latest release",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51091": {
+  "blocked": [],
+  "head": "3ba3c45ca547c61bebd5b5dcbb89009347bcfdc8",
+  "labels": [],
+  "merge_commit": "72bad2bf70bf46ac389b2324c055145faa4b7868",
+  "merged_at": "2026-11-22T17:29:28Z",
+  "pr": "51091",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45049105495,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45049105495",
+  "source": "not-run",
+  "title": "[vLLM CI] Show transformers/vLLM commits in the Slack report, pip freeze before pytest",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51092": {
+  "blocked": [],
+  "head": "990d3725aa7342380dda3c2a02a31cd9b44bba55",
+  "labels": [],
+  "merge_commit": "2eefc0e29c31b0357a6657976442bde993406cfe",
+  "merged_at": "2026-11-26T06:13:54Z",
+  "pr": "51092",
+  "red": [],
+  "run_id": 45761282022,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45761282022",
+  "source": "gate",
+  "title": "Fix `Llama4ForConditionalGeneration` forward reading `image_outputs` from the text model",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51095": {
+  "blocked": [],
+  "head": "70889e4eec105f747b483641fab5a49c4598be71",
+  "labels": [],
+  "merge_commit": "be48e7a0b63d2ff22ce1ebccbccbd0374c1592ef",
+  "merged_at": "2026-11-22T18:17:48Z",
+  "pr": "51095",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45053231489,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45053231489",
+  "source": "not-run",
+  "title": "[SGLang CI] Show the transformers/SGLang commits and their dates in the Slack report",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51099": {
+  "blocked": [],
+  "head": "b9064409beb7339f39d76680f4c3dcee7aeaa9d7",
+  "labels": [],
+  "merge_commit": "d1fc2bc545fd1dc0360d8c344b6e3c79c42805eb",
+  "merged_at": "2026-11-23T17:06:01Z",
+  "pr": "51099",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "ompile(code, filename, \"exec\"), namespace)",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45217076575,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45217076575",
+  "source": "gate",
+  "title": "Import torchaudio lazily in `audio_utils` so a broken torchaudio doesn't break model imports",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51100": {
+  "blocked": [],
+  "head": "63396e78061a9b46830c42f06a61457cae6b7b73",
+  "labels": [],
+  "merge_commit": "0d3998c0ae41a9cf9b853d93f2b22806c215f19e",
+  "merged_at": "2026-11-23T15:25:17Z",
+  "pr": "51100",
+  "red": [],
+  "run_id": 45195343538,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45195343538",
+  "source": "gate",
+  "title": "[OmniASR] Support a `padding_mask` kept on the CPU in the audio encoder",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51107": {
+  "blocked": [],
+  "head": "51554ff39f8affc872b1815fd18a91951a6612fa",
+  "labels": [],
+  "merge_commit": "d9bdc606d543e1a85c0d7121af9379fbd2445bf3",
+  "merged_at": "2026-11-23T08:36:33Z",
+  "pr": "51107",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45135181210,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45135181210",
+  "source": "not-run",
+  "title": "Fix flaky VideoLlama3 padding-free tests: flip `input_ids` together with the attention mask",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51108": {
+  "blocked": [],
+  "head": "0ba3ad54ff0972d7095e0e0c54c20e4bf15e585c",
+  "labels": [],
+  "merge_commit": "6248af01d4b96ca35313b38dad3c97d541585fdc",
+  "merged_at": "2026-11-23T12:21:13Z",
+  "pr": "51108",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45170584490,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45170584490",
+  "source": "not-run",
+  "title": "Fix flaky `test_load_img_url_timeout`: accept any timeout exception",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51109": {
+  "blocked": [],
+  "head": "b5089db218962015591fceb7239d0221e1910e4a",
+  "labels": [],
+  "merge_commit": "754c424c4ef32104b975cd8d2ce909e7bd71c24e",
+  "merged_at": "2026-11-23T09:29:07Z",
+  "pr": "51109",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45135194798,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45135194798",
+  "source": "not-run",
+  "title": "Fix order-dependent `test_advisory_warnings`: pin transformers' `warning_advice`",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51110": {
+  "blocked": [],
+  "head": "b581e0edcfe5acbd542424b7abcd19c5c19010db",
+  "labels": [],
+  "merge_commit": "95eb5106c322aca0126e1cf08041f830959b66d5",
+  "merged_at": "2026-11-23T12:26:19Z",
+  "pr": "51110",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45135202379,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45135202379",
+  "source": "not-run",
+  "title": "Fix flaky image processor backend equivalence tests: configurable mean tolerance",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51111": {
+  "blocked": [],
+  "head": "036aa225baba4f26512f23673ac5497513c7df53",
+  "labels": [],
+  "merge_commit": "0eb01638557fdbfc92fc6844eddc04a427f19d5b",
+  "merged_at": "2026-11-23T16:39:05Z",
+  "pr": "51111",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45211904644,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45211904644",
+  "source": "not-run",
+  "title": "Skip `test_generate_from_multimodal_encoder_outputs` for models without `mm_encoder_outputs` support",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51112": {
+  "blocked": [],
+  "head": "36b4be2a3dfb5a35f4d7061e320ab710aa6c667b",
+  "labels": [],
+  "merge_commit": "bc7bd00302067106c9d4f30f09689caddb955be8",
+  "merged_at": "2026-11-23T10:17:51Z",
+  "pr": "51112",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GLM5Next",
+    "failure": "answer_logits: max delta 0.00781 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "GLM-5.3-Flash-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "nd/run.py\", line 323, in execute_inline",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45148376250,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45148376250",
+  "source": "replay",
+  "title": "Never accept zero-probability draft tokens in speculative sampling",
+  "verdict": "pending",
+  "version": 1
+ },
+ "51113": {
+  "blocked": [],
+  "head": "66df065c0ea9ebe9bf9aceb98f016af08d33e110",
+  "labels": [],
+  "merge_commit": "95a2c17b4389a016ea0c425bafe2f6989c8326ef",
+  "merged_at": "2026-11-23T11:06:36Z",
+  "pr": "51113",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45136095479,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45136095479",
+  "source": "not-run",
+  "title": "[vLLM CI] Test more of vLLM's use of transformers: tokenizers / configs, outputs vs transformers, Transformers-backend multimodal generation",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51117": {
+  "blocked": [],
+  "head": "6fe4d113975cac0f9f715a749abf214185749f62",
+  "labels": [],
+  "merge_commit": "2649ee80474e124a27a7d77eaac187e808cd1df4",
+  "merged_at": "2026-11-23T11:32:21Z",
+  "pr": "51117",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45141877311,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45141877311",
+  "source": "not-run",
+  "title": "Remove benchmark_v2 (moved to huggingface/transformers-perf)",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51119": {
+  "blocked": [],
+  "head": "782627d0d10f5ef203c78b076d559efe19573895",
+  "labels": [],
+  "merge_commit": "373258720d2f0b4ae4f43d340d937286e41b0a2c",
+  "merged_at": "2026-11-26T08:38:12Z",
+  "pr": "51119",
+  "red": [
+   {
+    "contract": "Mistral3",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "96c877b94ca35d353af6cd4b9648dd2825291904",
+    "target": "Ministral-3-3B-Instruct-2512-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-mistral3",
+    "failure": "predicted_tokens: [']', ']'] != ['', '']",
+    "fleet": "prototypes",
+    "fleet_revision": "96c877b94ca35d353af6cd4b9648dd2825291904",
+    "target": "mistral3-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45776104523,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45776104523",
+  "source": "gate",
+  "title": "record-mic: re-record MIC expected values for a PR",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51121": {
+  "blocked": [],
+  "head": "280d7e2952ffee7b12afde3e914d0a1c74b261e1",
+  "labels": [],
+  "merge_commit": "89a04c18a28832544254ba735c90aac2694cf989",
+  "merged_at": "2026-11-26T10:32:46Z",
+  "pr": "51121",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "018d02493d3b29acc972079102c78fb57fe1b26a",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "018d02493d3b29acc972079102c78fb57fe1b26a",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "ompile(code, filename, \"exec\"), namespace)",
+    "fleet": "prototypes",
+    "fleet_revision": "018d02493d3b29acc972079102c78fb57fe1b26a",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45366157134,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45366157134",
+  "source": "gate",
+  "title": "[tests] Update TPU test expectations and skips for CI",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51124": {
+  "blocked": [],
+  "head": "41914cfde20782c3d21aaf4c53a0f32f71d98392",
+  "labels": [
+   "for patch"
+  ],
+  "merge_commit": "4b401cf208f3a39a5d9cc2a93723ce8dc7049d6c",
+  "merged_at": "2026-11-23T12:46:33Z",
+  "pr": "51124",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GLM5Next",
+    "failure": "answer_logits: max delta 0.00781 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "GLM-5.3-Flash-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "ompile(code, filename, \"exec\"), namespace)",
+    "fleet": "prototypes",
+    "fleet_revision": "3a63e8d7b91367d264af8ba44cf72cf50e04a657",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45168834297,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45168834297",
+  "source": "gate",
+  "title": "Restore `modeling_attn_mask_utils` for remote code (one-off to unblock vLLM)",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51126": {
+  "blocked": [],
+  "head": "94a621ef21af82565af22e2f1f1680e15ab1dae7",
+  "labels": [],
+  "merge_commit": "be56b7fd8c0ff94877ded9507326b4a3ac5ba7fb",
+  "merged_at": "2026-11-26T17:16:45Z",
+  "pr": "51126",
+  "red": [
+   {
+    "contract": "Mistral3",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "Ministral-3-3B-Instruct-2512-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-mistral3",
+    "failure": "predicted_tokens: [']', ']'] != ['', '']",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "mistral3-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45862901172,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45862901172",
+  "source": "gate",
+  "title": "Add MTP support to Ernie 4.5 MoE",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51130": {
+  "blocked": [],
+  "head": "adeb4599b8c8314587d20b3e2d54757c0bdd48da",
+  "labels": [],
+  "merge_commit": "bae9427f872e2a96e6ef612a99ff135a133f42e1",
+  "merged_at": "2026-11-23T15:19:34Z",
+  "pr": "51130",
+  "reason": "no PR CI run on the merged head",
+  "red": [],
+  "source": "no-pr-ci",
+  "title": "[vLLM CI] Test vLLM features built on transformers tokenizers / processors, and multimodal models vs transformers",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51136": {
+  "blocked": [],
+  "head": "7c21049c9e21d6309971b95532e7881a173b11e9",
+  "labels": [],
+  "merge_commit": "3924952c3b0d6feb10a796652e21c9009f7b7bd0",
+  "merged_at": "2026-11-23T16:56:08Z",
+  "pr": "51136",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "ompile(code, filename, \"exec\"), namespace)",
+    "fleet": "prototypes",
+    "fleet_revision": "bd28f6dbff25c3626de10cde3d7631ffd3171555",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45217453468,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45217453468",
+  "source": "gate",
+  "title": "Keep accelerate's hooks when kernelizing a model",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51141": {
+  "blocked": [],
+  "head": "4b2662cb1b1a3dd6b4cd9f9a4104181afa1f0719",
+  "labels": [],
+  "merge_commit": "d8f10a82213a3a9db48385aba3a4b57ab535de50",
+  "merged_at": "2026-11-23T19:49:11Z",
+  "pr": "51141",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45229478267,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45229478267",
+  "source": "not-run",
+  "title": "[vLLM CI] Add engine output processing, beam search and more language models vs transformers",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51144": {
+  "blocked": [],
+  "head": "9abfcf387680acae4cbe68b28d5a31ac4668a184",
+  "labels": [],
+  "merge_commit": "ab19734bb45071c74b6d9dd7a5906dd68b366ae7",
+  "merged_at": "2026-11-24T13:24:31Z",
+  "pr": "51144",
+  "red": [],
+  "run_id": 45256852148,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45256852148",
+  "source": "gate",
+  "title": "Fix Llama4 forward crash on missing image_outputs",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51146": {
+  "blocked": [],
+  "head": "07923f66ad69d473e57abe61de0a3e838bdac4e0",
+  "labels": [],
+  "merge_commit": "277cd96360961e57297f674d43a07f221bf7f6e9",
+  "merged_at": "2026-11-24T17:59:24Z",
+  "pr": "51146",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45254938195,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45254938195",
+  "source": "not-run",
+  "title": "Fix moved HQQ blog link in quantization docs",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51147": {
+  "blocked": [],
+  "head": "32ac3acd4cacd7b14cb52bc47fee8f7d365c4b23",
+  "labels": [],
+  "merge_commit": "7d6009323087459371c8d71402246a22f2951f11",
+  "merged_at": "2026-11-24T18:00:54Z",
+  "pr": "51147",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45254962358,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45254962358",
+  "source": "not-run",
+  "title": "Use current Hub name for Llama 3.1 model card links",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51148": {
+  "blocked": [],
+  "head": "39f3627584a03fe97c3b5b4951bc8ec0c18bae13",
+  "labels": [],
+  "merge_commit": "fa9c04ea60c5e1d2ecc38064442973fa1ddccc72",
+  "merged_at": "2026-11-24T21:30:31Z",
+  "pr": "51148",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45266899486,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45266899486",
+  "source": "not-run",
+  "title": "Fix flaky OWL-ViT / OWLv2 `test_eager_matches_sdpa_inference` (bf16)",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51150": {
+  "blocked": [],
+  "head": "f45668cb578346f44015fec0c497d5e30fa49281",
+  "labels": [],
+  "merge_commit": "292aead50f7659f5412e6966a9627d6d04ded6ce",
+  "merged_at": "2026-11-25T13:32:59Z",
+  "pr": "51150",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45272106733,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45272106733",
+  "source": "not-run",
+  "title": "Pre-fetch the `hf-internal-testing/test-videos` assets for CI",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51163": {
+  "blocked": [],
+  "head": "1592d162b725a2b11cbb9382703f718519fe25af",
+  "labels": [],
+  "merge_commit": "b308e3d194858a276c0481fabfd72e4380534e8c",
+  "merged_at": "2026-11-24T15:04:57Z",
+  "pr": "51163",
+  "reason": "no PR CI run on the merged head",
+  "red": [],
+  "source": "no-pr-ci",
+  "title": "[vLLM CI] Add more language / multimodal pooling models vs transformers, keep only HF comparisons in beam search",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51170": {
+  "blocked": [],
+  "head": "6a4937a100e6f3d6edf9b873acc8aeb24c8d58f2",
+  "labels": [],
+  "merge_commit": "840bc92650ad5b8d8a83f2c64c5b3782e05ce4f7",
+  "merged_at": "2026-11-24T15:12:18Z",
+  "pr": "51170",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "018d02493d3b29acc972079102c78fb57fe1b26a",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "018d02493d3b29acc972079102c78fb57fe1b26a",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "ompile(code, filename, \"exec\"), namespace)",
+    "fleet": "prototypes",
+    "fleet_revision": "018d02493d3b29acc972079102c78fb57fe1b26a",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45364724380,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45364724380",
+  "source": "gate",
+  "title": "Pad text and audio features on their own sides when batching multimodal pipelines",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51171": {
+  "blocked": [],
+  "head": "7a177342700ef7632ecdb07b6686b8b43bcf22e5",
+  "labels": [],
+  "merge_commit": "1d8544b25c6780d85c6538636a6ca15aeabbcb7e",
+  "merged_at": "2026-11-25T15:09:27Z",
+  "pr": "51171",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "018d02493d3b29acc972079102c78fb57fe1b26a",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "018d02493d3b29acc972079102c78fb57fe1b26a",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "ompile(code, filename, \"exec\"), namespace)",
+    "fleet": "prototypes",
+    "fleet_revision": "018d02493d3b29acc972079102c78fb57fe1b26a",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45367216333,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45367216333",
+  "source": "gate",
+  "title": "[tests] Fix SpeechT5 coverage and TPU device selection",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51174": {
+  "blocked": [],
+  "head": "9abd158895bd5f70346a57c4a61cde317df9a737",
+  "labels": [],
+  "merge_commit": "7cabd3e8b82fcce728194b2b9a8d2e08b542d64b",
+  "merged_at": "2026-11-25T21:01:28Z",
+  "pr": "51174",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45654942503,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45654942503",
+  "source": "not-run",
+  "title": "[tests] Build output equivalence diagnostics only on failure (optimization)",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51175": {
+  "blocked": [],
+  "head": "c5f9b889bae3fef6c0b097ee1edb63bdf952a556",
+  "labels": [],
+  "merge_commit": "ae61745a79914d83b8e600cea57341af82f19eb2",
+  "merged_at": "2026-11-24T12:00:39Z",
+  "pr": "51175",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "ompile(code, filename, \"exec\"), namespace)",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45379892139,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45379892139",
+  "source": "gate",
+  "title": "Move YaRN `mscale` helpers into `modeling_rope_utils`",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51176": {
+  "blocked": [],
+  "head": "31b7be965ab25f4b01be103dc84a51236a6bfdae",
+  "labels": [
+   "New model"
+  ],
+  "merge_commit": "e75335fb29c266b36b22bf32f250bfca1f2165f3",
+  "merged_at": "2026-11-24T11:43:09Z",
+  "pr": "51176",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Llama4",
+    "failure": "ompile(code, filename, \"exec\"), namespace)",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "Llama-4-Scout-17B-16E-Instruct-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45381994971,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45381994971",
+  "source": "gate",
+  "title": "Add kolibri 1.1",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51177": {
+  "blocked": [],
+  "head": "0b9ee034e85399cbc58f7d314753101b0c977fef",
+  "labels": [],
+  "merge_commit": "8f548bbfaed26adb72d88b897d9c3e60cc4a075b",
+  "merged_at": "2026-11-24T12:18:15Z",
+  "pr": "51177",
+  "red": [],
+  "run_id": 45383040040,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45383040040",
+  "source": "gate",
+  "title": "Expose `past_key_values` in `MBartDecoderLayer.forward` signature for remote code",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51180": {
+  "blocked": [],
+  "head": "23c2bb19280e7516ec7849f1a254fca55e4d3592",
+  "labels": [],
+  "merge_commit": "3df5bbbfa230cbfe19baa7cb6aec1feff56bc085",
+  "merged_at": "2026-11-26T15:22:18Z",
+  "pr": "51180",
+  "red": [
+   {
+    "contract": "Mistral3",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "Ministral-3-3B-Instruct-2512-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-mistral3",
+    "failure": "predicted_tokens: [']', ']'] != ['', '']",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "mistral3-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45844497075,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45844497075",
+  "source": "gate",
+  "title": "[cache][generate] Allow rollback on recurrent states caches!",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51182": {
+  "blocked": [],
+  "head": "1b045a933b39282c6eac457bb4129f0f691890f3",
+  "labels": [],
+  "merge_commit": "d7ef9c406d3f2dd73102c0440ad67abb779da8be",
+  "merged_at": "2026-11-24T18:49:22Z",
+  "pr": "51182",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45458125144,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45458125144",
+  "source": "gate",
+  "title": "add HF Jobs tag in Trainer ",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51184": {
+  "blocked": [],
+  "head": "ace7bf9c5f12cb8a7558dc4b8d04ef9a3c6afbd8",
+  "labels": [],
+  "merge_commit": "7b9a5cf51b1c194e5106b57d6971b045e34cb37e",
+  "merged_at": "2026-11-24T20:38:37Z",
+  "pr": "51184",
+  "red": [],
+  "run_id": 45447733699,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45447733699",
+  "source": "gate",
+  "title": "Remove falcon mamba kernel",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51185": {
+  "blocked": [],
+  "head": "8455d9b94647a2d573269cf76d6bcc1f0a79034a",
+  "labels": [],
+  "merge_commit": "185489b748a9495f9e37d9b34e0b210c540ec9e9",
+  "merged_at": "2026-11-24T17:16:50Z",
+  "pr": "51185",
+  "red": [],
+  "run_id": 45446019947,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45446019947",
+  "source": "gate",
+  "title": "[`Kolibri 1.1`] Rm moe tp",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51186": {
+  "blocked": [],
+  "head": "ddc6c6209f6c28bf8fcb2a91cb5740bc738af615",
+  "labels": [],
+  "merge_commit": "d59a9605db7ab65179f80dc7b0382b2c00a36d11",
+  "merged_at": "2026-11-24T18:01:33Z",
+  "pr": "51186",
+  "reason": "no PR CI run on the merged head",
+  "red": [],
+  "source": "no-pr-ci",
+  "title": "[vLLM CI] Compare more multimodal models with transformers",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51187": {
+  "blocked": [],
+  "head": "84cac2bd43d27daf04ad11ed7fadd9e9fe164b3e",
+  "labels": [],
+  "merge_commit": "ab014e21c5ef145b190ed475ace3c314721266e8",
+  "merged_at": "2026-11-24T19:50:29Z",
+  "pr": "51187",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45462242664,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45462242664",
+  "source": "gate",
+  "title": "Reject ROCm in the SonicMoE loader",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51192": {
+  "blocked": [],
+  "head": "78cb15cbaa9acc51e5a83ff4b315cf368d9ee97d",
+  "labels": [],
+  "merge_commit": "598021f5684f0e5f9e66433d9c700666f83b86a3",
+  "merged_at": "2026-11-25T13:41:28Z",
+  "pr": "51192",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45467750241,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45467750241",
+  "source": "not-run",
+  "title": "[docs] Fix the `images=` and `audio=` pipeline calls in the pipeline tutorial",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51194": {
+  "blocked": [],
+  "head": "90c82b0e551855761223667aaea928be8ee131b1",
+  "labels": [],
+  "merge_commit": "660f059e21359b27d6f83ee9b7b827393404473e",
+  "merged_at": "2026-11-24T20:44:11Z",
+  "pr": "51194",
+  "reason": "no PR CI run on the merged head",
+  "red": [],
+  "source": "no-pr-ci",
+  "title": "[vLLM CI] More vLLM vs transformers tests: language / hybrid models, pooling API, logprobs, per-model multimodal files",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51196": {
+  "blocked": [],
+  "head": "d6642f3830c24a8a2ea7d94a66e336364efdaa4b",
+  "labels": [],
+  "merge_commit": "4314a50eb32b100b4f6cdd9c8cc65041e6eddb29",
+  "merged_at": "2026-11-24T21:27:52Z",
+  "pr": "51196",
+  "reason": "no PR CI run on the merged head",
+  "red": [],
+  "source": "no-pr-ci",
+  "title": "[vLLM CI] Compare vLLM with transformers in more areas: basic correctness, prompt embeds API, tensorizer, compressed-tensors",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51199": {
+  "blocked": [],
+  "head": "dc94144cf290342834ee5d299257bbe758ab2dcc",
+  "labels": [],
+  "merge_commit": "805525acd0b81eaff7ce966a527176d39e813858",
+  "merged_at": "2026-11-25T12:18:12Z",
+  "pr": "51199",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45499626361,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45499626361",
+  "source": "gate",
+  "title": "Fix PEFT load report listing other adapters' weights as missing",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51200": {
+  "blocked": [],
+  "head": "1ec64a91ce1bdb7f6a96a3a5a10fed08ca34c750",
+  "labels": [],
+  "merge_commit": "369e05c58a105105d77d6f77abf6d782084dc387",
+  "merged_at": "2026-11-25T10:26:37Z",
+  "pr": "51200",
+  "red": [],
+  "run_id": 45588939823,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45588939823",
+  "source": "gate",
+  "title": "Fix `Phi3Config` loading legacy `\"su\"` rope type",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51207": {
+  "blocked": [],
+  "head": "a7720a0689dc0bbe458cd790c11a4c79a8229534",
+  "labels": [],
+  "merge_commit": "24a90dafb83f989eaa9a30452f784a1eb326c937",
+  "merged_at": "2026-11-26T04:39:15Z",
+  "pr": "51207",
+  "red": [],
+  "run_id": 45536140171,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45536140171",
+  "source": "gate",
+  "title": "make a WA to avoid torch.compile crash for clvp model",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51208": {
+  "blocked": [],
+  "head": "cc5e562de6f3cfc13e876376e769b152bd68d65e",
+  "labels": [],
+  "merge_commit": "ebf21a5acd6c49544ca035cef96e4c05a429211a",
+  "merged_at": "2026-11-26T15:00:04Z",
+  "pr": "51208",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45840220784,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45840220784",
+  "source": "not-run",
+  "title": "Fix reloading a `SynthIDTextWatermarkingConfig` from `generation_config.json`",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51209": {
+  "blocked": [],
+  "head": "8db9ac049b736d9b71eeeee1eeeb2e2008d1b3f0",
+  "labels": [],
+  "merge_commit": "8ce044a54857ae3957b052a1e092d8dea961370e",
+  "merged_at": "2026-11-25T13:42:15Z",
+  "pr": "51209",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45542690452,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45542690452",
+  "source": "not-run",
+  "title": "Fix line breaks in the Megatron-BERT download commands",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51225": {
+  "blocked": [],
+  "head": "69a3aa44067ef922dada2a0e91d935bc0ed4cc6b",
+  "labels": [],
+  "merge_commit": "3370f9427c2b948073ee17596970c0df19812af7",
+  "merged_at": "2026-11-25T13:22:47Z",
+  "pr": "51225",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45589309058,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45589309058",
+  "source": "gate",
+  "title": "Update dev version",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51226": {
+  "blocked": [],
+  "head": "a9349455f740b8ec51320c0719ecdd0f01c19639",
+  "labels": [],
+  "merge_commit": "664369a4fb1625537f1b0ca8581d2242a4d28f59",
+  "merged_at": "2026-11-26T14:14:23Z",
+  "pr": "51226",
+  "red": [],
+  "run_id": 45592681558,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45592681558",
+  "source": "gate",
+  "title": "fix multi GPU tests for pi05",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51228": {
+  "blocked": [],
+  "head": "555e803760a0430f2b6f15c9dd477048cf43fbb6",
+  "labels": [],
+  "merge_commit": "b76050fd0947af5833a9f89a0d9481d0b88e67ef",
+  "merged_at": "2026-11-26T10:06:00Z",
+  "pr": "51228",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45795878257,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45795878257",
+  "source": "not-run",
+  "title": "AMD CI: Strix Halo (gfx1151) scheduled CI on the MI300 pattern",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51230": {
+  "blocked": [],
+  "head": "994f492a79d64fda27d8d2b49e25e21d9833e82b",
+  "labels": [],
+  "merge_commit": "5f3a23faff548742e513f28de3458e204d593eea",
+  "merged_at": "2026-11-25T10:40:20Z",
+  "pr": "51230",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45597113131,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45597113131",
+  "source": "not-run",
+  "title": "Fix speecht5 name in IMPORTANT_MODELS",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51231": {
+  "blocked": [],
+  "head": "53fb300f435ff7d279c43c23389f0f8720e58c46",
+  "labels": [],
+  "merge_commit": "f7ba81261e1a9e29692f59e3bb0b39cfa0745e9a",
+  "merged_at": "2026-11-26T14:20:36Z",
+  "pr": "51231",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45837052705,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45837052705",
+  "source": "not-run",
+  "title": "Fix hybrid_sliding mapping in LAYER_PATTERN_TO_MASK_FUNCTION_MAPPING",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51236": {
+  "blocked": [],
+  "head": "e0b5c70d6fde8800dff78c12a4584b1e04bd401e",
+  "labels": [],
+  "merge_commit": "708d41ca9421f1432ee81aef46a16542e58c3d21",
+  "merged_at": "2026-11-26T12:02:05Z",
+  "pr": "51236",
+  "red": [],
+  "run_id": 45812403609,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45812403609",
+  "source": "gate",
+  "title": "Count only embedding tokens in the remaining `_get_num_multimodal_tokens` tests",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51238": {
+  "blocked": [],
+  "head": "c836a7c1c243d9c565d026e579a550c6ffbc09f4",
+  "labels": [],
+  "merge_commit": "112fa753b5125374686d291f8459a5915fe8a771",
+  "merged_at": "2026-11-26T08:53:52Z",
+  "pr": "51238",
+  "red": [],
+  "run_id": 45620664551,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45620664551",
+  "source": "gate",
+  "title": "step3p7 to use experts implementation, drop fp8 flag",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51240": {
+  "blocked": [],
+  "head": "ccf8736fcc9dc2530762e6412000e469fd4df52b",
+  "labels": [],
+  "merge_commit": "85d7be82fa26e16a0c87c35dc3c48175149a9e8a",
+  "merged_at": "2026-11-25T14:39:23Z",
+  "pr": "51240",
+  "reason": "no PR CI run on the merged head",
+  "red": [],
+  "source": "no-pr-ci",
+  "title": "[vLLM CI] Fix the KV cache memory check failures (page cache eviction), one vLLM commit for all jobs, shared setup action",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51243": {
+  "blocked": [],
+  "head": "678e2d0d140485d69427f5dab601bb902214e3b9",
+  "labels": [],
+  "merge_commit": "a8d55faa6fa1897e4e15b9315317ccc7c8d3ad22",
+  "merged_at": "2026-11-25T17:18:04Z",
+  "pr": "51243",
+  "red": [
+   {
+    "contract": "CodeGen2",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "codegen2-16B_P-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GPT-J",
+    "failure": "runtime: {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'sdpa'} != {'device': 'cpu', 'dtype': 'bfloat16', 'attn_implementation': 'eager'}",
+    "fleet": "prototypes",
+    "fleet_revision": "446e6cf81d08dc50ccd09ae39e1779708c9ce9a0",
+    "target": "gpt-j-6b-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45635941740,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45635941740",
+  "source": "gate",
+  "title": "Packing for bidirectional models",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51244": {
+  "blocked": [],
+  "head": "d743e1a1fa2bf5b820362cf65b2e597b1a33d214",
+  "labels": [],
+  "merge_commit": "083a0adc621ae9f55c5b4ff09d445ba58679c487",
+  "merged_at": "2026-11-26T13:33:32Z",
+  "pr": "51244",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45830050813,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45830050813",
+  "source": "not-run",
+  "title": "Fix assisted decoding crash when the model returns no attentions",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51247": {
+  "blocked": [],
+  "head": "8d0737b347ddcc44318d380e525a9f4239ad1ced",
+  "labels": [],
+  "merge_commit": "4df1ed5807a6c1b54430980f8fbc7ae496cb25e6",
+  "merged_at": "2026-11-25T21:33:28Z",
+  "pr": "51247",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45704027330,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45704027330",
+  "source": "not-run",
+  "title": "PR CI: cancel superseded merge-queue runs of the same PR",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51251": {
+  "blocked": [],
+  "head": "8e22c40502a74fda20eac5704c69dd45b5522e04",
+  "labels": [],
+  "merge_commit": "378f20a1fda66b9349731ee24844e1defd77e9dc",
+  "merged_at": "2026-11-26T11:52:12Z",
+  "pr": "51251",
+  "red": [
+   {
+    "contract": "Mistral3",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "Ministral-3-3B-Instruct-2512-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-mistral3",
+    "failure": "predicted_tokens: [']', ']'] != ['', '']",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "mistral3-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45809383593,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45809383593",
+  "source": "gate",
+  "title": "Let an explicit `attn_implementation` override a serialized `_attn_implementation`",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51252": {
+  "blocked": [],
+  "head": "f43bd059440ec1ccd9386630bd3aad500ebbafd8",
+  "labels": [],
+  "merge_commit": "ff17f5fdc264be609da5c090dee8ab19a7456bf7",
+  "merged_at": "2026-11-25T18:17:53Z",
+  "pr": "51252",
+  "red": [],
+  "run_id": 45671213633,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45671213633",
+  "source": "gate",
+  "title": "\ud83d\udea8 [modular fix] remove failing freeze_encoder",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51253": {
+  "blocked": [],
+  "head": "251a0e99780a7fa86df144663cf2d2af8762c21d",
+  "labels": [],
+  "merge_commit": "bdc94eee07d5198917c6f1a6fbe7d9dfa49c272b",
+  "merged_at": "2026-11-25T18:53:22Z",
+  "pr": "51253",
+  "red": [],
+  "run_id": 45671213495,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45671213495",
+  "source": "gate",
+  "title": "Revert 42461",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51258": {
+  "blocked": [],
+  "head": "fefbad51890b6fd07eb762d3756930fd3b556feb",
+  "labels": [],
+  "merge_commit": "d4b94d3f58c736a673ece14a6b2df8d8f93f136d",
+  "merged_at": "2026-11-26T14:01:21Z",
+  "pr": "51258",
+  "red": [],
+  "run_id": 45689319694,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45689319694",
+  "source": "gate",
+  "title": "[`Kernels`] Bump min version",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51273": {
+  "blocked": [],
+  "head": "50aaeead99d66b1ebf42d2b6f6ed7ee77b16ebc4",
+  "labels": [],
+  "merge_commit": "d3c4bfdc3a9f93fb869419f396833d165497e8ec",
+  "merged_at": "2026-11-26T09:13:37Z",
+  "pr": "51273",
+  "red": [],
+  "run_id": 45786899461,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45786899461",
+  "source": "gate",
+  "title": "[Qwen4-Exp] Pass the forward's kwargs to the n-gram shift, PLE short conv and QSA token selection",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51281": {
+  "blocked": [],
+  "head": "0ec18292bc2f10be3b78a76027c498c3b476f0c2",
+  "labels": [],
+  "merge_commit": "287f889ff029e3a9012b7eb00e5a2dc5fbb6d92e",
+  "merged_at": "2026-11-26T08:46:39Z",
+  "pr": "51281",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45775656687,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45775656687",
+  "source": "not-run",
+  "title": "Restore `sys.modules` after the auto_docstring import-time test",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51293": {
+  "blocked": [],
+  "head": "e7b01e929dd566d2c95098dcb2b07216790c8b79",
+  "labels": [],
+  "merge_commit": "8f5d1f1a8cf80659f82c2746acc0eb3018b019b2",
+  "merged_at": "2026-11-26T10:20:13Z",
+  "pr": "51293",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45796453141,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45796453141",
+  "source": "not-run",
+  "title": "[AMD CI] Pin the ROCm 10.1 flash-attn wheel",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51296": {
+  "blocked": [],
+  "head": "6fe4241ca0b4d5c5f7aff77024d95af1839f8c5e",
+  "labels": [],
+  "merge_commit": "a6c5e6f8e4a211cf829506b8afb3c90c73efb627",
+  "merged_at": "2026-11-26T13:29:43Z",
+  "pr": "51296",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45791900418,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45791900418",
+  "source": "not-run",
+  "title": "Use the correct forward method in the chunk batching example",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51323": {
+  "blocked": [],
+  "head": "4fcf1255bb0d37539a6c3e652662025365172055",
+  "labels": [],
+  "merge_commit": "6d3a78bb03820f8a81e3ed5eaf8624e54fa436c5",
+  "merged_at": "2026-11-26T16:35:06Z",
+  "pr": "51323",
+  "red": [
+   {
+    "contract": "Mistral3",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "Ministral-3-3B-Instruct-2512-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-mistral3",
+    "failure": "predicted_tokens: [']', ']'] != ['', '']",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "mistral3-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45853142311,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45853142311",
+  "source": "gate",
+  "title": "Fix `AutoProcessor` with a remote-code image processor",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51324": {
+  "blocked": [],
+  "head": "97f686ef24b109bdf13e0e6fca01eee76d81fdce",
+  "labels": [],
+  "merge_commit": "f879b5db43c9b4442b91d42e67285fa15261e806",
+  "merged_at": "2026-11-26T14:26:38Z",
+  "pr": "51324",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45834451351,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45834451351",
+  "source": "not-run",
+  "title": "Make root AGENTS.md a real file",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51330": {
+  "blocked": [],
+  "head": "c56184472b8b59657e6375e7518d526462000d3c",
+  "labels": [],
+  "merge_commit": "a3196ecf6ce04e8304f7a4c7f0605ae109d24571",
+  "merged_at": "2026-11-26T16:15:39Z",
+  "pr": "51330",
+  "red": [
+   {
+    "contract": "Mistral3",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "Ministral-3-3B-Instruct-2512-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-mistral3",
+    "failure": "predicted_tokens: [']', ']'] != ['', '']",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "mistral3-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45853226350,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45853226350",
+  "source": "gate",
+  "title": "Remove the _is_stateful flag completely",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51331": {
+  "blocked": [],
+  "head": "7ed3974bda4e922d9fab1a2225ed765135e4d611",
+  "labels": [],
+  "merge_commit": "cb5db81bd35e687c4d422c091007da20ba0c5bb6",
+  "merged_at": "2026-11-26T17:09:47Z",
+  "pr": "51331",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45852435172,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45852435172",
+  "source": "not-run",
+  "title": "AMD Strix Halo CI: report to production channel + dataset",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51333": {
+  "blocked": [],
+  "head": "a2713176c3de9fa79eb7463d8fc4c79655b57996",
+  "labels": [],
+  "merge_commit": "81fe9caceabb00c0e7d3694f8af95d080a83f772",
+  "merged_at": "2026-11-26T16:18:01Z",
+  "pr": "51333",
+  "red": [
+   {
+    "contract": "Mistral3",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "Ministral-3-3B-Instruct-2512-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-mistral3",
+    "failure": "predicted_tokens: [']', ']'] != ['', '']",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "mistral3-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45854864333,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45854864333",
+  "source": "gate",
+  "title": "Rename remove_from_pkv for clarity",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51334": {
+  "blocked": [],
+  "head": "9cd3a072ae60c3696346452fda63f9929d85884d",
+  "labels": [],
+  "merge_commit": "015e85094a97712731e7a9c11e4cb3c11ab5903d",
+  "merged_at": "2026-11-26T17:02:03Z",
+  "pr": "51334",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45861622641,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45861622641",
+  "source": "not-run",
+  "title": "Make `add_dates.py --check-only` fail instead of silently passing in CI",
+  "verdict": "clear",
+  "version": 1
+ }
+}

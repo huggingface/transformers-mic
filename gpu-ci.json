@@ -7693,6 +7693,18 @@
    "tests/models/mistral3/test_modeling_mistral3.py::Mistral3IntegrationTest::test_mistral3_integration_generate_text_only"
   ]
  },
+ "sticky#mistral3#2026-11-25": {
+  "date": "2026-11-25",
+  "day": 20782,
+  "integration": true,
+  "mic": "red-on-main",
+  "model": "mistral3",
+  "run_id": "45857465334",
+  "signal": "ValueError",
+  "tests": [
+   "tests/models/mistral3/test_modeling_mistral3.py::Mistral3IntegrationTest::test_mistral3_integration_batched_generate"
+  ]
+ },
  "sticky#mixtral#2026-10-07": {
   "date": "2026-10-07",
   "day": 20733,

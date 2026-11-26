@@ -10141,6 +10141,26 @@
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45565146538%3A1&var-pr=50887&var-gh_run_id=45565146538",
   "weights": "overfit"
  },
+ "50907#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
+  "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "commits": [
+   "46343ea62e9590310ab243e320a4bd46aa6ab1a9"
+  ],
+  "failure": "ompile(code, filename, \"exec\"), namespace)\n  File \"/tmp/hf_home/hub/models--huggingface-mic--Llama-4-Scout-17B-16E-Instruct-mic/snapshots/67dbacbc6fa067eebe86ba54ccccb5d8a080d79d/integrations/transformers/usage.md\", line 49, in <module>\n    logits = model(**inputs).logits\n             ^^^^^^^^^^^^^^",
+  "failure_kind": "Runtime traceback",
+  "first_fail_at": 1795700091.258018,
+  "first_seen": "2026-11-26",
+  "key": "50907#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
+  "kind": "fixture",
+  "last_seen": 20783,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "50907",
+  "pr_state": "open",
+  "pr_title": "Engine hooks for the quantization plan loader: load_serialized, sharding op, in-place params",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45829449409%3A1&var-pr=50907&var-gh_run_id=45829449409",
+  "weights": "random"
+ },
  "50927#huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16": {
   "case": "huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16",
   "commits": [
@@ -10388,10 +10408,10 @@
   "key": "51084#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "kind": "fixture",
   "last_seen": 20783,
-  "merged_at": null,
-  "outcome": "open",
+  "merged_at": "2026-11-26T13:11:07Z",
+  "outcome": "merged-watching",
   "pr": "51084",
-  "pr_state": "open",
+  "pr_state": "merged",
   "pr_title": "Fix Unigram tokenizers built from a bare `spiece.model` splitting text at user-defined pieces",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45264390234%3A2&var-pr=51084&var-gh_run_id=45264390234",
   "weights": "random"
@@ -11305,6 +11325,26 @@
   "pr_state": "open",
   "pr_title": "Saving: stream the sharded save into safetensors files written by every rank",
   "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45701960044%3A1&var-pr=51263&var-gh_run_id=45701960044",
+  "weights": "random"
+ },
+ "51332#huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16": {
+  "case": "huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16",
+  "commits": [
+   "5fc23fe7b797cff34afd61e8c2684b24e82c5b8b"
+  ],
+  "failure": "training.gradients: ['backbone_model.layers.0.self_attn.q_proj.weight', 'backbone_model.layers.0.mlp.down_proj.weight'] false",
+  "failure_kind": "Baseline assertion",
+  "first_fail_at": 1795708424.662243,
+  "first_seen": "2026-11-26",
+  "key": "51332#huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16",
+  "kind": "fixture",
+  "last_seen": 20783,
+  "merged_at": null,
+  "outcome": "open",
+  "pr": "51332",
+  "pr_state": "open",
+  "pr_title": "old checkpoints map additional_special_tokens to extra_special_tokens",
+  "run_url": "/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45853394136%3A1&var-pr=51332&var-gh_run_id=45853394136",
   "weights": "random"
  },
  "gh-readonly-queue/main/pr-49886-a4f362742ba4846882fd0bc9636461ef3a5e3f34#huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16": {

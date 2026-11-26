@@ -11,12 +11,44 @@
   "fixed_by_push": 27,
   "labelled_real_bug": 0,
   "merged_then_main_failed": 7,
-  "real_checkpoint": 3
+  "real_checkpoint": 4
  },
  "drafts_per_day": 2,
  "false_alarms": {
-  "prs_not_their_fault": 233,
-  "prs_with_failure": 290
+  "prs_not_their_fault": 241,
+  "prs_with_failure": 300
+ },
+ "merged_gate": {
+  "blocked": 1,
+  "flags": {
+   "false-positive": 0,
+   "real": 1,
+   "to-review": 0
+  },
+  "merged": 150,
+  "pending": 13,
+  "rows": [
+   {
+    "cases": [
+     "Mistral3/Ministral-3-3B-Instruct-2512-mic [bfloat16]",
+     "mic-mistral3/mistral3-mic [bfloat16]"
+    ],
+    "failure": "ValueError: Mismatch in `image` token count between text and `input_ids`. Got ids=[0, 0] and text=[9, 9]. Likely due to `truncation='max_length'`. Please disable truncation or increase `max_length`.",
+    "flag": "real",
+    "merged": "2026-11-26",
+    "pr": "50428",
+    "run": "https://github.com/huggingface/transformers/actions/runs/45762544835",
+    "source": "gate",
+    "title": "\ud83d\udea8 Rework slightly subprocessor loading",
+    "why": "red on main after the merge"
+   }
+  ],
+  "unmeasured": 0,
+  "window": [
+   "2026-10-27",
+   "2026-11-26"
+  ],
+  "with_red": 51
  },
  "missed": {
   "awaiting_verdict": 39,
@@ -336,6 +368,17 @@
    "run": "",
    "tests": 1,
    "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-25",
+   "detail": "the daily CI did not fail it",
+   "integration": true,
+   "job": "",
+   "model": "mistral3",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "not-reproduced"
   },
   {
    "date": "2026-11-24",
@@ -3451,7 +3494,7 @@
   "no-code-change": 1,
   "not-a-regression": 6,
   "not-covered": 268,
-  "not-reproduced": 9,
+  "not-reproduced": 10,
   "out-of-scope": 212,
   "pending": 0,
   "unrelated-culprit": 16

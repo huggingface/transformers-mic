@@ -2116,6 +2116,11 @@
   "verdict": "missed",
   "version": 9
  },
+ "sticky#mistral3#2026-11-25": {
+  "reason": "the daily CI did not fail it",
+  "verdict": "not-reproduced",
+  "version": 9
+ },
  "sticky#mixtral#2026-10-07": {
   "verdict": "out-of-scope",
   "version": 9

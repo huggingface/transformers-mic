@@ -18,7 +18,7 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 | already-red | 10 | red on both: says nothing about this regression |
 | no-code-change | 1 | nothing between the two commits changes code the model runs (the same commit, or only CI images, docs, tests or other models): nothing for a contract to catch |
 | already-failing | 8 | a sticky onset the daily CI was already failing the day before: a gap in the dashboard's day strip, not a new failure |
-| not-reproduced | 9 | a failing run the daily CI did not repeat: transient, not a regression |
+| not-reproduced | 10 | a failing run the daily CI did not repeat: transient, not a regression |
 | model-added | 4 | the bad commit added the model: no contract could have run before it |
 | duplicate | 5 | the same regression as a bisected one, counted there |
 | unrelated-culprit | 16 | upstream's bisect blamed a commit that does not touch the model or shared code: a flaky test |
@@ -29,6 +29,7 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 | date | model | regression | verdict | at the bad commit |
 |---|---|---|---|---|
 | 2026-11-26 | nemotron | sticky onset | out-of-scope |  |
+| 2026-11-25 | mistral3 | sticky onset | not-reproduced | the daily CI did not fail it |
 | 2026-11-24 | qwen3_5 | sticky onset | already-failing | the daily CI failed it the day before too |
 | 2026-11-24 | mistral3 | sticky onset | [missed](https://github.com/huggingface/transformers-mic/actions/runs/45581630080) | 53 commits in range;  |
 | 2026-11-21 | axk1 | sticky onset | duplicate | same regression as 50975#axk1 |
@@ -312,6 +313,26 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 | 2026-05-13 | beit | [PR #45777](https://github.com/huggingface/transformers/pull/45777) | unrelated-culprit | the bisected commit does not touch the model or shared code |
 | 2026-05-09 | mask2former | [PR #41693](https://github.com/huggingface/transformers/pull/41693) | [already-red](https://github.com/huggingface/transformers-mic/actions/runs/42796431187) | mask2former-swin-tiny-coco-instance-mic (bfloat16):       / MISSING    /  |
 
+## Merged PRs through the gate (last 30 days)
+
+Every PR merged into main 2026-10-27 → 2026-11-26, put through the contracts gate as it was when it merged: **blocked** when a case is red with the PR and green on the commit it merged onto. From 2026-11-23 that is PR CI's own verdict (shadow mode, `contracts-gate.json`); before, the red cases of the PR's last run are replayed on its squash commit and on that commit's parent.
+
+- Merged PRs looked up: **150**; with a red MIC case in their last run: 51.
+- Would have been blocked: **1** — real 1, false positive 0, to review 0.
+- Waiting for the replay: 13; could not be measured: 0.
+
+| flag | meaning |
+|---|---|
+| real | the PR changed what the contract checks: re-recorded after the merge (intended), or red on main after it |
+| false-positive | main stayed green on the blocked cases for 3 days after the merge, or labelled false-alarm/flake |
+| to-review | merged less than 3 days ago: main is still being watched |
+
+| merged | PR | blocked cases | source | flag | why |
+|---|---|---|---|---|---|
+| 2026-11-26 | [#50428](https://github.com/huggingface/transformers/pull/50428) 🚨 Rework slightly subprocessor loading | Mistral3/Ministral-3-3B-Instruct-2512-mic [bfloat16], mic-mistral3/mistral3-mic [bfloat16] | [gate](https://github.com/huggingface/transformers/actions/runs/45762544835) | real | red on main after the merge |
+
+Set the flag by hand with a line in `labels.jsonl`: `{"key": "merged#<pr>", "verdict": "real-bug|intended|false-alarm|flake", "note": "...", "by": "<login>"}`.
+
 ## Decision: block merges when MIC is red?
 
 Replayed on the 218 PRs merged 2026-10-20 → 2026-11-02: which merges a red MIC case would have stopped, and whether stopping them was right.
@@ -333,15 +354,15 @@ Proposed bar for rule B (constants `DECISION` in `experiments/impact.py`):
 
 ## 1. Real bugs caught on PRs
 
-- PR-only failures: **453** across 57 PRs.
+- PR-only failures: **455** across 59 PRs.
 - Fixed by a push, then passed: **27** — the strongest catch signal.
 - Merged red, then the same case failed on main: **7** — a change that landed (a bug, or an intended change needing a re-baseline).
 - Labelled `real-bug`: **0**; `intended`: 0.
 
 ## 2. False alarms
 
-- PR failure groups: 5051 — infra 141 (3%), pre-existing 2226 (44%), systemic (same case on ≥3 PRs that day) 11 (0%), PR-only 2673 (53%).
-- PRs that saw a MIC failure: 290; of those, only failures they did not cause: **233 (80%)**.
+- PR failure groups: 5121 — infra 141 (3%), pre-existing 2294 (45%), systemic (same case on ≥3 PRs that day) 11 (0%), PR-only 2675 (52%).
+- PRs that saw a MIC failure: 300; of those, only failures they did not cause: **241 (80%)**.
 - PR-only cases that recovered with no push (flaky/environment): 18; merged and main stayed green for 3 days: 22; labelled `false-alarm`/`flake`: 0.
 
 ## 3. Baseline review work
@@ -382,7 +403,7 @@ Sticky GPU failures that started in the window ([Fix failures](https://transform
 
 | MIC on main | integration (real checkpoints) | other GPU tests |
 |---|---|---|
-| red-on-main | 3 | 0 |
+| red-on-main | 4 | 0 |
 | green-on-main | 36 | 111 |
 | not-covered | 24 | 108 |
 
@@ -414,7 +435,7 @@ Real-checkpoint failures MIC stayed green on, waiting for a verdict. A miss is n
 | weights | PR-only | fixed by push | merged→main failed | labelled real-bug |
 |---|---|---|---|---|
 | overfit | 45 | 2 | 0 | 0 |
-| random | 392 | 25 | 7 | 0 |
+| random | 394 | 25 | 7 | 0 |
 | real | 10 | 0 | 0 | 0 |
 | unknown | 6 | 0 | 0 | 0 |
 
