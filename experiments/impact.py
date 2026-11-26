@@ -1589,6 +1589,7 @@ GATE_SINCE = "2026-11-23"  # transformers-ci #401
 MERGED_DAYS = 30
 MERGED_PER_RUN = 150  # merged PRs looked up per run (three GitHub calls each); the rest wait for the next run
 MERGED_REPLAYS_PER_RUN = 40
+MERGED_REPLAY_TRIES = 2  # a replay that could not be measured (a side did not install or run) is tried once more
 MERGED_VERSION = 1  # bump when a rule below changes: every merged PR is looked up again
 GATE_REPLAY_LIMIT = 40  # gate.py REPLAY_LIMIT: red cases past it warn
 GATE_LABELS = ("mic-intended-change", "New model")  # gate.py: a PR with one of these only warns
@@ -1752,9 +1753,10 @@ def merged_replay_plan(merged, limit=MERGED_REPLAYS_PER_RUN):
     """Plan entries (backfill.py --plan) for merged PRs waiting for the replay: their red cases, on
     the squash commit (`bad`) and the main commit it merged onto (`parent`), fleets as PR CI had them."""
     plan, keys = [], set()
-    for pr, entry in sorted(merged.items(), key=lambda kv: kv[1]["merged_at"], reverse=True):
-        if entry.get("verdict") != "pending":
-            continue
+    waiting = sorted(merged.items(), key=lambda kv: kv[1]["merged_at"], reverse=True)
+    for pr, entry in [kv for kv in waiting if kv[1].get("verdict") == "pending"] + [
+        kv for kv in waiting if retry_replay(kv[1])
+    ]:
         if len(keys) >= limit:
             break
         by_fleet = defaultdict(list)
@@ -1776,6 +1778,15 @@ def merged_replay_plan(merged, limit=MERGED_REPLAYS_PER_RUN):
     return plan
 
 
+def retry_replay(entry):
+    """A merged PR whose replay could not be measured and has tries left."""
+    return (
+        entry.get("verdict") == "unmeasured"
+        and entry.get("source") == "replay"
+        and entry.get("replay_tries", 1) < MERGED_REPLAY_TRIES
+    )
+
+
 def merged_replay_verdicts(records, merged, run_url=""):
     """Fold the replays of merged PRs (keys merged#<pr>) into `merged`, the gate's way: a red case
     blocks when it is red on the squash commit and green on its parent. Returns the PRs decided."""
@@ -1791,9 +1802,10 @@ def merged_replay_verdicts(records, merged, run_url=""):
     decided = []
     for pr in sorted(set(sides) | set(broken)):
         entry = merged.get(pr)
-        if not entry or entry.get("verdict") != "pending":
+        if not entry or not (entry.get("verdict") == "pending" or retry_replay(entry)):
             continue
-        entry["replay_run"] = run_url
+        tries = entry.get("replay_tries", 1) + 1 if entry.get("verdict") == "unmeasured" else 1
+        entry["replay_run"], entry["replay_tries"] = run_url, tries
         decided.append(pr)
         if broken[pr]:
             entry.update(verdict="unmeasured", reason=(broken[pr][0] or "a side did not run").splitlines()[-1][:200])
