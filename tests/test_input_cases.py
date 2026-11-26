@@ -217,6 +217,23 @@ def test_declaring_cases_keeps_the_old_baseline_for_the_default_case(contract, c
     }
 
 
+def test_declaring_only_the_original_case_changes_nothing_else(contract, capsys):
+    # Recorded by this runner before the contract declared cases: "case": null.
+    contract.write()
+    assert contract.main("--record") == 0
+    contract.approve()
+    before = (contract.expectations / "gemma3-mic.json").read_bytes()
+    assert json.loads(before)["recorded_with"]["case"] is None
+    capsys.readouterr()
+    contract.write({"text": {"default": True}})
+    assert contract.main() == 0
+    (record,) = records(capsys)
+    assert record["case"] == "text" and record["status"] == "pass"
+    assert record["baseline"].endswith("gemma3-mic.json")
+    assert [p.name for p in contract.expectations.iterdir()] == ["gemma3-mic.json"]
+    assert (contract.expectations / "gemma3-mic.json").read_bytes() == before
+
+
 def test_a_baseline_of_another_case_is_refused(contract, capsys):
     contract.write(CASES)
     assert contract.main("--record") == 0

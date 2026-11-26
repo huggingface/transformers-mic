@@ -1115,9 +1115,9 @@ def main():
                     reviewed = load(baseline, "baseline")
                     identity = reviewed["recorded_with"]
                     mismatch = [k for k in ("target", "variant", "framework") if identity.get(k) != record[k]]
-                    # Baselines recorded before cases existed carry none: they are the default case's
-                    # (or, for a contract without cases, the implicit case's).
-                    if identity.get("case", default_case) != case:
+                    # A baseline recorded while the contract declared no cases (no case, or null) is the
+                    # default case's (or, while it still declares none, the implicit case's).
+                    if (identity.get("case") or default_case) != case:
                         mismatch.append("case")
                     # Baselines recorded before the freeze carry no date and are compared as
                     # usual: only one whose template put the date into a checked output fails,
