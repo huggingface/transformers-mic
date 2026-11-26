@@ -99,6 +99,286 @@
   "verdict": "clear",
   "version": 1
  },
+ "44642": {
+  "blocked": [],
+  "head": "9f97bdf411b158b055b9b8826151b668be5158e7",
+  "labels": [],
+  "merge_commit": "6488cabb56d4bffe6d19ece65e8bd794c642ef93",
+  "merged_at": "2026-11-10T15:59:21Z",
+  "pr": "44642",
+  "red": [
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 0.736 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "b13c2e1394b7373443fd5420379b071d81390937",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 1.29 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "b13c2e1394b7373443fd5420379b071d81390937",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "default"
+   },
+   {
+    "contract": "BART",
+    "failure": "training.loss: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "b13c2e1394b7373443fd5420379b071d81390937",
+    "target": "bart-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BLIP2",
+    "failure": "training.loss: max delta 0.0209 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "b13c2e1394b7373443fd5420379b071d81390937",
+    "target": "blip2-opt-2.7b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BigBirdPegasus",
+    "failure": "training.loss: max delta 0.0625 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "b13c2e1394b7373443fd5420379b071d81390937",
+    "target": "bigbird-pegasus-large-arxiv-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "b13c2e1394b7373443fd5420379b071d81390937",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Hubert",
+    "failure": "training.loss: max delta 32.4 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "b13c2e1394b7373443fd5420379b071d81390937",
+    "target": "hubert-large-ls960-ft-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MarianMT",
+    "failure": "training.loss: max delta 0.0114 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "b13c2e1394b7373443fd5420379b071d81390937",
+    "target": "opus-mt-fr-en-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Mask2Former",
+    "failure": "training.loss: max delta 0.0548 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "b13c2e1394b7373443fd5420379b071d81390937",
+    "target": "mask2former-swin-tiny-coco-instance-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MiniMax-M3-MXFP8",
+    "failure": "logits_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "b13c2e1394b7373443fd5420379b071d81390937",
+    "target": "MiniMax-M3-MXFP8-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "OPT",
+    "failure": "training.loss: max delta 0.00194 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "b13c2e1394b7373443fd5420379b071d81390937",
+    "target": "opt-125m-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "b13c2e1394b7373443fd5420379b071d81390937",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Pegasus",
+    "failure": "logits.probe: max delta 0.25 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "b13c2e1394b7373443fd5420379b071d81390937",
+    "target": "pegasus-xsum-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "WavLM",
+    "failure": "training.loss: max delta 0.0583 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "b13c2e1394b7373443fd5420379b071d81390937",
+    "target": "wavlm-base-plus-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-table_transformer",
+    "failure": "training.loss: max delta 0.00256 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "b13c2e1394b7373443fd5420379b071d81390937",
+    "target": "table_transformer-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42679417947,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42679417947",
+  "source": "replay",
+  "title": "Clarify that causal LM labels are shifted internally",
+  "verdict": "pending",
+  "version": 1
+ },
+ "45422": {
+  "blocked": [],
+  "head": "ad1a96a4474e11227a0f94ca540a1278faf5db36",
+  "labels": [],
+  "merge_commit": "86fdf1595ab819a7baa1d06f2902d00aa94feeb6",
+  "merged_at": "2026-11-09T22:01:15Z",
+  "pr": "45422",
+  "red": [
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 0.736 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 1.29 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "default"
+   },
+   {
+    "contract": "BART",
+    "failure": "training.loss: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "bart-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BLIP2",
+    "failure": "training.loss: max delta 0.0209 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "blip2-opt-2.7b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BigBirdPegasus",
+    "failure": "training.loss: max delta 0.0625 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "bigbird-pegasus-large-arxiv-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Florence-2",
+    "failure": "training.loss: max delta 0.000637 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "Florence-2-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Hubert",
+    "failure": "training.loss: max delta 32.4 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "hubert-large-ls960-ft-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MarianMT",
+    "failure": "training.loss: max delta 0.0114 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "opus-mt-fr-en-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Mask2Former",
+    "failure": "training.loss: max delta 0.0548 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "mask2former-swin-tiny-coco-instance-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "OPT",
+    "failure": "training.loss: max delta 0.00194 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "opt-125m-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Pegasus",
+    "failure": "logits.probe: max delta 0.25 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "pegasus-xsum-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "WavLM",
+    "failure": "training.loss: max delta 0.0583 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "wavlm-base-plus-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-table_transformer",
+    "failure": "training.loss: max delta 0.00256 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "table_transformer-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42701513132,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42701513132",
+  "source": "replay",
+  "title": ":rotating_light: Drop None-valued keys from messages in `apply_chat_template`",
+  "verdict": "pending",
+  "version": 1
+ },
  "47616": {
   "blocked": [],
   "head": "12776f6b2999dfd41898486faa5232113ca292a3",
@@ -199,6 +479,24 @@
   "verdict": "clear",
   "version": 1
  },
+ "47844": {
+  "blocked": [],
+  "head": "87f153fa4aa98a825f155e78a18b95a86586cdad",
+  "labels": [
+   "New model"
+  ],
+  "merge_commit": "b0e6e7fd5264e6518d7ad500ef03b24d7247da27",
+  "merged_at": "2026-11-12T16:41:11Z",
+  "pr": "47844",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43256105877,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43256105877",
+  "source": "replay",
+  "title": "Add dots3-note Preview model support",
+  "verdict": "clear",
+  "version": 1
+ },
  "48553": {
   "blocked": [],
   "head": "25409a535ec7ef6d6b290d1454e296e6f62a93bd",
@@ -294,6 +592,78 @@
   "verdict": "clear",
   "version": 1
  },
+ "49012": {
+  "blocked": [],
+  "head": "cc2e274bb52a73f4bbf81b2c2d52b3c0fc68b08c",
+  "labels": [],
+  "merge_commit": "46b887d9705c6107cec7ed3335cd63cf93f33a23",
+  "merged_at": "2026-11-12T17:15:31Z",
+  "pr": "49012",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43263096423,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43263096423",
+  "source": "replay",
+  "title": "Granite for Docling",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49089": {
+  "blocked": [],
+  "head": "e8b0e860c269def232a3625448b77d3745dfd7df",
+  "labels": [],
+  "merge_commit": "3c3ff8c108203713da84efcbeab81f1db2fdf1b5",
+  "merged_at": "2026-11-09T16:17:37Z",
+  "pr": "49089",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42641201821,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42641201821",
+  "source": "replay",
+  "title": "\ud83d\udea8 Move processing defaults to class",
+  "verdict": "pending",
+  "version": 1
+ },
+ "49141": {
+  "blocked": [],
+  "head": "86efa5c889b80db7607b7296700c50359de1ab48",
+  "labels": [],
+  "merge_commit": "6096273e98bf84fb8b012e51b2b542f311d45dfa",
+  "merged_at": "2026-11-09T14:23:32Z",
+  "pr": "49141",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 42264143969,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42264143969",
+  "source": "replay",
+  "title": "Skip the query/key head repeat for grouped value heads in gated DeltaNet",
+  "verdict": "clear",
+  "version": 1
+ },
  "49150": {
   "blocked": [],
   "head": "636c253b92e9f7be3f0591e41ff24d7c7f557e27",
@@ -325,6 +695,22 @@
   "verdict": "clear",
   "version": 1
  },
+ "49188": {
+  "blocked": [],
+  "head": "9b43f175407af3db8e75191324e0f96309f4a6ea",
+  "labels": [],
+  "merge_commit": "baa3646ebfa4d8e4f8a857bae03dd01f0331ce10",
+  "merged_at": "2026-11-04T09:08:24Z",
+  "pr": "49188",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 40313511816,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/40313511816",
+  "source": "replay",
+  "title": "Restore BLT's 512-byte sliding windows (entropy patcher + local encoder/decoder)",
+  "verdict": "clear",
+  "version": 1
+ },
  "49243": {
   "blocked": [],
   "head": "708d6e1a7080a075efa420509c05f892f3b5f0d4",
@@ -339,6 +725,38 @@
   "source": "not-run",
   "title": "[serge] Fix 2 integration tests for model `pvt_v2` failing with `output_mismatch` (tensor values differ (2))",
   "verdict": "clear",
+  "version": 1
+ },
+ "49248": {
+  "blocked": [],
+  "head": "a40d0ea92eac9fba0f4b9261085e6ab20bdc492f",
+  "labels": [],
+  "merge_commit": "a0cf918fd0b3ff14ca49f7de2f208e0bc134cec3",
+  "merged_at": "2026-11-03T10:28:35Z",
+  "pr": "49248",
+  "red": [
+   {
+    "contract": "Granite",
+    "failure": "logits.probe: max delta 0.000488 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "0f42d422779191bef0efae521a1ec8685b4586bf",
+    "target": "granite-3.1-2b-instruct-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Muse-Glimmer",
+    "failure": "generated_text: ' istr \uac78\uff0c\u4e8e\u662f\u03b1\u03c1-van \u0432\u044a\u0440\u0445\u0443/# \uc2a4\ub9c8\ud2b8 pertama\u0e42\u0e0a Dalton \u043d\u0430\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f\u043c diffuseFind\u0446\u044b\u0456 Launcher' != ' istr kutualesvirti realizzato mogli\u30a9 markdownOpp \u03b7\u03bc\u03adromad\ud0c0\u0935\u093f\u0921claims apprentices'",
+    "fleet": "prototypes",
+    "fleet_revision": "0f42d422779191bef0efae521a1ec8685b4586bf",
+    "target": "Muse-Glimmer-30B-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 41615968488,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41615968488",
+  "source": "replay",
+  "title": "Rename `gradient_checkpointing` to `activation_checkpointing` in the public API",
+  "verdict": "pending",
   "version": 1
  },
  "49287": {
@@ -405,6 +823,70 @@
   "verdict": "clear",
   "version": 1
  },
+ "49429": {
+  "blocked": [],
+  "head": "2bd83bd6c18f034b5daf1c248b3ab3ac563d6da7",
+  "labels": [],
+  "merge_commit": "b7394bc75356d58b8c52aa472d523a258e10afee",
+  "merged_at": "2026-11-12T10:33:38Z",
+  "pr": "49429",
+  "red": [
+   {
+    "contract": "Canary-1B-v2",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "c8c6769b9e96f6c6f9dbdad5d41f78edcec74bbc",
+    "target": "canary-1b-v2-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 43196195057,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43196195057",
+  "source": "replay",
+  "title": "Expert-parallel implementations for `ep_dispatch_experts`: all-reduce at inference, all-to-all in training",
+  "verdict": "pending",
+  "version": 1
+ },
+ "49435": {
+  "blocked": [],
+  "head": "5fa7d3d1e457b273e91802d866ee77a9c8368176",
+  "labels": [],
+  "merge_commit": "6df64031b9fa0ecebe50161df8ad42ed8d36595c",
+  "merged_at": "2026-11-06T06:29:52Z",
+  "pr": "49435",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42165991469,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42165991469",
+  "source": "replay",
+  "title": "[vLLM] Add Omni token counting and text replacement offsets for the Transformers backend",
+  "verdict": "pending",
+  "version": 1
+ },
  "49480": {
   "blocked": [],
   "head": "b35d0ad927a172af6fe2bcab1062ae5a6c5de308",
@@ -419,6 +901,46 @@
   "source": "not-run",
   "title": "[serge] Fix 2 integration tests for model `qwen2_moe` failing with `other` (other (2))",
   "verdict": "clear",
+  "version": 1
+ },
+ "49507": {
+  "blocked": [],
+  "head": "b7964218a231cc362b8325e9cfb770554b725a8c",
+  "labels": [],
+  "merge_commit": "d9246b065544942361afcb2662ab8665c34bc5be",
+  "merged_at": "2026-11-06T17:03:09Z",
+  "pr": "49507",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 38185252505,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/38185252505",
+  "source": "not-run",
+  "title": "[serge] Fix 2 integration tests for model `pegasus` failing with `other` (other (2))",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49528": {
+  "blocked": [],
+  "head": "16f883829750f56635afb6413480a968d2d3b1bd",
+  "labels": [],
+  "merge_commit": "85db0e0663d95d2b030f6f31b2c7c1dcdc08b6a3",
+  "merged_at": "2026-11-06T04:10:38Z",
+  "pr": "49528",
+  "red": [
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42154326700,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42154326700",
+  "source": "replay",
+  "title": "Subconfig creation in testers",
+  "verdict": "pending",
   "version": 1
  },
  "49554": {
@@ -453,6 +975,174 @@
   "verdict": "clear",
   "version": 1
  },
+ "49594": {
+  "blocked": [],
+  "head": "c476dcfdfe5f6ffc92fac8ad00934abdf7a97199",
+  "labels": [],
+  "merge_commit": "c5bd76ec51a70c303be110cc04be3d78cf755299",
+  "merged_at": "2026-11-06T14:11:08Z",
+  "pr": "49594",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42218666215,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42218666215",
+  "source": "replay",
+  "title": "Capture only the projected hidden states in VLM feature extraction",
+  "verdict": "pending",
+  "version": 1
+ },
+ "49606": {
+  "blocked": [],
+  "head": "6345d0d2d26c5c015b7354d3025fe3011ebc6399",
+  "labels": [],
+  "merge_commit": "f5d8e7df0c6d8f359aebfb08d83d8410b8ada099",
+  "merged_at": "2026-11-12T15:44:51Z",
+  "pr": "49606",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43243219518,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43243219518",
+  "source": "replay",
+  "title": "\ud83d\udea8 `deepgemm_megamoe` EP implementation for DeepGEMM Mega MoE",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49607": {
+  "blocked": [],
+  "head": "9c668b0b5cc49a3ee79f40d9fbf9bd0dc5354554",
+  "labels": [],
+  "merge_commit": "290c247f7c5f4e979fa7a7686e7b084c4024c13e",
+  "merged_at": "2026-11-12T16:12:03Z",
+  "pr": "49607",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43251165789,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43251165789",
+  "source": "replay",
+  "title": "Move the remaining router-masked MoE plans to `ep_dispatch_experts`",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49613": {
+  "blocked": [],
+  "head": "7e41d090ab7297d2e9b34b649b12ba7cce6dbacd",
+  "labels": [],
+  "merge_commit": "95e9b5f694c1d6a1a3b33212b37030539bd180a8",
+  "merged_at": "2026-11-12T16:43:49Z",
+  "pr": "49613",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43256079952,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43256079952",
+  "source": "replay",
+  "title": "\ud83d\udea8 Run MXFP4 GPT-OSS experts through `ep_dispatch_experts`",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49615": {
+  "blocked": [],
+  "head": "78e10dc94fe66f35f05cdb7538c96631145b7879",
+  "labels": [],
+  "merge_commit": "506ac612812b9682dfcfea300b71c1b709cfbae0",
+  "merged_at": "2026-11-12T17:11:08Z",
+  "pr": "49615",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43262177861,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43262177861",
+  "source": "replay",
+  "title": "\ud83d\udea8 Remove the `ep_router` expert-parallel style",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49640": {
+  "blocked": [],
+  "head": "e177eca09f0d1edab537456fc549aecc603caeff",
+  "labels": [],
+  "merge_commit": "2c6a00f97fab4643f473c1b2e3d430399175abf5",
+  "merged_at": "2026-11-06T19:34:54Z",
+  "pr": "49640",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 42269652233,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42269652233",
+  "source": "replay",
+  "title": "[Gemma4] Stop prefill at last KV-owning layer when logits_to_keep=1",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49649": {
+  "blocked": [],
+  "head": "91f072d52629d2d8bdb9f4d742d421da3a80a751",
+  "labels": [],
+  "merge_commit": "7c22a03f99fc47deab0aeaab2efe7720acebf03e",
+  "merged_at": "2026-11-02T14:51:33Z",
+  "pr": "49649",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 41251567380,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41251567380",
+  "source": "replay",
+  "title": "Read add_bos_token and add_eos_token from GGUF files",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49723": {
+  "blocked": [],
+  "head": "324a8a48eed885a665e1a08754aedefcd2ef8332",
+  "labels": [],
+  "merge_commit": "27d7e6d2a5899aad422db82eb8a3178647ccf4d6",
+  "merged_at": "2026-11-12T14:14:37Z",
+  "pr": "49723",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 40429684350,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/40429684350",
+  "source": "replay",
+  "title": "Make distributed Trainer tests actually resume from checkpoints",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49733": {
+  "blocked": [],
+  "head": "5de4dbbd89adc30d0a41991e97a6d2ca1c446966",
+  "labels": [],
+  "merge_commit": "9b6e5e20b1d66c0d0b49c2a05cf60b3d0c7e6902",
+  "merged_at": "2026-11-12T14:49:43Z",
+  "pr": "49733",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43202927705,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43202927705",
+  "source": "replay",
+  "title": "fix(tokenizers): stop treating a missing transformers_version as Mistral",
+  "verdict": "clear",
+  "version": 1
+ },
  "49737": {
   "blocked": [],
   "head": "08e3a36bb02a2514b2a8db0996359a5afe5241c2",
@@ -469,6 +1159,22 @@
   "verdict": "clear",
   "version": 1
  },
+ "49743": {
+  "blocked": [],
+  "head": "642722dd580cd3bff7be5cbc578fc967088c56bf",
+  "labels": [],
+  "merge_commit": "03238b259958f820d065c0c93c6951b33e2469b1",
+  "merged_at": "2026-11-04T12:14:01Z",
+  "pr": "49743",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 41821576435,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41821576435",
+  "source": "replay",
+  "title": "Fold GQA query heads onto their KV head when decoding instead of repeating K/V",
+  "verdict": "clear",
+  "version": 1
+ },
  "49744": {
   "blocked": [],
   "head": "e18a767a826f10e34c313044cae7c60bbe90a122",
@@ -482,6 +1188,86 @@
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42781198345",
   "source": "replay",
   "title": "Fix grouped RMSNorm in Mamba2's non-fused path",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49753": {
+  "blocked": [],
+  "head": "a429f99fdd07e0d7f200c1678de4f82c53e7ed81",
+  "labels": [],
+  "merge_commit": "0c7f5ab8c579917b90bfa7502131e6420ec03978",
+  "merged_at": "2026-11-04T09:38:35Z",
+  "pr": "49753",
+  "red": [
+   {
+    "contract": "Granite",
+    "failure": "logits.probe: max delta 0.000488 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "73ed67b45e931d8d6e4148faab428e275390e65f",
+    "target": "granite-3.1-2b-instruct-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Muse-Glimmer",
+    "failure": "generated_text: ' istr \uac78\uff0c\u4e8e\u662f\u03b1\u03c1-van \u0432\u044a\u0440\u0445\u0443/# \uc2a4\ub9c8\ud2b8 pertama\u0e42\u0e0a Dalton \u043d\u0430\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f\u043c diffuseFind\u0446\u044b\u0456 Launcher' != ' istr \uac78\uff0c\u4e8e\u662f encomp terecht directs}$ \u043d\u0435\u043a\u043e\\tqueryPada correttamenteAnnotations locu\u5760 \ubc1b\uc558 Warrior'",
+    "fleet": "prototypes",
+    "fleet_revision": "73ed67b45e931d8d6e4148faab428e275390e65f",
+    "target": "Muse-Glimmer-30B-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 41590686316,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41590686316",
+  "source": "replay",
+  "title": "Keep image inputs on the first chunk of a chunked prefill",
+  "verdict": "pending",
+  "version": 1
+ },
+ "49773": {
+  "blocked": [],
+  "head": "77f0dd485bd875e6082809ff74e6e5e9e1def7bd",
+  "labels": [],
+  "merge_commit": "cea2686204c192ec7773823f8d017116fca30931",
+  "merged_at": "2026-11-06T15:17:57Z",
+  "pr": "49773",
+  "red": [
+   {
+    "contract": "Florence-2",
+    "failure": "training.loss: max delta 0.000315 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "144d86d0aa14983cd725fa026d2c360b5fd8191d",
+    "target": "Florence-2-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MiniMax-M3-MXFP8",
+    "failure": "logits_probe: max delta 0.25 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "144d86d0aa14983cd725fa026d2c360b5fd8191d",
+    "target": "MiniMax-M3-MXFP8-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 40496182951,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/40496182951",
+  "source": "replay",
+  "title": "Weight loading: conversion ops declare many-to-many support, and four small loader fixes",
+  "verdict": "pending",
+  "version": 1
+ },
+ "49783": {
+  "blocked": [],
+  "head": "1f91010dfd94417a92ee875e1864135329b397c7",
+  "labels": [],
+  "merge_commit": "a8d43b20622149fab30762129c59a2b1ba829364",
+  "merged_at": "2026-11-10T14:46:27Z",
+  "pr": "49783",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42639287960,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42639287960",
+  "source": "not-run",
+  "title": "Draft updates for contribution/agent rules",
   "verdict": "clear",
   "version": 1
  },
@@ -533,6 +1319,86 @@
   "verdict": "clear",
   "version": 1
  },
+ "49862": {
+  "blocked": [],
+  "head": "4b1a46f0b664ed5912d03f7ce882249040cc6821",
+  "labels": [],
+  "merge_commit": "f8a1e1fba977ecd39e1b877312f4452a2ba570fa",
+  "merged_at": "2026-11-04T15:51:04Z",
+  "pr": "49862",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 41860634515,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41860634515",
+  "source": "not-run",
+  "title": "[`FA`] Fix head dim manipulation for more special models",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49864": {
+  "blocked": [],
+  "head": "3486229b2ef2bbb92a61a081cd2eec0e4f02e04e",
+  "labels": [],
+  "merge_commit": "9822ea6ea8867935b17f804fc2bd2f16b5711aba",
+  "merged_at": "2026-11-04T17:03:48Z",
+  "pr": "49864",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 41862017015,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41862017015",
+  "source": "not-run",
+  "title": "[`Rope`] Fix per layer rope in head dim manipulation",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49869": {
+  "blocked": [],
+  "head": "0cefd4266994863fdd23d62249b1242161859ba5",
+  "labels": [],
+  "merge_commit": "666a686b33e78087f7560bd5f7b51e25289d897d",
+  "merged_at": "2026-11-04T15:41:19Z",
+  "pr": "49869",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 41855895096,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41855895096",
+  "source": "replay",
+  "title": "Add `transcription` input arg to `apply_transcription_request`",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49886": {
+  "blocked": [],
+  "head": "7f097da854c4b2ad327ebd1de1b35ffc6d86222e",
+  "labels": [],
+  "merge_commit": "9e7f5cd1870a3c69166ce1abd18ff8bd74ed45a8",
+  "merged_at": "2026-11-10T09:40:44Z",
+  "pr": "49886",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 11.6 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MMGroundingDino",
+    "failure": "logits_probe: max delta 1.28 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "mm_grounding_dino_tiny_o365v1_goldg_v3det-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42738314842,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42738314842",
+  "source": "replay",
+  "title": "[serge] Fix 8 integration tests for model `grounding_dino` failing with `output_mismatch` (tensor values differ (6), oth",
+  "verdict": "pending",
+  "version": 1
+ },
  "49909": {
   "blocked": [],
   "head": "f9762f8a2533ff8d0aab551775910cbe3426f318",
@@ -546,6 +1412,182 @@
   "run_url": "https://github.com/huggingface/transformers/actions/runs/41371664514",
   "source": "not-run",
   "title": "Fix resize_embeddings tests for deepspeed",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49910": {
+  "blocked": [],
+  "head": "aed7c6af46a1d6118a888d2590a459780362086c",
+  "labels": [],
+  "merge_commit": "e4e4e98845fcf92e2b75f709f356fbc838b55d11",
+  "merged_at": "2026-11-11T09:38:20Z",
+  "pr": "49910",
+  "red": [
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 0.736 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 1.29 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "default"
+   },
+   {
+    "contract": "BART",
+    "failure": "training.loss: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "bart-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BLIP2",
+    "failure": "training.loss: max delta 0.0209 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "blip2-opt-2.7b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BigBirdPegasus",
+    "failure": "training.loss: max delta 0.0625 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "bigbird-pegasus-large-arxiv-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Canary-1B-v2",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "canary-1b-v2-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 11.6 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Hubert",
+    "failure": "training.loss: max delta 32.4 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "hubert-large-ls960-ft-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MMGroundingDino",
+    "failure": "logits_probe: max delta 1.28 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "mm_grounding_dino_tiny_o365v1_goldg_v3det-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MarianMT",
+    "failure": "training.loss: max delta 0.0114 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "opus-mt-fr-en-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Mask2Former",
+    "failure": "training.loss: max delta 0.0548 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "mask2former-swin-tiny-coco-instance-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "OPT",
+    "failure": "training.loss: max delta 0.00194 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "opt-125m-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Pegasus",
+    "failure": "logits.probe: max delta 0.25 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "pegasus-xsum-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "WavLM",
+    "failure": "training.loss: max delta 0.0583 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "wavlm-base-plus-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-table_transformer",
+    "failure": "training.loss: max delta 0.00256 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "table_transformer-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42984050577,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42984050577",
+  "source": "replay",
+  "title": "fix some error in quantization xpu ci test",
+  "verdict": "pending",
+  "version": 1
+ },
+ "49914": {
+  "blocked": [],
+  "head": "3ab9e36fe2900dad54beb6dc7aa986ffdcb7d057",
+  "labels": [],
+  "merge_commit": "7fb5f73b46f101d8fca9b2c102e2b107302671f2",
+  "merged_at": "2026-11-06T14:46:29Z",
+  "pr": "49914",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42235766204,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42235766204",
+  "source": "not-run",
+  "title": "Allow saving an unchanged generation config",
+  "verdict": "clear",
+  "version": 1
+ },
+ "49917": {
+  "blocked": [],
+  "head": "bb5f6bfe1e805480fe3870bdcc1f8e764754cddc",
+  "labels": [],
+  "merge_commit": "62dd93e125d28fc8e1cdf6424783f5dc27762c63",
+  "merged_at": "2026-11-05T03:27:16Z",
+  "pr": "49917",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 39932932356,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/39932932356",
+  "source": "replay",
+  "title": "Build Idefics-style vision position ids with torch.where",
   "verdict": "clear",
   "version": 1
  },
@@ -595,6 +1637,46 @@
   "source": "replay",
   "title": "Refactor output tracing for `depth_anything`",
   "verdict": "clear",
+  "version": 1
+ },
+ "49976": {
+  "blocked": [],
+  "head": "85e1115a446c101e6629e5f6f3a8713946e33768",
+  "labels": [],
+  "merge_commit": "fa421d61e569c4cad3e7e988b199d7222dde0435",
+  "merged_at": "2026-11-06T02:09:23Z",
+  "pr": "49976",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42145532636,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42145532636",
+  "source": "replay",
+  "title": "Multmodal token count validation in processors",
+  "verdict": "pending",
   "version": 1
  },
  "49984": {
@@ -661,6 +1743,353 @@
   "verdict": "clear",
   "version": 1
  },
+ "50029": {
+  "blocked": [],
+  "head": "13f4ebbbaac61bb97aff2db6ab93d8753d9a0479",
+  "labels": [],
+  "merge_commit": "28ec08c4699e521aaecab9265af861077f670ac0",
+  "merged_at": "2026-11-11T15:04:01Z",
+  "pr": "50029",
+  "red": [
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 0.736 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "ec45dcbb3722fc79b41b66866b5def861fa91c25",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 1.29 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "ec45dcbb3722fc79b41b66866b5def861fa91c25",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "default"
+   },
+   {
+    "contract": "BART",
+    "failure": "training.loss: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ec45dcbb3722fc79b41b66866b5def861fa91c25",
+    "target": "bart-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BLIP2",
+    "failure": "training.loss: max delta 0.0209 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ec45dcbb3722fc79b41b66866b5def861fa91c25",
+    "target": "blip2-opt-2.7b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BigBirdPegasus",
+    "failure": "training.loss: max delta 0.0625 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ec45dcbb3722fc79b41b66866b5def861fa91c25",
+    "target": "bigbird-pegasus-large-arxiv-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Canary-1B-v2",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "ec45dcbb3722fc79b41b66866b5def861fa91c25",
+    "target": "canary-1b-v2-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 11.6 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ec45dcbb3722fc79b41b66866b5def861fa91c25",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Hubert",
+    "failure": "training.loss: max delta 32.4 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ec45dcbb3722fc79b41b66866b5def861fa91c25",
+    "target": "hubert-large-ls960-ft-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MMGroundingDino",
+    "failure": "logits_probe: max delta 1.28 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ec45dcbb3722fc79b41b66866b5def861fa91c25",
+    "target": "mm_grounding_dino_tiny_o365v1_goldg_v3det-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MarianMT",
+    "failure": "training.loss: max delta 0.0114 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ec45dcbb3722fc79b41b66866b5def861fa91c25",
+    "target": "opus-mt-fr-en-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "OPT",
+    "failure": "training.loss: max delta 0.00194 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ec45dcbb3722fc79b41b66866b5def861fa91c25",
+    "target": "opt-125m-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ec45dcbb3722fc79b41b66866b5def861fa91c25",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "WavLM",
+    "failure": "training.loss: max delta 0.0583 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ec45dcbb3722fc79b41b66866b5def861fa91c25",
+    "target": "wavlm-base-plus-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-table_transformer",
+    "failure": "training.loss: max delta 0.00256 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ec45dcbb3722fc79b41b66866b5def861fa91c25",
+    "target": "table_transformer-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 43029301452,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43029301452",
+  "source": "replay",
+  "title": "\ud83d\udea8 Exporters: `ExportedModel`, Hub save/load, one backend registry",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50032": {
+  "blocked": [],
+  "head": "4c9dc0796d2181f446a2612549280b24ec6dfde8",
+  "labels": [],
+  "merge_commit": "57583c28b04ddc6b6c1e9390ad86181d1033c660",
+  "merged_at": "2026-11-12T09:13:59Z",
+  "pr": "50032",
+  "red": [
+   {
+    "contract": "Canary-1B-v2",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "4114e6ba4924ee7c9cc3f63af4235464fbe79097",
+    "target": "canary-1b-v2-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 43186230372,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43186230372",
+  "source": "replay",
+  "title": "Exporters: run exported models on their backend's runtime (`ModelRunner`)",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50054": {
+  "blocked": [],
+  "head": "0145382667098d7c6dcc6485a0fe8503d3a03c29",
+  "labels": [
+   "New model"
+  ],
+  "merge_commit": "31d7392997c13162c58f2e3c6555b5e060d6f60b",
+  "merged_at": "2026-11-09T14:01:46Z",
+  "pr": "50054",
+  "reason": "`New model`: red cases only warn",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42628444788,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42628444788",
+  "source": "replay",
+  "title": "Add Jev + decision core",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50060": {
+  "blocked": [],
+  "head": "5aba8cc0c1ff9d5c13101d08d2d31d01a0dae9a2",
+  "labels": [],
+  "merge_commit": "f2754311602414ed561cdf8ed9d852390f514404",
+  "merged_at": "2026-11-04T01:42:22Z",
+  "pr": "50060",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 41680146451,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41680146451",
+  "source": "replay",
+  "title": "[Video] Require one metadata entry per video and refuse return_metadata=False",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50071": {
+  "blocked": [],
+  "head": "6dec358ff2c956014250f5414361e54bbcbb6bc5",
+  "labels": [],
+  "merge_commit": "9082094f27625f46d9f2b25309779051ccd38ab2",
+  "merged_at": "2026-11-11T11:57:09Z",
+  "pr": "50071",
+  "red": [
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 0.736 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "1b99ce7e14999426ce2a9840ee70b618401ac86e",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 1.29 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "1b99ce7e14999426ce2a9840ee70b618401ac86e",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "default"
+   },
+   {
+    "contract": "BART",
+    "failure": "training.loss: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "1b99ce7e14999426ce2a9840ee70b618401ac86e",
+    "target": "bart-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BLIP2",
+    "failure": "training.loss: max delta 0.0209 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "1b99ce7e14999426ce2a9840ee70b618401ac86e",
+    "target": "blip2-opt-2.7b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BigBirdPegasus",
+    "failure": "training.loss: max delta 0.0625 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "1b99ce7e14999426ce2a9840ee70b618401ac86e",
+    "target": "bigbird-pegasus-large-arxiv-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 11.6 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "1b99ce7e14999426ce2a9840ee70b618401ac86e",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Hubert",
+    "failure": "training.loss: max delta 32.4 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "1b99ce7e14999426ce2a9840ee70b618401ac86e",
+    "target": "hubert-large-ls960-ft-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MMGroundingDino",
+    "failure": "logits_probe: max delta 1.28 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "1b99ce7e14999426ce2a9840ee70b618401ac86e",
+    "target": "mm_grounding_dino_tiny_o365v1_goldg_v3det-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MarianMT",
+    "failure": "training.loss: max delta 0.0114 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "1b99ce7e14999426ce2a9840ee70b618401ac86e",
+    "target": "opus-mt-fr-en-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Mask2Former",
+    "failure": "training.loss: max delta 0.0548 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "1b99ce7e14999426ce2a9840ee70b618401ac86e",
+    "target": "mask2former-swin-tiny-coco-instance-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "OPT",
+    "failure": "training.loss: max delta 0.00194 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "1b99ce7e14999426ce2a9840ee70b618401ac86e",
+    "target": "opt-125m-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "1b99ce7e14999426ce2a9840ee70b618401ac86e",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Pegasus",
+    "failure": "logits.probe: max delta 0.25 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "1b99ce7e14999426ce2a9840ee70b618401ac86e",
+    "target": "pegasus-xsum-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "WavLM",
+    "failure": "training.loss: max delta 0.0583 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "1b99ce7e14999426ce2a9840ee70b618401ac86e",
+    "target": "wavlm-base-plus-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-table_transformer",
+    "failure": "training.loss: max delta 0.00256 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "1b99ce7e14999426ce2a9840ee70b618401ac86e",
+    "target": "table_transformer-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42848113820,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42848113820",
+  "source": "replay",
+  "title": "QA: move to transformers-mlinter 0.1.6",
+  "verdict": "pending",
+  "version": 1
+ },
  "50077": {
   "blocked": [],
   "head": "116205f9fd5c6800d25ad6db1d69717a812602f5",
@@ -674,6 +2103,22 @@
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44078345199",
   "source": "replay",
   "title": "Fix error message and remove duplicate code in convert_slow_tokenizer.py",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50095": {
+  "blocked": [],
+  "head": "daae9a8362b08f4d7ef022d0a569807931d96e94",
+  "labels": [],
+  "merge_commit": "7d5d6d667fb7b91580aebc3cf1bedab976fb61f5",
+  "merged_at": "2026-11-05T17:54:56Z",
+  "pr": "50095",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 40777764504,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/40777764504",
+  "source": "replay",
+  "title": "[docs] Common quantization tasks",
   "verdict": "clear",
   "version": 1
  },
@@ -725,6 +2170,46 @@
   "source": "not-run",
   "title": "[serge] Fix 2 integration tests for model `ministral` failing with `output_mismatch` (tensor values differ (2))",
   "verdict": "clear",
+  "version": 1
+ },
+ "50149": {
+  "blocked": [],
+  "head": "476fe89ae2aa2ad317e3ccb1aa188ea9a1157934",
+  "labels": [],
+  "merge_commit": "0f5a2a5bc682d01ce606533a91125141eb0377bc",
+  "merged_at": "2026-11-04T17:55:37Z",
+  "pr": "50149",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "83b70d778c7d0a14661f058d43a3ce1c7bb39758",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MMGroundingDino",
+    "failure": "logits_probe: max delta 1.25 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "83b70d778c7d0a14661f058d43a3ce1c7bb39758",
+    "target": "mm_grounding_dino_tiny_o365v1_goldg_v3det-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "83b70d778c7d0a14661f058d43a3ce1c7bb39758",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 41878887047,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41878887047",
+  "source": "replay",
+  "title": "Exclude attention-masked padding from repetition penalty",
+  "verdict": "pending",
   "version": 1
  },
  "50161": {
@@ -784,6 +2269,70 @@
   "verdict": "clear",
   "version": 1
  },
+ "50182": {
+  "blocked": [],
+  "head": "80c9ac075c2bfdba2c2331451de2152ab21813b5",
+  "labels": [],
+  "merge_commit": "9e9379e0cb5528250a3da3f9e40be0c02c5ec73d",
+  "merged_at": "2026-11-04T10:26:49Z",
+  "pr": "50182",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 41811770272,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41811770272",
+  "source": "replay",
+  "title": "Replace torch.FloatTensor with torch.Tensor outside the model files",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50183": {
+  "blocked": [],
+  "head": "d8bc297e05a95ebb3c52661c2e658685235eec43",
+  "labels": [],
+  "merge_commit": "fd3cf0140de03f7619ac95b5cfed05b711ff9e22",
+  "merged_at": "2026-11-04T09:56:22Z",
+  "pr": "50183",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 41806714652,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41806714652",
+  "source": "replay",
+  "title": "Replace torch.FloatTensor with torch.Tensor in the model files",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50198": {
+  "blocked": [],
+  "head": "54543a96c0065bbb62eefe4d2d0ac29de635a414",
+  "labels": [],
+  "merge_commit": "4fbb35b8f7b3f133baaaf3b7d856a2255abbb14b",
+  "merged_at": "2026-11-04T14:14:54Z",
+  "pr": "50198",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 41655895273,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41655895273",
+  "source": "replay",
+  "title": "fix: preserve multiple candidates in multimodal pipelines",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50226": {
+  "blocked": [],
+  "head": "01db63a55e72f69b6ea5048aa18cee1686b61b45",
+  "labels": [],
+  "merge_commit": "58d05ca5724a434979a9fb26d4ed65dce856b854",
+  "merged_at": "2026-11-05T04:16:47Z",
+  "pr": "50226",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 41960627482,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41960627482",
+  "source": "replay",
+  "title": "Fix Emu3 image processor crash on float numpy images",
+  "verdict": "clear",
+  "version": 1
+ },
  "50233": {
   "blocked": [],
   "head": "460fdd40f2272c832b213f8cc8c58c4cdbcd974b",
@@ -813,6 +2362,22 @@
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42547257812",
   "source": "not-run",
   "title": "fix failed cases for beam model",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50238": {
+  "blocked": [],
+  "head": "ac06ef5902ca9a4c243f85392df4d3cebea4ee08",
+  "labels": [],
+  "merge_commit": "b1a76d4006c9a82076696afec96bb40dcd59aa2e",
+  "merged_at": "2026-11-05T02:51:23Z",
+  "pr": "50238",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 41807737029,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41807737029",
+  "source": "replay",
+  "title": "[compressed-tensors] better path through conversion mapping",
   "verdict": "clear",
   "version": 1
  },
@@ -864,6 +2429,62 @@
   "verdict": "clear",
   "version": 1
  },
+ "50260": {
+  "blocked": [],
+  "head": "e88d70379db5013eb1496f85cd7071c4be4e500d",
+  "labels": [],
+  "merge_commit": "1949589178def2d24d1a08c344eeffc2c2eb4658",
+  "merged_at": "2026-11-04T16:22:31Z",
+  "pr": "50260",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 41473056904,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41473056904",
+  "source": "not-run",
+  "title": "Update FSDP non-rank-0 missing keys test after #45649",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50265": {
+  "blocked": [],
+  "head": "9f400bdeefc795988b310a579fa9230069c9a70e",
+  "labels": [],
+  "merge_commit": "a4f362742ba4846882fd0bc9636461ef3a5e3f34",
+  "merged_at": "2026-11-10T09:21:07Z",
+  "pr": "50265",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42667044258,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42667044258",
+  "source": "replay",
+  "title": "[Fix] Prevent duplicate weight renaming on save_pretrained for ALMs",
+  "verdict": "pending",
+  "version": 1
+ },
  "50271": {
   "blocked": [],
   "head": "81b59f151460a42f4cbc977f39588bec403045a7",
@@ -896,6 +2517,46 @@
   "verdict": "clear",
   "version": 1
  },
+ "50276": {
+  "blocked": [],
+  "head": "caecab097f52814f948569e0dd66d8c5ba5efb3c",
+  "labels": [],
+  "merge_commit": "fc6cdba12ac34295cad8831890ba0008e1eb2527",
+  "merged_at": "2026-11-10T06:10:00Z",
+  "pr": "50276",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42663144325,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42663144325",
+  "source": "replay",
+  "title": "[docs] Agent-specific content",
+  "verdict": "pending",
+  "version": 1
+ },
  "50279": {
   "blocked": [],
   "head": "49ae14a1d5d59942d938a183731cc56c6a5259a8",
@@ -910,6 +2571,40 @@
   "source": "not-run",
   "title": "[CI] docs-check fixes",
   "verdict": "clear",
+  "version": 1
+ },
+ "50281": {
+  "blocked": [],
+  "head": "78eb76f190b0566a8354621812019dd3272f7f20",
+  "labels": [
+   "for patch"
+  ],
+  "merge_commit": "409c349011c1099d66501d6c424ba411b9835a19",
+  "merged_at": "2026-11-03T01:36:32Z",
+  "pr": "50281",
+  "red": [
+   {
+    "contract": "Granite",
+    "failure": "logits.probe: max delta 0.000488 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "73ed67b45e931d8d6e4148faab428e275390e65f",
+    "target": "granite-3.1-2b-instruct-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Muse-Glimmer",
+    "failure": "generated_text: ' istr \uac78\uff0c\u4e8e\u662f\u03b1\u03c1-van \u0432\u044a\u0440\u0445\u0443/# \uc2a4\ub9c8\ud2b8 pertama\u0e42\u0e0a Dalton \u043d\u0430\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f\u043c diffuseFind\u0446\u044b\u0456 Launcher' != ' istr \uac78\uff0c\u4e8e\u662f encomp terecht directs}$ \u043d\u0435\u043a\u043e\\tqueryPada correttamenteAnnotations locu\u5760 \ubc1b\uc558 Warrior'",
+    "fleet": "prototypes",
+    "fleet_revision": "73ed67b45e931d8d6e4148faab428e275390e65f",
+    "target": "Muse-Glimmer-30B-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 41556516342,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41556516342",
+  "source": "replay",
+  "title": "[Distributed] Set `device_id` only for NCCL",
+  "verdict": "pending",
   "version": 1
  },
  "50282": {
@@ -942,6 +2637,214 @@
   "source": "not-run",
   "title": "[serge] Fix 1 integration test for model `flint` failing with `other`, raising `RuntimeError` (other (1))",
   "verdict": "clear",
+  "version": 1
+ },
+ "50284": {
+  "blocked": [],
+  "head": "9f13cdd081fe9f57e997e5ba500591c4db33e825",
+  "labels": [
+   "for patch"
+  ],
+  "merge_commit": "677b9ff1bccf61d696018dd59b969207ef7849c2",
+  "merged_at": "2026-11-06T02:17:29Z",
+  "pr": "50284",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "83b70d778c7d0a14661f058d43a3ce1c7bb39758",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MMGroundingDino",
+    "failure": "logits_probe: max delta 1.25 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "83b70d778c7d0a14661f058d43a3ce1c7bb39758",
+    "target": "mm_grounding_dino_tiny_o365v1_goldg_v3det-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "83b70d778c7d0a14661f058d43a3ce1c7bb39758",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 41964953299,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41964953299",
+  "source": "replay",
+  "title": "ZeRO-3: read weights on rank 0 only and convert them one group at a time",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50285": {
+  "blocked": [],
+  "head": "02091ba72b573f59de9bc9df1829842df290d941",
+  "labels": [
+   "for patch"
+  ],
+  "merge_commit": "522cbe68e0c1b1ac0c648d3d6aeebb0a23194a9f",
+  "merged_at": "2026-11-06T02:28:56Z",
+  "pr": "50285",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42147402323,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42147402323",
+  "source": "replay",
+  "title": "[`distributed`] Add HSDP (`dp_replicate_size`) to `DistributedConfig`",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50286": {
+  "blocked": [],
+  "head": "6b18f66157b337dfed711b7d3717bb3ae3f2d492",
+  "labels": [
+   "for patch"
+  ],
+  "merge_commit": "8833c9181eec925f1b4e0096db516462044345df",
+  "merged_at": "2026-11-06T03:33:56Z",
+  "pr": "50286",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42154100653,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42154100653",
+  "source": "replay",
+  "title": "[`distributed`] Trainer: reduce FSDP/HSDP gradients on the last micro-batch only",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50292": {
+  "blocked": [],
+  "head": "8b20e7a2c5279e3829fde815d8a1d06f03b3f012",
+  "labels": [],
+  "merge_commit": "b3187c7faec959b0e5facb40424e68441095adca",
+  "merged_at": "2026-11-05T03:09:22Z",
+  "pr": "50292",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "83b70d778c7d0a14661f058d43a3ce1c7bb39758",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MMGroundingDino",
+    "failure": "logits_probe: max delta 1.25 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "83b70d778c7d0a14661f058d43a3ce1c7bb39758",
+    "target": "mm_grounding_dino_tiny_o365v1_goldg_v3det-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "83b70d778c7d0a14661f058d43a3ce1c7bb39758",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 41955035686,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41955035686",
+  "source": "replay",
+  "title": "[`distributed`] Divide the expert gradients once when `efsdp_size == 1`",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50293": {
+  "blocked": [],
+  "head": "592950f5739d7a7224e657b8ff43f2de49aab303",
+  "labels": [
+   "for patch"
+  ],
+  "merge_commit": "bbe484b5680f9cdf4d51bafc6b775b136558ab43",
+  "merged_at": "2026-11-06T03:02:46Z",
+  "pr": "50293",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42150606737,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42150606737",
+  "source": "replay",
+  "title": "[`distributed`] Support HSDP with expert parallelism",
+  "verdict": "pending",
   "version": 1
  },
  "50294": {
@@ -994,6 +2897,190 @@
   "verdict": "clear",
   "version": 1
  },
+ "50302": {
+  "blocked": [],
+  "head": "aece66fde907732344e8cacdd76440d09eb540b7",
+  "labels": [],
+  "merge_commit": "f162a666f52c4fc3a23459f07870458306564525",
+  "merged_at": "2026-11-04T11:43:35Z",
+  "pr": "50302",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 41820202850,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41820202850",
+  "source": "replay",
+  "title": "[`Beam`] Fix TP on attn",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50307": {
+  "blocked": [],
+  "head": "a780066d92c7151c04d427e45b7f5f22e0645314",
+  "labels": [],
+  "merge_commit": "6280bfe74f4809302af80c39a435a07e9204f344",
+  "merged_at": "2026-11-04T14:08:51Z",
+  "pr": "50307",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 41825556887,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41825556887",
+  "source": "replay",
+  "title": ":rotating_light: [`kernels`] Bump version",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50309": {
+  "blocked": [],
+  "head": "ca44441ed0c0e78050423b9dacced4f8b976585a",
+  "labels": [],
+  "merge_commit": "5b99c07c047ae2af90bafe66bb91650e5b06989f",
+  "merged_at": "2026-11-12T08:36:03Z",
+  "pr": "50309",
+  "red": [
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 0.736 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "92401ce59ecee72c2ef9f05a06a46ad7fca8ab3f",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 1.29 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "92401ce59ecee72c2ef9f05a06a46ad7fca8ab3f",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "default"
+   },
+   {
+    "contract": "BART",
+    "failure": "training.loss: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "92401ce59ecee72c2ef9f05a06a46ad7fca8ab3f",
+    "target": "bart-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BLIP2",
+    "failure": "training.loss: max delta 0.0209 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "92401ce59ecee72c2ef9f05a06a46ad7fca8ab3f",
+    "target": "blip2-opt-2.7b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Canary-1B-v2",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "92401ce59ecee72c2ef9f05a06a46ad7fca8ab3f",
+    "target": "canary-1b-v2-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 11.6 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "92401ce59ecee72c2ef9f05a06a46ad7fca8ab3f",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Hubert",
+    "failure": "training.loss: max delta 32.4 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "92401ce59ecee72c2ef9f05a06a46ad7fca8ab3f",
+    "target": "hubert-large-ls960-ft-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MMGroundingDino",
+    "failure": "logits_probe: max delta 1.28 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "92401ce59ecee72c2ef9f05a06a46ad7fca8ab3f",
+    "target": "mm_grounding_dino_tiny_o365v1_goldg_v3det-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MarianMT",
+    "failure": "training.loss: max delta 0.0114 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "92401ce59ecee72c2ef9f05a06a46ad7fca8ab3f",
+    "target": "opus-mt-fr-en-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "OPT",
+    "failure": "training.loss: max delta 0.00194 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "92401ce59ecee72c2ef9f05a06a46ad7fca8ab3f",
+    "target": "opt-125m-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "92401ce59ecee72c2ef9f05a06a46ad7fca8ab3f",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "WavLM",
+    "failure": "training.loss: max delta 0.0583 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "92401ce59ecee72c2ef9f05a06a46ad7fca8ab3f",
+    "target": "wavlm-base-plus-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 43054630316,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43054630316",
+  "source": "replay",
+  "title": "Exporters: ONNX Runtime fusions at export time (`OnnxConfig(ort_fusions=...)`)",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50311": {
+  "blocked": [],
+  "head": "37234696c924a960a0bde4d36d6988f2e524edbe",
+  "labels": [],
+  "merge_commit": "72b487d158496eb0b67977aa1ce93a67e685c777",
+  "merged_at": "2026-11-06T10:31:08Z",
+  "pr": "50311",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42110195490,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42110195490",
+  "source": "replay",
+  "title": "OpenVINO exporter: let OpenVINO fuse attention, RoPE, the KV cache and compressed matmuls",
+  "verdict": "pending",
+  "version": 1
+ },
  "50317": {
   "blocked": [],
   "head": "c55bbf24a34c34aed20d28dcfe35cb55f24adf50",
@@ -1020,6 +3107,265 @@
   "verdict": "clear",
   "version": 1
  },
+ "50318": {
+  "blocked": [],
+  "head": "738b18c308536ed14c8200f7e835ec3eb410e7ef",
+  "labels": [],
+  "merge_commit": "b55e0761510c16c109614c99b333c44d8fbf1216",
+  "merged_at": "2026-11-05T12:35:10Z",
+  "pr": "50318",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 41865125077,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41865125077",
+  "source": "replay",
+  "title": "fix(pipelines): validate zero-shot detection batch labels",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50322": {
+  "blocked": [],
+  "head": "9d7b77f502a8e775e2ec94c919ddd5c592a33343",
+  "labels": [
+   "New model"
+  ],
+  "merge_commit": "7d6cae0807abded46f6e911855f1b14d42d9dd6c",
+  "merged_at": "2026-11-05T15:44:38Z",
+  "pr": "50322",
+  "reason": "`New model`: red cases only warn",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "9b11bb9dfd7edbb36ab428264b2f971e9cbcc4df",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "9b11bb9dfd7edbb36ab428264b2f971e9cbcc4df",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "9b11bb9dfd7edbb36ab428264b2f971e9cbcc4df",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42049900875,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42049900875",
+  "source": "replay",
+  "title": "[Model] LFM3 Family: LFM3-Text",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50325": {
+  "blocked": [],
+  "head": "42af833afcf8cc43ea265ba14c0d72df543d1fa1",
+  "labels": [],
+  "merge_commit": "3eb8e27a4f50da05e362ad19c0f3ab4a4eb17ead",
+  "merged_at": "2026-11-04T10:12:42Z",
+  "pr": "50325",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 41695967440,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41695967440",
+  "source": "replay",
+  "title": "Import torchcodec lazily in processing_utils",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50329": {
+  "blocked": [],
+  "head": "689762365a00c556abda570a25a72932ac7c7668",
+  "labels": [],
+  "merge_commit": "cc405bb3cfdc20836a3bc96421db669bfbaa9805",
+  "merged_at": "2026-11-09T13:51:35Z",
+  "pr": "50329",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 41869445891,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41869445891",
+  "source": "replay",
+  "title": "fix(pipelines): respect audio classification problem type",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50345": {
+  "blocked": [],
+  "head": "d0dd43c0442b3ae76ca702e047fa449103055075",
+  "labels": [],
+  "merge_commit": "4abc4e580a2252b2e7a1a86810ed337784f8942b",
+  "merged_at": "2026-11-04T14:32:35Z",
+  "pr": "50345",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 41830733266,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41830733266",
+  "source": "not-run",
+  "title": "Revert linguistic changes",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50346": {
+  "blocked": [],
+  "head": "1df92105a6838897765beea7ab9f5531de800402",
+  "labels": [],
+  "merge_commit": "e20e0787c9863f4b78781e603adfe6648415a854",
+  "merged_at": "2026-11-10T02:37:28Z",
+  "pr": "50346",
+  "red": [
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 0.736 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 1.29 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "default"
+   },
+   {
+    "contract": "BART",
+    "failure": "training.loss: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "bart-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BLIP2",
+    "failure": "training.loss: max delta 0.0209 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "blip2-opt-2.7b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BigBirdPegasus",
+    "failure": "training.loss: max delta 0.0625 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "bigbird-pegasus-large-arxiv-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Florence-2",
+    "failure": "training.loss: max delta 0.000637 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "Florence-2-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Hubert",
+    "failure": "training.loss: max delta 32.4 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "hubert-large-ls960-ft-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MarianMT",
+    "failure": "training.loss: max delta 0.0114 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "opus-mt-fr-en-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Mask2Former",
+    "failure": "training.loss: max delta 0.0548 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "mask2former-swin-tiny-coco-instance-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MiniMax-M3-MXFP8",
+    "failure": "logits_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "MiniMax-M3-MXFP8-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "OPT",
+    "failure": "training.loss: max delta 0.00194 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "opt-125m-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Pegasus",
+    "failure": "logits.probe: max delta 0.25 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "pegasus-xsum-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "WavLM",
+    "failure": "training.loss: max delta 0.0583 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "wavlm-base-plus-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-table_transformer",
+    "failure": "training.loss: max delta 0.00256 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "table_transformer-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42737287203,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42737287203",
+  "source": "replay",
+  "title": "Fix MiniMax-M3-VL packed vision attention isolation",
+  "verdict": "pending",
+  "version": 1
+ },
  "50348": {
   "blocked": [],
   "head": "d6b4de4bc7052fb70f1e75ab7a9d68b7a4ac728f",
@@ -1034,6 +3380,46 @@
   "source": "replay",
   "title": "Fix DeepSeek-V4 compression cache reordering for beam search",
   "verdict": "clear",
+  "version": 1
+ },
+ "50349": {
+  "blocked": [],
+  "head": "31a2cfbebd57927821907abc2062fee3ced071b4",
+  "labels": [],
+  "merge_commit": "a15175e3cc679f6b1f11d7ffdd04cb00bead4c43",
+  "merged_at": "2026-11-05T14:55:39Z",
+  "pr": "50349",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "9b11bb9dfd7edbb36ab428264b2f971e9cbcc4df",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "9b11bb9dfd7edbb36ab428264b2f971e9cbcc4df",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "9b11bb9dfd7edbb36ab428264b2f971e9cbcc4df",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42043132224,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42043132224",
+  "source": "replay",
+  "title": "Keep enabling checkpointing on models that only define gradient_checkpointing_enable",
+  "verdict": "pending",
   "version": 1
  },
  "50353": {
@@ -1052,6 +3438,134 @@
   "verdict": "clear",
   "version": 1
  },
+ "50354": {
+  "blocked": [],
+  "head": "b16a33d7060f315dc138027cf3460892c4a2dc28",
+  "labels": [],
+  "merge_commit": "c49879e7093a4de4f6b03108a0a9eaa33b0844ad",
+  "merged_at": "2026-11-10T06:25:34Z",
+  "pr": "50354",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 41851314415,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41851314415",
+  "source": "replay",
+  "title": "Rename FP8 `modules_to_not_convert` entries like weight names",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50358": {
+  "blocked": [],
+  "head": "1b22ac8a6187d9ac5a4478e88498187e79a4d8c6",
+  "labels": [],
+  "merge_commit": "9b283429f9bf5c680bec437ab888c435dd2fef8b",
+  "merged_at": "2026-11-04T17:10:39Z",
+  "pr": "50358",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 41872858184,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41872858184",
+  "source": "replay",
+  "title": "Do not touch torch internal compilation flags in chunked prefill",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50361": {
+  "blocked": [],
+  "head": "668a55afa1b7c803532d169ad94bd1c310f4abcd",
+  "labels": [],
+  "merge_commit": "d203390173fc074638e2268c6becd140fca5d92b",
+  "merged_at": "2026-11-04T18:03:17Z",
+  "pr": "50361",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 41881878711,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41881878711",
+  "source": "not-run",
+  "title": "Update PR CI to use torch 2.15",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50362": {
+  "blocked": [],
+  "head": "eb14768cacf7bfa95e78f625396352b1cb4cbd32",
+  "labels": [],
+  "merge_commit": "5ea23808403f2e434e47e83cc696aa61a62ac7f2",
+  "merged_at": "2026-11-05T15:41:28Z",
+  "pr": "50362",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "9b11bb9dfd7edbb36ab428264b2f971e9cbcc4df",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "9b11bb9dfd7edbb36ab428264b2f971e9cbcc4df",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "9b11bb9dfd7edbb36ab428264b2f971e9cbcc4df",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42046552763,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42046552763",
+  "source": "replay",
+  "title": "Don't pick torchcodec when it can't load or has no FFmpeg",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50364": {
+  "blocked": [],
+  "head": "d2d8598b5c7502980446d61dca6173abb858c3a4",
+  "labels": [],
+  "merge_commit": "0f53828e83f2212060233d2ea552cc76617b8712",
+  "merged_at": "2026-11-06T20:11:55Z",
+  "pr": "50364",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42110269434,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42110269434",
+  "source": "replay",
+  "title": "Clarify warmup_steps error message to warmup_steps >= 0",
+  "verdict": "pending",
+  "version": 1
+ },
  "50366": {
   "blocked": [],
   "head": "78c3359d2d17b1be7ca063b7e527de4b38bfd24e",
@@ -1065,6 +3579,198 @@
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44335773541",
   "source": "replay",
   "title": "Continuous batching: find the sharded key/value projections under any decoder path",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50368": {
+  "blocked": [],
+  "head": "236f7246b3b7b62f936bde34fbeb67bfde974ca5",
+  "labels": [],
+  "merge_commit": "acf8004ec93d3d3195ea4945c693ff1c8959374e",
+  "merged_at": "2026-11-12T17:35:03Z",
+  "pr": "50368",
+  "red": [
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 0.736 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 1.29 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "default"
+   },
+   {
+    "contract": "BART",
+    "failure": "training.loss: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "bart-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BLIP2",
+    "failure": "training.loss: max delta 0.0209 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "blip2-opt-2.7b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BigBirdPegasus",
+    "failure": "training.loss: max delta 0.0625 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "bigbird-pegasus-large-arxiv-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Florence-2",
+    "failure": "training.loss: max delta 0.000637 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "Florence-2-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 9.17 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Hubert",
+    "failure": "training.loss: max delta 23.5 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "hubert-large-ls960-ft-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MMGroundingDino",
+    "failure": "logits_probe: max delta 1.28 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "mm_grounding_dino_tiny_o365v1_goldg_v3det-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MarianMT",
+    "failure": "training.loss: max delta 0.0114 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "opus-mt-fr-en-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Mask2Former",
+    "failure": "training.loss: max delta 0.0548 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "mask2former-swin-tiny-coco-instance-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MiniMax-M3-MXFP8",
+    "failure": "logits_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "MiniMax-M3-MXFP8-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "OPT",
+    "failure": "training.loss: max delta 0.00194 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "opt-125m-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Pegasus",
+    "failure": "training.loss: max delta 0.0625 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "pegasus-xsum-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PegasusX",
+    "failure": "logits.probe: max delta 0.128 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "pegasus-x-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Wav2Vec2Conformer",
+    "failure": "training.loss: max delta 0.63 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "wav2vec2-conformer-rope-large-960h-ft-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "WavLM",
+    "failure": "training.loss: max delta 0.0583 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "wavlm-base-plus-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-table_transformer",
+    "failure": "training.loss: max delta 0.00256 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "table_transformer-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "vip-llava-7b-hf",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "cf5fbd91f3c4ef57059264c43b071e91f8feaa28",
+    "target": "vip-llava-7b-hf-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 41940882889,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41940882889",
+  "source": "replay",
+  "title": "Restore the root-level PEFT adapter when resuming from a checkpoint w\u2026",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50374": {
+  "blocked": [],
+  "head": "bb09051e50007c95ddadf4bb9f383ca5e1cf30d2",
+  "labels": [],
+  "merge_commit": "f262c71703eb138381d65ced86b3aaa496be0196",
+  "merged_at": "2026-11-06T01:16:59Z",
+  "pr": "50374",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 41952394624,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41952394624",
+  "source": "replay",
+  "title": "Remove deprecated refs",
   "verdict": "clear",
   "version": 1
  },
@@ -1121,6 +3827,625 @@
   "verdict": "blocked",
   "version": 1
  },
+ "50384": {
+  "blocked": [],
+  "head": "63c77b4a647e4b910227cb6338cf859d1ef17fa0",
+  "labels": [],
+  "merge_commit": "924266c478f7defb9841e9a759672b1234d6145c",
+  "merged_at": "2026-11-05T11:07:51Z",
+  "pr": "50384",
+  "red": [
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "08c55fd37a8aae285dd59fe3b3954da7630c5da1",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 41989837497,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/41989837497",
+  "source": "replay",
+  "title": "Fix PaddleOCR-VL vision position interpolation alignment",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50385": {
+  "blocked": [],
+  "head": "9eb3f28fb97ada134cc9373ad5b153876a8214ea",
+  "labels": [],
+  "merge_commit": "de058827e088cd96e4bba93232a8794a8a51d278",
+  "merged_at": "2026-11-09T13:24:35Z",
+  "pr": "50385",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "3f75e02aacffd49ad1c2064b7fa68a200f58b87f",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "3f75e02aacffd49ad1c2064b7fa68a200f58b87f",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "3f75e02aacffd49ad1c2064b7fa68a200f58b87f",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42038919470,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42038919470",
+  "source": "replay",
+  "title": "fix: forward tool schemas to response parsers",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50388": {
+  "blocked": [],
+  "head": "9f080cd3e4de87f19ef8dc5cb09711751f5ef9ec",
+  "labels": [],
+  "merge_commit": "2aab563bd5c98d748e1db3e055d1527468631b8d",
+  "merged_at": "2026-11-05T14:00:36Z",
+  "pr": "50388",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "08c55fd37a8aae285dd59fe3b3954da7630c5da1",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "08c55fd37a8aae285dd59fe3b3954da7630c5da1",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42012771701,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42012771701",
+  "source": "replay",
+  "title": "[`SDPA`] Fix decode under compile",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50391": {
+  "blocked": [],
+  "head": "ab86dcd31eb20753b832ac445d2e64bc304a95df",
+  "labels": [],
+  "merge_commit": "75ca973171ee654e288efc16dd9faf4f3051c014",
+  "merged_at": "2026-11-09T10:55:35Z",
+  "pr": "50391",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "08c55fd37a8aae285dd59fe3b3954da7630c5da1",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "08c55fd37a8aae285dd59fe3b3954da7630c5da1",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42014232182,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42014232182",
+  "source": "replay",
+  "title": "Retry the attention kernel load after a failed `lazy_import_flash_attention`",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50392": {
+  "blocked": [],
+  "head": "a03005fb9fc68a6b6994ddc08cfdb6e8f75cb343",
+  "labels": [
+   "New model"
+  ],
+  "merge_commit": "f1787be5be18c9d0e457f258eefd096b8da5a146",
+  "merged_at": "2026-11-10T15:03:49Z",
+  "pr": "50392",
+  "reason": "`New model`: red cases only warn",
+  "red": [
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 0.736 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "7de62a6fb76c878f56afe951a7bbf4d77e8ee27f",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 1.29 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "7de62a6fb76c878f56afe951a7bbf4d77e8ee27f",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "default"
+   },
+   {
+    "contract": "BART",
+    "failure": "training.loss: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "7de62a6fb76c878f56afe951a7bbf4d77e8ee27f",
+    "target": "bart-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BLIP2",
+    "failure": "training.loss: max delta 0.0209 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "7de62a6fb76c878f56afe951a7bbf4d77e8ee27f",
+    "target": "blip2-opt-2.7b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BigBirdPegasus",
+    "failure": "training.loss: max delta 0.0625 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "7de62a6fb76c878f56afe951a7bbf4d77e8ee27f",
+    "target": "bigbird-pegasus-large-arxiv-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 11.6 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "7de62a6fb76c878f56afe951a7bbf4d77e8ee27f",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Hubert",
+    "failure": "training.loss: max delta 32.4 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "7de62a6fb76c878f56afe951a7bbf4d77e8ee27f",
+    "target": "hubert-large-ls960-ft-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MMGroundingDino",
+    "failure": "logits_probe: max delta 1.28 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "7de62a6fb76c878f56afe951a7bbf4d77e8ee27f",
+    "target": "mm_grounding_dino_tiny_o365v1_goldg_v3det-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MarianMT",
+    "failure": "training.loss: max delta 0.0114 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "7de62a6fb76c878f56afe951a7bbf4d77e8ee27f",
+    "target": "opus-mt-fr-en-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Mask2Former",
+    "failure": "training.loss: max delta 0.0548 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "7de62a6fb76c878f56afe951a7bbf4d77e8ee27f",
+    "target": "mask2former-swin-tiny-coco-instance-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "OPT",
+    "failure": "training.loss: max delta 0.00194 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "7de62a6fb76c878f56afe951a7bbf4d77e8ee27f",
+    "target": "opt-125m-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "7de62a6fb76c878f56afe951a7bbf4d77e8ee27f",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Pegasus",
+    "failure": "logits.probe: max delta 0.25 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "7de62a6fb76c878f56afe951a7bbf4d77e8ee27f",
+    "target": "pegasus-xsum-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "WavLM",
+    "failure": "training.loss: max delta 0.0583 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "7de62a6fb76c878f56afe951a7bbf4d77e8ee27f",
+    "target": "wavlm-base-plus-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-table_transformer",
+    "failure": "training.loss: max delta 0.00256 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "7de62a6fb76c878f56afe951a7bbf4d77e8ee27f",
+    "target": "table_transformer-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42836396693,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42836396693",
+  "source": "replay",
+  "title": "[Model] LFM3 Family: LFM3-VL",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50402": {
+  "blocked": [],
+  "head": "c95a559e0b6d50e2e1dda2bd3af6c8ac5932ae58",
+  "labels": [],
+  "merge_commit": "9bb266d5e4646a4e37a91d83f33607858d5df8ff",
+  "merged_at": "2026-11-05T14:05:54Z",
+  "pr": "50402",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42038507600,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42038507600",
+  "source": "not-run",
+  "title": "Fix flaky `PocketTTSAudioTokenizerModelTest::test_batching_equivalence` on CPU",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50403": {
+  "blocked": [],
+  "head": "be6b95aaa01bf378e2d07005d58be6565b7c752f",
+  "labels": [],
+  "merge_commit": "f1eff6352f15b8ed1c22561f03656c2520997c55",
+  "merged_at": "2026-11-05T14:47:34Z",
+  "pr": "50403",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42045451946,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42045451946",
+  "source": "not-run",
+  "title": "Fix flaky `test_eager_matches_sdpa_inference_01_fp16_pad_left` for Owlv2 / OwlViT",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50404": {
+  "blocked": [],
+  "head": "19247c5fc25f723ee3d9d97b56c444d08320a100",
+  "labels": [],
+  "merge_commit": "2ffebc8c37cabaa20d1a310cb2952c9e35b96e83",
+  "merged_at": "2026-11-05T15:25:30Z",
+  "pr": "50404",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "9b11bb9dfd7edbb36ab428264b2f971e9cbcc4df",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "9b11bb9dfd7edbb36ab428264b2f971e9cbcc4df",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "9b11bb9dfd7edbb36ab428264b2f971e9cbcc4df",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42044208256,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42044208256",
+  "source": "replay",
+  "title": "[CB] Disable streams on MPS to fix continuous batching with torch 2.15",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50406": {
+  "blocked": [],
+  "head": "11a64c34dfde03ebce20d776b2f3107d311d4cef",
+  "labels": [],
+  "merge_commit": "92b21f8daa4b226821ab9aa5774f4b4887af0225",
+  "merged_at": "2026-11-06T16:33:18Z",
+  "pr": "50406",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42209567120,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42209567120",
+  "source": "replay",
+  "title": "[distributed - TPU] Fix tied-weight comparisons on TPUs when using TP",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50407": {
+  "blocked": [],
+  "head": "09ceb54b99bab8e4257e65a490c80d18b9d34a67",
+  "labels": [],
+  "merge_commit": "863d2620210d72fc0a9a03fdfe200bc9699154f6",
+  "merged_at": "2026-11-10T10:39:12Z",
+  "pr": "50407",
+  "red": [
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 0.736 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "15bca281180e1fe3367529e2b35fb29f8aa93fab",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 1.29 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "15bca281180e1fe3367529e2b35fb29f8aa93fab",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "default"
+   },
+   {
+    "contract": "BART",
+    "failure": "training.loss: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "15bca281180e1fe3367529e2b35fb29f8aa93fab",
+    "target": "bart-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BLIP2",
+    "failure": "training.loss: max delta 0.0209 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "15bca281180e1fe3367529e2b35fb29f8aa93fab",
+    "target": "blip2-opt-2.7b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BigBirdPegasus",
+    "failure": "training.loss: max delta 0.0625 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "15bca281180e1fe3367529e2b35fb29f8aa93fab",
+    "target": "bigbird-pegasus-large-arxiv-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Florence-2",
+    "failure": "training.loss: max delta 0.000637 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "15bca281180e1fe3367529e2b35fb29f8aa93fab",
+    "target": "Florence-2-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 11.6 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "15bca281180e1fe3367529e2b35fb29f8aa93fab",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Hubert",
+    "failure": "training.loss: max delta 32.4 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "15bca281180e1fe3367529e2b35fb29f8aa93fab",
+    "target": "hubert-large-ls960-ft-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MMGroundingDino",
+    "failure": "logits_probe: max delta 1.28 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "15bca281180e1fe3367529e2b35fb29f8aa93fab",
+    "target": "mm_grounding_dino_tiny_o365v1_goldg_v3det-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MarianMT",
+    "failure": "training.loss: max delta 0.0114 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "15bca281180e1fe3367529e2b35fb29f8aa93fab",
+    "target": "opus-mt-fr-en-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Mask2Former",
+    "failure": "training.loss: max delta 0.0548 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "15bca281180e1fe3367529e2b35fb29f8aa93fab",
+    "target": "mask2former-swin-tiny-coco-instance-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MiniMax-M3-MXFP8",
+    "failure": "logits_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "15bca281180e1fe3367529e2b35fb29f8aa93fab",
+    "target": "MiniMax-M3-MXFP8-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "OPT",
+    "failure": "training.loss: max delta 0.00194 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "15bca281180e1fe3367529e2b35fb29f8aa93fab",
+    "target": "opt-125m-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "15bca281180e1fe3367529e2b35fb29f8aa93fab",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Pegasus",
+    "failure": "logits.probe: max delta 0.25 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "15bca281180e1fe3367529e2b35fb29f8aa93fab",
+    "target": "pegasus-xsum-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "15bca281180e1fe3367529e2b35fb29f8aa93fab",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "WavLM",
+    "failure": "training.loss: max delta 0.0583 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "15bca281180e1fe3367529e2b35fb29f8aa93fab",
+    "target": "wavlm-base-plus-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-table_transformer",
+    "failure": "training.loss: max delta 0.00256 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "15bca281180e1fe3367529e2b35fb29f8aa93fab",
+    "target": "table_transformer-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42796983203,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42796983203",
+  "source": "replay",
+  "title": "QA / Add a mic runner in Make",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50408": {
+  "blocked": [],
+  "head": "c3278376a1f7da8efd5c0d750813abd5dc76d40b",
+  "labels": [],
+  "merge_commit": "f210a32fbf2e3213a143dad8c587935216088b38",
+  "merged_at": "2026-11-11T22:23:08Z",
+  "pr": "50408",
+  "red": [
+   {
+    "contract": "Canary-1B-v2",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "149677d4b35d4510de59b7b444acfa4f572c8d21",
+    "target": "canary-1b-v2-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Hubert",
+    "failure": "training.loss: max delta 32.4 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "149677d4b35d4510de59b7b444acfa4f572c8d21",
+    "target": "hubert-large-ls960-ft-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 43099790955,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43099790955",
+  "source": "replay",
+  "title": "\ud83d\udea8 Deprecate Wav2Vec2ProcessorWithLM and pyctcdecode/kenlm LM decoding",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50409": {
+  "blocked": [],
+  "head": "8f409039239a56306ac0dd0aebc5da27a9fd6f26",
+  "labels": [],
+  "merge_commit": "7b0fec70d8070d7d673d0edfd3c73259f0c05bc3",
+  "merged_at": "2026-11-05T15:45:11Z",
+  "pr": "50409",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42054236824,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42054236824",
+  "source": "not-run",
+  "title": "Fix flaky `T5GemmaModelTest::test_decoder_model_past_with_large_inputs`",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50410": {
+  "blocked": [],
+  "head": "e5c05ab6047e36cccdb1aa33ebb76b9453efea2b",
+  "labels": [],
+  "merge_commit": "084b1fd1b9983dca2ce12441aec4478371b9fe8f",
+  "merged_at": "2026-11-05T16:56:23Z",
+  "pr": "50410",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42060541688,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42060541688",
+  "source": "not-run",
+  "title": "Fix flaky `Gemma4Audio2TextModelTest::test_training_gradient_checkpointing_use_reentrant_true`",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50413": {
+  "blocked": [],
+  "head": "84bf6418ccb06bd2d94d1009e580ac128d8e97db",
+  "labels": [],
+  "merge_commit": "b6401d6605d16620e0f95b54fb2906f92de7e33f",
+  "merged_at": "2026-11-09T10:14:33Z",
+  "pr": "50413",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 42076036846,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42076036846",
+  "source": "replay",
+  "title": "Keep the GLM-5.3-Flash mHC base and scale in float32",
+  "verdict": "clear",
+  "version": 1
+ },
  "50415": {
   "blocked": [],
   "head": "5541c98321d0eff692c4002e9f943416f18e703f",
@@ -1135,6 +4460,110 @@
   "source": "replay",
   "title": "fix(attention): enforce packed isolation after blockwise overlays",
   "verdict": "clear",
+  "version": 1
+ },
+ "50417": {
+  "blocked": [],
+  "head": "37a88b00925e46dab01e44f699c4f72c3a56d0c8",
+  "labels": [],
+  "merge_commit": "9fa60240cda17fa4a4de951c6fe92c2bff5524a1",
+  "merged_at": "2026-11-06T09:48:12Z",
+  "pr": "50417",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 42092287017,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42092287017",
+  "source": "replay",
+  "title": "[VibeVoice] Avoid GPU syncs when removing audio padding",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50418": {
+  "blocked": [],
+  "head": "70c07197b0d0cad2b77d4a8ba4a302857061d494",
+  "labels": [],
+  "merge_commit": "cdb75de4adf71059c01f58dbd2d24d85084a397d",
+  "merged_at": "2026-11-05T18:32:33Z",
+  "pr": "50418",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 42083191026,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42083191026",
+  "source": "replay",
+  "title": "Fix Mistral Large 4 config",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50420": {
+  "blocked": [],
+  "head": "c7e4a62afcbc92679accf0ae175d5180c69d7511",
+  "labels": [],
+  "merge_commit": "9c5bdb1d6195b134dff8b4686901fcd9c5c6efa1",
+  "merged_at": "2026-11-09T13:11:13Z",
+  "pr": "50420",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 42095224609,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42095224609",
+  "source": "replay",
+  "title": "Doge: note that the MoE router split is not causal in a full forward pass",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50422": {
+  "blocked": [],
+  "head": "0a4eb8a5c4f4e3b37e6a518fee1305e864c24742",
+  "labels": [],
+  "merge_commit": "9ae35c181393d411bacbe7720b25d765ef1fbea3",
+  "merged_at": "2026-11-10T16:52:42Z",
+  "pr": "50422",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42109611385,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42109611385",
+  "source": "not-run",
+  "title": "CI: install OpenVINO and NNCF in the daily GPU image",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50423": {
+  "blocked": [],
+  "head": "b243d0d5b41ecaee9da31ecd02c74c700c1cf1c1",
+  "labels": [],
+  "merge_commit": "2a540d5c85dedeb205392496ec2c8e044b03b548",
+  "merged_at": "2026-11-10T16:59:50Z",
+  "pr": "50423",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42120123187,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42120123187",
+  "source": "not-run",
+  "title": "Tests: skip audio model tests when torchaudio or librosa is missing",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50427": {
+  "blocked": [],
+  "head": "f37a0fb591054580769b14c0ecd222dd787adf28",
+  "labels": [],
+  "merge_commit": "9f8c7c9409bc619a7bb091cbc56d348d61120db0",
+  "merged_at": "2026-11-10T01:49:52Z",
+  "pr": "50427",
+  "red": [
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42706314328,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42706314328",
+  "source": "replay",
+  "title": "Fix Qwen VL positions when a text cache is reused with a new image",
+  "verdict": "pending",
   "version": 1
  },
  "50428": {
@@ -1188,6 +4617,240 @@
   "verdict": "blocked",
   "version": 1
  },
+ "50430": {
+  "blocked": [],
+  "head": "2e570075e087766e7d8128b8cd33881a28c9ecdf",
+  "labels": [],
+  "merge_commit": "c6329dd080cb60758fb8eba34f748a7015b285cb",
+  "merged_at": "2026-11-06T11:53:16Z",
+  "pr": "50430",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 42206420180,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42206420180",
+  "source": "replay",
+  "title": "Fix!",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50431": {
+  "blocked": [],
+  "head": "7961375ea01cf8466b59a1e0314c4e1f517a65c4",
+  "labels": [
+   "for patch"
+  ],
+  "merge_commit": "316217d3273c70f0b02532e181ad7fd86b5bc1b5",
+  "merged_at": "2026-11-06T15:18:12Z",
+  "pr": "50431",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42235218798,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42235218798",
+  "source": "replay",
+  "title": "Harden our Jinja sandboxing",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50432": {
+  "blocked": [],
+  "head": "f88d29d9f6ab9a90e9b9be36a13741b807c8adef",
+  "labels": [],
+  "merge_commit": "d0efef1e61c43abbe901ffff5f4a428c8d5a8556",
+  "merged_at": "2026-11-06T12:03:29Z",
+  "pr": "50432",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42213816905,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42213816905",
+  "source": "not-run",
+  "title": "[`Colpali`] Fix offload tests",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50433": {
+  "blocked": [],
+  "head": "5862193381cd4521d53959640b93b992db2cd7da",
+  "labels": [],
+  "merge_commit": "b6bb35a3b21584468f7cb014501a4658662e6fc5",
+  "merged_at": "2026-11-06T14:33:06Z",
+  "pr": "50433",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42231810316,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42231810316",
+  "source": "replay",
+  "title": "[loading] Fix mismatched keys being silently ignored",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50435": {
+  "blocked": [],
+  "head": "9c4c2e9b9f4735252df1017b1648d9e04e4b2c34",
+  "labels": [],
+  "merge_commit": "96cff524c025955adafc0919066b9073490b0442",
+  "merged_at": "2026-11-06T14:08:15Z",
+  "pr": "50435",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42229622627,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42229622627",
+  "source": "not-run",
+  "title": "[Mistral Large 4] Fix flaky test_cached_decode_matches_cacheless",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50436": {
+  "blocked": [],
+  "head": "8b4f8408a60c8fd6a3b99bfc8de4aa24a85f5729",
+  "labels": [],
+  "merge_commit": "826edb70cd5b7b4e5b8b66f396f90b88898fdec1",
+  "merged_at": "2026-11-06T15:41:01Z",
+  "pr": "50436",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42244003337,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42244003337",
+  "source": "not-run",
+  "title": "vLLM CI: fix install and KV-cache memory, add failure report job",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50437": {
+  "blocked": [],
+  "head": "8847b621c1fb28875303ead7abeb483284e1ac38",
+  "labels": [],
+  "merge_commit": "04b0d424b93a18002c67836bbdb623c4b54fcb18",
+  "merged_at": "2026-11-06T17:23:48Z",
+  "pr": "50437",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42261181676,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42261181676",
+  "source": "not-run",
+  "title": "chore(ci): refresh workflow references (#50436)",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50444": {
+  "blocked": [],
+  "head": "37ea8626625dc3fdc7a2c782548550d6101567a5",
+  "labels": [],
+  "merge_commit": "7a0a6fd65de9297bcf53d091bdea1bbe2d942591",
+  "merged_at": "2026-11-09T13:59:25Z",
+  "pr": "50444",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42599986849,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42599986849",
+  "source": "not-run",
+  "title": "[FSDP tests] Fork CPU ranks from a forkserver instead of spawning them",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50446": {
+  "blocked": [],
+  "head": "d26bee6bba3f3b03db7d4dc156e345f7e55e8217",
+  "labels": [],
+  "merge_commit": "073a202c68492405e2f9ccbea5853a5394c8beb9",
+  "merged_at": "2026-11-06T18:27:26Z",
+  "pr": "50446",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "cf4c62496d3d46cbb8dea508a231143f45811772",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42270799078,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42270799078",
+  "source": "replay",
+  "title": "Fix duplicated docstring",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50450": {
+  "blocked": [],
+  "head": "5b4280b4808f1aad9c1245ac1695b9109bca647a",
+  "labels": [],
+  "merge_commit": "a065282cd638049aa1ba6efd465d097542a4f065",
+  "merged_at": "2026-11-11T18:27:53Z",
+  "pr": "50450",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 42920583655,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42920583655",
+  "source": "replay",
+  "title": "Fix Ministral3 and Mistral4 ignoring packed sequences under FlashAttention",
+  "verdict": "clear",
+  "version": 1
+ },
  "50455": {
   "blocked": [],
   "head": "9f321b44634596877bd19a530ac1f9dd7f7d2fa1",
@@ -1201,6 +4864,22 @@
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44019396951",
   "source": "replay",
   "title": "Fix first-subword label assignment in LayoutXLM, LayoutLMv2, and MarkupLM tokenizers",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50457": {
+  "blocked": [],
+  "head": "562926be46a7ba43fc8767dd9b24c4da4216f749",
+  "labels": [],
+  "merge_commit": "431e9e9df58ce80fcc7b83b112dcf42b3dcb6d5f",
+  "merged_at": "2026-11-09T02:49:56Z",
+  "pr": "50457",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 42343740443,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42343740443",
+  "source": "replay",
+  "title": "fix(gemma3n): Clamp the AltUp magnitudes instead of using a CPU epsilon tensor",
   "verdict": "clear",
   "version": 1
  },
@@ -1220,6 +4899,38 @@
   "verdict": "clear",
   "version": 1
  },
+ "50463": {
+  "blocked": [],
+  "head": "7ea9ddced79dfb806f3ddd3b1973a700512ae4d3",
+  "labels": [],
+  "merge_commit": "fee0f2b9bde46615295f21447597d9d298ac5aca",
+  "merged_at": "2026-11-10T15:56:43Z",
+  "pr": "50463",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 42831785318,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42831785318",
+  "source": "replay",
+  "title": "Avoid device -> host syncs in load_balancing_loss_func",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50467": {
+  "blocked": [],
+  "head": "d15c171167532f0dddf281f1664dd5e1858c0f2a",
+  "labels": [],
+  "merge_commit": "a6f5c8676b158c367dc3389f68dde7a97fb619d6",
+  "merged_at": "2026-11-07T20:57:01Z",
+  "pr": "50467",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42412753106,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42412753106",
+  "source": "not-run",
+  "title": "[Docker] Update Nvidia CI and Flash Attn CI images to torch 2.15 / cu132",
+  "verdict": "clear",
+  "version": 1
+ },
  "50469": {
   "blocked": [],
   "head": "1611121bcd7a0a17fde08d2715e3c1bff634e4ce",
@@ -1233,6 +4944,440 @@
   "run_url": "https://github.com/huggingface/transformers/actions/runs/43741062623",
   "source": "not-run",
   "title": "[serge] Fix 6 integration tests for model `bloom` failing with `output_mismatch` (list output differs (4), other (2))",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50475": {
+  "blocked": [],
+  "head": "17ee15a915ee03cc6d25fbeba8452966166fad42",
+  "labels": [],
+  "merge_commit": "147e66b34836d55637ddc9a936e51f5b77b12802",
+  "merged_at": "2026-11-09T18:41:58Z",
+  "pr": "50475",
+  "red": [
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 0.736 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 1.29 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "default"
+   },
+   {
+    "contract": "BART",
+    "failure": "training.loss: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "bart-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BLIP2",
+    "failure": "training.loss: max delta 0.0209 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "blip2-opt-2.7b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BigBirdPegasus",
+    "failure": "training.loss: max delta 0.0625 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "bigbird-pegasus-large-arxiv-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Florence-2",
+    "failure": "training.loss: max delta 0.000637 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "Florence-2-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Hubert",
+    "failure": "training.loss: max delta 32.4 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "hubert-large-ls960-ft-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MarianMT",
+    "failure": "training.loss: max delta 0.0114 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "opus-mt-fr-en-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Mask2Former",
+    "failure": "training.loss: max delta 0.0548 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "mask2former-swin-tiny-coco-instance-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "OPT",
+    "failure": "training.loss: max delta 0.00194 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "opt-125m-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Pegasus",
+    "failure": "logits.probe: max delta 0.25 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "pegasus-xsum-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "WavLM",
+    "failure": "training.loss: max delta 0.0583 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "wavlm-base-plus-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-table_transformer",
+    "failure": "training.loss: max delta 0.00256 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "table_transformer-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42661304068,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42661304068",
+  "source": "replay",
+  "title": "[Models] Fix torch.compile fullgraph training across models when layerdrop=0.0",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50478": {
+  "blocked": [],
+  "head": "08257db2e551dd0aaf2e1edee567a9bb51702551",
+  "labels": [],
+  "merge_commit": "0f7a8768733c448751f25abcb4b6b3ffef829cf5",
+  "merged_at": "2026-11-08T15:52:07Z",
+  "pr": "50478",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42493258369,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42493258369",
+  "source": "not-run",
+  "title": "[torch 2.15] Update integration test expected values for A10 (cuda 8.6)",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50479": {
+  "blocked": [],
+  "head": "1b9e8f0069885088c848954f067c97eee6ceb391",
+  "labels": [],
+  "merge_commit": "de35c2b1bff085ac422e45f2dc63618c7789fe52",
+  "merged_at": "2026-11-08T18:47:25Z",
+  "pr": "50479",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42510947381,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42510947381",
+  "source": "not-run",
+  "title": "[Mistral Large 4] Fix flaky test_left_padding_compatibility",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50480": {
+  "blocked": [],
+  "head": "eca938a96414176f978143f3de5a41f830c41529",
+  "labels": [],
+  "merge_commit": "b25568817a6cb458f6d8b180a32698c2ab11fd26",
+  "merged_at": "2026-11-09T11:21:23Z",
+  "pr": "50480",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42513902908,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42513902908",
+  "source": "replay",
+  "title": "Update the longrope inv_freq buffer in place",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50481": {
+  "blocked": [],
+  "head": "6e8d1e58b5dd3803b4716a934596a87fdba10d2d",
+  "labels": [],
+  "merge_commit": "f262a8cdaae8d78ab5bf57c6fa41a0db6ca01a34",
+  "merged_at": "2026-11-09T08:50:04Z",
+  "pr": "50481",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42515266835,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42515266835",
+  "source": "not-run",
+  "title": "[torch 2.15] Update qwen3_vl_moe FA2 integration test expected values",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50486": {
+  "blocked": [],
+  "head": "25a7bd3de8e0f5bfd51551ef923dc222d0134c03",
+  "labels": [],
+  "merge_commit": "800db143c605843edaa4fcec94a48fdc92f9c8e6",
+  "merged_at": "2026-11-10T01:54:15Z",
+  "pr": "50486",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42733187874,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42733187874",
+  "source": "not-run",
+  "title": "Tester always passes `per_layer_config`",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50487": {
+  "blocked": [],
+  "head": "f9b16aedab04f6c056aebaf83b8995f6a645fe95",
+  "labels": [],
+  "merge_commit": "34ac6a57bff04e1198ceb690e48a991c614ddc4a",
+  "merged_at": "2026-11-11T02:57:54Z",
+  "pr": "50487",
+  "red": [
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 0.736 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "14a9a18a1424332957f7b5326d19e7c2c7a75944",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 1.29 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "14a9a18a1424332957f7b5326d19e7c2c7a75944",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "default"
+   },
+   {
+    "contract": "BART",
+    "failure": "training.loss: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14a9a18a1424332957f7b5326d19e7c2c7a75944",
+    "target": "bart-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BLIP2",
+    "failure": "training.loss: max delta 0.0209 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14a9a18a1424332957f7b5326d19e7c2c7a75944",
+    "target": "blip2-opt-2.7b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BigBirdPegasus",
+    "failure": "training.loss: max delta 0.0625 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14a9a18a1424332957f7b5326d19e7c2c7a75944",
+    "target": "bigbird-pegasus-large-arxiv-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Florence-2",
+    "failure": "training.loss: max delta 0.000637 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14a9a18a1424332957f7b5326d19e7c2c7a75944",
+    "target": "Florence-2-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 11.6 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14a9a18a1424332957f7b5326d19e7c2c7a75944",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Hubert",
+    "failure": "training.loss: max delta 32.4 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14a9a18a1424332957f7b5326d19e7c2c7a75944",
+    "target": "hubert-large-ls960-ft-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MMGroundingDino",
+    "failure": "logits_probe: max delta 1.28 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14a9a18a1424332957f7b5326d19e7c2c7a75944",
+    "target": "mm_grounding_dino_tiny_o365v1_goldg_v3det-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MarianMT",
+    "failure": "training.loss: max delta 0.0114 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14a9a18a1424332957f7b5326d19e7c2c7a75944",
+    "target": "opus-mt-fr-en-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Mask2Former",
+    "failure": "training.loss: max delta 0.0548 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14a9a18a1424332957f7b5326d19e7c2c7a75944",
+    "target": "mask2former-swin-tiny-coco-instance-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MiniMax-M3-MXFP8",
+    "failure": "logits_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14a9a18a1424332957f7b5326d19e7c2c7a75944",
+    "target": "MiniMax-M3-MXFP8-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "OPT",
+    "failure": "training.loss: max delta 0.00194 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14a9a18a1424332957f7b5326d19e7c2c7a75944",
+    "target": "opt-125m-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14a9a18a1424332957f7b5326d19e7c2c7a75944",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Pegasus",
+    "failure": "logits.probe: max delta 0.25 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14a9a18a1424332957f7b5326d19e7c2c7a75944",
+    "target": "pegasus-xsum-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14a9a18a1424332957f7b5326d19e7c2c7a75944",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "WavLM",
+    "failure": "training.loss: max delta 0.0583 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14a9a18a1424332957f7b5326d19e7c2c7a75944",
+    "target": "wavlm-base-plus-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-table_transformer",
+    "failure": "training.loss: max delta 0.00256 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14a9a18a1424332957f7b5326d19e7c2c7a75944",
+    "target": "table_transformer-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42814326937,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42814326937",
+  "source": "replay",
+  "title": "Raise ValueError for out-of-range float images in convert_to_rgb",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50490": {
+  "blocked": [],
+  "head": "acf19c6b88c887d5ec844123a1e9a65e808b72d8",
+  "labels": [
+   "for patch"
+  ],
+  "merge_commit": "c527bbf6cf64b57fdbc1091ddde9110d3b716131",
+  "merged_at": "2026-11-12T07:34:50Z",
+  "pr": "50490",
+  "red": [
+   {
+    "contract": "Canary-1B-v2",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "149677d4b35d4510de59b7b444acfa4f572c8d21",
+    "target": "canary-1b-v2-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Hubert",
+    "failure": "training.loss: max delta 32.4 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "149677d4b35d4510de59b7b444acfa4f572c8d21",
+    "target": "hubert-large-ls960-ft-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 43169954775,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43169954775",
+  "source": "replay",
+  "title": " \u26a0\ufe0f i [`distributed`] Checkpoint the layer's `forward`, not `__call__`, so FSDP2 hooks stay outside the checkpoint",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50500": {
+  "blocked": [],
+  "head": "24daa0a9b58f6803b5b9a30db8802531fbf57bd8",
+  "labels": [],
+  "merge_commit": "4816e89f1abf9c8bd7778822eea872b83da256ec",
+  "merged_at": "2026-11-09T14:38:28Z",
+  "pr": "50500",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42635593826,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42635593826",
+  "source": "not-run",
+  "title": "Fix flaky `test_eager_matches_batched_and_grouped_inference` in fp16 / bf16",
   "verdict": "clear",
   "version": 1
  },
@@ -1288,6 +5433,102 @@
   "verdict": "clear",
   "version": 1
  },
+ "50509": {
+  "blocked": [],
+  "head": "bf39f8c2fb931e7b75ed0f3dfbc84177b0a2b21e",
+  "labels": [],
+  "merge_commit": "cfbca2d2fed28ccfcb6a33b2568a1f5112681a78",
+  "merged_at": "2026-11-09T15:07:42Z",
+  "pr": "50509",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42625268791,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42625268791",
+  "source": "replay",
+  "title": "[`kernels`] Bump min version",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50510": {
+  "blocked": [],
+  "head": "faaa35f190c1e5b80ccb3cf8c68160cea3e2e09c",
+  "labels": [],
+  "merge_commit": "70152d9081e56fbf159f6c88728da8895c5252a3",
+  "merged_at": "2026-11-09T14:07:52Z",
+  "pr": "50510",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42630172770,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42630172770",
+  "source": "not-run",
+  "title": "Fix flaky backend equivalence tests with Pillow 13 (follow-up of #50105)",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50513": {
+  "blocked": [],
+  "head": "b222f328ed8315c3e2dbaa552261e5e8640a6df2",
+  "labels": [],
+  "merge_commit": "fa5127c50098dfc8a8fd5421e61296ec31cbfad0",
+  "merged_at": "2026-11-09T17:08:29Z",
+  "pr": "50513",
+  "red": [
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42660081165,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42660081165",
+  "source": "replay",
+  "title": "[masking] Fix packed sequences for abitrary mask forms",
+  "verdict": "pending",
+  "version": 1
+ },
  "50523": {
   "blocked": [],
   "head": "825e4a43ffd43a7803f8305d0877220ea024c5f6",
@@ -1300,6 +5541,38 @@
   "run_url": "https://github.com/huggingface/transformers/actions/runs/45433539428",
   "source": "gate",
   "title": "\ud83d\udea8 [PR2] [Modular Cleanup] *Norm canonicals and renaming",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50528": {
+  "blocked": [],
+  "head": "e849031807f8118c80b22d387138f43d68a7618b",
+  "labels": [],
+  "merge_commit": "ca774efd8aec52f7430134a57b8146af5c24389f",
+  "merged_at": "2026-11-10T13:58:05Z",
+  "pr": "50528",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 42798220883,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42798220883",
+  "source": "replay",
+  "title": "Gemma4: fix static cache attending to empty cache slots in KV-shared layers at prefill",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50529": {
+  "blocked": [],
+  "head": "d8229f23ec617620173b369fcf1d0d23f61171c6",
+  "labels": [],
+  "merge_commit": "7ebb1328b39c3112827b9311fe26a6dd9dadf6af",
+  "merged_at": "2026-11-10T17:05:12Z",
+  "pr": "50529",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42696655681,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42696655681",
+  "source": "not-run",
+  "title": "[docs] Output capturing",
   "verdict": "clear",
   "version": 1
  },
@@ -1316,6 +5589,166 @@
   "run_url": "https://github.com/huggingface/transformers/actions/runs/43460991695",
   "source": "replay",
   "title": "fix(gemma4): Restore KV sharing for the Gemma 4 assistants and their targets",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50532": {
+  "blocked": [],
+  "head": "1fa78ef7ddcd72b5494bf213fbc474a2b1a81c2f",
+  "labels": [],
+  "merge_commit": "ed0ecab6c45112a0712b9481c67cf279d4a0f5cc",
+  "merged_at": "2026-11-10T14:12:35Z",
+  "pr": "50532",
+  "red": [
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 0.736 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 1.29 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "default"
+   },
+   {
+    "contract": "BART",
+    "failure": "training.loss: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "bart-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BLIP2",
+    "failure": "training.loss: max delta 0.0209 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "blip2-opt-2.7b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BigBirdPegasus",
+    "failure": "training.loss: max delta 0.0625 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "bigbird-pegasus-large-arxiv-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Florence-2",
+    "failure": "training.loss: max delta 0.000637 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "Florence-2-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 7.06 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Hubert",
+    "failure": "training.loss: max delta 32.4 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "hubert-large-ls960-ft-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MarianMT",
+    "failure": "training.loss: max delta 0.0114 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "opus-mt-fr-en-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Mask2Former",
+    "failure": "training.loss: max delta 0.0548 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "mask2former-swin-tiny-coco-instance-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "OPT",
+    "failure": "training.loss: max delta 0.00194 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "opt-125m-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Pegasus",
+    "failure": "logits.probe: max delta 0.25 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "pegasus-xsum-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "TimesFM",
+    "failure": "mean_predictions_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "timesfm-2.0-500m-pytorch-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "WavLM",
+    "failure": "training.loss: max delta 0.0583 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "wavlm-base-plus-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-table_transformer",
+    "failure": "training.loss: max delta 0.00256 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "table_transformer-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42692402574,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42692402574",
+  "source": "replay",
+  "title": "Speed up `bad_words_ids` and `sequence_bias` by matching multi-token sequences in one pass",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50533": {
+  "blocked": [],
+  "head": "4bb71b397a3ba6124d61b0e27fae0b7498ef70be",
+  "labels": [],
+  "merge_commit": "78a4dafe51c048b49652983b392d722fcefdcf09",
+  "merged_at": "2026-11-10T09:29:49Z",
+  "pr": "50533",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42701313467,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42701313467",
+  "source": "not-run",
+  "title": "Fix flaky `test_causal_lm_loss_honors_shift_labels`",
   "verdict": "clear",
   "version": 1
  },
@@ -1351,6 +5784,38 @@
   "verdict": "clear",
   "version": 1
  },
+ "50547": {
+  "blocked": [],
+  "head": "9fcf529284c171384143d1dce4ba94c83133bb88",
+  "labels": [],
+  "merge_commit": "335dd96bddf68a9f8758ec9dd7b5cdcae8133c94",
+  "merged_at": "2026-11-11T03:24:39Z",
+  "pr": "50547",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 42949246784,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42949246784",
+  "source": "replay",
+  "title": "Fix Step3.7 vision RoPE spatial W/H axis order",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50550": {
+  "blocked": [],
+  "head": "bed0dc4e01d5b9ff16421637c2a9044008b7de29",
+  "labels": [],
+  "merge_commit": "2ac1093a2dbf09c7c28d93c3915cbf09257bb19e",
+  "merged_at": "2026-11-10T17:05:29Z",
+  "pr": "50550",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42772994288,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42772994288",
+  "source": "not-run",
+  "title": "Bump doc-builder",
+  "verdict": "clear",
+  "version": 1
+ },
  "50555": {
   "blocked": [],
   "head": "fff62e3e2ad9b82c56908deff4df614242780921",
@@ -1364,6 +5829,386 @@
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44539249692",
   "source": "replay",
   "title": "Follow the SentencePiece model when converting a bare `tokenizer.model`",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50575": {
+  "blocked": [],
+  "head": "60cbcdd3a02c9c4e114f4362fc3daf62eff1598a",
+  "labels": [],
+  "merge_commit": "04935b4f86ece0b32581331c9f62363129ac9a65",
+  "merged_at": "2026-11-10T15:13:04Z",
+  "pr": "50575",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42834366969,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42834366969",
+  "source": "not-run",
+  "title": "Fix flaky ONNX export test for wav2vec2-style `ForPreTraining` models (argmax near-tie)",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50577": {
+  "blocked": [],
+  "head": "ba5a0d9c50b288c2b208e7a57531706c6f5fe4f3",
+  "labels": [],
+  "merge_commit": "07cc8e8c1b19160cfba6893ceb3099dc8f09d90c",
+  "merged_at": "2026-11-10T18:44:00Z",
+  "pr": "50577",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 42877262439,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42877262439",
+  "source": "replay",
+  "title": "Fix RecurrentGemma padded generation by declaring its `layer_types`",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50578": {
+  "blocked": [],
+  "head": "0e766e6406ca812a371d1436a56804cbd77d81cf",
+  "labels": [
+   "New model"
+  ],
+  "merge_commit": "1c76d04bd779c2724193c275c4150ef2c077670b",
+  "merged_at": "2026-11-12T15:44:48Z",
+  "pr": "50578",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43245815038,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43245815038",
+  "source": "replay",
+  "title": "Add InternLM3",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50579": {
+  "blocked": [],
+  "head": "a6269cb2bf89885ed0df305a4980a1d00320c768",
+  "labels": [
+   "New model"
+  ],
+  "merge_commit": "bb98e254894ee7d179714cecedf231accbc08057",
+  "merged_at": "2026-11-12T16:22:54Z",
+  "pr": "50579",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43252220735,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43252220735",
+  "source": "replay",
+  "title": "Add IQuestCoder",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50582": {
+  "blocked": [],
+  "head": "6dd2b1f44bd0cde38da410b4fc32a8d7365efd63",
+  "labels": [],
+  "merge_commit": "a72a1c385297bfaf1c8a07b5f4e689a315b90b77",
+  "merged_at": "2026-11-11T12:54:05Z",
+  "pr": "50582",
+  "red": [
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 0.736 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 1.29 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "default"
+   },
+   {
+    "contract": "BART",
+    "failure": "training.loss: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "bart-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BLIP2",
+    "failure": "training.loss: max delta 0.0209 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "blip2-opt-2.7b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BigBirdPegasus",
+    "failure": "training.loss: max delta 0.0625 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "bigbird-pegasus-large-arxiv-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 11.6 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Hubert",
+    "failure": "training.loss: max delta 32.4 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "hubert-large-ls960-ft-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MMGroundingDino",
+    "failure": "logits_probe: max delta 1.28 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "mm_grounding_dino_tiny_o365v1_goldg_v3det-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MarianMT",
+    "failure": "training.loss: max delta 0.0114 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "opus-mt-fr-en-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Mask2Former",
+    "failure": "training.loss: max delta 0.0548 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "mask2former-swin-tiny-coco-instance-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "OPT",
+    "failure": "training.loss: max delta 0.00194 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "opt-125m-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Pegasus",
+    "failure": "logits.probe: max delta 0.25 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "pegasus-xsum-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "WavLM",
+    "failure": "training.loss: max delta 0.0583 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "wavlm-base-plus-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-table_transformer",
+    "failure": "training.loss: max delta 0.00256 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "table_transformer-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42847895765,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42847895765",
+  "source": "replay",
+  "title": "fix(pipelines): respect problem_type in image and video classification pipelines",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50585": {
+  "blocked": [],
+  "head": "cef191a0cf41fac8cfa808cb05d06052e7de3fbf",
+  "labels": [],
+  "merge_commit": "6a9193deabe4ffcf495726897e3f2e651b8bbead",
+  "merged_at": "2026-11-13T13:19:02Z",
+  "pr": "50585",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43429447186,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43429447186",
+  "source": "replay",
+  "title": "\ud83d\udea8\ud83d\udea8 Rename `past_key_values`/`cache_params` to `cache`",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50587": {
+  "blocked": [],
+  "head": "d24b35030a038f6e3bfe0379a3156c60bdc0d557",
+  "labels": [],
+  "merge_commit": "f41b35a2eda56cde607d59735c152e9bb60b6dad",
+  "merged_at": "2026-11-10T17:29:32Z",
+  "pr": "50587",
+  "red": [
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 0.736 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 1.29 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "default"
+   },
+   {
+    "contract": "BART",
+    "failure": "training.loss: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "bart-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BLIP2",
+    "failure": "training.loss: max delta 0.0209 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "blip2-opt-2.7b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BigBirdPegasus",
+    "failure": "training.loss: max delta 0.0625 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "bigbird-pegasus-large-arxiv-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Canary-1B-v2",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "canary-1b-v2-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 11.6 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Hubert",
+    "failure": "training.loss: max delta 32.4 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "hubert-large-ls960-ft-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MMGroundingDino",
+    "failure": "logits_probe: max delta 1.28 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "mm_grounding_dino_tiny_o365v1_goldg_v3det-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MarianMT",
+    "failure": "training.loss: max delta 0.0114 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "opus-mt-fr-en-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Mask2Former",
+    "failure": "training.loss: max delta 0.0548 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "mask2former-swin-tiny-coco-instance-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "OPT",
+    "failure": "training.loss: max delta 0.00194 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "opt-125m-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Pegasus",
+    "failure": "logits.probe: max delta 0.25 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "pegasus-xsum-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "WavLM",
+    "failure": "training.loss: max delta 0.0583 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "wavlm-base-plus-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-table_transformer",
+    "failure": "training.loss: max delta 0.00256 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "table_transformer-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42860518695,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42860518695",
+  "source": "replay",
+  "title": "Revert \"Add `transcription` input arg to `apply_transcription_request ` (#49869)\"",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50591": {
+  "blocked": [],
+  "head": "9f8d27247426c8df56a9bdf5768a52106fc252f6",
+  "labels": [],
+  "merge_commit": "e5ce72afc2610b96cf9c9096f3c1a335a39d0776",
+  "merged_at": "2026-11-10T18:35:11Z",
+  "pr": "50591",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 42871850456,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42871850456",
+  "source": "not-run",
+  "title": "fixed typo in docs - changed \"a encoder-decoder\" to \"an encoder-decoder\"",
   "verdict": "clear",
   "version": 1
  },
@@ -1407,6 +6252,230 @@
   "source": "replay",
   "title": "Cast the unquantized weights of a dequantized FP8 checkpoint to the model's dtype",
   "verdict": "clear",
+  "version": 1
+ },
+ "50596": {
+  "blocked": [],
+  "head": "28266493464fb0998d396bc53a9b730180ebfabf",
+  "labels": [],
+  "merge_commit": "158f872ebb33a59f992f69a3abccc6472c548c3f",
+  "merged_at": "2026-11-12T13:40:53Z",
+  "pr": "50596",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43226423710,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43226423710",
+  "source": "replay",
+  "title": "Fix Mask2Former _init_weights to match Meta's original initialization",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50604": {
+  "blocked": [],
+  "head": "130c087f0a7dccb107f8715e497d7c07da746bf8",
+  "labels": [],
+  "merge_commit": "ebfd5e768ca7d5e5f17039e53b1245c56813aaab",
+  "merged_at": "2026-11-11T12:23:44Z",
+  "pr": "50604",
+  "red": [
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 0.736 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 1.29 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "default"
+   },
+   {
+    "contract": "BART",
+    "failure": "training.loss: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "bart-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BLIP2",
+    "failure": "training.loss: max delta 0.0209 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "blip2-opt-2.7b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BigBirdPegasus",
+    "failure": "training.loss: max delta 0.0625 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "bigbird-pegasus-large-arxiv-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Canary-1B-v2",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "canary-1b-v2-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "GroundingDINO",
+    "failure": "class_scores: max delta 11.6 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "grounding-dino-tiny-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Hubert",
+    "failure": "training.loss: max delta 32.4 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "hubert-large-ls960-ft-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MMGroundingDino",
+    "failure": "logits_probe: max delta 1.28 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "mm_grounding_dino_tiny_o365v1_goldg_v3det-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MarianMT",
+    "failure": "training.loss: max delta 0.0114 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "opus-mt-fr-en-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Mask2Former",
+    "failure": "training.loss: max delta 0.0548 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "mask2former-swin-tiny-coco-instance-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "OPT",
+    "failure": "training.loss: max delta 0.00194 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "opt-125m-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Pegasus",
+    "failure": "logits.probe: max delta 0.25 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "pegasus-xsum-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "WavLM",
+    "failure": "training.loss: max delta 0.0583 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "wavlm-base-plus-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-table_transformer",
+    "failure": "training.loss: max delta 0.00256 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "14f3ad02802018ab1671002906eac9e00bc71a55",
+    "target": "table_transformer-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 42980684913,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/42980684913",
+  "source": "replay",
+  "title": "Raise ValueError for empty conversation with continue_final_message in render_jinja_template",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50606": {
+  "blocked": [],
+  "head": "8067e7f3264addcd6c35758d6b64e83ee56c6660",
+  "labels": [],
+  "merge_commit": "e2427469e44082e1105593310dd09c3ed0e0e64a",
+  "merged_at": "2026-11-12T14:25:42Z",
+  "pr": "50606",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43077969586,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43077969586",
+  "source": "replay",
+  "title": "Fix get_json_schema truncating multi-line argument descriptions",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50610": {
+  "blocked": [],
+  "head": "a2e350bdc28c6f27fbe8db2073e1f83827edf0ed",
+  "labels": [],
+  "merge_commit": "880561aabb68be86c4c0f1c37ee5281e07ed1439",
+  "merged_at": "2026-11-12T10:50:13Z",
+  "pr": "50610",
+  "red": [
+   {
+    "contract": "Canary-1B-v2",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "af9b6ced123d1075d6a67b1080d5ee9852454ee5",
+    "target": "canary-1b-v2-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 43198657006,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43198657006",
+  "source": "replay",
+  "title": "\ud83d\udea8 Slim down `[audio]` to torchaudio + soundfile + soxr (drop librosa and phonemizer)",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50611": {
+  "blocked": [],
+  "head": "f6c09c11fb8b2b15140e40581924a76e9740b18d",
+  "labels": [],
+  "merge_commit": "5c239eec4ad2b39c10fb0e4af9aac29bb11bd89d",
+  "merged_at": "2026-11-12T12:20:54Z",
+  "pr": "50611",
+  "red": [
+   {
+    "contract": "Canary-1B-v2",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "579cbed280acf006cebd66797b053c714954565f",
+    "target": "canary-1b-v2-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 43018039661,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43018039661",
+  "source": "replay",
+  "title": "Avoid mutating input examples in DataCollatorForMultipleChoice",
+  "verdict": "pending",
   "version": 1
  },
  "50615": {
@@ -1505,6 +6574,54 @@
   "verdict": "clear",
   "version": 1
  },
+ "50630": {
+  "blocked": [],
+  "head": "53f6860db57a263ee422f93d7b599a06bb2d3fb8",
+  "labels": [],
+  "merge_commit": "f61791ca0c02f3e377d57ee198df7a6530ab85f8",
+  "merged_at": "2026-11-12T10:41:24Z",
+  "pr": "50630",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 43109737110,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43109737110",
+  "source": "not-run",
+  "title": "[`GptOss`] Fix the kernels autodispatch test",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50631": {
+  "blocked": [],
+  "head": "691a309c4562046a58796adde535448bca436894",
+  "labels": [],
+  "merge_commit": "06edaf111f8937028d83ab80f41bf0b044609b75",
+  "merged_at": "2026-11-12T11:06:35Z",
+  "pr": "50631",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 43203212249,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43203212249",
+  "source": "not-run",
+  "title": "[`Offloading`] Fix tests for some models",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50632": {
+  "blocked": [],
+  "head": "6a6aed55396260bba96bfdd4d50af9aa5b278ecf",
+  "labels": [],
+  "merge_commit": "1ee78b6e3811292e83f08f596905b13f681924ad",
+  "merged_at": "2026-11-12T11:01:34Z",
+  "pr": "50632",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43202640639,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43202640639",
+  "source": "replay",
+  "title": "[`FA`] Fix FA tests for unique models",
+  "verdict": "clear",
+  "version": 1
+ },
  "50633": {
   "blocked": [],
   "head": "a97f9cb7971df4c4c731140ed8ed2ab18fc33b54",
@@ -1553,6 +6670,22 @@
   "verdict": "clear",
   "version": 1
  },
+ "50644": {
+  "blocked": [],
+  "head": "b02498409d751507ce62d67aa6f94594b18d6e9d",
+  "labels": [],
+  "merge_commit": "0923f62cfff5ba37fa9dbdcca2522e795dae11c8",
+  "merged_at": "2026-11-12T14:35:33Z",
+  "pr": "50644",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43233905898,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43233905898",
+  "source": "replay",
+  "title": "Load the released A.X-K1 checkpoints without unexpected or missing keys",
+  "verdict": "clear",
+  "version": 1
+ },
  "50645": {
   "blocked": [],
   "head": "1c6982022317052289663a61c2a5fd2c087ec55a",
@@ -1566,6 +6699,62 @@
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44011136339",
   "source": "replay",
   "title": "Fix `pipeline` ignoring `device_map` when it targets a single device",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50646": {
+  "blocked": [],
+  "head": "ebc674b0c97826895db6485ebb9ac9f14040743f",
+  "labels": [],
+  "merge_commit": "fde3a3519c8d789e44f0d27082019b54463c528c",
+  "merged_at": "2026-11-12T11:12:50Z",
+  "pr": "50646",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43200975497,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43200975497",
+  "source": "replay",
+  "title": "Fix XVector outputs of the wav2vec2 family when the TDNN layers are offloaded",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50651": {
+  "blocked": [],
+  "head": "07e0c16365a3c9db6c6e55b95c27a983c07c4c97",
+  "labels": [],
+  "merge_commit": "3d284ce0c13a60aa07deaf5fe3bde3c6cca36d97",
+  "merged_at": "2026-11-12T12:54:17Z",
+  "pr": "50651",
+  "red": [
+   {
+    "contract": "Canary-1B-v2",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "3ce33a010bacee3ff9c5f2036b88db25944a4373",
+    "target": "canary-1b-v2-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 43203324115,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43203324115",
+  "source": "replay",
+  "title": "Fix `HfArgumentParser` on Python 3.15",
+  "verdict": "pending",
+  "version": 1
+ },
+ "50652": {
+  "blocked": [],
+  "head": "ccf7cc5a6340fd102116c29cff71144cd361e994",
+  "labels": [],
+  "merge_commit": "40a1fb90aa125da3c9f90dc293cc1a951b9ca9e2",
+  "merged_at": "2026-11-12T13:10:06Z",
+  "pr": "50652",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43220112957,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43220112957",
+  "source": "replay",
+  "title": "QA:  Make `make run-mic` easier to read and to target",
   "verdict": "clear",
   "version": 1
  },
@@ -1721,6 +6910,22 @@
   "verdict": "clear",
   "version": 1
  },
+ "50681": {
+  "blocked": [],
+  "head": "9c0b38349351553f4e5c65e3ccac2db937ce5cef",
+  "labels": [],
+  "merge_commit": "dc3bd32b76d358b567117a363fcb48cc862ebda2",
+  "merged_at": "2026-11-12T21:01:32Z",
+  "pr": "50681",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43301409168,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43301409168",
+  "source": "replay",
+  "title": "[`Gemma4`] Fix FA slicing",
+  "verdict": "clear",
+  "version": 1
+ },
  "50682": {
   "blocked": [],
   "head": "a87413448f8138738277f8c8b020bcb9c3555221",
@@ -1803,6 +7008,22 @@
   "verdict": "clear",
   "version": 1
  },
+ "50690": {
+  "blocked": [],
+  "head": "fb89325ca84299f31a7cc043e64430128319fa2e",
+  "labels": [],
+  "merge_commit": "41f9d3992023970fb5a463e70d56232506c80fbc",
+  "merged_at": "2026-11-13T09:22:38Z",
+  "pr": "50690",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43395091077,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43395091077",
+  "source": "replay",
+  "title": "CI pass, CI no pass?",
+  "verdict": "clear",
+  "version": 1
+ },
  "50693": {
   "blocked": [],
   "head": "8c8d51f99f531d022d0d599146a5d97ba8a6524d",
@@ -1880,6 +7101,38 @@
   "run_url": "https://github.com/huggingface/transformers/actions/runs/43414944724",
   "source": "not-run",
   "title": "docs: updates to security policy in SECURITY.md",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50712": {
+  "blocked": [],
+  "head": "87306728c84c109759c1d8e2de1eeba7a6cc6224",
+  "labels": [],
+  "merge_commit": "e18fcb1b8e2b8f597269887ccf4c5fea1e8f493d",
+  "merged_at": "2026-11-13T13:54:18Z",
+  "pr": "50712",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43414979988,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43414979988",
+  "source": "replay",
+  "title": "Check Flash Attention support before loading a Flash Attention kernel from the Hub",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50714": {
+  "blocked": [],
+  "head": "59b75e2bb12c21c2c4818535fae66c04d3219edf",
+  "labels": [],
+  "merge_commit": "c748111b3bb4d97df452f0fe60e63c480beb6fe6",
+  "merged_at": "2026-11-13T12:10:11Z",
+  "pr": "50714",
+  "reason": "no red case",
+  "red": [],
+  "run_id": 43419335553,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/43419335553",
+  "source": "replay",
+  "title": "Fix the MPS RMSNorm hub kernel repo id",
   "verdict": "clear",
   "version": 1
  },
@@ -6161,6 +11414,54 @@
   "run_url": "https://github.com/huggingface/transformers/actions/runs/45861622641",
   "source": "not-run",
   "title": "Make `add_dates.py --check-only` fail instead of silently passing in CI",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51343": {
+  "blocked": [],
+  "head": "5f6a2542b0cb107082e61d93e665809fed5ea224",
+  "labels": [],
+  "merge_commit": "cc53373bcb4676afa72e5e388c7863e2bf3b3127",
+  "merged_at": "2026-11-26T18:58:56Z",
+  "pr": "51343",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45879426652,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45879426652",
+  "source": "not-run",
+  "title": "[`GPT Oss`] Fix test",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51344": {
+  "blocked": [],
+  "head": "745fa557d26d3e46809498e5962252f4bae61a49",
+  "labels": [],
+  "merge_commit": "8e094f8970a60ca83052e2c199783b247b8fc13e",
+  "merged_at": "2026-11-26T19:12:49Z",
+  "pr": "51344",
+  "red": [
+   {
+    "contract": "Mistral3",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "Ministral-3-3B-Instruct-2512-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-mistral3",
+    "failure": "predicted_tokens: [']', ']'] != ['', '']",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "mistral3-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45881915415,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45881915415",
+  "source": "gate",
+  "title": "[`Kernels`] Fix logger location after version bump",
   "verdict": "clear",
   "version": 1
  }

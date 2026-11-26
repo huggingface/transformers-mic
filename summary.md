@@ -317,9 +317,9 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 
 Every PR merged into main 2026-10-27 → 2026-11-26, put through the contracts gate as it was when it merged: **blocked** when a case is red with the PR and green on the commit it merged onto. From 2026-11-23 that is PR CI's own verdict (shadow mode, `contracts-gate.json`); before, the red cases of the PR's last run are replayed on its squash commit and on that commit's parent.
 
-- Merged PRs looked up: **300**; with a red MIC case in their last run: 60.
+- Merged PRs looked up: **449**; with a red MIC case in their last run: 121.
 - Would have been blocked: **4** — real 4, false positive 0, to review 0.
-- Waiting for the replay: 0; could not be measured: 1.
+- Waiting for the replay: 57; could not be measured: 1.
 
 | flag | meaning |
 |---|---|
@@ -364,7 +364,7 @@ Proposed bar for rule B (constants `DECISION` in `experiments/impact.py`):
 
 ## 2. False alarms
 
-- PR failure groups: 5157 — infra 141 (3%), pre-existing 2330 (45%), systemic (same case on ≥3 PRs that day) 11 (0%), PR-only 2675 (52%).
+- PR failure groups: 5169 — infra 141 (3%), pre-existing 2342 (45%), systemic (same case on ≥3 PRs that day) 14 (0%), PR-only 2672 (52%).
 - PRs that saw a MIC failure: 306; of those, only failures they did not cause: **247 (81%)**.
 - PR-only cases that recovered with no push (flaky/environment): 18; merged and main stayed green for 3 days: 22; labelled `false-alarm`/`flake`: 0.
 
