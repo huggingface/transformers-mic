@@ -23,6 +23,7 @@ Results layout (the impact-results branch):
     candidates.json      PR-only failures, followed until they resolve
     gpu-ci.json          the daily GPU CI's bisected regressions, each with what MIC did on the culprit PR
     replays.json         each regression replayed with the model's contracts: caught, missed, already-red, ...
+    merged-gate.json     every PR merged in the last 30 days through the contracts gate: blocked or not, and after
     model-types.json     cache: fixture repo -> model_type
     baselines.jsonl      one line per fleet update: baselines changed/added/removed
     labels.jsonl         human verdicts: {"key", "verdict", "note", "by"}
@@ -68,7 +69,8 @@ INFRA = {"Setup error", "Wrong hardware", "Missing baseline"}
 SYSTEMIC_PRS = 3
 VERDICTS = {"real-bug", "intended", "false-alarm", "flake", "call-not-covered", "needs-real-weights"}
 DAILY_CI = "hf-internal-testing/transformers_daily_ci"
-MIC_JOB = "pr-ci / fast-integration / run"
+# MIC's PR CI job: "run" until transformers-ci #399 (2026-11-20) added the vLLM job beside it.
+MIC_JOBS = ("pr-ci / fast-integration / transformers", "pr-ci / fast-integration / run")
 # How long a merged PR's case is watched on main before it counts as "main ok".
 MAIN_WATCH_DAYS = 3
 # Proposed bar for "block merges when MIC is red" after a month of data (rule B below).
@@ -424,7 +426,7 @@ def mic_job(head_sha):
     for run in (r for r in runs if r.get("name") == "PR CI"):
         jobs = github(f"/repos/{TRANSFORMERS}/actions/runs/{run['id']}/jobs?per_page=100")["jobs"]
         for job in jobs:
-            if job["name"] == MIC_JOB and job.get("conclusion") not in (None, "skipped", "cancelled"):
+            if job["name"] in MIC_JOBS and job.get("conclusion") not in (None, "skipped", "cancelled"):
                 return job["conclusion"]
     return None
 
@@ -1576,6 +1578,374 @@ def replay_rows(gpu_ci, replays):
     return rows
 
 
+# ---------------------------------------------------------------- merged PRs through the gate
+
+# Every PR merged into Transformers main in the last MERGED_DAYS, put through the contracts gate as it
+# stood when it merged (transformers-ci src/transformersci/contracts/gate.py): blocked when a case is
+# red with the PR and green on the commit it merged onto. From GATE_SINCE PR CI writes the verdict
+# (contracts-gate.json, shadow mode); before that, the red cases of the PR's last run are replayed on
+# its squash commit and on that commit's parent, with backfill.py --plan like the regressions.
+GATE_SINCE = "2026-11-23"  # transformers-ci #401
+MERGED_DAYS = 30
+MERGED_PER_RUN = 150  # merged PRs looked up per run (three GitHub calls each); the rest wait for the next run
+MERGED_REPLAYS_PER_RUN = 40
+MERGED_VERSION = 1  # bump when a rule below changes: every merged PR is looked up again
+GATE_REPLAY_LIMIT = 40  # gate.py REPLAY_LIMIT: red cases past it warn
+GATE_LABELS = ("mic-intended-change", "New model")  # gate.py: a PR with one of these only warns
+KNOWN_PASS = "listed in known_failures but passes"
+REBASELINE_DAYS = 7  # a blocked contract re-recorded this soon after the merge: the change was intended
+MERGED_FLAGS = (
+    (
+        "real",
+        "the PR changed what the contract checks: re-recorded after the merge (intended), or red on main after it",
+    ),
+    (
+        "false-positive",
+        f"main stayed green on the blocked cases for {MAIN_WATCH_DAYS} days after the merge, or labelled false-alarm/flake",
+    ),
+    ("to-review", f"merged less than {MAIN_WATCH_DAYS} days ago: main is still being watched"),
+)
+
+
+def merged_prs(since):
+    """PRs merged into Transformers main on or after `since` (ISO date), most recently updated first."""
+    found, page = [], 1
+    while True:
+        batch = github(
+            f"/repos/{TRANSFORMERS}/pulls?state=closed&base=main&sort=updated&direction=desc&per_page=100&page={page}"
+        )
+        for pr in batch:
+            if pr.get("merged_at") and pr["merged_at"][:10] >= since:
+                found.append(
+                    {
+                        "pr": str(pr["number"]),
+                        "title": (pr.get("title") or "")[:200],
+                        "merged_at": pr["merged_at"],
+                        "head": pr["head"]["sha"],
+                        "merge_commit": pr.get("merge_commit_sha"),
+                        "labels": sorted(label["name"] for label in pr.get("labels") or []),
+                    }
+                )
+        # Sorted by last update, which is never before the merge: past `since`, nothing merged later.
+        if len(batch) < 100 or batch[-1]["updated_at"][:10] < since:
+            return found
+        page += 1
+
+
+def merge_run(head, merged_at):
+    """The last PR CI run on the merged head that started before the merge, or None."""
+    runs = github(f"/repos/{TRANSFORMERS}/actions/runs?head_sha={head}&event=pull_request&per_page=30")
+    runs = [r for r in runs["workflow_runs"] if r.get("name") == "PR CI" and r["created_at"] <= merged_at]
+    return max(runs, key=lambda r: r["created_at"], default=None)
+
+
+def download_contracts(run_id, folder):
+    """Unzip the run's newest `contracts` artifact (MIC's PR CI job) into folder; False when it has none."""
+    import io
+    import subprocess
+    import zipfile
+
+    artifacts = github(f"/repos/{TRANSFORMERS}/actions/runs/{run_id}/artifacts?name=contracts&per_page=100")
+    artifacts = [a for a in artifacts["artifacts"] if not a.get("expired")]
+    if not artifacts:
+        return False
+    newest = max(artifacts, key=lambda a: a["created_at"])
+    # gh follows the redirect to the blob store without sending it the token.
+    data = subprocess.run(
+        ["gh", "api", f"/repos/{TRANSFORMERS}/actions/artifacts/{newest['id']}/zip"], check=True, capture_output=True
+    ).stdout
+    zipfile.ZipFile(io.BytesIO(data)).extractall(folder)
+    return True
+
+
+def gate_case(record):
+    """A red case as the gate names it: the contract's name, not its repository."""
+    failures = record.get("failures") or [record.get("failure") or ""]
+    first = failures[0] if isinstance(failures, list) and failures else str(failures)
+    return {
+        "fleet": record.get("fleet") or "control",
+        "variant": record.get("variant") or "default",
+        "contract": record.get("contract_name") or record.get("contract"),
+        "target": record["target"],
+        "failure": (first or "").splitlines()[0][:200] if first else "",
+        "fleet_revision": record.get("fleet_revision"),
+    }
+
+
+def gate_red(record):
+    """gate.py to_replay: red, and neither a known failure that now passes nor a setup error."""
+    failures = record.get("failures") or []
+    if record.get("status") not in RED:
+        return False
+    if failures and all(str(f).startswith(KNOWN_PASS) for f in failures):
+        return False
+    return not any(p in " ".join(map(str, failures)) for p in SETUP_ERRORS)
+
+
+def read_contracts(folder):
+    """(source, red cases, blocked cases or None) from a `contracts` artifact. None: the run had no gate."""
+    folder = Path(folder)
+    red = sorted(
+        (gate_case(r) for r in read_jsonl(folder / "results.jsonl") if gate_red(r)),
+        key=lambda c: (c["fleet"], c["variant"], c["contract"] or "", c["target"]),
+    )
+    gate = folder / "contracts-gate.json"
+    if not gate.exists():
+        return "replay", red, None
+    decisions = json.loads(gate.read_text()).get("decisions") or []
+    return (
+        "gate",
+        red,
+        [
+            {**gate_case(d), "failure": (d.get("failure") or "")[:200]}
+            for d in decisions
+            if d.get("verdict") == "blocked"
+        ],
+    )
+
+
+def look_up_merged(merged, today, limit=MERGED_PER_RUN, download=download_contracts):
+    """Add the PRs merged in the window that `merged` does not hold yet; returns how many were looked up.
+
+    verdict: blocked | clear | pending (red cases waiting for the replay) | unmeasured.
+    """
+    since = (today - dt.timedelta(days=MERGED_DAYS)).isoformat()
+    looked = 0
+    for info in merged_prs(since):
+        if merged.get(info["pr"], {}).get("version") == MERGED_VERSION:
+            continue
+        if looked >= limit:
+            break
+        looked += 1
+        entry = {**info, "version": MERGED_VERSION, "red": [], "blocked": []}
+        try:
+            run = merge_run(info["head"], info["merged_at"])
+            if run is None:
+                entry.update(source="no-pr-ci", verdict="clear", reason="no PR CI run on the merged head")
+            else:
+                entry.update(run_id=run["id"], run_url=run["html_url"])
+                with tempfile.TemporaryDirectory() as folder:
+                    if not download(run["id"], folder):
+                        entry.update(source="not-run", verdict="clear", reason="MIC selected no contract")
+                    else:
+                        source, red, blocked = read_contracts(folder)
+                        entry.update(source=source, red=red)
+                        if blocked is not None:
+                            entry.update(blocked=blocked, verdict="blocked" if blocked else "clear")
+                        elif not red:
+                            entry.update(verdict="clear", reason="no red case")
+                        elif set(info["labels"]) & set(GATE_LABELS):
+                            label = sorted(set(info["labels"]) & set(GATE_LABELS))[0]
+                            entry.update(verdict="clear", reason=f"`{label}`: red cases only warn")
+                        elif not info.get("merge_commit"):
+                            entry.update(verdict="unmeasured", reason="no merge commit to replay")
+                        else:
+                            entry.update(verdict="pending")
+        except Exception as error:  # one PR must not stop the day: it is looked up again next run
+            print(f"merged PR #{info['pr']}: {error}", file=sys.stderr)
+            continue
+        merged[info["pr"]] = entry
+    return looked
+
+
+def merged_replay_plan(merged, limit=MERGED_REPLAYS_PER_RUN):
+    """Plan entries (backfill.py --plan) for merged PRs waiting for the replay: their red cases, on
+    the squash commit (`bad`) and the main commit it merged onto (`parent`), fleets as PR CI had them."""
+    plan, keys = [], set()
+    for pr, entry in sorted(merged.items(), key=lambda kv: kv[1]["merged_at"], reverse=True):
+        if entry.get("verdict") != "pending":
+            continue
+        if len(keys) >= limit:
+            break
+        by_fleet = defaultdict(list)
+        for case in entry["red"][:GATE_REPLAY_LIMIT]:
+            by_fleet[case["fleet"], case["fleet_revision"]].append(case)
+        for (fleet_name, revision), cases in sorted(by_fleet.items(), key=lambda kv: (kv[0][0], kv[0][1] or "")):
+            plan.append(
+                {
+                    "key": f"merged#{pr}",
+                    "fleet": fleet_name,
+                    "fleet_revision": revision,
+                    "variants": sorted({c["variant"] for c in cases}),
+                    "contracts": sorted({c["contract"] for c in cases}),
+                    "parent": f"{entry['merge_commit']}^",
+                    "bad": entry["merge_commit"],
+                }
+            )
+        keys.add(pr)
+    return plan
+
+
+def merged_replay_verdicts(records, merged, run_url=""):
+    """Fold the replays of merged PRs (keys merged#<pr>) into `merged`, the gate's way: a red case
+    blocks when it is red on the squash commit and green on its parent. Returns the PRs decided."""
+    sides = defaultdict(lambda: defaultdict(dict))
+    broken = defaultdict(list)
+    for record in records:
+        meta = record["replay"]
+        pr = meta["key"].removeprefix("merged#")
+        if record.get("target") == "*" or record.get("contract") == "*":
+            broken[pr] += [str(f) for f in record.get("failures") or []]
+            continue
+        sides[pr][meta["side"]][record["target"], record.get("variant") or "default"] = record
+    decided = []
+    for pr in sorted(set(sides) | set(broken)):
+        entry = merged.get(pr)
+        if not entry or entry.get("verdict") != "pending":
+            continue
+        entry["replay_run"] = run_url
+        decided.append(pr)
+        if broken[pr]:
+            entry.update(verdict="unmeasured", reason=(broken[pr][0] or "a side did not run").splitlines()[-1][:200])
+            continue
+        blocked, notes = [], Counter()
+        for case in entry["red"][:GATE_REPLAY_LIMIT]:
+            key = (case["target"], case["variant"])
+            bad, base = sides[pr]["bad"].get(key), sides[pr]["parent"].get(key)
+            if bad is None or base is None or any(r["status"] in RED and not gate_red(r) for r in (bad, base)):
+                notes["not measured"] += 1  # a side did not report it, or a setup error
+            elif base["status"] in RED:
+                notes["red on the base too"] += 1
+            elif bad["status"] not in RED:
+                notes["green when replayed"] += 1
+            else:
+                blocked.append({**case, "failure": gate_case(bad)["failure"] or case["failure"]})
+        reason = "; ".join(f"{n} {what}" for what, n in sorted(notes.items()))
+        verdict = "blocked" if blocked else "unmeasured" if notes["not measured"] else "clear"
+        entry.update(blocked=blocked, verdict=verdict, reason=reason)
+    return decided
+
+
+def settle_merged(merged, baselines, today_day, main_rows=None):
+    """What happened after each blocked merge: the blocked contracts re-recorded (`rebaselined`), and
+    main on the blocked cases (`main_after`: fail, or ok once MAIN_WATCH_DAYS passed green)."""
+    waiting = [e for e in merged.values() if e.get("verdict") == "blocked" and e.get("main_after") is None]
+    if not waiting:
+        return
+    if main_rows is None:
+        main_rows = mic_rows("main", 30, "model")[0]
+    first_day = today_day - 30 + 1
+    failed = defaultdict(set)  # (target, variant) -> days main failed it
+    for row in main_rows:
+        for offset, bucket in enumerate(row.get("daily") or []):
+            if bucket.get("fail"):
+                failed[row.get("target"), row.get("variant") or "default"].add(first_day + offset)
+    for entry in waiting:
+        merged_day = int(stamp(entry["merged_at"]) // 86400)
+        merged_date = entry["merged_at"][:10]
+        until = (dt.date.fromisoformat(merged_date) + dt.timedelta(days=REBASELINE_DAYS)).isoformat()
+        names = {c["contract"] for c in entry["blocked"]}
+        entry["rebaselined"] = sorted(
+            {
+                r["date"]
+                for r in baselines
+                if r.get("contract") in names
+                and r.get("changed")
+                and not r.get("fixture_rebuilt")
+                and merged_date <= r["date"] <= until
+            }
+        )
+        cases = {(c["target"], c["variant"]) for c in entry["blocked"]}
+        if any(merged_day <= day <= merged_day + MAIN_WATCH_DAYS for case in cases for day in failed[case]):
+            entry["main_after"] = "fail"
+        elif today_day - merged_day >= MAIN_WATCH_DAYS:
+            entry["main_after"] = "ok"
+
+
+def merged_flag(entry, label=None):
+    """(flag, why) of a blocked merge: real | false-positive | to-review. A label in labels.jsonl wins."""
+    if label in ("real-bug", "intended"):
+        return "real", f"labelled {label}"
+    if label in ("false-alarm", "flake"):
+        return "false-positive", f"labelled {label}"
+    if entry.get("rebaselined"):
+        return "real", f"intended change: re-recorded on {entry['rebaselined'][0]}"
+    if entry.get("main_after") == "fail":
+        return "real", "red on main after the merge"
+    if entry.get("main_after") == "ok":
+        return "false-positive", f"main stayed green for {MAIN_WATCH_DAYS} days after the merge"
+    return "to-review", "watching main"
+
+
+def merged_rows(merged, labels, first, last):
+    """Every blocked merge in the window, newest first, with its flag."""
+    rows = []
+    for pr, entry in sorted(merged.items(), key=lambda kv: kv[1]["merged_at"], reverse=True):
+        if entry.get("verdict") != "blocked" or not first <= entry["merged_at"][:10] <= last:
+            continue
+        flag, why = merged_flag(entry, labels.get(f"merged#{pr}", {}).get("verdict"))
+        rows.append(
+            {
+                "pr": pr,
+                "title": entry.get("title", ""),
+                "merged": entry["merged_at"][:10],
+                "source": entry.get("source"),
+                "cases": [f"{c['contract']}/{c['target']} [{c['variant']}]" for c in entry["blocked"]],
+                "failure": next((c["failure"] for c in entry["blocked"] if c.get("failure")), ""),
+                "run": entry.get("run_url", ""),
+                "flag": flag,
+                "why": why,
+            }
+        )
+    return rows
+
+
+def merged_lines(merged, labels, today):
+    """The report's section, and the overview's counts and rows."""
+    first = (today - dt.timedelta(days=MERGED_DAYS)).isoformat()
+    last = today.isoformat()
+    window = {pr: e for pr, e in merged.items() if first <= e["merged_at"][:10] <= last}
+    verdicts = Counter(e.get("verdict") for e in window.values())
+    rows = merged_rows(merged, labels, first, last)
+    flags = Counter(r["flag"] for r in rows)
+    with_red = sum(1 for e in window.values() if e.get("red"))
+    lines = [
+        f"## Merged PRs through the gate (last {MERGED_DAYS} days)",
+        "",
+        f"Every PR merged into main {first} → {last}, put through the contracts gate as it was when it merged: "
+        "**blocked** when a case is red with the PR and green on the commit it merged onto. From "
+        f"{GATE_SINCE} that is PR CI's own verdict (shadow mode, `contracts-gate.json`); before, the red cases of "
+        "the PR's last run are replayed on its squash commit and on that commit's parent.",
+        "",
+        f"- Merged PRs looked up: **{len(window)}**; with a red MIC case in their last run: {with_red}.",
+        f"- Would have been blocked: **{verdicts['blocked']}** — real {flags['real']}, false positive "
+        f"{flags['false-positive']}, to review {flags['to-review']}.",
+        f"- Waiting for the replay: {verdicts['pending']}; could not be measured: {verdicts['unmeasured']}.",
+        "",
+        "| flag | meaning |",
+        "|---|---|",
+        *[f"| {name} | {meaning} |" for name, meaning in MERGED_FLAGS],
+        "",
+    ]
+    if rows:
+        lines += ["| merged | PR | blocked cases | source | flag | why |", "|---|---|---|---|---|---|"]
+        for r in rows:
+            title = r["title"][:60].replace("|", "/")
+            cases = ", ".join(r["cases"][:4]) + (f" (+{len(r['cases']) - 4})" if len(r["cases"]) > 4 else "")
+            lines.append(
+                f"| {r['merged']} | [#{r['pr']}](https://github.com/{TRANSFORMERS}/pull/{r['pr']}) {title} | "
+                f"{cases} | [{r['source']}]({r['run']}) | {r['flag']} | {r['why']} |"
+            )
+        lines += [
+            "",
+            'Set the flag by hand with a line in `labels.jsonl`: `{"key": "merged#<pr>", "verdict": '
+            '"real-bug|intended|false-alarm|flake", "note": "...", "by": "<login>"}`.',
+        ]
+    else:
+        lines.append("- No merge would have been blocked.")
+    overview = {
+        "window": [first, last],
+        "merged": len(window),
+        "with_red": with_red,
+        "blocked": verdicts["blocked"],
+        "pending": verdicts["pending"],
+        "unmeasured": verdicts["unmeasured"],
+        "flags": {name: flags[name] for name, _ in MERGED_FLAGS},
+        "rows": rows,
+    }
+    return lines + [""], overview
+
+
 def summarize(results):
     results = Path(results)
     candidates = load(results / "candidates.json", {})
@@ -1605,6 +1975,7 @@ def summarize(results):
     decision, checks = replay_blocking(results, day_rows, candidates, labels, baselines, first, last)
     replays = with_replay_labels(load(results / "replays.json", {}), read_jsonl(results / "labels.jsonl"))
     replayed, replay_counts = replay_lines(gpu_ci, replays)
+    merged_section, merged_overview = merged_lines(load(results / "merged-gate.json", {}), labels, dt.date.today())
     lines = [
         "# MIC impact on Transformers PRs",
         "",
@@ -1617,6 +1988,7 @@ def summarize(results):
         "`labels.jsonl`.",
         "",
         *replayed,
+        *merged_section,
         *decision,
         "## 1. Real bugs caught on PRs",
         "",
@@ -1786,6 +2158,7 @@ def summarize(results):
                 "awaiting_verdict": len(missed),
             },
             "false_alarms": {"prs_with_failure": len(prs_failing), "prs_not_their_fault": len(prs_noise_only)},
+            "merged_gate": merged_overview,
             "block_merges": {"ready": all(ok for _, ok in checks), "unmet": [text for text, ok in checks if not ok]},
             "next": [
                 next_target(s, live_draft(s, drafts), s["model"] in batch) for s in suggestions["new"][:NEXT_TARGETS]
@@ -1986,6 +2359,13 @@ def main():
         "--replay-limit", type=int, default=REPLAYS_PER_RUN, metavar="N", help="regressions to plan at most"
     )
     parser.add_argument(
+        "--merged-limit",
+        type=int,
+        default=MERGED_PER_RUN,
+        metavar="N",
+        help=f"merged PRs of the last {MERGED_DAYS} days to put through the gate at most (0: none)",
+    )
+    parser.add_argument(
         "--backfill-days",
         type=int,
         default=0,
@@ -2004,6 +2384,11 @@ def main():
         else:
             today_day = int(time.time() // 86400)
             collect(args.results, args.days, today_day, fleet.download)
+            if args.merged_limit:
+                merged = load(args.results / "merged-gate.json", {})
+                looked = look_up_merged(merged, dt.date.today(), args.merged_limit)
+                write(args.results / "merged-gate.json", merged)
+                print(f"merged PRs: {looked} looked up", file=sys.stderr)
             if args.draft:
                 now = dt.datetime.now(dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
                 dispatch_drafts(load(args.results / "suggestions.json", {"new": []}), drafts, args.draft, now)
@@ -2015,12 +2400,24 @@ def main():
         from transformers_mic import fleet
 
         plan = write_replay_plan(args.results, args.replay_plan, fleet.download, limit=args.replay_limit)
+        plan += merged_replay_plan(load(args.results / "merged-gate.json", {}))
+        write(args.replay_plan / "plan.json", plan)
         print(f"replay plan: {len(plan)} entries", file=sys.stderr)
     if args.replay_results:
-        replays = replay_verdicts(
-            read_jsonl(args.replay_results), load(args.results / "replays.json", {}), args.replay_run
-        )
+        records = read_jsonl(args.replay_results)
+        mine = [r for r in records if r["replay"]["key"].startswith("merged#")]
+        theirs = [r for r in records if not r["replay"]["key"].startswith("merged#")]
+        replays = replay_verdicts(theirs, load(args.results / "replays.json", {}), args.replay_run)
         write(args.results / "replays.json", replays)
+        merged = load(args.results / "merged-gate.json", {})
+        merged_replay_verdicts(mine, merged, args.replay_run)
+        write(args.results / "merged-gate.json", merged)
+    if not args.refresh:
+        merged = load(args.results / "merged-gate.json", {})
+        baselines = [r for r in read_jsonl(args.results / "baselines.jsonl") if r.get("contract")]
+        settle_merged(merged, baselines, int(time.time() // 86400))
+        if merged:
+            write(args.results / "merged-gate.json", merged)
     with tempfile.TemporaryDirectory() as shrink:
         if args.publish_space:
             drafts = load(args.results / "drafts.json", {})
