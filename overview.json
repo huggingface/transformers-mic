@@ -19,14 +19,14 @@
   "prs_with_failure": 306
  },
  "merged_gate": {
-  "blocked": 4,
+  "blocked": 6,
   "flags": {
    "false-positive": 0,
-   "real": 4,
+   "real": 6,
    "to-review": 0
   },
   "merged": 449,
-  "pending": 57,
+  "pending": 17,
   "rows": [
    {
     "cases": [
@@ -81,9 +81,35 @@
     "source": "replay",
     "title": "Move GPT-J and CodeGen onto the attention interface with modular files",
     "why": "red on main after the merge"
+   },
+   {
+    "cases": [
+     "Canary-1B-v2/canary-1b-v2-mic [bfloat16]"
+    ],
+    "failure": "Traceback (most recent call last):",
+    "flag": "real",
+    "merged": "2026-11-10",
+    "pr": "50587",
+    "run": "https://github.com/huggingface/transformers/actions/runs/42860518695",
+    "source": "replay",
+    "title": "Revert \"Add `transcription` input arg to `apply_transcription_request ` (#49869)\"",
+    "why": "red on main after the merge"
+   },
+   {
+    "cases": [
+     "MMGroundingDino/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic [bfloat16]"
+    ],
+    "failure": "logits_probe: max delta 1.28 over tolerance",
+    "flag": "real",
+    "merged": "2026-11-10",
+    "pr": "49886",
+    "run": "https://github.com/huggingface/transformers/actions/runs/42738314842",
+    "source": "replay",
+    "title": "[serge] Fix 8 integration tests for model `grounding_dino` failing with `output_mismatch` (tensor values differ (6), oth",
+    "why": "red on main after the merge"
    }
   ],
-  "unmeasured": 1,
+  "unmeasured": 20,
   "window": [
    "2026-10-27",
    "2026-11-26"

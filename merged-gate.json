@@ -106,6 +106,7 @@
   "merge_commit": "6488cabb56d4bffe6d19ece65e8bd794c642ef93",
   "merged_at": "2026-11-10T15:59:21Z",
   "pr": "44642",
+  "reason": "1 green when replayed; 14 red on the base too",
   "red": [
    {
     "contract": "Wav2Vec2",
@@ -228,11 +229,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42679417947,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42679417947",
   "source": "replay",
   "title": "Clarify that causal LM labels are shifted internally",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "45422": {
@@ -242,6 +244,7 @@
   "merge_commit": "86fdf1595ab819a7baa1d06f2902d00aa94feeb6",
   "merged_at": "2026-11-09T22:01:15Z",
   "pr": "45422",
+  "reason": "86fdf1595ab819a7baa1d06f2902d00aa94feeb6^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
   "red": [
    {
     "contract": "Wav2Vec2",
@@ -372,11 +375,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42701513132,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42701513132",
   "source": "replay",
   "title": ":rotating_light: Drop None-valued keys from messages in `apply_chat_template`",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "47616": {
@@ -615,6 +619,7 @@
   "merge_commit": "3c3ff8c108203713da84efcbeab81f1db2fdf1b5",
   "merged_at": "2026-11-09T16:17:37Z",
   "pr": "49089",
+  "reason": "3c3ff8c108203713da84efcbeab81f1db2fdf1b5^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -641,11 +646,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42641201821,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42641201821",
   "source": "replay",
   "title": "\ud83d\udea8 Move processing defaults to class",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "49141": {
@@ -830,6 +836,7 @@
   "merge_commit": "b7394bc75356d58b8c52aa472d523a258e10afee",
   "merged_at": "2026-11-12T10:33:38Z",
   "pr": "49429",
+  "reason": "1 red on the base too",
   "red": [
    {
     "contract": "Canary-1B-v2",
@@ -840,11 +847,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 43196195057,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/43196195057",
   "source": "replay",
   "title": "Expert-parallel implementations for `ep_dispatch_experts`: all-reduce at inference, all-to-all in training",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "49435": {
@@ -982,6 +990,7 @@
   "merge_commit": "c5bd76ec51a70c303be110cc04be3d78cf755299",
   "merged_at": "2026-11-06T14:11:08Z",
   "pr": "49594",
+  "reason": "c5bd76ec51a70c303be110cc04be3d78cf755299^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -1008,11 +1017,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42218666215,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42218666215",
   "source": "replay",
   "title": "Capture only the projected hidden states in VLM feature extraction",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "49606": {
@@ -1230,6 +1240,7 @@
   "merge_commit": "cea2686204c192ec7773823f8d017116fca30931",
   "merged_at": "2026-11-06T15:17:57Z",
   "pr": "49773",
+  "reason": "cea2686204c192ec7773823f8d017116fca30931^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
   "red": [
    {
     "contract": "Florence-2",
@@ -1248,11 +1259,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 40496182951,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/40496182951",
   "source": "replay",
   "title": "Weight loading: conversion ops declare many-to-many support, and four small loader fixes",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "49783": {
@@ -1368,12 +1380,24 @@
   "version": 1
  },
  "49886": {
-  "blocked": [],
+  "blocked": [
+   {
+    "contract": "MMGroundingDino",
+    "failure": "logits_probe: max delta 1.28 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "mm_grounding_dino_tiny_o365v1_goldg_v3det-mic",
+    "variant": "bfloat16"
+   }
+  ],
   "head": "7f097da854c4b2ad327ebd1de1b35ffc6d86222e",
   "labels": [],
+  "main_after": "fail",
   "merge_commit": "9e7f5cd1870a3c69166ce1abd18ff8bd74ed45a8",
   "merged_at": "2026-11-10T09:40:44Z",
   "pr": "49886",
+  "reason": "1 red on the base too",
+  "rebaselined": [],
   "red": [
    {
     "contract": "GroundingDINO",
@@ -1392,11 +1416,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42738314842,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42738314842",
   "source": "replay",
   "title": "[serge] Fix 8 integration tests for model `grounding_dino` failing with `output_mismatch` (tensor values differ (6), oth",
-  "verdict": "pending",
+  "verdict": "blocked",
   "version": 1
  },
  "49909": {
@@ -1422,6 +1447,7 @@
   "merge_commit": "e4e4e98845fcf92e2b75f709f356fbc838b55d11",
   "merged_at": "2026-11-11T09:38:20Z",
   "pr": "49910",
+  "reason": "16 red on the base too",
   "red": [
    {
     "contract": "Wav2Vec2",
@@ -1552,11 +1578,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42984050577,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42984050577",
   "source": "replay",
   "title": "fix some error in quantization xpu ci test",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "49914": {
@@ -1750,6 +1777,7 @@
   "merge_commit": "28ec08c4699e521aaecab9265af861077f670ac0",
   "merged_at": "2026-11-11T15:04:01Z",
   "pr": "50029",
+  "reason": "14 red on the base too",
   "red": [
    {
     "contract": "Wav2Vec2",
@@ -1864,11 +1892,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 43029301452,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/43029301452",
   "source": "replay",
   "title": "\ud83d\udea8 Exporters: `ExportedModel`, Hub save/load, one backend registry",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50032": {
@@ -1878,6 +1907,7 @@
   "merge_commit": "57583c28b04ddc6b6c1e9390ad86181d1033c660",
   "merged_at": "2026-11-12T09:13:59Z",
   "pr": "50032",
+  "reason": "1 red on the base too",
   "red": [
    {
     "contract": "Canary-1B-v2",
@@ -1888,11 +1918,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 43186230372,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/43186230372",
   "source": "replay",
   "title": "Exporters: run exported models on their backend's runtime (`ModelRunner`)",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50054": {
@@ -1961,6 +1992,7 @@
   "merge_commit": "9082094f27625f46d9f2b25309779051ccd38ab2",
   "merged_at": "2026-11-11T11:57:09Z",
   "pr": "50071",
+  "reason": "15 red on the base too",
   "red": [
    {
     "contract": "Wav2Vec2",
@@ -2083,11 +2115,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42848113820,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42848113820",
   "source": "replay",
   "title": "QA: move to transformers-mlinter 0.1.6",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50077": {
@@ -2452,6 +2485,7 @@
   "merge_commit": "a4f362742ba4846882fd0bc9636461ef3a5e3f34",
   "merged_at": "2026-11-10T09:21:07Z",
   "pr": "50265",
+  "reason": "3 red on the base too",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -2478,11 +2512,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42667044258,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42667044258",
   "source": "replay",
   "title": "[Fix] Prevent duplicate weight renaming on save_pretrained for ALMs",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50271": {
@@ -2524,6 +2559,7 @@
   "merge_commit": "fc6cdba12ac34295cad8831890ba0008e1eb2527",
   "merged_at": "2026-11-10T06:10:00Z",
   "pr": "50276",
+  "reason": "fc6cdba12ac34295cad8831890ba0008e1eb2527^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -2550,11 +2586,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42663144325,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42663144325",
   "source": "replay",
   "title": "[docs] Agent-specific content",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "50279": {
@@ -2936,6 +2973,7 @@
   "merge_commit": "5b99c07c047ae2af90bafe66bb91650e5b06989f",
   "merged_at": "2026-11-12T08:36:03Z",
   "pr": "50309",
+  "reason": "12 red on the base too",
   "red": [
    {
     "contract": "Wav2Vec2",
@@ -3034,11 +3072,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 43054630316,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/43054630316",
   "source": "replay",
   "title": "Exporters: ONNX Runtime fusions at export time (`OnnxConfig(ort_fusions=...)`)",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50311": {
@@ -3048,6 +3087,7 @@
   "merge_commit": "72b487d158496eb0b67977aa1ce93a67e685c777",
   "merged_at": "2026-11-06T10:31:08Z",
   "pr": "50311",
+  "reason": "72b487d158496eb0b67977aa1ce93a67e685c777^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -3074,11 +3114,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42110195490,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42110195490",
   "source": "replay",
   "title": "OpenVINO exporter: let OpenVINO fuse attention, RoPE, the KV cache and compressed matmuls",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "50317": {
@@ -3221,6 +3262,7 @@
   "merge_commit": "e20e0787c9863f4b78781e603adfe6648415a854",
   "merged_at": "2026-11-10T02:37:28Z",
   "pr": "50346",
+  "reason": "e20e0787c9863f4b78781e603adfe6648415a854^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
   "red": [
    {
     "contract": "Wav2Vec2",
@@ -3359,11 +3401,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42737287203,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42737287203",
   "source": "replay",
   "title": "Fix MiniMax-M3-VL packed vision attention isolation",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "50348": {
@@ -3533,6 +3576,7 @@
   "merge_commit": "0f53828e83f2212060233d2ea552cc76617b8712",
   "merged_at": "2026-11-06T20:11:55Z",
   "pr": "50364",
+  "reason": "0f53828e83f2212060233d2ea552cc76617b8712^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -3559,11 +3603,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42110269434,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42110269434",
   "source": "replay",
   "title": "Clarify warmup_steps error message to warmup_steps >= 0",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "50366": {
@@ -3589,6 +3634,7 @@
   "merge_commit": "acf8004ec93d3d3195ea4945c693ff1c8959374e",
   "merged_at": "2026-11-12T17:35:03Z",
   "pr": "50368",
+  "reason": "20 green when replayed",
   "red": [
    {
     "contract": "Wav2Vec2",
@@ -3751,11 +3797,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 41940882889,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/41940882889",
   "source": "replay",
   "title": "Restore the root-level PEFT adapter when resuming from a checkpoint w\u2026",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50374": {
@@ -3858,6 +3905,7 @@
   "merge_commit": "de058827e088cd96e4bba93232a8794a8a51d278",
   "merged_at": "2026-11-09T13:24:35Z",
   "pr": "50385",
+  "reason": "de058827e088cd96e4bba93232a8794a8a51d278^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -3884,11 +3932,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42038919470,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42038919470",
   "source": "replay",
   "title": "fix: forward tool schemas to response parsers",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "50388": {
@@ -3930,6 +3979,7 @@
   "merge_commit": "75ca973171ee654e288efc16dd9faf4f3051c014",
   "merged_at": "2026-11-09T10:55:35Z",
   "pr": "50391",
+  "reason": "75ca973171ee654e288efc16dd9faf4f3051c014^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -3948,11 +3998,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42014232182,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42014232182",
   "source": "replay",
   "title": "Retry the attention kernel load after a failed `lazy_import_flash_attention`",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "50392": {
@@ -4173,6 +4224,7 @@
   "merge_commit": "92b21f8daa4b226821ab9aa5774f4b4887af0225",
   "merged_at": "2026-11-06T16:33:18Z",
   "pr": "50406",
+  "reason": "92b21f8daa4b226821ab9aa5774f4b4887af0225^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -4199,11 +4251,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42209567120,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42209567120",
   "source": "replay",
   "title": "[distributed - TPU] Fix tied-weight comparisons on TPUs when using TP",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "50407": {
@@ -4213,6 +4266,7 @@
   "merge_commit": "863d2620210d72fc0a9a03fdfe200bc9699154f6",
   "merged_at": "2026-11-10T10:39:12Z",
   "pr": "50407",
+  "reason": "18 red on the base too",
   "red": [
    {
     "contract": "Wav2Vec2",
@@ -4359,11 +4413,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42796983203,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42796983203",
   "source": "replay",
   "title": "QA / Add a mic runner in Make",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50408": {
@@ -4373,6 +4428,7 @@
   "merge_commit": "f210a32fbf2e3213a143dad8c587935216088b38",
   "merged_at": "2026-11-11T22:23:08Z",
   "pr": "50408",
+  "reason": "2 red on the base too",
   "red": [
    {
     "contract": "Canary-1B-v2",
@@ -4391,11 +4447,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 43099790955,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/43099790955",
   "source": "replay",
   "title": "\ud83d\udea8 Deprecate Wav2Vec2ProcessorWithLM and pyctcdecode/kenlm LM decoding",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50409": {
@@ -4549,6 +4606,7 @@
   "merge_commit": "9f8c7c9409bc619a7bb091cbc56d348d61120db0",
   "merged_at": "2026-11-10T01:49:52Z",
   "pr": "50427",
+  "reason": "9f8c7c9409bc619a7bb091cbc56d348d61120db0^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
   "red": [
    {
     "contract": "PaddleOCR-VL",
@@ -4559,11 +4617,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42706314328,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42706314328",
   "source": "replay",
   "title": "Fix Qwen VL positions when a text cache is reused with a new image",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "50428": {
@@ -4642,6 +4701,7 @@
   "merge_commit": "316217d3273c70f0b02532e181ad7fd86b5bc1b5",
   "merged_at": "2026-11-06T15:18:12Z",
   "pr": "50431",
+  "reason": "316217d3273c70f0b02532e181ad7fd86b5bc1b5^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -4668,11 +4728,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42235218798,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42235218798",
   "source": "replay",
   "title": "Harden our Jinja sandboxing",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "50432": {
@@ -4698,6 +4759,7 @@
   "merge_commit": "b6bb35a3b21584468f7cb014501a4658662e6fc5",
   "merged_at": "2026-11-06T14:33:06Z",
   "pr": "50433",
+  "reason": "b6bb35a3b21584468f7cb014501a4658662e6fc5^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -4724,11 +4786,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42231810316,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42231810316",
   "source": "replay",
   "title": "[loading] Fix mismatched keys being silently ignored",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "50435": {
@@ -4802,6 +4865,7 @@
   "merge_commit": "073a202c68492405e2f9ccbea5853a5394c8beb9",
   "merged_at": "2026-11-06T18:27:26Z",
   "pr": "50446",
+  "reason": "073a202c68492405e2f9ccbea5853a5394c8beb9^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -4828,11 +4892,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42270799078,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42270799078",
   "source": "replay",
   "title": "Fix duplicated docstring",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "50450": {
@@ -4954,6 +5019,7 @@
   "merge_commit": "147e66b34836d55637ddc9a936e51f5b77b12802",
   "merged_at": "2026-11-09T18:41:58Z",
   "pr": "50475",
+  "reason": "147e66b34836d55637ddc9a936e51f5b77b12802^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
   "red": [
    {
     "contract": "Wav2Vec2",
@@ -5060,11 +5126,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42661304068,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42661304068",
   "source": "replay",
   "title": "[Models] Fix torch.compile fullgraph training across models when layerdrop=0.0",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "50478": {
@@ -5106,6 +5173,7 @@
   "merge_commit": "b25568817a6cb458f6d8b180a32698c2ab11fd26",
   "merged_at": "2026-11-09T11:21:23Z",
   "pr": "50480",
+  "reason": "b25568817a6cb458f6d8b180a32698c2ab11fd26^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -5132,11 +5200,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42513902908,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42513902908",
   "source": "replay",
   "title": "Update the longrope inv_freq buffer in place",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "50481": {
@@ -5178,6 +5247,7 @@
   "merge_commit": "34ac6a57bff04e1198ceb690e48a991c614ddc4a",
   "merged_at": "2026-11-11T02:57:54Z",
   "pr": "50487",
+  "reason": "18 red on the base too",
   "red": [
    {
     "contract": "Wav2Vec2",
@@ -5324,11 +5394,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42814326937,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42814326937",
   "source": "replay",
   "title": "Raise ValueError for out-of-range float images in convert_to_rgb",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50490": {
@@ -5340,6 +5411,7 @@
   "merge_commit": "c527bbf6cf64b57fdbc1091ddde9110d3b716131",
   "merged_at": "2026-11-12T07:34:50Z",
   "pr": "50490",
+  "reason": "2 red on the base too",
   "red": [
    {
     "contract": "Canary-1B-v2",
@@ -5358,11 +5430,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 43169954775,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/43169954775",
   "source": "replay",
   "title": " \u26a0\ufe0f i [`distributed`] Checkpoint the layer's `forward`, not `__call__`, so FSDP2 hooks stay outside the checkpoint",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50500": {
@@ -5440,6 +5513,7 @@
   "merge_commit": "cfbca2d2fed28ccfcb6a33b2568a1f5112681a78",
   "merged_at": "2026-11-09T15:07:42Z",
   "pr": "50509",
+  "reason": "cfbca2d2fed28ccfcb6a33b2568a1f5112681a78^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -5466,11 +5540,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42625268791,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42625268791",
   "source": "replay",
   "title": "[`kernels`] Bump min version",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "50510": {
@@ -5496,6 +5571,7 @@
   "merge_commit": "fa5127c50098dfc8a8fd5421e61296ec31cbfad0",
   "merged_at": "2026-11-09T17:08:29Z",
   "pr": "50513",
+  "reason": "fa5127c50098dfc8a8fd5421e61296ec31cbfad0^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -5522,11 +5598,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42660081165,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42660081165",
   "source": "replay",
   "title": "[masking] Fix packed sequences for abitrary mask forms",
-  "verdict": "pending",
+  "verdict": "unmeasured",
   "version": 1
  },
  "50523": {
@@ -5599,6 +5676,7 @@
   "merge_commit": "ed0ecab6c45112a0712b9481c67cf279d4a0f5cc",
   "merged_at": "2026-11-10T14:12:35Z",
   "pr": "50532",
+  "reason": "16 red on the base too",
   "red": [
    {
     "contract": "Wav2Vec2",
@@ -5729,11 +5807,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42692402574,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42692402574",
   "source": "replay",
   "title": "Speed up `bad_words_ids` and `sequence_bias` by matching multi-token sequences in one pass",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50533": {
@@ -5907,6 +5986,7 @@
   "merge_commit": "a72a1c385297bfaf1c8a07b5f4e689a315b90b77",
   "merged_at": "2026-11-11T12:54:05Z",
   "pr": "50582",
+  "reason": "15 red on the base too",
   "red": [
    {
     "contract": "Wav2Vec2",
@@ -6029,11 +6109,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42847895765,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42847895765",
   "source": "replay",
   "title": "fix(pipelines): respect problem_type in image and video classification pipelines",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50585": {
@@ -6053,12 +6134,24 @@
   "version": 1
  },
  "50587": {
-  "blocked": [],
+  "blocked": [
+   {
+    "contract": "Canary-1B-v2",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "a1f147ba8cdefa6baa8c33578235425f484f4581",
+    "target": "canary-1b-v2-mic",
+    "variant": "bfloat16"
+   }
+  ],
   "head": "d24b35030a038f6e3bfe0379a3156c60bdc0d557",
   "labels": [],
+  "main_after": "fail",
   "merge_commit": "f41b35a2eda56cde607d59735c152e9bb60b6dad",
   "merged_at": "2026-11-10T17:29:32Z",
   "pr": "50587",
+  "reason": "15 red on the base too",
+  "rebaselined": [],
   "red": [
    {
     "contract": "Wav2Vec2",
@@ -6189,11 +6282,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42860518695,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42860518695",
   "source": "replay",
   "title": "Revert \"Add `transcription` input arg to `apply_transcription_request ` (#49869)\"",
-  "verdict": "pending",
+  "verdict": "blocked",
   "version": 1
  },
  "50591": {
@@ -6277,6 +6371,7 @@
   "merge_commit": "ebfd5e768ca7d5e5f17039e53b1245c56813aaab",
   "merged_at": "2026-11-11T12:23:44Z",
   "pr": "50604",
+  "reason": "16 red on the base too",
   "red": [
    {
     "contract": "Wav2Vec2",
@@ -6407,11 +6502,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 42980684913,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42980684913",
   "source": "replay",
   "title": "Raise ValueError for empty conversation with continue_final_message in render_jinja_template",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50606": {
@@ -6437,6 +6533,7 @@
   "merge_commit": "880561aabb68be86c4c0f1c37ee5281e07ed1439",
   "merged_at": "2026-11-12T10:50:13Z",
   "pr": "50610",
+  "reason": "1 red on the base too",
   "red": [
    {
     "contract": "Canary-1B-v2",
@@ -6447,11 +6544,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 43198657006,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/43198657006",
   "source": "replay",
   "title": "\ud83d\udea8 Slim down `[audio]` to torchaudio + soundfile + soxr (drop librosa and phonemizer)",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50611": {
@@ -6461,6 +6559,7 @@
   "merge_commit": "5c239eec4ad2b39c10fb0e4af9aac29bb11bd89d",
   "merged_at": "2026-11-12T12:20:54Z",
   "pr": "50611",
+  "reason": "1 red on the base too",
   "red": [
    {
     "contract": "Canary-1B-v2",
@@ -6471,11 +6570,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 43018039661,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/43018039661",
   "source": "replay",
   "title": "Avoid mutating input examples in DataCollatorForMultipleChoice",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50615": {
@@ -6725,6 +6825,7 @@
   "merge_commit": "3d284ce0c13a60aa07deaf5fe3bde3c6cca36d97",
   "merged_at": "2026-11-12T12:54:17Z",
   "pr": "50651",
+  "reason": "1 red on the base too",
   "red": [
    {
     "contract": "Canary-1B-v2",
@@ -6735,11 +6836,12 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
   "run_id": 43203324115,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/43203324115",
   "source": "replay",
   "title": "Fix `HfArgumentParser` on Python 3.15",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50652": {
