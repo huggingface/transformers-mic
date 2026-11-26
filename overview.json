@@ -801,14 +801,14 @@
   },
   {
    "date": "2026-11-08",
-   "detail": "",
+   "detail": "339 commits in range; ",
    "integration": true,
    "job": "",
    "model": "llava",
    "pr": null,
-   "run": "",
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/45788297989",
    "tests": 3,
-   "verdict": "pending"
+   "verdict": "missed"
   },
   {
    "date": "2026-11-08",
@@ -3446,14 +3446,14 @@
   "broken": 0,
   "caught": 10,
   "duplicate": 5,
-  "missed": 1,
+  "missed": 2,
   "model-added": 4,
   "no-code-change": 1,
   "not-a-regression": 6,
   "not-covered": 268,
   "not-reproduced": 9,
   "out-of-scope": 212,
-  "pending": 1,
+  "pending": 0,
   "unrelated-culprit": 16
  },
  "window": [

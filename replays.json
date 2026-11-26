@@ -1989,6 +1989,18 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#llava#2026-11-08": {
+  "bad": "a8d55faa6fa1897e4e15b9315317ccc7c8d3ad22",
+  "commits": 339,
+  "contracts": [
+   "huggingface-mic/llava-mic"
+  ],
+  "failures": [],
+  "parent": "0f53828e83f2212060233d2ea552cc76617b8712",
+  "run": "https://github.com/huggingface/transformers-mic/actions/runs/45788297989",
+  "verdict": "missed",
+  "version": 9
+ },
  "sticky#llava#2026-11-13": {
   "verdict": "out-of-scope",
   "version": 9
