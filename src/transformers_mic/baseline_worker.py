@@ -46,6 +46,16 @@ def expected_targets(contract, manifest, fixtures_only):
     return [safe(target) for target in result]
 
 
+def input_cases(manifest):
+    """The contract's input cases (every one runs), or [None] when it declares none."""
+    return [safe(case) for case in manifest["integrations"]["transformers"].get("cases", {})] or [None]
+
+
+def case_key(fleet_name, name, target, case, variant):
+    """A measured case's key; a contract without input cases keeps the key it always had."""
+    return "/".join([fleet_name, name, target, *([case] if case else []), variant])
+
+
 def read_rows(path):
     return [json.loads(line) for line in path.read_text().splitlines() if line.strip()] if path.exists() else []
 
@@ -67,40 +77,38 @@ def profile_exclusions(contract, manifest, variant, profile):
     return result
 
 
-def assess(targets, variant, rows, verification, profile, declared_profile_skips=()):
-    """An omitted, duplicate or hardware-skipped case is never a complete run."""
-    by_target = {}
+def assess(targets, variant, rows, verification, profile, declared_profile_skips=(), cases=(None,)):
+    """An omitted, duplicate or hardware-skipped case is never a complete run.
+
+    Each target runs once per input case; `cases` is [None] for a contract without them."""
+    expected = [(target, case) for target in targets for case in cases]
+    by_run = {}
     for row in rows:
-        if row.get("variant") != variant or row["target"] in by_target:
+        run = (row["target"], row.get("case"))
+        if row.get("variant") != variant or run in by_run:
             raise ValueError("Unexpected variant or duplicate runner case")
-        by_target[row["target"]] = row
-    if set(by_target) != set(targets):
+        by_run[run] = row
+    if set(by_run) != set(expected):
         raise ValueError("Runner omitted or added declared targets")
-    checked = {row["target"]: row for row in verification}
+    checked = {(row["target"], row.get("case")): row for row in verification}
     if (
         len(checked) != len(verification)
         or any(row.get("variant") != variant for row in verification)
-        or set(checked) - set(targets)
+        or set(checked) - set(expected)
     ):
         raise ValueError("Unexpected or duplicate verification case")
     result = []
-    for target in targets:
-        row = by_target[target]
+    for target, case in expected:
+        row = by_run[(target, case)]
+        named = {"target": target, **({"case": case} if case else {}), "variant": variant}
         if row["status"] == "unsupported" and (
             row.get("skip") == "declared" or (row.get("skip") == "hardware" and target in declared_profile_skips)
         ):
-            result.append(
-                {
-                    "target": target,
-                    "variant": variant,
-                    "status": "declared-unsupported",
-                    "reason": row.get("failures", []),
-                }
-            )
+            result.append({**named, "status": "declared-unsupported", "reason": row.get("failures", [])})
             continue
         platform_name = row.get("platform", "")
         valid_platform = platform_name == "cuda" if profile == "cuda" else platform_name.startswith("cpu-")
-        verification_row = checked.get(target, {})
+        verification_row = checked.get((target, case), {})
         okay = (
             row["status"] == "recorded"
             and valid_platform
@@ -109,8 +117,7 @@ def assess(targets, variant, rows, verification, profile, declared_profile_skips
         )
         result.append(
             {
-                "target": target,
-                "variant": variant,
+                **named,
                 "platform": platform_name,
                 "status": "validated" if okay else "failed",
                 "record": row,
@@ -295,11 +302,16 @@ def measure(args):
             planned_targets = expected_targets(contract, manifest, args.fixtures_only)
             if not planned_targets and not args.fixtures_only:
                 raise ValueError("Contract declares no targets present in this fleet")
+            planned_cases = input_cases(manifest)
             for variant, spec in planned_variants.items():
                 safe(variant)
                 if isinstance(spec, dict) and spec.get("dtype") in NATIVE_FLAGS:
                     planned_dtypes.add(spec["dtype"])
-                report["expected_cases"].extend(f"{fleet_name}/{name}/{target}/{variant}" for target in planned_targets)
+                report["expected_cases"].extend(
+                    case_key(fleet_name, name, target, case, variant)
+                    for target in planned_targets
+                    for case in planned_cases
+                )
     total = len(report["expected_cases"])
     completed = 0
     if args.profile == "cpu" and (host_error := missing_native_support(planned_dtypes)):
@@ -323,6 +335,7 @@ def measure(args):
             manifest = read(hf_hub_download(pin["repo"], "integration.json", revision=pin["revision"]))
             targets = expected_targets(contract, manifest, args.fixtures_only)
             variants = manifest["integrations"]["transformers"].get("variants", {"default": {}})
+            cases = input_cases(manifest)
             folder = root / fleet_name / name
             folder.mkdir(parents=True, exist_ok=True)
             write(folder / "integration.json", manifest)
@@ -343,7 +356,7 @@ def measure(args):
             for variant in variants:
                 safe(variant)
                 print(f"{args.profile}: {fleet_name}/{name}/{variant}", flush=True)
-                expected = [f"{fleet_name}/{name}/{target}/{variant}" for target in targets]
+                expected = [case_key(fleet_name, name, target, case, variant) for target in targets for case in cases]
                 assert all(key in report["expected_cases"] for key in expected)
                 # Store tolerance overrides next to candidates too; never loosen them.
                 candidate_root = folder / "candidates"
@@ -404,48 +417,51 @@ def measure(args):
                     f"{fleet_name}-{name}-{variant}-check",
                 )
                 try:
-                    cases = assess(
+                    measured = assess(
                         targets,
                         variant,
                         read_rows(output),
                         read_rows(checked),
                         args.profile,
                         profile_exclusions(contract, manifest, variant, args.profile),
+                        cases,
                     )
-                    declared_skip = any(case["status"] == "declared-unsupported" for case in cases)
+                    declared_skip = any(case["status"] == "declared-unsupported" for case in measured)
                     if any(code not in (0, 1) for code in (record_code, check_code)) or (
                         (record_code or check_code) and not declared_skip
                     ):
                         raise ValueError(f"Runner exited unsuccessfully: record={record_code}, check={check_code}")
                 except ValueError as error:
-                    cases = [
+                    measured = [
                         {
                             "target": target,
+                            **({"case": case} if case else {}),
                             "variant": variant,
                             "status": "failed",
                             "error": str(error),
                         }
                         for target in targets
+                        for case in cases
                     ]
-                for case in cases:
+                for case in measured:
                     case.update(
                         fleet=fleet_name,
                         contract=name,
                         repo=pin["repo"],
                         revision=pin["revision"],
                     )
-                    case["key"] = f"{fleet_name}/{name}/{case['target']}/{variant}"
+                    case["key"] = case_key(fleet_name, name, case["target"], case.get("case"), variant)
                     case["files"] = {}
                     if case["status"] == "validated":
-                        suffix = "" if variant == "default" else "." + variant
-                        candidate = candidate_root / case["platform"] / (case["target"] + suffix + ".candidate.json")
+                        # The runner names the candidate (with the input case, if any); never rebuild that name.
+                        candidate = candidate_root / case["platform"] / Path(case["record"]["baseline"]).name
                         paths = [candidate, folder / "integration.json"]
                         paths += list((folder / "references").glob(f"{case['platform']}/*.json"))
                         for path in paths:
                             case["files"][path.relative_to(root).as_posix()] = sha256(path)
                         case["candidate"] = candidate.relative_to(root).as_posix()
                     report["cases"].append(case)
-                completed += len(cases)
+                completed += len(measured)
                 progress.emit("validating", completed, total, f"{fleet_name}/{name}/{variant}")
                 write(root / "collection.json", report)
     keys = [case["key"] for case in report["cases"]]
