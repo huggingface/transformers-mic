@@ -488,15 +488,21 @@ def input_cases(integration, where):
 
     No cases declared: one implicit case, None. The default case (at most one) keeps the
     case-free baseline names. A case may not share a variant's name, so a baseline name
-    never reads two ways."""
+    never reads two ways, nor be named `candidate`, the suffix of candidate baselines."""
     cases = integration.get("cases")
     if not cases:
         return [None], None
     default = [case for case, spec in cases.items() if spec.get("default")]
     clash = sorted(set(cases) & set(integration["variants"]))
-    if len(default) > 1 or clash:
-        problem = f"more than one default case {default}" if len(default) > 1 else f"cases named like variants {clash}"
-        raise SystemExit(f"{where}: {problem}")
+    if len(default) > 1 or clash or "candidate" in cases:
+        problem = (
+            f"more than one default case {default}"
+            if len(default) > 1
+            else f"cases named like variants {clash}"
+            if clash
+            else "a case named 'candidate' (the candidate baselines' suffix)"
+        )
+        raise ValueError(f"{where}: {problem}")
     return list(cases), default[0] if default else None
 
 
@@ -903,8 +909,12 @@ def main():
                 **({"selected_by": selected_by.get(name)} if selected_by is not None else {}),
             }
             variant = integration["variants"].get(args.variant)
-            cases, default_case = input_cases(integration, f"{name}: {args.framework}")
-            cases = [case for case in cases if not args.case or case in args.case]
+            try:
+                cases, default_case = input_cases(integration, f"{name}: {args.framework}")
+                cases_problem = None
+                cases = [case for case in cases if not args.case or case in args.case]
+            except ValueError as e:  # a bad manifest fails its own targets, not the whole run
+                cases, default_case, cases_problem = [None], None, str(e)
             required = required_outputs(manifest["outputs"], integration)
             executor = Executor(
                 root / integration["entry_point"],
@@ -926,6 +936,9 @@ def main():
                 if args.target and target not in args.target:
                     continue
                 record = {**base, "target": target, "case": case, "kind": kind, "revision": revision}
+                if cases_problem:
+                    emit({**record, "status": "error", "failures": [cases_problem]})
+                    continue
                 if variant is None:
                     emit(
                         {
@@ -1130,7 +1143,7 @@ def main():
                     rules = {k: r for k, r in rules_for(manifest, platform_dir).items() if k not in skipped}
                     failures += compare(rules, actual, reviewed["outputs"], checked)
                 emit({**record, "status": "fail" if failures else "pass", "failures": failures})
-    if not set(counts) - {"unsupported"} and (counts or args.contract or args.target):
+    if not set(counts) - {"unsupported"} and (counts or args.contract or args.target or args.case):
         # Every requested target was skipped, or none matched: nothing was checked, which is not a pass.
         # Exception: --changed-files drove the selection and nothing ran — either no contracts matched
         # the changed paths at all, or the specific --contract/--target requested wasn't among them.

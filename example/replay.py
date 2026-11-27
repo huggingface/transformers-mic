@@ -50,7 +50,7 @@ def run(ref, options):
     records = [json.loads(line) for line in out.stdout.splitlines() if line.startswith("{")]
     if not records:
         raise SystemExit(f"run.py produced no records on {ref}:\n{out.stderr[-1500:]}")
-    return {r["target"]: r for r in records}
+    return {(r["target"], r.get("case")): r for r in records}
 
 
 def main():
@@ -61,8 +61,8 @@ def main():
     fix, bad = sha(args.fix), sha(args.bad or f"{args.fix}^")
     results = {"bad": run(bad, options), "fix": run(fix, options)}
     print(json.dumps({"fix": fix, "bad": bad, "options": options}))
-    for target, on_bad in results["bad"].items():
-        on_fix = results["fix"].get(target, {})
+    for (target, case), on_bad in results["bad"].items():
+        on_fix = results["fix"].get((target, case), {})
         verdict = (
             "caught"
             if on_bad["status"] == "fail" and on_fix.get("status") == "pass"
@@ -76,6 +76,7 @@ def main():
             json.dumps(
                 {
                     "target": target,
+                    **({"case": case} if case is not None else {}),
                     "verdict": verdict,
                     "bad": on_bad["status"],
                     "fix": on_fix.get("status"),

@@ -170,7 +170,7 @@ def dispatch(tool, workspace, args):
             records = [json.loads(line) for line in out.stdout.splitlines() if line.startswith("{")]
             if not records:
                 raise ValueError(f"No replay records on {ref}: {out.stderr[-1500:]}")
-            return {r["target"]: r for r in records}
+            return {(r["target"], r.get("case")): r for r in records}
 
         module.run = replay_run
     sys.argv = [tool, *args]
