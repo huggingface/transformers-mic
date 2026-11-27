@@ -2003,11 +2003,9 @@ def execute_one(args, record=False):
     options.append("--skip-wrong-hardware")
     if getattr(args, "no_baseline", False):
         options.append("--no-baseline")
-    output = (
-        workspace.root
-        / ".mic"
-        / f"{'record' if record else 'check'}.{'' if framework == 'transformers' else framework + '.'}{args.variant}.jsonl"
-    )
+    # One file per integration, nested ones (vllm/transformers) included.
+    prefix = "" if framework == "transformers" else framework.replace("/", "-") + "."
+    output = workspace.root / ".mic" / f"{'record' if record else 'check'}.{prefix}{args.variant}.jsonl"
     output.unlink(missing_ok=True)
     options += ["--output", str(output)]
     result = backend.invoke("run", workspace.root, options)
