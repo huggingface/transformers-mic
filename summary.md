@@ -369,11 +369,13 @@ Proposed bar for rule B (constants `DECISION` in `experiments/impact.py`):
 - Merged red, then the same case failed on main: **7** — a change that landed (a bug, or an intended change needing a re-baseline).
 - Labelled `real-bug`: **0**; `intended`: 0.
 
-## 2. False alarms
+## 2. False positives
 
+A false positive is a PR-only case (red with the PR, not red on main) the PR did not cause: it passed again with no push (flaky or environment), it merged and main stayed green for 3 days, or it is labelled `false-alarm`/`flake`. These are what the gate would wrongly block.
+
+- **10 (3%)** of the 314 PRs with a red MIC case hit one: 40 cases, passed again with no push 18, merged and main stayed green 22, labelled 0.
+- Only warned, never blocked: 253 PRs saw only cases red on main too, infra errors or cases red on many PRs that day; the gate re-runs those on the base and warns.
 - PR failure groups: 5596 — infra 141 (3%), pre-existing 2509 (45%), systemic (same case on ≥3 PRs that day) 14 (0%), PR-only 2932 (52%).
-- PRs that saw a MIC failure: 314; of those, only failures they did not cause: **253 (81%)**.
-- PR-only cases that recovered with no push (flaky/environment): 18; merged and main stayed green for 3 days: 22; labelled `false-alarm`/`flake`: 0.
 
 ## 3. Baseline review work
 

@@ -15,6 +15,8 @@
  },
  "drafts_per_day": 2,
  "false_alarms": {
+  "false_positive_cases": 40,
+  "false_positive_prs": 10,
   "prs_not_their_fault": 253,
   "prs_with_failure": 314
  },
