@@ -507,9 +507,9 @@
    "job": "https://github.com/huggingface/transformers/actions/runs/45928276795/job/140275519807",
    "model": "whisper",
    "pr": "51180",
-   "run": "",
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/45970362902",
    "tests": 1,
-   "verdict": "pending"
+   "verdict": "missed"
   },
   {
    "date": "2026-11-27",
@@ -518,9 +518,9 @@
    "job": "https://github.com/huggingface/transformers/actions/runs/45928276795/job/140275513013",
    "model": "mistral",
    "pr": "51180",
-   "run": "",
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/45970362902",
    "tests": 1,
-   "verdict": "pending"
+   "verdict": "missed"
   },
   {
    "date": "2026-11-27",
@@ -535,14 +535,14 @@
   },
   {
    "date": "2026-11-27",
-   "detail": "",
+   "detail": "mistral3-mic (bfloat16): predicted_tokens: [']', ']'] != ['', '']; Ministral-3-3B-Instruct-2512-mic (bfloat16): Traceback (most recent call last):",
    "integration": true,
    "job": "https://github.com/huggingface/transformers/actions/runs/45928276795/job/140275513184",
    "model": "mistral3",
    "pr": "50428",
-   "run": "",
+   "run": "https://github.com/huggingface/transformers-mic/actions/runs/45970362902",
    "tests": 1,
-   "verdict": "pending"
+   "verdict": "caught"
   },
   {
    "date": "2026-11-26",
@@ -3684,16 +3684,16 @@
   "already-failing": 8,
   "already-red": 10,
   "broken": 0,
-  "caught": 10,
+  "caught": 11,
   "duplicate": 5,
-  "missed": 2,
+  "missed": 4,
   "model-added": 4,
   "no-code-change": 1,
   "not-a-regression": 6,
   "not-covered": 270,
   "not-reproduced": 11,
   "out-of-scope": 213,
-  "pending": 3,
+  "pending": 0,
   "unrelated-culprit": 16
  },
  "window": [
