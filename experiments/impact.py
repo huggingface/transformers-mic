@@ -1977,6 +1977,8 @@ def summarize(results):
     prs_noise_only = {pr for pr in prs_failing if all(r["class"] != "pr-only" for r in day_rows if r["pr"] == pr)}
     outcomes = Counter(c.get("outcome", "open") for c in candidates.values())
     verdicts = Counter(labels[k]["verdict"] for k in candidates if k in labels)
+    false_positives = false_positive_cases(candidates, labels)
+    false_positive_prs = {c["pr"] for c in false_positives}
     pending = [
         c for k, c in candidates.items() if k not in labels and c.get("outcome") not in ("open", "merged-watching")
     ]
@@ -2009,16 +2011,20 @@ def summarize(results):
         f"- Merged red, then the same case failed on main: **{outcomes['merged-then-main-failed']}** — a change that landed (a bug, or an intended change needing a re-baseline).",
         f"- Labelled `real-bug`: **{verdicts['real-bug']}**; `intended`: {verdicts['intended']}.",
         "",
-        "## 2. False alarms",
+        "## 2. False positives",
         "",
+        "A false positive is a PR-only case (red with the PR, not red on main) the PR did not cause: it passed "
+        f"again with no push (flaky or environment), it merged and main stayed green for {MAIN_WATCH_DAYS} days, "
+        "or it is labelled `false-alarm`/`flake`. These are what the gate would wrongly block.",
+        "",
+        f"- **{pct(len(false_positive_prs), len(prs_failing))}** of the {len(prs_failing)} PRs with a red MIC case "
+        f"hit one: {len(false_positives)} cases, passed again with no push {outcomes['recovered-no-push']}, merged "
+        f"and main stayed green {outcomes['merged-main-ok']}, labelled {verdicts['false-alarm'] + verdicts['flake']}.",
+        f"- Only warned, never blocked: {len(prs_noise_only)} PRs saw only cases red on main too, infra errors or "
+        "cases red on many PRs that day; the gate re-runs those on the base and warns.",
         f"- PR failure groups: {len(day_rows)} — infra {pct(classes['infra'], len(day_rows))}, "
         f"pre-existing {pct(classes['pre-existing'], len(day_rows))}, systemic (same case on ≥{SYSTEMIC_PRS} PRs that day) "
         f"{pct(classes['systemic'], len(day_rows))}, PR-only {pct(classes['pr-only'], len(day_rows))}.",
-        f"- PRs that saw a MIC failure: {len(prs_failing)}; of those, only failures they did not cause: "
-        f"**{pct(len(prs_noise_only), len(prs_failing))}**.",
-        f"- PR-only cases that recovered with no push (flaky/environment): {outcomes['recovered-no-push']}; "
-        f"merged and main stayed green for {MAIN_WATCH_DAYS} days: {outcomes['merged-main-ok']}; "
-        f"labelled `false-alarm`/`flake`: {verdicts['false-alarm'] + verdicts['flake']}.",
         "",
         "## 3. Baseline review work",
         "",
@@ -2169,7 +2175,12 @@ def summarize(results):
                 "not_covered": gpu(("not-covered",)),
                 "awaiting_verdict": len(missed),
             },
-            "false_alarms": {"prs_with_failure": len(prs_failing), "prs_not_their_fault": len(prs_noise_only)},
+            "false_alarms": {
+                "prs_with_failure": len(prs_failing),
+                "prs_not_their_fault": len(prs_noise_only),
+                "false_positive_prs": len(false_positive_prs),
+                "false_positive_cases": len(false_positives),
+            },
             "merged_gate": merged_overview,
             "block_merges": {"ready": all(ok for _, ok in checks), "unmet": [text for text, ok in checks if not ok]},
             "next": [
@@ -2179,6 +2190,17 @@ def summarize(results):
             "awaiting_verdict": len(pending),
         },
     )
+
+
+def false_positive_cases(candidates, labels):
+    """PR-only cases the PR did not cause: labelled false-alarm/flake, or an outcome that says so
+    (WRONG) unless a human labelled them real-bug/intended."""
+    found = []
+    for key, case in candidates.items():
+        verdict = labels.get(key, {}).get("verdict")
+        if verdict in WRONG_VERDICTS or (case.get("outcome") in WRONG and verdict not in ("real-bug", "intended")):
+            found.append(case)
+    return found
 
 
 def next_target(suggestion, draft, next_batch=False):

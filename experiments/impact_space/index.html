@@ -76,7 +76,7 @@
       <div class="note" id="uncovered-note"></div>
     </div>
     <div class="tile">
-      <div class="label">False alarms</div>
+      <div class="label">False positives</div>
       <div class="value" id="false">–</div>
       <div class="note" id="false-note"></div>
     </div>
@@ -254,9 +254,13 @@
     set("uncovered-note", `regressions on models with no contract${r["out-of-scope"] ? ` · ${r["out-of-scope"]} more GPU-only` : ""}`);
 
     const f = o.false_alarms;
-    const share = f.prs_with_failure ? Math.round((100 * f.prs_not_their_fault) / f.prs_with_failure) : 0;
-    set("false", f.prs_with_failure ? `${share}%` : "–");
-    set("false-note", `of ${plural(f.prs_with_failure, "PR")} with a red MIC saw only failures they did not cause`);
+    if (f.false_positive_prs === undefined) {
+      set("false", "–");
+    } else {
+      const share = f.prs_with_failure ? Math.round((100 * f.false_positive_prs) / f.prs_with_failure) : 0;
+      set("false", `${f.false_positive_prs}`);
+      set("false-note", `PRs (${share}% of ${f.prs_with_failure} with a red MIC) hit a case they did not cause: ${plural(f.false_positive_cases, "flaky or environment case")} · ${f.prs_not_their_fault} more only saw failures already on main, which the gate warns on`);
+    }
 
     renderRegressions(o.regressions || []);
     renderMerged(o.merged_gate);
