@@ -28,7 +28,7 @@
    "to-review": 0
   },
   "merged": 554,
-  "pending": 1,
+  "pending": 0,
   "rows": [
    {
     "cases": [
@@ -175,7 +175,7 @@
     "why": "red on main after the merge"
    }
   ],
-  "unmeasured": 16,
+  "unmeasured": 1,
   "window": [
    "2026-10-28",
    "2026-11-27"

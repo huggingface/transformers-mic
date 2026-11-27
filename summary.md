@@ -320,7 +320,7 @@ Every PR merged into main 2026-10-28 → 2026-11-27, put through the contracts g
 
 - Merged PRs looked up: **554**; with a red MIC case in their last run: 138.
 - Would have been blocked: **10** — real 10, false positive 0, to review 0.
-- Waiting for the replay: 1; could not be measured: 16.
+- Waiting for the replay: 0; could not be measured: 1.
 
 | flag | meaning |
 |---|---|
