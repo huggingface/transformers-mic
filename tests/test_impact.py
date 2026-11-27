@@ -664,6 +664,7 @@ def offline_sources(monkeypatch):
     monkeypatch.setattr(impact, "test_file_text", lambda path, ref="main": "")
     monkeypatch.setattr(impact, "range_files", lambda parent, bad: None)
     monkeypatch.setattr(impact, "daily_failure_traces", lambda date: {})
+    monkeypatch.setattr(impact, "bisect_statuses", lambda date: {})
 
 
 LLAMA_TEST = "tests/models/llama/test_modeling_llama.py::LlamaIntegrationTest::test_x"
@@ -910,6 +911,7 @@ def test_overview_counts_the_replays(tmp_path):
         "no-code-change": 0,
         "already-failing": 0,
         "not-reproduced": 0,
+        "flaky": 0,
         "model-added": 0,
         "duplicate": 0,
         "unrelated-culprit": 0,
@@ -975,6 +977,38 @@ def test_a_sticky_onset_the_daily_ci_did_not_repeat_is_not_reproduced():
         failing_on=lambda day: {LLAMA_TEST} if day == "2026-11-04" else set(),
     )
     assert {p["key"] for p in plan} == {"sticky#llama#2026-11-02"}
+
+
+def test_a_sticky_onset_upstream_called_flaky_is_not_replayed():
+    gpu_ci = {"sticky#llama#2026-11-24": regression(date="2026-11-24", run_id="9")}
+    days = {"2026-11-23": "p" * 40, "2026-11-24": "q" * 40}
+    flaky = "flaky: test both passed and failed during the check of the current run on the previous commit: abc"
+
+    def plan(statuses):
+        replays = {}
+        entries = impact.replay_plan(
+            gpu_ci,
+            replays,
+            CONTRACTS,
+            days.get,
+            sha_of_run=lambda run: "r" * 40,
+            failing_on=lambda day: {LLAMA_TEST},
+            failed_before=lambda day: set(),
+            statuses_of=lambda day: statuses.get(day, {}),
+        )
+        return entries, replays
+
+    # Called flaky the day after the onset, within CONFIRM_DAYS: no replay.
+    entries, replays = plan({"2026-11-25": {LLAMA_TEST: [flaky]}})
+    assert entries == []
+    assert replays["sticky#llama#2026-11-24"]["verdict"] == "flaky"
+    # A real bisect result for one of its tests, or none at all, still replays it.
+    for statuses in ({"2026-11-24": {LLAMA_TEST: [flaky, "git bisect found the bad commit."]}}, {}):
+        entries, replays = plan(statuses)
+        assert {e["key"] for e in entries} == {"sticky#llama#2026-11-24"}
+    # Outside the window it does not count.
+    entries, _ = plan({"2026-11-28": {LLAMA_TEST: [flaky]}})
+    assert {e["key"] for e in entries} == {"sticky#llama#2026-11-24"}
 
 
 def test_a_sticky_onset_of_a_bisected_regression_is_counted_once():

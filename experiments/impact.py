@@ -1189,6 +1189,48 @@ def daily_failures(date):
     return set(daily_failure_traces(date))
 
 
+def bisect_statuses(date, _cache={}):
+    """{node id: [status]} upstream's bisect gave the daily GPU CI's new failures on `date`
+    (new_failures_with_bad_commit.json; a status starting with "flaky" means the test both passed
+    and failed on the same commit)."""
+    if date not in _cache:
+        url = (
+            f"{HUB}/datasets/{DAILY_CI}/resolve/main/{date}/ci_results_run_models_gpu/new_failures_with_bad_commit.json"
+        )
+        try:
+            data = get_json(url)
+        except urllib.error.HTTPError as error:
+            if error.code != 404:
+                raise
+            data = {}
+        found = defaultdict(list)
+        for entries in (e for by_gpu in data.values() for e in by_gpu.values()):
+            for entry in entries:
+                found[entry.get("test", "")].append(str(entry.get("status", "")))
+        _cache[date] = dict(found)
+    return _cache[date]
+
+
+def flaky_upstream(item, statuses_of=None):
+    """Whether upstream's bisect called a sticky onset's in-scope tests flaky within CONFIRM_DAYS.
+
+    A sticky onset is never bisected here, but its failing tests usually are upstream, which reruns
+    each on the previous commit. The mistral3 11-24 and llava 11-08 onsets both passed and failed on
+    the same commit there: one-word greedy drifts on real checkpoints, replayed as "missed".
+    Every status upstream gave the onset's tests must be flaky, and there must be one.
+    """
+    tests = {t for t in item["tests"] if in_scope(t)}
+    start = dt.date.fromisoformat(item["date"])
+    statuses = [
+        status
+        for d in range(CONFIRM_DAYS)
+        for test, found in (statuses_of or bisect_statuses)((start + dt.timedelta(days=d)).isoformat()).items()
+        if test in tests
+        for status in found
+    ]
+    return bool(statuses) and all(status.startswith("flaky") for status in statuses)
+
+
 def failing_before(item, failing_on=None):
     """Whether the daily CI already failed one of a sticky onset's in-scope tests the day before it.
 
@@ -1254,6 +1296,7 @@ def replay_plan(
     text_of=None,
     traces_of=None,
     failed_before=None,
+    statuses_of=None,
 ):
     """Plan entries for the regressions not replayed yet, newest first: one per (regression, fleet).
 
@@ -1292,6 +1335,13 @@ def replay_plan(
             replays[key] = {
                 "verdict": "not-reproduced",
                 "reason": "the daily CI did not fail it",
+                "version": REPLAY_VERSION,
+            }
+            continue
+        if not item.get("bad_commit") and flaky_upstream(item, statuses_of):
+            replays[key] = {
+                "verdict": "flaky",
+                "reason": "upstream's bisect saw its tests pass and fail on the same commit",
                 "version": REPLAY_VERSION,
             }
             continue
@@ -1474,6 +1524,10 @@ REPLAY_VERDICTS = (
         "a sticky onset the daily CI was already failing the day before: a gap in the dashboard's day strip, not a new failure",
     ),
     ("not-reproduced", "a failing run the daily CI did not repeat: transient, not a regression"),
+    (
+        "flaky",
+        "a sticky onset whose tests upstream's bisect saw pass and fail on the same commit: not a regression",
+    ),
     ("model-added", "the bad commit added the model: no contract could have run before it"),
     ("duplicate", "the same regression as a bisected one, counted there"),
     (
