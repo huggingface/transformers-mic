@@ -644,6 +644,12 @@
   ],
   "whisper": [
    {
+    "date": "2026-11-26",
+    "gpu_only": false,
+    "integration": true,
+    "test": "tests/models/whisper/test_modeling_whisper.py::WhisperModelIntegrationTests::test_speculative_decoding_distil"
+   },
+   {
     "date": "2026-11-08",
     "gpu_only": false,
     "integration": false,

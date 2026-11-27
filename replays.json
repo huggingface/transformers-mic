@@ -2533,6 +2533,11 @@
   "verdict": "out-of-scope",
   "version": 9
  },
+ "sticky#whisper#2026-11-26": {
+  "reason": "the daily CI did not fail it",
+  "verdict": "not-reproduced",
+  "version": 9
+ },
  "sticky#xlstm#2026-11-14": {
   "verdict": "not-covered",
   "version": 9

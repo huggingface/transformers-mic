@@ -8963,6 +8963,18 @@
    "tests/models/whisper/test_modeling_whisper.py::WhisperStandaloneDecoderModelTest::test_bc_cache_name_generate"
   ]
  },
+ "sticky#whisper#2026-11-26": {
+  "date": "2026-11-26",
+  "day": 20783,
+  "integration": true,
+  "mic": "green-on-main",
+  "model": "whisper",
+  "run_id": "45928276795",
+  "signal": "RuntimeError",
+  "tests": [
+   "tests/models/whisper/test_modeling_whisper.py::WhisperModelIntegrationTests::test_speculative_decoding_distil"
+  ]
+ },
  "sticky#xlstm#2026-11-14": {
   "date": "2026-11-14",
   "day": 20771,
