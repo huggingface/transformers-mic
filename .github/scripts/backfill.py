@@ -199,11 +199,12 @@ def replay(args):
                 else:
                     records = []
                     for variant in entry["variants"]:
+                        # A result without a fleet revision (an older run) replays the fleet's current one.
+                        revision = ["--fleet-revision", entry["fleet_revision"]] if entry.get("fleet_revision") else []
                         options = [
                             "--fleet",
                             entry["fleet"],
-                            "--fleet-revision",
-                            entry["fleet_revision"],
+                            *revision,
                             "--variant",
                             variant,
                             *contracts,
