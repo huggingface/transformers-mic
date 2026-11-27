@@ -303,10 +303,11 @@ def test_measure_cases_records_blocked_targets_without_a_check_pass(tmp_path, mo
     ]
 
 
-@pytest.mark.parametrize("blocked_case", ["image", None])
+@pytest.mark.parametrize("blocked_case", ["image", None, "renamed"])
 def test_measure_records_the_blocked_input_cases_under_the_runners_names(tmp_path, monkeypatch, hub, blocked_case):
     """A contract with input cases text (default) and image. The gate names the blocked case, or (older gates)
-    only the target, which then means every case of it."""
+    only the target, which then means every case of it. A case the contract does not declare (stale or renamed)
+    returns no run: an error, not a silent pass."""
     decision = {"fleet": "control", "contract": "gpt-j-6b", "variant": "default", "target": "gpt-j-6b-mic"}
     report = tmp_path / "gate.json"
     case = {"case": blocked_case} if blocked_case else {}
@@ -327,6 +328,7 @@ def test_measure_records_the_blocked_input_cases_under_the_runners_names(tmp_pat
 
     def fake_run(root, options, name):
         cases = [options[i + 1] for i, o in enumerate(options) if o == "--case"] or ["text", "image"]
+        cases = [case for case in cases if case in ("text", "image")]  # like run.py: undeclared cases never run
         runs.append((name, cases))
         out, rows = options[options.index("--output") + 1], []
         for case in cases:
@@ -346,9 +348,12 @@ def test_measure_records_the_blocked_input_cases_under_the_runners_names(tmp_pat
     monkeypatch.setattr(pr_record, "run", fake_run)
     out = tmp_path / "rec"
     args = ["measure", "--pr", "7", "--cases", str(report), "--out", str(out), "--transformers-sha", "m" * 40]
-    assert pr_record.main(args) == 0
+    assert pr_record.main(args) == (1 if blocked_case == "renamed" else 0)
     record = json.loads((out / pr_record.RECORD).read_text())
     got = [(c.get("case"), c["path_in_repo"].split("/")[-1], c["verified"]) for c in record["cases"]]
+    if blocked_case == "renamed":
+        assert got == [] and [e["targets"] for e in record["errors"]] == [["gpt-j-6b-mic [renamed]"]]
+        return
     if blocked_case:
         assert runs[0][1] == ["image"]  # only the blocked case is recorded
         assert got == [("image", "gpt-j-6b-mic.image.json", True)]

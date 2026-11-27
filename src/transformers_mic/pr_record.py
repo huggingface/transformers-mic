@@ -229,6 +229,7 @@ def record_and_verify(root, record, folder, options, tag, red, references, pinne
     copy_tolerances(references, candidates)
     selection = [x for t in sorted({t for t, _ in red}) for x in ("--target", t)]
     if all(case for _, case in red):
+        # --target/--case select their cross product; `wanted` keeps the extra runs out of the record.
         selection += [x for c in sorted({c for _, c in red}) for x in ("--case", c)]
 
     def wanted(row):
@@ -240,18 +241,21 @@ def record_and_verify(root, record, folder, options, tag, red, references, pinne
         [*options, *selection, "--record", "--expectations", str(candidates), "--output", str(recorded)],
         tag + "-record",
     )
+
+    def error(row, reason):
+        record["errors"].append(
+            {"fleet": fleet_name, "contract": name, "variant": variant, "targets": [label(row)], "reason": reason}
+        )
+
     for row in filter(wanted, rows(recorded)):
         if row["status"] != "recorded":
             # A crash, a non-finite value or a failing assertion is not a value change to record.
-            record["errors"].append(
-                {
-                    "fleet": fleet_name,
-                    "contract": name,
-                    "variant": variant,
-                    "targets": [label(row)],
-                    "reason": "; ".join(row.get("failures", []))[:500] or row["status"],
-                }
-            )
+            error(row, "; ".join(row.get("failures", []))[:500] or row["status"])
+    # A blocked run the runner did not return is an error, never dropped.
+    returned = {(r["target"], r.get("case")) for r in rows(recorded)}
+    for target, case in sorted(red, key=str):
+        if not any(t == target and case in (None, c) for t, c in returned):
+            error({"target": target, "case": case}, "blocked, but the runner returned no run for it")
     for candidate in candidates.glob("*/*.candidate.json"):
         final = verification / candidate.parent.name / candidate.name.replace(".candidate.json", ".json")
         final.parent.mkdir(parents=True, exist_ok=True)
@@ -267,6 +271,7 @@ def record_and_verify(root, record, folder, options, tag, red, references, pinne
         # The runner names the candidate (with the input case, if any); never rebuild that name.
         file = verification / platform / Path(row["baseline"]).name.replace(".candidate.json", ".json")
         if not file.exists():
+            error(row, f"recorded, but no candidate file {Path(row['baseline']).name}")
             continue
         old = references / platform / file.name
         record["cases"].append(
