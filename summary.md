@@ -319,8 +319,8 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 Every PR merged into main 2026-10-28 → 2026-11-27, put through the contracts gate as it was when it merged: **blocked** when a case is red with the PR and green on the commit it merged onto. From 2026-11-23 that is PR CI's own verdict (shadow mode, `contracts-gate.json`); before, the red cases of the PR's last run are replayed on its squash commit and on that commit's parent.
 
 - Merged PRs looked up: **554**; with a red MIC case in their last run: 138.
-- Would have been blocked: **6** — real 6, false positive 0, to review 0.
-- Waiting for the replay: 34; could not be measured: 20.
+- Would have been blocked: **10** — real 10, false positive 0, to review 0.
+- Waiting for the replay: 1; could not be measured: 16.
 
 | flag | meaning |
 |---|---|
@@ -336,6 +336,10 @@ Every PR merged into main 2026-10-28 → 2026-11-27, put through the contracts g
 | 2026-11-19 | [#50965](https://github.com/huggingface/transformers/pull/50965) Move GPT-J and CodeGen onto the attention interface with mod | CodeGen2/codegen2-16B_P-mic [bfloat16], GPT-J/gpt-j-6b-mic [bfloat16] | [replay](https://github.com/huggingface/transformers/actions/runs/44557888468) | real | red on main after the merge |
 | 2026-11-10 | [#50587](https://github.com/huggingface/transformers/pull/50587) Revert "Add `transcription` input arg to `apply_transcriptio | Canary-1B-v2/canary-1b-v2-mic [bfloat16] | [replay](https://github.com/huggingface/transformers/actions/runs/42860518695) | real | red on main after the merge |
 | 2026-11-10 | [#49886](https://github.com/huggingface/transformers/pull/49886) [serge] Fix 8 integration tests for model `grounding_dino` f | MMGroundingDino/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic [bfloat16] | [replay](https://github.com/huggingface/transformers/actions/runs/42738314842) | real | red on main after the merge |
+| 2026-11-10 | [#50346](https://github.com/huggingface/transformers/pull/50346) Fix MiniMax-M3-VL packed vision attention isolation | MiniMax-M3-MXFP8/MiniMax-M3-MXFP8-mic [bfloat16] | [replay](https://github.com/huggingface/transformers/actions/runs/42737287203) | real | red on main after the merge |
+| 2026-11-09 | [#50475](https://github.com/huggingface/transformers/pull/50475) [Models] Fix torch.compile fullgraph training across models  | Wav2Vec2/mic-wav2vec2-base-960h-slim [bfloat16], Wav2Vec2/mic-wav2vec2-base-960h-slim [default], BART/bart-base-mic [bfloat16], BLIP2/blip2-opt-2.7b-mic [bfloat16] (+9) | [replay](https://github.com/huggingface/transformers/actions/runs/42661304068) | real | intended change: re-recorded on 2026-11-12 |
+| 2026-11-05 | [#50384](https://github.com/huggingface/transformers/pull/50384) Fix PaddleOCR-VL vision position interpolation alignment | PaddleOCR-VL/tibetan-ocr-mic [bfloat16] | [replay](https://github.com/huggingface/transformers/actions/runs/41989837497) | real | intended change: re-recorded on 2026-11-05 |
+| 2026-10-29 | [#50037](https://github.com/huggingface/transformers/pull/50037) Remove expired deprecation cycles | mic-qwen2_5_omni/mic-qwen2_5_omni-slim [bfloat16] | [replay](https://github.com/huggingface/transformers/actions/runs/40904826020) | real | red on main after the merge |
 
 Set the flag by hand with a line in `labels.jsonl`: `{"key": "merged#<pr>", "verdict": "real-bug|intended|false-alarm|flake", "note": "...", "by": "<login>"}`.
 

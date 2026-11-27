@@ -19,14 +19,14 @@
   "prs_with_failure": 314
  },
  "merged_gate": {
-  "blocked": 6,
+  "blocked": 10,
   "flags": {
    "false-positive": 0,
-   "real": 6,
+   "real": 10,
    "to-review": 0
   },
   "merged": 554,
-  "pending": 34,
+  "pending": 1,
   "rows": [
    {
     "cases": [
@@ -107,9 +107,73 @@
     "source": "replay",
     "title": "[serge] Fix 8 integration tests for model `grounding_dino` failing with `output_mismatch` (tensor values differ (6), oth",
     "why": "red on main after the merge"
+   },
+   {
+    "cases": [
+     "MiniMax-M3-MXFP8/MiniMax-M3-MXFP8-mic [bfloat16]"
+    ],
+    "failure": "logits_probe: max delta 0.00195 over tolerance",
+    "flag": "real",
+    "merged": "2026-11-10",
+    "pr": "50346",
+    "run": "https://github.com/huggingface/transformers/actions/runs/42737287203",
+    "source": "replay",
+    "title": "Fix MiniMax-M3-VL packed vision attention isolation",
+    "why": "red on main after the merge"
+   },
+   {
+    "cases": [
+     "Wav2Vec2/mic-wav2vec2-base-960h-slim [bfloat16]",
+     "Wav2Vec2/mic-wav2vec2-base-960h-slim [default]",
+     "BART/bart-base-mic [bfloat16]",
+     "BLIP2/blip2-opt-2.7b-mic [bfloat16]",
+     "BigBirdPegasus/bigbird-pegasus-large-arxiv-mic [bfloat16]",
+     "Florence-2/Florence-2-base-mic [bfloat16]",
+     "Hubert/hubert-large-ls960-ft-mic [bfloat16]",
+     "MarianMT/opus-mt-fr-en-mic [bfloat16]",
+     "Mask2Former/mask2former-swin-tiny-coco-instance-mic [bfloat16]",
+     "OPT/opt-125m-mic [bfloat16]",
+     "Pegasus/pegasus-xsum-mic [bfloat16]",
+     "WavLM/wavlm-base-plus-mic [bfloat16]",
+     "mic-table_transformer/table_transformer-mic [bfloat16]"
+    ],
+    "failure": "training.loss: max delta 0.736 over tolerance",
+    "flag": "real",
+    "merged": "2026-11-09",
+    "pr": "50475",
+    "run": "https://github.com/huggingface/transformers/actions/runs/42661304068",
+    "source": "replay",
+    "title": "[Models] Fix torch.compile fullgraph training across models when layerdrop=0.0",
+    "why": "intended change: re-recorded on 2026-11-12"
+   },
+   {
+    "cases": [
+     "PaddleOCR-VL/tibetan-ocr-mic [bfloat16]"
+    ],
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "flag": "real",
+    "merged": "2026-11-05",
+    "pr": "50384",
+    "run": "https://github.com/huggingface/transformers/actions/runs/41989837497",
+    "source": "replay",
+    "title": "Fix PaddleOCR-VL vision position interpolation alignment",
+    "why": "intended change: re-recorded on 2026-11-05"
+   },
+   {
+    "cases": [
+     "mic-qwen2_5_omni/mic-qwen2_5_omni-slim [bfloat16]"
+    ],
+    "failure": "_backend/run.py\", line 349, in execute_inline",
+    "flag": "real",
+    "merged": "2026-10-29",
+    "pr": "50037",
+    "run": "https://github.com/huggingface/transformers/actions/runs/40904826020",
+    "source": "replay",
+    "title": "Remove expired deprecation cycles",
+    "why": "red on main after the merge"
    }
   ],
-  "unmeasured": 20,
+  "unmeasured": 16,
   "window": [
    "2026-10-28",
    "2026-11-27"

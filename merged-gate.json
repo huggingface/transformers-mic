@@ -260,7 +260,7 @@
   "merge_commit": "86fdf1595ab819a7baa1d06f2902d00aa94feeb6",
   "merged_at": "2026-11-09T22:01:15Z",
   "pr": "45422",
-  "reason": "86fdf1595ab819a7baa1d06f2902d00aa94feeb6^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
+  "reason": "16 red on the base too",
   "red": [
    {
     "contract": "Wav2Vec2",
@@ -391,12 +391,13 @@
     "variant": "bfloat16"
    }
   ],
-  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 2,
   "run_id": 42701513132,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42701513132",
   "source": "replay",
   "title": ":rotating_light: Drop None-valued keys from messages in `apply_chat_template`",
-  "verdict": "unmeasured",
+  "verdict": "clear",
   "version": 1
  },
  "45649": {
@@ -422,6 +423,7 @@
   "merge_commit": "cc1451df3b5b218295bc16803569256c53c9d6e2",
   "merged_at": "2026-11-02T18:40:41Z",
   "pr": "47290",
+  "reason": "3 green when replayed",
   "red": [
    {
     "contract": "mic-llava",
@@ -448,11 +450,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 41495312057,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/41495312057",
   "source": "replay",
   "title": "[Improvement] Formalize KV sharing",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "47616": {
@@ -844,6 +848,7 @@
   "merge_commit": "a0cf918fd0b3ff14ca49f7de2f208e0bc134cec3",
   "merged_at": "2026-11-03T10:28:35Z",
   "pr": "49248",
+  "reason": "2 green when replayed",
   "red": [
    {
     "contract": "Granite",
@@ -862,11 +867,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 41615968488,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/41615968488",
   "source": "replay",
   "title": "Rename `gradient_checkpointing` to `activation_checkpointing` in the public API",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "49283": {
@@ -956,6 +963,7 @@
   "merge_commit": "e400105d30bc4c13726fddf958fcad0ce49412df",
   "merged_at": "2026-11-02T00:45:30Z",
   "pr": "49382",
+  "reason": "2 red on the base too",
   "red": [
    {
     "contract": "Granite",
@@ -974,11 +982,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 40996859337,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/40996859337",
   "source": "replay",
   "title": "Audio from video in jinja ",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "49386": {
@@ -1062,6 +1072,7 @@
   "merge_commit": "6df64031b9fa0ecebe50161df8ad42ed8d36595c",
   "merged_at": "2026-11-06T06:29:52Z",
   "pr": "49435",
+  "reason": "3 red on the base too",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -1088,11 +1099,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 42165991469,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42165991469",
   "source": "replay",
   "title": "[vLLM] Add Omni token counting and text replacement offsets for the Transformers backend",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "49459": {
@@ -1134,6 +1147,7 @@
   "merge_commit": "e82b00dd04d71b2e2801ecf3029eea3858868091",
   "merged_at": "2026-10-30T04:18:06Z",
   "pr": "49501",
+  "reason": "2 red on the base too",
   "red": [
    {
     "contract": "Granite",
@@ -1152,11 +1166,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 40997722317,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/40997722317",
   "source": "replay",
   "title": "Shard the parameters kept in float32 in their own FSDP2 group",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "49507": {
@@ -1182,6 +1198,7 @@
   "merge_commit": "88e83834536df4e2d02bca2381bf5622b9b3bc65",
   "merged_at": "2026-10-30T03:02:01Z",
   "pr": "49527",
+  "reason": "2 red on the base too",
   "red": [
    {
     "contract": "Granite",
@@ -1200,11 +1217,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 40990006140,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/40990006140",
   "source": "replay",
   "title": "\ud83d\udea8 build and expand once the tp/ep_plan/fsdp_plan",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "49528": {
@@ -1214,6 +1233,7 @@
   "merge_commit": "85db0e0663d95d2b030f6f31b2c7c1dcdc08b6a3",
   "merged_at": "2026-11-06T04:10:38Z",
   "pr": "49528",
+  "reason": "1 red on the base too",
   "red": [
    {
     "contract": "PaddleOCR-VL",
@@ -1224,11 +1244,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 42154326700,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42154326700",
   "source": "replay",
   "title": "Subconfig creation in testers",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "49554": {
@@ -1254,6 +1276,7 @@
   "merge_commit": "0a83ff7f7b48352123dc509838235925abbe7c40",
   "merged_at": "2026-10-30T02:36:19Z",
   "pr": "49567",
+  "reason": "2 red on the base too",
   "red": [
    {
     "contract": "Granite",
@@ -1272,11 +1295,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 40984551206,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/40984551206",
   "source": "replay",
   "title": "handle local sink in TP",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "49581": {
@@ -1576,6 +1601,7 @@
   "merge_commit": "0c7f5ab8c579917b90bfa7502131e6420ec03978",
   "merged_at": "2026-11-04T09:38:35Z",
   "pr": "49753",
+  "reason": "2 red on the base too",
   "red": [
    {
     "contract": "Granite",
@@ -1594,11 +1620,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 41590686316,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/41590686316",
   "source": "replay",
   "title": "Keep image inputs on the first chunk of a chunked prefill",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "49754": {
@@ -1754,6 +1782,7 @@
   "merge_commit": "c6fab466578ac84c4ebc9be3ea24a0eef55a4857",
   "merged_at": "2026-11-03T09:47:16Z",
   "pr": "49857",
+  "reason": "2 green when replayed",
   "red": [
    {
     "contract": "Granite",
@@ -1772,11 +1801,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 41610198967,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/41610198967",
   "source": "replay",
   "title": "[`Moe`] Fix grouped mm fallback",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "49859": {
@@ -1786,6 +1817,7 @@
   "merge_commit": "37cbab342d6477d7e5d1eb99b9b8b0c27069123e",
   "merged_at": "2026-11-03T11:08:34Z",
   "pr": "49859",
+  "reason": "2 green when replayed",
   "red": [
    {
     "contract": "Granite",
@@ -1804,11 +1836,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 41613869068,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/41613869068",
   "source": "replay",
   "title": "[`FA`] Fix old models that do not use a proper interface",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "49861": {
@@ -2233,6 +2267,7 @@
   "merge_commit": "fa421d61e569c4cad3e7e988b199d7222dde0435",
   "merged_at": "2026-11-06T02:09:23Z",
   "pr": "49976",
+  "reason": "3 red on the base too",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -2259,11 +2294,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 42145532636,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42145532636",
   "source": "replay",
   "title": "Multmodal token count validation in processors",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "49982": {
@@ -2567,12 +2604,24 @@
   "version": 1
  },
  "50037": {
-  "blocked": [],
+  "blocked": [
+   {
+    "contract": "mic-qwen2_5_omni",
+    "failure": "_backend/run.py\", line 349, in execute_inline",
+    "fleet": "prototypes",
+    "fleet_revision": "872d0b5b383facf025954f40ec0f01ec0a6c5cc9",
+    "target": "mic-qwen2_5_omni-slim",
+    "variant": "bfloat16"
+   }
+  ],
   "head": "0ec6b7c140113adbf91241f545309473262dbb82",
   "labels": [],
+  "main_after": "fail",
   "merge_commit": "a95a05c86ad87f3598a568093b5fbca5a9104d54",
   "merged_at": "2026-10-29T16:19:52Z",
   "pr": "50037",
+  "reason": "",
+  "rebaselined": [],
   "red": [
    {
     "contract": "mic-qwen2_5_omni",
@@ -2583,11 +2632,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 40904826020,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/40904826020",
   "source": "replay",
   "title": "Remove expired deprecation cycles",
-  "verdict": "pending",
+  "verdict": "blocked",
   "version": 1
  },
  "50039": {
@@ -2752,6 +2803,7 @@
   "merge_commit": "0c38601b69653fa2f6f4c88b287e7a8d7c57fb4e",
   "merged_at": "2026-10-29T17:39:44Z",
   "pr": "50059",
+  "reason": "1 red on the base too",
   "red": [
    {
     "contract": "mic-qwen2_5_omni",
@@ -2762,11 +2814,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 40920987871,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/40920987871",
   "source": "replay",
   "title": "[Masking] Skip linear layers for the default full-attention mask",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50060": {
@@ -2808,6 +2862,7 @@
   "merge_commit": "f90e93c4f83974f634860e246cdfd2c68666d605",
   "merged_at": "2026-10-30T05:44:46Z",
   "pr": "50067",
+  "reason": "2 red on the base too",
   "red": [
    {
     "contract": "Granite",
@@ -2826,11 +2881,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 40996213341,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/40996213341",
   "source": "replay",
   "title": "Config annotations",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50068": {
@@ -3174,6 +3231,7 @@
   "merge_commit": "49368678c603decb466897f92f63ce1ca4b44903",
   "merged_at": "2026-11-03T03:02:50Z",
   "pr": "50103",
+  "reason": "2 red on the base too",
   "red": [
    {
     "contract": "Granite",
@@ -3192,11 +3250,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 41551947515,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/41551947515",
   "source": "replay",
   "title": "Chat template output tensor type",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50104": {
@@ -3494,6 +3554,7 @@
   "merge_commit": "0f5a2a5bc682d01ce606533a91125141eb0377bc",
   "merged_at": "2026-11-04T17:55:37Z",
   "pr": "50149",
+  "reason": "3 red on the base too",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -3520,11 +3581,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 41878887047,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/41878887047",
   "source": "replay",
   "title": "Exclude attention-masked padding from repetition penalty",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50150": {
@@ -3550,6 +3613,7 @@
   "merge_commit": "d6c0ec4b16cfb0c643e33085f668fe9928424fe0",
   "merged_at": "2026-11-04T01:27:25Z",
   "pr": "50153",
+  "reason": "1 red on the base too",
   "red": [
    {
     "contract": "mic-qwen2_5_omni",
@@ -3560,11 +3624,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 41010750241,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/41010750241",
   "source": "replay",
   "title": ":rotating_light: Finally drop rope deltas from ModelOutput!",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50155": {
@@ -3574,6 +3640,7 @@
   "merge_commit": "d284899a08e8e5e87c007f82d3b372f3f357b755",
   "merged_at": "2026-10-30T07:23:17Z",
   "pr": "50155",
+  "reason": "2 red on the base too",
   "red": [
    {
     "contract": "Granite",
@@ -3592,11 +3659,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 41019765074,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/41019765074",
   "source": "replay",
   "title": "v5.23.0-dev0",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50156": {
@@ -3652,6 +3721,7 @@
   "merge_commit": "865e28f9d6fd255d8cbad2b8e7ee19a0738e3dbe",
   "merged_at": "2026-11-03T05:29:59Z",
   "pr": "50160",
+  "reason": "2 red on the base too",
   "red": [
    {
     "contract": "Granite",
@@ -3670,11 +3740,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 41562775284,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/41562775284",
   "source": "replay",
   "title": "\ud83d\udea8 Safe-ize pi0 graphs",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50161": {
@@ -3885,6 +3957,7 @@
   "merge_commit": "11d500747477451544f0fe622c5337cb16b12347",
   "merged_at": "2026-11-03T13:21:58Z",
   "pr": "50210",
+  "reason": "3 green when replayed",
   "red": [
    {
     "contract": "mic-llava",
@@ -3911,11 +3984,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 41473610986,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/41473610986",
   "source": "replay",
   "title": "fix(pipelines): preserve batched generation metadata",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50214": {
@@ -4379,6 +4454,7 @@
   "merge_commit": "409c349011c1099d66501d6c424ba411b9835a19",
   "merged_at": "2026-11-03T01:36:32Z",
   "pr": "50281",
+  "reason": "2 red on the base too",
   "red": [
    {
     "contract": "Granite",
@@ -4397,11 +4473,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 41556516342,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/41556516342",
   "source": "replay",
   "title": "[Distributed] Set `device_id` only for NCCL",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50282": {
@@ -4445,6 +4523,7 @@
   "merge_commit": "677b9ff1bccf61d696018dd59b969207ef7849c2",
   "merged_at": "2026-11-06T02:17:29Z",
   "pr": "50284",
+  "reason": "3 red on the base too",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -4471,11 +4550,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 41964953299,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/41964953299",
   "source": "replay",
   "title": "ZeRO-3: read weights on rank 0 only and convert them one group at a time",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50285": {
@@ -4487,6 +4568,7 @@
   "merge_commit": "522cbe68e0c1b1ac0c648d3d6aeebb0a23194a9f",
   "merged_at": "2026-11-06T02:28:56Z",
   "pr": "50285",
+  "reason": "3 red on the base too",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -4513,11 +4595,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 42147402323,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42147402323",
   "source": "replay",
   "title": "[`distributed`] Add HSDP (`dp_replicate_size`) to `DistributedConfig`",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50286": {
@@ -4529,6 +4613,7 @@
   "merge_commit": "8833c9181eec925f1b4e0096db516462044345df",
   "merged_at": "2026-11-06T03:33:56Z",
   "pr": "50286",
+  "reason": "3 red on the base too",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -4555,11 +4640,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 42154100653,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42154100653",
   "source": "replay",
   "title": "[`distributed`] Trainer: reduce FSDP/HSDP gradients on the last micro-batch only",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50292": {
@@ -4569,6 +4656,7 @@
   "merge_commit": "b3187c7faec959b0e5facb40424e68441095adca",
   "merged_at": "2026-11-05T03:09:22Z",
   "pr": "50292",
+  "reason": "3 red on the base too",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -4595,11 +4683,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 41955035686,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/41955035686",
   "source": "replay",
   "title": "[`distributed`] Divide the expert gradients once when `efsdp_size == 1`",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50293": {
@@ -4611,6 +4701,7 @@
   "merge_commit": "bbe484b5680f9cdf4d51bafc6b775b136558ab43",
   "merged_at": "2026-11-06T03:02:46Z",
   "pr": "50293",
+  "reason": "3 red on the base too",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -4637,11 +4728,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 42150606737,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42150606737",
   "source": "replay",
   "title": "[`distributed`] Support HSDP with expert parallelism",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50294": {
@@ -5160,13 +5253,24 @@
   "version": 1
  },
  "50346": {
-  "blocked": [],
+  "blocked": [
+   {
+    "contract": "MiniMax-M3-MXFP8",
+    "failure": "logits_probe: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "MiniMax-M3-MXFP8-mic",
+    "variant": "bfloat16"
+   }
+  ],
   "head": "1df92105a6838897765beea7ab9f5531de800402",
   "labels": [],
+  "main_after": "fail",
   "merge_commit": "e20e0787c9863f4b78781e603adfe6648415a854",
   "merged_at": "2026-11-10T02:37:28Z",
   "pr": "50346",
-  "reason": "e20e0787c9863f4b78781e603adfe6648415a854^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
+  "reason": "16 red on the base too",
+  "rebaselined": [],
   "red": [
    {
     "contract": "Wav2Vec2",
@@ -5305,12 +5409,13 @@
     "variant": "bfloat16"
    }
   ],
-  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 2,
   "run_id": 42737287203,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42737287203",
   "source": "replay",
   "title": "Fix MiniMax-M3-VL packed vision attention isolation",
-  "verdict": "unmeasured",
+  "verdict": "blocked",
   "version": 1
  },
  "50348": {
@@ -5336,6 +5441,7 @@
   "merge_commit": "a15175e3cc679f6b1f11d7ffdd04cb00bead4c43",
   "merged_at": "2026-11-05T14:55:39Z",
   "pr": "50349",
+  "reason": "3 red on the base too",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -5362,11 +5468,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 42043132224,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42043132224",
   "source": "replay",
   "title": "Keep enabling checkpointing on models that only define gradient_checkpointing_enable",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50353": {
@@ -5440,6 +5548,7 @@
   "merge_commit": "5ea23808403f2e434e47e83cc696aa61a62ac7f2",
   "merged_at": "2026-11-05T15:41:28Z",
   "pr": "50362",
+  "reason": "3 red on the base too",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -5466,11 +5575,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 42046552763,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42046552763",
   "source": "replay",
   "title": "Don't pick torchcodec when it can't load or has no FFmpeg",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50364": {
@@ -5779,12 +5890,26 @@
   "version": 1
  },
  "50384": {
-  "blocked": [],
+  "blocked": [
+   {
+    "contract": "PaddleOCR-VL",
+    "failure": "logits.probe: max delta 0.00391 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "08c55fd37a8aae285dd59fe3b3954da7630c5da1",
+    "target": "tibetan-ocr-mic",
+    "variant": "bfloat16"
+   }
+  ],
   "head": "63c77b4a647e4b910227cb6338cf859d1ef17fa0",
   "labels": [],
+  "main_after": "fail",
   "merge_commit": "924266c478f7defb9841e9a759672b1234d6145c",
   "merged_at": "2026-11-05T11:07:51Z",
   "pr": "50384",
+  "reason": "",
+  "rebaselined": [
+   "2026-11-05"
+  ],
   "red": [
    {
     "contract": "PaddleOCR-VL",
@@ -5795,11 +5920,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 41989837497,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/41989837497",
   "source": "replay",
   "title": "Fix PaddleOCR-VL vision position interpolation alignment",
-  "verdict": "pending",
+  "verdict": "blocked",
   "version": 1
  },
  "50385": {
@@ -5851,6 +5978,7 @@
   "merge_commit": "2aab563bd5c98d748e1db3e055d1527468631b8d",
   "merged_at": "2026-11-05T14:00:36Z",
   "pr": "50388",
+  "reason": "2 red on the base too",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -5869,11 +5997,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 42012771701,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42012771701",
   "source": "replay",
   "title": "[`SDPA`] Fix decode under compile",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50391": {
@@ -6088,6 +6218,7 @@
   "merge_commit": "2ffebc8c37cabaa20d1a310cb2952c9e35b96e83",
   "merged_at": "2026-11-05T15:25:30Z",
   "pr": "50404",
+  "reason": "3 red on the base too",
   "red": [
    {
     "contract": "GroundingDINO",
@@ -6114,11 +6245,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 42044208256,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42044208256",
   "source": "replay",
   "title": "[CB] Disable streams on MPS to fix continuous batching with torch 2.15",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50406": {
@@ -6510,7 +6643,7 @@
   "merge_commit": "9f8c7c9409bc619a7bb091cbc56d348d61120db0",
   "merged_at": "2026-11-10T01:49:52Z",
   "pr": "50427",
-  "reason": "9f8c7c9409bc619a7bb091cbc56d348d61120db0^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
+  "reason": "1 red on the base too",
   "red": [
    {
     "contract": "PaddleOCR-VL",
@@ -6521,12 +6654,13 @@
     "variant": "bfloat16"
    }
   ],
-  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 2,
   "run_id": 42706314328,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42706314328",
   "source": "replay",
   "title": "Fix Qwen VL positions when a text cache is reused with a new image",
-  "verdict": "unmeasured",
+  "verdict": "clear",
   "version": 1
  },
  "50428": {
@@ -6917,13 +7051,122 @@
   "version": 1
  },
  "50475": {
-  "blocked": [],
+  "blocked": [
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 0.736 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Wav2Vec2",
+    "failure": "training.loss: max delta 1.29 over tolerance",
+    "fleet": "control",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "mic-wav2vec2-base-960h-slim",
+    "variant": "default"
+   },
+   {
+    "contract": "BART",
+    "failure": "training.loss: max delta 0.00195 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "bart-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BLIP2",
+    "failure": "training.loss: max delta 0.0209 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "blip2-opt-2.7b-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "BigBirdPegasus",
+    "failure": "training.loss: max delta 0.0625 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "bigbird-pegasus-large-arxiv-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Florence-2",
+    "failure": "training.loss: max delta 0.000637 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "Florence-2-base-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Hubert",
+    "failure": "training.loss: max delta 32.4 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "hubert-large-ls960-ft-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "MarianMT",
+    "failure": "training.loss: max delta 0.0114 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "opus-mt-fr-en-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Mask2Former",
+    "failure": "training.loss: max delta 0.0548 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "mask2former-swin-tiny-coco-instance-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "OPT",
+    "failure": "training.loss: max delta 0.00194 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "opt-125m-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "Pegasus",
+    "failure": "logits.probe: max delta 0.25 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "pegasus-xsum-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "WavLM",
+    "failure": "training.loss: max delta 0.0583 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "wavlm-base-plus-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-table_transformer",
+    "failure": "training.loss: max delta 0.00256 over tolerance",
+    "fleet": "prototypes",
+    "fleet_revision": "ba95bc3ce2877721cddd0918e14ae58e0b4b83bf",
+    "target": "table_transformer-mic",
+    "variant": "bfloat16"
+   }
+  ],
   "head": "17ee15a915ee03cc6d25fbeba8452966166fad42",
   "labels": [],
+  "main_after": "fail",
   "merge_commit": "147e66b34836d55637ddc9a936e51f5b77b12802",
   "merged_at": "2026-11-09T18:41:58Z",
   "pr": "50475",
-  "reason": "147e66b34836d55637ddc9a936e51f5b77b12802^: Command '['/usr/local/bin/python', '-m', 'pip', 'install', '--quiet', 'hf-doc-builder==0.6.0.dev0']' returned non-zero exit status 1.",
+  "reason": "",
+  "rebaselined": [
+   "2026-11-12"
+  ],
   "red": [
    {
     "contract": "Wav2Vec2",
@@ -7030,12 +7273,13 @@
     "variant": "bfloat16"
    }
   ],
-  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45884804550",
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 2,
   "run_id": 42661304068,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42661304068",
   "source": "replay",
   "title": "[Models] Fix torch.compile fullgraph training across models when layerdrop=0.0",
-  "verdict": "unmeasured",
+  "verdict": "blocked",
   "version": 1
  },
  "50478": {
@@ -8028,6 +8272,7 @@
   "merge_commit": "715b48b1c86aefbadb1d87ff09c34dcc3a50573f",
   "merged_at": "2026-11-11T12:47:35Z",
   "pr": "50583",
+  "reason": "16 red on the base too",
   "red": [
    {
     "contract": "Wav2Vec2",
@@ -8158,11 +8403,13 @@
     "variant": "bfloat16"
    }
   ],
+  "replay_run": "https://github.com/huggingface/transformers-mic/actions/runs/45948001559",
+  "replay_tries": 1,
   "run_id": 43018873963,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/43018873963",
   "source": "replay",
   "title": "Support Enum in get_json_schema, raise on custom classes",
-  "verdict": "pending",
+  "verdict": "clear",
   "version": 1
  },
  "50585": {
