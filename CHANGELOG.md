@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `known_failures` entries can be scoped to integrations (`"integrations": ["vllm"]`), like `variants` and
+  `platforms`: a target that fails in one integration of a contract and passes in another is xfail in the first
+  only, instead of the passing one being reported as "listed in known_failures but passes".
+
 ## [0.1.4] - 2026-11-25
 
 ### Added
