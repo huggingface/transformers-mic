@@ -8,13 +8,13 @@ Each PR failure is classified on the day it first failed: **infra** (setup error
 
 Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers_daily_ci`) — bisected to a commit, or a sticky failure's first day — is replayed with the model's fixture contracts as Transformers PR CI runs them (today's fleets; control in the default and bfloat16 variants, prototypes in bfloat16; `run-model-contracts` on the same runner and image) on the commit before it and on the commit that broke it. When that commit added the model, only its side runs.
 
-**Catch rate: 12 of 15** (80%) — caught / (caught + missed).
+**Catch rate: 12 of 13** (92%) — caught / (caught + missed).
 
 | verdict | regressions | meaning |
 |---|---|---|
 | caught | 12 | the contracts' result changes between the two commits: green to red, or red to green when the baseline was recorded after the change |
-| missed | 3 | green on both |
-| not-a-regression | 6 | a human reproduced the failing test on both sides of the range: the failure is not from these commits (the environment, a Hub checkpoint, a tokenizer); see the note |
+| missed | 1 | green on both |
+| not-a-regression | 8 | a human reproduced the failing test on both sides of the range: the failure is not from these commits (the environment, a Hub checkpoint, a tokenizer); see the note |
 | already-red | 10 | red on both: says nothing about this regression |
 | no-code-change | 1 | nothing between the two commits changes code the model runs (the same commit, or only CI images, docs, tests or other models): nothing for a contract to catch |
 | already-failing | 8 | a sticky onset the daily CI was already failing the day before: a gap in the dashboard's day strip, not a new failure |
@@ -36,7 +36,7 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 | 2026-11-26 | nemotron | sticky onset | out-of-scope |  |
 | 2026-11-25 | mistral3 | sticky onset | not-reproduced | the daily CI did not fail it |
 | 2026-11-24 | qwen3_5 | sticky onset | already-failing | the daily CI failed it the day before too |
-| 2026-11-24 | mistral3 | sticky onset | [missed](https://github.com/huggingface/transformers-mic/actions/runs/45581630080) | 53 commits in range;  |
+| 2026-11-24 | mistral3 | sticky onset | [not-a-regression](https://github.com/huggingface/transformers-mic/actions/runs/45581630080) | 53 commits in range; Upstream's bisect (daily CI 2026-11-25 new_failures_with_bad_commit) marked test_mistral3_integration_generate_text_only, _generate and _batched_generate_multi_image flaky: each b |
 | 2026-11-21 | axk1 | sticky onset | duplicate | same regression as 50975#axk1 |
 | 2026-11-21 | axk1 | [PR #50975](https://github.com/huggingface/transformers/pull/50975) | [not-a-regression](https://github.com/huggingface/transformers-mic/actions/runs/44887652085) | #50975 keeps gate.weight in fp32 on load and forward already upcasts it, so only an fp32-on-disk checkpoint changes. tiny-axk1 is all F32 loaded as bf16 (the test's expectations were recorded with a b |
 | 2026-11-21 | deepseek_v2 | [PR #49846](https://github.com/huggingface/transformers/pull/49846) | out-of-scope |  |
@@ -77,7 +77,7 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 | 2026-11-08 | whisper | sticky onset | out-of-scope |  |
 | 2026-11-08 | unlimited_ocr | sticky onset | out-of-scope |  |
 | 2026-11-08 | owlvit | sticky onset | out-of-scope |  |
-| 2026-11-08 | llava | sticky onset | [missed](https://github.com/huggingface/transformers-mic/actions/runs/45788297989) | 339 commits in range;  |
+| 2026-11-08 | llava | sticky onset | [not-a-regression](https://github.com/huggingface/transformers-mic/actions/runs/45788297989) | 339 commits in range; Upstream's bisect (daily CI 2026-11-08 new_failures_with_bad_commit) marked test_batched_generation, test_pixtral and test_small_model_integration_test_llama_single flaky: each b |
 | 2026-11-08 | janus | sticky onset | no-code-change | nothing in the range changes code the model runs: .github/workflows/build-docker-images.yml, docker/transformers-all-latest-gpu/Dockerfile |
 | 2026-11-08 | deepseek_v32 | sticky onset | out-of-scope |  |
 | 2026-11-07 | vipllava | sticky onset | out-of-scope |  |
