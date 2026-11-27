@@ -50,14 +50,20 @@ def test_the_schema_rejects_an_empty_scope():
 
 def test_an_integration_scoped_entry_covers_only_its_integrations():
     known = {"Qwen2/qwen2-mic": {"issue": "backend bug", "integrations": ["vllm"], "variants": ["default"]}}
-    assert run.known_entry(known, "Qwen2", "qwen2-mic", "default", "cpu-x86_64", "vllm")["issue"] == "backend bug"
-    assert run.known_entry(known, "Qwen2", "qwen2-mic", "default", "cpu-x86_64", "transformers") is None
+    assert (
+        run.known_entry(known, "Qwen2", "qwen2-mic", "default", "cpu-x86_64", integration="vllm")["issue"]
+        == "backend bug"
+    )
+    assert run.known_entry(known, "Qwen2", "qwen2-mic", "default", "cpu-x86_64", integration="transformers") is None
     # every scope must match: the right integration with another variant is not covered
-    assert run.known_entry(known, "Qwen2", "qwen2-mic", "bfloat16", "cpu-x86_64", "vllm") is None
+    assert run.known_entry(known, "Qwen2", "qwen2-mic", "bfloat16", "cpu-x86_64", integration="vllm") is None
     # an entry without integrations keeps covering every integration
     unscoped = {"Qwen2/qwen2-mic": {"issue": "bug", "variants": ["default"]}}
     for integration in ("transformers", "vllm", None):
-        assert run.known_entry(unscoped, "Qwen2", "qwen2-mic", "default", "cuda", integration)["issue"] == "bug"
+        assert (
+            run.known_entry(unscoped, "Qwen2", "qwen2-mic", "default", "cuda", integration=integration)["issue"]
+            == "bug"
+        )
 
 
 def test_the_schema_rejects_an_empty_integrations_scope():
