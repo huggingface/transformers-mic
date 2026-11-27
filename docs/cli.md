@@ -1133,7 +1133,9 @@ variant of the Transformers integration (the only integration, when there is no
 Transformers one), and of every other integration this workspace changed.
 
 Another integration is unchanged, and carried over, when every local file under
-`integrations/<name>/` (usage and reviewed expectations), its `integration.json`
+`integrations/<name>/` (usage and reviewed expectations), the files directly in
+the folders above a nested one (`integrations/vllm/*`, shared by both vLLM
+integrations), its `integration.json`
 section, the output rules it inherits, the checkpoints and fixtures, and the
 fixture weights (`build.json`) are identical to the Hub revision the workspace's
 lock pins. The Hub's `main` must also still have the same section and usage;

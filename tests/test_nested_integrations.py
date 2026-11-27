@@ -246,6 +246,57 @@ def test_carryover_compares_each_nested_folder_alone(workspace, tmp_path):
     )
 
 
+def test_carryover_counts_the_files_both_vllm_integrations_share(workspace, tmp_path):
+    shared = workspace.contract_root / "integrations/vllm/requirements.txt"
+    shared.write_text("vllm>=0.34\n")
+    fetch = published(workspace, tmp_path)
+    # the parent folder's own files belong to both; its subfolders are the siblings, not shared
+    assert sorted(carryover.integration_files(workspace.contract_root, workspace.manifest, "vllm/vllm")) == [
+        "integrations/vllm/requirements.txt",
+        "integrations/vllm/vllm/expectations/cpu-x86_64/qwen2-vllm-mic.json",
+        "integrations/vllm/vllm/usage.md",
+    ]
+    assert "integrations/vllm/requirements.txt" in carryover.integration_files(
+        workspace.contract_root, workspace.manifest, "vllm/transformers"
+    )
+    assert carryover.plan(workspace, fetch=fetch) == {"vllm/transformers": "primary", "vllm/vllm": None}
+    # a change to a shared file is a change of every nested integration: none is carried over
+    shared.write_text("vllm>=0.35\n")
+    assert carryover.plan(workspace, fetch=fetch)["vllm/vllm"].startswith(
+        "files differ: integrations/vllm/requirements.txt vs bbbbbbbbbbbb"
+    )
+    # so is a shared file the Hub does not have yet
+    shared.write_text("vllm>=0.34\n")
+    (workspace.contract_root / "integrations/vllm/constraints.txt").write_text("torch<3\n")
+    assert carryover.plan(workspace, fetch=fetch)["vllm/vllm"].startswith(
+        "files differ: integrations/vllm/constraints.txt vs bbbbbbbbbbbb"
+    )
+
+
+def test_carryover_fetches_the_shared_files_of_nested_integrations(monkeypatch):
+    import huggingface_hub
+
+    fetched = []
+    monkeypatch.setattr(
+        huggingface_hub,
+        "snapshot_download",
+        lambda repo, revision, allow_patterns: fetched.append(allow_patterns) or "snapshot",
+    )
+    carryover.published("huggingface-mic/qwen2-vllm-mic", "b" * 40, ["vllm/vllm", "sentence_transformers"])
+    assert fetched == [
+        [
+            "integration.json",
+            "build.json",
+            "integrations/vllm/vllm/**",
+            "integrations/sentence_transformers/**",
+            "integrations/vllm/*",
+        ]
+    ]
+    # a flat integration has no folder above it
+    assert carryover.shared_folders("sentence_transformers") == []
+    assert carryover.shared_folders("vllm/vllm") == ["vllm"]
+
+
 @pytest.mark.requires_runtime
 def test_publish_stages_nested_expectations_and_carries_one(workspace, tmp_path, monkeypatch):
     for name in NAMES:
