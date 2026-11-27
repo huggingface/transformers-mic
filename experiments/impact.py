@@ -1818,19 +1818,27 @@ def merged_replay_verdicts(records, merged, run_url=""):
 
 def settle_merged(merged, baselines, today_day, main_rows=None):
     """What happened after each blocked merge: the blocked contracts re-recorded (`rebaselined`), and
-    main on the blocked cases (`main_after`: fail, or ok once MAIN_WATCH_DAYS passed green)."""
-    waiting = [e for e in merged.values() if e.get("verdict") == "blocked" and e.get("main_after") is None]
-    if not waiting:
+    main on the blocked cases (`main_after`: fail, or ok once MAIN_WATCH_DAYS passed green), and how
+    many of them are red on main today (`still_broken`, see still_broken())."""
+    blocked = [e for e in merged.values() if e.get("verdict") == "blocked"]
+    if not blocked:
         return
     if main_rows is None:
         main_rows = mic_rows("main", 30, "model")[0]
     first_day = today_day - 30 + 1
     failed = defaultdict(set)  # (target, variant) -> days main failed it
+    latest = {}  # (target, variant) -> whether main's last day with a run of it had no pass
     for row in main_rows:
+        key = row.get("target"), row.get("variant") or "default"
         for offset, bucket in enumerate(row.get("daily") or []):
             if bucket.get("fail"):
-                failed[row.get("target"), row.get("variant") or "default"].add(first_day + offset)
-    for entry in waiting:
+                failed[key].add(first_day + offset)
+            if bucket.get("pass") or bucket.get("fail"):
+                latest[key] = not bucket.get("pass")
+    for entry in blocked:
+        seen = [latest[c["target"], c["variant"]] for c in entry["blocked"] if (c["target"], c["variant"]) in latest]
+        entry["still_broken"], entry["still_seen"] = (sum(seen), len(seen)) if seen else (None, 0)
+    for entry in (e for e in blocked if e.get("main_after") is None):
         merged_day = int(stamp(entry["merged_at"]) // 86400)
         merged_date = entry["merged_at"][:10]
         until = (dt.date.fromisoformat(merged_date) + dt.timedelta(days=REBASELINE_DAYS)).isoformat()
@@ -1867,6 +1875,16 @@ def merged_flag(entry, label=None):
     return "to-review", "watching main"
 
 
+def still_broken(entry):
+    """Whether main still fails the blocked cases: "yes", "2 of 3", "no", or "" when main has not run them
+    in 30 days. A case is broken when main's last day with a run of it had no pass; cases main did not
+    run are left out."""
+    count, seen = entry.get("still_broken"), entry.get("still_seen", 0)
+    if count is None:
+        return ""
+    return "no" if count == 0 else "yes" if count == seen else f"{count} of {seen}"
+
+
 def merged_rows(merged, labels, first, last):
     """Every blocked merge in the window, newest first, with its flag."""
     rows = []
@@ -1885,6 +1903,7 @@ def merged_rows(merged, labels, first, last):
                 "run": entry.get("run_url", ""),
                 "flag": flag,
                 "why": why,
+                "still_broken": still_broken(entry),
             }
         )
     return rows
@@ -1918,13 +1937,16 @@ def merged_lines(merged, labels, today):
         "",
     ]
     if rows:
-        lines += ["| merged | PR | blocked cases | source | flag | why |", "|---|---|---|---|---|---|"]
+        lines += [
+            "| merged | PR | blocked cases | source | flag | why | still broken |",
+            "|---|---|---|---|---|---|---|",
+        ]
         for r in rows:
             title = r["title"][:60].replace("|", "/")
             cases = ", ".join(r["cases"][:4]) + (f" (+{len(r['cases']) - 4})" if len(r["cases"]) > 4 else "")
             lines.append(
                 f"| {r['merged']} | [#{r['pr']}](https://github.com/{TRANSFORMERS}/pull/{r['pr']}) {title} | "
-                f"{cases} | [{r['source']}]({r['run']}) | {r['flag']} | {r['why']} |"
+                f"{cases} | [{r['source']}]({r['run']}) | {r['flag']} | {r['why']} | {r['still_broken'] or '–'} |"
             )
         lines += [
             "",

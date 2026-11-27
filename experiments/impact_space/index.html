@@ -96,7 +96,7 @@
   <p class="muted" id="merged-note"></p>
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Merged</th><th>PR</th><th>Blocked cases</th><th>Source</th><th>Flag</th><th>Why</th></tr></thead>
+      <thead><tr><th>Merged</th><th>PR</th><th>Blocked cases</th><th>Source</th><th>Flag</th><th>Why</th><th title="Main's last run of the blocked cases still fails them">Still broken</th></tr></thead>
       <tbody id="merged"></tbody>
     </table>
   </div>
@@ -230,6 +230,10 @@
       flag.textContent = r.flag;
       cell(row, flag);
       cell(row, r.why || "");
+      const broken = document.createElement("span");
+      if (r.still_broken && r.still_broken !== "no") broken.className = "flag-real";
+      broken.textContent = r.still_broken || "–";
+      cell(row, broken);
       body.appendChild(row);
     }
     if (!(m.rows || []).length) {
