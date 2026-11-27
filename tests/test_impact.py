@@ -1399,6 +1399,30 @@ def test_settle_merged_and_flags():
     assert recent["9"].get("main_after") is None and impact.merged_flag(recent["9"])[0] == "to-review"
 
 
+def test_still_broken_reads_mains_last_run_of_each_blocked_case():
+    case_b = {**impact.gate_case(result("b-mic")), "contract": "B"}
+    entry = blocked_entry()
+    entry["blocked"].append(case_b)
+    fixed = [{"pass": 0, "fail": 0} for _ in range(30)]
+    fixed[5], fixed[6] = {"pass": 0, "fail": 2}, {"pass": 3, "fail": 0}  # failed, then fixed
+    broken = [{"pass": 0, "fail": 0} for _ in range(30)]
+    broken[5], broken[20] = {"pass": 1, "fail": 0}, {"pass": 0, "fail": 1}  # passed, then broke
+    rows = [
+        {"target": "a-mic", "variant": "bfloat16", "daily": fixed},
+        {"target": "b-mic", "variant": "bfloat16", "daily": broken},
+    ]
+    merged = {"9": entry}
+    impact.settle_merged(merged, [], 20000, rows)
+    assert entry["still_broken"] == 1 and impact.still_broken(entry) == "1 of 2"
+    impact.settle_merged(merged, [], 20000, rows[1:])
+    assert impact.still_broken(entry) == "yes"  # a-mic not run on main: left out
+    impact.settle_merged(merged, [], 20000, [])
+    assert impact.still_broken(entry) == ""
+    rows[1]["daily"][20] = {"pass": 1, "fail": 0}
+    impact.settle_merged(merged, [], 20000, rows)
+    assert impact.still_broken(entry) == "no"
+
+
 def test_merged_lines_lists_blocked_merges_in_the_window():
     merged = {
         "9": {**blocked_entry(), "main_after": "ok", "run_url": "u"},
