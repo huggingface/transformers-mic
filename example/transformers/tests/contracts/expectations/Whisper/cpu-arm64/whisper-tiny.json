@@ -2,7 +2,7 @@
  "recorded_with": {
   "contract": "hf-internal-testing/Whisper-integration",
   "contract_name": "Whisper",
-  "contract_revision": "d5f035b6fb3376d502de523606c5cef5305d294e",
+  "contract_revision": "local",
   "framework": "transformers",
   "variant": "default",
   "target": "whisper-tiny",
@@ -10,7 +10,7 @@
   "revision": "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
   "environment": {
    "python": "3.11.14",
-   "transformers": "5.23.0.dev0",
+   "transformers": "5.19.0.dev0",
    "sentence-transformers": null,
    "torch": "2.15.0",
    "torchvision": "0.29.2",
@@ -32,7 +32,7 @@
     "whisper-decode-tensor-batch"
    ]
   },
-  "seconds": 4.92,
+  "seconds": 6.55,
   "platform": "cpu-arm64",
   "template_date": "2026-01-01"
  },
@@ -170,6 +170,12 @@
    [
     509
    ]
+  ],
+  "assisted_sampled_lengths": [
+   32,
+   32,
+   32,
+   32
   ],
   "longform_tokens": [
    [

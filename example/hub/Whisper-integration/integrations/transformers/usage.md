@@ -134,6 +134,22 @@ continued = model.generate(
 print(processor.batch_decode(continued, skip_special_tokens=True))
 ```
 
+## Sample with an assistant
+
+Assisted generation also samples. The full model then accepts a drafted token only with some probability, so drafts get rejected and the assistant's cache is rolled back to the accepted length before it drafts again. A fixed length (`min_new_tokens` and `max_new_tokens` set to the same value) keeps decoding through many of those rollbacks.
+
+```py runnable:transcribe:3
+set_seed(0)
+sampled = [
+    model.generate(
+        features[None], language="en", task="transcribe", assistant_model=assistant,
+        do_sample=True, temperature=0.3, min_new_tokens=32, max_new_tokens=32,
+    )[0]
+    for features in inputs.input_features
+]
+print([len(tokens) for tokens in sampled])
+```
+
 ## One training step
 
 ```py runnable:transcribe:3
@@ -173,6 +189,7 @@ if os.environ.get("MIC_RUNNER"):  # doc-builder: hide
         "feature_extractor_config_keys": sorted(feature_config),
         "max_length_tokens": limited.tolist(),
         "assisted_tokens": assisted,
+        "assisted_sampled_lengths": [len(tokens) for tokens in sampled],
         "longform_tokens": longform.tolist(),
         "continued_longform_tokens": continued.tolist(),
         "training": {

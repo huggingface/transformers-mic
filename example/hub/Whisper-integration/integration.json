@@ -83,6 +83,9 @@
     "assisted_tokens": {
       "compare": "exact"
     },
+    "assisted_sampled_lengths": {
+      "compare": "exact"
+    },
     "longform_tokens": {
       "compare": "exact"
     },
