@@ -1394,19 +1394,6 @@
   "verdict": "not-covered",
   "version": 9
  },
- "51180#whisper": {
-  "bad": "3df5bbbfa230cbfe19baa7cb6aec1feff56bc085",
-  "commits": 1,
-  "contracts": [
-   "huggingface-mic/whisper-mic",
-   "huggingface-mic/whisper-tiny-mic"
-  ],
-  "failures": [],
-  "parent": "ebf21a5acd6c49544ca035cef96e4c05a429211a",
-  "run": "https://github.com/huggingface/transformers-mic/actions/runs/45970362902",
-  "verdict": "missed",
-  "version": 9
- },
  "sticky#albert#2026-10-06": {
   "verdict": "out-of-scope",
   "version": 9
