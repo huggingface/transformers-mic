@@ -1972,6 +1972,8 @@
   "run_id": 42738314842,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42738314842",
   "source": "replay",
+  "still_broken": 0,
+  "still_seen": 1,
   "title": "[serge] Fix 8 integration tests for model `grounding_dino` failing with `output_mismatch` (tensor values differ (6), oth",
   "verdict": "blocked",
   "version": 1
@@ -2643,6 +2645,8 @@
   "run_id": 40904826020,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/40904826020",
   "source": "replay",
+  "still_broken": 1,
+  "still_seen": 1,
   "title": "Remove expired deprecation cycles",
   "verdict": "blocked",
   "version": 1
@@ -5423,6 +5427,8 @@
   "run_id": 42737287203,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42737287203",
   "source": "replay",
+  "still_broken": 0,
+  "still_seen": 1,
   "title": "Fix MiniMax-M3-VL packed vision attention isolation",
   "verdict": "blocked",
   "version": 1
@@ -5895,6 +5901,8 @@
   "run_id": 44676135620,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44676135620",
   "source": "replay",
+  "still_broken": 0,
+  "still_seen": 1,
   "title": ":rotating_light: Multimodal Model Output for generative LMs",
   "verdict": "blocked",
   "version": 1
@@ -5935,6 +5943,8 @@
   "run_id": 41989837497,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/41989837497",
   "source": "replay",
+  "still_broken": 0,
+  "still_seen": 1,
   "title": "Fix PaddleOCR-VL vision position interpolation alignment",
   "verdict": "blocked",
   "version": 1
@@ -6723,6 +6733,8 @@
   "run_id": 45762544835,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/45762544835",
   "source": "gate",
+  "still_broken": 1,
+  "still_seen": 2,
   "title": "\ud83d\udea8 Rework slightly subprocessor loading",
   "verdict": "blocked",
   "version": 1
@@ -7294,6 +7306,8 @@
   "run_id": 42661304068,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42661304068",
   "source": "replay",
+  "still_broken": 1,
+  "still_seen": 13,
   "title": "[Models] Fix torch.compile fullgraph training across models when layerdrop=0.0",
   "verdict": "blocked",
   "version": 1
@@ -8600,6 +8614,8 @@
   "run_id": 42860518695,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/42860518695",
   "source": "replay",
+  "still_broken": 0,
+  "still_seen": 1,
   "title": "Revert \"Add `transcription` input arg to `apply_transcription_request ` (#49869)\"",
   "verdict": "blocked",
   "version": 1
@@ -11162,6 +11178,8 @@
   "run_id": 44557888468,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44557888468",
   "source": "replay",
+  "still_broken": 0,
+  "still_seen": 2,
   "title": "Move GPT-J and CodeGen onto the attention interface with modular files",
   "verdict": "blocked",
   "version": 1
@@ -11249,6 +11267,8 @@
   "run_id": 44575416194,
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44575416194",
   "source": "replay",
+  "still_broken": 0,
+  "still_seen": 1,
   "title": "Always ensure correct dtype for _keep_in_fp32_modules_strict",
   "verdict": "blocked",
   "version": 1
@@ -13314,6 +13334,36 @@
   "verdict": "clear",
   "version": 1
  },
+ "51222": {
+  "blocked": [],
+  "head": "d36cc19021efc18025d20618142f0aae5ec472b3",
+  "labels": [],
+  "merge_commit": "e6f44c33fe6f817411c98aa5d3b0e567a6bb6bdb",
+  "merged_at": "2026-11-27T06:33:25Z",
+  "pr": "51222",
+  "red": [],
+  "run_id": 45764184798,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45764184798",
+  "source": "gate",
+  "title": "Fix PaliGemma labels for unpadded batches",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51223": {
+  "blocked": [],
+  "head": "44ca5e099b6d92c3f13158e527f84cca2ae035a1",
+  "labels": [],
+  "merge_commit": "fc1adcd98cb4fb95c0939c3e2123a673982f9e0e",
+  "merged_at": "2026-11-27T06:36:13Z",
+  "pr": "51223",
+  "red": [],
+  "run_id": 45764237218,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45764237218",
+  "source": "gate",
+  "title": "Fix SmolVLM video prompt frame counts",
+  "verdict": "clear",
+  "version": 1
+ },
  "51225": {
   "blocked": [],
   "head": "69a3aa44067ef922dada2a0e91d935bc0ed4cc6b",
@@ -13689,6 +13739,21 @@
   "verdict": "clear",
   "version": 1
  },
+ "51301": {
+  "blocked": [],
+  "head": "9a0cbbc1382446243197db136a67613ff8d44b06",
+  "labels": [],
+  "merge_commit": "44ee1da4158b5cdb5f836d2ddc489d191bf7d49c",
+  "merged_at": "2026-11-27T09:05:15Z",
+  "pr": "51301",
+  "red": [],
+  "run_id": 45961032870,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45961032870",
+  "source": "gate",
+  "title": "Fix Gemma 4 dropping `audio_outputs`, which made `audio_hidden_states` raise",
+  "verdict": "clear",
+  "version": 1
+ },
  "51307": {
   "blocked": [],
   "head": "f96f2d84b7ec8bda2ecba57fde9130e706c6989f",
@@ -13701,6 +13766,22 @@
   "run_url": "https://github.com/huggingface/transformers/actions/runs/45812681178",
   "source": "gate",
   "title": "Revert it back",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51311": {
+  "blocked": [],
+  "head": "356d4e77d1b66bd93b6b870ab49875e002891e72",
+  "labels": [],
+  "merge_commit": "adcc6878bd98d31ffe85f44b75ee1529a8f56259",
+  "merged_at": "2026-11-27T08:36:46Z",
+  "pr": "51311",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45964708546,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45964708546",
+  "source": "not-run",
+  "title": "Post the model integration contracts gate on the PR",
   "verdict": "clear",
   "version": 1
  },

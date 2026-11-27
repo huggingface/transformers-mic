@@ -5299,6 +5299,30 @@
    "tests/tensor_parallel/test_tensor_parallel.py::TestTensorParallelTiedWeights::test_checkpoint_with_both_tied_keys_matches_tp1_1_different"
   ]
  },
+ "50428#mistral3": {
+  "bad_commit": "3d2d3b3f7bed13f858da128cd932a2f8d36e1490",
+  "culprit_files": [
+   "src/transformers/image_processing_base.py",
+   "src/transformers/models/auto/auto_factory.py",
+   "src/transformers/models/auto/feature_extraction_auto.py",
+   "src/transformers/models/auto/image_processing_auto.py",
+   "src/transformers/models/auto/video_processing_auto.py",
+   "src/transformers/models/ernie4_5_vl_moe/processing_ernie4_5_vl_moe.py",
+   "src/transformers/processing_utils.py",
+   "src/transformers/video_processing_utils.py",
+   "tests/models/auto/test_tokenization_auto.py",
+   "tests/models/phi4_multimodal/test_processing_phi4_multimodal.py"
+  ],
+  "date": "2026-11-27",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/45928276795/job/140275513184",
+  "mic": "missed",
+  "model": "mistral3",
+  "pr": "50428",
+  "tests": [
+   "tests/models/mistral3/test_modeling_mistral3.py::Mistral3IntegrationTest::test_mistral3_integration_batched_generate"
+  ]
+ },
  "50682#inkling2": {
   "bad_commit": "109a7d19bf667168837f32929e00b791e195d14d",
   "date": "2026-11-13",
@@ -5468,6 +5492,126 @@
    "tests/models/dots3_note/test_modeling_dots3_note.py::Dots3NoteHubIntegrationTest::test_image_generation",
    "tests/models/dots3_note/test_modeling_dots3_note.py::Dots3NoteHubIntegrationTest::test_text_generation",
    "tests/models/dots3_note/test_modeling_dots3_note.py::Dots3NoteHubIntegrationTest::test_video_generation"
+  ]
+ },
+ "51092#llama4": {
+  "bad_commit": "2eefc0e29c31b0357a6657976442bde993406cfe",
+  "date": "2026-11-27",
+  "integration": false,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/45928276795/job/140275508385",
+  "mic": "missed",
+  "model": "llama4",
+  "pr": "51092",
+  "tests": [
+   "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_dynamic",
+   "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_generate_dynamic",
+   "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_generate_dynamic_static_cache",
+   "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_generate_static",
+   "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_generate_static_static_cache",
+   "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_static",
+   "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_sdpa_can_compile_dynamic"
+  ]
+ },
+ "51180#mistral": {
+  "bad_commit": "3df5bbbfa230cbfe19baa7cb6aec1feff56bc085",
+  "culprit_files": [
+   "src/transformers/cache_utils.py",
+   "src/transformers/generation/candidate_generator.py",
+   "src/transformers/generation/utils.py",
+   "src/transformers/models/bailing_hybrid/modeling_bailing_hybrid.py",
+   "src/transformers/models/bailing_hybrid/modular_bailing_hybrid.py",
+   "src/transformers/models/bamba/modeling_bamba.py",
+   "src/transformers/models/deepseek_v4/modeling_deepseek_v4.py",
+   "src/transformers/models/deepseek_v4/modular_deepseek_v4.py",
+   "src/transformers/models/falcon_h1/modeling_falcon_h1.py",
+   "src/transformers/models/falcon_mamba/modeling_falcon_mamba.py",
+   "src/transformers/models/glm5_next/modeling_glm5_next.py",
+   "src/transformers/models/glm5_next/modular_glm5_next.py",
+   "src/transformers/models/granitemoehybrid/modeling_granitemoehybrid.py",
+   "src/transformers/models/jamba/modeling_jamba.py",
+   "src/transformers/models/kimi_linear/modeling_kimi_linear.py",
+   "src/transformers/models/lara_mini/modeling_lara_mini.py",
+   "src/transformers/models/mamba/modeling_mamba.py",
+   "src/transformers/models/mamba2/modeling_mamba2.py",
+   "src/transformers/models/mamba2/modular_mamba2.py",
+   "src/transformers/models/nemotron_h/modeling_nemotron_h.py",
+   "src/transformers/models/olmo_hybrid/modeling_olmo_hybrid.py",
+   "src/transformers/models/olmo_hybrid/modular_olmo_hybrid.py",
+   "src/transformers/models/qwen3_5/modeling_qwen3_5.py",
+   "src/transformers/models/qwen3_5/modular_qwen3_5.py",
+   "src/transformers/models/qwen3_5_moe/modeling_qwen3_5_moe.py",
+   "src/transformers/models/qwen3_next/modeling_qwen3_next.py",
+   "src/transformers/models/qwen3_next/modular_qwen3_next.py",
+   "src/transformers/models/qwen4_exp/modeling_qwen4_exp.py",
+   "src/transformers/models/zamba2/modeling_zamba2.py",
+   "tests/generation/test_utils.py",
+   "tests/models/rwkv/test_modeling_rwkv.py"
+  ],
+  "date": "2026-11-27",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/45928276795/job/140275513013",
+  "mic": "missed",
+  "model": "mistral",
+  "pr": "51180",
+  "tests": [
+   "tests/models/mistral/test_modeling_mistral.py::MistralIntegrationTest::test_speculative_generation"
+  ]
+ },
+ "51180#shared": {
+  "bad_commit": "3df5bbbfa230cbfe19baa7cb6aec1feff56bc085",
+  "date": "2026-11-27",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/45928276795/job/140275522814",
+  "mic": "not-covered",
+  "model": null,
+  "pr": "51180",
+  "tests": [
+   "tests/generation/test_utils.py::GenerationIntegrationTests::test_validate_assistant"
+  ]
+ },
+ "51180#whisper": {
+  "bad_commit": "3df5bbbfa230cbfe19baa7cb6aec1feff56bc085",
+  "culprit_files": [
+   "src/transformers/cache_utils.py",
+   "src/transformers/generation/candidate_generator.py",
+   "src/transformers/generation/utils.py",
+   "src/transformers/models/bailing_hybrid/modeling_bailing_hybrid.py",
+   "src/transformers/models/bailing_hybrid/modular_bailing_hybrid.py",
+   "src/transformers/models/bamba/modeling_bamba.py",
+   "src/transformers/models/deepseek_v4/modeling_deepseek_v4.py",
+   "src/transformers/models/deepseek_v4/modular_deepseek_v4.py",
+   "src/transformers/models/falcon_h1/modeling_falcon_h1.py",
+   "src/transformers/models/falcon_mamba/modeling_falcon_mamba.py",
+   "src/transformers/models/glm5_next/modeling_glm5_next.py",
+   "src/transformers/models/glm5_next/modular_glm5_next.py",
+   "src/transformers/models/granitemoehybrid/modeling_granitemoehybrid.py",
+   "src/transformers/models/jamba/modeling_jamba.py",
+   "src/transformers/models/kimi_linear/modeling_kimi_linear.py",
+   "src/transformers/models/lara_mini/modeling_lara_mini.py",
+   "src/transformers/models/mamba/modeling_mamba.py",
+   "src/transformers/models/mamba2/modeling_mamba2.py",
+   "src/transformers/models/mamba2/modular_mamba2.py",
+   "src/transformers/models/nemotron_h/modeling_nemotron_h.py",
+   "src/transformers/models/olmo_hybrid/modeling_olmo_hybrid.py",
+   "src/transformers/models/olmo_hybrid/modular_olmo_hybrid.py",
+   "src/transformers/models/qwen3_5/modeling_qwen3_5.py",
+   "src/transformers/models/qwen3_5/modular_qwen3_5.py",
+   "src/transformers/models/qwen3_5_moe/modeling_qwen3_5_moe.py",
+   "src/transformers/models/qwen3_next/modeling_qwen3_next.py",
+   "src/transformers/models/qwen3_next/modular_qwen3_next.py",
+   "src/transformers/models/qwen4_exp/modeling_qwen4_exp.py",
+   "src/transformers/models/zamba2/modeling_zamba2.py",
+   "tests/generation/test_utils.py",
+   "tests/models/rwkv/test_modeling_rwkv.py"
+  ],
+  "date": "2026-11-27",
+  "integration": true,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/45928276795/job/140275519807",
+  "mic": "missed",
+  "model": "whisper",
+  "pr": "51180",
+  "tests": [
+   "tests/models/whisper/test_modeling_whisper.py::WhisperModelIntegrationTests::test_speculative_decoding_distil"
   ]
  },
  "sticky#albert#2026-10-06": {
@@ -8042,6 +8186,18 @@
   "tests": [
    "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_no_head",
    "tests/models/oneformer/test_modeling_oneformer.py::OneFormerModelIntegrationTest::test_inference_universal_segmentation_head"
+  ]
+ },
+ "sticky#ovis2_5#2026-11-26": {
+  "date": "2026-11-26",
+  "day": 20783,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "ovis2_5",
+  "run_id": "45928276795",
+  "signal": "RuntimeError",
+  "tests": [
+   "tests/models/ovis2_5/test_modeling_ovis2_5.py::Ovis2_5ModelTest::test_model_parallelism"
   ]
  },
  "sticky#owlv2#2026-11-09": {

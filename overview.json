@@ -27,7 +27,7 @@
    "real": 10,
    "to-review": 0
   },
-  "merged": 554,
+  "merged": 558,
   "pending": 0,
   "rows": [
    {
@@ -41,6 +41,7 @@
     "pr": "50428",
     "run": "https://github.com/huggingface/transformers/actions/runs/45762544835",
     "source": "gate",
+    "still_broken": "1 of 2",
     "title": "\ud83d\udea8 Rework slightly subprocessor loading",
     "why": "red on main after the merge"
    },
@@ -54,6 +55,7 @@
     "pr": "50975",
     "run": "https://github.com/huggingface/transformers/actions/runs/44575416194",
     "source": "replay",
+    "still_broken": "no",
     "title": "Always ensure correct dtype for _keep_in_fp32_modules_strict",
     "why": "red on main after the merge"
    },
@@ -67,6 +69,7 @@
     "pr": "50379",
     "run": "https://github.com/huggingface/transformers/actions/runs/44676135620",
     "source": "replay",
+    "still_broken": "no",
     "title": ":rotating_light: Multimodal Model Output for generative LMs",
     "why": "red on main after the merge"
    },
@@ -81,6 +84,7 @@
     "pr": "50965",
     "run": "https://github.com/huggingface/transformers/actions/runs/44557888468",
     "source": "replay",
+    "still_broken": "no",
     "title": "Move GPT-J and CodeGen onto the attention interface with modular files",
     "why": "red on main after the merge"
    },
@@ -94,6 +98,7 @@
     "pr": "50587",
     "run": "https://github.com/huggingface/transformers/actions/runs/42860518695",
     "source": "replay",
+    "still_broken": "no",
     "title": "Revert \"Add `transcription` input arg to `apply_transcription_request ` (#49869)\"",
     "why": "red on main after the merge"
    },
@@ -107,6 +112,7 @@
     "pr": "49886",
     "run": "https://github.com/huggingface/transformers/actions/runs/42738314842",
     "source": "replay",
+    "still_broken": "no",
     "title": "[serge] Fix 8 integration tests for model `grounding_dino` failing with `output_mismatch` (tensor values differ (6), oth",
     "why": "red on main after the merge"
    },
@@ -120,6 +126,7 @@
     "pr": "50346",
     "run": "https://github.com/huggingface/transformers/actions/runs/42737287203",
     "source": "replay",
+    "still_broken": "no",
     "title": "Fix MiniMax-M3-VL packed vision attention isolation",
     "why": "red on main after the merge"
    },
@@ -145,6 +152,7 @@
     "pr": "50475",
     "run": "https://github.com/huggingface/transformers/actions/runs/42661304068",
     "source": "replay",
+    "still_broken": "1 of 13",
     "title": "[Models] Fix torch.compile fullgraph training across models when layerdrop=0.0",
     "why": "intended change: re-recorded on 2026-11-12"
    },
@@ -158,6 +166,7 @@
     "pr": "50384",
     "run": "https://github.com/huggingface/transformers/actions/runs/41989837497",
     "source": "replay",
+    "still_broken": "no",
     "title": "Fix PaddleOCR-VL vision position interpolation alignment",
     "why": "intended change: re-recorded on 2026-11-05"
    },
@@ -171,6 +180,7 @@
     "pr": "50037",
     "run": "https://github.com/huggingface/transformers/actions/runs/40904826020",
     "source": "replay",
+    "still_broken": "yes",
     "title": "Remove expired deprecation cycles",
     "why": "red on main after the merge"
    }
@@ -183,9 +193,9 @@
   "with_red": 138
  },
  "missed": {
-  "awaiting_verdict": 40,
-  "not_covered": 38,
-  "real_checkpoint": 40
+  "awaiting_verdict": 43,
+  "not_covered": 39,
+  "real_checkpoint": 43
  },
  "next": [
   {
@@ -490,6 +500,50 @@
   }
  ],
  "regressions": [
+  {
+   "date": "2026-11-27",
+   "detail": "",
+   "integration": true,
+   "job": "https://github.com/huggingface/transformers/actions/runs/45928276795/job/140275519807",
+   "model": "whisper",
+   "pr": "51180",
+   "run": "",
+   "tests": 1,
+   "verdict": "pending"
+  },
+  {
+   "date": "2026-11-27",
+   "detail": "",
+   "integration": true,
+   "job": "https://github.com/huggingface/transformers/actions/runs/45928276795/job/140275513013",
+   "model": "mistral",
+   "pr": "51180",
+   "run": "",
+   "tests": 1,
+   "verdict": "pending"
+  },
+  {
+   "date": "2026-11-27",
+   "detail": "",
+   "integration": false,
+   "job": "https://github.com/huggingface/transformers/actions/runs/45928276795/job/140275508385",
+   "model": "llama4",
+   "pr": "51092",
+   "run": "",
+   "tests": 7,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-27",
+   "detail": "",
+   "integration": true,
+   "job": "https://github.com/huggingface/transformers/actions/runs/45928276795/job/140275513184",
+   "model": "mistral3",
+   "pr": "50428",
+   "run": "",
+   "tests": 1,
+   "verdict": "pending"
+  },
   {
    "date": "2026-11-26",
    "detail": "the daily CI did not fail it",
@@ -3636,10 +3690,10 @@
   "model-added": 4,
   "no-code-change": 1,
   "not-a-regression": 6,
-  "not-covered": 268,
+  "not-covered": 270,
   "not-reproduced": 11,
-  "out-of-scope": 212,
-  "pending": 0,
+  "out-of-scope": 213,
+  "pending": 3,
   "unrelated-culprit": 16
  },
  "window": [

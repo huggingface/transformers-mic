@@ -1358,6 +1358,14 @@
   "verdict": "not-covered",
   "version": 9
  },
+ "51092#llama4": {
+  "verdict": "out-of-scope",
+  "version": 9
+ },
+ "51180#shared": {
+  "verdict": "not-covered",
+  "version": 9
+ },
  "sticky#albert#2026-10-06": {
   "verdict": "out-of-scope",
   "version": 9
@@ -2232,6 +2240,10 @@
  "sticky#oneformer#2026-11-01": {
   "reason": "the daily CI failed it the day before too",
   "verdict": "already-failing",
+  "version": 9
+ },
+ "sticky#ovis2_5#2026-11-26": {
+  "verdict": "not-covered",
   "version": 9
  },
  "sticky#owlv2#2026-11-09": {

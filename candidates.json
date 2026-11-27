@@ -11853,7 +11853,8 @@
  "51346#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|": {
   "case": "huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|",
   "commits": [
-   "6f697caec12c076d916f48381dd90013a80d056f"
+   "6f697caec12c076d916f48381dd90013a80d056f",
+   "462e63b06c440eae8ae6a675f0d6c0a6a397c63d"
   ],
   "failure": "ts\n             ^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py\", line 1787, in _wrapped_call_impl\n    return self._call_impl(*args, **kwargs)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/lib/python3.11/site-packages/torch/nn/modules/modul",
   "failure_kind": "Runtime traceback",
