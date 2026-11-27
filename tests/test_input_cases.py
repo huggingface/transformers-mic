@@ -6,12 +6,14 @@ baseline names and contents: a baseline recorded before cases existed still pass
 import json
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "example"))
 
+import replay  # noqa: E402
 import run  # noqa: E402
 
 CASES = {"text": {"default": True}, "image": {}, "text_image": {}}
@@ -36,10 +38,12 @@ def test_input_cases_default_to_one_implicit_case():
 
 
 def test_input_cases_refuse_names_that_read_two_ways():
-    with pytest.raises(SystemExit, match="cases named like variants"):
+    with pytest.raises(ValueError, match="cases named like variants"):
         run.input_cases({"variants": {"default": {}, "image": {}}, "cases": {"text": {}, "image": {}}}, "x")
-    with pytest.raises(SystemExit, match="more than one default"):
+    with pytest.raises(ValueError, match="more than one default"):
         run.input_cases({"variants": {"default": {}}, "cases": {"a": {"default": True}, "b": {"default": True}}}, "x")
+    with pytest.raises(ValueError, match="'candidate'"):
+        run.input_cases({"variants": {"default": {}}, "cases": {"text": {"default": True}, "candidate": {}}}, "x")
 
 
 def test_known_failures_scoped_to_cases():
@@ -255,6 +259,19 @@ def test_only_selected_cases_run(contract, capsys):
     assert [p.name for p in contract.expectations.iterdir()] == ["gemma3-mic.image.candidate.json"]
 
 
+def test_a_case_that_matches_nothing_fails(contract, capsys):
+    contract.write(CASES)
+    assert contract.main("--case", "imgae") == 1
+    assert contract.cases_run == [] and records(capsys) == []
+
+
+def test_a_bad_cases_declaration_fails_its_contract_without_stopping_the_run(contract, capsys):
+    contract.write({"a": {"default": True}, "b": {"default": True}})
+    assert contract.main() == 1
+    (record,) = records(capsys)
+    assert record["status"] == "error" and "more than one default case" in record["failures"][0]
+
+
 def test_a_known_failure_scoped_to_a_case_is_xfail_and_says_when_it_passes(contract, capsys):
     contract.write(CASES)
     assert contract.main("--record") == 0
@@ -271,3 +288,21 @@ def test_a_known_failure_scoped_to_a_case_is_xfail_and_says_when_it_passes(contr
     rows = {r["case"]: r for r in records(capsys)}
     assert rows["image"]["status"] == "fail" and "remove it" in rows["image"]["failures"][0]
     assert rows["text"]["status"] == rows["text_image"]["status"] == "pass"
+
+
+def test_replay_judges_each_case_on_its_own(monkeypatch, capsys):
+    # The bad build breaks only the image case; text_image, reported after it, still passes.
+    statuses = {"bad": {"image": "fail", "text_image": "pass"}, "fix": {"image": "pass", "text_image": "pass"}}
+
+    def fake_run(cmd, env, **kwargs):
+        side = env["PYTHONPATH"].split(":")[0]
+        rows = [{"target": "gemma3-mic", "case": c, "status": s} for c, s in statuses[side].items()]
+        return SimpleNamespace(stdout="".join(json.dumps(r) + "\n" for r in rows), stderr="")
+
+    monkeypatch.setattr(replay, "sha", lambda ref: ref)
+    monkeypatch.setattr(replay, "build", lambda ref: ref)
+    monkeypatch.setattr(replay.subprocess, "run", fake_run)
+    monkeypatch.setattr(sys, "argv", ["replay", "fix", "--bad", "bad"])
+    replay.main()
+    verdicts = [json.loads(line) for line in capsys.readouterr().out.splitlines()[1:]]
+    assert {v["case"]: v["verdict"] for v in verdicts} == {"image": "caught", "text_image": "clean"}
