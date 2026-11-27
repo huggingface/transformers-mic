@@ -8,11 +8,11 @@ Each PR failure is classified on the day it first failed: **infra** (setup error
 
 Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers_daily_ci`) — bisected to a commit, or a sticky failure's first day — is replayed with the model's fixture contracts as Transformers PR CI runs them (today's fleets; control in the default and bfloat16 variants, prototypes in bfloat16; `run-model-contracts` on the same runner and image) on the commit before it and on the commit that broke it. When that commit added the model, only its side runs.
 
-**Catch rate: 11 of 14** (79%) — caught / (caught + missed).
+**Catch rate: 12 of 15** (80%) — caught / (caught + missed).
 
 | verdict | regressions | meaning |
 |---|---|---|
-| caught | 11 | the contracts' result changes between the two commits: green to red, or red to green when the baseline was recorded after the change |
+| caught | 12 | the contracts' result changes between the two commits: green to red, or red to green when the baseline was recorded after the change |
 | missed | 3 | green on both |
 | not-a-regression | 6 | a human reproduced the failing test on both sides of the range: the failure is not from these commits (the environment, a Hub checkpoint, a tokenizer); see the note |
 | already-red | 10 | red on both: says nothing about this regression |
@@ -25,10 +25,10 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 | broken | 0 | the replay could not measure it (commit, install, fixture or baseline setup) |
 | out-of-scope | 213 | no failing *IntegrationTest a CPU fixture contract mirrors: GPU-only (by name, body, or a trace that is out of memory or multi-GPU only), or a feature contracts do not call (export, offloading, parallelism, processors) |
 | not-covered | 270 | no contract for the model |
-| pending | 1 | not replayed yet |
 
 | date | model | regression | verdict | at the bad commit |
 |---|---|---|---|---|
+| 2026-11-27 | whisper | [PR #51180](https://github.com/huggingface/transformers/pull/51180) | [caught](https://github.com/huggingface/transformers-mic/actions/runs/46059504624) | mic-whisper-tiny-slim (default): mp/transformers/src/transformers/modeling_layers.py", line 124, in forward_with_checkpointing; mic-whisper-tiny-slim (bfloat16): mp/transformers/src/transformers/model |
 | 2026-11-27 | mistral | [PR #51180](https://github.com/huggingface/transformers/pull/51180) | [missed](https://github.com/huggingface/transformers-mic/actions/runs/45970362902) |  |
 | 2026-11-27 | llama4 | [PR #51092](https://github.com/huggingface/transformers/pull/51092) | out-of-scope |  |
 | 2026-11-27 | mistral3 | [PR #50428](https://github.com/huggingface/transformers/pull/50428) | [caught](https://github.com/huggingface/transformers-mic/actions/runs/45970362902) | mistral3-mic (bfloat16): predicted_tokens: [']', ']'] != ['', '']; Ministral-3-3B-Instruct-2512-mic (bfloat16): Traceback (most recent call last): |
