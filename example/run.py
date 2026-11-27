@@ -63,9 +63,9 @@ once the bug is fixed. An object {issue, match, skip_outputs} narrows it:
 with match, the target is xfail only if every failure line contains that text
 (any other failure still fails, and a pass asks to remove the entry); with
 skip_outputs, those outputs are left out of the comparison and recorded as
-skipped_outputs, and the others are checked as usual; with variants and/or
-platforms, the entry covers only runs of those variants on those platforms (a
-pass anywhere else is an ordinary pass). A contract that raises
+skipped_outputs, and the others are checked as usual; with integrations,
+variants and/or platforms, the entry covers only runs of those integrations and
+variants on those platforms (a pass anywhere else is an ordinary pass). A contract that raises
 stops there, so a matched error still hides the checks after it. local_patches in the fleet lock name
 workarounds from patches.py, applied before every contract (in this process and
 in isolated ones) and recorded in each result's environment. Chat templates see
@@ -457,14 +457,16 @@ def dims(value):
     return f"({', '.join(map(str, shape))})"
 
 
-def known_entry(known, contract, target, variant=None, platform=None):
+def known_entry(known, contract, target, variant=None, platform=None, integration=None):
     """The fleet lock's known_failures entry for a target, as a dict (a plain string covers the whole target).
 
-    An entry with variants and/or platforms applies only to a run of one of those
-    variants measured on one of those platforms; a run whose platform is not known
-    yet (it failed before measuring) is not covered."""
+    An entry with integrations, variants and/or platforms applies only to a run of one of
+    those integrations and variants measured on one of those platforms; a run whose platform
+    is not known yet (it failed before measuring) is not covered."""
     entry = known.get(f"{contract.split('/')[-1].removesuffix('-integration')}/{target}")
     entry = {"issue": entry} if isinstance(entry, str) else entry
+    if entry and "integrations" in entry and integration not in entry["integrations"]:
+        return None
     if entry and "variants" in entry and variant not in entry["variants"]:
         return None
     if entry and "platforms" in entry and platform not in entry["platforms"]:
@@ -804,6 +806,7 @@ def main():
             record["target"],
             record.get("variant"),
             record.get("platform"),
+            record.get("framework"),
         )
         if entry and not args.record and not args.golden and ("match" in entry or "skip_outputs" not in entry):
             issue = entry["issue"]
@@ -955,7 +958,12 @@ def main():
                 platform = platform_class(actual["runtime"]["device"], actual["runtime"].get("dtype"))
                 record["platform"] = platform
                 entry = known_entry(
-                    known, record.get("contract_name", record["contract"]), target, args.variant, platform
+                    known,
+                    record.get("contract_name", record["contract"]),
+                    target,
+                    args.variant,
+                    platform,
+                    args.framework,
                 )
                 skipped = sorted(entry.get("skip_outputs", [])) if entry and not args.record else []
                 outputs = {k: r for k, r in manifest["outputs"].items() if k not in skipped}
