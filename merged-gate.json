@@ -8461,6 +8461,21 @@
   "verdict": "clear",
   "version": 1
  },
+ "50586": {
+  "blocked": [],
+  "head": "bfb4e5581ea454ead2fa918efde09ab16bfcc079",
+  "labels": [],
+  "merge_commit": "8d8895d949f8bf6d04e26d5c7b4e84333291095d",
+  "merged_at": "2026-11-27T15:20:24Z",
+  "pr": "50586",
+  "red": [],
+  "run_id": 46018440116,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/46018440116",
+  "source": "gate",
+  "title": "Add native loss support for JEV decision models",
+  "verdict": "clear",
+  "version": 1
+ },
  "50587": {
   "blocked": [
    {
@@ -9501,6 +9516,38 @@
   "run_url": "https://github.com/huggingface/transformers/actions/runs/43798274398",
   "source": "not-run",
   "title": "Scale the padding-free position_ids test tolerance to the logits",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50706": {
+  "blocked": [],
+  "head": "40b1e8666b2b67ff66e5c5d042dfe4f64667c16d",
+  "labels": [],
+  "merge_commit": "5c9ca18ef807755d892671727ba9b55d2a757a9d",
+  "merged_at": "2026-11-27T09:54:01Z",
+  "pr": "50706",
+  "red": [
+   {
+    "contract": "Mistral3",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "Ministral-3-3B-Instruct-2512-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-mistral3",
+    "failure": "predicted_tokens: [']', ']'] != ['', '']",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "mistral3-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45817259478,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45817259478",
+  "source": "gate",
+  "title": "Add `_merge_and_standardize_kwargs` to image and video processors",
   "verdict": "clear",
   "version": 1
  },
@@ -11006,6 +11053,38 @@
   "run_url": "https://github.com/huggingface/transformers/actions/runs/44329704074",
   "source": "not-run",
   "title": "[Apertus1.5] Add A10G expectations for audio and batch generation integration tests",
+  "verdict": "clear",
+  "version": 1
+ },
+ "50927": {
+  "blocked": [],
+  "head": "e808369193fe970c0327e850a8a90a715bbe0412",
+  "labels": [],
+  "merge_commit": "f6b7cbef762d0b5997a2dcab0a6ea33f28f68753",
+  "merged_at": "2026-11-27T11:56:26Z",
+  "pr": "50927",
+  "red": [
+   {
+    "contract": "Mistral3",
+    "failure": "Traceback (most recent call last):",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "Ministral-3-3B-Instruct-2512-mic",
+    "variant": "bfloat16"
+   },
+   {
+    "contract": "mic-mistral3",
+    "failure": "predicted_tokens: [']', ']'] != ['', '']",
+    "fleet": "prototypes",
+    "fleet_revision": "c6e6c786544eecaac1220d9b736df07529077b96",
+    "target": "mistral3-mic",
+    "variant": "bfloat16"
+   }
+  ],
+  "run_id": 45860583618,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45860583618",
+  "source": "gate",
+  "title": "[serve] Refactor server and engine architecture",
   "verdict": "clear",
   "version": 1
  },
@@ -12863,6 +12942,22 @@
   "verdict": "clear",
   "version": 1
  },
+ "51168": {
+  "blocked": [],
+  "head": "cdb309058a00e4c1809ebe56a74e8052f72f0b9b",
+  "labels": [],
+  "merge_commit": "04925af08a729b479998d6ad57886a748d51d878",
+  "merged_at": "2026-11-27T10:22:54Z",
+  "pr": "51168",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45357462731,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45357462731",
+  "source": "not-run",
+  "title": "fix some numeric issue for CB on XPU test cases",
+  "verdict": "clear",
+  "version": 1
+ },
  "51170": {
   "blocked": [],
   "head": "6a4937a100e6f3d6edf9b873acc8aeb24c8d58f2",
@@ -13196,6 +13291,21 @@
   "verdict": "clear",
   "version": 1
  },
+ "51188": {
+  "blocked": [],
+  "head": "d8b86a68febf7d41eb6819dc56691c19574d35bc",
+  "labels": [],
+  "merge_commit": "d5a6bfe462882c221ac35a06b920bd14530233a0",
+  "merged_at": "2026-11-27T10:36:25Z",
+  "pr": "51188",
+  "red": [],
+  "run_id": 45977808428,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45977808428",
+  "source": "gate",
+  "title": "Fix CamemBERTv2 WordPiece tokenizer auto-dispatch",
+  "verdict": "clear",
+  "version": 1
+ },
  "51192": {
   "blocked": [],
   "head": "78cb15cbaa9acc51e5a83ff4b315cf368d9ee97d",
@@ -13424,6 +13534,21 @@
   "run_url": "https://github.com/huggingface/transformers/actions/runs/45795878257",
   "source": "not-run",
   "title": "AMD CI: Strix Halo (gfx1151) scheduled CI on the MI300 pattern",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51229": {
+  "blocked": [],
+  "head": "8cdafb0ae6f0a54e6004a819820570dcc518edc1",
+  "labels": [],
+  "merge_commit": "a779a0d3598a868cc3f67e4f4794bfc39b109767",
+  "merged_at": "2026-11-27T10:48:04Z",
+  "pr": "51229",
+  "red": [],
+  "run_id": 45976752979,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45976752979",
+  "source": "gate",
+  "title": "Fix Qwen3-VL video expansion keeping the chat template's outer vision\u2026",
   "verdict": "clear",
   "version": 1
  },
@@ -13707,6 +13832,22 @@
   "verdict": "clear",
   "version": 1
  },
+ "51285": {
+  "blocked": [],
+  "head": "0c0bcbbf3d46abb5baf8f8445ced4617b458adad",
+  "labels": [],
+  "merge_commit": "ce66e565061a9cd8441f34c2cd922f56dff1f22d",
+  "merged_at": "2026-11-27T10:22:38Z",
+  "pr": "51285",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45779380433,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45779380433",
+  "source": "not-run",
+  "title": "fix failed test cases for apertus1p5",
+  "verdict": "clear",
+  "version": 1
+ },
  "51293": {
   "blocked": [],
   "head": "e7b01e929dd566d2c95098dcb2b07216790c8b79",
@@ -13929,6 +14070,21 @@
   "verdict": "clear",
   "version": 1
  },
+ "51339": {
+  "blocked": [],
+  "head": "2c6f25e463e52a29ec1f1fc1a8db541a7e2e714e",
+  "labels": [],
+  "merge_commit": "1aa850f87ec600d43ccab9f285b771811f1b41ee",
+  "merged_at": "2026-11-27T15:17:46Z",
+  "pr": "51339",
+  "red": [],
+  "run_id": 46011879679,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/46011879679",
+  "source": "gate",
+  "title": "[TP] Keep the gradient all-reduce of replicated norms when kernels replace forward",
+  "verdict": "clear",
+  "version": 1
+ },
  "51343": {
   "blocked": [],
   "head": "5f6a2542b0cb107082e61d93e665809fed5ea224",
@@ -13974,6 +14130,97 @@
   "run_url": "https://github.com/huggingface/transformers/actions/runs/45881915415",
   "source": "gate",
   "title": "[`Kernels`] Fix logger location after version bump",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51363": {
+  "blocked": [],
+  "head": "19419602921c62d3901856d63320ca17b5df5ed8",
+  "labels": [],
+  "merge_commit": "1c9278519d5e6fcc1d13044bed63e4ab3448be28",
+  "merged_at": "2026-11-27T10:48:39Z",
+  "pr": "51363",
+  "reason": "MIC selected no contract",
+  "red": [],
+  "run_id": 45948961183,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45948961183",
+  "source": "not-run",
+  "title": "add or update xpu expectations for 4 models tests",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51365": {
+  "blocked": [],
+  "head": "724746dd435a242c586f50ceb4d7ad383fda136a",
+  "labels": [],
+  "merge_commit": "9acc6335d881fd46c5c4827c47d2d72e4c4b51c5",
+  "merged_at": "2026-11-27T10:10:12Z",
+  "pr": "51365",
+  "red": [],
+  "run_id": 45965271641,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/45965271641",
+  "source": "gate",
+  "title": "Accept remote-code sub-processors that ignore `return_unused_kwargs`",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51379": {
+  "blocked": [],
+  "head": "43e96fab43026c14ab25c461a28a7fbe792a0e7f",
+  "labels": [],
+  "merge_commit": "c35c54a121eaae277b0455c86d7f02465097aa14",
+  "merged_at": "2026-11-27T17:03:32Z",
+  "pr": "51379",
+  "red": [],
+  "run_id": 46012107402,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/46012107402",
+  "source": "gate",
+  "title": "Merge kwargs in `_get_num_multimodal_tokens` of Ovis2.5, Fuyu, MUSE and Granite-Docling",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51381": {
+  "blocked": [],
+  "head": "39f243396b265a32611b691a1410d335b5d3233f",
+  "labels": [],
+  "merge_commit": "15a6ad5c424ffc92e589d63e13ba39fbd50d51e1",
+  "merged_at": "2026-11-27T16:46:39Z",
+  "pr": "51381",
+  "red": [],
+  "run_id": 46023961782,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/46023961782",
+  "source": "gate",
+  "title": "Fix autodocstring returns parsing",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51384": {
+  "blocked": [],
+  "head": "3bca6b42dbba0f7dde81b40ca3de5f2045e9c13d",
+  "labels": [],
+  "merge_commit": "e5bbd1d6fe33295fa200d34dabfbc20579d249cf",
+  "merged_at": "2026-11-27T17:15:52Z",
+  "pr": "51384",
+  "red": [],
+  "run_id": 46036750314,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/46036750314",
+  "source": "gate",
+  "title": "Fix cropping in older assisted decoding methods",
+  "verdict": "clear",
+  "version": 1
+ },
+ "51389": {
+  "blocked": [],
+  "head": "63fe74a8e5c173dc3d3343e5ccd8fe07958907a7",
+  "labels": [],
+  "merge_commit": "d4e99de8366de181f36d0249cd49603a624ec5fd",
+  "merged_at": "2026-11-27T17:15:32Z",
+  "pr": "51389",
+  "red": [],
+  "run_id": 46037287078,
+  "run_url": "https://github.com/huggingface/transformers/actions/runs/46037287078",
+  "source": "gate",
+  "title": "Merge kwargs with `_merge_kwargs` in HY-V4-VL's `_get_num_multimodal_tokens`",
   "verdict": "clear",
   "version": 1
  }

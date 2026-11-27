@@ -1510,11 +1510,16 @@
   "state": "open"
  },
  "51357": {
+  "closed_at": "2026-11-27T12:04:42Z",
+  "merged_at": null,
+  "state": "closed"
+ },
+ "51358": {
   "closed_at": null,
   "merged_at": null,
   "state": "open"
  },
- "51358": {
+ "51372": {
   "closed_at": null,
   "merged_at": null,
   "state": "open"

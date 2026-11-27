@@ -8,12 +8,12 @@ Each PR failure is classified on the day it first failed: **infra** (setup error
 
 Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers_daily_ci`) — bisected to a commit, or a sticky failure's first day — is replayed with the model's fixture contracts as Transformers PR CI runs them (today's fleets; control in the default and bfloat16 variants, prototypes in bfloat16; `run-model-contracts` on the same runner and image) on the commit before it and on the commit that broke it. When that commit added the model, only its side runs.
 
-**Catch rate: 11 of 15** (73%) — caught / (caught + missed).
+**Catch rate: 11 of 14** (79%) — caught / (caught + missed).
 
 | verdict | regressions | meaning |
 |---|---|---|
 | caught | 11 | the contracts' result changes between the two commits: green to red, or red to green when the baseline was recorded after the change |
-| missed | 4 | green on both |
+| missed | 3 | green on both |
 | not-a-regression | 6 | a human reproduced the failing test on both sides of the range: the failure is not from these commits (the environment, a Hub checkpoint, a tokenizer); see the note |
 | already-red | 10 | red on both: says nothing about this regression |
 | no-code-change | 1 | nothing between the two commits changes code the model runs (the same commit, or only CI images, docs, tests or other models): nothing for a contract to catch |
@@ -25,10 +25,10 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 | broken | 0 | the replay could not measure it (commit, install, fixture or baseline setup) |
 | out-of-scope | 213 | no failing *IntegrationTest a CPU fixture contract mirrors: GPU-only (by name, body, or a trace that is out of memory or multi-GPU only), or a feature contracts do not call (export, offloading, parallelism, processors) |
 | not-covered | 270 | no contract for the model |
+| pending | 1 | not replayed yet |
 
 | date | model | regression | verdict | at the bad commit |
 |---|---|---|---|---|
-| 2026-11-27 | whisper | [PR #51180](https://github.com/huggingface/transformers/pull/51180) | [missed](https://github.com/huggingface/transformers-mic/actions/runs/45970362902) |  |
 | 2026-11-27 | mistral | [PR #51180](https://github.com/huggingface/transformers/pull/51180) | [missed](https://github.com/huggingface/transformers-mic/actions/runs/45970362902) |  |
 | 2026-11-27 | llama4 | [PR #51092](https://github.com/huggingface/transformers/pull/51092) | out-of-scope |  |
 | 2026-11-27 | mistral3 | [PR #50428](https://github.com/huggingface/transformers/pull/50428) | [caught](https://github.com/huggingface/transformers-mic/actions/runs/45970362902) | mistral3-mic (bfloat16): predicted_tokens: [']', ']'] != ['', '']; Ministral-3-3B-Instruct-2512-mic (bfloat16): Traceback (most recent call last): |
@@ -322,7 +322,7 @@ Each regression of Transformers' daily GPU CI (`hf-internal-testing/transformers
 
 Every PR merged into main 2026-10-28 → 2026-11-27, put through the contracts gate as it was when it merged: **blocked** when a case is red with the PR and green on the commit it merged onto. From 2026-11-23 that is PR CI's own verdict (shadow mode, `contracts-gate.json`); before, the red cases of the PR's last run are replayed on its squash commit and on that commit's parent.
 
-- Merged PRs looked up: **558**; with a red MIC case in their last run: 138.
+- Merged PRs looked up: **572**; with a red MIC case in their last run: 140.
 - Would have been blocked: **10** — real 10, false positive 0, to review 0.
 - Waiting for the replay: 0; could not be measured: 1.
 
@@ -362,13 +362,13 @@ Proposed bar for rule B (constants `DECISION` in `experiments/impact.py`):
 - ✅ wrong blocks 1 = 0.46% of 218 merged PRs (bar ≤ 1%)
 - ✅ justified blocks 2 (bar ≥ 1)
 - ✅ unresolved blocks 0 of 3 (bar ≤ 10%)
-- ❌ re-baselined contracts 33.0/week (bar ≤ 10)
+- ❌ re-baselined contracts 33.5/week (bar ≤ 10)
 
 **Not yet** — the call stays with a maintainer; unresolved blocks shrink as cases get an outcome or a verdict in `labels.jsonl`.
 
 ## 1. Real bugs caught on PRs
 
-- PR-only failures: **457** across 61 PRs.
+- PR-only failures: **458** across 62 PRs.
 - Fixed by a push, then passed: **27** — the strongest catch signal.
 - Merged red, then the same case failed on main: **7** — a change that landed (a bug, or an intended change needing a re-baseline).
 - Labelled `real-bug`: **0**; `intended`: 0.
@@ -377,9 +377,9 @@ Proposed bar for rule B (constants `DECISION` in `experiments/impact.py`):
 
 A false positive is a PR-only case (red with the PR, not red on main) the PR did not cause: it passed again with no push (flaky or environment), it merged and main stayed green for 3 days, or it is labelled `false-alarm`/`flake`. These are what the gate would wrongly block.
 
-- **10 (3%)** of the 314 PRs with a red MIC case hit one: 40 cases, passed again with no push 18, merged and main stayed green 22, labelled 0.
+- **11 (3%)** of the 315 PRs with a red MIC case hit one: 286 cases, passed again with no push 264, merged and main stayed green 22, labelled 0.
 - Only warned, never blocked: 253 PRs saw only cases red on main too, infra errors or cases red on many PRs that day; the gate re-runs those on the base and warns.
-- PR failure groups: 5596 — infra 141 (3%), pre-existing 2509 (45%), systemic (same case on ≥3 PRs that day) 14 (0%), PR-only 2932 (52%).
+- PR failure groups: 5597 — infra 141 (3%), pre-existing 2509 (45%), systemic (same case on ≥3 PRs that day) 17 (0%), PR-only 2930 (52%).
 
 ## 3. Baseline review work
 
@@ -391,10 +391,10 @@ Re-baselined = baselines changed with the same fixture weights (the review work 
 | 2026-W44 | 343 | 163 | 36 | 17 | 380 | 1592 |
 | 2026-W45 | 64 | 6 | 27 | 26 | 444 | 72 |
 | 2026-W46 | 4 | 1 | 3 | 0 | 26 | 6 |
+| 2026-W48 | 1 | 0 | 1 | 0 | 18 | 0 |
 
 Latest re-baselines (model commit title):
 
-- 2026-11-05 Mistral3: Publish MIC usage, slim fixture and reviewed Transformers expectations
 - 2026-11-05 RTDetrV2: Publish MIC usage, slim fixture and reviewed Transformers expectations
 - 2026-11-05 RTDetr: Publish MIC usage, slim fixture and reviewed Transformers expectations
 - 2026-11-05 GraniteDocling: Publish MIC usage, slim fixture and reviewed Transformers expectations
@@ -402,6 +402,7 @@ Latest re-baselines (model commit title):
 - 2026-11-12 Hubert: Publish MIC usage, slim fixture and reviewed Transformers expectations
 - 2026-11-12 Voxtral: Publish MIC usage, slim fixture and reviewed Transformers expectations
 - 2026-11-12 Phi4Multimodal: Publish MIC usage, slim fixture and reviewed Transformers expectations
+- 2026-11-27 Whisper: Publish MIC usage, slim fixture and reviewed Transformers expectations
 
 ## 4. Real-checkpoint regressions: did MIC flag them first?
 
@@ -429,8 +430,6 @@ Real-checkpoint failures MIC stayed green on, waiting for a verdict. A miss is n
 - `gpu#49976#phi4_multimodal`: 2026-11-06, 4 test(s), e.g. `tests/models/phi4_multimodal/test_modeling_phi4_multimodal.py::Phi4MultimodalIntegrationTest::test_audio_text_generation` ([PR #49976](https://github.com/huggingface/transformers/pull/49976))
 - `gpu#50428#mistral3`: 2026-11-27, 1 test(s), e.g. `tests/models/mistral3/test_modeling_mistral3.py::Mistral3IntegrationTest::test_mistral3_integration_batched_generate` ([PR #50428](https://github.com/huggingface/transformers/pull/50428))
 - `gpu#50975#axk1`: 2026-11-21, 1 test(s), e.g. `tests/models/axk1/test_modeling_axk1.py::AXK1IntegrationTest::test_model_logits_batched` ([PR #50975](https://github.com/huggingface/transformers/pull/50975))
-- `gpu#51180#mistral`: 2026-11-27, 1 test(s), e.g. `tests/models/mistral/test_modeling_mistral.py::MistralIntegrationTest::test_speculative_generation` ([PR #51180](https://github.com/huggingface/transformers/pull/51180))
-- `gpu#51180#whisper`: 2026-11-27, 1 test(s), e.g. `tests/models/whisper/test_modeling_whisper.py::WhisperModelIntegrationTests::test_speculative_decoding_distil` ([PR #51180](https://github.com/huggingface/transformers/pull/51180))
 - `gpu#sticky#axk1#2026-11-21`: 2026-11-21, 1 test(s), e.g. `tests/models/axk1/test_modeling_axk1.py::AXK1IntegrationTest::test_model_logits_batched`
 - `gpu#sticky#cohere#2026-10-17`: 2026-10-17, 1 test(s), e.g. `tests/models/cohere/test_modeling_cohere.py::CohereIntegrationTest::test_batched_4bit`
 - `gpu#sticky#deepseek_v3#2026-10-16`: 2026-10-16, 1 test(s), e.g. `tests/models/deepseek_v3/test_modeling_deepseek_v3.py::DeepseekV3IntegrationTest::test_compile_static_cache`
@@ -445,13 +444,16 @@ Real-checkpoint failures MIC stayed green on, waiting for a verdict. A miss is n
 - `gpu#sticky#gemma4#2026-10-19`: 2026-10-19, 1 test(s), e.g. `tests/models/gemma4/test_modeling_gemma4.py::Gemma4IntegrationTest::test_generation_beyond_sliding_window_0_sdpa`
 - `gpu#sticky#gemma4#2026-11-02`: 2026-11-02, 1 test(s), e.g. `tests/models/gemma4/test_modeling_gemma4.py::Gemma4IntegrationTest::test_generation_beyond_sliding_window_1_eager`
 - `gpu#sticky#got_ocr2#2026-11-02`: 2026-11-02, 1 test(s), e.g. `tests/models/got_ocr2/test_modeling_got_ocr2.py::GotOcr2IntegrationTest::test_small_model_integration_test_got_ocr_format`
+- `gpu#sticky#grounding_dino#2026-10-13`: 2026-10-13, 4 test(s), e.g. `tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_cross_attention_mask`
+- `gpu#sticky#grounding_dino#2026-10-18`: 2026-10-18, 4 test(s), e.g. `tests/models/grounding_dino/test_modeling_grounding_dino.py::GroundingDinoModelIntegrationTests::test_cross_attention_mask`
+- Labelled: needs-real-weights 0, call-not-covered 2.
 
 ## 5. Overfit vs random fixtures
 
 | weights | PR-only | fixed by push | merged→main failed | labelled real-bug |
 |---|---|---|---|---|
 | overfit | 45 | 2 | 0 | 0 |
-| random | 396 | 25 | 7 | 0 |
+| random | 397 | 25 | 7 | 0 |
 | real | 10 | 0 | 0 | 0 |
 | unknown | 6 | 0 | 0 | 0 |
 
@@ -546,27 +548,10 @@ GPU CI regressions on models whose contract stayed green; **bold** models have a
 - unlimited_ocr (GPU-only): `test_sdpa_can_compile_dynamic`
 - **whisper**: `WhisperModelIntegrationTests::test_speculative_decoding_distil`, `WhisperModelTest::test_onnx_export_generate_dynamic_static_cache` — `tmic update '<the call these tests make>'`
 
-## Waiting for a verdict (79)
+## Waiting for a verdict (326)
 
 Add a line to `labels.jsonl`: `{"key": "<key>", "verdict": "real-bug|intended|false-alarm|flake", "note": "...", "by": "<login>"}`.
 
-- `50610#huggingface-mic/pegasus-x-base-mic|pegasus-x-base-mic|bfloat16|cpu-x86_64-bf16` — fixed-by-push, random fixture, Baseline assertion: logits.probe: max delta 0.128 over tolerance — [PR #50610](https://github.com/huggingface/transformers/pull/50610), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43041319580%3A1&var-pr=50610&var-gh_run_id=43041319580)
-- `50610#huggingface-mic/wav2vec2-conformer-rope-large-960h-ft-mic|wav2vec2-conformer-rope-large-960h-ft-mic|bfloat16|cpu-x86_64-bf16` — fixed-by-push, random fixture, Baseline assertion: training.loss: max delta 0.63 over tolerance — [PR #50610](https://github.com/huggingface/transformers/pull/50610), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43041319580%3A1&var-pr=50610&var-gh_run_id=43041319580)
-- `50379#huggingface-mic/Llama-3.2-11B-Vision-Instruct-mic|Llama-3.2-11B-Vision-Instruct-mic|bfloat16|` — merged-main-ok, overfit fixture, Runtime traceback: usr/local/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1798, in _call_impl — [PR #50379](https://github.com/huggingface/transformers/pull/50379), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43420767622%3A1&var-pr=50379&var-gh_run_id=43420767622)
-- `50754#huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16` — merged-main-ok, random fixture, Baseline assertion: training.gradients: ['backbone_model.layers.0.self_attn.q_proj.weight', 'backbone_model.layers.0.mlp — [PR #50754](https://github.com/huggingface/transformers/pull/50754), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43575282361%3A2&var-pr=50754&var-gh_run_id=43575282361)
-- `50251#huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16` — fixed-by-push, random fixture, Baseline assertion: training.gradients: ['backbone_model.layers.0.self_attn.q_proj.weight', 'backbone_model.layers.0.mlp — [PR #50251](https://github.com/huggingface/transformers/pull/50251), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43757093859%3A1&var-pr=50251&var-gh_run_id=43757093859)
-- `48918#huggingface-mic/Florence-2-base-mic|Florence-2-base-mic|bfloat16|cpu-x86_64-bf16` — recovered-no-push, overfit fixture, Baseline assertion: training.loss: max delta 0.000637 over tolerance — [PR #48918](https://github.com/huggingface/transformers/pull/48918), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265)
-- `48918#huggingface-mic/MiniMax-M3-MXFP8-mic|MiniMax-M3-MXFP8-mic|bfloat16|cpu-x86_64-bf16` — recovered-no-push, random fixture, Baseline assertion: logits_probe: max delta 0.00195 over tolerance — [PR #48918](https://github.com/huggingface/transformers/pull/48918), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265)
-- `48918#huggingface-mic/bart-base-mic|bart-base-mic|bfloat16|cpu-x86_64-bf16` — recovered-no-push, overfit fixture, Baseline assertion: training.loss: max delta 0.00195 over tolerance — [PR #48918](https://github.com/huggingface/transformers/pull/48918), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265)
-- `48918#huggingface-mic/bigbird-pegasus-large-arxiv-mic|bigbird-pegasus-large-arxiv-mic|bfloat16|cpu-x86_64-bf16` — recovered-no-push, random fixture, Baseline assertion: training.loss: max delta 0.0625 over tolerance — [PR #48918](https://github.com/huggingface/transformers/pull/48918), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265)
-- `48918#huggingface-mic/blip2-opt-2.7b-mic|blip2-opt-2.7b-mic|bfloat16|cpu-x86_64-bf16` — recovered-no-push, random fixture, Baseline assertion: training.loss: max delta 0.0209 over tolerance — [PR #48918](https://github.com/huggingface/transformers/pull/48918), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265)
-- `48918#huggingface-mic/grounding-dino-tiny-mic|grounding-dino-tiny-mic|bfloat16|cpu-x86_64-bf16` — recovered-no-push, random fixture, Baseline assertion: class_scores: max delta 9.17 over tolerance — [PR #48918](https://github.com/huggingface/transformers/pull/48918), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265)
-- `48918#huggingface-mic/hubert-large-ls960-ft-mic|hubert-large-ls960-ft-mic|bfloat16|cpu-x86_64-bf16` — recovered-no-push, overfit fixture, Baseline assertion: training.loss: max delta 23.5 over tolerance — [PR #48918](https://github.com/huggingface/transformers/pull/48918), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265)
-- `48918#huggingface-mic/mask2former-swin-tiny-coco-instance-mic|mask2former-swin-tiny-coco-instance-mic|bfloat16|cpu-x86_64-bf16` — recovered-no-push, random fixture, Baseline assertion: training.loss: max delta 0.0548 over tolerance — [PR #48918](https://github.com/huggingface/transformers/pull/48918), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265)
-- `48918#huggingface-mic/mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|mm_grounding_dino_tiny_o365v1_goldg_v3det-mic|bfloat16|cpu-x86_64-bf16` — recovered-no-push, random fixture, Baseline assertion: logits_probe: max delta 1.28 over tolerance — [PR #48918](https://github.com/huggingface/transformers/pull/48918), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265)
-- `48918#huggingface-mic/opt-125m-mic|opt-125m-mic|bfloat16|cpu-x86_64-bf16` — recovered-no-push, random fixture, Baseline assertion: training.loss: max delta 0.00194 over tolerance — [PR #48918](https://github.com/huggingface/transformers/pull/48918), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265)
-- `48918#huggingface-mic/opus-mt-fr-en-mic|opus-mt-fr-en-mic|bfloat16|cpu-x86_64-bf16` — recovered-no-push, overfit fixture, Baseline assertion: training.loss: max delta 0.0114 over tolerance — [PR #48918](https://github.com/huggingface/transformers/pull/48918), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265)
-- `48918#huggingface-mic/pegasus-x-base-mic|pegasus-x-base-mic|bfloat16|cpu-x86_64-bf16` — recovered-no-push, random fixture, Baseline assertion: logits.probe: max delta 0.128 over tolerance — [PR #48918](https://github.com/huggingface/transformers/pull/48918), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265)
 - `48918#huggingface-mic/pegasus-xsum-mic|pegasus-xsum-mic|bfloat16|cpu-x86_64-bf16` — recovered-no-push, random fixture, Baseline assertion: training.loss: max delta 0.0625 over tolerance — [PR #48918](https://github.com/huggingface/transformers/pull/48918), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265)
 - `48918#huggingface-mic/s2t-small-librispeech-asr-mic|s2t-small-librispeech-asr-mic|bfloat16|cpu-x86_64-bf16` — recovered-no-push, random fixture, Baseline assertion: training.loss: max delta 0.0625 over tolerance — [PR #48918](https://github.com/huggingface/transformers/pull/48918), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265)
 - `48918#huggingface-mic/table_transformer-mic|table_transformer-mic|bfloat16|cpu-x86_64-bf16` — recovered-no-push, random fixture, Baseline assertion: training.loss: max delta 0.00256 over tolerance — [PR #48918](https://github.com/huggingface/transformers/pull/48918), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=42593212265%3A2&var-pr=48918&var-gh_run_id=42593212265)
@@ -575,12 +560,28 @@ Add a line to `labels.jsonl`: `{"key": "<key>", "verdict": "real-bug|intended|fa
 - `50379#huggingface-mic/LLaVA-NeXT-Video-7B-hf-mic|LLaVA-NeXT-Video-7B-hf-mic|bfloat16|` — merged-main-ok, random fixture, Runtime traceback:  filename, "exec"), namespace) — [PR #50379](https://github.com/huggingface/transformers/pull/50379), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43848906473%3A1&var-pr=50379&var-gh_run_id=43848906473)
 - `50379#huggingface-mic/gemma-4-12B-it-mic|gemma-4-12B-it-mic|bfloat16|` — merged-main-ok, random fixture, Runtime traceback: ied/modeling_gemma4_unified.py", line 1184, in forward — [PR #50379](https://github.com/huggingface/transformers/pull/50379), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43848906473%3A1&var-pr=50379&var-gh_run_id=43848906473)
 - `50379#huggingface-mic/gemma-4-E2B-it-mic|gemma-4-E2B-it-mic|bfloat16|` — merged-main-ok, random fixture, Runtime traceback: nsformers/src/transformers/models/gemma4/modeling_gemma4.py", line 2491, in forward — [PR #50379](https://github.com/huggingface/transformers/pull/50379), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=43848906473%3A1&var-pr=50379&var-gh_run_id=43848906473)
+- `47773#huggingface-mic/s2t-small-librispeech-asr-mic|s2t-small-librispeech-asr-mic|bfloat16|` — recovered-no-push, random fixture, Runtime traceback: Traceback (most recent call last): — [PR #47773](https://github.com/huggingface/transformers/pull/47773), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44163829482%3A1&var-pr=47773&var-gh_run_id=44163829482)
 - `50643#huggingface-mic/Llama-4-Scout-17B-16E-Instruct-mic|Llama-4-Scout-17B-16E-Instruct-mic|bfloat16|` — closed-unmerged, random fixture, Runtime traceback: ec"), namespace) — [PR #50643](https://github.com/huggingface/transformers/pull/50643), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44415213523%3A1&var-pr=50643&var-gh_run_id=44415213523)
 - `50975#huggingface-mic/DeepSeek-V4-Flash-0731-mic|DeepSeek-V4-Flash-0731-mic|bfloat16|` — merged-main-ok, random fixture, Runtime traceback: ransformers/transformers/src/transformers/models/deepseek_v4/modeling_deepseek_v4.py", line 1465, in — [PR #50975](https://github.com/huggingface/transformers/pull/50975), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44561135825%3A1&var-pr=50975&var-gh_run_id=44561135825)
 - `50975#huggingface-mic/GLM-5.3-Flash-mic|GLM-5.3-Flash-mic|bfloat16|cpu-x86_64-bf16` — merged-then-main-failed, random fixture, Baseline assertion: answer_logits: max delta 0.00781 over tolerance — [PR #50975](https://github.com/huggingface/transformers/pull/50975), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44575416194%3A1&var-pr=50975&var-gh_run_id=44575416194)
 - `51044#huggingface-mic/OLMo-1B-hf-mic|OLMo-1B-hf-mic|bfloat16|cpu-x86_64-bf16` — fixed-by-push, random fixture, Baseline assertion: logits.probe: max delta 0.0811 over tolerance — [PR #51044](https://github.com/huggingface/transformers/pull/51044), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=44786418420%3A1&var-pr=51044&var-gh_run_id=44786418420)
 - `51172#huggingface-mic/pythia-160m-mic|pythia-160m-mic|bfloat16|cpu-x86_64-bf16` — recovered-no-push, random fixture, Baseline assertion: probe_logits: max delta 0.0156 over tolerance — [PR #51172](https://github.com/huggingface/transformers/pull/51172), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45367986466%3A1&var-pr=51172&var-gh_run_id=45367986466)
 - `51180#huggingface-mic/Qwen3-Next-80B-A3B-Instruct-mic|Qwen3-Next-80B-A3B-Instruct-mic|bfloat16|` — fixed-by-push, random fixture, Runtime traceback: odules/module.py", line 1787, in _wrapped_call_impl — [PR #51180](https://github.com/huggingface/transformers/pull/51180), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45426675453%3A1&var-pr=51180&var-gh_run_id=45426675453)
+- `47773#huggingface-mic/gemma-vllm-mic|gemma-vllm-mic|default|` — recovered-no-push, random fixture, Runtime traceback: Traceback (most recent call last): — [PR #47773](https://github.com/huggingface/transformers/pull/47773), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45690224962%3A1&var-pr=47773&var-gh_run_id=45690224962)
+- `47773#huggingface-mic/gemma2-vllm-mic|gemma2-vllm-mic|default|` — recovered-no-push, random fixture, Runtime traceback: Traceback (most recent call last): — [PR #47773](https://github.com/huggingface/transformers/pull/47773), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45690224962%3A1&var-pr=47773&var-gh_run_id=45690224962)
+- `47773#huggingface-mic/gemma3-vllm-mic|gemma3-vllm-mic|default|` — recovered-no-push, random fixture, Runtime traceback: Traceback (most recent call last): — [PR #47773](https://github.com/huggingface/transformers/pull/47773), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45690224962%3A1&var-pr=47773&var-gh_run_id=45690224962)
+- `47773#huggingface-mic/idefics2-8b-base-mic|idefics2-8b-base-mic|bfloat16|` — recovered-no-push, random fixture, Runtime traceback: Traceback (most recent call last): — [PR #47773](https://github.com/huggingface/transformers/pull/47773), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45690224962%3A1&var-pr=47773&var-gh_run_id=45690224962)
+- `47773#huggingface-mic/llama-vllm-mic|llama-vllm-mic|default|` — recovered-no-push, random fixture, Runtime traceback: Traceback (most recent call last): — [PR #47773](https://github.com/huggingface/transformers/pull/47773), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45690224962%3A1&var-pr=47773&var-gh_run_id=45690224962)
+- `47773#huggingface-mic/llava-next-mistral-vllm-mic|llava-next-mistral-vllm-mic|default|` — recovered-no-push, random fixture, Runtime traceback: Traceback (most recent call last): — [PR #47773](https://github.com/huggingface/transformers/pull/47773), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45690224962%3A1&var-pr=47773&var-gh_run_id=45690224962)
+- `47773#huggingface-mic/llava-onevision-qwen2-vllm-mic|llava-onevision-qwen2-vllm-mic|default|` — recovered-no-push, random fixture, Runtime traceback: Traceback (most recent call last): — [PR #47773](https://github.com/huggingface/transformers/pull/47773), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45690224962%3A1&var-pr=47773&var-gh_run_id=45690224962)
+- `47773#huggingface-mic/mistral-7b-instruct-v0.2-vllm-mic|mistral-7b-instruct-v0.2-vllm-mic|default|` — recovered-no-push, random fixture, Runtime traceback: Traceback (most recent call last): — [PR #47773](https://github.com/huggingface/transformers/pull/47773), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45690224962%3A1&var-pr=47773&var-gh_run_id=45690224962)
+- `47773#huggingface-mic/qwen2-audio-vllm-mic|qwen2-audio-vllm-mic|default|` — recovered-no-push, random fixture, Runtime traceback: Traceback (most recent call last): — [PR #47773](https://github.com/huggingface/transformers/pull/47773), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45690224962%3A1&var-pr=47773&var-gh_run_id=45690224962)
+- `47773#huggingface-mic/qwen2-vl-vllm-mic|qwen2-vl-vllm-mic|default|` — recovered-no-push, random fixture, Runtime traceback: Traceback (most recent call last): — [PR #47773](https://github.com/huggingface/transformers/pull/47773), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45690224962%3A1&var-pr=47773&var-gh_run_id=45690224962)
+- `47773#huggingface-mic/qwen2-vllm-mic|qwen2-vllm-mic|default|` — recovered-no-push, random fixture, Runtime traceback: Traceback (most recent call last): — [PR #47773](https://github.com/huggingface/transformers/pull/47773), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45690224962%3A1&var-pr=47773&var-gh_run_id=45690224962)
+- `47773#huggingface-mic/qwen2.5-vl-vllm-mic|qwen2.5-vl-vllm-mic|default|` — recovered-no-push, random fixture, Runtime traceback: Traceback (most recent call last): — [PR #47773](https://github.com/huggingface/transformers/pull/47773), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45690224962%3A1&var-pr=47773&var-gh_run_id=45690224962)
+- `47773#huggingface-mic/qwen3-vl-vllm-mic|qwen3-vl-vllm-mic|default|` — recovered-no-push, random fixture, Runtime traceback: Traceback (most recent call last): — [PR #47773](https://github.com/huggingface/transformers/pull/47773), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45690224962%3A1&var-pr=47773&var-gh_run_id=45690224962)
+- `47773#huggingface-mic/qwen3-vllm-mic|qwen3-vllm-mic|default|` — recovered-no-push, random fixture, Runtime traceback: Traceback (most recent call last): — [PR #47773](https://github.com/huggingface/transformers/pull/47773), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45690224962%3A1&var-pr=47773&var-gh_run_id=45690224962)
+- `47773#huggingface-mic/vaultgemma-vllm-mic|vaultgemma-vllm-mic|default|` — recovered-no-push, random fixture, Runtime traceback: Traceback (most recent call last): — [PR #47773](https://github.com/huggingface/transformers/pull/47773), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45690224962%3A1&var-pr=47773&var-gh_run_id=45690224962)
 - `50574#huggingface-mic/csm-1b-mic|csm-1b-mic|bfloat16|cpu-x86_64-bf16` — fixed-by-push, random fixture, Baseline assertion: training.gradients: ['backbone_model.layers.0.self_attn.q_proj.weight', 'backbone_model.layers.0.mlp — [PR #50574](https://github.com/huggingface/transformers/pull/50574), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45616915215%3A2&var-pr=50574&var-gh_run_id=45616915215)
 - `51180#huggingface-mic/MiniCPM-OCR-1.0-mic|MiniCPM-OCR-1.0-mic|bfloat16|` — fixed-by-push, random fixture, Runtime traceback: nn/modules/module.py", line 1787, in _wrapped_call_impl — [PR #51180](https://github.com/huggingface/transformers/pull/51180), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45593085571%3A1&var-pr=51180&var-gh_run_id=45593085571)
 - `51180#huggingface-mic/MiniCPM-V-4.6-mic|MiniCPM-V-4.6-mic|bfloat16|` — fixed-by-push, random fixture, Runtime traceback: nn/modules/module.py", line 1787, in _wrapped_call_impl — [PR #51180](https://github.com/huggingface/transformers/pull/51180), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45593085571%3A1&var-pr=51180&var-gh_run_id=45593085571)
@@ -590,3 +591,4 @@ Add a line to `labels.jsonl`: `{"key": "<key>", "verdict": "real-bug|intended|fa
 - `51180#huggingface-mic/Qwen3.8-1.0B-A0.6B-mic|Qwen3.8-1.0B-A0.6B-mic|bfloat16|cpu-x86_64-bf16` — fixed-by-push, random fixture, Baseline assertion: logits.probe: max delta 0.00195 over tolerance — [PR #51180](https://github.com/huggingface/transformers/pull/51180), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45611044969%3A1&var-pr=51180&var-gh_run_id=45611044969)
 - `51180#huggingface-mic/Qwen3.8-Flash-Next-mic|Qwen3.8-Flash-Next-mic|bfloat16|` — fixed-by-push, random fixture, Runtime traceback: odules/module.py", line 1787, in _wrapped_call_impl — [PR #51180](https://github.com/huggingface/transformers/pull/51180), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45593085571%3A1&var-pr=51180&var-gh_run_id=45593085571)
 - `51180#huggingface-mic/Qwen3.8-Flash-Next-mic|Qwen3.8-Flash-Next-mic|bfloat16|cpu-x86_64-bf16` — fixed-by-push, random fixture, Baseline assertion: image_logits: max delta 0.000977 over tolerance — [PR #51180](https://github.com/huggingface/transformers/pull/51180), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45611044969%3A1&var-pr=51180&var-gh_run_id=45611044969)
+- `51357#huggingface-mic/switch-base-8-mic|switch-base-8-mic|bfloat16|cpu-x86_64-bf16` — closed-unmerged, random fixture, Baseline assertion: label_logprobs: max delta 0.422 over tolerance — [PR #51357](https://github.com/huggingface/transformers/pull/51357), [run](https://transformers-ci.huggingface.cool/d/pytest-observability-by-run/pytest-observability-run?var-run_id=45907327992%3A2&var-pr=51357&var-gh_run_id=45907327992)

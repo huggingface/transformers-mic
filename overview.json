@@ -1,10 +1,10 @@
 {
- "awaiting_verdict": 79,
+ "awaiting_verdict": 326,
  "block_merges": {
   "ready": false,
   "unmet": [
    "14 of 30 days observed",
-   "re-baselined contracts 33.0/week (bar \u2264 10)"
+   "re-baselined contracts 33.5/week (bar \u2264 10)"
   ]
  },
  "caught": {
@@ -15,10 +15,10 @@
  },
  "drafts_per_day": 2,
  "false_alarms": {
-  "false_positive_cases": 40,
-  "false_positive_prs": 10,
+  "false_positive_cases": 286,
+  "false_positive_prs": 11,
   "prs_not_their_fault": 253,
-  "prs_with_failure": 314
+  "prs_with_failure": 315
  },
  "merged_gate": {
   "blocked": 10,
@@ -27,7 +27,7 @@
    "real": 10,
    "to-review": 0
   },
-  "merged": 558,
+  "merged": 572,
   "pending": 0,
   "rows": [
    {
@@ -190,10 +190,10 @@
    "2026-10-28",
    "2026-11-27"
   ],
-  "with_red": 138
+  "with_red": 140
  },
  "missed": {
-  "awaiting_verdict": 43,
+  "awaiting_verdict": 41,
   "not_covered": 39,
   "real_checkpoint": 43
  },
@@ -507,9 +507,9 @@
    "job": "https://github.com/huggingface/transformers/actions/runs/45928276795/job/140275519807",
    "model": "whisper",
    "pr": "51180",
-   "run": "https://github.com/huggingface/transformers-mic/actions/runs/45970362902",
+   "run": "",
    "tests": 1,
-   "verdict": "missed"
+   "verdict": "pending"
   },
   {
    "date": "2026-11-27",
@@ -3686,14 +3686,14 @@
   "broken": 0,
   "caught": 11,
   "duplicate": 5,
-  "missed": 4,
+  "missed": 3,
   "model-added": 4,
   "no-code-change": 1,
   "not-a-regression": 6,
   "not-covered": 270,
   "not-reproduced": 11,
   "out-of-scope": 213,
-  "pending": 0,
+  "pending": 1,
   "unrelated-culprit": 16
  },
  "window": [
