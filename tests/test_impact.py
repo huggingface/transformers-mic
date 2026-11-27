@@ -487,7 +487,12 @@ def test_overview_has_the_headline_numbers_and_next_targets(tmp_path):
         "not_covered": 1,
         "awaiting_verdict": 1,
     }
-    assert o["false_alarms"] == {"prs_with_failure": 4, "prs_not_their_fault": 1}
+    assert o["false_alarms"] == {
+        "prs_with_failure": 4,
+        "prs_not_their_fault": 1,
+        "false_positive_prs": 1,  # the PR-only flake
+        "false_positive_cases": 1,
+    }
     assert o["block_merges"]["ready"] is False and any("days observed" in u for u in o["block_merges"]["unmet"])
     assert len(o["next"]) == 7  # every suggestion, up to NEXT_TARGETS
     assert o["next"][0] == {
@@ -1406,3 +1411,15 @@ def test_merged_lines_lists_blocked_merges_in_the_window():
     assert "[#9](https://github.com/huggingface/transformers/pull/9)" in text and "#1]" not in text
     assert overview["merged"] == 2 and overview["with_red"] == 2 and overview["flags"]["false-positive"] == 1
     assert overview["rows"][0]["cases"] == ["A/a-mic [bfloat16]"]
+
+
+def test_false_positive_cases_follow_outcomes_and_labels():
+    candidates = {
+        "a": {"pr": "1", "outcome": "recovered-no-push"},
+        "b": {"pr": "1", "outcome": "merged-main-ok"},
+        "c": {"pr": "2", "outcome": "merged-main-ok"},  # a human says it was real
+        "d": {"pr": "3", "outcome": "open"},  # labelled a flake
+        "e": {"pr": "4", "outcome": "fixed-by-push"},
+    }
+    labels = {"c": {"verdict": "real-bug"}, "d": {"verdict": "flake"}}
+    assert [c["pr"] for c in impact.false_positive_cases(candidates, labels)] == ["1", "1", "3"]
