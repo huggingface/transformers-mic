@@ -1123,14 +1123,19 @@ Transformers creation/cloud-baseline flow. To add another embedding model to
 generation, add a reviewed scenario to `src/transformers_mic/integrations.py`.
 
 Each integration owns its usage, assertions and baselines under
-`integrations/<name>/`. An integration's optional `outputs` map replaces the
+`integrations/<name>/`; the name may be nested, as in `vllm/transformers` and
+`vllm/vllm` (`--integration vllm/vllm`). A contract with integrations of one
+framework only (both vLLM ones, say) builds and publishes with its first declared
+one as the primary. An integration's optional `outputs` map replaces the
 manifest-level output map for that integration. Existing Transformers assertions
 stay unchanged. Publication requires successful checks of every declared
 variant of the Transformers integration (the only integration, when there is no
 Transformers one), and of every other integration this workspace changed.
 
 Another integration is unchanged, and carried over, when every local file under
-`integrations/<name>/` (usage and reviewed expectations), its `integration.json`
+`integrations/<name>/` (usage and reviewed expectations), the files directly in
+the folders above a nested one (`integrations/vllm/*`, shared by both vLLM
+integrations), its `integration.json`
 section, the output rules it inherits, the checkpoints and fixtures, and the
 fixture weights (`build.json`) are identical to the Hub revision the workspace's
 lock pins. The Hub's `main` must also still have the same section and usage;

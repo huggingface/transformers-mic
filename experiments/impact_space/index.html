@@ -36,12 +36,18 @@
   .tile .note { font-size: 13px; color: var(--muted); }
   .verdict-caught { color: var(--good); font-weight: 600; }
   .verdict-missed { color: var(--bad); font-weight: 600; }
+  .flag-real { color: var(--good); font-weight: 600; }
+  .flag-false-positive { color: var(--bad); font-weight: 600; }
+  .flag-to-review { color: var(--muted); font-weight: 600; }
   .table-wrap { overflow-x: auto; }
   table { border-collapse: collapse; width: 100%; font-size: 14px; }
   th, td { border-bottom: 1px solid var(--border); padding: 7px 8px; text-align: left; white-space: nowrap; }
   th { color: var(--muted); font-weight: 600; font-size: 13px; }
   td.num { text-align: right; font-variant-numeric: tabular-nums; }
   #next td:nth-child(2), #regressions td:last-child { white-space: normal; overflow-wrap: anywhere; }
+  #merged td:nth-child(2), #merged td:nth-child(3), #merged td:last-child { white-space: normal; overflow-wrap: anywhere; }
+  #merged td:nth-child(2) { min-width: 200px; }
+  #merged td:nth-child(3), #merged td:last-child { font-size: 13px; color: var(--muted); }
   #regressions td:last-child { min-width: 240px; font-size: 13px; color: var(--muted); }
   tr.next-batch td { background: var(--tile); font-weight: 600; }
   .filters { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 10px; }
@@ -70,7 +76,7 @@
       <div class="note" id="uncovered-note"></div>
     </div>
     <div class="tile">
-      <div class="label">False alarms</div>
+      <div class="label">False positives</div>
       <div class="value" id="false">–</div>
       <div class="note" id="false-note"></div>
     </div>
@@ -83,6 +89,15 @@
     <table>
       <thead><tr><th>Date</th><th>Model</th><th>Regression</th><th class="num">Tests</th><th>Verdict</th><th>MIC at the bad commit</th></tr></thead>
       <tbody id="regressions"></tbody>
+    </table>
+  </div>
+
+  <h2>Merged PRs the gate would have blocked</h2>
+  <p class="muted" id="merged-note"></p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Merged</th><th>PR</th><th>Blocked cases</th><th>Source</th><th>Flag</th><th>Why</th><th title="Main's last run of the blocked cases still fails them">Still broken</th></tr></thead>
+      <tbody id="merged"></tbody>
     </table>
   </div>
 
@@ -191,6 +206,43 @@
     }
   }
 
+  // Every PR merged into main in the window, through the contracts gate as it was when it merged.
+  function renderMerged(m) {
+    const body = $("merged");
+    body.replaceChildren();
+    if (!m) {
+      set("merged-note", "Not collected yet.");
+      return;
+    }
+    const f = m.flags || {};
+    set("merged-note", `${plural(m.merged, "PR")} merged ${m.window[0]} → ${m.window[1]}; ${m.with_red} had a red MIC case in their last run, ${m.blocked} would have been blocked: a case red with the PR and green on the commit it merged onto (PR CI's own verdict since 2026-11-23, replayed before). real: re-recorded after the merge or red on main after it · false-positive: main stayed green · to-review: merged too recently to tell.${m.pending ? ` ${m.pending} waiting for the replay.` : ""}${m.unmeasured ? ` ${m.unmeasured} could not be measured.` : ""} Real ${f.real || 0} · false positive ${f["false-positive"] || 0} · to review ${f["to-review"] || 0}.`);
+    for (const r of m.rows || []) {
+      const row = document.createElement("tr");
+      cell(row, r.merged);
+      const pr = document.createElement("span");
+      if (/^\d+$/.test(r.pr)) pr.appendChild(link(`#${r.pr}`, `https://github.com/huggingface/transformers/pull/${r.pr}`));
+      pr.append(` ${r.title || ""}`);
+      cell(row, pr);
+      cell(row, (r.cases || []).join(", ") + (r.failure ? ` — ${r.failure}` : ""));
+      cell(row, /^https:\/\/github\.com\//.test(r.run || "") ? link(r.source, r.run) : r.source || "");
+      const flag = document.createElement("span");
+      flag.className = `flag-${r.flag}`;
+      flag.textContent = r.flag;
+      cell(row, flag);
+      cell(row, r.why || "");
+      const broken = document.createElement("span");
+      if (r.still_broken && r.still_broken !== "no") broken.className = "flag-real";
+      broken.textContent = r.still_broken || "–";
+      cell(row, broken);
+      body.appendChild(row);
+    }
+    if (!(m.rows || []).length) {
+      const row = document.createElement("tr");
+      cell(row, "No merge would have been blocked.");
+      body.appendChild(row);
+    }
+  }
+
   function render(o) {
     const [first, last] = o.window || [];
     set("window", first ? `Transformers PRs and daily GPU CI, ${first} → ${last}` : "No data yet");
@@ -206,11 +258,16 @@
     set("uncovered-note", `regressions on models with no contract${r["out-of-scope"] ? ` · ${r["out-of-scope"]} more GPU-only` : ""}`);
 
     const f = o.false_alarms;
-    const share = f.prs_with_failure ? Math.round((100 * f.prs_not_their_fault) / f.prs_with_failure) : 0;
-    set("false", f.prs_with_failure ? `${share}%` : "–");
-    set("false-note", `of ${plural(f.prs_with_failure, "PR")} with a red MIC saw only failures they did not cause`);
+    if (f.false_positive_prs === undefined) {
+      set("false", "–");
+    } else {
+      const share = f.prs_with_failure ? Math.round((100 * f.false_positive_prs) / f.prs_with_failure) : 0;
+      set("false", `${f.false_positive_prs}`);
+      set("false-note", `PRs (${share}% of ${f.prs_with_failure} with a red MIC) hit a case they did not cause: ${plural(f.false_positive_cases, "flaky or environment case")} · ${f.prs_not_their_fault} more only saw failures already on main, which the gate warns on`);
+    }
 
     renderRegressions(o.regressions || []);
+    renderMerged(o.merged_gate);
 
     const body = $("next");
     for (const t of o.next) {

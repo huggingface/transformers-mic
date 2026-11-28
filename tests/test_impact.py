@@ -487,7 +487,12 @@ def test_overview_has_the_headline_numbers_and_next_targets(tmp_path):
         "not_covered": 1,
         "awaiting_verdict": 1,
     }
-    assert o["false_alarms"] == {"prs_with_failure": 4, "prs_not_their_fault": 1}
+    assert o["false_alarms"] == {
+        "prs_with_failure": 4,
+        "prs_not_their_fault": 1,
+        "false_positive_prs": 1,  # the PR-only flake
+        "false_positive_cases": 1,
+    }
     assert o["block_merges"]["ready"] is False and any("days observed" in u for u in o["block_merges"]["unmet"])
     assert len(o["next"]) == 7  # every suggestion, up to NEXT_TARGETS
     assert o["next"][0] == {
@@ -1180,3 +1185,265 @@ def test_a_sticky_onset_days_after_a_bisected_regression_is_that_regression():
     # Beyond SAME_EVENT_DAYS it is a new onset.
     gpu_ci["sticky#llama#2026-10-30"] = gpu_ci.pop("sticky#llama#2026-10-19") | {"date": "2026-10-30"}
     assert impact.same_event("sticky#llama#2026-10-30", gpu_ci["sticky#llama#2026-10-30"], gpu_ci) is None
+
+
+# ---------------------------------------------------------------- merged PRs through the gate
+
+
+def result(target, status="fail", variant="bfloat16", fleet="prototypes", failures=("logits: max delta 0.1",)):
+    return {
+        "contract": f"huggingface-mic/{target}",
+        "contract_name": target.upper(),
+        "target": target,
+        "variant": variant,
+        "fleet": fleet,
+        "fleet_revision": "rev1",
+        "status": status,
+        "failures": list(failures),
+    }
+
+
+def artifact(folder, records, gate=None):
+    folder = Path(folder)
+    folder.mkdir(parents=True, exist_ok=True)
+    (folder / "results.jsonl").write_text("".join(json.dumps(r) + "\n" for r in records))
+    if gate is not None:
+        (folder / "contracts-gate.json").write_text(json.dumps({"enforced": False, "decisions": gate}))
+    return folder
+
+
+def test_mic_job_reads_both_job_names(monkeypatch):
+    for name in ("pr-ci / fast-integration / run", "pr-ci / fast-integration / transformers"):
+
+        def github(path, name=name):
+            if "/jobs" in path:
+                return {"jobs": [{"name": name, "conclusion": "failure"}]}
+            return {"workflow_runs": [{"id": 1, "name": "PR CI"}]}
+
+        monkeypatch.setattr(impact, "github", github)
+        assert impact.mic_job("abc") == "failure"
+
+
+def test_read_contracts_without_gate_keeps_red_cases_the_gate_would_replay(tmp_path):
+    folder = artifact(
+        tmp_path,
+        [
+            result("a-mic"),
+            result("b-mic", status="pass"),
+            result("c-mic", failures=["no reviewed baseline for cpu"]),
+            result("d-mic", failures=[f"{impact.KNOWN_PASS}: x"]),
+        ],
+    )
+    source, red, blocked = impact.read_contracts(folder)
+    assert source == "replay" and blocked is None
+    assert [(c["contract"], c["target"], c["failure"]) for c in red] == [("A-MIC", "a-mic", "logits: max delta 0.1")]
+
+
+def test_read_contracts_takes_the_gate_verdict(tmp_path):
+    gate = [
+        {
+            "fleet": "prototypes",
+            "variant": "bfloat16",
+            "contract": "A",
+            "target": "a-mic",
+            "verdict": "blocked",
+            "failure": "x",
+        },
+        {"fleet": "prototypes", "variant": "bfloat16", "contract": "B", "target": "b-mic", "verdict": "warn"},
+    ]
+    source, red, blocked = impact.read_contracts(artifact(tmp_path, [result("a-mic"), result("b-mic")], gate))
+    assert source == "gate" and len(red) == 2
+    assert [(c["contract"], c["target"]) for c in blocked] == [("A", "a-mic")]
+
+
+def merged_pr(number="7", labels=(), merged_at="2026-11-10T12:00:00Z"):
+    return {
+        "pr": number,
+        "title": "t",
+        "merged_at": merged_at,
+        "head": "h" + number,
+        "merge_commit": "m" + number,
+        "labels": list(labels),
+    }
+
+
+def test_look_up_merged_sorts_prs_into_verdicts(monkeypatch, tmp_path):
+    prs = [
+        merged_pr("1"),  # gate blocked
+        merged_pr("2"),  # red, no gate: replay
+        merged_pr("3"),  # no artifact
+        merged_pr("4", labels=["New model"]),  # red, but the label makes it warn
+        merged_pr("5"),  # no PR CI run before the merge
+        merged_pr("6"),  # ran, nothing red
+    ]
+    monkeypatch.setattr(impact, "merged_prs", lambda since: prs)
+    monkeypatch.setattr(
+        impact,
+        "merge_run",
+        lambda head, merged_at: None if head == "h5" else {"id": int(head[1:]), "html_url": f"u{head}"},
+    )
+    gate = [{"fleet": "control", "variant": "default", "contract": "A", "target": "a-mic", "verdict": "blocked"}]
+
+    def download(run_id, folder):
+        if run_id == 3:
+            return False
+        records = [result("a-mic", status="pass" if run_id == 6 else "fail")]
+        artifact(folder, records, gate if run_id == 1 else None)
+        return True
+
+    merged = {}
+    assert impact.look_up_merged(merged, impact.dt.date(2026, 11, 26), download=download) == 6
+    verdicts = {pr: (e["source"], e["verdict"]) for pr, e in merged.items()}
+    assert verdicts == {
+        "1": ("gate", "blocked"),
+        "2": ("replay", "pending"),
+        "3": ("not-run", "clear"),
+        "4": ("replay", "clear"),
+        "5": ("no-pr-ci", "clear"),
+        "6": ("replay", "clear"),
+    }
+    # Looked up once per rule version; the limit leaves the rest for the next run.
+    assert impact.look_up_merged(merged, impact.dt.date(2026, 11, 26), download=download) == 0
+    assert impact.look_up_merged({}, impact.dt.date(2026, 11, 26), limit=2, download=download) == 2
+
+
+def test_merged_replay_plan_and_verdicts(tmp_path):
+    entry = {
+        **merged_pr("9"),
+        "verdict": "pending",
+        "red": [impact.gate_case(result(t)) for t in ("a-mic", "b-mic", "c-mic", "d-mic")],
+    }
+    merged = {"9": entry}
+    plan = impact.merged_replay_plan(merged)
+    assert plan == [
+        {
+            "key": "merged#9",
+            "fleet": "prototypes",
+            "fleet_revision": "rev1",
+            "variants": ["bfloat16"],
+            "contracts": ["A-MIC", "B-MIC", "C-MIC", "D-MIC"],
+            "parent": "m9^",
+            "bad": "m9",
+        }
+    ]
+
+    def replayed(target, side, status):
+        return {**result(target, status=status), "replay": {"key": "merged#9", "side": side}}
+
+    records = [
+        replayed("a-mic", "parent", "pass"),
+        replayed("a-mic", "bad", "fail"),  # green on the base, red with the PR: blocked
+        replayed("b-mic", "parent", "fail"),
+        replayed("b-mic", "bad", "fail"),  # red on the base too
+        replayed("c-mic", "parent", "pass"),
+        replayed("c-mic", "bad", "pass"),  # red in PR CI, green when replayed
+        replayed("d-mic", "parent", "pass"),  # bad side missing: not measured
+    ]
+    assert impact.merged_replay_verdicts(records, merged, "run") == ["9"]
+    assert entry["verdict"] == "blocked" and [c["target"] for c in entry["blocked"]] == ["a-mic"]
+    assert entry["reason"] == "1 green when replayed; 1 not measured; 1 red on the base too"
+    assert impact.merged_replay_plan(merged) == []
+
+
+def test_merged_replay_that_could_not_run_is_unmeasured():
+    merged = {"9": {**merged_pr("9"), "verdict": "pending", "red": [impact.gate_case(result("a-mic"))]}}
+    broken = {
+        "contract": "*",
+        "target": "*",
+        "status": "error",
+        "failures": ["m9: unknown revision"],
+        "replay": {"key": "merged#9", "side": "bad"},
+    }
+    impact.merged_replay_verdicts([broken], merged)
+    assert merged["9"]["verdict"] == "unmeasured" and "unknown revision" in merged["9"]["reason"]
+
+
+def blocked_entry(merged_at="2026-11-10T12:00:00Z"):
+    case = {**impact.gate_case(result("a-mic")), "contract": "A"}
+    return {
+        **merged_pr("9", merged_at=merged_at),
+        "verdict": "blocked",
+        "source": "gate",
+        "blocked": [case],
+        "red": [case],
+    }
+
+
+def main_row(target, fail_day_offset, variant="bfloat16"):
+    daily = [{"pass": 1, "fail": 0} for _ in range(30)]
+    daily[fail_day_offset]["fail"] = 1
+    return {"target": target, "variant": variant, "daily": daily}
+
+
+def test_settle_merged_and_flags():
+    merged_day = int(impact.stamp("2026-11-10T12:00:00Z") // 86400)
+    today = merged_day + 10
+    first_day = today - 29
+    # Red on main the day after the merge: real.
+    red = {"9": blocked_entry()}
+    impact.settle_merged(red, [], today, [main_row("a-mic", merged_day + 1 - first_day)])
+    assert red["9"]["main_after"] == "fail" and impact.merged_flag(red["9"]) == ("real", "red on main after the merge")
+    # Main green for the watch days: a false positive, unless a maintainer says otherwise.
+    green = {"9": blocked_entry()}
+    impact.settle_merged(green, [], today, [main_row("other-mic", 0)])
+    assert impact.merged_flag(green["9"])[0] == "false-positive"
+    assert impact.merged_flag(green["9"], "real-bug") == ("real", "labelled real-bug")
+    # Re-recorded after the merge: an intended change, the block was real.
+    rebaselined = {"9": blocked_entry()}
+    baselines = [{"date": "2026-11-12", "contract": "A", "changed": ["x.json"], "fixture_rebuilt": False}]
+    impact.settle_merged(rebaselined, baselines, today, [])
+    assert impact.merged_flag(rebaselined["9"]) == ("real", "intended change: re-recorded on 2026-11-12")
+    # Merged yesterday and green so far: still watching.
+    recent = {"9": blocked_entry("2026-11-19T12:00:00Z")}
+    impact.settle_merged(recent, [], today, [])
+    assert recent["9"].get("main_after") is None and impact.merged_flag(recent["9"])[0] == "to-review"
+
+
+def test_still_broken_reads_mains_last_run_of_each_blocked_case():
+    case_b = {**impact.gate_case(result("b-mic")), "contract": "B"}
+    entry = blocked_entry()
+    entry["blocked"].append(case_b)
+    fixed = [{"pass": 0, "fail": 0} for _ in range(30)]
+    fixed[5], fixed[6] = {"pass": 0, "fail": 2}, {"pass": 3, "fail": 0}  # failed, then fixed
+    broken = [{"pass": 0, "fail": 0} for _ in range(30)]
+    broken[5], broken[20] = {"pass": 1, "fail": 0}, {"pass": 0, "fail": 1}  # passed, then broke
+    rows = [
+        {"target": "a-mic", "variant": "bfloat16", "daily": fixed},
+        {"target": "b-mic", "variant": "bfloat16", "daily": broken},
+    ]
+    merged = {"9": entry}
+    impact.settle_merged(merged, [], 20000, rows)
+    assert entry["still_broken"] == 1 and impact.still_broken(entry) == "1 of 2"
+    impact.settle_merged(merged, [], 20000, rows[1:])
+    assert impact.still_broken(entry) == "yes"  # a-mic not run on main: left out
+    impact.settle_merged(merged, [], 20000, [])
+    assert impact.still_broken(entry) == ""
+    rows[1]["daily"][20] = {"pass": 1, "fail": 0}
+    impact.settle_merged(merged, [], 20000, rows)
+    assert impact.still_broken(entry) == "no"
+
+
+def test_merged_lines_lists_blocked_merges_in_the_window():
+    merged = {
+        "9": {**blocked_entry(), "main_after": "ok", "run_url": "u"},
+        "8": {**merged_pr("8"), "verdict": "clear", "red": [{"x": 1}]},
+        "1": {**blocked_entry("2026-09-01T00:00:00Z"), "pr": "1"},  # out of the window
+    }
+    lines, overview = impact.merged_lines(merged, {}, impact.dt.date(2026, 11, 26))
+    text = "\n".join(lines)
+    assert "Would have been blocked: **1** — real 0, false positive 1" in text
+    assert "[#9](https://github.com/huggingface/transformers/pull/9)" in text and "#1]" not in text
+    assert overview["merged"] == 2 and overview["with_red"] == 2 and overview["flags"]["false-positive"] == 1
+    assert overview["rows"][0]["cases"] == ["A/a-mic [bfloat16]"]
+
+
+def test_false_positive_cases_follow_outcomes_and_labels():
+    candidates = {
+        "a": {"pr": "1", "outcome": "recovered-no-push"},
+        "b": {"pr": "1", "outcome": "merged-main-ok"},
+        "c": {"pr": "2", "outcome": "merged-main-ok"},  # a human says it was real
+        "d": {"pr": "3", "outcome": "open"},  # labelled a flake
+        "e": {"pr": "4", "outcome": "fixed-by-push"},
+    }
+    labels = {"c": {"verdict": "real-bug"}, "d": {"verdict": "flake"}}
+    assert [c["pr"] for c in impact.false_positive_cases(candidates, labels)] == ["1", "1", "3"]

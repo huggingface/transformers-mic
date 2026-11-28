@@ -5,6 +5,15 @@ All notable changes to `transformers-mic` will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Nested integrations: `integrations/vllm/transformers/` (vLLM's Transformers backend) and
+  `integrations/vllm/vllm/` (vLLM's own model code) are two integrations of one framework, each with its own
+  usage and expectations (`--integration vllm/transformers`). A contract with only these is built and
+  published with the first declared one as the primary.
+
 ## [0.1.4] - 2026-11-25
 
 ### Added

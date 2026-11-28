@@ -154,6 +154,13 @@ def validate(value, name, where):
     except jsonschema.ValidationError as exc:
         path = "/".join(str(p) for p in exc.absolute_path) or "(root)"
         raise SystemExit(f"{where}: invalid {name} at {path}: {exc.message}") from None
+    if name == "integration":
+        # integrations/<name>/ holds one integration's usage and expectations: a nested
+        # one (vllm/transformers) cannot sit inside a declared one (vllm).
+        names = value["integrations"]
+        nested = sorted(n for n in names if any(n.startswith(f"{other}/") for other in names))
+        if nested:
+            raise SystemExit(f"{where}: invalid {name}: {nested[0]} is inside another declared integration's folder")
     return value
 
 
@@ -722,7 +729,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument(
         "--framework",
-        choices=("transformers", "transformers.js", "sentence_transformers", "vllm", "sglang"),
+        choices=(
+            "transformers",
+            "transformers.js",
+            "sentence_transformers",
+            "vllm",
+            "vllm/transformers",
+            "vllm/vllm",
+            "sglang",
+        ),
         required=True,
     )
     parser.add_argument("--contract", action="append", help="run only this contract (repeatable)")

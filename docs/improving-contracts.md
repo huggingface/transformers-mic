@@ -2,6 +2,8 @@
 
 A contract catches only what it calls: over five months of `main`, frozen contracts caught one regression and missed four whose calls they didn't make ([evidence](evidence.md#shadow-backfill)). Adding those calls found a live bug ([#49403](https://github.com/huggingface/transformers/issues/49403)).
 
+> **Here because a Transformers PR turned a contract red?** This page is for contract authors. To update the baselines a PR changed on purpose, comment `record-mic: <model>` on the PR: see [Model integration contracts](https://huggingface.co/docs/transformers/main/en/pr_checks#model-integration-contracts) in the Transformers docs.
+
 The loop: find misses, add the user-facing call, prove it on history, keep false alarms out. Tools: [shadow](../.github/workflows/shadow.yml), [backfill](../.github/workflows/shadow-backfill.yml), [nightly](../.github/workflows/nightly.yml), [`find_misses.py`](../example/find_misses.py), [`replay.py`](../example/replay.py), [`review_candidates.py`](../example/review_candidates.py).
 
 ## Where new checks come from

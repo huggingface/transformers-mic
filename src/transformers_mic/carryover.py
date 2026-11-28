@@ -9,7 +9,9 @@ workspace did not change it, so publication compares each one with the Hub:
 - another integration is carried over only when everything that decides its
   result is identical to the published revision the workspace is based on (the
   lock's pin): every local file under ``integrations/<name>/`` (entry point and
-  reviewed expectations), its manifest section, the comparison rules it
+  reviewed expectations), the files directly in the folders above a nested one
+  (``integrations/vllm/*`` for ``vllm/vllm``, shared with ``vllm/transformers``),
+  its manifest section, the comparison rules it
   inherits, the checkpoints and fixtures it runs, and the fixture's weights
   (``build.json``). The Hub's ``main``, which the publish commits onto, must
   still carry the same manifest section and entry point, since the publish
@@ -36,12 +38,20 @@ def sha256(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def shared_folders(framework):
+    """The folders above a nested integration, whose own files its siblings share: ["vllm"] for vllm/vllm."""
+    parts = framework.split("/")
+    return ["/".join(parts[:i]) for i in range(1, len(parts))]
+
+
 def integration_files(root, manifest, framework):
-    """{path: sha256} of what decides one integration: its folder and entry point."""
+    """{path: sha256} of what decides one integration: its folder, the files directly in the
+    folders above a nested one (not their subfolders: those are its siblings) and its entry point."""
     folder = Path(root) / "integrations" / framework
+    shared = [Path(root) / "integrations" / name for name in shared_folders(framework)]
     paths = {
         p
-        for p in folder.rglob("*")
+        for p in [*folder.rglob("*"), *(p for f in shared if f.is_dir() for p in f.iterdir())]
         if p.is_file() and not p.name.endswith(".candidate.json") and not SKIPPED_PARTS & set(p.relative_to(root).parts)
     }
     entry = manifest["integrations"][framework].get("entry_point")
@@ -64,7 +74,7 @@ def manifest_view(manifest, framework):
 
 
 def published(repo, revision, frameworks):
-    """The published integration.json, build.json and integration folders at one revision."""
+    """The published integration.json, build.json and integration folders (with their shared files) at one revision."""
     from huggingface_hub import snapshot_download
 
     return Path(
@@ -75,6 +85,7 @@ def published(repo, revision, frameworks):
                 "integration.json",
                 "build.json",
                 *(f"integrations/{name}/**" for name in frameworks),
+                *(f"integrations/{shared}/*" for name in frameworks for shared in shared_folders(name)),
             ],
         )
     )

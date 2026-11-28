@@ -19,7 +19,20 @@ qwen2_5_omni-mic/
     transformers.js/                         # if supported
       integration.js
       expectations/<platform>/<target>.<variant>.json
+    vllm/                                    # a framework with several implementations
+      transformers/                          # integration vllm/transformers: the Transformers backend
+        usage.md
+        expectations/<platform>/<target>.json
+      vllm/                                  # integration vllm/vllm: vLLM's own model code
+        usage.md
+        expectations/<platform>/<target>.json
 ```
+
+An integration is named after its folder under `integrations/`. A framework that runs a
+model through several implementations nests them, `<framework>/<implementation>`, each
+with its own usage and expectations; `integrations/<framework>/` is left for what they
+share. A folder holds one integration: `vllm` and `vllm/transformers` cannot both be
+declared.
 
 `tmic create` defaults to the `huggingface-mic` organization; `--namespace` overrides
 it. New generated usage and the fixture share a `<name>-mic` Hub identifier.

@@ -11,7 +11,11 @@ name: MIC impact
 # prototypes fleet (new contracts only). Each GPU CI regression on a model with a
 # contract is then replayed: the model's fixture contracts run on the commit before
 # the regression and on the one that broke it (backfill.py --plan, in parallel jobs),
-# which says whether MIC catches it. Observational: it never comments on a PR and
+# which says whether MIC catches it. Every PR merged in the last 30 days also goes
+# through the contracts gate as it was when it merged (PR CI's contracts-gate.json from
+# 2026-11-23; before, its red cases replayed on the squash commit and its parent, in the
+# same replay jobs), flagged real or false positive by what main did next.
+# Observational: it never comments on a PR and
 # never fails because of what it finds.
 #
 #   gh workflow run mic-impact.yml --repo huggingface/transformers-mic             # yesterday
