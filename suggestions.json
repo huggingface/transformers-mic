@@ -391,7 +391,25 @@
     "date": "2026-11-27",
     "gpu_only": false,
     "integration": false,
+    "test": "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_dynamic"
+   },
+   {
+    "date": "2026-11-27",
+    "gpu_only": false,
+    "integration": false,
     "test": "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_generate_dynamic"
+   },
+   {
+    "date": "2026-11-27",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_generate_dynamic"
+   },
+   {
+    "date": "2026-11-27",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_generate_dynamic_static_cache"
    },
    {
     "date": "2026-11-27",
@@ -409,6 +427,18 @@
     "date": "2026-11-27",
     "gpu_only": false,
     "integration": false,
+    "test": "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_generate_static"
+   },
+   {
+    "date": "2026-11-27",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_generate_static_static_cache"
+   },
+   {
+    "date": "2026-11-27",
+    "gpu_only": false,
+    "integration": false,
     "test": "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_generate_static_static_cache"
    },
    {
@@ -416,6 +446,18 @@
     "gpu_only": false,
     "integration": false,
     "test": "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_static"
+   },
+   {
+    "date": "2026-11-27",
+    "gpu_only": false,
+    "integration": false,
+    "test": "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_static"
+   },
+   {
+    "date": "2026-11-27",
+    "gpu_only": true,
+    "integration": false,
+    "test": "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_sdpa_can_compile_dynamic"
    },
    {
     "date": "2026-11-27",
@@ -1103,7 +1145,7 @@
    "checkpoint_source": "failing test",
    "integration": 0,
    "model": "hunyuan_v1_moe",
-   "other": 6,
+   "other": 7,
    "shrinkable": false,
    "tests": [
     "tests/models/hunyuan_v1_moe/test_modeling_hunyuan_v1_moe.py::HunYuanMoEV1ModelTest::test_flash_attn_2_equivalence"

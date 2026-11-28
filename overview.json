@@ -1,5 +1,5 @@
 {
- "awaiting_verdict": 326,
+ "awaiting_verdict": 328,
  "block_merges": {
   "ready": false,
   "unmet": [
@@ -15,7 +15,7 @@
  },
  "drafts_per_day": 2,
  "false_alarms": {
-  "false_positive_cases": 286,
+  "false_positive_cases": 288,
   "false_positive_prs": 11,
   "prs_not_their_fault": 253,
   "prs_with_failure": 315
@@ -27,7 +27,7 @@
    "real": 10,
    "to-review": 0
   },
-  "merged": 572,
+  "merged": 560,
   "pending": 0,
   "rows": [
    {
@@ -187,8 +187,8 @@
   ],
   "unmeasured": 1,
   "window": [
-   "2026-10-28",
-   "2026-11-27"
+   "2026-10-29",
+   "2026-11-28"
   ],
   "with_red": 140
  },
@@ -500,6 +500,17 @@
   }
  ],
  "regressions": [
+  {
+   "date": "2026-11-27",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "llama4",
+   "pr": null,
+   "run": "",
+   "tests": 7,
+   "verdict": "out-of-scope"
+  },
   {
    "date": "2026-11-27",
    "detail": "mic-whisper-tiny-slim (default): mp/transformers/src/transformers/modeling_layers.py\", line 124, in forward_with_checkpointing; mic-whisper-tiny-slim (bfloat16): mp/transformers/src/transformers/model",
@@ -839,6 +850,17 @@
    "pr": null,
    "run": "",
    "tests": 2,
+   "verdict": "out-of-scope"
+  },
+  {
+   "date": "2026-11-13",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "mixtral",
+   "pr": null,
+   "run": "",
+   "tests": 1,
    "verdict": "out-of-scope"
   },
   {
@@ -1249,6 +1271,17 @@
    "verdict": "out-of-scope"
   },
   {
+   "date": "2026-11-04",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "jetmoe",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
+  },
+  {
    "date": "2026-11-03",
    "detail": "",
    "integration": false,
@@ -1357,6 +1390,17 @@
    "run": "",
    "tests": 1,
    "verdict": "not-reproduced"
+  },
+  {
+   "date": "2026-11-02",
+   "detail": "",
+   "integration": false,
+   "job": "",
+   "model": "axk1",
+   "pr": null,
+   "run": "",
+   "tests": 1,
+   "verdict": "out-of-scope"
   },
   {
    "date": "2026-11-01",
@@ -3686,18 +3730,19 @@
   "broken": 0,
   "caught": 12,
   "duplicate": 5,
+  "flaky": 0,
   "missed": 1,
   "model-added": 4,
   "no-code-change": 1,
   "not-a-regression": 8,
-  "not-covered": 270,
+  "not-covered": 272,
   "not-reproduced": 11,
-  "out-of-scope": 213,
+  "out-of-scope": 217,
   "pending": 0,
   "unrelated-culprit": 16
  },
  "window": [
   "2026-10-20",
-  "2026-11-27"
+  "2026-11-28"
  ]
 }

@@ -5385,6 +5385,18 @@
    "tests/models/longcat_flash/test_modeling_longcat_flash.py::LongcatFlashIntegrationTest::test_shortcat_generation"
   ]
  },
+ "50927#shared": {
+  "bad_commit": "f6b7cbef762d0b5997a2dcab0a6ea33f28f68753",
+  "date": "2026-11-28",
+  "integration": false,
+  "job_link": "https://github.com/huggingface/transformers/actions/runs/46097928400/job/140833920539",
+  "mic": "not-covered",
+  "model": null,
+  "pr": "50927",
+  "tests": [
+   "tests/cli/test_serve.py::TestProcessLifecycle::test_server_killed_leaves_no_process"
+  ]
+ },
  "50975#axk1": {
   "bad_commit": "42efcfde46e668067a74bbd439d33f107b4a7c6c",
   "culprit_files": [
@@ -5714,6 +5726,18 @@
   "mic": "green-on-main",
   "model": "axk1",
   "run_id": "45742236307",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/axk1/test_modeling_axk1.py::AXK1ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#axk1#2026-11-02": {
+  "date": "2026-11-02",
+  "day": 20759,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "axk1",
+  "run_id": "46097879801",
   "signal": "AssertionError",
   "tests": [
    "tests/models/axk1/test_modeling_axk1.py::AXK1ModelTest::test_flash_attn_2_equivalence"
@@ -7147,6 +7171,18 @@
    "tests/models/hunyuan_v1_moe/test_modeling_hunyuan_v1_moe.py::HunYuanMoEV1ModelTest::test_flash_attn_2_equivalence"
   ]
  },
+ "sticky#hunyuan_v1_moe#2026-11-02": {
+  "date": "2026-11-02",
+  "day": 20759,
+  "integration": false,
+  "mic": "not-covered",
+  "model": "hunyuan_v1_moe",
+  "run_id": "45742236307",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/hunyuan_v1_moe/test_modeling_hunyuan_v1_moe.py::HunYuanMoEV1ModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
  "sticky#hunyuan_vl#2026-10-20": {
   "date": "2026-10-20",
   "day": 20746,
@@ -7369,6 +7405,18 @@
    "tests/models/jetmoe/test_modeling_jetmoe.py::JetMoeModelTest::test_flash_attn_2_equivalence"
   ]
  },
+ "sticky#jetmoe#2026-11-04": {
+  "date": "2026-11-04",
+  "day": 20761,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "jetmoe",
+  "run_id": "45928215308",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/jetmoe/test_modeling_jetmoe.py::JetMoeModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
  "sticky#jev#2026-11-10": {
   "date": "2026-11-10",
   "day": 20767,
@@ -7505,6 +7553,24 @@
   "tests": [
    "tests/models/llama/test_modeling_llama.py::LlamaModelTest::test_bc_cache_name_forward",
    "tests/models/llama/test_modeling_llama.py::LlamaModelTest::test_bc_cache_name_generate"
+  ]
+ },
+ "sticky#llama4#2026-11-27": {
+  "date": "2026-11-27",
+  "day": 20784,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "llama4",
+  "run_id": "46097928400",
+  "signal": "torch.onnx._internal.exporter._errors.ConversionError",
+  "tests": [
+   "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_dynamic",
+   "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_generate_dynamic",
+   "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_generate_dynamic_static_cache",
+   "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_generate_static",
+   "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_generate_static_static_cache",
+   "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_onnx_export_static",
+   "tests/models/llama4/test_modeling_llama4.py::Llama4ForConditionalGenerationModelTest::test_sdpa_can_compile_dynamic"
   ]
  },
  "sticky#llava#2026-11-02": {
@@ -7891,6 +7957,18 @@
   "mic": "green-on-main",
   "model": "mixtral",
   "run_id": "45742236307",
+  "signal": "AssertionError",
+  "tests": [
+   "tests/models/mixtral/test_modeling_mixtral.py::MixtralModelTest::test_flash_attn_2_equivalence"
+  ]
+ },
+ "sticky#mixtral#2026-11-13": {
+  "date": "2026-11-13",
+  "day": 20770,
+  "integration": false,
+  "mic": "green-on-main",
+  "model": "mixtral",
+  "run_id": "45928215308",
   "signal": "AssertionError",
   "tests": [
    "tests/models/mixtral/test_modeling_mixtral.py::MixtralModelTest::test_flash_attn_2_equivalence"
