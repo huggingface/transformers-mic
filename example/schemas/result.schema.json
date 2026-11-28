@@ -25,6 +25,13 @@
   "variant": {
    "type": "string"
   },
+  "case": {
+   "type": [
+    "string",
+    "null"
+   ],
+   "description": "the input case this run fed; null when the contract declares no cases"
+  },
   "fixture_repo": {
    "type": "string",
    "description": "Hub repository of the fixture this target ran (fixtures only)"

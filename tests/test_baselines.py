@@ -392,6 +392,29 @@ def test_case_accounting_rejects_missing_duplicate_and_hardware_skips():
     assert baseline_worker.assess(["demo"], "default", [declared], [], "cuda")[0]["status"] == "declared-unsupported"
 
 
+def test_case_accounting_covers_every_input_case_of_every_target():
+    manifest = {"integrations": {"transformers": {"cases": {"text": {"default": True}, "image": {}}}}}
+    assert baseline_worker.input_cases(manifest) == ["text", "image"]
+    assert baseline_worker.input_cases({"integrations": {"transformers": {}}}) == [None]
+    assert baseline_worker.case_key("control", "Demo", "demo", None, "eager") == "control/Demo/demo/eager"
+    assert baseline_worker.case_key("control", "Demo", "demo", "image", "eager") == "control/Demo/demo/image/eager"
+    rows = [
+        {"target": "demo", "case": case, "variant": "default", "status": "recorded", "platform": "cuda"}
+        for case in ("text", "image")
+    ]
+    checks = [{**row, "status": "pass"} for row in rows]
+    result = baseline_worker.assess(["demo"], "default", rows, checks, "cuda", (), ["text", "image"])
+    assert [(r["case"], r["status"]) for r in result] == [("text", "validated"), ("image", "validated")]
+    # One target per case is not a duplicate; a missing or repeated case is an incomplete run.
+    for broken in (rows[:1], [rows[0], rows[0], rows[1]]):
+        with pytest.raises(ValueError):
+            baseline_worker.assess(["demo"], "default", broken, checks, "cuda", (), ["text", "image"])
+    # The failing case alone fails.
+    checks[1] = {**checks[1], "status": "fail"}
+    result = baseline_worker.assess(["demo"], "default", rows, checks, "cuda", (), ["text", "image"])
+    assert [(r["case"], r["status"]) for r in result] == [("text", "validated"), ("image", "failed")]
+
+
 def test_manifest_target_matrix_includes_checkpoints_unless_explicitly_excluded():
     contract = {
         "fixtures": {"org/slim": {"target": "tiny"}},
@@ -416,8 +439,12 @@ def test_manifest_target_matrix_includes_checkpoints_unless_explicitly_excluded(
     assert baseline_worker.profile_exclusions(contract, manifest, "bfloat16", "cuda") == set()
 
 
-@pytest.mark.parametrize("omit_case,runner_code", [(False, 0), (True, 0), (False, 2)])
-def test_worker_records_verifies_and_accounts_for_the_whole_matrix(tmp_path, monkeypatch, omit_case, runner_code):
+@pytest.mark.parametrize(
+    "omit_case,runner_code,input_cases", [(False, 0, False), (True, 0, False), (False, 2, False), (False, 0, True)]
+)
+def test_worker_records_verifies_and_accounts_for_the_whole_matrix(
+    tmp_path, monkeypatch, omit_case, runner_code, input_cases
+):
     import sys
 
     model = tmp_path / "hub"
@@ -434,6 +461,10 @@ def test_worker_records_verifies_and_accounts_for_the_whole_matrix(tmp_path, mon
         },
         "outputs": {"answer": {"compare": "allclose", "atol": 0.01, "rtol": 0.01}},
     }
+    # Input cases: every one runs for every target and variant; the default case keeps the case-free names.
+    cases = ["text", "image"] if input_cases else [None]
+    if input_cases:
+        manifest["integrations"]["transformers"]["cases"] = {"text": {"default": True}, "image": {}}
     write(model / "integration.json", manifest)
     contract = {
         "integration": {"repo": "huggingface-mic/demo-mic", "revision": "f" * 40},
@@ -475,25 +506,32 @@ def test_worker_records_verifies_and_accounts_for_the_whole_matrix(tmp_path, mon
         targets = ["tiny"] if omit_case else ["tiny", "full"]
         rows = []
         for target in targets:
-            row = {
-                "target": target,
-                "variant": variant,
-                "platform": platform,
-                "status": "recorded" if "--record" in command else "pass",
-            }
-            if "--record" in command:
-                suffix = "" if variant == "default" else "." + variant
-                write(
-                    folder / platform / (target + suffix + ".candidate.json"),
-                    {
-                        "recorded_with": row,
-                        "outputs": {
-                            "runtime": {"device": current_profile},
-                            "answer": [1.0],
+            for case in cases:
+                row = {
+                    "target": target,
+                    **({"case": case} if case else {}),
+                    "variant": variant,
+                    "platform": platform,
+                    "status": "recorded" if "--record" in command else "pass",
+                }
+                if "--record" in command:
+                    # Named like run.py: <target>[.<case>][.<variant>], no case part for the default case.
+                    suffix = ("" if case in (None, "text") else "." + case) + (
+                        "" if variant == "default" else "." + variant
+                    )
+                    candidate = folder / platform / (target + suffix + ".candidate.json")
+                    write(
+                        candidate,
+                        {
+                            "recorded_with": row,
+                            "outputs": {
+                                "runtime": {"device": current_profile},
+                                "answer": [1.0],
+                            },
                         },
-                    },
-                )
-            rows.append(row)
+                    )
+                    row = {**row, "baseline": str(candidate)}
+                rows.append(row)
         output.write_text("".join(json.dumps(row) + "\n" for row in rows))
         return runner_code
 
@@ -513,8 +551,21 @@ def test_worker_records_verifies_and_accounts_for_the_whole_matrix(tmp_path, mon
         )
         assert baseline_worker.measure(args) == int(omit_case or bool(runner_code))
         report = read(args.out / "collection.json")
-        assert len(report["expected_cases"]) == 4 and len(report["cases"]) == 4
+        assert len(report["expected_cases"]) == 4 * len(cases) and len(report["cases"]) == 4 * len(cases)
         assert report["complete"] is (not omit_case and not runner_code)
+        if input_cases:
+            # Keys and candidates carry the case; the default case keeps the case-free candidate name.
+            assert "control/Demo/tiny/image/bfloat16" in report["expected_cases"]
+            assert {Path(c["candidate"]).name for c in report["cases"] if c["target"] == "tiny"} == {
+                "tiny.candidate.json",
+                "tiny.bfloat16.candidate.json",
+                "tiny.image.candidate.json",
+                "tiny.image.bfloat16.candidate.json",
+            }
+        else:
+            # A contract without cases: the keys it always had, and no case in its entries.
+            assert "control/Demo/tiny/bfloat16" in report["expected_cases"]
+            assert not any("case" in c for c in report["cases"])
         # Both profiles name the pinned sources; neither carries copies.
         assert report["models"] == [
             {

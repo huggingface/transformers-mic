@@ -61,9 +61,9 @@ def main():
         lines = sys.stdin if name == "-" else open(name)
         for line in lines:
             r = json.loads(line)
-            records[(r["shadow"]["transformers_sha"], r["contract"], r["target"])] = r
+            records[(r["shadow"]["transformers_sha"], r["contract"], r["target"], r.get("case"))] = r
     order = git(args.repo, "rev-list", "--first-parent", "--reverse", args.ref).split()
-    seen = {sha for sha, _, _ in records}
+    seen = {sha for sha, *_ in records}
     order = [sha for sha in order if sha in seen]
 
     lock_dir = HERE / args.framework / "tests/contracts"
@@ -76,9 +76,9 @@ def main():
         }
         for contract in lock["contracts"].values()
     }
-    outcome = defaultdict(dict)  # contract -> sha -> {target: (status, failures)}
-    for (sha, contract, target), r in records.items():
-        outcome[contract].setdefault(sha, {})[target] = (
+    outcome = defaultdict(dict)  # contract -> sha -> {(target, case): (status, failures)}
+    for (sha, contract, target, case), r in records.items():
+        outcome[contract].setdefault(sha, {})[(target, case)] = (
             r["status"],
             tuple(f.split(":")[0] for f in r.get("failures", [])),
         )

@@ -121,14 +121,21 @@ def changes(old, new):
 
 
 def blocked_cases(path):
-    """{(fleet, contract, variant): {targets}} of a contracts gate report's `blocked` decisions.
+    """{(fleet, contract, variant): {(target, input case)}} of a contracts gate report's `blocked` decisions.
 
-    Gates before huggingface/transformers-ci#404 wrote the verdict as `block`: read both."""
+    Gates before huggingface/transformers-ci#404 wrote the verdict as `block`: read both. A decision
+    without an input case (a contract without cases, or a gate that does not report them) means every
+    case of its target."""
     wanted = {}
     for d in read(path).get("decisions", []):
         if d.get("verdict") in ("blocked", "block"):
-            wanted.setdefault((d["fleet"], d["contract"], d["variant"]), set()).add(d["target"])
+            wanted.setdefault((d["fleet"], d["contract"], d["variant"]), set()).add((d["target"], d.get("case")))
     return wanted
+
+
+def label(row):
+    """A target with its input case, if the contract declares cases."""
+    return row["target"] + (f" [{row['case']}]" if row.get("case") else "")
 
 
 def measure(args):
@@ -188,12 +195,14 @@ def measure(args):
                 options += ["--variant", variant, "--isolate", "--fixtures-only"]
                 tag = f"{fleet_name}-{name}-{variant}"
                 if args.cases:
-                    red = sorted(blocked.get((fleet_name, name, variant), ()))
+                    red = sorted(blocked.get((fleet_name, name, variant), ()), key=str)
                 else:
                     checked = folder / f"{variant}.check.jsonl"
                     run(root, [*options, "--output", str(checked)], tag + "-check")
-                    red = sorted({r["target"] for r in rows(checked) if r["status"] == "fail"})
-                    crashed = sorted({r["target"] for r in rows(checked) if r["status"] == "error"})
+                    red = sorted(
+                        {(r["target"], r.get("case")) for r in rows(checked) if r["status"] == "fail"}, key=str
+                    )
+                    crashed = sorted({label(r) for r in rows(checked) if r["status"] == "error"})
                     if crashed:
                         record["errors"].append(
                             {
@@ -214,43 +223,55 @@ def measure(args):
 
 
 def record_and_verify(root, record, folder, options, tag, red, references, pinned, fleet_name, name, pin, variant):
-    """Record candidates for the `red` targets (each rerun in a fresh process), then check them in a separate pass."""
+    """Record candidates for the `red` (target, input case) runs (each rerun in a fresh process), then check them
+    in a separate pass. A red run without an input case covers every case of its target."""
     candidates, verification = folder / "candidates", folder / "verification"
     copy_tolerances(references, candidates)
-    targets = [x for t in red for x in ("--target", t)]
+    selection = [x for t in sorted({t for t, _ in red}) for x in ("--target", t)]
+    if all(case for _, case in red):
+        # --target/--case select their cross product; `wanted` keeps the extra runs out of the record.
+        selection += [x for c in sorted({c for _, c in red}) for x in ("--case", c)]
+
+    def wanted(row):
+        return (row["target"], row.get("case")) in red or (row["target"], None) in red
+
     recorded = folder / f"{variant}.record.jsonl"
     run(
         root,
-        [*options, *targets, "--record", "--expectations", str(candidates), "--output", str(recorded)],
+        [*options, *selection, "--record", "--expectations", str(candidates), "--output", str(recorded)],
         tag + "-record",
     )
-    for row in rows(recorded):
+
+    def error(row, reason):
+        record["errors"].append(
+            {"fleet": fleet_name, "contract": name, "variant": variant, "targets": [label(row)], "reason": reason}
+        )
+
+    for row in filter(wanted, rows(recorded)):
         if row["status"] != "recorded":
             # A crash, a non-finite value or a failing assertion is not a value change to record.
-            record["errors"].append(
-                {
-                    "fleet": fleet_name,
-                    "contract": name,
-                    "variant": variant,
-                    "targets": [row["target"]],
-                    "reason": "; ".join(row.get("failures", []))[:500] or row["status"],
-                }
-            )
+            error(row, "; ".join(row.get("failures", []))[:500] or row["status"])
+    # A blocked run the runner did not return is an error, never dropped.
+    returned = {(r["target"], r.get("case")) for r in rows(recorded)}
+    for target, case in sorted(red, key=str):
+        if not any(t == target and case in (None, c) for t, c in returned):
+            error({"target": target, "case": case}, "blocked, but the runner returned no run for it")
     for candidate in candidates.glob("*/*.candidate.json"):
         final = verification / candidate.parent.name / candidate.name.replace(".candidate.json", ".json")
         final.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(candidate, final)
     copy_tolerances(candidates, verification)
     verified = folder / f"{variant}.verify.jsonl"
-    run(root, [*options, *targets, "--expectations", str(verification), "--output", str(verified)], tag + "-verify")
-    passed = {r["target"] for r in rows(verified) if r["status"] == "pass"}
-    suffix = "" if variant == "default" else f".{variant}"
-    for row in rows(recorded):
+    run(root, [*options, *selection, "--expectations", str(verification), "--output", str(verified)], tag + "-verify")
+    passed = {(r["target"], r.get("case")) for r in rows(verified) if r["status"] == "pass"}
+    for row in filter(wanted, rows(recorded)):
         if row["status"] != "recorded":
             continue
         platform = row["platform"]
-        file = verification / platform / f"{row['target']}{suffix}.json"
+        # The runner names the candidate (with the input case, if any); never rebuild that name.
+        file = verification / platform / Path(row["baseline"]).name.replace(".candidate.json", ".json")
         if not file.exists():
+            error(row, f"recorded, but no candidate file {Path(row['baseline']).name}")
             continue
         old = references / platform / file.name
         record["cases"].append(
@@ -261,11 +282,12 @@ def record_and_verify(root, record, folder, options, tag, red, references, pinne
                 "pinned": pinned["contracts"][name]["integration"]["revision"],
                 "measured_on": pin["revision"],
                 "target": row["target"],
+                **({"case": row["case"]} if row.get("case") else {}),
                 "variant": variant,
                 "platform": platform,
                 "path_in_repo": f"{EXPECTATIONS}/{platform}/{file.name}",
                 "file": str(file.relative_to(root)),
-                "verified": row["target"] in passed,
+                "verified": (row["target"], row.get("case")) in passed,
                 "changes": changes(read(old) if old.exists() else None, read(file)),
             }
         )
@@ -315,7 +337,7 @@ def summary(record):
         for c in record["cases"]:
             changed = "; ".join(f"`{k}` {describe(o, n)}" for k, (o, n) in c["changes"].items()) or "—"
             lines.append(
-                f"| {c['contract']} | {c['target']} | {c['variant']} | {c['platform']} | "
+                f"| {c['contract']} | {label(c)} | {c['variant']} | {c['platform']} | "
                 f"{'✅' if c['verified'] else '❌'} | {changed.replace('|', chr(92) + '|')} |"
             )
     else:
@@ -346,7 +368,7 @@ def validate(root, record, pr, merge_sha=None):
     files = {}
     for case in record["cases"]:
         if not case["verified"]:
-            raise ValueError(f"{case['contract']}/{case['target']}: candidate failed its verification pass")
+            raise ValueError(f"{case['contract']}/{label(case)}: candidate failed its verification pass")
         if case["fleet"] not in fleet.FILES or not PATH.fullmatch(case["path_in_repo"]):
             raise ValueError(f"unexpected destination {case['fleet']}:{case['path_in_repo']}")
         source = (root / case["file"]).resolve()
@@ -416,7 +438,7 @@ def publish(args, api=None):
         {
             "by": args.by,
             "transformers_sha": record.get("transformers_sha"),
-            "cases": [f"{c['contract']}/{c['target']}[{c['variant']}]" for c in record["cases"]],
+            "cases": [f"{c['contract']}/{label(c)}[{c['variant']}]" for c in record["cases"]],
         }
     )
     commit = api.create_commit(

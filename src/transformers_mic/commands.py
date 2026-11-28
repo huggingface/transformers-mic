@@ -1996,6 +1996,9 @@ def execute_one(args, record=False):
     if args.target:
         for target in args.target:
             options += ["--target", target]
+    for case in getattr(args, "case", None) or []:
+        options += ["--case", case]
+    partial = bool(args.target or getattr(args, "case", None))
     if record:
         options.append("--record")
     # A workspace is drafted and checked on whatever runner is at hand; the cloud
@@ -2012,7 +2015,7 @@ def execute_one(args, record=False):
     options += ["--output", str(output)]
     result = backend.invoke("run", workspace.root, options)
     if not record:
-        # Publication requires every declared target, not a focused partial check.
+        # Publication requires every declared target and input case, not a focused partial check.
         rows = [json.loads(line) for line in output.read_text().splitlines()] if output.exists() else []
         evidence = {
             "framework": framework,
@@ -2026,7 +2029,7 @@ def execute_one(args, record=False):
         }
         key = args.variant if framework == "transformers" else f"{framework}:{args.variant}"
         validations = workspace.state.get("validations", {})
-        if not args.target and result.returncode == 0 and bool(rows):
+        if not partial and result.returncode == 0 and bool(rows):
             validations[key] = {
                 **evidence,
                 "fingerprint": workspace.validation_fingerprint(),
@@ -2034,7 +2037,7 @@ def execute_one(args, record=False):
         else:
             validations.pop(key, None)
         workspace.save_state(
-            validated=not args.target and result.returncode == 0 and bool(rows),
+            validated=not partial and result.returncode == 0 and bool(rows),
             validation=evidence,
             validations=validations,
         )

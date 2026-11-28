@@ -16,7 +16,16 @@ For each contract in <framework>/tests/contracts/fleet.lock (or --lock, with
 expectations/ next to it) it reads the
 manifest from the pinned integration repo, expands the targets (each slim
 fixture once, then each checkpoint), runs the contract, and compares the result
-with <framework>/tests/contracts/expectations/<contract>/<platform>/<target>[.<variant>].json.
+with <framework>/tests/contracts/expectations/<contract>/<platform>/<target>[.<case>][.<variant>].json.
+
+An integration may declare input cases (e.g. text, image, text_image). Unlike
+variants, which a run selects, every case runs for every target, with MIC_CASE
+set; each (target, case) gets its own result and baseline. A contract without
+cases is one implicit case (null in records, nothing in names). The case marked
+default feeds the inputs the contract fed before it declared cases, so it keeps
+the case-free baseline names, and a baseline recorded before cases existed (no
+case in recorded_with) counts as that case's.
+
 The manifest, fleet lock, fixture builds, baselines, tolerances, and result
 records are validated against the JSON schemas in schemas/.
 
@@ -63,9 +72,9 @@ once the bug is fixed. An object {issue, match, skip_outputs} narrows it:
 with match, the target is xfail only if every failure line contains that text
 (any other failure still fails, and a pass asks to remove the entry); with
 skip_outputs, those outputs are left out of the comparison and recorded as
-skipped_outputs, and the others are checked as usual; with variants and/or
-platforms, the entry covers only runs of those variants on those platforms (a
-pass anywhere else is an ordinary pass). A contract that raises
+skipped_outputs, and the others are checked as usual; with variants, cases and/or
+platforms, the entry covers only runs of those variants and input cases on those
+platforms (a pass anywhere else is an ordinary pass). A contract that raises
 stops there, so a matched error still hides the checks after it. local_patches in the fleet lock name
 workarounds from patches.py, applied before every contract (in this process and
 in isolated ones) and recorded in each result's environment. Chat templates see
@@ -457,19 +466,54 @@ def dims(value):
     return f"({', '.join(map(str, shape))})"
 
 
-def known_entry(known, contract, target, variant=None, platform=None):
+def known_entry(known, contract, target, variant=None, platform=None, case=None):
     """The fleet lock's known_failures entry for a target, as a dict (a plain string covers the whole target).
 
-    An entry with variants and/or platforms applies only to a run of one of those
-    variants measured on one of those platforms; a run whose platform is not known
+    An entry with variants, cases and/or platforms applies only to a run of one of those
+    variants and input cases measured on one of those platforms; a run whose platform is not known
     yet (it failed before measuring) is not covered."""
     entry = known.get(f"{contract.split('/')[-1].removesuffix('-integration')}/{target}")
     entry = {"issue": entry} if isinstance(entry, str) else entry
     if entry and "variants" in entry and variant not in entry["variants"]:
         return None
+    if entry and "cases" in entry and case not in entry["cases"]:
+        return None
     if entry and "platforms" in entry and platform not in entry["platforms"]:
         return None
     return entry
+
+
+def input_cases(integration, where):
+    """(cases, default case) of an integration: every declared input case runs, in order.
+
+    No cases declared: one implicit case, None. The default case (at most one) keeps the
+    case-free baseline names. A case may not share a variant's name, so a baseline name
+    never reads two ways, nor be named `candidate`, the suffix of candidate baselines."""
+    cases = integration.get("cases")
+    if not cases:
+        return [None], None
+    default = [case for case, spec in cases.items() if spec.get("default")]
+    clash = sorted(set(cases) & set(integration["variants"]))
+    if len(default) > 1 or clash or "candidate" in cases:
+        problem = (
+            f"more than one default case {default}"
+            if len(default) > 1
+            else f"cases named like variants {clash}"
+            if clash
+            else "a case named 'candidate' (the candidate baselines' suffix)"
+        )
+        raise ValueError(f"{where}: {problem}")
+    return list(cases), default[0] if default else None
+
+
+def baseline_name(target, variant, case, default_case):
+    """<target>[.<case>][.<variant>].json: the default variant, the default case and no case add nothing."""
+    parts = [
+        target,
+        *([case] if case not in (None, default_case) else []),
+        *([variant] if variant != "default" else []),
+    ]
+    return ".".join(parts) + ".json"
 
 
 def shown(path):
@@ -702,6 +746,11 @@ def main():
     parser.add_argument("--expectations", type=Path, help="override baseline directory")
     parser.add_argument("--variant", default="default")
     parser.add_argument(
+        "--case",
+        action="append",
+        help="run only this input case (repeatable; default: every case the contract declares)",
+    )
+    parser.add_argument(
         "--run-declared",
         action="store_true",
         help="also run variants the manifest declares unmeasured (reproduce the bug behind the declaration, or check its fix)",
@@ -804,6 +853,7 @@ def main():
             record["target"],
             record.get("variant"),
             record.get("platform"),
+            record.get("case"),
         )
         if entry and not args.record and not args.golden and ("match" in entry or "skip_outputs" not in entry):
             issue = entry["issue"]
@@ -859,6 +909,12 @@ def main():
                 **({"selected_by": selected_by.get(name)} if selected_by is not None else {}),
             }
             variant = integration["variants"].get(args.variant)
+            try:
+                cases, default_case = input_cases(integration, f"{name}: {args.framework}")
+                cases_problem = None
+                cases = [case for case in cases if not args.case or case in args.case]
+            except ValueError as e:  # a bad manifest fails its own targets, not the whole run
+                cases, default_case, cases_problem = [None], None, str(e)
             required = required_outputs(manifest["outputs"], integration)
             executor = Executor(
                 root / integration["entry_point"],
@@ -869,12 +925,20 @@ def main():
                 lock.get("environment"),
             )
             env_info = None
-            for target, kind, model, revision, problem in targets(
-                lock_dir, contract, manifest, args.framework, args.fixtures_only, args.local_fixtures
-            ):
+            runs = (
+                (found, case)
+                for found in targets(
+                    lock_dir, contract, manifest, args.framework, args.fixtures_only, args.local_fixtures
+                )
+                for case in cases
+            )
+            for (target, kind, model, revision, problem), case in runs:
                 if args.target and target not in args.target:
                     continue
-                record = {**base, "target": target, "kind": kind, "revision": revision}
+                record = {**base, "target": target, "case": case, "kind": kind, "revision": revision}
+                if cases_problem:
+                    emit({**record, "status": "error", "failures": [cases_problem]})
+                    continue
                 if variant is None:
                     emit(
                         {
@@ -936,6 +1000,7 @@ def main():
                     "MIC_MODEL_REVISION": "" if os.path.isdir(model) else revision,
                     "MIC_MODEL_KWARGS": json.dumps(variant),
                     "MIC_TEMPLATE_DATE": template_date.TEMPLATE_DATE,
+                    **({"MIC_CASE": case} if case is not None else {}),
                 }
                 ok, stdout, stderr = executor.run(env)
                 environment = {**env_info, "local_patches": local_patches} if local_patches else env_info
@@ -955,14 +1020,13 @@ def main():
                 platform = platform_class(actual["runtime"]["device"], actual["runtime"].get("dtype"))
                 record["platform"] = platform
                 entry = known_entry(
-                    known, record.get("contract_name", record["contract"]), target, args.variant, platform
+                    known, record.get("contract_name", record["contract"]), target, args.variant, platform, case
                 )
                 skipped = sorted(entry.get("skip_outputs", [])) if entry and not args.record else []
                 outputs = {k: r for k, r in manifest["outputs"].items() if k not in skipped}
                 checked = required - set(skipped)
                 if skipped:
                     record["skipped_outputs"] = skipped
-                suffix = "" if args.variant == "default" or args.golden else f".{args.variant}"
                 platform_dir = (
                     args.expectations
                     or (
@@ -971,7 +1035,10 @@ def main():
                         else lock_dir / "expectations" / name
                     )
                 ) / (args.golden or platform)
-                baseline = platform_dir / f"{target}{suffix}.json"
+                # A golden check compares with the other platform's default variant, for the same inputs.
+                baseline = platform_dir / baseline_name(
+                    target, "default" if args.golden else args.variant, case, default_case
+                )
                 record["baseline"] = shown(baseline)
                 if (root / ".mic-repo.json").exists() and not args.expectations:
                     # The reviewed baseline as a Hub location, not a cache path.
@@ -1036,7 +1103,7 @@ def main():
                             }
                         )
                         continue
-                    candidate = baseline.with_name(f"{target}{suffix}.candidate.json")
+                    candidate = baseline.with_suffix(".candidate.json")
                     candidate.parent.mkdir(parents=True, exist_ok=True)
                     recorded = {k: v for k, v in record.items() if k != "baseline"}
                     if args.framework == "transformers":
@@ -1061,6 +1128,10 @@ def main():
                     reviewed = load(baseline, "baseline")
                     identity = reviewed["recorded_with"]
                     mismatch = [k for k in ("target", "variant", "framework") if identity.get(k) != record[k]]
+                    # A baseline recorded while the contract declared no cases (no case, or null) is the
+                    # default case's (or, while it still declares none, the implicit case's).
+                    if (identity.get("case") or default_case) != case:
+                        mismatch.append("case")
                     # Baselines recorded before the freeze carry no date and are compared as
                     # usual: only one whose template put the date into a checked output fails,
                     # and it failed every day but its recording day anyway. Re-record it.
@@ -1072,7 +1143,7 @@ def main():
                     rules = {k: r for k, r in rules_for(manifest, platform_dir).items() if k not in skipped}
                     failures += compare(rules, actual, reviewed["outputs"], checked)
                 emit({**record, "status": "fail" if failures else "pass", "failures": failures})
-    if not set(counts) - {"unsupported"} and (counts or args.contract or args.target):
+    if not set(counts) - {"unsupported"} and (counts or args.contract or args.target or args.case):
         # Every requested target was skipped, or none matched: nothing was checked, which is not a pass.
         # Exception: --changed-files drove the selection and nothing ran — either no contracts matched
         # the changed paths at all, or the specific --contract/--target requested wasn't among them.
