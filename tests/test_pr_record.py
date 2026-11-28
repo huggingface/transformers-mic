@@ -221,7 +221,7 @@ def test_blocked_cases_reads_only_blocked_decisions(tmp_path):
             }
         )
     )
-    assert pr_record.blocked_cases(report) == {("control", "gpt-j-6b", "bfloat16"): {"gpt-j-6b-mic"}}
+    assert pr_record.blocked_cases(report) == {("control", "gpt-j-6b", "bfloat16"): {("gpt-j-6b-mic", None)}}
 
 
 def test_measure_needs_exactly_one_of_models_and_cases(tmp_path):
@@ -268,7 +268,10 @@ def test_measure_cases_records_blocked_targets_without_a_check_pass(tmp_path, mo
             cand.parent.mkdir(parents=True, exist_ok=True)
             cand.write_text(json.dumps({"recorded_with": {}, "outputs": {"logits": [1.0]}}))
             Path(out).write_text(
-                json.dumps({"target": "gpt-j-6b-mic", "status": "recorded", "platform": "cpu-x86_64"}) + "\n"
+                json.dumps(
+                    {"target": "gpt-j-6b-mic", "status": "recorded", "platform": "cpu-x86_64", "baseline": str(cand)}
+                )
+                + "\n"
             )
         else:
             Path(out).write_text(json.dumps({"target": "gpt-j-6b-mic", "status": "pass"}) + "\n")
@@ -300,6 +303,66 @@ def test_measure_cases_records_blocked_targets_without_a_check_pass(tmp_path, mo
     ]
 
 
+@pytest.mark.parametrize("blocked_case", ["image", None, "renamed"])
+def test_measure_records_the_blocked_input_cases_under_the_runners_names(tmp_path, monkeypatch, hub, blocked_case):
+    """A contract with input cases text (default) and image. The gate names the blocked case, or (older gates)
+    only the target, which then means every case of it. A case the contract does not declare (stale or renamed)
+    returns no run: an error, not a silent pass."""
+    decision = {"fleet": "control", "contract": "gpt-j-6b", "variant": "default", "target": "gpt-j-6b-mic"}
+    report = tmp_path / "gate.json"
+    case = {"case": blocked_case} if blocked_case else {}
+    report.write_text(json.dumps({"decisions": [{**decision, **case, "verdict": "blocked"}]}))
+    monkeypatch.setattr(
+        fleet, "download_for_pr", lambda name, rev, pr: (*fleet.download(name, rev), {"applied": [], "stale": []})
+    )
+    import huggingface_hub
+
+    snap = tmp_path / "snap"
+    (snap / pr_record.EXPECTATIONS).mkdir(parents=True)
+    manifest = tmp_path / "integration.json"
+    integration = {"variants": {"default": {}}, "cases": {"text": {"default": True}, "image": {}}}
+    manifest.write_text(json.dumps({"integrations": {"transformers": integration}}))
+    monkeypatch.setattr(huggingface_hub, "snapshot_download", lambda *a, **k: str(snap))
+    monkeypatch.setattr(huggingface_hub, "hf_hub_download", lambda *a, **k: str(manifest))
+    runs = []
+
+    def fake_run(root, options, name):
+        cases = [options[i + 1] for i, o in enumerate(options) if o == "--case"] or ["text", "image"]
+        cases = [case for case in cases if case in ("text", "image")]  # like run.py: undeclared cases never run
+        runs.append((name, cases))
+        out, rows = options[options.index("--output") + 1], []
+        for case in cases:
+            row = {"target": "gpt-j-6b-mic", "case": case, "platform": "cpu-x86_64"}
+            if "--record" in options:
+                # Named like run.py: the default case keeps the case-free name.
+                name = "gpt-j-6b-mic" + ("" if case == "text" else "." + case) + ".candidate.json"
+                cand = Path(options[options.index("--expectations") + 1]) / "cpu-x86_64" / name
+                cand.parent.mkdir(parents=True, exist_ok=True)
+                cand.write_text(json.dumps({"recorded_with": {"case": case}, "outputs": {"logits": [1.0]}}))
+                rows.append({**row, "status": "recorded", "baseline": str(cand)})
+            else:
+                rows.append({**row, "status": "pass"})
+        Path(out).write_text("".join(json.dumps(row) + "\n" for row in rows))
+        return 0
+
+    monkeypatch.setattr(pr_record, "run", fake_run)
+    out = tmp_path / "rec"
+    args = ["measure", "--pr", "7", "--cases", str(report), "--out", str(out), "--transformers-sha", "m" * 40]
+    assert pr_record.main(args) == (1 if blocked_case == "renamed" else 0)
+    record = json.loads((out / pr_record.RECORD).read_text())
+    got = [(c.get("case"), c["path_in_repo"].split("/")[-1], c["verified"]) for c in record["cases"]]
+    if blocked_case == "renamed":
+        assert got == [] and [e["targets"] for e in record["errors"]] == [["gpt-j-6b-mic [renamed]"]]
+        return
+    if blocked_case:
+        assert runs[0][1] == ["image"]  # only the blocked case is recorded
+        assert got == [("image", "gpt-j-6b-mic.image.json", True)]
+    else:
+        assert runs[0][1] == ["text", "image"]
+        assert got == [("text", "gpt-j-6b-mic.json", True), ("image", "gpt-j-6b-mic.image.json", True)]
+    assert "gpt-j-6b-mic [image]" in pr_record.summary(record)
+
+
 def test_publish_refuses_a_record_of_another_commit(tmp_path, hub):
     root = tmp_path / "rec"
     record = write_record(root)
@@ -326,4 +389,4 @@ def test_blocked_cases_reads_an_older_gate_report(tmp_path):
     report = tmp_path / "gate.json"
     decision = {"fleet": "control", "contract": "c", "variant": "v", "target": "t", "verdict": "block"}
     report.write_text(json.dumps({"decisions": [decision]}))
-    assert pr_record.blocked_cases(report) == {("control", "c", "v"): {"t"}}
+    assert pr_record.blocked_cases(report) == {("control", "c", "v"): {("t", None)}}
