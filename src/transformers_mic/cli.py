@@ -12,6 +12,9 @@ from huggingface_hub.errors import HfHubHTTPError
 from . import __version__, backend, commands, fleet, planner
 from .workspace import Workspace
 
+# integrations/<name>/ of a MIC repo; a framework with several implementations nests them.
+INTEGRATIONS = ("transformers", "sentence_transformers", "vllm", "vllm/transformers", "vllm/vllm", "sglang")
+
 
 def llm_options(parser):
     parser.add_argument("--llm-model", default=planner.DEFAULT_MODEL)
@@ -388,8 +391,8 @@ No Git commit or framework PR is created automatically.""",
         )
         run.add_argument(
             "--integration",
-            choices=("transformers", "sentence_transformers", "vllm", "sglang", "all"),
-            help="Defaults to transformers, or the contract's only integration",
+            choices=(*INTEGRATIONS, "all"),
+            help="Defaults to transformers, else the contract's only integration, or the first of its only framework",
         )
         run.add_argument("--variant", default="default")
         run.add_argument("--all-variants", action="store_true")
@@ -452,8 +455,8 @@ No Git commit or framework PR is created automatically.""",
     review = sub.add_parser("review", help="Compare measured candidates with approved expectations")
     review.add_argument(
         "--integration",
-        choices=("transformers", "sentence_transformers", "vllm", "sglang", "all"),
-        help="Defaults to transformers, or the contract's only integration",
+        choices=(*INTEGRATIONS, "all"),
+        help="Defaults to transformers, else the contract's only integration, or the first of its only framework",
     )
     review.add_argument("--platform")
     review.add_argument(
