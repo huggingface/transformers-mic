@@ -58,6 +58,7 @@ def normalize(name):
 def dependency_overrides(repo, sha, pinned):
     """Install what this commit's dependency table needs instead of the pins; return {package: requirement}."""
     from packaging.requirements import Requirement
+    from packaging.version import Version
 
     table = git(repo, "show", f"{sha}:src/transformers/dependency_versions_table.py")
     specs = {normalize(name): spec for name, spec in re.findall(r'"([^"]+)": "([^"]+)"', table)}
@@ -69,13 +70,17 @@ def dependency_overrides(repo, sha, pinned):
         target = f"{name}=={version}"
         if requirement.specifier and not requirement.specifier.contains(version, prereleases=True):
             target = overrides[name] = f"{name}{requirement.specifier}"
+        elif Version(version).is_devrelease:
+            # A dev pin was installed from git (the image's hf-doc-builder 0.6.0.dev0) and the index does
+            # not have it: once an override replaced it, keep whatever this commit accepts.
+            target = f"{name}{requirement.specifier}"
         try:
             installed = md.version(name).split("+")[0]
         except md.PackageNotFoundError:
             installed = None
         satisfied = installed is not None and (
             Requirement(target).specifier.contains(installed, prereleases=True)
-            and (name in overrides or installed == version)
+            and (name in overrides or installed == version or Version(version).is_devrelease)
         )
         if not satisfied:
             wanted.append(target)
@@ -194,11 +199,12 @@ def replay(args):
                 else:
                     records = []
                     for variant in entry["variants"]:
+                        # A result without a fleet revision (an older run) replays the fleet's current one.
+                        revision = ["--fleet-revision", entry["fleet_revision"]] if entry.get("fleet_revision") else []
                         options = [
                             "--fleet",
                             entry["fleet"],
-                            "--fleet-revision",
-                            entry["fleet_revision"],
+                            *revision,
                             "--variant",
                             variant,
                             *contracts,

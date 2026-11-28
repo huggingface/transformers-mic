@@ -1392,6 +1392,32 @@ def test_merged_replay_that_could_not_run_is_unmeasured():
     assert merged["9"]["verdict"] == "unmeasured" and "unknown revision" in merged["9"]["reason"]
 
 
+def test_unmeasured_replay_is_retried_once():
+    merged = {
+        "9": {
+            **merged_pr("9"),
+            "verdict": "unmeasured",
+            "source": "replay",
+            "red": [impact.gate_case(result("a-mic"))],
+        },
+        "8": {**merged_pr("8", merged_at="2026-11-01T00:00:00Z"), "verdict": "unmeasured", "source": "gate"},
+    }
+    assert [e["key"] for e in impact.merged_replay_plan(merged)] == ["merged#9"]
+
+    def broken(side):
+        return {
+            "contract": "*",
+            "target": "*",
+            "status": "error",
+            "failures": ["pip"],
+            "replay": {"key": "merged#9", "side": side},
+        }
+
+    assert impact.merged_replay_verdicts([broken("parent")], merged) == ["9"]
+    assert merged["9"]["replay_tries"] == 2 and impact.merged_replay_plan(merged) == []
+    assert impact.merged_replay_verdicts([broken("parent")], merged) == []
+
+
 def blocked_entry(merged_at="2026-11-10T12:00:00Z"):
     case = {**impact.gate_case(result("a-mic")), "contract": "A"}
     return {
